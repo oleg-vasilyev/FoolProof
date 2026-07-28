@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { loadEnv, requireEnv, rootDir } from "./env.ts";
 
 
@@ -18,8 +19,8 @@ const givenNoEnvFile = (): void => {
 };
 
 describe("rootDir", () => {
-  it("should point at the project root, above src", () => {
-    expect(rootDir.endsWith("FoolProof")).toBe(true);
+  it("should point two levels above shared, at the project root", () => {
+    expect(join(rootDir, "src", "shared")).toBe(import.meta.dirname);
   });
 });
 
@@ -59,6 +60,22 @@ describe("loadEnv()", () => {
     expect(loadEnv().BOT_TOKEN).toBe("abc123");
   });
 
+  it("should read the .env file at the project root", () => {
+    givenEnvFile("");
+
+    loadEnv();
+
+    expect(readFileSyncMock.mock.calls[0]?.[0]).toBe(join(rootDir, ".env"));
+  });
+
+  it("should read it as utf8 so non-latin values survive", () => {
+    givenEnvFile("");
+
+    loadEnv();
+
+    expect(readFileSyncMock.mock.calls[0]?.[1]).toBe("utf8");
+  });
+
   it("should trim whitespace around keys and values", () => {
     givenEnvFile("  BOT_TOKEN  =  abc123  ");
 
@@ -71,10 +88,35 @@ describe("loadEnv()", () => {
     expect(loadEnv().BOT_TOKEN).toBeUndefined();
   });
 
+  it("should skip an indented comment", () => {
+    givenEnvFile("   # BOT_TOKEN=commented\nDB_PATH=data/x.db");
+
+    expect(loadEnv().BOT_TOKEN).toBeUndefined();
+  });
+
+  it("should keep a hash that appears inside a value", () => {
+    givenEnvFile("TOKEN=abc#123");
+
+    expect(loadEnv().TOKEN).toBe("abc#123");
+  });
+
   it("should skip lines without an equals sign", () => {
     givenEnvFile("nonsense\nDB_PATH=data/x.db");
 
     expect(loadEnv().DB_PATH).toBe("data/x.db");
+  });
+
+  it("should not invent a key from a line without an equals sign", () => {
+    givenEnvFile("nonsense\nDB_PATH=data/x.db");
+    const fromFile = Object.keys(loadEnv()).filter((key) => key.startsWith("nonsen"));
+
+    expect(fromFile).toEqual([]);
+  });
+
+  it("should not invent a key from a blank line", () => {
+    givenEnvFile("A=1\n\nB=2");
+
+    expect(loadEnv()[""]).toBeUndefined();
   });
 
   it("should keep equals signs inside a value", () => {

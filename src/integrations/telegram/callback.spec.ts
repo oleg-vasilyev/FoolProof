@@ -131,4 +131,56 @@ describe("decodeCallback()", () => {
   it("should reject empty data", () => {
     expect(decodeCallback("")).toBeNull();
   });
+
+  it("should reject trailing rubbish after the version", () => {
+    expect(decodeCallback("1:p:3:5x")).toBeNull();
+  });
+
+  it("should reject leading rubbish before the version", () => {
+    expect(decodeCallback("1:p:3:x5")).toBeNull();
+  });
+
+  it("should reject trailing rubbish after the slot", () => {
+    expect(decodeCallback("1:p:3x:5")).toBeNull();
+  });
+
+  it("should reject a game id that is not base62", () => {
+    expect(decodeCallback("1_2:p:3:5")).toBeNull();
+  });
+
+  it("should reject a multi-character action code", () => {
+    expect(decodeCallback("1:pp:3:5")).toBeNull();
+  });
+
+  it("should accept a multi-digit version", () => {
+    expect(decodeCallback("1:p:3:42")?.version).toBe(42);
+  });
+
+  it("should accept a multi-digit slot", () => {
+    expect(decodeCallback("1:p:12:5")?.slot).toBe(12);
+  });
+
+  it("should accept a multi-character game id", () => {
+    expect(decodeCallback("2v:p:0:1")?.gameId).toBe(fromBase62("2v"));
+  });
+
+  it("should treat a lone dash as no slot rather than a number", () => {
+    expect(decodeCallback("1:p:-:5")?.slot).toBeNull();
+  });
+
+  it("should reject a negative slot", () => {
+    expect(decodeCallback("1:p:-3:5")).toBeNull();
+  });
+
+  it("should reject an empty field", () => {
+    expect(decodeCallback("1:p::5")).toBeNull();
+  });
+
+  it("should reject whitespace padding", () => {
+    expect(decodeCallback(" 1:p:3:5")).toBeNull();
+  });
+
+  it("should reject a newline smuggled onto the end", () => {
+    expect(decodeCallback("1:p:3:5\n")).toBeNull();
+  });
 });

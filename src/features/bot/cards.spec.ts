@@ -83,6 +83,37 @@ describe("createCardService()", () => {
       expect(repo.gameNumberInSeriesSpy).toHaveBeenCalledWith(CHAT_ID);
     });
 
+    it("should send a keyboard with a row per player plus the controls", async () => {
+      await cards.open(CHAT_ID, seatsOf(...THREE));
+      const markup = telegram.sendMessageSpy.mock.calls[0]?.[2]?.reply_markup;
+
+      expect(markup.inline_keyboard).toHaveLength(THREE.length + 1);
+    });
+
+    it("should give every button a caption and callback data", async () => {
+      await cards.open(CHAT_ID, seatsOf(...THREE));
+      const markup = telegram.sendMessageSpy.mock.calls[0]?.[2]?.reply_markup;
+      const buttons = markup.inline_keyboard.flat();
+
+      expect(
+        buttons.every(
+          (button: { text?: string; callback_data?: string }) =>
+            typeof button.text === "string" &&
+            button.text.length > 0 &&
+            typeof button.callback_data === "string" &&
+            button.callback_data.length > 0
+        )
+      ).toBe(true);
+    });
+
+    it("should put the player names on the buttons", async () => {
+      await cards.open(CHAT_ID, seatsOf(...THREE));
+      const markup = telegram.sendMessageSpy.mock.calls[0]?.[2]?.reply_markup;
+      const captions = markup.inline_keyboard.flat().map((b: { text: string }) => b.text);
+
+      expect(captions).toContain("Oleg");
+    });
+
     it("should delete the row when Telegram refuses the message", async () => {
       telegram.sendMessageSpy.mockRejectedValue(new Error("bad request"));
 
@@ -218,6 +249,80 @@ describe("createCardService()", () => {
         await cards.tap(payload("back", null, 1), ACTOR_ID);
 
         expect(repo.updateCardSpy).toHaveBeenCalledWith(GAME_ID, "PICK_STARTER", 2, null);
+      });
+    });
+
+    describe("rebuilding a card from the database", () => {
+      it("should read a READY card with two left as an accepted draw", async () => {
+        repo.cardByIdSpy.mockReturnValue(
+          cardRecordOf(
+            THREE,
+            { state: "READY", starter_player_id: playerIdOf(OLEG), state_version: 3 },
+            [ROMA]
+          )
+        );
+
+        await cards.tap(payload("back", null, 3), ACTOR_ID);
+
+        expect(repo.dropLastExitSpy).toHaveBeenCalledTimes(NEVER);
+      });
+
+      it("should step a rebuilt draw back to recording without losing the exit", async () => {
+        repo.cardByIdSpy.mockReturnValue(
+          cardRecordOf(
+            THREE,
+            { state: "READY", starter_player_id: playerIdOf(OLEG), state_version: 3 },
+            [ROMA]
+          )
+        );
+
+        await cards.tap(payload("back", null, 3), ACTOR_ID);
+
+        expect(repo.updateCardSpy).toHaveBeenCalledWith(
+          GAME_ID,
+          "RECORDING",
+          4,
+          playerIdOf(OLEG)
+        );
+      });
+
+      it("should read a READY card with one left as an automatic fool", async () => {
+        repo.cardByIdSpy.mockReturnValue(
+          cardRecordOf(
+            THREE,
+            { state: "READY", starter_player_id: playerIdOf(OLEG), state_version: 3 },
+            [ROMA, OLEG]
+          )
+        );
+
+        await cards.tap(payload("back", null, 3), ACTOR_ID);
+
+        expect(repo.dropLastExitSpy).toHaveBeenCalledTimes(ONCE);
+      });
+
+      it("should treat a starter who is not at the table as no starter", async () => {
+        const strangerId = 9999;
+        repo.cardByIdSpy.mockReturnValue(
+          cardRecordOf(THREE, { state: "RECORDING", starter_player_id: strangerId })
+        );
+
+        expect(await cards.tap(payload("back", null), ACTOR_ID)).toBe("Not available right now");
+      });
+
+      it("should ignore an event for a player who is not at the table", async () => {
+        const card = cardRecordOf(THREE, {
+          state: "RECORDING",
+          starter_player_id: playerIdOf(OLEG),
+          state_version: 1,
+        });
+        repo.cardByIdSpy.mockReturnValue({
+          ...card,
+          exits: [{ player_id: 9999, position: 1 }],
+        });
+
+        await cards.tap(payload("pick", ROMA, 1), ACTOR_ID);
+
+        expect(repo.appendExitSpy).toHaveBeenCalledWith(GAME_ID, playerIdOf(ROMA), 1, ACTOR_ID);
       });
     });
 

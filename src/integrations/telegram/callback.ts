@@ -2,13 +2,9 @@ const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
 const BASE = 62;
 
-const BASE62_ONLY = /^[0-9A-Za-z]+$/;
-
-const DIGITS_ONLY = /^[0-9]+$/;
+const CALLBACK_PATTERN = /^([0-9A-Za-z]+):([a-z]):(-|[0-9]+):([0-9]+)$/;
 
 const NO_SLOT = "-";
-
-const CALLBACK_FIELDS = 4;
 
 export type CallbackAction = "pick" | "draw" | "back" | "confirm" | "cancel";
 
@@ -48,27 +44,15 @@ export const encodeCallback = (payload: CallbackPayload): string =>
   ].join(":");
 
 export const decodeCallback = (data: string): CallbackPayload | null => {
-  const parts = data.split(":");
-  if (parts.length !== CALLBACK_FIELDS) {
+  const match = CALLBACK_PATTERN.exec(data);
+  if (match === null) {
     return null;
   }
 
-  const [rawGameId, rawAction, rawSlot, rawVersion] = parts;
-  if (
-    rawGameId === undefined ||
-    rawAction === undefined ||
-    rawSlot === undefined ||
-    rawVersion === undefined
-  ) {
-    return null;
-  }
+  const [, rawGameId = "", rawAction = "", rawSlot = "", rawVersion = ""] = match;
 
   const action = ACTIONS_BY_CODE.get(rawAction);
-  if (action === undefined || !BASE62_ONLY.test(rawGameId) || !DIGITS_ONLY.test(rawVersion)) {
-    return null;
-  }
-
-  if (rawSlot !== NO_SLOT && !DIGITS_ONLY.test(rawSlot)) {
+  if (action === undefined) {
     return null;
   }
 

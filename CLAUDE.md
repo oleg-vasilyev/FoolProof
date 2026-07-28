@@ -87,6 +87,10 @@ not a new npm script.
 - `npm run typecheck` — `tsc --noEmit`, `strict` plus `noUncheckedIndexedAccess`.
 - `npm test` — vitest. `npm run test:coverage` fails below **70%** on every metric.
 - `npm run check` — all three. **Keep it at zero errors.**
+- `npm run test:mutation` — Stryker, roughly two minutes. Coverage only proves a
+  line ran; the mutation score proves a test would notice if it broke. It is not
+  part of `check` because of the runtime, but a drop below the current **~92%**
+  means new tests are watching without asserting.
 
 ### Tests
 
