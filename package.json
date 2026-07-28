@@ -7,7 +7,10 @@
   },
   "scripts": {
     "start": "node src/bot.ts",
-    "check": "npm run lint && npm run typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "check": "npm run lint && npm run typecheck && npm run test",
     "lint": "eslint src",
     "lint:fix": "eslint --fix src",
     "typecheck": "tsc --noEmit"
@@ -18,8 +21,10 @@
   "devDependencies": {
     "@types/node": "^26.1.2",
     "@typescript-eslint/parser": "^8.65.0",
+    "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^10.8.0",
     "eslint-plugin-unused-imports": "^4.4.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
   }
 }

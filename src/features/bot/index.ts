@@ -1,4 +1,5 @@
 import { Bot, type Api } from "grammy";
+import type { UserFromGetMe } from "grammy/types";
 import type { Logger } from "../../shared/logger.ts";
 import type { Repository } from "../../shared/repository/types.ts";
 import { decodeCallback } from "../../integrations/telegram/callback.ts";
@@ -12,6 +13,7 @@ import { createCardService, type CardService } from "./cards.ts";
 export interface BotDeps {
   readonly repo: Repository;
   readonly log: Logger;
+  readonly botInfo?: UserFromGetMe;
 }
 
 export interface BotBundle {
@@ -69,8 +71,8 @@ const lineupProblemText = (result: Exclude<ReturnType<typeof parseLineup>, { ok:
 };
 
 export function createBot(token: string, deps: BotDeps): BotBundle {
-  const { repo, log } = deps;
-  const bot = new Bot(token);
+  const { repo, log, botInfo } = deps;
+  const bot = new Bot(token, botInfo === undefined ? {} : { botInfo });
   const cards = createCardService({ repo, api: bot.api, log });
   const openPrompts = new Map<number, number>();
 

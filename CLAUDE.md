@@ -70,7 +70,7 @@ has to say what the script does on its own.
 Keep the list short — it is the first thing a new user reads:
 
 ```
-start   check   lint   lint:fix   typecheck
+start   test   test:coverage   check   lint   lint:fix   typecheck
 ```
 
 `start` is the whole bot — there is no separate dev command, because long polling
@@ -85,7 +85,30 @@ not a new npm script.
 
 - `npm run lint` / `npm run lint:fix` — ESLint (unused imports, braces).
 - `npm run typecheck` — `tsc --noEmit`, `strict` plus `noUncheckedIndexedAccess`.
-- `npm run check` — both. **Keep it at zero errors.**
+- `npm test` — vitest. `npm run test:coverage` fails below **70%** on every metric.
+- `npm run check` — all three. **Keep it at zero errors.**
+
+### Tests
+
+Specs sit next to the code as `*.spec.ts` and mirror the source tree. Reusable
+stubs live in `src/testing/` and follow one convention: a stub is a **class**
+whose public `*Spy` fields are `vi.fn()`s, with sensible defaults set in the
+constructor, and whose methods just delegate to those spies. Tests then override
+one spy instead of rebuilding a fake. Nest `describe` by unit and then by method,
+name numbers (`const ONCE = 1`), and separate arrange/act/assert with blank lines.
+
+Two deliberate exceptions to "mock everything":
+
+- `repository/sqlite.spec.ts` runs against a **real** temporary SQLite file. Its
+  whole job is the SQL, and a mocked database would assert nothing. Set
+  `process.env.DB_PATH` before importing, because `db.ts` opens the connection at
+  module load.
+- `features/bot/index.spec.ts` drives a **real** grammY `Bot` through
+  `bot.handleUpdate()` with synthetic updates, intercepting the network at
+  `bot.api.config.use()`. Middleware order is exactly what that file gets wrong,
+  and only the real router can catch it. Pass `botInfo` so no `getMe` call is
+  needed. Note `bot.catch` only runs under `bot.start()` — `handleUpdate` rethrows,
+  so test the handler through `bot.errorHandler`.
 
 `strict: true` and **no `any`**. There is no build step: `tsconfig.json` mirrors
 how Node actually runs the code. `erasableSyntaxOnly` and `verbatimModuleSyntax`
