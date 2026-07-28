@@ -96,24 +96,37 @@ types), and `allowImportingTsExtensions` matches the explicit `.ts` import paths
 Imports point only **downward** — never sideways or up:
 
 ```
-entry (src/bot.ts)
+entry (src/bot.ts, src/webhook.ts)
   → features/*  →  integrations/* + shared/*  →  (nothing)
 ```
 
-- `shared/`       — infra used everywhere: env, logger, db, repository, types
+- `shared/`       — infra used everywhere: env, logger, debounce, db, repository
 - `integrations/` — thin clients for external services: telegram
-- `features/`     — one folder per capability: commands, game, render, stats, reaper
+- `features/`     — one folder per capability: game, render, bot (stats later)
 
-The entry file stays thin and declarative — it names the steps, never the
-implementation.
+Entry files stay thin and declarative — they name the steps, never the
+implementation. Both entries build the same bot and differ only in how updates
+arrive: `bot.ts` long-polls for development, `webhook.ts` serves production.
+
+Keep cross-feature imports rare and one-directional. There is exactly one:
+`bot` → `game` + `render`. `bot` is the orchestration layer that owns everything
+impure — the database, the grammY handlers, the debounced edits, the idle sweep —
+so that `game` and `render` can stay pure. Nothing may import `bot`.
 
 ### The state machine is a pure reducer
 
 `features/game/` holds `(state, action) => state` and nothing else. **No database
 access, no grammY, no `Date.now()`, no I/O of any kind** — the clock and the
 storage are passed in. Every transition in `PLAN.md` must be exercisable without a
-Telegram token and without Postgres running. This is the rule that makes the
+Telegram token and without a database file. This is the rule that makes the
 product testable at all; it is worth defending against convenience.
+
+`CardState` carries no phase field: `phaseOf()` derives it from whether a starter
+is set, how many players remain, and whether a draw was accepted. The `state`
+column exists only so a restart can tell an accepted draw (two remain) from an
+automatic fool (one remains) — everything else about a live card is rebuilt from
+`game_players` and `game_events` on every single tap, which is what makes a
+restart mid-game a non-event.
 
 `features/render/` is the same shape one layer out: state in, message text and
 inline keyboard out, pure. Anything that talks to Telegram lives in

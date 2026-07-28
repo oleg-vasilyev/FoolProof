@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["esnext"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+
+    // Node runs the .ts files directly by stripping types — never emit, and
+    // allow the explicit .ts extensions the runtime requires.
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+
+    // Keep the source runnable by Node's type stripping: only erasable syntax
+    // (no enums / namespaces / parameter properties) and explicit `import type`.
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+
+    // Node globals (process, fetch, node:sqlite …) come from @types/node; list
+    // it explicitly so resolution never depends on scanning.
+    "types": ["node"],
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*.ts"]
+}
