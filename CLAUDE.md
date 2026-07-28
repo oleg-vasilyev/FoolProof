@@ -193,11 +193,15 @@ is (`❌` red, `✅` green, `✔️`/`✖️` grey).
   at button size) and a `<pre>` block for aligned columns (Telegram renders it as a
   code block with a "copy" header). Reach for weight and wording before reaching
   for another emoji.
-- **The live card never repeats what the buttons already say.** Player buttons
-  carry their own positions, so the body holds only the game number, the starter
-  and the progress line. The standings render once, on Confirm — `renderResult`,
-  not `renderCard` — because that is when the keyboard goes away and the text
-  becomes the only record.
+- **The live card never repeats what the buttons already say**, and stops changing
+  once the starter is picked. Player buttons carry their own positions, so the body
+  holds only the game number and the starter — no progress line, no table size, no
+  "tap Confirm" prompt. Text whose length changes makes the message reflow under
+  the keyboard on every tap. The standings render once, on Confirm —
+  `renderResult`, not `renderCard`.
+- Command handlers must be registered **before** any `bot.on("message:text")`
+  filter. Commands are text messages too, so a text handler that returns without
+  calling `next()` will silently swallow every command below it.
 
 ## Configuration
 

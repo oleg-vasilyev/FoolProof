@@ -75,6 +75,19 @@ memory. A command that is not implemented yet stays out of the menu.
 The parser must strip the `@foolproof_bot` suffix — Telegram appends it in groups
 that contain more than one bot.
 
+### `/game` with no names
+
+Tapping a command in Telegram's `/` menu sends it immediately — the client gives
+no chance to type arguments, and no Bot API setting changes that. So a bare
+`/game` is not an error: the bot replies with a `force_reply` prompt, the client
+opens the input field with that message quoted, and the names arrive in the next
+message. This also survives privacy mode, which hides ordinary group chatter from
+bots but always delivers replies to the bot's own messages.
+
+The reply is recognised by matching `reply_to_message` against the bot's own id
+and the exact prompt text, so it stays stateless — nothing has to be remembered
+between the prompt and the answer.
+
 ### Parsing the player list
 
 Separators: `,`, `->`, `→`, `>`, newline. Trim every name.
@@ -183,22 +196,24 @@ not richer.
 **The live card does not repeat the standings.** The buttons already are the
 table — every name carries its own position — so a list above them says the same
 thing twice and costs a screenful of height on a phone. The body carries only
-what the keyboard cannot: which game this is, who dealt, and how far along it is.
+what the keyboard cannot: which game this is and who dealt.
 
 ```
-<b>Game 3</b> · 5 at the table
+<b>Game 3</b>
 Dealt first: <b>Oleg</b>
-<i>2 of 5 out</i>
 ```
 
-Once every place is settled that last line becomes `All places are in — tap
-Confirm.`
+**And it stops changing once the starter is picked.** A progress line and a
+"tap Confirm" prompt were both tried and removed: text that grows and shrinks
+makes the message reflow under the keyboard on every tap, and the twitch is more
+distracting than the line is useful. After the starter is chosen the body is
+frozen and only the buttons move.
 
 The standings appear exactly once, on Confirm, because that is the moment the
 keyboard disappears and the text becomes the only record left in the chat:
 
 ```
-<b>Game 3</b> · 5 at the table
+<b>Game 3</b>
 Dealt first: <b>Oleg</b>
 
 1 · Oleg
@@ -207,6 +222,9 @@ Dealt first: <b>Oleg</b>
 4 · Kim
 5 · <b>Anya</b> — fool
 ```
+
+The table size is not printed anywhere — the buttons are the table, and counting
+them is easier than reading a number.
 
 After a draw, both players share the last number and are labelled `draw`. A
 monospace `<pre>` block was tried for column alignment and reverted: Telegram

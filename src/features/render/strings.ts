@@ -1,5 +1,7 @@
 export const strings = {
   lineupMissing: "Who is playing? For example: /game Oleg, Anya, Roma",
+  lineupPrompt: "Who is playing? Send the names in seating order.",
+  lineupPlaceholder: "Oleg, Anya, Roma",
   lineupTooFew: "A game needs at least two players.",
   lineupDuplicates: (names: readonly string[]) =>
     `These names appear twice: ${names.join(", ")}. Give everyone a name of their own.`,
@@ -22,12 +24,9 @@ export const strings = {
     "are left. Back undoes one step at a time, and nothing is recorded until you tap Confirm.",
   ].join("\n"),
 
-  header: (gameNumber: number, tableSize: number) =>
-    `<b>Game ${gameNumber}</b> · ${tableSize} at the table`,
+  header: (gameNumber: number) => `<b>Game ${gameNumber}</b>`,
   askStarter: "Who dealt first?",
   dealtFirst: (name: string) => `Dealt first: <b>${name}</b>`,
-  progress: (out: number, total: number) => `<i>${out} of ${total} out</i>`,
-  readyToConfirm: "<i>All places are in — tap Confirm.</i>",
 
   resultPlace: (position: number, name: string) => `${position} · ${name}`,
   resultFool: (position: number, name: string) => `${position} · <b>${name}</b> — fool`,

@@ -82,6 +82,21 @@ export function createBot(token: string, deps: BotDeps): BotBundle {
     return true;
   };
 
+  const openFromNames = async (
+    chatId: number,
+    rawText: string,
+    say: (text: string) => Promise<unknown>
+  ): Promise<void> => {
+    const parsed = parseLineup(rawText);
+    if (!parsed.ok) {
+      await say(lineupProblemText(parsed));
+
+      return;
+    }
+
+    await cards.open(chatId, rotateToLowestId(resolveSeats(repo, chatId, parsed.names)));
+  };
+
   bot.command("game", async (ctx) => {
     const chatId = ctx.chat.id;
     const reply: ReplyFn = (text, replyTo) =>
@@ -91,14 +106,22 @@ export function createBot(token: string, deps: BotDeps): BotBundle {
       return;
     }
 
-    const parsed = parseLineup(ctx.message?.text ?? "");
-    if (!parsed.ok) {
-      await ctx.reply(lineupProblemText(parsed));
+    const rawText = ctx.message?.text ?? "";
+    const parsed = parseLineup(rawText);
+
+    if (!parsed.ok && parsed.problem === "empty") {
+      await ctx.reply(strings.lineupPrompt, {
+        reply_markup: {
+          force_reply: true,
+          selective: true,
+          input_field_placeholder: strings.lineupPlaceholder,
+        },
+      });
 
       return;
     }
 
-    await cards.open(chatId, rotateToLowestId(resolveSeats(repo, chatId, parsed.names)));
+    await openFromNames(chatId, rawText, (text) => ctx.reply(text));
   });
 
   bot.command("next", async (ctx) => {
@@ -125,6 +148,23 @@ export function createBot(token: string, deps: BotDeps): BotBundle {
 
   bot.command("help", async (ctx) => {
     await ctx.reply(strings.helpBody);
+  });
+
+  bot.on("message:text", async (ctx) => {
+    const prompt = ctx.message.reply_to_message;
+    if (prompt?.from?.id !== ctx.me.id || prompt.text !== strings.lineupPrompt) {
+      return;
+    }
+
+    const chatId = ctx.chat.id;
+    const reply: ReplyFn = (text, replyTo) =>
+      ctx.reply(text, { reply_parameters: { message_id: replyTo } }).then(() => undefined);
+
+    if (await refuseWhenLive(chatId, reply)) {
+      return;
+    }
+
+    await openFromNames(chatId, ctx.message.text, (text) => ctx.reply(text));
   });
 
   bot.on("callback_query:data", async (ctx) => {

@@ -1,18 +1,12 @@
 import { escapeHtml } from "../../integrations/telegram/html.ts";
-import {
-  finalPlacements,
-  isReady,
-  nameAt,
-  remainingSlots,
-  type CardState,
-} from "../game/state.ts";
+import { finalPlacements, nameAt, remainingSlots, type CardState } from "../game/state.ts";
 import { strings } from "./strings.ts";
 
 
 const nameOf = (state: CardState, slot: number): string => escapeHtml(nameAt(state, slot));
 
 const heading = (state: CardState, gameNumber: number): readonly string[] => [
-  strings.header(gameNumber, state.seats.length),
+  strings.header(gameNumber),
   strings.dealtFirst(nameOf(state, state.starterSlot ?? 0)),
 ];
 
@@ -33,14 +27,10 @@ const placeLines = (state: CardState): readonly string[] => {
 
 export const renderCard = (state: CardState, gameNumber: number): string => {
   if (state.starterSlot === null) {
-    return [strings.header(gameNumber, state.seats.length), strings.askStarter].join("\n");
+    return [strings.header(gameNumber), strings.askStarter].join("\n");
   }
 
-  const status = isReady(state)
-    ? strings.readyToConfirm
-    : strings.progress(state.exits.length, state.seats.length);
-
-  return [...heading(state, gameNumber), status].join("\n");
+  return heading(state, gameNumber).join("\n");
 };
 
 export const renderResult = (state: CardState, gameNumber: number): string =>
