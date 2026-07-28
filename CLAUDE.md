@@ -70,10 +70,11 @@ has to say what the script does on its own.
 Keep the list short — it is the first thing a new user reads:
 
 ```
-start   dev   check   lint   lint:fix   typecheck
+start   check   lint   lint:fix   typecheck
 ```
 
-`start` runs the webhook build, `dev` runs long polling. There is no `migrate` —
+`start` is the whole bot — there is no separate dev command, because long polling
+is the only delivery mode (see `PLAN.md`). There is no `migrate` either:
 `shared/db.ts` creates the schema with `CREATE TABLE IF NOT EXISTS` on startup,
 the way job-finder does. Anything occasional
 (one-off backfills, duplicate-player merges) goes behind `scripts/tools.ts`, which
@@ -96,7 +97,7 @@ types), and `allowImportingTsExtensions` matches the explicit `.ts` import paths
 Imports point only **downward** — never sideways or up:
 
 ```
-entry (src/bot.ts, src/webhook.ts)
+entry (src/bot.ts)
   → features/*  →  integrations/* + shared/*  →  (nothing)
 ```
 
@@ -104,9 +105,8 @@ entry (src/bot.ts, src/webhook.ts)
 - `integrations/` — thin clients for external services: telegram
 - `features/`     — one folder per capability: game, render, bot (stats later)
 
-Entry files stay thin and declarative — they name the steps, never the
-implementation. Both entries build the same bot and differ only in how updates
-arrive: `bot.ts` long-polls for development, `webhook.ts` serves production.
+The entry file stays thin and declarative — it names the steps, never the
+implementation.
 
 Keep cross-feature imports rare and one-directional. There is exactly one:
 `bot` → `game` + `render`. `bot` is the orchestration layer that owns everything

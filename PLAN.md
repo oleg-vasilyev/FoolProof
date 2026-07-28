@@ -16,7 +16,7 @@ of taps, not for completeness of data.
 - grammY (better typed than telegraf)
 - SQLite through the built-in `node:sqlite` module
 - No ORM, no query builder
-- Long polling for development, webhook for production
+- Long polling, and only long polling
 
 SQLite rather than the originally proposed PostgreSQL. This is one group chat of
 friends playing a few games a week — the write rate is a handful of rows an
@@ -28,6 +28,15 @@ running on a Friday night. Backup is copying one file.
 What this costs: a single writer, so the bot stays one process. That is already
 true — a Telegram bot with long polling is one process by nature. If the product
 ever outgrows it, the repository interface is the only thing that has to change.
+
+Long polling and no webhook, for the same reason. A webhook needs a public HTTPS
+address with a valid certificate — a domain, a reverse proxy, a VPS — which is
+real infrastructure for a bot that runs on a laptop. Polling inverts who dials
+whom: the bot reaches out, so it works from behind NAT with nothing exposed and
+no secret to verify. The cost is a couple of hundred milliseconds between a tap
+and the card updating, which nobody will notice, and a process that has to
+actually be running on a Friday evening. A webhook earns its keep at thousands of
+chats; this is one.
 
 ## Language
 

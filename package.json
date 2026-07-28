@@ -6,8 +6,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "start": "node src/webhook.ts",
-    "dev": "node src/bot.ts",
+    "start": "node src/bot.ts",
     "check": "npm run lint && npm run typecheck",
     "lint": "eslint src",
     "lint:fix": "eslint --fix src",
