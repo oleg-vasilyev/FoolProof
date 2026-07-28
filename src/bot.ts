@@ -1,4 +1,4 @@
-import { createBot } from "./features/bot/index.ts";
+import { createBot, publishCommandMenu } from "./features/bot/index.ts";
 import { startReaper } from "./features/bot/reaper.ts";
 import { loadEnv, requireEnv } from "./shared/env.ts";
 import { createLogger } from "./shared/logger.ts";
@@ -20,6 +20,8 @@ const shutdown = async (): Promise<void> => {
 
 process.once("SIGINT", () => void shutdown());
 process.once("SIGTERM", () => void shutdown());
+
+await publishCommandMenu(bot.api);
 
 log.info("listening for updates by long polling");
 await bot.start({ drop_pending_updates: true });

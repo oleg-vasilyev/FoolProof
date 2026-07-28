@@ -6,6 +6,22 @@ export const strings = {
   gameAlreadyRunning: "A game is already in progress.",
   noLineupToRepeat: "No previous line-up here yet. Start with /game and the names.",
 
+  commandGame: "Open a game — /game Oleg, Anya, Roma",
+  commandNext: "Another game, same line-up",
+  commandHelp: "How the card works",
+
+  helpBody: [
+    "FoolProof keeps score for games of Durak.",
+    "",
+    "/game Oleg, Anya, Roma — open a game; the list is the seating order around the table",
+    "/next — another game with the same line-up",
+    "/help — this message",
+    "",
+    "Tap a name to record who dealt first, then tap players in the order they go out.",
+    "The last one left is the fool and gets marked for you. Draw appears once two players",
+    "are left. Back undoes one step at a time, and nothing is recorded until you tap Confirm.",
+  ].join("\n"),
+
   header: (gameNumber: number, tableSize: number) => `Game ${gameNumber} · ${tableSize} at the table`,
   askStarter: "Who dealt first?",
   dealtFirst: (name: string) => `Dealt first: ${name}`,

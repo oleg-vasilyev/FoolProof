@@ -65,7 +65,12 @@ Latin characters and lower case only — a Telegram requirement.
 |---|---|
 | `/game Oleg, Anya, Roma` | Open a game. The list is the seating order around the table, clockwise |
 | `/next` | A new game with the same line-up |
+| `/help` | What the commands do and how the card works |
 | `/stats` | Statistics for the latest session |
+
+The bot publishes this list through `setMyCommands` on every start, so the
+commands show up in Telegram's `/` menu instead of having to be typed from
+memory. A command that is not implemented yet stays out of the menu.
 
 The parser must strip the `@foolproof_bot` suffix — Telegram appends it in groups
 that contain more than one bot.

@@ -1,4 +1,4 @@
-import { Bot } from "grammy";
+import { Bot, type Api } from "grammy";
 import type { Logger } from "../../shared/logger.ts";
 import type { Repository } from "../../shared/repository/types.ts";
 import { decodeCallback } from "../../integrations/telegram/callback.ts";
@@ -19,6 +19,16 @@ export interface BotBundle {
 }
 
 type ReplyFn = (text: string, replyTo: number) => Promise<void>;
+
+const COMMAND_MENU = [
+  { command: "game", description: strings.commandGame },
+  { command: "next", description: strings.commandNext },
+  { command: "help", description: strings.commandHelp },
+];
+
+export async function publishCommandMenu(api: Api): Promise<void> {
+  await api.setMyCommands(COMMAND_MENU);
+}
 
 const resolveSeats = (
   repo: Repository,
@@ -111,6 +121,10 @@ export function createBot(token: string, deps: BotDeps): BotBundle {
       chatId,
       lineup.map((seat) => ({ playerId: seat.player_id, displayName: seat.display_name }))
     );
+  });
+
+  bot.command("help", async (ctx) => {
+    await ctx.reply(strings.helpBody);
   });
 
   bot.on("callback_query:data", async (ctx) => {
