@@ -2,6 +2,9 @@
 .env
 secrets/
 
+# the SQLite database and its WAL sidecars
+data/
+
 # machine-local Claude Code settings (paths + personal permission grants)
 # .claude/settings.json IS shared — it carries the project hooks
 .claude/settings.local.json

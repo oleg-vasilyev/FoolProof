@@ -10,13 +10,24 @@ The key constraint: input happens on a Friday evening, on a phone, one-handed,
 between games. Any friction in input kills the product. Optimise for the number
 of taps, not for completeness of data.
 
-## Stack (a proposal, open to change)
+## Stack
 
-- Node 20+, TypeScript
+- Node 24+, TypeScript
 - grammY (better typed than telegraf)
-- PostgreSQL
-- No ORM, or drizzle
+- SQLite through the built-in `node:sqlite` module
+- No ORM, no query builder
 - Long polling for development, webhook for production
+
+SQLite rather than the originally proposed PostgreSQL. This is one group chat of
+friends playing a few games a week — the write rate is a handful of rows an
+evening, and the whole dataset will fit in a file smaller than a photo for years.
+`node:sqlite` ships with Node, so there is no dependency, no daemon, no
+connection string and no container to keep alive for a bot that must simply be
+running on a Friday night. Backup is copying one file.
+
+What this costs: a single writer, so the bot stays one process. That is already
+true — a Telegram bot with long polling is one process by nature. If the product
+ever outgrows it, the repository interface is the only thing that has to change.
 
 ## Language
 
@@ -178,41 +189,70 @@ where the name was last time.
 ## Data model
 
 ```sql
-players (
-  id           bigserial primary key,
-  chat_id      bigint not null,
-  display_name text not null,
-  created_at   timestamptz not null default now()
-)
+CREATE TABLE players (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  chat_id      INTEGER NOT NULL,
+  display_name TEXT NOT NULL,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX idx_players_chat ON players(chat_id);
 
-games (
-  id                bigserial primary key,
-  chat_id           bigint not null,
-  message_id        bigint not null,
-  state             text not null,
-  state_version     int not null default 0,
-  starter_player_id bigint references players(id),
-  started_at        timestamptz not null default now(),
-  confirmed_at      timestamptz,
-  last_touched_at   timestamptz not null default now()
-)
+CREATE TABLE games (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  chat_id           INTEGER NOT NULL,
+  message_id        INTEGER NOT NULL,
+  state             TEXT NOT NULL,
+  state_version     INTEGER NOT NULL DEFAULT 0,
+  starter_player_id INTEGER REFERENCES players(id),
+  started_at        TEXT NOT NULL DEFAULT (datetime('now')),
+  confirmed_at      TEXT,
+  last_touched_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX idx_games_chat_started ON games(chat_id, started_at);
 
-game_players (
-  game_id    bigint references games(id),
-  player_id  bigint references players(id),
-  seat_index int not null,
-  primary key (game_id, player_id)
-)
+CREATE UNIQUE INDEX idx_games_one_live ON games(chat_id) WHERE confirmed_at IS NULL;
 
-game_events (
-  id           bigserial primary key,
-  game_id      bigint references games(id),
-  player_id    bigint references players(id),
-  position     int not null,
-  recorded_at  timestamptz not null default now(),
-  actor_tg_id  bigint not null
-)
+CREATE TABLE game_players (
+  game_id    INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+  player_id  INTEGER NOT NULL REFERENCES players(id),
+  seat_index INTEGER NOT NULL,
+  PRIMARY KEY (game_id, player_id)
+);
+
+CREATE TABLE game_events (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  game_id     INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+  player_id   INTEGER NOT NULL REFERENCES players(id),
+  position    INTEGER NOT NULL,
+  recorded_at TEXT NOT NULL DEFAULT (datetime('now')),
+  actor_tg_id INTEGER NOT NULL
+);
+CREATE INDEX idx_game_events_game ON game_events(game_id);
 ```
+
+Three SQLite specifics that are easy to get wrong:
+
+- **`PRAGMA foreign_keys = ON` on every connection.** SQLite ignores foreign keys
+  by default, and the `ON DELETE CASCADE` above is what keeps a cancelled game
+  from leaving orphaned rows behind
+- **Timestamps are TEXT** in `datetime('now')` form — `YYYY-MM-DD HH:MM:SS`, always
+  UTC. That format sorts lexicographically, so `ORDER BY started_at` is correct
+  without parsing
+- **Telegram IDs go in INTEGER columns.** SQLite integers are 64-bit and the Bot
+  API caps IDs at 52 significant bits, so they survive the round trip through a JS
+  number
+
+### A live card is a row; a dead one is not
+
+A live card lives in `games` with `confirmed_at IS NULL` — it has to survive a
+restart, since the message is already posted in the chat. Confirm sets
+`confirmed_at`. **Cancel and abandonment `DELETE` the row**, which is what "never
+written to the database" means in practice: nothing partial is ever left behind
+for statistics to trip over.
+
+The partial unique index makes invariant 1 the database's problem rather than the
+code's — a second live card in one chat is rejected by the engine, not by a check
+someone has to remember to write.
 
 ### Seating is normalised
 
@@ -227,23 +267,30 @@ Implement it with a window function over `games.started_at` rather than storing 
 `series_id`. Then the threshold changes in one line, with no data migration.
 
 ```sql
-create view game_series as
-select *, sum(new_series) over (partition by chat_id order by started_at) as series_no
-from (
-  select *,
-    case when started_at - lag(started_at) over (partition by chat_id order by started_at)
-              > interval '3 hours'
-         or lag(started_at) over (partition by chat_id order by started_at) is null
-      then 1 else 0 end as new_series
-  from games where confirmed_at is not null
-) t;
+CREATE VIEW game_series AS
+SELECT *, SUM(new_series) OVER (PARTITION BY chat_id ORDER BY started_at) AS series_no
+FROM (
+  SELECT *,
+    CASE
+      WHEN LAG(started_at) OVER (PARTITION BY chat_id ORDER BY started_at) IS NULL
+        OR unixepoch(started_at)
+           - unixepoch(LAG(started_at) OVER (PARTITION BY chat_id ORDER BY started_at))
+           > 3 * 3600
+      THEN 1 ELSE 0
+    END AS new_series
+  FROM games WHERE confirmed_at IS NOT NULL
+);
 ```
+
+Window functions need SQLite 3.25+ and `unixepoch()` needs 3.38+; the build
+bundled with Node 24 is well past both.
 
 ---
 
 ## Invariants
 
-1. **Exactly one live card per chat.** Every other card is in a terminal state
+1. **Exactly one live card per chat.** Enforced by the partial unique index, not
+   by a check in the code
 2. **Positions are dense.** They run consecutively from 1 with no gaps. The last
    position may be duplicated — that is a draw. Duplicates in the middle are
    forbidden. Do not add `UNIQUE(game_id, position)`

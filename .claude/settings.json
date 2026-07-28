@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run --silent lint:fix || true",
+            "async": true,
+            "timeout": 60,
+            "statusMessage": "Applying ESLint fixes…"
+          }
+        ]
+      }
+    ]
+  }
+}

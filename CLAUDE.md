@@ -70,10 +70,12 @@ has to say what the script does on its own.
 Keep the list short — it is the first thing a new user reads:
 
 ```
-start   dev   migrate   check   lint   lint:fix   typecheck
+start   dev   check   lint   lint:fix   typecheck
 ```
 
-`start` runs the webhook build, `dev` runs long polling. Anything occasional
+`start` runs the webhook build, `dev` runs long polling. There is no `migrate` —
+`shared/db.ts` creates the schema with `CREATE TABLE IF NOT EXISTS` on startup,
+the way job-finder does. Anything occasional
 (one-off backfills, duplicate-player merges) goes behind `scripts/tools.ts`, which
 lists itself when run with no argument. Adding a tool means one line in its table,
 not a new npm script.
@@ -130,13 +132,22 @@ games.confirm(game.id, positions);
 ```
 
 - `shared/db.ts` — connection + schema only.
-- `shared/repository/postgres.ts` — the **only** file allowed to contain SQL or
+- `shared/repository/sqlite.ts` — the **only** file allowed to contain SQL or
   import `db`. Adding a query means adding a method here and to the interface.
 - `shared/repository/index.ts` — the composition point that binds the interface to
-  the Postgres implementation.
+  the SQLite implementation.
 
 No raw SQL, no query building, and no knowledge of column names outside the
-repository.
+repository. Swapping storage engines should mean writing one new file.
+
+Storage is SQLite via the built-in `node:sqlite` — no dependency and no daemon.
+Three things `shared/db.ts` owns and nothing else may assume:
+
+- `PRAGMA foreign_keys = ON`, `journal_mode = WAL`, `busy_timeout`. Foreign keys
+  are **off** by default in SQLite, and the schema leans on `ON DELETE CASCADE`.
+- Timestamps are TEXT in `datetime('now')` form, always UTC. Never store a locale
+  format — the columns are sorted on directly.
+- The database file lives under `data/`, which is gitignored.
 
 ## Telegram constraints
 
