@@ -1,6 +1,5 @@
-import { escapeHtml, quoteBlock } from "../../integrations/telegram/html.ts";
+import { escapeHtml, preBlock } from "../../integrations/telegram/html.ts";
 import {
-  finalPlacements,
   isReady,
   nameAt,
   recordedPlacements,
@@ -10,30 +9,48 @@ import {
 import { strings } from "./strings.ts";
 
 
-const nameOf = (state: CardState, slot: number): string => escapeHtml(nameAt(state, slot));
+const MARKER_WIDTH = 2;
 
-const badgeFor = (position: number): string => strings.medals[position - 1] ?? `${position}.`;
+const COLUMN_GAP = "  ";
 
-const runningLines = (state: CardState): readonly string[] => {
-  const exits = recordedPlacements(state).map(
-    ({ slot, position }) => `${position}. ${nameOf(state, slot)}`
-  );
+interface Row {
+  readonly marker: string;
+  readonly name: string;
+  readonly note: string;
+}
 
-  const rest = strings.stillIn(remainingSlots(state).map((slot) => nameOf(state, slot)));
-
-  return exits.length === 0 ? [rest] : [...exits, "", rest];
-};
-
-const finishedLines = (state: CardState): readonly string[] => {
+const rowsOf = (state: CardState): readonly Row[] => {
+  const settled = isReady(state);
   const lastPosition = state.exits.length + 1;
   const shared = remainingSlots(state).length > 1;
 
-  return finalPlacements(state).map(({ slot, position }) => {
-    const badge =
-      position === lastPosition ? (shared ? strings.markDraw : strings.markFool) : badgeFor(position);
+  const exited = recordedPlacements(state).map(({ slot, position }) => ({
+    marker: String(position),
+    name: nameAt(state, slot),
+    note: "",
+  }));
 
-    return `${badge} ${nameOf(state, slot)}`;
-  });
+  const pending = remainingSlots(state).map((slot) => ({
+    marker: settled ? String(lastPosition) : strings.pendingMark,
+    name: nameAt(state, slot),
+    note: settled ? (shared ? strings.labelDraw : strings.labelFool) : "",
+  }));
+
+  return [...exited, ...pending];
+};
+
+const formatRows = (rows: readonly Row[]): readonly string[] => {
+  const nameWidth = rows.reduce((widest, row) => Math.max(widest, row.name.length), 0);
+
+  return rows.map((row) =>
+    [
+      row.marker.padStart(MARKER_WIDTH),
+      escapeHtml(row.name.padEnd(nameWidth)),
+      row.note,
+    ]
+      .join(COLUMN_GAP)
+      .trimEnd()
+  );
 };
 
 export const renderCard = (state: CardState, gameNumber: number): string => {
@@ -45,8 +62,8 @@ export const renderCard = (state: CardState, gameNumber: number): string => {
 
   return [
     header,
-    strings.dealtFirst(nameOf(state, state.starterSlot)),
+    strings.dealtFirst(escapeHtml(nameAt(state, state.starterSlot))),
     "",
-    quoteBlock(isReady(state) ? finishedLines(state) : runningLines(state)),
+    preBlock(formatRows(rowsOf(state))),
   ].join("\n");
 };

@@ -7,5 +7,5 @@ const ESCAPES: readonly (readonly [string, string])[] = [
 export const escapeHtml = (value: string): string =>
   ESCAPES.reduce((escaped, [from, to]) => escaped.replaceAll(from, to), value);
 
-export const quoteBlock = (lines: readonly string[]): string =>
-  `<blockquote>${lines.join("\n")}</blockquote>`;
+export const preBlock = (lines: readonly string[]): string =>
+  `<pre>${lines.join("\n")}</pre>`;

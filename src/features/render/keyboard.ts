@@ -28,9 +28,7 @@ const captionFor = (
   const position = positions.get(slot) ?? 0;
 
   if (state.exits.includes(slot)) {
-    const medal = strings.medals[position - 1];
-
-    return medal === undefined ? `${strings.markExit} ${position} ${name}` : `${medal} ${name}`;
+    return `${strings.markExit} ${position} ${name}`;
   }
 
   if (!isReady(state)) {

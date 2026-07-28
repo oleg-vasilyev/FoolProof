@@ -153,10 +153,8 @@ Three things that **do not exist** in the Bot API — do not try to implement th
 ### Button format
 
 ```
-🥇 Oleg       ← went out first
-🥈 Roma       ← went out second
-🥉 Dima       ← went out third
-✅ 4 Kim      ← fourth place onwards keeps the number
+✅ 1 Oleg     ← went out first
+✅ 2 Roma     ← went out second
 Anya          ← still in the game
 💀 Anya       ← the fool, set automatically
 🤝 Anya       ← shared last place after a draw
@@ -166,45 +164,53 @@ Anya          ← still in the game
 ✖️ Cancel
 ```
 
-**The last place is never a medal.** The fool takes 💀 even when the table is
-small enough that their position would otherwise earn one — three players finish
-🥇 🥈 💀, two finish 🥇 💀. A draw replaces both with 🤝.
+Exactly three emoji carry meaning here — done, fool, draw. Medals for the top
+three were tried and reverted: at button and list size they read as
+indistinguishable coloured dots, and a row of them makes the card look cheaper,
+not richer.
 
 ### Message body
 
 Above the keyboard — a readable order; it matters more than the button captions.
-Messages are sent with `parse_mode: HTML`, and the standings sit in a
-`<blockquote>` so the result reads as one block rather than loose lines:
+Messages are sent with `parse_mode: HTML`, and the standings sit in a `<pre>`
+block, because a monospace block is the only way to get columns to line up in
+Telegram:
 
 ```
 <b>Game 3</b> · 5 at the table
 Dealt first: <b>Oleg</b>
 
-<blockquote>1. Oleg
-2. Roma
-
-still in: Dima, Kim, Anya</blockquote>
+<pre> 1  Oleg
+ 2  Roma
+ ·  Dima
+ ·  Kim
+ ·  Anya</pre>
 ```
 
-Once every position is known, the numbers give way to the same badges the buttons
-use:
+A player who is still in gets `·` instead of a number. Once every position is
+known the dots resolve, and the last line is labelled in words rather than with
+an emoji:
 
 ```
 <b>Game 3</b> · 5 at the table
 Dealt first: <b>Oleg</b>
 
-<blockquote>🥇 Oleg
-🥈 Roma
-🥉 Dima
-4. Kim
-💀 Anya</blockquote>
+<pre> 1  Oleg
+ 2  Roma
+ 3  Dima
+ 4  Kim
+ 5  Anya  fool</pre>
 ```
+
+After a draw, both players share the last number and are labelled `draw`.
 
 **Player names are user data and must be HTML-escaped** before they reach the
 message body — a player called `Аня & Оля` would otherwise break the markup and
-one called `<b>x</b>` would inject it. Button captions are the opposite case:
-Telegram does not parse HTML there, so escaping them would show `&amp;`
-literally.
+one called `<b>x</b>` would inject it, and escaping applies inside `<pre>` too.
+Pad the name to the column width **before** escaping: `&amp;` is five characters
+of markup but one character on screen, so escaping first throws the column off.
+Button captions are the opposite case entirely — Telegram does not parse HTML
+there, so escaping them would show `&amp;` literally.
 
 ### Button order
 

@@ -26,9 +26,11 @@ export const strings = {
     `<b>Game ${gameNumber}</b> · ${tableSize} at the table`,
   askStarter: "Who dealt first?",
   dealtFirst: (name: string) => `Dealt first: <b>${name}</b>`,
-  stillIn: (names: readonly string[]) => `still in: ${names.join(", ")}`,
 
-  medals: ["🥇", "🥈", "🥉"],
+  pendingMark: "·",
+  labelFool: "fool",
+  labelDraw: "draw",
+
   markExit: "✅",
   markFool: "💀",
   markDraw: "🤝",
