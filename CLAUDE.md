@@ -204,8 +204,12 @@ is (`❌` red, `✅` green, `✔️`/`✖️` grey).
   calling `next()` will silently swallow every command below it.
 - A `force_reply` prompt cannot be withdrawn through the API — the client holds
   the pending reply in the chat draft until the message it points at is deleted.
-  Any prompt must therefore be deleted once answered, and `selective: true` only
-  works if the prompt is itself a reply to the user's message.
+  Delete a prompt **only when it went unanswered**; deleting an answered one turns
+  the quote in the user's reply into "Deleted message" for good. `selective: true`
+  works only if the prompt is itself a reply to the user's message.
+- More generally: deleting a message that something else quotes is not a clean
+  undo. The quote survives as a tombstone, and unlike a stale draft it cannot be
+  cleared.
 
 ## Configuration
 

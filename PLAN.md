@@ -93,10 +93,13 @@ Two rules keep the prompt from becoming litter, both learned the hard way:
   targets someone if the message either @mentions them or replies to theirs. A
   standalone prompt with `selective` set targets nobody in particular, and the
   reply interface behaves erratically.
-- **Delete the prompt once it is answered.** There is no API call to withdraw a
-  `force_reply`; the client keeps the reply pending in the chat's draft until the
-  message it points at is gone. Opening `/game` again, or `/next`, also clears any
-  prompt still standing, so at most one is ever live per chat.
+- **Delete a prompt only if it goes unanswered.** There is no API call to withdraw
+  a `force_reply`, so a prompt nobody replied to would keep the reply pending in
+  the chat's draft indefinitely. `/game` and `/next` therefore clear any prompt
+  still standing, and at most one is ever live per chat. An **answered** prompt
+  must be left alone: deleting it turns the quote inside the player's own reply
+  into "Deleted message", which is permanent and looks worse than the draft it was
+  meant to fix.
 
 ### Parsing the player list
 

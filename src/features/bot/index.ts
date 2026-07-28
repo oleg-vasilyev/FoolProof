@@ -189,7 +189,6 @@ export function createBot(token: string, deps: BotDeps): BotBundle {
       ctx.reply(text, { reply_parameters: { message_id: replyTo } }).then(() => undefined);
 
     openPrompts.delete(chatId);
-    await removeMessage(chatId, prompt.message_id);
 
     if (await refuseWhenLive(chatId, reply)) {
       return;
