@@ -181,6 +181,11 @@ body above the keyboard.
   limit.
 - Button order follows the seating and **never changes** within a game or a
   session. Muscle memory beats tidiness.
+- Cards go out with `parse_mode: "HTML"`. Player names are user data, so anything
+  reaching the **message body** goes through `escapeHtml` first. **Button captions
+  are the opposite** — Telegram does not parse HTML there, and escaping them would
+  render `&amp;` literally. Getting this backwards is silent in testing and
+  obvious in the chat.
 
 ## Configuration
 

@@ -28,14 +28,16 @@ const captionFor = (
   const position = positions.get(slot) ?? 0;
 
   if (state.exits.includes(slot)) {
-    return `${strings.markExit} ${position} ${name}`;
+    const medal = strings.medals[position - 1];
+
+    return medal === undefined ? `${strings.markExit} ${position} ${name}` : `${medal} ${name}`;
   }
 
   if (!isReady(state)) {
     return name;
   }
 
-  return `${sharedFinish ? strings.markDraw : strings.markFool} ${position} ${name}`;
+  return `${sharedFinish ? strings.markDraw : strings.markFool} ${name}`;
 };
 
 const controlRow = (state: CardState, gameId: number, version: number): readonly InlineButton[] => {

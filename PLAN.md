@@ -153,28 +153,58 @@ Three things that **do not exist** in the Bot API — do not try to implement th
 ### Button format
 
 ```
-✅ 1 Oleg     ← went out first
-✅ 2 Roma     ← went out second
+🥇 Oleg       ← went out first
+🥈 Roma       ← went out second
+🥉 Dima       ← went out third
+✅ 4 Kim      ← fourth place onwards keeps the number
 Anya          ← still in the game
-💀 3 Anya     ← the fool, set automatically
+💀 Anya       ← the fool, set automatically
+🤝 Anya       ← shared last place after a draw
 🤝 Draw
 ✔️ Confirm
 ↩️ Back
 ✖️ Cancel
 ```
 
+**The last place is never a medal.** The fool takes 💀 even when the table is
+small enough that their position would otherwise earn one — three players finish
+🥇 🥈 💀, two finish 🥇 💀. A draw replaces both with 🤝.
+
 ### Message body
 
-Above the keyboard — a readable order; it matters more than the button captions:
+Above the keyboard — a readable order; it matters more than the button captions.
+Messages are sent with `parse_mode: HTML`, and the standings sit in a
+`<blockquote>` so the result reads as one block rather than loose lines:
 
 ```
-Game 3 · 5 at the table
-Dealt first: Oleg
+<b>Game 3</b> · 5 at the table
+Dealt first: <b>Oleg</b>
 
-1. Oleg
+<blockquote>1. Oleg
 2. Roma
-— still in: Anya, Dima
+
+still in: Dima, Kim, Anya</blockquote>
 ```
+
+Once every position is known, the numbers give way to the same badges the buttons
+use:
+
+```
+<b>Game 3</b> · 5 at the table
+Dealt first: <b>Oleg</b>
+
+<blockquote>🥇 Oleg
+🥈 Roma
+🥉 Dima
+4. Kim
+💀 Anya</blockquote>
+```
+
+**Player names are user data and must be HTML-escaped** before they reach the
+message body — a player called `Аня & Оля` would otherwise break the markup and
+one called `<b>x</b>` would inject it. Button captions are the opposite case:
+Telegram does not parse HTML there, so escaping them would show `&amp;`
+literally.
 
 ### Button order
 

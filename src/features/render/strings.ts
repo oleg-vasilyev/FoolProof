@@ -22,11 +22,13 @@ export const strings = {
     "are left. Back undoes one step at a time, and nothing is recorded until you tap Confirm.",
   ].join("\n"),
 
-  header: (gameNumber: number, tableSize: number) => `Game ${gameNumber} · ${tableSize} at the table`,
+  header: (gameNumber: number, tableSize: number) =>
+    `<b>Game ${gameNumber}</b> · ${tableSize} at the table`,
   askStarter: "Who dealt first?",
-  dealtFirst: (name: string) => `Dealt first: ${name}`,
-  stillIn: (names: readonly string[]) => `— still in: ${names.join(", ")}`,
+  dealtFirst: (name: string) => `Dealt first: <b>${name}</b>`,
+  stillIn: (names: readonly string[]) => `still in: ${names.join(", ")}`,
 
+  medals: ["🥇", "🥈", "🥉"],
   markExit: "✅",
   markFool: "💀",
   markDraw: "🤝",

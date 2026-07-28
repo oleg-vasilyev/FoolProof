@@ -99,6 +99,7 @@ export function createCardService(deps: CardServiceDeps): CardService {
   const sendEdit = async (request: EditRequest): Promise<void> => {
     try {
       await api.editMessageText(request.chatId, request.messageId, request.text, {
+        parse_mode: "HTML",
         reply_markup: request.keyboard === null ? undefined : toMarkup(request.keyboard),
       });
     } catch (error) {
@@ -142,7 +143,7 @@ export function createCardService(deps: CardServiceDeps): CardService {
         const message = await api.sendMessage(
           chatId,
           renderCard(state, repo.gameNumberInSeries(chatId)),
-          { reply_markup: toMarkup(renderKeyboard(state, gameId, 0)) }
+          { parse_mode: "HTML", reply_markup: toMarkup(renderKeyboard(state, gameId, 0)) }
         );
 
         repo.attachMessage(gameId, message.message_id);
