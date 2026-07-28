@@ -12,6 +12,9 @@ data/
 # build / deps / noise
 node_modules/
 dist/
+coverage/
+reports/
+.stryker-tmp/
 *.log
 .DS_Store
 Thumbs.db
