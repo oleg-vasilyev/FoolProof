@@ -1,0 +1,14 @@
+# secrets — .env.example is the shareable template
+.env
+secrets/
+
+# machine-local Claude Code settings (paths + personal permission grants)
+# .claude/settings.json IS shared — it carries the project hooks
+.claude/settings.local.json
+
+# build / deps / noise
+node_modules/
+dist/
+*.log
+.DS_Store
+Thumbs.db
