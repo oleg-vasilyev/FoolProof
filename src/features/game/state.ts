@@ -90,40 +90,46 @@ const steppedBack = (state: CardState): CardState => {
   return { ...state, starterSlot: null };
 };
 
+const picked = (state: CardState, phase: Phase, slot: number): Transition => {
+  if (!isSlot(state, slot)) {
+    return { outcome: "rejected" };
+  }
+
+  switch (phase) {
+    case "PICK_STARTER":
+      return { outcome: "updated", state: { ...state, starterSlot: slot } };
+
+    case "RECORDING":
+      return state.exits.includes(slot)
+        ? { outcome: "rejected" }
+        : { outcome: "updated", state: { ...state, exits: [...state.exits, slot] } };
+
+    case "READY":
+      return { outcome: "rejected" };
+  }
+};
+
 export const apply = (state: CardState, action: Action): Transition => {
   const phase = phaseOf(state);
 
-  if (action.kind === "cancel") {
-    return phase === "PICK_STARTER" ? { outcome: "cancelled" } : { outcome: "rejected" };
-  }
+  switch (action.kind) {
+    case "cancel":
+      return phase === "PICK_STARTER" ? { outcome: "cancelled" } : { outcome: "rejected" };
 
-  if (action.kind === "confirm") {
-    return phase === "READY" ? { outcome: "confirmed", state } : { outcome: "rejected" };
-  }
+    case "confirm":
+      return phase === "READY" ? { outcome: "confirmed", state } : { outcome: "rejected" };
 
-  if (action.kind === "back") {
-    return phase === "PICK_STARTER"
-      ? { outcome: "rejected" }
-      : { outcome: "updated", state: steppedBack(state) };
-  }
+    case "back":
+      return phase === "PICK_STARTER"
+        ? { outcome: "rejected" }
+        : { outcome: "updated", state: steppedBack(state) };
 
-  if (action.kind === "draw") {
-    return drawAvailable(state)
-      ? { outcome: "updated", state: { ...state, drawAccepted: true } }
-      : { outcome: "rejected" };
-  }
+    case "draw":
+      return drawAvailable(state)
+        ? { outcome: "updated", state: { ...state, drawAccepted: true } }
+        : { outcome: "rejected" };
 
-  if (!isSlot(state, action.slot)) {
-    return { outcome: "rejected" };
+    case "pick":
+      return picked(state, phase, action.slot);
   }
-
-  if (phase === "PICK_STARTER") {
-    return { outcome: "updated", state: { ...state, starterSlot: action.slot } };
-  }
-
-  if (phase !== "RECORDING" || state.exits.includes(action.slot)) {
-    return { outcome: "rejected" };
-  }
-
-  return { outcome: "updated", state: { ...state, exits: [...state.exits, action.slot] } };
 };
