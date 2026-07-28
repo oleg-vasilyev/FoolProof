@@ -10,13 +10,23 @@ export const strings = {
 
   commandGame: "Open a game — /game Oleg, Anya, Roma",
   commandNext: "Another game, same line-up",
+  commandStats: "How tonight is going",
   commandHelp: "How the card works",
+
+  statsHeader: (games: number) =>
+    `<b>Session</b> · ${games} ${games === 1 ? "game" : "games"}`,
+  statsFools: "<b>Fool</b>",
+  statsWins: "<b>Wins</b>",
+  statsRow: (bar: string, value: number, name: string) => `${bar} ${value} — ${name}`,
+  statsEmpty: "Nothing recorded yet. Start a game with /game.",
+  statsAllDrawn: "<i>Every game ended in a draw.</i>",
 
   helpBody: [
     "FoolProof keeps score for games of Durak.",
     "",
     "/game Oleg, Anya, Roma — open a game; the list is the seating order around the table",
     "/next — another game with the same line-up",
+    "/stats — how the current session is going",
     "/help — this message",
     "",
     "Tap a name to record who dealt first, then tap players in the order they go out.",

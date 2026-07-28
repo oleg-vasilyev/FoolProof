@@ -103,7 +103,7 @@ entry (src/bot.ts)
 
 - `shared/`       — infra used everywhere: env, logger, debounce, db, repository
 - `integrations/` — thin clients for external services: telegram
-- `features/`     — one folder per capability: game, render, bot (stats later)
+- `features/`     — one folder per capability: game, render, bot
 
 The entry file stays thin and declarative — it names the steps, never the
 implementation.

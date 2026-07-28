@@ -246,6 +246,57 @@ export const sqliteRepository: Repository = {
 
     return row === undefined ? 1 : num(row.game_no);
   },
+
+  seriesStats(chatId) {
+    const counted = db
+      .prepare(
+        `SELECT COUNT(*) AS games FROM game_series
+         WHERE chat_id = ?
+           AND series_no = (SELECT MAX(series_no) FROM game_series WHERE chat_id = ?)`
+      )
+      .get(chatId, chatId);
+
+    const games = counted === undefined ? 0 : num(counted.games);
+    if (games === 0) {
+      return { games: 0, players: [] };
+    }
+
+    const players = db
+      .prepare(
+        `WITH placed AS (
+           SELECT ge.player_id,
+                  ge.position,
+                  COUNT(*) OVER (PARTITION BY ge.game_id, ge.position) AS sharing,
+                  MAX(ge.position) OVER (PARTITION BY ge.game_id) AS last_position
+           FROM game_events ge
+           WHERE ge.game_id IN (
+             SELECT id FROM game_series
+             WHERE chat_id = ?
+               AND series_no = (SELECT MAX(series_no) FROM game_series WHERE chat_id = ?)
+           )
+         )
+         SELECT p.id AS player_id,
+                p.display_name,
+                COUNT(*) AS games,
+                SUM(CASE WHEN placed.position = 1 AND placed.sharing = 1 THEN 1 ELSE 0 END) AS wins,
+                SUM(CASE WHEN placed.position = placed.last_position AND placed.sharing = 1
+                         THEN 1 ELSE 0 END) AS fools
+         FROM placed
+         JOIN players p ON p.id = placed.player_id
+         GROUP BY p.id, p.display_name
+         ORDER BY fools DESC, wins DESC, p.display_name`
+      )
+      .all(chatId, chatId)
+      .map((row) => ({
+        playerId: num(row.player_id),
+        displayName: text(row.display_name),
+        games: num(row.games),
+        wins: num(row.wins),
+        fools: num(row.fools),
+      }));
+
+    return { games, players };
+  },
 };
 
 export type { Finalist };

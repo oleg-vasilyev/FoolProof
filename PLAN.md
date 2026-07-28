@@ -348,6 +348,35 @@ someone has to remember to write.
 `seat_index`, the list is **rotated so that the player with the smallest `player_id`
 ends up in position zero**. Without this, neighbour analytics falls apart.
 
+### `/stats`
+
+Two counts for the current session, each as a text bar chart. No image is
+rendered: a PNG would mean either a native dependency and a build step, or
+shipping the players' names to a third-party chart service on every call, and
+neither is worth it for two rows of numbers.
+
+```
+<b>Session</b> · 9 games
+
+<b>Fool</b>
+████ 4 — Roma
+██ 2 — Oleg
+█ 1 — Anya
+
+<b>Wins</b>
+███ 3 — Anya
+██ 2 — Oleg
+```
+
+The bar is drawn **before** the name so the bars share a left edge — Telegram's
+proportional font would stagger them otherwise. One cell means one game while the
+leader has twelve or fewer; past that the bars scale to the leader. Scaling
+always would draw a full-width bar for a single game and overstate it.
+
+**A draw counts as neither a win nor a fool.** Both counts only credit a player
+who held the position alone, so a shared last place leaves the fool tally
+untouched — nobody was the fool that game.
+
 ### A session is computed, not a table
 
 A session is a chain of games where consecutive starts are less than 3 hours apart.
@@ -407,7 +436,8 @@ bundled with Node 24 is well past both.
 
 ## Out of scope for the first version
 
-- `/stats` beyond statistics for the latest session
+- `/stats` beyond the current session — no arbitrary periods, no all-time table
+- Rendered image charts, for the dependency and privacy reasons above
 - A Telegram Mini App and a dashboard
 - AI analytics
 - The trump suit and validation of the first move

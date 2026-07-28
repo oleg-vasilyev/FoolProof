@@ -4,6 +4,7 @@ import type { Repository } from "../../shared/repository/types.ts";
 import { decodeCallback } from "../../integrations/telegram/callback.ts";
 import { normalizeName, parseLineup, rotateToLowestId } from "../game/lineup.ts";
 import type { Seat } from "../game/state.ts";
+import { renderStats } from "../render/stats.ts";
 import { strings } from "../render/strings.ts";
 import { createCardService, type CardService } from "./cards.ts";
 
@@ -23,6 +24,7 @@ type ReplyFn = (text: string, replyTo: number) => Promise<void>;
 const COMMAND_MENU = [
   { command: "game", description: strings.commandGame },
   { command: "next", description: strings.commandNext },
+  { command: "stats", description: strings.commandStats },
   { command: "help", description: strings.commandHelp },
 ];
 
@@ -172,6 +174,10 @@ export function createBot(token: string, deps: BotDeps): BotBundle {
       chatId,
       lineup.map((seat) => ({ playerId: seat.player_id, displayName: seat.display_name }))
     );
+  });
+
+  bot.command("stats", async (ctx) => {
+    await ctx.reply(renderStats(repo.seriesStats(ctx.chat.id)), { parse_mode: "HTML" });
   });
 
   bot.command("help", async (ctx) => {
