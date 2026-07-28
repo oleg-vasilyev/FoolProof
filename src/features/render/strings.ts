@@ -26,19 +26,21 @@ export const strings = {
     `<b>Game ${gameNumber}</b> · ${tableSize} at the table`,
   askStarter: "Who dealt first?",
   dealtFirst: (name: string) => `Dealt first: <b>${name}</b>`,
+  progress: (out: number, total: number) => `<i>${out} of ${total} out</i>`,
+  readyToConfirm: "<i>All places are in — tap Confirm.</i>",
 
-  pendingMark: "·",
-  labelFool: "fool",
-  labelDraw: "draw",
+  resultPlace: (position: number, name: string) => `${position} · ${name}`,
+  resultFool: (position: number, name: string) => `${position} · <b>${name}</b> — fool`,
+  resultDraw: (position: number, name: string) => `${position} · <b>${name}</b> — draw`,
 
   markExit: "✅",
   markFool: "💀",
   markDraw: "🤝",
 
   buttonDraw: "🤝 Draw",
-  buttonConfirm: "✔️ Confirm",
+  buttonConfirm: "✅ Confirm",
   buttonBack: "↩️ Back",
-  buttonCancel: "✖️ Cancel",
+  buttonCancel: "❌ Cancel",
 
   tapRecorded: (name: string, position: number) => `${name} — ${position}`,
   tapStarter: (name: string) => `${name} dealt first`,

@@ -14,7 +14,7 @@ import {
   type CardState,
   type Seat,
 } from "../game/state.ts";
-import { renderCard } from "../render/card.ts";
+import { renderCard, renderResult } from "../render/card.ts";
 import { renderKeyboard, type InlineKeyboardRows } from "../render/keyboard.ts";
 import { strings } from "../render/strings.ts";
 
@@ -200,7 +200,7 @@ export function createCardService(deps: CardServiceDeps): CardService {
         await sendEdit({
           chatId: card.game.chat_id,
           messageId: card.game.message_id,
-          text: renderCard(before, gameNumber),
+          text: renderResult(before, gameNumber),
           keyboard: null,
         });
 

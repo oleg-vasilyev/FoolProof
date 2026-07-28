@@ -143,12 +143,21 @@ The game is not closed — Confirm is still required. Back rolls the draw back.
 
 ## Telegram keyboard rules
 
-Three things that **do not exist** in the Bot API — do not try to implement them:
+Five things that **do not exist** in the Bot API — do not try to implement them,
+and do not accept a design that assumes them:
 
 1. **Button colours.** `InlineKeyboardButton` has no style field. State is conveyed
-   by an emoji in the button text and by the body of the message above the keyboard
+   by an emoji in the button text and by the body of the message above the keyboard.
+   The emoji's *own* colour is the only lever there is — `❌` reads red where `✖️`
+   reads grey, `✅` green where `✔️` reads grey
 2. **Disabled buttons.** They cannot be greyed out. A button either exists or it does not
 3. **Drag and drop.** An inline keyboard is taps only
+4. **Font size and colour.** Message text allows only bold, italic, underline,
+   strikethrough, spoiler, code, pre, blockquote and links. Hierarchy has to come
+   from weight and wording. Unicode pseudo-fonts (𝐁𝐨𝐥𝐝, 𝓼𝓬𝓻𝓲𝓹𝓽) are not a
+   workaround — they break search and screen readers, and they look cheap
+5. **Button label alignment.** Captions are always centred, so buttons of different
+   text length will never line up with each other
 
 ### Button format
 
@@ -164,53 +173,51 @@ Anya          ← still in the game
 ✖️ Cancel
 ```
 
-Exactly three emoji carry meaning here — done, fool, draw. Medals for the top
-three were tried and reverted: at button and list size they read as
+Exactly three emoji carry meaning on player buttons — done, fool, draw. Medals for
+the top three were tried and reverted: at button size they read as
 indistinguishable coloured dots, and a row of them makes the card look cheaper,
 not richer.
 
 ### Message body
 
-Above the keyboard — a readable order; it matters more than the button captions.
-Messages are sent with `parse_mode: HTML`, and the standings sit in a `<pre>`
-block, because a monospace block is the only way to get columns to line up in
-Telegram:
+**The live card does not repeat the standings.** The buttons already are the
+table — every name carries its own position — so a list above them says the same
+thing twice and costs a screenful of height on a phone. The body carries only
+what the keyboard cannot: which game this is, who dealt, and how far along it is.
+
+```
+<b>Game 3</b> · 5 at the table
+Dealt first: <b>Oleg</b>
+<i>2 of 5 out</i>
+```
+
+Once every place is settled that last line becomes `All places are in — tap
+Confirm.`
+
+The standings appear exactly once, on Confirm, because that is the moment the
+keyboard disappears and the text becomes the only record left in the chat:
 
 ```
 <b>Game 3</b> · 5 at the table
 Dealt first: <b>Oleg</b>
 
-<pre> 1  Oleg
- 2  Roma
- ·  Dima
- ·  Kim
- ·  Anya</pre>
+1 · Oleg
+2 · Roma
+3 · Dima
+4 · Kim
+5 · <b>Anya</b> — fool
 ```
 
-A player who is still in gets `·` instead of a number. Once every position is
-known the dots resolve, and the last line is labelled in words rather than with
-an emoji:
-
-```
-<b>Game 3</b> · 5 at the table
-Dealt first: <b>Oleg</b>
-
-<pre> 1  Oleg
- 2  Roma
- 3  Dima
- 4  Kim
- 5  Anya  fool</pre>
-```
-
-After a draw, both players share the last number and are labelled `draw`.
+After a draw, both players share the last number and are labelled `draw`. A
+monospace `<pre>` block was tried for column alignment and reverted: Telegram
+renders it as a code block with a "copy" header, which is meaningless for a
+scoreboard.
 
 **Player names are user data and must be HTML-escaped** before they reach the
 message body — a player called `Аня & Оля` would otherwise break the markup and
-one called `<b>x</b>` would inject it, and escaping applies inside `<pre>` too.
-Pad the name to the column width **before** escaping: `&amp;` is five characters
-of markup but one character on screen, so escaping first throws the column off.
-Button captions are the opposite case entirely — Telegram does not parse HTML
-there, so escaping them would show `&amp;` literally.
+one called `<b>x</b>` would inject it. Button captions are the opposite case
+entirely: Telegram does not parse HTML there, so escaping them would show
+`&amp;` literally.
 
 ### Button order
 

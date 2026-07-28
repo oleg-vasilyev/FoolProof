@@ -164,10 +164,12 @@ Three things `shared/db.ts` owns and nothing else may assume:
 
 ## Telegram constraints
 
-Three things the Bot API does not have — do not attempt them, and do not accept a
+Five things the Bot API does not have — do not attempt them, and do not accept a
 design that assumes them: **button colours**, **disabled buttons**, **drag and
-drop**. State is conveyed by an emoji in the button caption and by the message
-body above the keyboard.
+drop**, **font size or colour**, and **button label alignment** (captions are
+always centred). State is conveyed by an emoji in the button caption and by the
+message body above the keyboard; the emoji's own colour is the only palette there
+is (`❌` red, `✅` green, `✔️`/`✖️` grey).
 
 - `callback_data` is capped at 64 bytes. **Never put a name in it** —
   `<game_id_b62>:<action>:<slot>:<state_version>`.
@@ -182,15 +184,20 @@ body above the keyboard.
 - Button order follows the seating and **never changes** within a game or a
   session. Muscle memory beats tidiness.
 - Cards go out with `parse_mode: "HTML"`. Player names are user data, so anything
-  reaching the **message body** goes through `escapeHtml` first — including inside
-  `<pre>`. Pad to a column width *before* escaping, never after. **Button captions
+  reaching the **message body** goes through `escapeHtml` first. **Button captions
   are the opposite** — Telegram does not parse HTML there, and escaping them would
   render `&amp;` literally. Getting this backwards is silent in testing and
   obvious in the chat.
-- Emoji are load-bearing, not decoration: ✅ done, 💀 fool, 🤝 draw, and the four
-  control buttons. Medals for the top three were tried and reverted — at this size
-  they read as coloured dots and cheapen the card. Reach for alignment and weight
-  before reaching for another emoji.
+- Emoji are load-bearing, not decoration: ✅ done, 💀 fool, 🤝 draw, and the control
+  buttons. Two dead ends already paid for — medals for the top three (coloured dots
+  at button size) and a `<pre>` block for aligned columns (Telegram renders it as a
+  code block with a "copy" header). Reach for weight and wording before reaching
+  for another emoji.
+- **The live card never repeats what the buttons already say.** Player buttons
+  carry their own positions, so the body holds only the game number, the starter
+  and the progress line. The standings render once, on Confirm — `renderResult`,
+  not `renderCard` — because that is when the keyboard goes away and the text
+  becomes the only record.
 
 ## Configuration
 
