@@ -70,6 +70,25 @@ export function createBot(token: string, deps: BotDeps): BotBundle {
   const { repo, log } = deps;
   const bot = new Bot(token);
   const cards = createCardService({ repo, api: bot.api, log });
+  const openPrompts = new Map<number, number>();
+
+  const removeMessage = async (chatId: number, messageId: number): Promise<void> => {
+    try {
+      await bot.api.deleteMessage(chatId, messageId);
+    } catch (error) {
+      log.debug(`could not delete message ${messageId}: ${String(error)}`);
+    }
+  };
+
+  const dropPrompt = async (chatId: number): Promise<void> => {
+    const messageId = openPrompts.get(chatId);
+    if (messageId === undefined) {
+      return;
+    }
+
+    openPrompts.delete(chatId);
+    await removeMessage(chatId, messageId);
+  };
 
   const refuseWhenLive = async (chatId: number, reply: ReplyFn): Promise<boolean> => {
     const live = repo.liveCardInChat(chatId);
@@ -102,21 +121,28 @@ export function createBot(token: string, deps: BotDeps): BotBundle {
     const reply: ReplyFn = (text, replyTo) =>
       ctx.reply(text, { reply_parameters: { message_id: replyTo } }).then(() => undefined);
 
+    await dropPrompt(chatId);
+
     if (await refuseWhenLive(chatId, reply)) {
       return;
     }
 
-    const rawText = ctx.message?.text ?? "";
+    const commandMessageId = ctx.msg?.message_id;
+    const rawText = ctx.msg?.text ?? "";
     const parsed = parseLineup(rawText);
 
     if (!parsed.ok && parsed.problem === "empty") {
-      await ctx.reply(strings.lineupPrompt, {
+      const prompt = await ctx.reply(strings.lineupPrompt, {
+        reply_parameters:
+          commandMessageId === undefined ? undefined : { message_id: commandMessageId },
         reply_markup: {
           force_reply: true,
           selective: true,
           input_field_placeholder: strings.lineupPlaceholder,
         },
       });
+
+      openPrompts.set(chatId, prompt.message_id);
 
       return;
     }
@@ -128,6 +154,8 @@ export function createBot(token: string, deps: BotDeps): BotBundle {
     const chatId = ctx.chat.id;
     const reply: ReplyFn = (text, replyTo) =>
       ctx.reply(text, { reply_parameters: { message_id: replyTo } }).then(() => undefined);
+
+    await dropPrompt(chatId);
 
     if (await refuseWhenLive(chatId, reply)) {
       return;
@@ -159,6 +187,9 @@ export function createBot(token: string, deps: BotDeps): BotBundle {
     const chatId = ctx.chat.id;
     const reply: ReplyFn = (text, replyTo) =>
       ctx.reply(text, { reply_parameters: { message_id: replyTo } }).then(() => undefined);
+
+    openPrompts.delete(chatId);
+    await removeMessage(chatId, prompt.message_id);
 
     if (await refuseWhenLive(chatId, reply)) {
       return;

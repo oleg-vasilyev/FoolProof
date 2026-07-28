@@ -84,9 +84,19 @@ opens the input field with that message quoted, and the names arrive in the next
 message. This also survives privacy mode, which hides ordinary group chatter from
 bots but always delivers replies to the bot's own messages.
 
-The reply is recognised by matching `reply_to_message` against the bot's own id
-and the exact prompt text, so it stays stateless — nothing has to be remembered
-between the prompt and the answer.
+The answer is recognised by matching `reply_to_message` against the bot's own id
+and the exact prompt text, so no state is needed to read it.
+
+Two rules keep the prompt from becoming litter, both learned the hard way:
+
+- **The prompt must itself be a reply to the command.** `selective: true` only
+  targets someone if the message either @mentions them or replies to theirs. A
+  standalone prompt with `selective` set targets nobody in particular, and the
+  reply interface behaves erratically.
+- **Delete the prompt once it is answered.** There is no API call to withdraw a
+  `force_reply`; the client keeps the reply pending in the chat's draft until the
+  message it points at is gone. Opening `/game` again, or `/next`, also clears any
+  prompt still standing, so at most one is ever live per chat.
 
 ### Parsing the player list
 
