@@ -1,12 +1,63 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cardRecordOf, playerIdOf } from "../../shared/repository/records.stub.ts";
-import { seatsOf } from "../game/state.stub.ts";
 import { RepositoryStub } from "../../shared/repository/repository.stub.ts";
 import { LoggerStub } from "../../shared/logger.stub.ts";
-import { TelegramApiStub } from "./api.stub.ts";
+import { seatsOf } from "../game/state.stub.ts";
 import type { CallbackAction, CallbackPayload } from "../render/callback.ts";
-import { createCardService, type CardService } from "./cards.ts";
+import { strings } from "../render/strings.ts";
+import { TelegramApiStub } from "./api.stub.ts";
 
+
+const scheduleSpy = vi.fn();
+
+const cancelSpy = vi.fn();
+
+const flushAllSpy = vi.fn();
+
+const createDebouncerSpy = vi.fn();
+
+const applySpy = vi.fn();
+
+const nameAtSpy = vi.fn();
+
+const phaseOfSpy = vi.fn();
+
+const remainingSlotsSpy = vi.fn();
+
+const seatAtSpy = vi.fn();
+
+const starterPlayerIdSpy = vi.fn();
+
+const renderCardSpy = vi.fn();
+
+const renderResultSpy = vi.fn();
+
+const renderKeyboardSpy = vi.fn();
+
+vi.mock("../../shared/debounce.ts", () => ({
+  createDebouncer: (delayMs: number, run: unknown) => createDebouncerSpy(delayMs, run),
+}));
+
+vi.mock("../game/state.ts", () => ({
+  apply: (state: unknown, action: unknown) => applySpy(state, action),
+  nameAt: (state: unknown, slot: number) => nameAtSpy(state, slot),
+  phaseOf: (state: unknown) => phaseOfSpy(state),
+  remainingSlots: (state: unknown) => remainingSlotsSpy(state),
+  seatAt: (state: unknown, slot: number) => seatAtSpy(state, slot),
+  starterPlayerId: (state: unknown) => starterPlayerIdSpy(state),
+}));
+
+vi.mock("../render/card.ts", () => ({
+  renderCard: (state: unknown, gameNumber: number) => renderCardSpy(state, gameNumber),
+  renderResult: (state: unknown, gameNumber: number) => renderResultSpy(state, gameNumber),
+}));
+
+vi.mock("../render/keyboard.ts", () => ({
+  renderKeyboard: (state: unknown, gameId: number, version: number) =>
+    renderKeyboardSpy(state, gameId, version),
+}));
+
+const { createCardService } = await import("./cards.ts");
 
 const THREE = ["Oleg", "Anya", "Roma"];
 
@@ -26,34 +77,118 @@ const ACTOR_ID = 777;
 
 const IDLE_SECONDS = 10_800;
 
-const EDIT_DEBOUNCE_MS = 350;
+const GAME_NUMBER = 3;
+
+const FIRST_VERSION = 0;
+
+const NEXT_VERSION = 1;
+
+const SHORTEST_DEBOUNCE_MS = 300;
+
+const LONGEST_DEBOUNCE_MS = 500;
 
 const ONCE = 1;
 
 const NEVER = 0;
 
+const CARD_TEXT = "the rendered card";
+
+const RESULT_TEXT = "the rendered standings";
+
+const KEYBOARD = [[{ text: "Oleg", callback_data: "1:p:0:0" }]];
+
+const payload = (action: CallbackAction, slot: number | null, version = FIRST_VERSION):
+  CallbackPayload => ({ gameId: GAME_ID, action, slot, version });
+
+const stateAfter = (over: Record<string, unknown> = {}) => ({
+  seats: seatsOf(...THREE),
+  starterSlot: OLEG,
+  exits: [],
+  drawAccepted: false,
+  ...over,
+});
+
 describe("createCardService()", () => {
   let repo: RepositoryStub;
   let telegram: TelegramApiStub;
   let log: LoggerStub;
-  let cards: CardService;
+  let cards: ReturnType<typeof createCardService>;
+  let runScheduledEdit: (request: unknown) => Promise<void>;
 
-  const payload = (
-    action: CallbackAction,
-    slot: number | null,
-    version = 0
-  ): CallbackPayload => ({ gameId: GAME_ID, action, slot, version });
+  const build = () => {
+    cards = createCardService({ repo, api: telegram.api, log });
+    runScheduledEdit = createDebouncerSpy.mock.calls[0]?.[1] as (r: unknown) => Promise<void>;
+  };
 
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.clearAllMocks();
+
     repo = new RepositoryStub();
     telegram = new TelegramApiStub();
     log = new LoggerStub();
-    cards = createCardService({ repo, api: telegram.api, log });
+
+    createDebouncerSpy.mockReturnValue({
+      schedule: scheduleSpy,
+      cancel: cancelSpy,
+      flush: vi.fn(),
+      flushAll: flushAllSpy,
+    });
+
+    renderCardSpy.mockReturnValue(CARD_TEXT);
+    renderResultSpy.mockReturnValue(RESULT_TEXT);
+    renderKeyboardSpy.mockReturnValue(KEYBOARD);
+    nameAtSpy.mockReturnValue("Oleg");
+    phaseOfSpy.mockReturnValue("RECORDING");
+    remainingSlotsSpy.mockReturnValue([]);
+    seatAtSpy.mockReturnValue({ playerId: playerIdOf(ROMA), displayName: "Roma" });
+    starterPlayerIdSpy.mockReturnValue(playerIdOf(OLEG));
+    repo.openGameSpy.mockReturnValue(GAME_ID);
+    repo.gameNumberInSeriesSpy.mockReturnValue(GAME_NUMBER);
+
+    build();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  describe("the debounced editor", () => {
+    it("should debounce edits inside the range the Bot API tolerates", () => {
+      expect(createDebouncerSpy.mock.calls[0]?.[0]).toBeGreaterThanOrEqual(SHORTEST_DEBOUNCE_MS);
+      expect(createDebouncerSpy.mock.calls[0]?.[0]).toBeLessThanOrEqual(LONGEST_DEBOUNCE_MS);
+    });
+
+    it("should send a scheduled edit as HTML", async () => {
+      await runScheduledEdit({
+        chatId: CHAT_ID,
+        messageId: MESSAGE_ID,
+        text: CARD_TEXT,
+        keyboard: KEYBOARD,
+      });
+
+      expect(telegram.editMessageTextSpy).toHaveBeenCalledWith(
+        CHAT_ID,
+        MESSAGE_ID,
+        CARD_TEXT,
+        expect.objectContaining({ parse_mode: "HTML" })
+      );
+    });
+
+    it("should drop the keyboard entirely when the edit carries none", async () => {
+      await runScheduledEdit({
+        chatId: CHAT_ID,
+        messageId: MESSAGE_ID,
+        text: CARD_TEXT,
+        keyboard: null,
+      });
+
+      expect(telegram.lastEdit().markup).toBeUndefined();
+    });
+
+    it("should warn rather than throw when Telegram refuses the edit", async () => {
+      telegram.editMessageTextSpy.mockRejectedValue(new Error("message is not modified"));
+
+      await expect(
+        runScheduledEdit({ chatId: CHAT_ID, messageId: MESSAGE_ID, text: "x", keyboard: null })
+      ).resolves.toBeUndefined();
+      expect(log.warnSpy).toHaveBeenCalledTimes(ONCE);
+    });
   });
 
   describe("open()", () => {
@@ -67,64 +202,42 @@ describe("createCardService()", () => {
       ]);
     });
 
-    it("should send the card as HTML", async () => {
+    it("should send the card the renderer produced", async () => {
       await cards.open(CHAT_ID, seatsOf(...THREE));
 
-      expect(telegram.sendMessageSpy.mock.calls[0]?.[2]?.parse_mode).toBe("HTML");
+      expect(telegram.lastSend().text).toBe(CARD_TEXT);
     });
 
-    it("should attach the message id so the card survives a restart", async () => {
+    it("should render a fresh card with no starter and no exits", async () => {
       await cards.open(CHAT_ID, seatsOf(...THREE));
 
-      expect(repo.attachMessageSpy).toHaveBeenCalledWith(GAME_ID, MESSAGE_ID);
+      expect(renderCardSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ starterSlot: null, exits: [], drawAccepted: false }),
+        GAME_NUMBER
+      );
     });
 
-    it("should ask the repository which game number this is", async () => {
+    it("should build the keyboard at the first version", async () => {
       await cards.open(CHAT_ID, seatsOf(...THREE));
 
-      expect(repo.gameNumberInSeriesSpy).toHaveBeenCalledWith(CHAT_ID);
+      expect(renderKeyboardSpy).toHaveBeenCalledWith(expect.anything(), GAME_ID, FIRST_VERSION);
     });
 
-    it("should send a keyboard with a row per player plus the controls", async () => {
+    it("should remember which message the card became", async () => {
       await cards.open(CHAT_ID, seatsOf(...THREE));
-      const markup = telegram.sendMessageSpy.mock.calls[0]?.[2]?.reply_markup;
 
-      expect(markup.inline_keyboard).toHaveLength(THREE.length + 1);
-    });
-
-    it("should give every button a caption and callback data", async () => {
-      await cards.open(CHAT_ID, seatsOf(...THREE));
-      const markup = telegram.sendMessageSpy.mock.calls[0]?.[2]?.reply_markup;
-      const buttons = markup.inline_keyboard.flat();
-
-      expect(
-        buttons.every(
-          (button: { text?: string; callback_data?: string }) =>
-            typeof button.text === "string" &&
-            button.text.length > 0 &&
-            typeof button.callback_data === "string" &&
-            button.callback_data.length > 0
-        )
-      ).toBe(true);
-    });
-
-    it("should put the player names on the buttons", async () => {
-      await cards.open(CHAT_ID, seatsOf(...THREE));
-      const markup = telegram.sendMessageSpy.mock.calls[0]?.[2]?.reply_markup;
-      const captions = markup.inline_keyboard.flat().map((b: { text: string }) => b.text);
-
-      expect(captions).toContain("Oleg");
+      expect(repo.attachMessageSpy).toHaveBeenCalledWith(GAME_ID, expect.any(Number));
     });
 
     it("should delete the row when Telegram refuses the message", async () => {
-      telegram.sendMessageSpy.mockRejectedValue(new Error("bad request"));
+      telegram.sendMessageSpy.mockRejectedValue(new Error("chat not found"));
 
-      await expect(cards.open(CHAT_ID, seatsOf(...THREE))).rejects.toThrow("bad request");
+      await expect(cards.open(CHAT_ID, seatsOf(...THREE))).rejects.toThrow("chat not found");
       expect(repo.deleteGameSpy).toHaveBeenCalledWith(GAME_ID);
     });
 
-    it("should not leave a message attached when sending failed", async () => {
-      telegram.sendMessageSpy.mockRejectedValue(new Error("bad request"));
+    it("should not leave a card attached to a message that was never sent", async () => {
+      telegram.sendMessageSpy.mockRejectedValue(new Error("chat not found"));
 
       await expect(cards.open(CHAT_ID, seatsOf(...THREE))).rejects.toThrow();
       expect(repo.attachMessageSpy).toHaveBeenCalledTimes(NEVER);
@@ -132,342 +245,467 @@ describe("createCardService()", () => {
   });
 
   describe("tap()", () => {
-    it("should report a missing card as gone", async () => {
-      repo.cardByIdSpy.mockReturnValue(null);
+    const liveCard = () =>
+      cardRecordOf(THREE, {
+        id: GAME_ID,
+        message_id: MESSAGE_ID,
+        starter_player_id: playerIdOf(OLEG),
+      });
 
-      expect(await cards.tap(payload("pick", OLEG), ACTOR_ID)).toBe("This game is already over");
+    beforeEach(() => {
+      repo.cardByIdSpy.mockReturnValue(liveCard());
+      applySpy.mockReturnValue({ outcome: "updated", state: stateAfter() });
     });
 
-    it("should report a confirmed card as gone", async () => {
-      repo.cardByIdSpy.mockReturnValue(
-        cardRecordOf(THREE, { confirmed_at: "2026-07-29 21:00:00" })
+    describe("when the card cannot be tapped", () => {
+      it("should say the card is gone when there is no row", async () => {
+        repo.cardByIdSpy.mockReturnValue(null);
+
+        expect(await cards.tap(payload("pick", OLEG), ACTOR_ID)).toBe(strings.cardGone);
+      });
+
+      it("should say the card is gone once it was confirmed", async () => {
+        repo.cardByIdSpy.mockReturnValue(
+          cardRecordOf(THREE, { id: GAME_ID, confirmed_at: "2026-07-29 12:00:00" })
+        );
+
+        expect(await cards.tap(payload("pick", OLEG), ACTOR_ID)).toBe(strings.cardGone);
+      });
+
+      it("should say the card is stale when the version moved on", async () => {
+        repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE, { id: GAME_ID, state_version: 5 }));
+
+        expect(await cards.tap(payload("pick", OLEG), ACTOR_ID)).toBe(strings.cardStale);
+      });
+
+      it("should not touch the reducer for a stale tap", async () => {
+        repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE, { id: GAME_ID, state_version: 5 }));
+
+        await cards.tap(payload("pick", OLEG), ACTOR_ID);
+
+        expect(applySpy).toHaveBeenCalledTimes(NEVER);
+      });
+
+      it("should refuse a tap the reducer rejected", async () => {
+        applySpy.mockReturnValue({ outcome: "rejected" });
+
+        expect(await cards.tap(payload("pick", OLEG), ACTOR_ID)).toBe(strings.tapNotAllowed);
+      });
+
+      it("should change nothing when the reducer rejected the tap", async () => {
+        applySpy.mockReturnValue({ outcome: "rejected" });
+
+        await cards.tap(payload("pick", OLEG), ACTOR_ID);
+
+        expect(repo.updateCardSpy).toHaveBeenCalledTimes(NEVER);
+      });
+    });
+
+    describe("the action it hands the reducer", () => {
+      it("should carry the slot for a pick", async () => {
+        await cards.tap(payload("pick", ROMA), ACTOR_ID);
+
+        expect(applySpy).toHaveBeenCalledWith(expect.anything(), { kind: "pick", slot: ROMA });
+      });
+
+      it("should send a pick without a slot somewhere no seat can be", async () => {
+        await cards.tap(payload("pick", null), ACTOR_ID);
+
+        expect(applySpy.mock.calls[0]?.[1]).toEqual({ kind: "pick", slot: -1 });
+      });
+
+      it.each(["draw", "back", "confirm", "cancel"])(
+        "should send %s as a bare action",
+        async (action) => {
+          await cards.tap(payload(action as CallbackAction, null), ACTOR_ID);
+
+          expect(applySpy).toHaveBeenCalledWith(expect.anything(), { kind: action });
+        }
       );
 
-      expect(await cards.tap(payload("pick", OLEG), ACTOR_ID)).toBe("This game is already over");
+      it("should rebuild the state from the stored seats and exits", async () => {
+        repo.cardByIdSpy.mockReturnValue(
+          cardRecordOf(THREE, { id: GAME_ID, starter_player_id: playerIdOf(OLEG) }, [ROMA])
+        );
+
+        await cards.tap(payload("back", null), ACTOR_ID);
+
+        expect(applySpy.mock.calls[0]?.[0]).toMatchObject({ starterSlot: OLEG, exits: [ROMA] });
+      });
+
+      it("should treat a READY card with two left as an accepted draw", async () => {
+        repo.cardByIdSpy.mockReturnValue(
+          cardRecordOf(THREE, { id: GAME_ID, state: "READY" }, [OLEG])
+        );
+
+        await cards.tap(payload("back", null), ACTOR_ID);
+
+        expect(applySpy.mock.calls[0]?.[0]).toMatchObject({ drawAccepted: true });
+      });
+
+      it("should treat a READY card with one left as an automatic fool", async () => {
+        repo.cardByIdSpy.mockReturnValue(
+          cardRecordOf(THREE, { id: GAME_ID, state: "READY" }, [OLEG, ANYA])
+        );
+
+        await cards.tap(payload("back", null), ACTOR_ID);
+
+        expect(applySpy.mock.calls[0]?.[0]).toMatchObject({ drawAccepted: false });
+      });
     });
 
-    it("should reject a stale version without touching the card", async () => {
-      repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE, { state_version: 4 }));
-
-      const notice = await cards.tap(payload("pick", OLEG, 1), ACTOR_ID);
-
-      expect(notice).toBe("Card updated — look again");
-      expect(repo.updateCardSpy).toHaveBeenCalledTimes(NEVER);
-    });
-
-    it("should refuse an illegal action", async () => {
-      repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE));
-
-      expect(await cards.tap(payload("confirm", null), ACTOR_ID)).toBe("Not available right now");
-    });
-
-    describe("picking a starter", () => {
+    describe("cancelled", () => {
       beforeEach(() => {
-        repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE));
+        applySpy.mockReturnValue({ outcome: "cancelled" });
       });
 
-      it("should announce who dealt", async () => {
-        expect(await cards.tap(payload("pick", ANYA), ACTOR_ID)).toBe("Anya dealt first");
+      it("should delete the row, since a cancelled game is never stored", async () => {
+        await cards.tap(payload("cancel", null), ACTOR_ID);
+
+        expect(repo.deleteGameSpy).toHaveBeenCalledWith(GAME_ID);
       });
 
-      it("should bump the version by one", async () => {
-        await cards.tap(payload("pick", ANYA), ACTOR_ID);
+      it("should drop any edit still pending for that card", async () => {
+        await cards.tap(payload("cancel", null), ACTOR_ID);
+
+        expect(cancelSpy).toHaveBeenCalledWith(String(GAME_ID));
+      });
+
+      it("should replace the card with the cancelled notice and no keyboard", async () => {
+        await cards.tap(payload("cancel", null), ACTOR_ID);
+
+        expect(telegram.lastEdit().text).toBe(strings.cancelledBody);
+        expect(telegram.lastEdit().markup).toBeUndefined();
+      });
+
+      it("should tell the tapper it was cancelled", async () => {
+        expect(await cards.tap(payload("cancel", null), ACTOR_ID)).toBe(strings.cancelledNotice);
+      });
+    });
+
+    describe("confirmed", () => {
+      beforeEach(() => {
+        applySpy.mockReturnValue({ outcome: "confirmed" });
+        remainingSlotsSpy.mockReturnValue([ROMA]);
+      });
+
+      it("should freeze the game with the finalists and the next version", async () => {
+        await cards.tap(payload("confirm", null), ACTOR_ID);
+
+        expect(repo.confirmGameSpy).toHaveBeenCalledWith(
+          GAME_ID,
+          [{ playerId: playerIdOf(ROMA), position: ONCE }],
+          ACTOR_ID,
+          NEXT_VERSION
+        );
+      });
+
+      it("should give every remaining player the same last position", async () => {
+        remainingSlotsSpy.mockReturnValue([ANYA, ROMA]);
+        seatAtSpy
+          .mockReturnValueOnce({ playerId: playerIdOf(ANYA), displayName: "Anya" })
+          .mockReturnValueOnce({ playerId: playerIdOf(ROMA), displayName: "Roma" });
+
+        await cards.tap(payload("confirm", null), ACTOR_ID);
+
+        expect(repo.confirmGameSpy.mock.calls[0]?.[1]).toEqual([
+          { playerId: playerIdOf(ANYA), position: ONCE },
+          { playerId: playerIdOf(ROMA), position: ONCE },
+        ]);
+      });
+
+      it("should skip a remaining slot that has no seat", async () => {
+        seatAtSpy.mockReturnValue(undefined);
+
+        await cards.tap(payload("confirm", null), ACTOR_ID);
+
+        expect(repo.confirmGameSpy.mock.calls[0]?.[1]).toEqual([]);
+      });
+
+      it("should show the standings, which the live card never did", async () => {
+        await cards.tap(payload("confirm", null), ACTOR_ID);
+
+        expect(telegram.lastEdit().text).toBe(RESULT_TEXT);
+      });
+
+      it("should take the keyboard away for good", async () => {
+        await cards.tap(payload("confirm", null), ACTOR_ID);
+
+        expect(telegram.lastEdit().markup).toBeUndefined();
+      });
+
+      it("should tell the tapper it was confirmed", async () => {
+        expect(await cards.tap(payload("confirm", null), ACTOR_ID)).toBe(strings.confirmedNotice);
+      });
+    });
+
+    describe("updated", () => {
+      it("should record a new exit against the player who left", async () => {
+        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [ROMA] }) });
+
+        await cards.tap(payload("pick", ROMA), ACTOR_ID);
+
+        expect(repo.appendExitSpy).toHaveBeenCalledWith(
+          GAME_ID,
+          playerIdOf(ROMA),
+          ONCE,
+          ACTOR_ID
+        );
+      });
+
+      it("should not record an exit whose slot has no seat", async () => {
+        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [ROMA] }) });
+        seatAtSpy.mockReturnValue(undefined);
+
+        await cards.tap(payload("pick", ROMA), ACTOR_ID);
+
+        expect(repo.appendExitSpy).toHaveBeenCalledTimes(NEVER);
+      });
+
+      it("should drop the last exit when the reducer took one back", async () => {
+        repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE, { id: GAME_ID }, [ROMA]));
+        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [] }) });
+
+        await cards.tap(payload("back", null), ACTOR_ID);
+
+        expect(repo.dropLastExitSpy).toHaveBeenCalledWith(GAME_ID);
+      });
+
+      it("should store the phase and starter the reducer derived", async () => {
+        phaseOfSpy.mockReturnValue("READY");
+        starterPlayerIdSpy.mockReturnValue(playerIdOf(ANYA));
+
+        await cards.tap(payload("pick", OLEG), ACTOR_ID);
 
         expect(repo.updateCardSpy).toHaveBeenCalledWith(
           GAME_ID,
-          "RECORDING",
-          1,
+          "READY",
+          NEXT_VERSION,
           playerIdOf(ANYA)
         );
       });
 
-      it("should not record an exit", async () => {
-        await cards.tap(payload("pick", ANYA), ACTOR_ID);
+      it("should schedule the edit rather than send it at once", async () => {
+        await cards.tap(payload("pick", OLEG), ACTOR_ID);
 
-        expect(repo.appendExitSpy).toHaveBeenCalledTimes(NEVER);
-      });
-    });
-
-    describe("recording an exit", () => {
-      beforeEach(() => {
-        repo.cardByIdSpy.mockReturnValue(
-          cardRecordOf(THREE, {
-            state: "RECORDING",
-            starter_player_id: playerIdOf(OLEG),
-            state_version: 1,
-          })
-        );
-      });
-
-      it("should announce the name and position", async () => {
-        expect(await cards.tap(payload("pick", ROMA, 1), ACTOR_ID)).toBe("Roma — 1");
-      });
-
-      it("should store the exit with the tapping actor", async () => {
-        await cards.tap(payload("pick", ROMA, 1), ACTOR_ID);
-
-        expect(repo.appendExitSpy).toHaveBeenCalledWith(GAME_ID, playerIdOf(ROMA), 1, ACTOR_ID);
-      });
-
-      it("should not edit the message before the debounce elapses", async () => {
-        await cards.tap(payload("pick", ROMA, 1), ACTOR_ID);
-
+        expect(scheduleSpy).toHaveBeenCalledTimes(ONCE);
         expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(NEVER);
       });
 
-      it("should edit the message once the debounce elapses", async () => {
-        await cards.tap(payload("pick", ROMA, 1), ACTOR_ID);
-        await vi.advanceTimersByTimeAsync(EDIT_DEBOUNCE_MS);
+      it("should schedule the edit under the card's own key", async () => {
+        await cards.tap(payload("pick", OLEG), ACTOR_ID);
 
-        expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(ONCE);
-      });
-    });
-
-    describe("stepping back", () => {
-      it("should drop the last exit", async () => {
-        repo.cardByIdSpy.mockReturnValue(
-          cardRecordOf(
-            THREE,
-            { state: "RECORDING", starter_player_id: playerIdOf(OLEG), state_version: 2 },
-            [ROMA]
-          )
-        );
-
-        const notice = await cards.tap(payload("back", null, 2), ACTOR_ID);
-
-        expect(notice).toBe("Undone");
-        expect(repo.dropLastExitSpy).toHaveBeenCalledWith(GAME_ID);
+        expect(scheduleSpy.mock.calls[0]?.[0]).toBe(String(GAME_ID));
       });
 
-      it("should clear the starter when no exits are left", async () => {
-        repo.cardByIdSpy.mockReturnValue(
-          cardRecordOf(THREE, {
-            state: "RECORDING",
-            starter_player_id: playerIdOf(OLEG),
-            state_version: 1,
-          })
-        );
+      it("should redraw the keyboard at the version the tap produced", async () => {
+        await cards.tap(payload("pick", OLEG), ACTOR_ID);
 
-        await cards.tap(payload("back", null, 1), ACTOR_ID);
-
-        expect(repo.updateCardSpy).toHaveBeenCalledWith(GAME_ID, "PICK_STARTER", 2, null);
-      });
-    });
-
-    describe("rebuilding a card from the database", () => {
-      it("should read a READY card with two left as an accepted draw", async () => {
-        repo.cardByIdSpy.mockReturnValue(
-          cardRecordOf(
-            THREE,
-            { state: "READY", starter_player_id: playerIdOf(OLEG), state_version: 3 },
-            [ROMA]
-          )
-        );
-
-        await cards.tap(payload("back", null, 3), ACTOR_ID);
-
-        expect(repo.dropLastExitSpy).toHaveBeenCalledTimes(NEVER);
-      });
-
-      it("should step a rebuilt draw back to recording without losing the exit", async () => {
-        repo.cardByIdSpy.mockReturnValue(
-          cardRecordOf(
-            THREE,
-            { state: "READY", starter_player_id: playerIdOf(OLEG), state_version: 3 },
-            [ROMA]
-          )
-        );
-
-        await cards.tap(payload("back", null, 3), ACTOR_ID);
-
-        expect(repo.updateCardSpy).toHaveBeenCalledWith(
+        expect(renderKeyboardSpy).toHaveBeenCalledWith(
+          expect.anything(),
           GAME_ID,
-          "RECORDING",
-          4,
-          playerIdOf(OLEG)
-        );
-      });
-
-      it("should read a READY card with one left as an automatic fool", async () => {
-        repo.cardByIdSpy.mockReturnValue(
-          cardRecordOf(
-            THREE,
-            { state: "READY", starter_player_id: playerIdOf(OLEG), state_version: 3 },
-            [ROMA, OLEG]
-          )
-        );
-
-        await cards.tap(payload("back", null, 3), ACTOR_ID);
-
-        expect(repo.dropLastExitSpy).toHaveBeenCalledTimes(ONCE);
-      });
-
-      it("should treat a starter who is not at the table as no starter", async () => {
-        const strangerId = 9999;
-        repo.cardByIdSpy.mockReturnValue(
-          cardRecordOf(THREE, { state: "RECORDING", starter_player_id: strangerId })
-        );
-
-        expect(await cards.tap(payload("back", null), ACTOR_ID)).toBe("Not available right now");
-      });
-
-      it("should ignore an event for a player who is not at the table", async () => {
-        const card = cardRecordOf(THREE, {
-          state: "RECORDING",
-          starter_player_id: playerIdOf(OLEG),
-          state_version: 1,
-        });
-        repo.cardByIdSpy.mockReturnValue({
-          ...card,
-          exits: [{ player_id: 9999, position: 1 }],
-        });
-
-        await cards.tap(payload("pick", ROMA, 1), ACTOR_ID);
-
-        expect(repo.appendExitSpy).toHaveBeenCalledWith(GAME_ID, playerIdOf(ROMA), 1, ACTOR_ID);
-      });
-    });
-
-    describe("accepting a draw", () => {
-      it("should mark the card ready", async () => {
-        repo.cardByIdSpy.mockReturnValue(
-          cardRecordOf(
-            THREE,
-            { state: "RECORDING", starter_player_id: playerIdOf(OLEG), state_version: 2 },
-            [ROMA]
-          )
-        );
-
-        const notice = await cards.tap(payload("draw", null, 2), ACTOR_ID);
-
-        expect(notice).toBe("Draw");
-        expect(repo.updateCardSpy).toHaveBeenCalledWith(
-          GAME_ID,
-          "READY",
-          3,
-          playerIdOf(OLEG)
+          NEXT_VERSION
         );
       });
     });
 
-    describe("confirming", () => {
-      beforeEach(() => {
+    describe("what the tapper is told", () => {
+      it("should name the starter when one was just picked", async () => {
+        repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE, { id: GAME_ID }));
+        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ starterSlot: OLEG }) });
+        nameAtSpy.mockReturnValue("Oleg");
+
+        expect(await cards.tap(payload("pick", OLEG), ACTOR_ID)).toBe(strings.tapStarter("Oleg"));
+      });
+
+      it("should name the player and their place when an exit was recorded", async () => {
+        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [ROMA] }) });
+        nameAtSpy.mockReturnValue("Roma");
+
+        expect(await cards.tap(payload("pick", ROMA), ACTOR_ID)).toBe(
+          strings.tapRecorded("Roma", ONCE)
+        );
+      });
+
+      it("should announce a draw when the reducer accepted one", async () => {
+        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ drawAccepted: true }) });
+
+        expect(await cards.tap(payload("draw", null), ACTOR_ID)).toBe(strings.tapDraw);
+      });
+
+      it("should fall back to the Back notice when nothing else changed", async () => {
         repo.cardByIdSpy.mockReturnValue(
-          cardRecordOf(
-            THREE,
-            { state: "READY", starter_player_id: playerIdOf(OLEG), state_version: 3 },
-            [ROMA, OLEG]
-          )
+          cardRecordOf(THREE, { id: GAME_ID, starter_player_id: playerIdOf(OLEG) }, [ROMA])
         );
-      });
+        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [] }) });
 
-      it("should acknowledge the tap", async () => {
-        expect(await cards.tap(payload("confirm", null, 3), ACTOR_ID)).toBe("Recorded");
-      });
-
-      it("should write the remaining player as the last place", async () => {
-        await cards.tap(payload("confirm", null, 3), ACTOR_ID);
-
-        expect(repo.confirmGameSpy).toHaveBeenCalledWith(
-          GAME_ID,
-          [{ playerId: playerIdOf(ANYA), position: 3 }],
-          ACTOR_ID,
-          4
-        );
-      });
-
-      it("should strip the keyboard immediately, without waiting for the debounce", async () => {
-        await cards.tap(payload("confirm", null, 3), ACTOR_ID);
-
-        expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(ONCE);
-        expect(telegram.lastEdit().markup).toBeUndefined();
-      });
-
-      it("should leave the standings in the message", async () => {
-        await cards.tap(payload("confirm", null, 3), ACTOR_ID);
-
-        expect(telegram.lastEdit().text).toContain("fool");
-      });
-    });
-
-    describe("cancelling", () => {
-      beforeEach(() => {
-        repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE));
-      });
-
-      it("should acknowledge the tap", async () => {
-        expect(await cards.tap(payload("cancel", null), ACTOR_ID)).toBe("Cancelled");
-      });
-
-      it("should delete the game rather than record it", async () => {
-        await cards.tap(payload("cancel", null), ACTOR_ID);
-
-        expect(repo.deleteGameSpy).toHaveBeenCalledWith(GAME_ID);
-        expect(repo.confirmGameSpy).toHaveBeenCalledTimes(NEVER);
-      });
-
-      it("should replace the card with a cancelled note and no keyboard", async () => {
-        await cards.tap(payload("cancel", null), ACTOR_ID);
-
-        expect(telegram.lastEdit().text).toBe("Cancelled — nothing recorded.");
-        expect(telegram.lastEdit().markup).toBeUndefined();
+        expect(await cards.tap(payload("back", null), ACTOR_ID)).toBe(strings.tapBack);
       });
     });
   });
 
   describe("sweepIdle()", () => {
-    it("should report nothing when no card is idle", async () => {
-      expect(await cards.sweepIdle(IDLE_SECONDS)).toBe(NEVER);
+    const idle = [{ id: GAME_ID, chat_id: CHAT_ID, message_id: MESSAGE_ID }];
+
+    it("should ask the repository which cards went quiet", async () => {
+      repo.idleCardsSpy.mockReturnValue([]);
+
+      await cards.sweepIdle(IDLE_SECONDS);
+
+      expect(repo.idleCardsSpy).toHaveBeenCalledWith(IDLE_SECONDS);
     });
 
-    it("should delete an idle card", async () => {
-      repo.idleCardsSpy.mockReturnValue([cardRecordOf(THREE).game]);
+    it("should report how many it abandoned", async () => {
+      repo.idleCardsSpy.mockReturnValue(idle);
+
+      expect(await cards.sweepIdle(IDLE_SECONDS)).toBe(ONCE);
+    });
+
+    it("should delete the row, since an abandoned game is never stored", async () => {
+      repo.idleCardsSpy.mockReturnValue(idle);
 
       await cards.sweepIdle(IDLE_SECONDS);
 
       expect(repo.deleteGameSpy).toHaveBeenCalledWith(GAME_ID);
     });
 
-    it("should replace an abandoned card with a note and no keyboard", async () => {
-      repo.idleCardsSpy.mockReturnValue([cardRecordOf(THREE).game]);
+    it("should drop any edit still pending for it", async () => {
+      repo.idleCardsSpy.mockReturnValue(idle);
 
       await cards.sweepIdle(IDLE_SECONDS);
 
-      expect(telegram.lastEdit().text).toContain("Abandoned");
+      expect(cancelSpy).toHaveBeenCalledWith(String(GAME_ID));
+    });
+
+    it("should replace the card with the abandoned notice and no keyboard", async () => {
+      repo.idleCardsSpy.mockReturnValue(idle);
+
+      await cards.sweepIdle(IDLE_SECONDS);
+
+      expect(telegram.lastEdit().text).toBe(strings.abandonedBody);
       expect(telegram.lastEdit().markup).toBeUndefined();
     });
 
-    it("should count what it swept", async () => {
-      repo.idleCardsSpy.mockReturnValue([cardRecordOf(THREE).game]);
+    it("should do nothing when every card is fresh", async () => {
+      repo.idleCardsSpy.mockReturnValue([]);
 
-      expect(await cards.sweepIdle(IDLE_SECONDS)).toBe(ONCE);
-    });
-  });
+      await cards.sweepIdle(IDLE_SECONDS);
 
-  describe("failure handling", () => {
-    it("should warn rather than throw when an edit fails", async () => {
-      telegram.editMessageTextSpy.mockRejectedValue(new Error("message not found"));
-      repo.idleCardsSpy.mockReturnValue([cardRecordOf(THREE).game]);
-
-      await expect(cards.sweepIdle(IDLE_SECONDS)).resolves.toBe(ONCE);
-      expect(log.warnSpy).toHaveBeenCalledTimes(ONCE);
+      expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(NEVER);
     });
   });
 
   describe("shutdown()", () => {
-    it("should flush a pending edit so the last tap is not lost", async () => {
-      repo.cardByIdSpy.mockReturnValue(
-        cardRecordOf(THREE, {
-          state: "RECORDING",
-          starter_player_id: playerIdOf(OLEG),
-          state_version: 1,
-        })
-      );
-
-      await cards.tap(payload("pick", ROMA, 1), ACTOR_ID);
+    it("should flush every pending edit so nothing is lost on exit", async () => {
       await cards.shutdown();
 
-      expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(ONCE);
+      expect(flushAllSpy).toHaveBeenCalledTimes(ONCE);
+    });
+  });
+
+  describe("rebuilding the state from stored rows", () => {
+    const cardWith = (over: Record<string, unknown>, exits: readonly number[] = []) => {
+      const record = cardRecordOf(THREE, { id: GAME_ID, ...over }, exits);
+
+      repo.cardByIdSpy.mockReturnValue(record);
+
+      return record;
+    };
+
+    const stateHandedToReducer = () => applySpy.mock.calls[0]?.[0];
+
+    beforeEach(() => {
+      applySpy.mockReturnValue({ outcome: "rejected" });
+    });
+
+    it("should leave the starter unset when no player dealt yet", async () => {
+      cardWith({ starter_player_id: null });
+
+      await cards.tap(payload("back", null), ACTOR_ID);
+
+      expect(stateHandedToReducer()).toMatchObject({ starterSlot: null });
+    });
+
+    it("should leave the starter unset when the stored id sits at no seat", async () => {
+      cardWith({ starter_player_id: playerIdOf(THREE.length) });
+
+      await cards.tap(payload("back", null), ACTOR_ID);
+
+      expect(stateHandedToReducer()).toMatchObject({ starterSlot: null });
+    });
+
+    it("should ignore an exit belonging to nobody at this table", async () => {
+      const record = cardWith({ starter_player_id: playerIdOf(OLEG) }, [ROMA]);
+      repo.cardByIdSpy.mockReturnValue({
+        ...record,
+        exits: [{ player_id: playerIdOf(THREE.length), position: ONCE }],
+      });
+
+      await cards.tap(payload("back", null), ACTOR_ID);
+
+      expect(stateHandedToReducer()).toMatchObject({ exits: [] });
+    });
+  });
+
+  describe("what reaches Telegram", () => {
+    it("should send the keyboard as inline buttons, not as the rows it was given", async () => {
+      await cards.open(CHAT_ID, seatsOf(...THREE));
+
+      expect(telegram.lastSend().markup).toEqual({ inline_keyboard: KEYBOARD });
+    });
+
+    it("should send a new card as HTML", async () => {
+      await cards.open(CHAT_ID, seatsOf(...THREE));
+
+      expect(telegram.sendMessageSpy.mock.calls[0]?.[2]?.parse_mode).toBe("HTML");
+    });
+
+    it("should carry the keyboard through a scheduled edit", async () => {
+      await runScheduledEdit({
+        chatId: CHAT_ID,
+        messageId: MESSAGE_ID,
+        text: CARD_TEXT,
+        keyboard: KEYBOARD,
+      });
+
+      expect(telegram.lastEdit().markup).toEqual({ inline_keyboard: KEYBOARD });
+    });
+
+    it("should name the message and the cause when an edit is refused", async () => {
+      telegram.editMessageTextSpy.mockRejectedValue(new Error("message is not modified"));
+
+      await runScheduledEdit({
+        chatId: CHAT_ID,
+        messageId: MESSAGE_ID,
+        text: CARD_TEXT,
+        keyboard: null,
+      });
+
+      expect(log.warnSpy.mock.calls[0]?.[0]).toContain(String(MESSAGE_ID));
+      expect(log.warnSpy.mock.calls[0]?.[0]).toContain("message is not modified");
+    });
+  });
+
+  describe("the notice a tap earns", () => {
+    it("should name the player of the LAST exit, not the first", async () => {
+      repo.cardByIdSpy.mockReturnValue(
+        cardRecordOf(THREE, { id: GAME_ID, starter_player_id: playerIdOf(OLEG) }, [ANYA])
+      );
+      applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [ANYA, ROMA] }) });
+
+      await cards.tap(payload("pick", ROMA), ACTOR_ID);
+
+      expect(nameAtSpy).toHaveBeenCalledWith(expect.anything(), ROMA);
+    });
+
+    it("should not claim a starter was picked when there still is none", async () => {
+      repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE, { id: GAME_ID, starter_player_id: null }));
+      applySpy.mockReturnValue({
+        outcome: "updated",
+        state: stateAfter({ starterSlot: null, exits: [] }),
+      });
+
+      expect(await cards.tap(payload("back", null), ACTOR_ID)).toBe(strings.tapBack);
     });
   });
 });

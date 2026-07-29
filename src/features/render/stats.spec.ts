@@ -1,7 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { PlayerTally } from "../../shared/repository/types.ts";
-import { renderStats } from "./stats.ts";
 
+
+const escapeHtmlSpy = vi.fn((value: string) => value);
+
+vi.mock("./html.ts", () => ({
+  escapeHtml: (value: string) => escapeHtmlSpy(value),
+}));
+
+const { renderStats } = await import("./stats.ts");
 
 const tally = (displayName: string, wins: number, fools: number): PlayerTally => ({
   playerId: 1,
@@ -110,9 +117,22 @@ describe("renderStats()", () => {
     expect(rendered).toContain("Every game ended in a draw.");
   });
 
-  it("should escape player names", () => {
-    const rendered = renderStats({ games: 1, players: [tally("Аня & Оля", 1, 0)] });
+});
 
-    expect(rendered).toContain("Аня &amp; Оля");
+describe("renderStats() and user data", () => {
+  it("should route every player name through the escaper", () => {
+    escapeHtmlSpy.mockClear();
+
+    renderStats({ games: 2, players: [tally("Аня & Оля", 1, 1)] });
+
+    expect(escapeHtmlSpy).toHaveBeenCalledWith("Аня & Оля");
+  });
+
+  it("should print what the escaper returned, not the raw name", () => {
+    escapeHtmlSpy.mockReturnValueOnce("ESCAPED");
+
+    const rendered = renderStats({ games: 2, players: [tally("Аня & Оля", 0, 1)] });
+
+    expect(rendered).toContain("ESCAPED");
   });
 });

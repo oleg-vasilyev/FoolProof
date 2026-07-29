@@ -1,15 +1,40 @@
-import { describe, expect, it } from "vitest";
-import { cardStateOf } from "../game/state.stub.ts";
-import { decodeCallback } from "./callback.ts";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CardState } from "../game/state.ts";
-import { renderKeyboard, type InlineKeyboardRows } from "./keyboard.ts";
+import type { CallbackPayload } from "./callback.ts";
 
 
-const FIVE = ["Oleg", "Anya", "Roma", "Dima", "Kim"];
+const nameAtSpy = vi.fn();
 
-const THREE = ["Oleg", "Anya", "Roma"];
+const finalPlacementsSpy = vi.fn();
 
-const TWO = ["Oleg", "Anya"];
+const remainingSlotsSpy = vi.fn();
+
+const phaseOfSpy = vi.fn();
+
+const isReadySpy = vi.fn();
+
+const drawAvailableSpy = vi.fn();
+
+const encodeCallbackSpy = vi.fn();
+
+vi.mock("../game/state.ts", () => ({
+  nameAt: (state: unknown, slot: number) => nameAtSpy(state, slot),
+  finalPlacements: (state: unknown) => finalPlacementsSpy(state),
+  remainingSlots: (state: unknown) => remainingSlotsSpy(state),
+  phaseOf: (state: unknown) => phaseOfSpy(state),
+  isReady: (state: unknown) => isReadySpy(state),
+  drawAvailable: (state: unknown) => drawAvailableSpy(state),
+}));
+
+vi.mock("./callback.ts", () => ({
+  encodeCallback: (payload: CallbackPayload) => encodeCallbackSpy(payload),
+}));
+
+const { renderKeyboard } = await import("./keyboard.ts");
+
+const GAME_ID = 42;
+
+const VERSION = 7;
 
 const OLEG = 0;
 
@@ -17,158 +42,165 @@ const ANYA = 1;
 
 const ROMA = 2;
 
-const DIMA = 3;
+const FIRST_PLACE = 1;
 
-const GAME_ID = 42;
+const THREE_SEATS = [
+  { playerId: 10, displayName: "Oleg" },
+  { playerId: 11, displayName: "Anya" },
+  { playerId: 12, displayName: "Roma" },
+];
 
-const VERSION = 7;
+const stateWith = (over: Partial<CardState>): CardState =>
+  ({ seats: THREE_SEATS, starterSlot: OLEG, exits: [], drawAccepted: false, ...over }) as CardState;
 
-const CALLBACK_DATA_LIMIT_BYTES = 64;
+const encodedAs = (payload: CallbackPayload): string =>
+  `cb(${payload.gameId},${payload.action},${String(payload.slot)},${payload.version})`;
 
-const keyboardOf = (state: CardState): InlineKeyboardRows =>
-  renderKeyboard(state, GAME_ID, VERSION);
+const render = (state: CardState) => renderKeyboard(state, GAME_ID, VERSION);
 
 const captionsOf = (state: CardState): readonly string[] =>
-  keyboardOf(state).flatMap((row) => row.map((button) => button.text));
+  render(state)
+    .slice(0, THREE_SEATS.length)
+    .map((row) => row[0]?.text ?? "");
 
-const controlsOf = (state: CardState): readonly string[] => {
-  const rows = keyboardOf(state);
+const controlCaptions = (state: CardState): readonly string[] =>
+  (render(state)[THREE_SEATS.length] ?? []).map((button) => button.text);
 
-  return (rows[rows.length - 1] ?? []).map((button) => button.text);
-};
+const controlButton = (state: CardState, index: number): string =>
+  (render(state)[THREE_SEATS.length] ?? [])[index]?.callback_data ?? "";
 
 describe("renderKeyboard()", () => {
-  it("should give every player their own row", () => {
-    const rows = keyboardOf(cardStateOf(FIVE));
-    const playerRows = rows.slice(0, FIVE.length);
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-    expect(playerRows.every((row) => row.length === 1)).toBe(true);
+    nameAtSpy.mockImplementation((_state: unknown, slot: number) => THREE_SEATS[slot]?.displayName);
+    encodeCallbackSpy.mockImplementation(encodedAs);
+    finalPlacementsSpy.mockReturnValue([]);
+    remainingSlotsSpy.mockReturnValue([]);
+    phaseOfSpy.mockReturnValue("RECORDING");
+    isReadySpy.mockReturnValue(false);
+    drawAvailableSpy.mockReturnValue(false);
   });
 
-  it("should keep the players in seating order", () => {
-    expect(captionsOf(cardStateOf(THREE)).slice(0, THREE.length)).toEqual(THREE);
-  });
-
-  it("should show bare names before anyone is out", () => {
-    const state = cardStateOf(THREE, { starterSlot: OLEG });
-
-    expect(captionsOf(state).slice(0, THREE.length)).toEqual(THREE);
-  });
-
-  it("should mark players who went out with a tick and their position", () => {
-    const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [ROMA, ANYA] });
-    const captions = captionsOf(state);
-
-    expect(captions).toContain("✅ 1 Roma");
-    expect(captions).toContain("✅ 2 Anya");
-  });
-
-  it("should mark the fool with a skull and no number", () => {
-    const state = cardStateOf(THREE, { starterSlot: OLEG, exits: [ROMA, OLEG] });
-
-    expect(captionsOf(state)).toContain("💀 Anya");
-  });
-
-  it("should mark both players of a draw with a handshake", () => {
-    const state = cardStateOf(THREE, {
-      starterSlot: OLEG,
-      exits: [ROMA],
-      drawAccepted: true,
-    });
-    const captions = captionsOf(state);
-
-    expect(captions).toContain("🤝 Oleg");
-    expect(captions).toContain("🤝 Anya");
-  });
-
-  it("should never escape a name in a caption", () => {
-    const state = cardStateOf(["Аня & Оля", "Roma"], { starterSlot: OLEG });
-
-    expect(captionsOf(state)).toContain("Аня & Оля");
-  });
-
-  describe("controls", () => {
-    it("should offer only cancel in phase one", () => {
-      expect(controlsOf(cardStateOf(FIVE))).toEqual(["❌ Cancel"]);
+  describe("player rows", () => {
+    it("should give every seat a row of its own", () => {
+      expect(render(stateWith({}))).toHaveLength(THREE_SEATS.length + 1);
     });
 
-    it("should offer only back while recording", () => {
-      const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [ROMA] });
-
-      expect(controlsOf(state)).toEqual(["↩️ Back"]);
+    it("should keep the rows in seating order", () => {
+      expect(captionsOf(stateWith({}))).toEqual(["Oleg", "Anya", "Roma"]);
     });
 
-    it("should offer draw once two players remain", () => {
-      const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [OLEG, ANYA, ROMA] });
+    it("should carry the seat's own slot in its callback", () => {
+      const [firstRow] = render(stateWith({}));
 
-      expect(controlsOf(state)).toEqual(["↩️ Back", "🤝 Draw"]);
+      expect(firstRow?.[0]?.callback_data).toBe(
+        encodedAs({ gameId: GAME_ID, action: "pick", slot: OLEG, version: VERSION })
+      );
     });
 
-    it("should offer draw immediately in a two player game", () => {
-      const state = cardStateOf(TWO, { starterSlot: OLEG });
+    it("should stamp the version it was given on every button", () => {
+      render(stateWith({}));
 
-      expect(controlsOf(state)).toEqual(["↩️ Back", "🤝 Draw"]);
+      expect(encodeCallbackSpy).toHaveBeenCalledWith(expect.objectContaining({ version: VERSION }));
     });
 
-    it("should replace draw with confirm when the card is ready", () => {
-      const state = cardStateOf(THREE, { starterSlot: OLEG, exits: [ROMA, OLEG] });
+    it("should mark a player who is out with a tick and their position", () => {
+      finalPlacementsSpy.mockReturnValue([{ slot: ANYA, position: FIRST_PLACE }]);
 
-      expect(controlsOf(state)).toEqual(["↩️ Back", "✅ Confirm"]);
+      expect(captionsOf(stateWith({ exits: [ANYA] }))[ANYA]).toBe("✅ 1 Anya");
     });
 
-    it("should never show draw and confirm together", () => {
-      const state = cardStateOf(FIVE, {
-        starterSlot: OLEG,
-        exits: [OLEG, ANYA, ROMA],
-        drawAccepted: true,
-      });
-      const controls = controlsOf(state);
-
-      expect(controls).toContain("✅ Confirm");
-      expect(controls).not.toContain("🤝 Draw");
+    it("should leave a player still in the game unmarked", () => {
+      expect(captionsOf(stateWith({}))[ROMA]).toBe("Roma");
     });
 
-    it("should never offer cancel outside phase one", () => {
-      const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [ROMA] });
+    it("should mark the last one left as the fool", () => {
+      isReadySpy.mockReturnValue(true);
+      remainingSlotsSpy.mockReturnValue([ROMA]);
 
-      expect(controlsOf(state)).not.toContain("❌ Cancel");
+      expect(captionsOf(stateWith({ exits: [OLEG, ANYA] }))[ROMA]).toBe("💀 Roma");
+    });
+
+    it("should mark both players of a draw with the handshake instead", () => {
+      isReadySpy.mockReturnValue(true);
+      remainingSlotsSpy.mockReturnValue([ANYA, ROMA]);
+
+      expect(captionsOf(stateWith({ exits: [OLEG] }))[ROMA]).toBe("🤝 Roma");
+    });
+
+    it("should not escape a caption, since Telegram renders it literally", () => {
+      nameAtSpy.mockReturnValue("Аня & Оля");
+
+      expect(captionsOf(stateWith({}))[OLEG]).toBe("Аня & Оля");
     });
   });
 
-  describe("callback data", () => {
-    it("should carry the slot on a player button", () => {
-      const rows = keyboardOf(cardStateOf(THREE));
-      const decoded = decodeCallback(rows[DIMA - 1]?.[0]?.callback_data ?? "");
+  describe("the control row", () => {
+    it("should offer only Cancel while the starter is unknown", () => {
+      phaseOfSpy.mockReturnValue("PICK_STARTER");
 
-      expect(decoded).toEqual({ gameId: GAME_ID, action: "pick", slot: ROMA, version: VERSION });
+      expect(controlCaptions(stateWith({ starterSlot: null }))).toEqual(["❌ Cancel"]);
     });
 
-    it("should stamp every button with the current version", () => {
-      const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [ROMA] });
-      const versions = keyboardOf(state)
-        .flat()
-        .map((button) => decodeCallback(button.callback_data)?.version);
+    it("should never offer Back before the starter is picked", () => {
+      phaseOfSpy.mockReturnValue("PICK_STARTER");
 
-      expect(versions.every((version) => version === VERSION)).toBe(true);
+      expect(controlCaptions(stateWith({ starterSlot: null }))).not.toContain("↩️ Back");
     });
 
-    it("should stay inside Telegram's 64 byte limit", () => {
-      const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [ROMA] });
-      const sizes = keyboardOf(state)
-        .flat()
-        .map((button) => Buffer.byteLength(button.callback_data, "utf8"));
-
-      expect(Math.max(...sizes)).toBeLessThanOrEqual(CALLBACK_DATA_LIMIT_BYTES);
+    it("should offer only Back while exits are being recorded", () => {
+      expect(controlCaptions(stateWith({ exits: [OLEG] }))).toEqual(["↩️ Back"]);
     });
 
-    it("should never put a name in callback data", () => {
-      const state = cardStateOf(["Александра", "Владимир"], { starterSlot: OLEG });
-      const data = keyboardOf(state)
-        .flat()
-        .map((button) => button.callback_data)
-        .join(" ");
+    it("should never offer Cancel once recording has started", () => {
+      expect(controlCaptions(stateWith({ exits: [OLEG] }))).not.toContain("❌ Cancel");
+    });
 
-      expect(data).not.toMatch(/[а-яА-Я]/);
+    it("should offer Draw beside Back once two players remain", () => {
+      drawAvailableSpy.mockReturnValue(true);
+
+      expect(controlCaptions(stateWith({ exits: [OLEG] }))).toEqual(["↩️ Back", "🤝 Draw"]);
+    });
+
+    it("should replace Draw with Confirm once every place is known", () => {
+      phaseOfSpy.mockReturnValue("READY");
+      drawAvailableSpy.mockReturnValue(true);
+
+      expect(controlCaptions(stateWith({ exits: [OLEG, ANYA] }))).toEqual([
+        "↩️ Back",
+        "✅ Confirm",
+      ]);
+    });
+
+    it("should send Cancel as its own action", () => {
+      phaseOfSpy.mockReturnValue("PICK_STARTER");
+
+      expect(controlButton(stateWith({ starterSlot: null }), 0)).toBe(
+        encodedAs({ gameId: GAME_ID, action: "cancel", slot: null, version: VERSION })
+      );
+    });
+
+    it("should send Back as its own action", () => {
+      expect(controlButton(stateWith({}), 0)).toBe(
+        encodedAs({ gameId: GAME_ID, action: "back", slot: null, version: VERSION })
+      );
+    });
+
+    it("should send Confirm as its own action", () => {
+      phaseOfSpy.mockReturnValue("READY");
+
+      expect(controlButton(stateWith({}), 1)).toBe(
+        encodedAs({ gameId: GAME_ID, action: "confirm", slot: null, version: VERSION })
+      );
+    });
+
+    it("should send Draw as its own action", () => {
+      drawAvailableSpy.mockReturnValue(true);
+
+      expect(controlButton(stateWith({}), 1)).toBe(
+        encodedAs({ gameId: GAME_ID, action: "draw", slot: null, version: VERSION })
+      );
     });
   });
 });

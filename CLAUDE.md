@@ -164,29 +164,62 @@ import.
 
 A stub is a **class** whose public `*Spy` fields are `vi.fn()`s, with sensible
 defaults set in the constructor, and whose methods just delegate to those spies.
-Tests then override one spy instead of rebuilding a fake. Nest `describe` by unit
-and then by method, name numbers (`const ONCE = 1`), and separate
-arrange/act/assert with blank lines.
+Expose the assembled object as a **field set in the constructor, not a getter** —
+a getter builds a new object per call, and `toBe` identity checks then fail for
+no reason a reader can see. Tests override one spy instead of rebuilding a fake.
+
+Nest `describe` by unit and then by method, name numbers (`const ONCE = 1`), and
+separate arrange/act/assert with blank lines.
+
+A module mocked with `vi.mock` is hoisted above the imports, so the file under
+test is loaded afterwards with `const { thing } = await import("./thing.ts")`.
+That is why the specs here import their subject at the bottom of the header
+rather than at the top.
 
 ### Units by default, integration by exception
 
-**A spec tests one file, and everything outside that file is mocked** — the
-library, the sibling module, the repository, the collaborator handed in through a
-context object. A spec that drives grammY is testing grammY, whose authors have
-already tested it; what it is not testing is the file it names.
+**A spec tests one file. Everything that file imports is mocked.** Not "the
+awkward parts" — everything: the library, the sibling module in the next folder,
+the pure helper, the collaborator handed in through a context object.
 
-Mocking is usually the *more* direct test, not a weaker one. `router.ts` exists
-to register routes in an order that matters, and on a mocked `Bot` that is
-asserted literally — `bot.command` was called before `bot.on("message:text")` —
-instead of inferred from whether a `/help` update happened to produce a reply.
+Three rules follow from that, and the first is absolute:
 
-An integration spec is an exception with a reason: several parts once went wrong
-*together*, and no single unit could have caught it. It is named
-`*.integration.spec.ts`, so nobody mistakes it for the default, and it sits beside
-the code like every other spec. `npm run test:unit` and `npm run test:integration`
-run them separately; `npm test` runs both.
+1. **Never exercise third-party code in a unit spec.** grammY, `node:sqlite`,
+   `node:fs` — mock them. Their authors have their own tests, and a spec that
+   drives them is reporting on their code while claiming to report on ours. When
+   one of them breaks our spec, the failure points at the wrong file.
+2. **Mock our own modules too.** `card.ts` is not tested by feeding it a real
+   `CardState` and checking the whole rendered string — that spec fails when
+   `finalPlacements` changes, which is `state.ts`'s business. Mock the helper,
+   drive the file by what it returns, and the failure lands where the fault is.
+3. **Leave data tables real.** `features/render/strings.ts` is keys and text, not
+   behaviour; mocking it would compare a constant against itself. Everything with
+   a body gets mocked.
 
-There are two:
+Mocking is usually the *more* direct test, not a weaker one:
+
+- `router.ts` exists to register routes in an order that matters. On a mocked
+  `Bot` that is asserted literally — `bot.command` was called before
+  `bot.on("message:text")` — instead of inferred from whether a `/help` update
+  happened to produce a reply.
+- `card.ts` must route user data through `escapeHtml`. With the escaper mocked
+  that is asserted as a fact about `card.ts`, not guessed from spotting `&amp;`
+  in the output.
+
+The tell that a spec has drifted is an assertion it has no business making: a
+keyboard spec checking the 64-byte callback limit, a stats spec checking that
+`&` becomes `&amp;`. Both were really testing another module, and both already
+had a proper home elsewhere.
+
+**An integration spec is an exception with a reason**: several parts once went
+wrong *together*, and no single unit could have caught it. Do not write one
+because mocking is inconvenient — write it when the seam between systems is
+itself the thing under test. It is named `*.integration.spec.ts`, so nobody
+mistakes it for the default, and it sits beside the code like every other spec.
+`npm run test:unit` and `npm run test:integration` run them separately; `npm test`
+runs both.
+
+There are two, and the bar for a third is a bug that got through the units:
 
 - `features/bot/router.integration.spec.ts` drives a **real** grammY `Bot`
   through `bot.handleUpdate()`, intercepting the network at
