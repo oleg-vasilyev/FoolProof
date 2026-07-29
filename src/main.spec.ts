@@ -32,6 +32,19 @@ const startReaperSpy = vi.fn((_cards: unknown, _log: unknown) => stopReaperSpy);
 
 const signalHandlers = new Map<string, () => void>();
 
+const logInfoSpy = vi.fn();
+
+const createLoggerSpy = vi.fn((_scope: string) => ({
+  debug: vi.fn(),
+  info: logInfoSpy,
+  warn: vi.fn(),
+  error: vi.fn(),
+}));
+
+vi.mock("./shared/logger.ts", () => ({
+  createLogger: (scope: string) => createLoggerSpy(scope),
+}));
+
 vi.mock("./features/bot/index.ts", () => ({
   createBot: (token: string, deps: { repo: unknown; log: unknown }) =>
     createBotSpy(token, deps),
@@ -86,21 +99,44 @@ describe("main.ts", () => {
     expect(startSpy).toHaveBeenCalledWith({ drop_pending_updates: true });
   });
 
+  it("should name the log scope after the delivery mode", () => {
+    expect(createLoggerSpy).toHaveBeenCalledWith("polling");
+  });
+
+  it("should announce that it is listening", () => {
+    expect(logInfoSpy).toHaveBeenCalledWith("listening for updates by long polling");
+  });
+
+  it("should register a handler for SIGINT", () => {
+    expect(signalHandlers.has("SIGINT")).toBe(true);
+  });
+
+  it("should register a handler for SIGTERM", () => {
+    expect(signalHandlers.has("SIGTERM")).toBe(true);
+  });
+
   it("should shut down cleanly on SIGINT", async () => {
+    cardsShutdownSpy.mockClear();
+
     await signalHandlers.get("SIGINT")?.();
 
-    expect(cardsShutdownSpy).toHaveBeenCalled();
+    expect(cardsShutdownSpy).toHaveBeenCalledTimes(ONCE);
   });
 
   it("should shut down cleanly on SIGTERM", async () => {
+    cardsShutdownSpy.mockClear();
+    stopSpy.mockClear();
+
     await signalHandlers.get("SIGTERM")?.();
 
-    expect(stopSpy).toHaveBeenCalled();
+    expect(stopSpy).toHaveBeenCalledTimes(ONCE);
   });
 
   it("should stop the sweep as part of shutting down", async () => {
+    stopReaperSpy.mockClear();
+
     await signalHandlers.get("SIGINT")?.();
 
-    expect(stopReaperSpy).toHaveBeenCalled();
+    expect(stopReaperSpy).toHaveBeenCalledTimes(ONCE);
   });
 });

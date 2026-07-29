@@ -89,7 +89,7 @@ not a new npm script.
 - `npm run check` — all three. **Keep it at zero errors.**
 - `npm run test:mutation` — Stryker, roughly two minutes. Coverage only proves a
   line ran; the mutation score proves a test would notice if it broke. It is not
-  part of `check` because of the runtime, but a drop below the current **~92%**
+  part of `check` because of the runtime, but the build **breaks below 85%**, and a drop from the current ~92%
   means new tests are watching without asserting.
 
 ### Tests
