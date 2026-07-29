@@ -9,11 +9,11 @@ import type { CardService } from "./cards.ts";
 import type { PromptRegistry } from "./prompts.ts";
 
 
-type Command = CommandContext<Context>;
+export type Command = CommandContext<Context>;
 
-type TextMessage = Filter<Context, "message:text">;
+export type TextMessage = Filter<Context, "message:text">;
 
-type CallbackTap = Filter<Context, "callback_query:data">;
+export type CallbackTap = Filter<Context, "callback_query:data">;
 
 type LineupProblem = Exclude<ReturnType<typeof parseLineup>, { ok: true }>;
 

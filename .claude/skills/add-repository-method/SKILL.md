@@ -36,10 +36,11 @@ Add a `<method>Spy` field with a sensible default in the constructor, and a
 method that delegates to it. Every spec that mocks the repository gets the new
 method for free; without this step they fail to compile.
 
-## 4. `src/shared/repository/sqlite.spec.ts`
+## 4. `src/shared/repository/sqlite.integration.spec.ts`
 
-This spec runs against a **real** temporary SQLite file — its whole job is the
-SQL, and a mocked database would assert nothing.
+One of the project's two integration specs, and it runs against a **real**
+temporary SQLite file — its whole job is the SQL, and a mocked database would
+assert nothing.
 
 `process.env.DB_PATH` is set before the import, because `db.ts` opens the
 connection at module load. Assert the behaviour the method promises, including

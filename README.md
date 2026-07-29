@@ -62,7 +62,9 @@ copying that file.
 | Script | What it runs |
 |---|---|
 | `npm start` | The bot |
-| `npm test` | Vitest, once |
+| `npm test` | Vitest, once — units and integration together |
+| `npm run test:unit` | Only the unit specs, where everything outside the file is mocked |
+| `npm run test:integration` | Only `*.integration.spec.ts` — the real grammY bot and a real SQLite file |
 | `npm run test:coverage` | Vitest with coverage; fails below 70% on any metric |
 | `npm run test:mutation` | Stryker, about two minutes; fails below 85% |
 | `npm run check` | Lint, types and tests — the gate to keep at zero |

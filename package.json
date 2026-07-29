@@ -8,6 +8,8 @@
   "scripts": {
     "start": "node src/main.ts",
     "test": "vitest run",
+    "test:unit": "vitest run --exclude \"**/*.integration.spec.ts\"",
+    "test:integration": "vitest run integration.spec",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:mutation": "stryker run",

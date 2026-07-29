@@ -168,19 +168,41 @@ Tests then override one spy instead of rebuilding a fake. Nest `describe` by uni
 and then by method, name numbers (`const ONCE = 1`), and separate
 arrange/act/assert with blank lines.
 
-Two deliberate exceptions to "mock everything":
+### Units by default, integration by exception
 
-- `repository/sqlite.spec.ts` runs against a **real** temporary SQLite file. Its
-  whole job is the SQL, and a mocked database would assert nothing. Set
-  `process.env.DB_PATH` before importing, because `db.ts` opens the connection at
-  module load — and close the connection before deleting the file, or Windows
-  refuses and the temp files pile up.
-- `features/bot/router.spec.ts` drives a **real** grammY `Bot` through
-  `bot.handleUpdate()` with synthetic updates, intercepting the network at
-  `bot.api.config.use()`. Middleware order is exactly what that file gets wrong,
-  and only the real router can catch it. Pass `botInfo` so no `getMe` call is
-  needed. Note `bot.catch` only runs under `bot.start()` — `handleUpdate`
-  rethrows, so test the handler through `bot.errorHandler`.
+**A spec tests one file, and everything outside that file is mocked** — the
+library, the sibling module, the repository, the collaborator handed in through a
+context object. A spec that drives grammY is testing grammY, whose authors have
+already tested it; what it is not testing is the file it names.
+
+Mocking is usually the *more* direct test, not a weaker one. `router.ts` exists
+to register routes in an order that matters, and on a mocked `Bot` that is
+asserted literally — `bot.command` was called before `bot.on("message:text")` —
+instead of inferred from whether a `/help` update happened to produce a reply.
+
+An integration spec is an exception with a reason: several parts once went wrong
+*together*, and no single unit could have caught it. It is named
+`*.integration.spec.ts`, so nobody mistakes it for the default, and it sits beside
+the code like every other spec. `npm run test:unit` and `npm run test:integration`
+run them separately; `npm test` runs both.
+
+There are two:
+
+- `features/bot/router.integration.spec.ts` drives a **real** grammY `Bot`
+  through `bot.handleUpdate()`, intercepting the network at
+  `bot.api.config.use()`. Pass `botInfo` so no `getMe` call is needed. **Flush the
+  card service in `afterEach`** — the real debouncer schedules a real 350 ms
+  timer, and a timer that outlives its test fires into the next test's
+  assertions, which this spec has already been caught doing.
+- `shared/repository/sqlite.integration.spec.ts` runs against a **real**
+  temporary SQLite file. The SQL is the unit under test and a mocked database
+  would assert nothing. Set `process.env.DB_PATH` before importing, because
+  `db.ts` opens the connection at module load — and close the connection before
+  deleting the file, or Windows refuses and the temp files pile up.
+
+One trap worth keeping: `bot.catch` only participates in `bot.start()`.
+`handleUpdate` rethrows, so an error handler is exercised through
+`bot.errorHandler` — or, better, on the mock.
 
 `strict: true` and **no `any`**. There is no build step: `tsconfig.json` mirrors
 how Node actually runs the code. `erasableSyntaxOnly` and `verbatimModuleSyntax`
