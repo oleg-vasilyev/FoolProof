@@ -135,8 +135,10 @@ useful if a later regression has something to be compared against.
 Specs sit next to the code as `*.spec.ts`, and **so do the stubs** — `*.stub.ts`
 lives beside the thing it stands in for, never in a central testing folder. This
 is the same feature-based rule the source follows: `repository.stub.ts` next to
-`sqlite.ts`, `api.stub.ts` next to the Telegram client, `state.stub.ts` next to
-the reducer. Stub imports point downward like every other import.
+`sqlite.ts`, `state.stub.ts` next to the reducer. A stub for something we did not
+write — grammY's `Api`, a synthetic `Update` — sits next to its only consumer
+instead, which is `features/bot/`. Stub imports point downward like every other
+import.
 
 A stub is a **class** whose public `*Spy` fields are `vi.fn()`s, with sensible
 defaults set in the constructor, and whose methods just delegate to those spies.
@@ -168,12 +170,17 @@ Imports point only **downward** — never sideways or up:
 
 ```
 entry (src/main.ts)
-  → features/*  →  integrations/* + shared/*  →  (nothing)
+  → features/*  →  shared/*  →  (nothing)
 ```
 
-- `shared/`       — infra used everywhere: env, logger, debounce, db, repository
-- `integrations/` — thin clients for external services: telegram
-- `features/`     — one folder per capability: game, render, bot
+- `shared/`   — infra used everywhere: env, logger, debounce, db, repository
+- `features/` — one folder per capability: game, render, bot
+
+There is no `integrations/` layer. It existed once and held no client: grammY is
+the Telegram client and is imported directly, so the folder only contained two
+dependency-free modules and two stubs, each with a single consumer. A module goes
+in the feature that uses it; a second external service can have its own folder on
+the day it exists.
 
 The entry file stays thin and declarative — it names the steps, never the
 implementation.
@@ -199,8 +206,9 @@ automatic fool (one remains) — everything else about a live card is rebuilt fr
 restart mid-game a non-event.
 
 `features/render/` is the same shape one layer out: state in, message text and
-inline keyboard out, pure. Anything that talks to Telegram lives in
-`integrations/telegram/`.
+inline keyboard out, pure. It also owns the two wire-format modules the card
+needs — `html.ts` escapes the body and `callback.ts` is the codec for
+`callback_data`, encoded by the keyboard and decoded by `bot`.
 
 ## Data access
 

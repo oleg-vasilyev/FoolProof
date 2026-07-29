@@ -11,8 +11,8 @@ import {
   messageUpdate,
   PROMPT_MESSAGE_ID,
   USER_ID,
-} from "../../integrations/telegram/updates.stub.ts";
-import { encodeCallback } from "../../integrations/telegram/callback.ts";
+} from "./updates.stub.ts";
+import { encodeCallback } from "../render/callback.ts";
 import { createBot, publishCommandMenu } from "./index.ts";
 
 

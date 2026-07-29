@@ -1,4 +1,3 @@
-import { encodeCallback } from "../../integrations/telegram/callback.ts";
 import {
   drawAvailable,
   finalPlacements,
@@ -8,6 +7,7 @@ import {
   remainingSlots,
   type CardState,
 } from "../game/state.ts";
+import { encodeCallback } from "./callback.ts";
 import { strings } from "./strings.ts";
 
 

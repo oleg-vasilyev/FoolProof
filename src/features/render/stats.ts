@@ -1,5 +1,5 @@
-import { escapeHtml } from "../../integrations/telegram/html.ts";
 import type { SeriesStats } from "../../shared/repository/types.ts";
+import { escapeHtml } from "./html.ts";
 import { strings } from "./strings.ts";
 
 

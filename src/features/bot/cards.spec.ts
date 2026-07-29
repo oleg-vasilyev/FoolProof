@@ -3,8 +3,8 @@ import { cardRecordOf, playerIdOf } from "../../shared/repository/records.stub.t
 import { seatsOf } from "../game/state.stub.ts";
 import { RepositoryStub } from "../../shared/repository/repository.stub.ts";
 import { LoggerStub } from "../../shared/logger.stub.ts";
-import { TelegramApiStub } from "../../integrations/telegram/api.stub.ts";
-import type { CallbackAction, CallbackPayload } from "../../integrations/telegram/callback.ts";
+import { TelegramApiStub } from "./api.stub.ts";
+import type { CallbackAction, CallbackPayload } from "../render/callback.ts";
 import { createCardService, type CardService } from "./cards.ts";
 
 

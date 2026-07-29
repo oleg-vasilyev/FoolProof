@@ -2,7 +2,6 @@ import type { Api } from "grammy";
 import { createDebouncer, type Debouncer } from "../../shared/debounce.ts";
 import type { Logger } from "../../shared/logger.ts";
 import type { CardRecord, Finalist, Repository } from "../../shared/repository/types.ts";
-import type { CallbackPayload } from "../../integrations/telegram/callback.ts";
 import {
   apply,
   nameAt,
@@ -14,6 +13,7 @@ import {
   type CardState,
   type Seat,
 } from "../game/state.ts";
+import type { CallbackPayload } from "../render/callback.ts";
 import { renderCard, renderResult } from "../render/card.ts";
 import { renderKeyboard, type InlineKeyboardRows } from "../render/keyboard.ts";
 import { strings } from "../render/strings.ts";

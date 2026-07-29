@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { cardStateOf } from "../game/state.stub.ts";
-import { decodeCallback } from "../../integrations/telegram/callback.ts";
+import { decodeCallback } from "./callback.ts";
 import type { CardState } from "../game/state.ts";
 import { renderKeyboard, type InlineKeyboardRows } from "./keyboard.ts";
 

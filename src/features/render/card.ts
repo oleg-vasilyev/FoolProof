@@ -1,5 +1,5 @@
-import { escapeHtml } from "../../integrations/telegram/html.ts";
 import { finalPlacements, nameAt, remainingSlots, type CardState } from "../game/state.ts";
+import { escapeHtml } from "./html.ts";
 import { strings } from "./strings.ts";
 
 

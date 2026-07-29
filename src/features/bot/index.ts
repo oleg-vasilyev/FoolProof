@@ -2,9 +2,9 @@ import { Bot, type Api, type CommandContext, type Context, type Filter } from "g
 import type { UserFromGetMe } from "grammy/types";
 import type { Logger } from "../../shared/logger.ts";
 import type { Repository } from "../../shared/repository/types.ts";
-import { decodeCallback } from "../../integrations/telegram/callback.ts";
 import { normalizeName, parseLineup, rotateToLowestId } from "../game/lineup.ts";
 import type { Seat } from "../game/state.ts";
+import { decodeCallback } from "../render/callback.ts";
 import { renderStats } from "../render/stats.ts";
 import { strings } from "../render/strings.ts";
 import { createCardService, type CardService } from "./cards.ts";
