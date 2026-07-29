@@ -1,4 +1,4 @@
-import { Bot, type Api } from "grammy";
+import { Bot, type Api, type CommandContext, type Context, type Filter } from "grammy";
 import type { UserFromGetMe } from "grammy/types";
 import type { Logger } from "../../shared/logger.ts";
 import type { Repository } from "../../shared/repository/types.ts";
@@ -9,6 +9,14 @@ import { renderStats } from "../render/stats.ts";
 import { strings } from "../render/strings.ts";
 import { createCardService, type CardService } from "./cards.ts";
 
+
+type Command = CommandContext<Context>;
+
+type TextMessage = Filter<Context, "message:text">;
+
+type CallbackTap = Filter<Context, "callback_query:data">;
+
+type LineupProblem = Exclude<ReturnType<typeof parseLineup>, { ok: true }>;
 
 export interface BotDeps {
   readonly repo: Repository;
@@ -21,7 +29,17 @@ export interface BotBundle {
   readonly cards: CardService;
 }
 
-type ReplyFn = (text: string, replyTo: number) => Promise<void>;
+interface PromptRegistry {
+  remember(chatId: number, messageId: number): void;
+  forget(chatId: number): void;
+  dropUnanswered(chatId: number): Promise<void>;
+}
+
+interface BotContext {
+  readonly repo: Repository;
+  readonly cards: CardService;
+  readonly prompts: PromptRegistry;
+}
 
 const COMMAND_MENU = [
   { command: "game", description: strings.commandGame },
@@ -33,6 +51,29 @@ const COMMAND_MENU = [
 export async function publishCommandMenu(api: Api): Promise<void> {
   await api.setMyCommands(COMMAND_MENU);
 }
+
+const createPromptRegistry = (api: Api, log: Logger): PromptRegistry => {
+  const open = new Map<number, number>();
+
+  return {
+    remember: (chatId, messageId) => void open.set(chatId, messageId),
+    forget: (chatId) => void open.delete(chatId),
+    async dropUnanswered(chatId) {
+      const messageId = open.get(chatId);
+      if (messageId === undefined) {
+        return;
+      }
+
+      open.delete(chatId);
+
+      try {
+        await api.deleteMessage(chatId, messageId);
+      } catch (error) {
+        log.debug(`could not delete message ${messageId}: ${String(error)}`);
+      }
+    },
+  };
+};
 
 const resolveSeats = (
   repo: Repository,
@@ -58,163 +99,155 @@ const resolveSeats = (
   });
 };
 
-const lineupProblemText = (result: Exclude<ReturnType<typeof parseLineup>, { ok: true }>): string => {
-  if (result.problem === "empty") {
-    return strings.lineupMissing;
+const lineupProblemText = (result: LineupProblem): string => {
+  switch (result.problem) {
+    case "empty":
+      return strings.lineupMissing;
+
+    case "too_few":
+      return strings.lineupTooFew;
+
+    case "duplicates":
+      return strings.lineupDuplicates(result.names);
+  }
+};
+
+const refusedBecauseLive = async (context: BotContext, ctx: Command | TextMessage): Promise<boolean> => {
+  const live = context.repo.liveCardInChat(ctx.chat.id);
+  if (live === null) {
+    return false;
   }
 
-  if (result.problem === "too_few") {
-    return strings.lineupTooFew;
+  await ctx.reply(strings.gameAlreadyRunning, {
+    reply_parameters: { message_id: live.game.message_id },
+  });
+
+  return true;
+};
+
+const openFromNames = async (
+  context: BotContext,
+  ctx: Command | TextMessage,
+  rawText: string
+): Promise<void> => {
+  const parsed = parseLineup(rawText);
+  if (!parsed.ok) {
+    await ctx.reply(lineupProblemText(parsed));
+
+    return;
   }
 
-  return strings.lineupDuplicates(result.names);
+  const chatId = ctx.chat.id;
+  await context.cards.open(chatId, rotateToLowestId(resolveSeats(context.repo, chatId, parsed.names)));
+};
+
+const askForNames = async (context: BotContext, ctx: Command): Promise<void> => {
+  const commandMessageId = ctx.msg?.message_id;
+
+  const prompt = await ctx.reply(strings.lineupPrompt, {
+    reply_parameters:
+      commandMessageId === undefined ? undefined : { message_id: commandMessageId },
+    reply_markup: {
+      force_reply: true,
+      selective: true,
+      input_field_placeholder: strings.lineupPlaceholder,
+    },
+  });
+
+  context.prompts.remember(ctx.chat.id, prompt.message_id);
+};
+
+const onGame = async (context: BotContext, ctx: Command): Promise<void> => {
+  await context.prompts.dropUnanswered(ctx.chat.id);
+
+  if (await refusedBecauseLive(context, ctx)) {
+    return;
+  }
+
+  const rawText = ctx.msg?.text ?? "";
+  const parsed = parseLineup(rawText);
+
+  if (!parsed.ok && parsed.problem === "empty") {
+    await askForNames(context, ctx);
+
+    return;
+  }
+
+  await openFromNames(context, ctx, rawText);
+};
+
+const onNext = async (context: BotContext, ctx: Command): Promise<void> => {
+  await context.prompts.dropUnanswered(ctx.chat.id);
+
+  if (await refusedBecauseLive(context, ctx)) {
+    return;
+  }
+
+  const lineup = context.repo.lastLineup(ctx.chat.id);
+  if (lineup === null || lineup.length === 0) {
+    await ctx.reply(strings.noLineupToRepeat);
+
+    return;
+  }
+
+  await context.cards.open(
+    ctx.chat.id,
+    lineup.map((seat) => ({ playerId: seat.player_id, displayName: seat.display_name }))
+  );
+};
+
+const onStats = async (context: BotContext, ctx: Command): Promise<void> => {
+  await ctx.reply(renderStats(context.repo.seriesStats(ctx.chat.id)), { parse_mode: "HTML" });
+};
+
+const onHelp = async (ctx: Command): Promise<void> => {
+  await ctx.reply(strings.helpBody);
+};
+
+const onNamesReply = async (context: BotContext, ctx: TextMessage): Promise<void> => {
+  const prompt = ctx.message.reply_to_message;
+  if (prompt?.from?.id !== ctx.me.id || prompt.text !== strings.lineupPrompt) {
+    return;
+  }
+
+  context.prompts.forget(ctx.chat.id);
+
+  if (await refusedBecauseLive(context, ctx)) {
+    return;
+  }
+
+  await openFromNames(context, ctx, ctx.message.text);
+};
+
+const onTap = async (context: BotContext, ctx: CallbackTap): Promise<void> => {
+  const payload = decodeCallback(ctx.callbackQuery.data);
+  if (payload === null) {
+    await ctx.answerCallbackQuery(strings.cardStale);
+
+    return;
+  }
+
+  await ctx.answerCallbackQuery(await context.cards.tap(payload, ctx.from.id));
 };
 
 export function createBot(token: string, deps: BotDeps): BotBundle {
   const { repo, log, botInfo } = deps;
   const bot = new Bot(token, botInfo === undefined ? {} : { botInfo });
   const cards = createCardService({ repo, api: bot.api, log });
-  const openPrompts = new Map<number, number>();
 
-  const removeMessage = async (chatId: number, messageId: number): Promise<void> => {
-    try {
-      await bot.api.deleteMessage(chatId, messageId);
-    } catch (error) {
-      log.debug(`could not delete message ${messageId}: ${String(error)}`);
-    }
+  const context: BotContext = {
+    repo,
+    cards,
+    prompts: createPromptRegistry(bot.api, log),
   };
 
-  const dropPrompt = async (chatId: number): Promise<void> => {
-    const messageId = openPrompts.get(chatId);
-    if (messageId === undefined) {
-      return;
-    }
+  bot.command("game", (ctx) => onGame(context, ctx));
+  bot.command("next", (ctx) => onNext(context, ctx));
+  bot.command("stats", (ctx) => onStats(context, ctx));
+  bot.command("help", (ctx) => onHelp(ctx));
 
-    openPrompts.delete(chatId);
-    await removeMessage(chatId, messageId);
-  };
-
-  const refuseWhenLive = async (chatId: number, reply: ReplyFn): Promise<boolean> => {
-    const live = repo.liveCardInChat(chatId);
-    if (live === null) {
-      return false;
-    }
-
-    await reply(strings.gameAlreadyRunning, live.game.message_id);
-
-    return true;
-  };
-
-  const openFromNames = async (
-    chatId: number,
-    rawText: string,
-    say: (text: string) => Promise<unknown>
-  ): Promise<void> => {
-    const parsed = parseLineup(rawText);
-    if (!parsed.ok) {
-      await say(lineupProblemText(parsed));
-
-      return;
-    }
-
-    await cards.open(chatId, rotateToLowestId(resolveSeats(repo, chatId, parsed.names)));
-  };
-
-  bot.command("game", async (ctx) => {
-    const chatId = ctx.chat.id;
-    const reply: ReplyFn = (text, replyTo) =>
-      ctx.reply(text, { reply_parameters: { message_id: replyTo } }).then(() => undefined);
-
-    await dropPrompt(chatId);
-
-    if (await refuseWhenLive(chatId, reply)) {
-      return;
-    }
-
-    const commandMessageId = ctx.msg?.message_id;
-    const rawText = ctx.msg?.text ?? "";
-    const parsed = parseLineup(rawText);
-
-    if (!parsed.ok && parsed.problem === "empty") {
-      const prompt = await ctx.reply(strings.lineupPrompt, {
-        reply_parameters:
-          commandMessageId === undefined ? undefined : { message_id: commandMessageId },
-        reply_markup: {
-          force_reply: true,
-          selective: true,
-          input_field_placeholder: strings.lineupPlaceholder,
-        },
-      });
-
-      openPrompts.set(chatId, prompt.message_id);
-
-      return;
-    }
-
-    await openFromNames(chatId, rawText, (text) => ctx.reply(text));
-  });
-
-  bot.command("next", async (ctx) => {
-    const chatId = ctx.chat.id;
-    const reply: ReplyFn = (text, replyTo) =>
-      ctx.reply(text, { reply_parameters: { message_id: replyTo } }).then(() => undefined);
-
-    await dropPrompt(chatId);
-
-    if (await refuseWhenLive(chatId, reply)) {
-      return;
-    }
-
-    const lineup = repo.lastLineup(chatId);
-    if (lineup === null || lineup.length === 0) {
-      await ctx.reply(strings.noLineupToRepeat);
-
-      return;
-    }
-
-    await cards.open(
-      chatId,
-      lineup.map((seat) => ({ playerId: seat.player_id, displayName: seat.display_name }))
-    );
-  });
-
-  bot.command("stats", async (ctx) => {
-    await ctx.reply(renderStats(repo.seriesStats(ctx.chat.id)), { parse_mode: "HTML" });
-  });
-
-  bot.command("help", async (ctx) => {
-    await ctx.reply(strings.helpBody);
-  });
-
-  bot.on("message:text", async (ctx) => {
-    const prompt = ctx.message.reply_to_message;
-    if (prompt?.from?.id !== ctx.me.id || prompt.text !== strings.lineupPrompt) {
-      return;
-    }
-
-    const chatId = ctx.chat.id;
-    const reply: ReplyFn = (text, replyTo) =>
-      ctx.reply(text, { reply_parameters: { message_id: replyTo } }).then(() => undefined);
-
-    openPrompts.delete(chatId);
-
-    if (await refuseWhenLive(chatId, reply)) {
-      return;
-    }
-
-    await openFromNames(chatId, ctx.message.text, (text) => ctx.reply(text));
-  });
-
-  bot.on("callback_query:data", async (ctx) => {
-    const payload = decodeCallback(ctx.callbackQuery.data);
-    if (payload === null) {
-      await ctx.answerCallbackQuery(strings.cardStale);
-
-      return;
-    }
-
-    await ctx.answerCallbackQuery(await cards.tap(payload, ctx.from.id));
-  });
+  bot.on("message:text", (ctx) => onNamesReply(context, ctx));
+  bot.on("callback_query:data", (ctx) => onTap(context, ctx));
 
   bot.catch((error) => {
     log.error(`update ${error.ctx.update.update_id} failed: ${String(error.error)}`);
