@@ -26,7 +26,7 @@ the two disagree, `PLAN.md` wins on behaviour and this file wins on style.
 - **Separate semantically distinct blocks** with a single blank line so they don't
   visually merge.
 - **Keep functions pure where you can** — a function works off its arguments, not
-  module-level state. Wiring belongs in the composition root (`src/bot.ts`), not
+  module-level state. Wiring belongs in the composition root (`src/main.ts`), not
   inside the logic.
 - **No magic numbers** — name them with a `const`.
 - **No `console.*` for app logging** — use the scoped logger from
@@ -129,7 +129,7 @@ types), and `allowImportingTsExtensions` matches the explicit `.ts` import paths
 Imports point only **downward** — never sideways or up:
 
 ```
-entry (src/bot.ts)
+entry (src/main.ts)
   → features/*  →  integrations/* + shared/*  →  (nothing)
 ```
 

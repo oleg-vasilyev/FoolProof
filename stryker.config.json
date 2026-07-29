@@ -2,7 +2,11 @@
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "packageManager": "npm",
   "testRunner": "vitest",
-  "reporters": ["html", "clear-text", "progress"],
+  "reporters": [
+    "html",
+    "clear-text",
+    "progress"
+  ],
   "coverageAnalysis": "perTest",
   "concurrency": 4,
   "timeoutMS": 20000,
@@ -10,7 +14,6 @@
     "src/**/*.ts",
     "!src/**/*.spec.ts",
     "!src/**/*.stub.ts",
-    "!src/bot.ts",
     "!src/shared/db.ts",
     "!src/shared/repository/index.ts",
     "!src/shared/repository/types.ts"
