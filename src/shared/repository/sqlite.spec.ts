@@ -63,12 +63,10 @@ beforeEach(() => {
 });
 
 afterAll(() => {
+  db.close();
+
   for (const suffix of ["", "-wal", "-shm"]) {
-    try {
-      rmSync(DB_FILE + suffix);
-    } catch {
-      // the file may not exist on every run
-    }
+    rmSync(DB_FILE + suffix, { force: true });
   }
 });
 
@@ -148,11 +146,7 @@ describe("opening a card", () => {
     const ids = seedPlayers("Oleg", "Anya");
     repo.openGame(CHAT_ID, ids);
 
-    try {
-      repo.openGame(CHAT_ID, ids);
-    } catch {
-      // expected — the partial unique index rejects it
-    }
+    expect(() => repo.openGame(CHAT_ID, ids)).toThrow();
 
     const seatRows = db.prepare("SELECT COUNT(*) AS c FROM game_players").get();
 

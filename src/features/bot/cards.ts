@@ -23,6 +23,8 @@ const EDIT_DEBOUNCE_MS = 350;
 
 const FIRST_VERSION = 0;
 
+const NO_SLOT = -1;
+
 export interface CardServiceDeps {
   readonly repo: Repository;
   readonly api: Api;
@@ -94,7 +96,9 @@ const toCardState = (card: CardRecord): CardState => {
 };
 
 const toAction = (payload: CallbackPayload): Action =>
-  payload.action === "pick" ? { kind: "pick", slot: payload.slot ?? -1 } : { kind: payload.action };
+  payload.action === "pick"
+    ? { kind: "pick", slot: payload.slot ?? NO_SLOT }
+    : { kind: payload.action };
 
 const findTappableCard = (repo: Repository, payload: CallbackPayload): CardLookup => {
   const card = repo.cardById(payload.gameId);

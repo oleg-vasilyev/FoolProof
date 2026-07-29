@@ -84,7 +84,7 @@ const steppedBack = (state: CardState): CardState => {
   }
 
   if (state.exits.length > 0) {
-    return { ...state, exits: state.exits.slice(0, -1) };
+    return { ...state, exits: state.exits.slice(0, state.exits.length - 1) };
   }
 
   return { ...state, starterSlot: null };

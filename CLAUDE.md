@@ -113,26 +113,35 @@ not a new npm script.
   part of `check` because of the runtime, but the build **breaks below 85%**, and a drop from the current ~92%
   means new tests are watching without asserting.
 
+### What enforces what
+
+A rule that can be checked mechanically is a lint rule, not a paragraph — prose
+is for judgement. `eslint.config.js` holds the checkable ones, including three
+with no core equivalent that are defined inline there:
+
+| Rule | Enforced by |
+|---|---|
+| No comments in `src/` | `project/no-comments` |
+| Two blank lines after the last import | `project/blank-lines-after-imports` (autofixed) |
+| A number must be named by a `const` | `project/named-numbers` |
+| Braces on every `if`, `const` over `let` | `curly`, `prefer-const`, `no-var` |
+| No `console.*` outside `shared/logger.ts` | `no-console` |
+| Imports point only downward | `no-restricted-imports`, one zone per layer |
+
+The layering zones are the valuable ones: `shared/` may not import a feature,
+`features/game/` may not import another feature, and `features/render/` may not
+import `bot`. A violation is a build error rather than something a reviewer has
+to notice.
+
+A `PostToolUse` hook lints each file as it is written, so a violation surfaces at
+the edit instead of at the end of the turn.
+
 ### Finishing a phase
 
 A phase ends with a release, and a phase is done when the code is *releasable* —
-not when it works. Before the final commit of a phase, run all four gates and act
-on what they say:
-
-1. **`npm run check`** — lint, types, tests. Zero errors, no exceptions.
-2. **`npm run test:coverage`** — 70% floor on every metric. A file that dropped
-   is a file whose new branches nobody exercised.
-3. **`npm run test:mutation`** — Stryker, breaks below 85%. Coverage says a line
-   ran; this says a test would have noticed it break. A file that dropped is a
-   file whose new tests assert too little — strengthen them, do not lower the bar.
-4. **A review pass over the phase's whole diff**, read against this file rather
-   than against the individual commits: does each touched file still read as a
-   skeleton, is every union dispatched with `switch`, are there comments that
-   crept into `src/`, is there a user-facing string outside `strings.ts`, does
-   every stub sit beside its subject?
-
-Put the resulting numbers in the phase's final commit message. A score is only
-useful if a later regression has something to be compared against.
+not when it works. Four gates run before the final commit: `check`, coverage,
+mutation, and a review pass over the whole diff. The procedure lives in the
+`finish-phase` skill, and the review pass has a subagent (`phase-reviewer`).
 
 ### Tests
 
