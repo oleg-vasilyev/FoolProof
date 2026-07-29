@@ -32,8 +32,11 @@ run `npm run check` and trust it. Spend the pass on what no rule can check:
   that grew a responsibility belonging to another layer. Look for purity leaking
   out of `features/game/` and `features/render/`.
 - **Tests.** Does each new test assert something that would fail if the code
-  broke, or only that the code ran? Does every stub sit beside its subject, or
-  beside its only consumer when the subject is someone else's code?
+  broke, or only that the code ran? Is every spec a unit — nothing unmocked but
+  its subject, its stubs and a data table — or is it an integration spec wearing
+  a unit's name? Does every stub sit beside its subject, or beside its only
+  consumer when the subject is someone else's code? The `write-a-spec` skill has
+  the full standard, including how to judge a spec you did not write.
 
 ## How to report
 

@@ -64,6 +64,11 @@ Anything a machine can check is a lint rule, not a paragraph — see
   `LOG_LEVEL` (debug|info|warn|error, default `info`) sets the threshold. Raw
   `console.*` is for `scripts/` dev utilities and for `shared/logger.ts` itself.
 
+`strict: true` and **no `any`**. There is no build step: `tsconfig.json` mirrors
+how Node actually runs the code. `erasableSyntaxOnly` and `verbatimModuleSyntax`
+keep the source type-strippable (no enums, no namespaces, `import type` for
+types), and `allowImportingTsExtensions` matches the explicit `.ts` import paths.
+
 ## Language in code
 
 Everything is English — code, identifiers, commits, docs and every user-facing
@@ -156,91 +161,24 @@ query has a procedure: the `add-repository-method` skill.
 
 ## Tests
 
-Specs sit next to the code as `*.spec.ts`, and **so do the stubs** — `*.stub.ts`
-lives beside the thing it stands in for, never in a central testing folder. A
-stub for something we did not write (grammY's `Api`, a synthetic `Update`) sits
-next to its only consumer instead. Stub imports point downward like every other
-import.
+Two facts about where things live, because they shape the source tree:
 
-A stub is a **class** whose public `*Spy` fields are `vi.fn()`s, with sensible
-defaults set in the constructor, and whose methods just delegate to those spies.
-Expose the assembled object as a **field set in the constructor, not a getter** —
-a getter builds a new object per call, and `toBe` identity checks then fail for
-no reason a reader can see. Tests override one spy instead of rebuilding a fake.
+- Specs sit next to the code as `*.spec.ts`, and **so do the stubs** —
+  `*.stub.ts` lives beside the thing it stands in for, never in a central testing
+  folder. A stub for something we did not write (grammY's `Api`, a `Context`) sits
+  next to its only consumer instead. Stub imports point downward like every other
+  import.
+- **A spec tests one file, and everything that file imports is mocked.** Third-
+  party code is never exercised in a unit — that is the one rule with no
+  exceptions. An integration spec is written only when the seam between systems is
+  itself under test, and is named `*.integration.spec.ts` so it cannot be mistaken
+  for the default. There are two; the bar for a third is a bug that got through
+  the units.
 
-Nest `describe` by unit and then by method, name numbers (`const ONCE = 1`), and
-separate arrange/act/assert with blank lines.
-
-A module mocked with `vi.mock` is hoisted above the imports, so the file under
-test is loaded afterwards with `const { thing } = await import("./thing.ts")`.
-That is why the specs here import their subject at the bottom of the header
-rather than at the top.
-
-### Units by default, integration by exception
-
-**A spec tests one file. Everything that file imports is mocked.** Not "the
-awkward parts" — everything: the library, the sibling module in the next folder,
-the pure helper, the collaborator handed in through a context object.
-
-Three rules follow from that, and the first is absolute:
-
-1. **Never exercise third-party code in a unit spec.** grammY, `node:sqlite`,
-   `node:fs` — mock them. Their authors have their own tests, and a spec that
-   drives them is reporting on their code while claiming to report on ours. When
-   one of them breaks our spec, the failure points at the wrong file.
-2. **Mock our own modules too.** `card.ts` is not tested by feeding it a real
-   `CardState` and checking the whole rendered string — that spec fails when
-   `finalPlacements` changes, which is `state.ts`'s business. Mock the helper,
-   drive the file by what it returns, and the failure lands where the fault is.
-3. **Leave data tables real.** `features/render/strings.ts` is keys and text, not
-   behaviour; mocking it would compare a constant against itself. Everything with
-   a body gets mocked.
-
-Mocking is usually the *more* direct test, not a weaker one:
-
-- `router.ts` exists to register routes in an order that matters. On a mocked
-  `Bot` that is asserted literally — `bot.command` was called before
-  `bot.on("message:text")` — instead of inferred from whether a `/help` update
-  happened to produce a reply.
-- `card.ts` must route user data through `escapeHtml`. With the escaper mocked
-  that is asserted as a fact about `card.ts`, not guessed from spotting `&amp;`
-  in the output.
-
-The tell that a spec has drifted is an assertion it has no business making: a
-keyboard spec checking the 64-byte callback limit, a stats spec checking that
-`&` becomes `&amp;`. Both were really testing another module, and both already
-had a proper home elsewhere.
-
-**An integration spec is an exception with a reason**: several parts once went
-wrong *together*, and no single unit could have caught it. Do not write one
-because mocking is inconvenient — write it when the seam between systems is
-itself the thing under test. It is named `*.integration.spec.ts`, so nobody
-mistakes it for the default, and it sits beside the code like every other spec.
-`npm run test:unit` and `npm run test:integration` run them separately; `npm test`
-runs both.
-
-There are two, and the bar for a third is a bug that got through the units:
-
-- `features/bot/router.integration.spec.ts` drives a **real** grammY `Bot`
-  through `bot.handleUpdate()`, intercepting the network at
-  `bot.api.config.use()`. Pass `botInfo` so no `getMe` call is needed. **Flush the
-  card service in `afterEach`** — the real debouncer schedules a real 350 ms
-  timer, and a timer that outlives its test fires into the next test's
-  assertions, which this spec has already been caught doing.
-- `shared/repository/sqlite.integration.spec.ts` runs against a **real**
-  temporary SQLite file. The SQL is the unit under test and a mocked database
-  would assert nothing. Set `process.env.DB_PATH` before importing, because
-  `db.ts` opens the connection at module load — and close the connection before
-  deleting the file, or Windows refuses and the temp files pile up.
-
-One trap worth keeping: `bot.catch` only participates in `bot.start()`.
-`handleUpdate` rethrows, so an error handler is exercised through
-`bot.errorHandler` — or, better, on the mock.
-
-`strict: true` and **no `any`**. There is no build step: `tsconfig.json` mirrors
-how Node actually runs the code. `erasableSyntaxOnly` and `verbatimModuleSyntax`
-keep the source type-strippable (no enums, no namespaces, `import type` for
-types), and `allowImportingTsExtensions` matches the explicit `.ts` import paths.
+Everything else about testing — what to mock, how to shape a stub, how to name
+and structure cases, the traps in the two integration specs, and how to judge a
+spec you did not write — lives in the **`write-a-spec` skill**. Load it before
+writing or changing any spec.
 
 ## Checks
 

@@ -29,8 +29,12 @@ says a test would have noticed it break.
 
 A file that dropped is a file whose new tests assert too little — strengthen the
 tests, never lower the bar. Read `reports/mutation/mutation.html` for the
-survivors; the instructive ones are usually a spy left dirty by the test above,
-or an optional chain hiding a value that was never set.
+survivors, or run `npx stryker run --mutate <file> --reporters clear-text` to
+list them for one file. The instructive ones are usually a spy left dirty by the
+test above, or an optional chain hiding a value that was never set.
+
+Strengthening a spec is the `write-a-spec` skill's job — load it rather than
+reaching for the nearest assertion that turns the mutant red.
 
 ## 4. A review pass over the phase's whole diff
 
