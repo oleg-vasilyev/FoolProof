@@ -1,46 +1,36 @@
-# FoolProof — project rules
+# FoolProof — how the code here is written
 
-A Telegram bot that records games of Durak in a group chat of friends. Input
-happens on a phone, one-handed, between games — **taps are the scarce resource**,
-not data completeness. When a design choice trades a tap for a column, drop the
-column.
+Three documents, one job each:
 
-`PLAN.md` is the spec: state machine, data model, invariants, edge cases. This
-file is the rules for writing the code. Do not restate one in the other — when
-the two disagree, `PLAN.md` wins on behaviour and this file wins on style.
+- **`README.md`** — what the bot is and how to run it. For someone arriving at
+  the repository.
+- **`PLAN.md`** — what the bot does and why. State machine, data model,
+  invariants, edge cases, and the design dead ends already paid for.
+- **`CLAUDE.md`** — this file. How code is written here: style, layering,
+  testing, gates.
+
+The dividing question is *would this still be true if the bot were rewritten in
+Python?* If yes, it belongs in `PLAN.md` — the Bot API's limits, the state
+machine, the schema. If no, it belongs here. A fact lives where its reason lives;
+the other file gets a pointer, never a retelling. When the two disagree, `PLAN.md`
+wins on behaviour and this file wins on style.
 
 ## Code style
 
-- **No comments in `src/` and `scripts/`.** Not English, not Russian. Naming
-  carries the intent. This overrides the "name the constant *and* comment it"
-  habit from job-finder — here a magic number still gets a named `const`, but the
-  intent has to fit in the name (`ABANDON_AFTER_MS`, `EDIT_DEBOUNCE_MS`). If it
-  genuinely cannot, the explanation belongs in `PLAN.md`, not in the source.
-  Config files (`tsconfig.json`, `eslint.config.js`) may carry comments — a
-  non-obvious compiler flag has nowhere else to live.
-- **Functional style, `const` over `let`.** No mutation of arguments; return a new
-  value instead.
-- **Two blank lines** after the last import, before the first statement.
-- **Never write an `if` without braces** — always `if (cond) { ... }`, even for a
-  one-line body.
-- **Separate semantically distinct blocks** with a single blank line so they don't
-  visually merge.
-- **Keep functions pure where you can** — a function works off its arguments, not
-  module-level state. Wiring belongs in the composition root (`src/main.ts`), not
-  inside the logic.
-- **No magic numbers** — name them with a `const`.
+Anything a machine can check is a lint rule, not a paragraph — see
+[What enforces what](#what-enforces-what). What is left needs judgement:
+
 - **A file must read as a skeleton, not an implementation.** Opening it should
   show the idea before any detail. The exported factory or entry point is a table
   of contents that names the steps and delegates; the steps are named
   module-level functions that take an explicit context object instead of reaching
-  into closure scope. `src/main.ts` and `features/bot/cards.ts` are the reference
-  shape. A function grown past a screenful is usually several functions that have
-  not been named yet — and one that needs a comment to explain its sections is
-  really asking to be split.
-- **`index.ts` promises a re-export, so do not put logic in one.** A file is named
-  after what it holds: `router.ts` registers routes, `handlers.ts` holds handlers,
-  `prompts.ts` owns the prompt registry. A reader who opens `index.ts` expects the
-  folder's public surface and nothing else.
+  into closure scope. `src/main.ts`, `features/bot/router.ts` and
+  `features/bot/cards.ts` are the reference shape. A function grown past a
+  screenful is usually several functions that have not been named yet — and one
+  that needs a comment to explain its sections is really asking to be split.
+- **A file is named after what it holds.** `index.ts` promises a re-export, so
+  logic never goes in one: `router.ts` registers routes, `handlers.ts` holds
+  handlers, `prompts.ts` owns the prompt registry.
 - **Dispatch on a union with `switch`, never a chain of `if`.** Actions, phases
   and transition outcomes are closed unions: a `switch` says so, and the compiler
   then checks exhaustiveness, so adding a case becomes a compile error in every
@@ -50,8 +40,19 @@ the two disagree, `PLAN.md` wins on behaviour and this file wins on style.
   lookup that can fail returns `{ ok: true, … } | { ok: false, notice }`, so the
   narrowing survives the call and the caller reads as one early return
   (`findTappableCard`).
-- **No `console.*` for app logging** — use the scoped logger from
-  `src/shared/logger.ts`:
+- **Keep functions pure where you can** — a function works off its arguments, not
+  module-level state. Wiring belongs in the composition root (`src/main.ts`), not
+  inside the logic.
+- **Functional style.** No mutation of arguments; return a new value instead.
+- **Separate semantically distinct blocks** with a single blank line so they
+  don't visually merge.
+- **No comments in `src/` and `scripts/`** — naming carries the intent. A magic
+  number still gets a named `const`, but the intent has to fit in the name
+  (`ABANDON_AFTER_MS`, `EDIT_DEBOUNCE_MS`). If it genuinely cannot, the
+  explanation belongs in `PLAN.md`, not in the source. Config files
+  (`tsconfig.json`, `eslint.config.js`) are exempt — a non-obvious compiler flag
+  has nowhere else to live.
+- **No `console.*` for app logging** — use the scoped logger:
 
   ```ts
   import { createLogger } from "../../shared/logger.ts";
@@ -60,58 +61,140 @@ the two disagree, `PLAN.md` wins on behaviour and this file wins on style.
   log.info("...");   // debug | info | warn | error
   ```
 
-  `LOG_LEVEL` (debug|info|warn|error, default `info`) sets the threshold.
-  Raw `console.*` is fine only in `scripts/` dev utilities.
+  `LOG_LEVEL` (debug|info|warn|error, default `info`) sets the threshold. Raw
+  `console.*` is for `scripts/` dev utilities and for `shared/logger.ts` itself.
 
-## Language
+## Language in code
 
-Everything is English — code, identifiers, commits, docs **and every user-facing
-string**. This is an international product from the first commit.
+Everything is English — code, identifiers, commits, docs and every user-facing
+string. `PLAN.md` says why; this is what it means when writing code.
 
-All copy the bot emits lives in one module (`features/render/strings.ts`) and is
-referenced by key. **No string literal that a user can read may appear anywhere
-else** — not in the state machine, not in a command handler, not in an
-`answerCallbackQuery` call. Per-chat locale selection is out of scope for v1, but
-the module boundary that makes it a small change is not: keep the strings table
-flat and keyed, and put anything with a count behind a function rather than
-concatenating at the call site.
+All copy the bot emits lives in `features/render/strings.ts` and is referenced by
+key. **No string literal that a user can read may appear anywhere else** — not in
+the state machine, not in a handler, not in an `answerCallbackQuery` call. Keep
+the table flat and keyed, and put anything with a count behind a function rather
+than concatenating at the call site: that is the seam that makes a second locale
+a small change.
 
-Player names are user data, not copy — any script, stored and displayed exactly as
-typed. The parser must not assume latin, and name matching normalises via Unicode
-NFC and lower case (plus `ё` → `е` for Cyrillic).
+Player names are user data, not copy. Matching normalises via Unicode NFC and
+lower case, plus `ё` → `е`; the parser must not assume latin
+(`features/game/lineup.ts`).
 
-Telegram commands are latin lower case only (`/game`, `/next`, `/stats`) — a Bot
-API constraint, not a preference.
+## Architecture
 
-## npm scripts
-
-**Never put comment keys (`"// ...": "..."`) in `package.json`.** The script name
-has to say what the script does on its own.
-
-Keep the list short — it is the first thing a new user reads:
+Imports point only **downward** — never sideways or up. ESLint enforces it with
+one zone per layer, so a bad import is a build error:
 
 ```
-start   test   test:coverage   check   lint   lint:fix   typecheck
+entry (src/main.ts)
+  → features/*  →  shared/*  →  (nothing)
 ```
 
-`start` is the whole bot — there is no separate dev command, because long polling
-is the only delivery mode (see `PLAN.md`). There is no `migrate` either:
-`shared/db.ts` creates the schema with `CREATE TABLE IF NOT EXISTS` on startup,
-the way job-finder does. Anything occasional
-(one-off backfills, duplicate-player merges) goes behind `scripts/tools.ts`, which
-lists itself when run with no argument. Adding a tool means one line in its table,
-not a new npm script.
+- `shared/`   — infra used everywhere: env, logger, debounce, db, repository
+- `features/` — one folder per capability: game, render, bot
+
+There is no `integrations/` layer. It existed once and held no client: grammY is
+the Telegram client and is imported directly. A module goes in the feature that
+uses it; a second external service can have its own folder on the day it exists.
+
+Cross-feature imports are rare and one-directional. There are exactly two:
+`bot` → `game` + `render`, and `render` → `game`. `bot` is the orchestration
+layer that owns everything impure — the database, the grammY handlers, the
+debounced edits, the idle sweep — so that `game` and `render` can stay pure.
+Nothing may import `bot`.
+
+The entry file stays thin and declarative: it names the steps, never the
+implementation.
+
+### The state machine is a pure reducer
+
+`features/game/` holds `(state, action) => state` and nothing else. **No database
+access, no grammY, no `Date.now()`, no I/O of any kind** — the clock and the
+storage are passed in. Every transition in `PLAN.md` must be exercisable without
+a Telegram token and without a database file. This is the rule that makes the
+product testable at all; it is worth defending against convenience.
+
+`CardState` carries no phase field: `phaseOf()` derives it. Everything about a
+live card is rebuilt from `game_players` and `game_events` on every single tap,
+which is what makes a restart mid-game a non-event. `PLAN.md` explains why the
+`state` column still exists.
+
+`features/render/` is the same shape one layer out: state in, message text and
+inline keyboard out, pure. It also owns the two wire-format modules the card
+needs — `html.ts` escapes the body, `callback.ts` is the codec for
+`callback_data`, encoded by the keyboard and decoded by `bot`.
+
+Two Bot API facts that are easy to get backwards in code, both explained in
+`PLAN.md`:
+
+- **Escape user data reaching the message body, never button captions.** Telegram
+  does not parse HTML in captions, so escaping there renders `&amp;` literally.
+- **Register command handlers before any `bot.on("message:text")` filter**
+  (`features/bot/router.ts`). Commands are text messages too, so a text handler
+  that returns without calling `next()` silently swallows every command below it.
+
+### Data access
+
+Features never touch the database. They depend on the **repository interface**
+(`shared/repository/types.ts`) and call named domain methods:
+
+```ts
+import { repository } from "../../shared/repository/index.ts";
+
+const card = repository.liveCardInChat(chatId);
+```
+
+- `shared/db.ts` — connection and schema only. It owns the pragmas and the
+  timestamp format that `PLAN.md` describes; nothing else may assume them.
+- `shared/repository/sqlite.ts` — the **only** file allowed to contain SQL or to
+  import `db`.
+- `shared/repository/index.ts` — binds the interface to the SQLite implementation.
+
+No raw SQL, no query building, and no knowledge of column names outside the
+repository. Swapping storage engines should mean writing one new file. Adding a
+query has a procedure: the `add-repository-method` skill.
+
+## Tests
+
+Specs sit next to the code as `*.spec.ts`, and **so do the stubs** — `*.stub.ts`
+lives beside the thing it stands in for, never in a central testing folder. A
+stub for something we did not write (grammY's `Api`, a synthetic `Update`) sits
+next to its only consumer instead. Stub imports point downward like every other
+import.
+
+A stub is a **class** whose public `*Spy` fields are `vi.fn()`s, with sensible
+defaults set in the constructor, and whose methods just delegate to those spies.
+Tests then override one spy instead of rebuilding a fake. Nest `describe` by unit
+and then by method, name numbers (`const ONCE = 1`), and separate
+arrange/act/assert with blank lines.
+
+Two deliberate exceptions to "mock everything":
+
+- `repository/sqlite.spec.ts` runs against a **real** temporary SQLite file. Its
+  whole job is the SQL, and a mocked database would assert nothing. Set
+  `process.env.DB_PATH` before importing, because `db.ts` opens the connection at
+  module load — and close the connection before deleting the file, or Windows
+  refuses and the temp files pile up.
+- `features/bot/router.spec.ts` drives a **real** grammY `Bot` through
+  `bot.handleUpdate()` with synthetic updates, intercepting the network at
+  `bot.api.config.use()`. Middleware order is exactly what that file gets wrong,
+  and only the real router can catch it. Pass `botInfo` so no `getMe` call is
+  needed. Note `bot.catch` only runs under `bot.start()` — `handleUpdate`
+  rethrows, so test the handler through `bot.errorHandler`.
+
+`strict: true` and **no `any`**. There is no build step: `tsconfig.json` mirrors
+how Node actually runs the code. `erasableSyntaxOnly` and `verbatimModuleSyntax`
+keep the source type-strippable (no enums, no namespaces, `import type` for
+types), and `allowImportingTsExtensions` matches the explicit `.ts` import paths.
 
 ## Checks
 
-- `npm run lint` / `npm run lint:fix` — ESLint (unused imports, braces).
-- `npm run typecheck` — `tsc --noEmit`, `strict` plus `noUncheckedIndexedAccess`.
-- `npm test` — vitest. `npm run test:coverage` fails below **70%** on every metric.
-- `npm run check` — all three. **Keep it at zero errors.**
-- `npm run test:mutation` — Stryker, roughly two minutes. Coverage only proves a
-  line ran; the mutation score proves a test would notice if it broke. It is not
-  part of `check` because of the runtime, but the build **breaks below 85%**, and a drop from the current ~92%
-  means new tests are watching without asserting.
+`README.md` lists what each npm script runs. Two rules about the list itself:
+**never put comment keys (`"// ...": "..."`) in `package.json`** — the script name
+has to say what it does — and **keep the list short**, because it is the first
+thing a new reader sees. Anything occasional (backfills, merging duplicate
+players) goes behind a single `scripts/tools.ts` that lists itself when run with
+no argument; adding a tool is then one line in its table, not a new npm script.
 
 ### What enforces what
 
@@ -130,8 +213,7 @@ with no core equivalent that are defined inline there:
 
 The layering zones are the valuable ones: `shared/` may not import a feature,
 `features/game/` may not import another feature, and `features/render/` may not
-import `bot`. A violation is a build error rather than something a reviewer has
-to notice.
+import `bot`.
 
 A `PostToolUse` hook lints each file as it is written, so a violation surfaces at
 the edit instead of at the end of the turn.
@@ -139,179 +221,15 @@ the edit instead of at the end of the turn.
 ### Finishing a phase
 
 A phase ends with a release, and a phase is done when the code is *releasable* —
-not when it works. Four gates run before the final commit: `check`, coverage,
-mutation, and a review pass over the whole diff. The procedure lives in the
-`finish-phase` skill, and the review pass has a subagent (`phase-reviewer`).
-
-### Tests
-
-Specs sit next to the code as `*.spec.ts`, and **so do the stubs** — `*.stub.ts`
-lives beside the thing it stands in for, never in a central testing folder. This
-is the same feature-based rule the source follows: `repository.stub.ts` next to
-`sqlite.ts`, `state.stub.ts` next to the reducer. A stub for something we did not
-write — grammY's `Api`, a synthetic `Update` — sits next to its only consumer
-instead, which is `features/bot/`. Stub imports point downward like every other
-import.
-
-A stub is a **class** whose public `*Spy` fields are `vi.fn()`s, with sensible
-defaults set in the constructor, and whose methods just delegate to those spies.
-Tests then override one spy instead of rebuilding a fake. Nest `describe` by unit
-and then by method, name numbers (`const ONCE = 1`), and separate
-arrange/act/assert with blank lines.
-
-Two deliberate exceptions to "mock everything":
-
-- `repository/sqlite.spec.ts` runs against a **real** temporary SQLite file. Its
-  whole job is the SQL, and a mocked database would assert nothing. Set
-  `process.env.DB_PATH` before importing, because `db.ts` opens the connection at
-  module load.
-- `features/bot/router.spec.ts` drives a **real** grammY `Bot` through
-  `bot.handleUpdate()` with synthetic updates, intercepting the network at
-  `bot.api.config.use()`. Middleware order is exactly what that file gets wrong,
-  and only the real router can catch it. Pass `botInfo` so no `getMe` call is
-  needed. Note `bot.catch` only runs under `bot.start()` — `handleUpdate` rethrows,
-  so test the handler through `bot.errorHandler`.
-
-`strict: true` and **no `any`**. There is no build step: `tsconfig.json` mirrors
-how Node actually runs the code. `erasableSyntaxOnly` and `verbatimModuleSyntax`
-keep the source type-strippable (no enums, no namespaces, `import type` for
-types), and `allowImportingTsExtensions` matches the explicit `.ts` import paths.
-
-## Architecture
-
-Imports point only **downward** — never sideways or up:
-
-```
-entry (src/main.ts)
-  → features/*  →  shared/*  →  (nothing)
-```
-
-- `shared/`   — infra used everywhere: env, logger, debounce, db, repository
-- `features/` — one folder per capability: game, render, bot
-
-There is no `integrations/` layer. It existed once and held no client: grammY is
-the Telegram client and is imported directly, so the folder only contained two
-dependency-free modules and two stubs, each with a single consumer. A module goes
-in the feature that uses it; a second external service can have its own folder on
-the day it exists.
-
-The entry file stays thin and declarative — it names the steps, never the
-implementation.
-
-Keep cross-feature imports rare and one-directional. There is exactly one:
-`bot` → `game` + `render`. `bot` is the orchestration layer that owns everything
-impure — the database, the grammY handlers, the debounced edits, the idle sweep —
-so that `game` and `render` can stay pure. Nothing may import `bot`.
-
-### The state machine is a pure reducer
-
-`features/game/` holds `(state, action) => state` and nothing else. **No database
-access, no grammY, no `Date.now()`, no I/O of any kind** — the clock and the
-storage are passed in. Every transition in `PLAN.md` must be exercisable without a
-Telegram token and without a database file. This is the rule that makes the
-product testable at all; it is worth defending against convenience.
-
-`CardState` carries no phase field: `phaseOf()` derives it from whether a starter
-is set, how many players remain, and whether a draw was accepted. The `state`
-column exists only so a restart can tell an accepted draw (two remain) from an
-automatic fool (one remains) — everything else about a live card is rebuilt from
-`game_players` and `game_events` on every single tap, which is what makes a
-restart mid-game a non-event.
-
-`features/render/` is the same shape one layer out: state in, message text and
-inline keyboard out, pure. It also owns the two wire-format modules the card
-needs — `html.ts` escapes the body and `callback.ts` is the codec for
-`callback_data`, encoded by the keyboard and decoded by `bot`.
-
-## Data access
-
-Features never touch the database. They depend on the **repository interface**
-(`shared/repository/types.ts`) and call named domain methods:
-
-```ts
-import { games } from "../../shared/repository/index.ts";
-
-const game = games.liveInChat(chatId);
-games.confirm(game.id, positions);
-```
-
-- `shared/db.ts` — connection + schema only.
-- `shared/repository/sqlite.ts` — the **only** file allowed to contain SQL or
-  import `db`. Adding a query means adding a method here and to the interface.
-- `shared/repository/index.ts` — the composition point that binds the interface to
-  the SQLite implementation.
-
-No raw SQL, no query building, and no knowledge of column names outside the
-repository. Swapping storage engines should mean writing one new file.
-
-Storage is SQLite via the built-in `node:sqlite` — no dependency and no daemon.
-Three things `shared/db.ts` owns and nothing else may assume:
-
-- `PRAGMA foreign_keys = ON`, `journal_mode = WAL`, `busy_timeout`. Foreign keys
-  are **off** by default in SQLite, and the schema leans on `ON DELETE CASCADE`.
-- Timestamps are TEXT in `datetime('now')` form, always UTC. Never store a locale
-  format — the columns are sorted on directly.
-- The database file lives under `data/`, which is gitignored.
-
-## Telegram constraints
-
-Five things the Bot API does not have — do not attempt them, and do not accept a
-design that assumes them: **button colours**, **disabled buttons**, **drag and
-drop**, **font size or colour**, and **button label alignment** (captions are
-always centred). State is conveyed by an emoji in the button caption and by the
-message body above the keyboard; the emoji's own colour is the only palette there
-is (`❌` red, `✅` green, `✔️`/`✖️` grey).
-
-- `callback_data` is capped at 64 bytes. **Never put a name in it** —
-  `<game_id_b62>:<action>:<slot>:<state_version>`.
-- Every accepted tap gets an `answerCallbackQuery`, always. Without it, lag reads
-  as a dropped tap and the person taps again.
-- `state_version` is checked on every callback and bumped on every transition. A
-  stale version answers "Card updated" and changes nothing. This is what
-  makes double taps and simultaneous tappers safe — it is a correctness
-  requirement, not an optimisation.
-- Debounce edits by 300–500 ms; `editMessageText` counts against the group rate
-  limit.
-- Button order follows the seating and **never changes** within a game or a
-  session. Muscle memory beats tidiness.
-- Cards go out with `parse_mode: "HTML"`. Player names are user data, so anything
-  reaching the **message body** goes through `escapeHtml` first. **Button captions
-  are the opposite** — Telegram does not parse HTML there, and escaping them would
-  render `&amp;` literally. Getting this backwards is silent in testing and
-  obvious in the chat.
-- Emoji are load-bearing, not decoration: ✅ done, 💀 fool, 🤝 draw, and the control
-  buttons. Two dead ends already paid for — medals for the top three (coloured dots
-  at button size) and a `<pre>` block for aligned columns (Telegram renders it as a
-  code block with a "copy" header). Reach for weight and wording before reaching
-  for another emoji.
-- **The live card never repeats what the buttons already say**, and stops changing
-  once the starter is picked. Player buttons carry their own positions, so the body
-  holds only the game number and the starter — no progress line, no table size, no
-  "tap Confirm" prompt. Text whose length changes makes the message reflow under
-  the keyboard on every tap. The standings render once, on Confirm —
-  `renderResult`, not `renderCard`.
-- Command handlers must be registered **before** any `bot.on("message:text")`
-  filter. Commands are text messages too, so a text handler that returns without
-  calling `next()` will silently swallow every command below it.
-- A `force_reply` prompt cannot be withdrawn through the API — the client holds
-  the pending reply in the chat draft until the message it points at is deleted.
-  Delete a prompt **only when it went unanswered**; deleting an answered one turns
-  the quote in the user's reply into "Deleted message" for good. `selective: true`
-  works only if the prompt is itself a reply to the user's message.
-- More generally: deleting a message that something else quotes is not a clean
-  undo. The quote survives as a tombstone, and unlike a stale draft it cannot be
-  cleared.
+not when it works. Four gates run before the final commit: `npm run check`,
+coverage (70% floor), mutation (breaks below 85%), and a review pass over the
+phase's whole diff. The procedure lives in the `finish-phase` skill, and the
+review pass has a subagent (`phase-reviewer`). The resulting numbers go in the
+final commit message — a score is only useful if a later regression has something
+to be compared against.
 
 ## Configuration
 
-Secrets live in `.env` (gitignored) next to `.env.example`, which is the shareable
-template and must list every key the app reads. Read them in one place —
-`shared/env.ts` — and pass values down; no `process.env` in feature code.
-
-## Data integrity
-
-- `game_events` stores a `player_id`, **never a name**. Merging duplicate players
-  must stay a foreign-key repoint.
-- `CANCELLED` and `ABANDONED` games are never written to the database.
-- `FROZEN` is immutable. There is no rollback path, and adding one is a `PLAN.md`
-  decision, not an implementation detail.
+Secrets live in `.env` (gitignored) next to `.env.example`, which is the
+shareable template and must list every key the app reads. Read them in one place
+— `shared/env.ts` — and pass values down; no `process.env` in feature code.

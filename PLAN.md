@@ -1,5 +1,14 @@
 # FoolProof — a Telegram bot for tracking games of Durak
 
+This is the specification: what the bot does and why. Behaviour, the state
+machine, the data model, the invariants, and the design dead ends already paid
+for. How the code is written lives in `CLAUDE.md`; how to run the bot lives in
+`README.md`.
+
+The dividing question is whether a fact would survive a rewrite in another
+language. The Bot API's limits, the transitions and the schema would — so they
+are here. Naming, layering and test conventions would not — so they are not.
+
 ## Purpose
 
 The bot lives in a group chat of friends. It records games of Podkidnoy Durak:
@@ -48,13 +57,6 @@ scope for the first version; the seam that makes it possible is not.
 Player names are user data, not copy: they may be in any script and are stored and
 displayed exactly as typed.
 
-## Code style
-
-- Functional style, `const` over `let`
-- **No comments in code.** Neither English nor Russian. The code must be
-  self-documenting through naming
-- Strict TypeScript, `strict: true`, no `any`
-
 ---
 
 ## Commands
@@ -74,6 +76,12 @@ memory. A command that is not implemented yet stays out of the menu.
 
 The parser must strip the `@foolproof_bot` suffix — Telegram appends it in groups
 that contain more than one bot.
+
+A command is an ordinary text message with an entity on it, which every framework
+routes accordingly: **command handlers must be registered before any general text
+handler**. A text handler that returns without passing the update along silently
+swallows every command below it. This has already happened here once, and the
+symptom is the worst kind — nothing fails, the commands simply stop existing.
 
 ### `/game` with no names
 
@@ -100,6 +108,10 @@ Two rules keep the prompt from becoming litter, both learned the hard way:
   must be left alone: deleting it turns the quote inside the player's own reply
   into "Deleted message", which is permanent and looks worse than the draft it was
   meant to fix.
+
+More generally: deleting a message that something else quotes is not a clean
+undo. The quote survives as a tombstone, and unlike a stale draft it cannot be
+cleared.
 
 ### Parsing the player list
 
