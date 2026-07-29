@@ -1,4 +1,5 @@
 import { createBot, publishCommandMenu } from "./features/bot/index.ts";
+import { createShutdown } from "./features/bot/lifecycle.ts";
 import { startReaper } from "./features/bot/reaper.ts";
 import { loadEnv, requireEnv } from "./shared/env.ts";
 import { createLogger } from "./shared/logger.ts";
@@ -12,11 +13,7 @@ const { bot, cards } = createBot(requireEnv(env, "BOT_TOKEN"), { repo: repositor
 
 const stopReaper = startReaper(cards, log);
 
-const shutdown = async (): Promise<void> => {
-  stopReaper();
-  await cards.shutdown();
-  await bot.stop();
-};
+const shutdown = createShutdown({ stopReaper, cards, stopPolling: () => bot.stop() });
 
 process.once("SIGINT", () => void shutdown());
 process.once("SIGTERM", () => void shutdown());

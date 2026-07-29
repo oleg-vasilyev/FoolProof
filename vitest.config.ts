@@ -1,9 +1,12 @@
 import { defineConfig } from "vitest/config";
 
-// Coverage excludes the two files that exist only to wire things together:
-// src/bot.ts is the composition root (it starts long polling on import), and
-// shared/repository/index.ts is a one-line binding. Neither has behaviour of
-// its own to assert.
+// Coverage excludes the two files that exist only to wire things together.
+// src/bot.ts cannot be imported by a test at all: its last statement is
+// `await bot.start()`, so importing it would open a long polling connection.
+// That is a reason to keep logic OUT of it, not a licence to hide logic there —
+// the shutdown sequence it used to own now lives in features/bot/lifecycle.ts
+// and is tested. What remains is a list of calls to already-tested functions.
+// shared/repository/index.ts is a one-line binding.
 export default defineConfig({
   test: {
     include: ["src/**/*.spec.ts"],
