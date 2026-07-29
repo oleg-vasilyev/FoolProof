@@ -29,6 +29,23 @@ the two disagree, `PLAN.md` wins on behaviour and this file wins on style.
   module-level state. Wiring belongs in the composition root (`src/main.ts`), not
   inside the logic.
 - **No magic numbers** — name them with a `const`.
+- **A file must read as a skeleton, not an implementation.** Opening it should
+  show the idea before any detail. The exported factory or entry point is a table
+  of contents that names the steps and delegates; the steps are named
+  module-level functions that take an explicit context object instead of reaching
+  into closure scope. `src/main.ts` and `features/bot/cards.ts` are the reference
+  shape. A function grown past a screenful is usually several functions that have
+  not been named yet — and one that needs a comment to explain its sections is
+  really asking to be split.
+- **Dispatch on a union with `switch`, never a chain of `if`.** Actions, phases
+  and transition outcomes are closed unions: a `switch` says so, and the compiler
+  then checks exhaustiveness, so adding a case becomes a compile error in every
+  place obliged to handle it. Keep `if` for guards and priority chains, where
+  there is no discriminant to switch on.
+- **Prefer a discriminated union over a nullable plus a separate reason.** A
+  lookup that can fail returns `{ ok: true, … } | { ok: false, notice }`, so the
+  narrowing survives the call and the caller reads as one early return
+  (`findTappableCard`).
 - **No `console.*` for app logging** — use the scoped logger from
   `src/shared/logger.ts`:
 
@@ -91,6 +108,27 @@ not a new npm script.
   line ran; the mutation score proves a test would notice if it broke. It is not
   part of `check` because of the runtime, but the build **breaks below 85%**, and a drop from the current ~92%
   means new tests are watching without asserting.
+
+### Finishing a phase
+
+A phase ends with a release, and a phase is done when the code is *releasable* —
+not when it works. Before the final commit of a phase, run all four gates and act
+on what they say:
+
+1. **`npm run check`** — lint, types, tests. Zero errors, no exceptions.
+2. **`npm run test:coverage`** — 70% floor on every metric. A file that dropped
+   is a file whose new branches nobody exercised.
+3. **`npm run test:mutation`** — Stryker, breaks below 85%. Coverage says a line
+   ran; this says a test would have noticed it break. A file that dropped is a
+   file whose new tests assert too little — strengthen them, do not lower the bar.
+4. **A review pass over the phase's whole diff**, read against this file rather
+   than against the individual commits: does each touched file still read as a
+   skeleton, is every union dispatched with `switch`, are there comments that
+   crept into `src/`, is there a user-facing string outside `strings.ts`, does
+   every stub sit beside its subject?
+
+Put the resulting numbers in the phase's final commit message. A score is only
+useful if a later regression has something to be compared against.
 
 ### Tests
 
