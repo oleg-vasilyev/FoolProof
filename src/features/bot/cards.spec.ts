@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cardRecordOf, playerIdOf, seatsOf } from "../../testing/factories.ts";
-import { RepositoryStub } from "../../testing/repository.stub.ts";
-import { LoggerStub, TelegramApiStub } from "../../testing/telegram.stub.ts";
+import { cardRecordOf, playerIdOf } from "../../shared/repository/records.stub.ts";
+import { seatsOf } from "../game/state.stub.ts";
+import { RepositoryStub } from "../../shared/repository/repository.stub.ts";
+import { LoggerStub } from "../../shared/logger.stub.ts";
+import { TelegramApiStub } from "../../integrations/telegram/api.stub.ts";
 import type { CallbackAction, CallbackPayload } from "../../integrations/telegram/callback.ts";
 import { createCardService, type CardService } from "./cards.ts";
 

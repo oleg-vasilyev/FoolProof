@@ -1,5 +1,4 @@
-import type { CardState, Seat } from "../features/game/state.ts";
-import type { CardRecord, GameRecord, SeatRecord } from "../shared/repository/types.ts";
+import type { CardRecord, GameRecord, SeatRecord } from "./types.ts";
 
 
 const FIRST_PLAYER_ID = 10;
@@ -8,19 +7,7 @@ const DEFAULT_CHAT_ID = -100777;
 
 const DEFAULT_MESSAGE_ID = 500;
 
-export const seatsOf = (...names: readonly string[]): readonly Seat[] =>
-  names.map((displayName, index) => ({ playerId: FIRST_PLAYER_ID + index, displayName }));
-
-export const cardStateOf = (
-  names: readonly string[],
-  overrides: Partial<CardState> = {}
-): CardState => ({
-  seats: seatsOf(...names),
-  starterSlot: null,
-  exits: [],
-  drawAccepted: false,
-  ...overrides,
-});
+export const playerIdOf = (slot: number): number => FIRST_PLAYER_ID + slot;
 
 export const gameRecordOf = (overrides: Partial<GameRecord> = {}): GameRecord => ({
   id: 1,
@@ -36,7 +23,7 @@ export const gameRecordOf = (overrides: Partial<GameRecord> = {}): GameRecord =>
 
 export const seatRecordsOf = (...names: readonly string[]): readonly SeatRecord[] =>
   names.map((display_name, seat_index) => ({
-    player_id: FIRST_PLAYER_ID + seat_index,
+    player_id: playerIdOf(seat_index),
     seat_index,
     display_name,
   }));
@@ -49,9 +36,7 @@ export const cardRecordOf = (
   game: gameRecordOf(game),
   seats: seatRecordsOf(...names),
   exits: exits.map((slot, index) => ({
-    player_id: FIRST_PLAYER_ID + slot,
+    player_id: playerIdOf(slot),
     position: index + 1,
   })),
 });
-
-export const playerIdOf = (slot: number): number => FIRST_PLAYER_ID + slot;

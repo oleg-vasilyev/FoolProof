@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardStateOf } from "../../testing/factories.ts";
+import { cardStateOf } from "../game/state.stub.ts";
 import { renderCard, renderResult } from "./card.ts";
 
 

@@ -94,12 +94,17 @@ not a new npm script.
 
 ### Tests
 
-Specs sit next to the code as `*.spec.ts` and mirror the source tree. Reusable
-stubs live in `src/testing/` and follow one convention: a stub is a **class**
-whose public `*Spy` fields are `vi.fn()`s, with sensible defaults set in the
-constructor, and whose methods just delegate to those spies. Tests then override
-one spy instead of rebuilding a fake. Nest `describe` by unit and then by method,
-name numbers (`const ONCE = 1`), and separate arrange/act/assert with blank lines.
+Specs sit next to the code as `*.spec.ts`, and **so do the stubs** — `*.stub.ts`
+lives beside the thing it stands in for, never in a central testing folder. This
+is the same feature-based rule the source follows: `repository.stub.ts` next to
+`sqlite.ts`, `api.stub.ts` next to the Telegram client, `state.stub.ts` next to
+the reducer. Stub imports point downward like every other import.
+
+A stub is a **class** whose public `*Spy` fields are `vi.fn()`s, with sensible
+defaults set in the constructor, and whose methods just delegate to those spies.
+Tests then override one spy instead of rebuilding a fake. Nest `describe` by unit
+and then by method, name numbers (`const ONCE = 1`), and separate
+arrange/act/assert with blank lines.
 
 Two deliberate exceptions to "mock everything":
 

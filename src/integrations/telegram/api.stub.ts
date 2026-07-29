@@ -1,6 +1,5 @@
 import { vi } from "vitest";
 import type { Api } from "grammy";
-import type { Logger } from "../shared/logger.ts";
 
 
 const FIRST_MESSAGE_ID = 500;
@@ -43,28 +42,5 @@ export class TelegramApiStub {
     const last = calls[calls.length - 1];
 
     return { text: last?.[1] ?? "", markup: last?.[2]?.reply_markup };
-  }
-}
-
-export class LoggerStub implements Logger {
-  public debugSpy = vi.fn();
-  public infoSpy = vi.fn();
-  public warnSpy = vi.fn();
-  public errorSpy = vi.fn();
-
-  public debug(message: string): void {
-    this.debugSpy(message);
-  }
-
-  public info(message: string): void {
-    this.infoSpy(message);
-  }
-
-  public warn(message: string): void {
-    this.warnSpy(message);
-  }
-
-  public error(message: string): void {
-    this.errorSpy(message);
   }
 }

@@ -15,7 +15,7 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html"],
       include: ["src/**/*.ts"],
-      exclude: ["src/**/*.spec.ts", "src/testing/**", "src/bot.ts", "src/shared/repository/index.ts"],
+      exclude: ["src/**/*.spec.ts", "src/**/*.stub.ts", "src/bot.ts", "src/shared/repository/index.ts"],
       thresholds: {
         lines: 70,
         functions: 70,

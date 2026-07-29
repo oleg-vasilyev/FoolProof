@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { LoggerStub } from "../../testing/telegram.stub.ts";
+import { LoggerStub } from "../../shared/logger.stub.ts";
 import type { CardService } from "./cards.ts";
 import { ABANDON_AFTER_SECONDS, startReaper } from "./reaper.ts";
 

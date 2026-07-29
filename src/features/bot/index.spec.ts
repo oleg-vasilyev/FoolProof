@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BotError, type Bot, type Context } from "grammy";
-import { cardRecordOf, playerIdOf, seatRecordsOf } from "../../testing/factories.ts";
-import { RepositoryStub } from "../../testing/repository.stub.ts";
-import { LoggerStub } from "../../testing/telegram.stub.ts";
+import { cardRecordOf, playerIdOf, seatRecordsOf } from "../../shared/repository/records.stub.ts";
+import { RepositoryStub } from "../../shared/repository/repository.stub.ts";
+import { LoggerStub } from "../../shared/logger.stub.ts";
 import {
   botInfoStub,
   callbackUpdate,
@@ -11,7 +11,7 @@ import {
   messageUpdate,
   PROMPT_MESSAGE_ID,
   USER_ID,
-} from "../../testing/updates.ts";
+} from "../../integrations/telegram/updates.stub.ts";
 import { encodeCallback } from "../../integrations/telegram/callback.ts";
 import { createBot, publishCommandMenu } from "./index.ts";
 

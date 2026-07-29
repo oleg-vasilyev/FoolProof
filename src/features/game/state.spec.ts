@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { cardStateOf, playerIdOf } from "../../testing/factories.ts";
+import { playerIdOf } from "../../shared/repository/records.stub.ts";
+import { cardStateOf } from "./state.stub.ts";
 import {
   apply,
   drawAvailable,

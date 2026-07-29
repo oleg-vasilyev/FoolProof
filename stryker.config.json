@@ -9,7 +9,7 @@
   "mutate": [
     "src/**/*.ts",
     "!src/**/*.spec.ts",
-    "!src/testing/**",
+    "!src/**/*.stub.ts",
     "!src/bot.ts",
     "!src/shared/db.ts",
     "!src/shared/repository/index.ts",

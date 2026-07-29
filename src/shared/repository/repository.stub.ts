@@ -7,7 +7,7 @@ import type {
   Repository,
   SeatRecord,
   SeriesStats,
-} from "../shared/repository/types.ts";
+} from "./types.ts";
 
 
 const FIRST_GAME_NUMBER = 1;
