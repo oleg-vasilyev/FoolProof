@@ -13,7 +13,7 @@ import {
   USER_ID,
 } from "./updates.stub.ts";
 import { encodeCallback } from "../render/callback.ts";
-import { createBot, publishCommandMenu } from "./index.ts";
+import { createBot, publishCommandMenu } from "./router.ts";
 
 
 const FAKE_TOKEN = "424242:AAHfake-token-for-tests";

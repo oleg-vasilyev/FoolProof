@@ -45,7 +45,7 @@ vi.mock("./shared/logger.ts", () => ({
   createLogger: (scope: string) => createLoggerSpy(scope),
 }));
 
-vi.mock("./features/bot/index.ts", () => ({
+vi.mock("./features/bot/router.ts", () => ({
   createBot: (token: string, deps: { repo: unknown; log: unknown }) =>
     createBotSpy(token, deps),
   publishCommandMenu: (api: unknown) => publishCommandMenuSpy(api),

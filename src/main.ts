@@ -1,4 +1,4 @@
-import { createBot, publishCommandMenu } from "./features/bot/index.ts";
+import { createBot, publishCommandMenu } from "./features/bot/router.ts";
 import { createShutdown } from "./features/bot/lifecycle.ts";
 import { startReaper } from "./features/bot/reaper.ts";
 import { loadEnv, requireEnv } from "./shared/env.ts";

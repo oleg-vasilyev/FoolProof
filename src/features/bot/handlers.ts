@@ -1,13 +1,12 @@
-import { Bot, type Api, type CommandContext, type Context, type Filter } from "grammy";
-import type { UserFromGetMe } from "grammy/types";
-import type { Logger } from "../../shared/logger.ts";
+import type { CommandContext, Context, Filter } from "grammy";
 import type { Repository } from "../../shared/repository/types.ts";
 import { normalizeName, parseLineup, rotateToLowestId } from "../game/lineup.ts";
 import type { Seat } from "../game/state.ts";
 import { decodeCallback } from "../render/callback.ts";
 import { renderStats } from "../render/stats.ts";
 import { strings } from "../render/strings.ts";
-import { createCardService, type CardService } from "./cards.ts";
+import type { CardService } from "./cards.ts";
+import type { PromptRegistry } from "./prompts.ts";
 
 
 type Command = CommandContext<Context>;
@@ -18,62 +17,11 @@ type CallbackTap = Filter<Context, "callback_query:data">;
 
 type LineupProblem = Exclude<ReturnType<typeof parseLineup>, { ok: true }>;
 
-export interface BotDeps {
-  readonly repo: Repository;
-  readonly log: Logger;
-  readonly botInfo?: UserFromGetMe;
-}
-
-export interface BotBundle {
-  readonly bot: Bot;
-  readonly cards: CardService;
-}
-
-interface PromptRegistry {
-  remember(chatId: number, messageId: number): void;
-  forget(chatId: number): void;
-  dropUnanswered(chatId: number): Promise<void>;
-}
-
-interface BotContext {
+export interface BotContext {
   readonly repo: Repository;
   readonly cards: CardService;
   readonly prompts: PromptRegistry;
 }
-
-const COMMAND_MENU = [
-  { command: "game", description: strings.commandGame },
-  { command: "next", description: strings.commandNext },
-  { command: "stats", description: strings.commandStats },
-  { command: "help", description: strings.commandHelp },
-];
-
-export async function publishCommandMenu(api: Api): Promise<void> {
-  await api.setMyCommands(COMMAND_MENU);
-}
-
-const createPromptRegistry = (api: Api, log: Logger): PromptRegistry => {
-  const open = new Map<number, number>();
-
-  return {
-    remember: (chatId, messageId) => void open.set(chatId, messageId),
-    forget: (chatId) => void open.delete(chatId),
-    async dropUnanswered(chatId) {
-      const messageId = open.get(chatId);
-      if (messageId === undefined) {
-        return;
-      }
-
-      open.delete(chatId);
-
-      try {
-        await api.deleteMessage(chatId, messageId);
-      } catch (error) {
-        log.debug(`could not delete message ${messageId}: ${String(error)}`);
-      }
-    },
-  };
-};
 
 const resolveSeats = (
   repo: Repository,
@@ -112,7 +60,10 @@ const lineupProblemText = (result: LineupProblem): string => {
   }
 };
 
-const refusedBecauseLive = async (context: BotContext, ctx: Command | TextMessage): Promise<boolean> => {
+const refusedBecauseLive = async (
+  context: BotContext,
+  ctx: Command | TextMessage
+): Promise<boolean> => {
   const live = context.repo.liveCardInChat(ctx.chat.id);
   if (live === null) {
     return false;
@@ -138,7 +89,10 @@ const openFromNames = async (
   }
 
   const chatId = ctx.chat.id;
-  await context.cards.open(chatId, rotateToLowestId(resolveSeats(context.repo, chatId, parsed.names)));
+  await context.cards.open(
+    chatId,
+    rotateToLowestId(resolveSeats(context.repo, chatId, parsed.names))
+  );
 };
 
 const askForNames = async (context: BotContext, ctx: Command): Promise<void> => {
@@ -157,7 +111,7 @@ const askForNames = async (context: BotContext, ctx: Command): Promise<void> => 
   context.prompts.remember(ctx.chat.id, prompt.message_id);
 };
 
-const onGame = async (context: BotContext, ctx: Command): Promise<void> => {
+export const onGame = async (context: BotContext, ctx: Command): Promise<void> => {
   await context.prompts.dropUnanswered(ctx.chat.id);
 
   if (await refusedBecauseLive(context, ctx)) {
@@ -176,7 +130,7 @@ const onGame = async (context: BotContext, ctx: Command): Promise<void> => {
   await openFromNames(context, ctx, rawText);
 };
 
-const onNext = async (context: BotContext, ctx: Command): Promise<void> => {
+export const onNext = async (context: BotContext, ctx: Command): Promise<void> => {
   await context.prompts.dropUnanswered(ctx.chat.id);
 
   if (await refusedBecauseLive(context, ctx)) {
@@ -196,15 +150,15 @@ const onNext = async (context: BotContext, ctx: Command): Promise<void> => {
   );
 };
 
-const onStats = async (context: BotContext, ctx: Command): Promise<void> => {
+export const onStats = async (context: BotContext, ctx: Command): Promise<void> => {
   await ctx.reply(renderStats(context.repo.seriesStats(ctx.chat.id)), { parse_mode: "HTML" });
 };
 
-const onHelp = async (ctx: Command): Promise<void> => {
+export const onHelp = async (ctx: Command): Promise<void> => {
   await ctx.reply(strings.helpBody);
 };
 
-const onNamesReply = async (context: BotContext, ctx: TextMessage): Promise<void> => {
+export const onNamesReply = async (context: BotContext, ctx: TextMessage): Promise<void> => {
   const prompt = ctx.message.reply_to_message;
   if (prompt?.from?.id !== ctx.me.id || prompt.text !== strings.lineupPrompt) {
     return;
@@ -219,7 +173,7 @@ const onNamesReply = async (context: BotContext, ctx: TextMessage): Promise<void
   await openFromNames(context, ctx, ctx.message.text);
 };
 
-const onTap = async (context: BotContext, ctx: CallbackTap): Promise<void> => {
+export const onTap = async (context: BotContext, ctx: CallbackTap): Promise<void> => {
   const payload = decodeCallback(ctx.callbackQuery.data);
   if (payload === null) {
     await ctx.answerCallbackQuery(strings.cardStale);
@@ -229,29 +183,3 @@ const onTap = async (context: BotContext, ctx: CallbackTap): Promise<void> => {
 
   await ctx.answerCallbackQuery(await context.cards.tap(payload, ctx.from.id));
 };
-
-export function createBot(token: string, deps: BotDeps): BotBundle {
-  const { repo, log, botInfo } = deps;
-  const bot = new Bot(token, botInfo === undefined ? {} : { botInfo });
-  const cards = createCardService({ repo, api: bot.api, log });
-
-  const context: BotContext = {
-    repo,
-    cards,
-    prompts: createPromptRegistry(bot.api, log),
-  };
-
-  bot.command("game", (ctx) => onGame(context, ctx));
-  bot.command("next", (ctx) => onNext(context, ctx));
-  bot.command("stats", (ctx) => onStats(context, ctx));
-  bot.command("help", (ctx) => onHelp(ctx));
-
-  bot.on("message:text", (ctx) => onNamesReply(context, ctx));
-  bot.on("callback_query:data", (ctx) => onTap(context, ctx));
-
-  bot.catch((error) => {
-    log.error(`update ${error.ctx.update.update_id} failed: ${String(error.error)}`);
-  });
-
-  return { bot, cards };
-}

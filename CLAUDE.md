@@ -37,6 +37,10 @@ the two disagree, `PLAN.md` wins on behaviour and this file wins on style.
   shape. A function grown past a screenful is usually several functions that have
   not been named yet — and one that needs a comment to explain its sections is
   really asking to be split.
+- **`index.ts` promises a re-export, so do not put logic in one.** A file is named
+  after what it holds: `router.ts` registers routes, `handlers.ts` holds handlers,
+  `prompts.ts` owns the prompt registry. A reader who opens `index.ts` expects the
+  folder's public surface and nothing else.
 - **Dispatch on a union with `switch`, never a chain of `if`.** Actions, phases
   and transition outcomes are closed unions: a `switch` says so, and the compiler
   then checks exhaustiveness, so adding a case becomes a compile error in every
@@ -152,7 +156,7 @@ Two deliberate exceptions to "mock everything":
   whole job is the SQL, and a mocked database would assert nothing. Set
   `process.env.DB_PATH` before importing, because `db.ts` opens the connection at
   module load.
-- `features/bot/index.spec.ts` drives a **real** grammY `Bot` through
+- `features/bot/router.spec.ts` drives a **real** grammY `Bot` through
   `bot.handleUpdate()` with synthetic updates, intercepting the network at
   `bot.api.config.use()`. Middleware order is exactly what that file gets wrong,
   and only the real router can catch it. Pass `botInfo` so no `getMe` call is
