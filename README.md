@@ -103,10 +103,11 @@ downward:
 
 ```
 features/scoresheet/
-  domain/        the pure core — no framework, no I/O
-  render/        state in, SVG out; still pure
-  bot/           the impure edge: grammY, rasterizing
-  copy.en.ts     every string this feature shows a user
+  scoresheet-feature.ts  the entry point: what this feature offers the bot
+  copy.en.ts             every string this feature shows a user
+  domain/                the pure core — no framework, no I/O
+  render/                state in, SVG out; still pure
+  bot/                   the impure edge: grammY, rasterizing
 ```
 
 Specs (`*.spec.ts`) and stubs (`*.stub.ts`) sit next to the file they stand for,

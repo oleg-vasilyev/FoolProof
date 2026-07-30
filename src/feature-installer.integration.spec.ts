@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { Bot } from "grammy";
-import { createLiveGameFeature } from "#live-game/bot/live-game-feature.ts";
+import { createLiveGameFeature } from "#live-game/live-game-feature.ts";
 import { encodeCallback } from "#live-game/render/callback-data-codec.ts";
 import { installFeatures } from "#app/feature-installer.ts";
 import type { Feature } from "#shared/telegram/feature-contract.ts";

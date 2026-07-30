@@ -50,7 +50,7 @@ vi.mock("#live-game/bot/update-handlers.ts", () => ({
   onTap: (context: unknown, ctx: unknown) => onTapSpy(context, ctx),
 }));
 
-const { createLiveGameFeature } = await import("#live-game/bot/live-game-feature.ts");
+const { createLiveGameFeature } = await import("#live-game/live-game-feature.ts");
 
 const ONCE = 1;
 

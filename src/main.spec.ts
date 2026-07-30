@@ -77,11 +77,11 @@ vi.mock("#app/feature-installer.ts", () => ({
   publishCommandMenu: (api: unknown, features: unknown) => publishCommandMenuSpy(api, features),
 }));
 
-vi.mock("#live-game/bot/live-game-feature.ts", () => ({
+vi.mock("#live-game/live-game-feature.ts", () => ({
   createLiveGameFeature: (deps: unknown) => createLiveGameFeatureSpy(deps),
 }));
 
-vi.mock("#scoresheet/bot/scoresheet-feature.ts", () => ({
+vi.mock("#scoresheet/scoresheet-feature.ts", () => ({
   createScoresheetFeature: (deps: unknown) => createScoresheetFeatureSpy(deps),
 }));
 

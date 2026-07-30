@@ -1,6 +1,6 @@
 import { Bot } from "grammy";
-import { createLiveGameFeature } from "#live-game/bot/live-game-feature.ts";
-import { createScoresheetFeature } from "#scoresheet/bot/scoresheet-feature.ts";
+import { createLiveGameFeature } from "#live-game/live-game-feature.ts";
+import { createScoresheetFeature } from "#scoresheet/scoresheet-feature.ts";
 import { installFeatures, publishCommandMenu } from "#app/feature-installer.ts";
 import { loadEnv, requireEnv } from "#shared/config/env.ts";
 import { createShutdown } from "#shared/lifecycle/shutdown.ts";

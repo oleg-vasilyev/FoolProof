@@ -171,11 +171,18 @@ reach `render` and `domain`, `render` may reach `domain`, `domain` reaches nothi
 
 ```
 features/<name>/
-  domain/   the pure core — no framework, no I/O, no rendering
-  render/   state in, message text and SVG out; still pure
-  bot/      the impure edge: grammY handlers, the debouncer, rasterizing
-  copy.en.ts  every string this feature shows a user
+  <name>-feature.ts  the entry point: builds the parts and declares the commands
+  copy.en.ts         every string this feature shows a user
+  domain/            the pure core — no framework, no I/O, no rendering
+  render/            state in, message text and SVG out; still pure
+  bot/               the impure edge: grammY handlers, the debouncer, rasterizing
 ```
+
+**The entry point sits at the feature root, not inside a layer.** It is the
+feature's composition root — it builds the service, the registry and the sweep and
+hands them to the handlers — which is the same job `src/main.ts` does one level up,
+and `main.ts` is not inside a layer either. Opening the folder then shows what the
+feature *is* before how it works.
 
 There is no `integrations/` layer. It existed once and held no client: grammY is
 the Telegram client and is imported directly.

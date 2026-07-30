@@ -15,7 +15,7 @@ vi.mock("#scoresheet/bot/stats-handler.ts", () => ({
   onStats: (context: unknown, ctx: unknown) => onStatsSpy(context, ctx),
 }));
 
-const { createScoresheetFeature } = await import("#scoresheet/bot/scoresheet-feature.ts");
+const { createScoresheetFeature } = await import("#scoresheet/scoresheet-feature.ts");
 
 const ONCE = 1;
 
