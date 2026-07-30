@@ -14,7 +14,7 @@ const loggerWithLevel = async (level: string | undefined) => {
     process.env.LOG_LEVEL = level;
   }
 
-  const { createLogger } = await import("./logger.ts");
+  const { createLogger } = await import("#shared/logger.ts");
 
   return createLogger("scope");
 };

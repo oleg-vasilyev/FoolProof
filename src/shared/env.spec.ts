@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadEnv, requireEnv, rootDir } from "./env.ts";
+import { loadEnv, requireEnv, rootDir } from "#shared/env.ts";
 
 
 vi.mock("node:fs", () => ({ readFileSync: vi.fn() }));

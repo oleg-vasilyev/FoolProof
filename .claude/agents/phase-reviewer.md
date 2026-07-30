@@ -26,7 +26,7 @@ run `npm run check` and trust it. Spend the pass on what no rule can check:
 - **Dispatch.** Is every closed union handled with `switch`, so that adding a
   case becomes a compile error everywhere obliged to handle it? An `if` chain
   over a discriminant is a finding.
-- **Copy.** Any user-readable string outside the feature's own `strings.ts` is a
+- **Copy.** Any user-readable string outside the feature's own `copy.en.ts` is a
   finding, including inside an `answerCallbackQuery` call.
 - **Layering.** The lint rules catch a bad import; they do not catch a feature
   that grew a responsibility belonging to another layer. Look for purity leaking

@@ -78,6 +78,9 @@ machine that will run the bot rather than copied from another one.
 | `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
 | `npm run typecheck` | `tsc --noEmit` |
 
+Coverage and mutation write their reports into `reports/`, which is gitignored
+whole — nothing about testing lands next to the source.
+
 ## Layout
 
 A feature is a folder you can delete: nothing outside it imports it except the
@@ -85,28 +88,34 @@ composition root, which names the roster.
 
 ```
 src/
-  main.ts        names the features and wires them; starts polling
-  router.ts      registers whatever features it was given
+  main.ts               names the features and wires them; starts polling
+  feature-installer.ts  registers whatever features it was given
   features/
-    card/        playing a game on a live card
-    session/     the /stats scoresheet
-  shared/        env, logger, debounce, escaping, database, repository
-assets/fonts/    the two faces the scoresheet is drawn with
+    live-game/          playing a game on a live card of buttons
+    scoresheet/         the picture /stats sends back
+  shared/               env, logger, debounce, escaping, database, repository
+assets/fonts/           the two faces the scoresheet is drawn with
 ```
 
 Inside a feature the same three layers every time, and imports point only
 downward:
 
 ```
-features/session/
+features/scoresheet/
   domain/        the pure core — no framework, no I/O
   render/        state in, SVG out; still pure
   bot/           the impure edge: grammY, rasterizing
-  strings.ts     this feature's own copy
+  copy.en.ts     every string this feature shows a user
 ```
 
 Specs (`*.spec.ts`) and stubs (`*.stub.ts`) sit next to the file they stand for,
 so a feature carries its own tests with it.
+
+Nothing in `src/` imports by relative path. Every import goes through an alias
+declared in `package.json` — `#shared/logger.ts`,
+`#live-game/bot/prompt-registry.ts` — so a line says which zone it reached into.
+These are Node's own subpath imports, which is why they work with no build step
+and no loader flag.
 
 ESLint enforces all of it: a cross-feature import and a framework import in
 `domain/` are both build errors.

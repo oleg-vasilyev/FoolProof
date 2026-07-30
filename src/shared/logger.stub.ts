@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import type { Logger } from "./logger.ts";
+import type { Logger } from "#shared/logger.ts";
 
 
 export class LoggerStub implements Logger {

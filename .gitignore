@@ -9,12 +9,12 @@ data/
 # .claude/settings.json IS shared — it carries the project hooks
 .claude/settings.local.json
 
+# everything a check writes: coverage/, mutation/, .stryker-tmp/
+reports/
+
 # build / deps / noise
 node_modules/
 dist/
-coverage/
-reports/
-.stryker-tmp/
 *.log
 .DS_Store
 Thumbs.db

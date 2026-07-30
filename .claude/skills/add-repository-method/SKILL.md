@@ -11,16 +11,16 @@ the call site.
 
 Four files change together. Skipping one is what breaks the layer.
 
-## 1. `src/shared/repository/types.ts`
+## 1. `src/shared/repository/repository-contract.ts`
 
 Add the method to the `Repository` interface, and any row type it returns.
 
 The name is a domain phrase, not a SQL one: `liveCardInChat`, `lastLineup`,
 `seriesStats`. A caller should not be able to guess the table from the name.
 
-## 2. `src/shared/repository/sqlite.ts`
+## 2. `src/shared/repository/sqlite-repository.ts`
 
-The **only** file allowed to contain SQL or to import `db`. Implement the method
+The **only** file allowed to contain SQL or to import the connection. Implement the method
 here.
 
 - Timestamps are TEXT in `datetime('now')` form, always UTC — the columns are
@@ -36,13 +36,13 @@ Add a `<method>Spy` field with a sensible default in the constructor, and a
 method that delegates to it. Every spec that mocks the repository gets the new
 method for free; without this step they fail to compile.
 
-## 4. `src/shared/repository/sqlite.integration.spec.ts`
+## 4. `src/shared/repository/sqlite-repository.integration.spec.ts`
 
 One of the project's two integration specs, and it runs against a **real**
 temporary SQLite file — its whole job is the SQL, and a mocked database would
 assert nothing.
 
-`process.env.DB_PATH` is set before the import, because `db.ts` opens the
+`process.env.DB_PATH` is set before the import, because `sqlite-connection.ts` opens the
 connection at module load. Assert the behaviour the method promises, including
 what happens with no rows, and — where the schema is doing the work — that the
 constraint actually rejects the bad case.

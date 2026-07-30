@@ -1,11 +1,11 @@
 import { Bot } from "grammy";
-import { createCardFeature } from "./features/card/bot/feature.ts";
-import { createSessionFeature } from "./features/session/bot/feature.ts";
-import { installFeatures, publishCommandMenu } from "./router.ts";
-import { loadEnv, requireEnv } from "./shared/env.ts";
-import { createShutdown } from "./shared/lifecycle.ts";
-import { createLogger } from "./shared/logger.ts";
-import { repository } from "./shared/repository/index.ts";
+import { createLiveGameFeature } from "#live-game/bot/live-game-feature.ts";
+import { createScoresheetFeature } from "#scoresheet/bot/scoresheet-feature.ts";
+import { installFeatures, publishCommandMenu } from "#app/feature-installer.ts";
+import { loadEnv, requireEnv } from "#shared/env.ts";
+import { createShutdown } from "#shared/shutdown.ts";
+import { createLogger } from "#shared/logger.ts";
+import { repository } from "#shared/repository/repository-instance.ts";
 
 
 const log = createLogger("polling");
@@ -14,8 +14,8 @@ const env = loadEnv();
 const bot = new Bot(requireEnv(env, "BOT_TOKEN"));
 
 const features = [
-  createCardFeature({ repo: repository, api: bot.api, log }),
-  createSessionFeature({ repo: repository }),
+  createLiveGameFeature({ repo: repository, api: bot.api, log }),
+  createScoresheetFeature({ repo: repository }),
 ];
 
 const stops = installFeatures(bot, features, log);

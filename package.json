@@ -5,6 +5,12 @@
   "engines": {
     "node": ">=24"
   },
+  "imports": {
+    "#app/*": "./src/*",
+    "#shared/*": "./src/shared/*",
+    "#live-game/*": "./src/features/live-game/*",
+    "#scoresheet/*": "./src/features/scoresheet/*"
+  },
   "scripts": {
     "start": "node src/main.ts",
     "test": "vitest run",

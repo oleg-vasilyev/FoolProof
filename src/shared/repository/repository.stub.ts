@@ -7,7 +7,7 @@ import type {
   Repository,
   SeatRecord,
   SeriesChronology,
-} from "./types.ts";
+} from "#shared/repository/repository-contract.ts";
 
 
 const FIRST_GAME_NUMBER = 1;

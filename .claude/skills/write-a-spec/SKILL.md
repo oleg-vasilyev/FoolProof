@@ -18,11 +18,11 @@ Three consequences, the first absolute:
    `node:fs` — mock them. Their authors have their own tests, and a spec that
    drives them is reporting on their code while claiming to report on ours. When
    one of them breaks the spec, the failure points at the wrong file.
-2. **Mock our own modules too.** `card.ts` is not tested by feeding it a real
+2. **Mock our own modules too.** `card-message.ts` is not tested by feeding it a real
    `CardState` and checking the whole rendered string — that spec fails when
-   `finalPlacements` changes, which is `state.ts`'s business. Mock the helper,
+   `finalPlacements` changes, which is `card-state.ts`'s business. Mock the helper,
    drive the file by what it returns, and the failure lands where the fault is.
-3. **Leave data tables real.** A feature's `strings.ts` is keys and text, not
+3. **Leave data tables real.** A feature's `copy.en.ts` is keys and text, not
    behaviour; mocking it would compare a constant against itself. Everything with
    a body gets mocked.
 
@@ -31,12 +31,12 @@ Three consequences, the first absolute:
 It is not a weaker substitute for the real thing. It is often the only way to
 assert what the file is actually for:
 
-- `router.ts` exists to register routes in an order that matters. On a mocked
+- `feature-installer.ts` exists to register routes in an order that matters. On a mocked
   `Bot` that is asserted literally — `bot.command` was called before
   `bot.on("message:text")` — instead of inferred from whether a `/help` update
   happened to produce a reply.
-- `card.ts` must route user data through `escapeHtml`. With the escaper mocked,
-  that is asserted as a fact about `card.ts`, not guessed from spotting `&amp;`
+- `card-message.ts` must route user data through `escapeHtml`. With the escaper mocked,
+  that is asserted as a fact about `card-message.ts`, not guessed from spotting `&amp;`
   in the output.
 
 **The tell that a spec has drifted is an assertion it has no business making.**
@@ -51,16 +51,16 @@ load the subject last:
 
 ```ts
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { strings } from "../render/strings.ts";
+import { copy } from "#live-game/copy.en.ts";
 
 
 const nameAtSpy = vi.fn();
 
-vi.mock("../game/state.ts", () => ({
+vi.mock("#live-game/domain/card-state.ts", () => ({
   nameAt: (state: unknown, slot: number) => nameAtSpy(state, slot),
 }));
 
-const { renderCard } = await import("./card.ts");
+const { renderCard } = await import("#live-game/render/card-message.ts");
 ```
 
 That is why specs here import their subject at the bottom of the header rather
@@ -70,8 +70,8 @@ default return values there, so each case overrides one thing.
 ## Stubs
 
 `*.stub.ts` lives **beside the thing it stands in for**, never in a central
-testing folder — `repository.stub.ts` next to `sqlite.ts`, `state.stub.ts` next
-to the reducer. A stub for something we did not write (grammY's `Api`, a
+testing folder — `repository.stub.ts` next to `sqlite-repository.ts`,
+`card-state.stub.ts` next to the reducer. A stub for something we did not write (grammY's `Api`, a
 synthetic `Update`, a `Context`) sits next to its only consumer instead, which is
 usually a feature's `bot/` folder.
 
@@ -118,16 +118,16 @@ it beside the code like every other spec. `npm run test:unit` and
 
 Two exist, and the bar for a third is a bug that got through the units:
 
-- **`src/router.integration.spec.ts`** drives a real grammY `Bot`
+- **`src/feature-installer.integration.spec.ts`** drives a real grammY `Bot`
   through `bot.handleUpdate()`, intercepting the network at
   `bot.api.config.use()`. Pass `botInfo` so no `getMe` call is needed. **Flush the
   card service in `afterEach`** — the real debouncer schedules a real 350 ms
   timer, and a timer that outlives its test fires into the next test's
   assertions, which this spec has already been caught doing.
-- **`shared/repository/sqlite.integration.spec.ts`** runs against a real
+- **`shared/repository/sqlite-repository.integration.spec.ts`** runs against a real
   temporary SQLite file. The SQL is the unit under test and a mocked database
   would assert nothing. Set `process.env.DB_PATH` before importing, because
-  `db.ts` opens the connection at module load — and close the connection before
+  `sqlite-connection.ts` opens the connection at module load — and close the connection before
   deleting the file, or Windows refuses and the temp files pile up.
 
 One trap worth keeping: `bot.catch` only participates in `bot.start()`.

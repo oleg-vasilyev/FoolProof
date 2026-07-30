@@ -142,47 +142,74 @@ const project = {
 // overlap: each file falls in exactly one zone and gets one combined pattern
 // list. Splitting purity and independence into separate blocks silently drops
 // whichever comes first.
-const forbid = (groups, message) => ({
-  "no-restricted-imports": ["error", { patterns: [{ group: groups, message }] }],
-});
+//
+// Second trap, from the same family: a ban is a *glob*, and minimatch reads a
+// leading `#` as a comment, so `#live-game/**` matches nothing at all and the
+// zone silently passes everything. Imports here are Node subpath aliases, so
+// every ban starting with `#` is converted to a `regex` pattern instead. Both
+// traps were found by running deliberate violations — never assume a zone fires.
+const forbid = (bans, message) => {
+  const globs = bans.filter((ban) => !ban.startsWith("#"));
+  const aliases = bans.filter((ban) => ban.startsWith("#"));
+
+  return {
+    "no-restricted-imports": [
+      "error",
+      {
+        patterns: [
+          ...(globs.length > 0 ? [{ group: globs, message }] : []),
+          ...aliases.map((alias) => ({ regex: `^${alias.replace("**", "")}`, message })),
+        ],
+      },
+    ],
+  };
+};
 
 const FRAMEWORK = ["grammy", "grammy/*", "@resvg/*", "node:*"];
 
-const FEATURES = ["card", "session"];
+const FEATURES = ["live-game", "scoresheet"];
 
+// Imports are written as Node subpath aliases (`#live-game/bot/x.ts`), so that is
+// the shape the bans have to name. The relative globs stay listed as well, so a
+// relative import that slips back in is caught too.
 const otherFeatures = (self) =>
   FEATURES.filter((name) => name !== self).flatMap((name) => [
+    `#${name}/**`,
     `**/${name}/**`,
     `**/features/${name}/**`,
   ]);
 
 const independence = (self) =>
-  `A feature is independent — ${self}/ may not reach into another feature.`;
+  `A feature is independent — ${self}/ may not reach into another feature, and never into the app shell (#app/).`;
+
+// `#app/**` is the composition root and its own copy. Nothing below it may reach
+// back up, so every zone bans it alongside the other features.
+const above = (self) => [...otherFeatures(self), "#app/**"];
 
 const featureZones = (self) => [
   {
     files: [`src/features/${self}/domain/**/*.ts`],
     rules: forbid(
-      [...otherFeatures(self), "**/render/**", "**/bot/**", ...FRAMEWORK],
+      [...above(self), `#${self}/render/**`, `#${self}/bot/**`, ...FRAMEWORK],
       `domain/ is the pure core — no framework, no I/O, no rendering. ${independence(self)}`
     ),
   },
   {
     files: [`src/features/${self}/render/**/*.ts`],
     rules: forbid(
-      [...otherFeatures(self), "**/bot/**", ...FRAMEWORK],
+      [...above(self), `#${self}/bot/**`, ...FRAMEWORK],
       `render/ turns state into text and SVG — bot orchestrates it, never the reverse. ${independence(self)}`
     ),
   },
   {
     files: [`src/features/${self}/bot/**/*.ts`, `src/features/${self}/*.ts`],
-    rules: forbid(otherFeatures(self), independence(self)),
+    rules: forbid(above(self), independence(self)),
   },
 ];
 
 export default [
   {
-    ignores: ["node_modules/**", "data/**", "coverage/**", "reports/**", ".stryker-tmp/**"],
+    ignores: ["node_modules/**", "data/**", "reports/**"],
   },
   {
     files: ["src/**/*.ts"],
@@ -229,7 +256,7 @@ export default [
   {
     files: ["src/shared/**/*.ts"],
     rules: forbid(
-      ["**/features/**"],
+      [...FEATURES.map((name) => `#${name}/**`), "**/features/**", "#app/**"],
       "shared/ is the bottom layer — a feature may import it, never the reverse."
     ),
   },

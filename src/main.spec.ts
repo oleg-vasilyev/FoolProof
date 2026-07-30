@@ -25,9 +25,9 @@ const CARD_FEATURE = { commands: [{ command: "game" }], stop: cardStopSpy };
 
 const SESSION_FEATURE = { commands: [{ command: "stats" }] };
 
-const createCardFeatureSpy = vi.fn((_deps: unknown) => CARD_FEATURE);
+const createLiveGameFeatureSpy = vi.fn((_deps: unknown) => CARD_FEATURE);
 
-const createSessionFeatureSpy = vi.fn((_deps: unknown) => SESSION_FEATURE);
+const createScoresheetFeatureSpy = vi.fn((_deps: unknown) => SESSION_FEATURE);
 
 const installFeaturesSpy = vi.fn((_bot: unknown, _features: unknown, _log: unknown) => {
   order.push("install");
@@ -62,25 +62,25 @@ vi.mock("grammy", () => ({
   },
 }));
 
-vi.mock("./shared/logger.ts", () => ({
+vi.mock("#shared/logger.ts", () => ({
   createLogger: (scope: string) => createLoggerSpy(scope),
 }));
 
-vi.mock("./router.ts", () => ({
+vi.mock("#app/feature-installer.ts", () => ({
   installFeatures: (bot: unknown, features: unknown, log: unknown) =>
     installFeaturesSpy(bot, features, log),
   publishCommandMenu: (api: unknown, features: unknown) => publishCommandMenuSpy(api, features),
 }));
 
-vi.mock("./features/card/bot/feature.ts", () => ({
-  createCardFeature: (deps: unknown) => createCardFeatureSpy(deps),
+vi.mock("#live-game/bot/live-game-feature.ts", () => ({
+  createLiveGameFeature: (deps: unknown) => createLiveGameFeatureSpy(deps),
 }));
 
-vi.mock("./features/session/bot/feature.ts", () => ({
-  createSessionFeature: (deps: unknown) => createSessionFeatureSpy(deps),
+vi.mock("#scoresheet/bot/scoresheet-feature.ts", () => ({
+  createScoresheetFeature: (deps: unknown) => createScoresheetFeatureSpy(deps),
 }));
 
-vi.mock("./shared/lifecycle.ts", () => ({
+vi.mock("#shared/shutdown.ts", () => ({
   createShutdown: (stops: readonly (() => Promise<void>)[]) => async () => {
     for (const stop of stops) {
       await stop();
@@ -88,12 +88,12 @@ vi.mock("./shared/lifecycle.ts", () => ({
   },
 }));
 
-vi.mock("./shared/env.ts", () => ({
+vi.mock("#shared/env.ts", () => ({
   loadEnv: () => ({ BOT_TOKEN: TOKEN_FROM_ENV }),
   requireEnv: (env: Record<string, string>, key: string) => env[key],
 }));
 
-vi.mock("./shared/repository/index.ts", () => ({ repository: { marker: "the-repository" } }));
+vi.mock("#shared/repository/repository-instance.ts", () => ({ repository: { marker: "the-repository" } }));
 
 describe("main.ts", () => {
   beforeAll(async () => {
@@ -103,7 +103,7 @@ describe("main.ts", () => {
       return process;
     }) as typeof process.once);
 
-    await import("./main.ts");
+    await import("#app/main.ts");
   });
 
   it("should build the bot with the token from the environment", () => {
@@ -111,19 +111,19 @@ describe("main.ts", () => {
   });
 
   it("should hand the card feature the real repository", () => {
-    expect(createCardFeatureSpy).toHaveBeenCalledWith(
+    expect(createLiveGameFeatureSpy).toHaveBeenCalledWith(
       expect.objectContaining({ repo: { marker: "the-repository" } })
     );
   });
 
   it("should hand the card feature the bot's own api, so its edits go somewhere", () => {
-    expect(createCardFeatureSpy).toHaveBeenCalledWith(
+    expect(createLiveGameFeatureSpy).toHaveBeenCalledWith(
       expect.objectContaining({ api: botApi })
     );
   });
 
-  it("should hand the session feature the real repository", () => {
-    expect(createSessionFeatureSpy).toHaveBeenCalledWith({ repo: { marker: "the-repository" } });
+  it("should hand the scoresheet feature the real repository", () => {
+    expect(createScoresheetFeatureSpy).toHaveBeenCalledWith({ repo: { marker: "the-repository" } });
   });
 
   it("should install both features", () => {
