@@ -9,7 +9,7 @@ const DB_FILE = join(tmpdir(), `foolproof-sqlite-spec-${process.pid}.db`);
 process.env.DB_PATH = DB_FILE;
 
 const { sqliteRepository: repo } = await import("#shared/repository/sqlite-repository.ts");
-const { db } = await import("#shared/sqlite-connection.ts");
+const { db } = await import("#shared/repository/sqlite-connection.ts");
 
 const CHAT_ID = -100777;
 

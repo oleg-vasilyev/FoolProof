@@ -1,4 +1,4 @@
-import { db, SERIES_GAP_SECONDS } from "#shared/sqlite-connection.ts";
+import { db, SERIES_GAP_SECONDS } from "#shared/repository/sqlite-connection.ts";
 import { num, numberOr, text } from "#shared/repository/column-values.ts";
 import {
   groupByGame,

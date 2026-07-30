@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cardRecordOf, playerIdOf } from "#shared/repository/database-records.stub.ts";
-import { RepositoryStub } from "#shared/repository/repository.stub.ts";
-import { LoggerStub } from "#shared/logger.stub.ts";
+import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
+import { LoggerStub } from "#shared/logging/logger.stub.ts";
 import { seatsOf } from "#live-game/domain/card-state.stub.ts";
 import type { CallbackAction, CallbackPayload } from "#live-game/render/callback-data-codec.ts";
 import { copy } from "#live-game/copy.en.ts";
@@ -34,7 +34,7 @@ const renderResultSpy = vi.fn();
 
 const renderKeyboardSpy = vi.fn();
 
-vi.mock("#shared/debounce.ts", () => ({
+vi.mock("#shared/timing/debounce.ts", () => ({
   createDebouncer: (delayMs: number, run: unknown) => createDebouncerSpy(delayMs, run),
 }));
 

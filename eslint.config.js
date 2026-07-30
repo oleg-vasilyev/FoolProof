@@ -248,7 +248,7 @@ export default [
   {
     // The logger is the one file allowed to reach the console — it is the
     // wrapper everything else uses instead.
-    files: ["src/shared/logger.ts"],
+    files: ["src/shared/logging/logger.ts"],
     rules: {
       "no-console": "off",
     },

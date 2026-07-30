@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const escapeHtmlSpy = vi.fn();
 
-vi.mock("#shared/html-escape.ts", () => ({
+vi.mock("#shared/text/html-escape.ts", () => ({
   escapeHtml: (value: string) => escapeHtmlSpy(value),
 }));
 

@@ -3,11 +3,11 @@ import { Bot } from "grammy";
 import { createLiveGameFeature } from "#live-game/bot/live-game-feature.ts";
 import { encodeCallback } from "#live-game/render/callback-data-codec.ts";
 import { installFeatures } from "#app/feature-installer.ts";
-import type { Feature } from "#shared/feature-contract.ts";
-import type { Command } from "#shared/telegram-contexts.ts";
-import { LoggerStub } from "#shared/logger.stub.ts";
+import type { Feature } from "#shared/telegram/feature-contract.ts";
+import type { Command } from "#shared/telegram/telegram-contexts.ts";
+import { LoggerStub } from "#shared/logging/logger.stub.ts";
 import { cardRecordOf, playerIdOf } from "#shared/repository/database-records.stub.ts";
-import { RepositoryStub } from "#shared/repository/repository.stub.ts";
+import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { botInfoStub, callbackUpdate, messageUpdate, PROMPT_MESSAGE_ID } from "#app/telegram-updates.stub.ts";
 
 

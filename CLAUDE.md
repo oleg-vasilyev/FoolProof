@@ -65,14 +65,14 @@ Anything a machine can check is a lint rule, not a paragraph — see
 - **No `console.*` for app logging** — use the scoped logger:
 
   ```ts
-  import { createLogger } from "#shared/logger.ts";
+  import { createLogger } from "#shared/logging/logger.ts";
 
   const log = createLogger("scope");
   log.info("...");   // debug | info | warn | error
   ```
 
   `LOG_LEVEL` (debug|info|warn|error, default `info`) sets the threshold. Raw
-  `console.*` is for `scripts/` dev utilities and for `shared/logger.ts` itself.
+  `console.*` is for `scripts/` dev utilities and for `shared/logging/logger.ts` itself.
 
 `strict: true` and **no `any`**. There is no build step: `tsconfig.json` mirrors
 how Node actually runs the code. `erasableSyntaxOnly` and `verbatimModuleSyntax`
@@ -114,9 +114,21 @@ src/
   features/
     live-game/          playing a game on a live card
     scoresheet/         the /stats picture
-  shared/               infra: env, logger, debounce, html-escape,
-                        sqlite-connection, repository, telegram-contexts
+  shared/
+    config/             reading .env, and where the project root is
+    lifecycle/          draining the stops on a signal
+    logging/            the scoped logger
+    repository/         the connection, the contract, the SQL
+    telegram/           Bot API context types, and the feature contract
+    text/               HTML escaping
+    timing/             the edit debouncer
 ```
+
+**Everything in `shared/` lives in a folder named after its subject**, including
+the ones holding a single module plus its spec. The alternative was a folder for
+`repository/` and loose files for everything else, which reads as an accident
+rather than a rule. The names are specific on purpose: a `platform/` or `infra/`
+bucket would be the same vagueness the file names were just cured of.
 
 Independence is a **lint rule, not an aspiration**: `live-game/` may not import
 `scoresheet/` and the reverse, so a reach across features is a build error. Deleting
@@ -130,7 +142,7 @@ roster.
 line tells you which zone the code came from without counting `../`:
 
 ```ts
-import type { Logger } from "#shared/logger.ts";
+import type { Logger } from "#shared/logging/logger.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { createPromptRegistry } from "#live-game/bot/prompt-registry.ts";
 ```
@@ -197,7 +209,7 @@ would lose its commands, silently.
 
 So a feature does **not** get the `Bot`. It declares `commands`, and optionally a
 `listen` that receives a narrow `Listeners` interface offering only `onText` and
-`onTap` (`shared/feature-contract.ts`). `feature-installer.ts` registers every
+`onTap` (`shared/telegram/feature-contract.ts`). `feature-installer.ts` registers every
 feature's commands first, then the listeners. A feature physically cannot register a command late.
 `/help` and the `/` menu are both generated from the same command list, so they
 cannot drift from what is installed.
@@ -218,7 +230,7 @@ which is what makes a restart mid-game a non-event. `PLAN.md` explains why the
 `render/` is the same shape one layer out: state in, message text and inline
 keyboard out, pure. `live-game/render/callback-data-codec.ts` is the codec for
 `callback_data`, encoded by the keyboard and decoded by `bot`. Escaping is infra
-rather than a feature's business, so `shared/html-escape.ts` holds it — both
+rather than a feature's business, so `shared/text/html-escape.ts` holds it — both
 features need it.
 
 **A drawing is a string; only `bot` may turn it into pixels.** `/stats` renders an
@@ -257,7 +269,7 @@ import { repository } from "#shared/repository/repository-instance.ts";
 const card = repository.liveCardInChat(chatId);
 ```
 
-- `shared/sqlite-connection.ts` — connection and schema only. It owns the pragmas
+- `shared/repository/sqlite-connection.ts` — connection and schema only. It owns the pragmas
   and the timestamp format that `PLAN.md` describes; nothing else may assume them.
 - `shared/repository/sqlite-repository.ts` — the **only** file allowed to contain
   SQL or to import the connection.
@@ -328,7 +340,7 @@ with no core equivalent that are defined inline there:
 | Two blank lines after the last import | `project/blank-lines-after-imports` (autofixed) |
 | A number must be named by a `const` | `project/named-numbers` |
 | Braces on every `if`, `const` over `let` | `curly`, `prefer-const`, `no-var` |
-| No `console.*` outside `shared/logger.ts` | `no-console` |
+| No `console.*` outside `shared/logging/logger.ts` | `no-console` |
 | Imports point only downward, features stay independent | `no-restricted-imports`, one zone per feature layer |
 | An alias ban (`#live-game/**`) actually fires | the same rule, compiled to a `regex` pattern |
 
@@ -358,4 +370,4 @@ to be compared against.
 
 Secrets live in `.env` (gitignored) next to `.env.example`, which is the
 shareable template and must list every key the app reads. Read them in one place
-— `shared/env.ts` — and pass values down; no `process.env` in feature code.
+— `shared/config/env.ts` — and pass values down; no `process.env` in feature code.

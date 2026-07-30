@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { LoggerStub } from "#shared/logger.stub.ts";
+import { LoggerStub } from "#shared/logging/logger.stub.ts";
 import type { CardService } from "#live-game/bot/card-service.ts";
 import { ABANDON_AFTER_SECONDS, startIdleSweep } from "#live-game/bot/idle-sweep.ts";
 

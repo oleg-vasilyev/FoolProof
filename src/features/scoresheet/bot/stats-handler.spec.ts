@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { RepositoryStub } from "#shared/repository/repository.stub.ts";
+import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import { CHAT_ID, ContextStub } from "#scoresheet/bot/grammy-context.stub.ts";
 

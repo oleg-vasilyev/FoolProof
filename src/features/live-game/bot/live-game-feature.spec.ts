@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { LoggerStub } from "#shared/logger.stub.ts";
-import { RepositoryStub } from "#shared/repository/repository.stub.ts";
+import { LoggerStub } from "#shared/logging/logger.stub.ts";
+import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 
 

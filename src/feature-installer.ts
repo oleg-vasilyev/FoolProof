@@ -1,6 +1,6 @@
 import type { Api, Bot } from "grammy";
-import type { Feature, Listeners } from "#shared/feature-contract.ts";
-import type { Logger } from "#shared/logger.ts";
+import type { Feature, Listeners } from "#shared/telegram/feature-contract.ts";
+import type { Logger } from "#shared/logging/logger.ts";
 import { copy } from "#app/copy.en.ts";
 
 

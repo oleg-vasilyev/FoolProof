@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import type { Command } from "#shared/telegram-contexts.ts";
+import type { Command } from "#shared/telegram/telegram-contexts.ts";
 
 
 export const CHAT_ID = -100777;

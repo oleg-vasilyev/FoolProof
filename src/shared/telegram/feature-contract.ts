@@ -1,4 +1,4 @@
-import type { CallbackTap, Command, TextMessage } from "#shared/telegram-contexts.ts";
+import type { CallbackTap, Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 
 
 export interface CommandRoute {

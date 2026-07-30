@@ -1,6 +1,6 @@
 import type { Api } from "grammy";
-import type { Feature, Listeners } from "#shared/feature-contract.ts";
-import type { Logger } from "#shared/logger.ts";
+import type { Feature, Listeners } from "#shared/telegram/feature-contract.ts";
+import type { Logger } from "#shared/logging/logger.ts";
 import type { CardRepository } from "#shared/repository/repository-contract.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { createCardService } from "#live-game/bot/card-service.ts";

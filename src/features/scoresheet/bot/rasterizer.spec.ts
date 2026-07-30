@@ -37,7 +37,7 @@ vi.mock("node:path", () => ({
   resolve: (...parts: readonly string[]) => parts.join("/"),
 }));
 
-vi.mock("#shared/env.ts", () => ({
+vi.mock("#shared/config/env.ts", () => ({
   rootDir: ROOT,
 }));
 

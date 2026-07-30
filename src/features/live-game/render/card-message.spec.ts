@@ -16,7 +16,7 @@ vi.mock("#live-game/domain/card-state.ts", () => ({
   remainingSlots: (state: unknown) => remainingSlotsSpy(state),
 }));
 
-vi.mock("#shared/html-escape.ts", () => ({
+vi.mock("#shared/text/html-escape.ts", () => ({
   escapeHtml: (value: string) => escapeHtmlSpy(value),
 }));
 

@@ -1,4 +1,4 @@
-import type { Feature } from "#shared/feature-contract.ts";
+import type { Feature } from "#shared/telegram/feature-contract.ts";
 import type { ScoresheetRepository } from "#shared/repository/repository-contract.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import { onStats, type ScoresheetContext } from "#scoresheet/bot/stats-handler.ts";

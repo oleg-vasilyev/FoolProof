@@ -62,7 +62,7 @@ vi.mock("grammy", () => ({
   },
 }));
 
-vi.mock("#shared/logger.ts", () => ({
+vi.mock("#shared/logging/logger.ts", () => ({
   createLogger: (scope: string) => createLoggerSpy(scope),
 }));
 
@@ -80,7 +80,7 @@ vi.mock("#scoresheet/bot/scoresheet-feature.ts", () => ({
   createScoresheetFeature: (deps: unknown) => createScoresheetFeatureSpy(deps),
 }));
 
-vi.mock("#shared/shutdown.ts", () => ({
+vi.mock("#shared/lifecycle/shutdown.ts", () => ({
   createShutdown: (stops: readonly (() => Promise<void>)[]) => async () => {
     for (const stop of stops) {
       await stop();
@@ -88,7 +88,7 @@ vi.mock("#shared/shutdown.ts", () => ({
   },
 }));
 
-vi.mock("#shared/env.ts", () => ({
+vi.mock("#shared/config/env.ts", () => ({
   loadEnv: () => ({ BOT_TOKEN: TOKEN_FROM_ENV }),
   requireEnv: (env: Record<string, string>, key: string) => env[key],
 }));

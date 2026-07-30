@@ -1,6 +1,6 @@
 import type { Api } from "grammy";
-import { createDebouncer, type Debouncer } from "#shared/debounce.ts";
-import type { Logger } from "#shared/logger.ts";
+import { createDebouncer, type Debouncer } from "#shared/timing/debounce.ts";
+import type { Logger } from "#shared/logging/logger.ts";
 import type { CardRecord, Finalist, CardRepository } from "#shared/repository/repository-contract.ts";
 import {
   apply,

@@ -1,4 +1,4 @@
-import type { Logger } from "#shared/logger.ts";
+import type { Logger } from "#shared/logging/logger.ts";
 import type { CardService } from "#live-game/bot/card-service.ts";
 
 

@@ -1,4 +1,4 @@
-import { escapeHtml } from "#shared/html-escape.ts";
+import { escapeHtml } from "#shared/text/html-escape.ts";
 
 
 export type AttributeValue = string | number;

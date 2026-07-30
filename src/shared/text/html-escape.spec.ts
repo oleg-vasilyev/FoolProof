@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { escapeHtml } from "#shared/html-escape.ts";
+import { escapeHtml } from "#shared/text/html-escape.ts";
 
 
 describe("escapeHtml()", () => {

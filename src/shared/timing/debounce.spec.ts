@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createDebouncer } from "#shared/debounce.ts";
+import { createDebouncer } from "#shared/timing/debounce.ts";
 
 
 const DELAY_MS = 350;

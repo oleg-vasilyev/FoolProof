@@ -1,5 +1,5 @@
 import { finalPlacements, nameAt, remainingSlots, type CardState } from "#live-game/domain/card-state.ts";
-import { escapeHtml } from "#shared/html-escape.ts";
+import { escapeHtml } from "#shared/text/html-escape.ts";
 import { copy } from "#live-game/copy.en.ts";
 
 

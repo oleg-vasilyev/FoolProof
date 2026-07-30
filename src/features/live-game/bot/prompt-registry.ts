@@ -1,5 +1,5 @@
 import type { Api } from "grammy";
-import type { Logger } from "#shared/logger.ts";
+import type { Logger } from "#shared/logging/logger.ts";
 
 
 export interface PromptRegistry {

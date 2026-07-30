@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { installFeatures, publishCommandMenu } from "#app/feature-installer.ts";
-import type { Feature } from "#shared/feature-contract.ts";
+import type { Feature } from "#shared/telegram/feature-contract.ts";
 import { copy } from "#app/copy.en.ts";
 
 

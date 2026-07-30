@@ -93,7 +93,8 @@ src/
   features/
     live-game/          playing a game on a live card of buttons
     scoresheet/         the picture /stats sends back
-  shared/               env, logger, debounce, escaping, database, repository
+  shared/               config, lifecycle, logging, repository,
+                        telegram, text, timing — a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
 ```
 
@@ -112,7 +113,7 @@ Specs (`*.spec.ts`) and stubs (`*.stub.ts`) sit next to the file they stand for,
 so a feature carries its own tests with it.
 
 Nothing in `src/` imports by relative path. Every import goes through an alias
-declared in `package.json` — `#shared/logger.ts`,
+declared in `package.json` — `#shared/logging/logger.ts`,
 `#live-game/bot/prompt-registry.ts` — so a line says which zone it reached into.
 These are Node's own subpath imports, which is why they work with no build step
 and no loader flag.

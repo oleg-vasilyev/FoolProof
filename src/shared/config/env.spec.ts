@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadEnv, requireEnv, rootDir } from "#shared/env.ts";
+import { loadEnv, requireEnv, rootDir } from "#shared/config/env.ts";
 
 
 vi.mock("node:fs", () => ({ readFileSync: vi.fn() }));
@@ -19,8 +19,8 @@ const givenNoEnvFile = (): void => {
 };
 
 describe("rootDir", () => {
-  it("should point two levels above shared, at the project root", () => {
-    expect(join(rootDir, "src", "shared")).toBe(import.meta.dirname);
+  it("should point at the project root, however deep this file is nested", () => {
+    expect(join(rootDir, "src", "shared", "config")).toBe(import.meta.dirname);
   });
 });
 

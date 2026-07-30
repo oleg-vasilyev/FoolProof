@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { LoggerStub } from "#shared/logger.stub.ts";
+import { LoggerStub } from "#shared/logging/logger.stub.ts";
 import { TelegramApiStub } from "#live-game/bot/grammy-api.stub.ts";
 import { createPromptRegistry, type PromptRegistry } from "#live-game/bot/prompt-registry.ts";
 

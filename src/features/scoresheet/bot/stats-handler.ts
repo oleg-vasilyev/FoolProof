@@ -1,6 +1,6 @@
 import { InputFile } from "grammy";
 import type { ScoresheetRepository } from "#shared/repository/repository-contract.ts";
-import type { Command } from "#shared/telegram-contexts.ts";
+import type { Command } from "#shared/telegram/telegram-contexts.ts";
 import { renderScoresheet } from "#scoresheet/render/scoresheet-svg.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";

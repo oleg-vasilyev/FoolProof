@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 
-export const rootDir = resolve(import.meta.dirname, "..", "..");
+export const rootDir = resolve(import.meta.dirname, "..", "..", "..");
 
 export function requireEnv(env: Record<string, string>, key: string): string {
   const value = env[key];

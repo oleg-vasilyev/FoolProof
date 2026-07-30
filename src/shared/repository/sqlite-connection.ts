@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
-import { rootDir, loadEnv } from "#shared/env.ts";
+import { rootDir, loadEnv } from "#shared/config/env.ts";
 
 
 export const SERIES_GAP_SECONDS = 3 * 60 * 60;

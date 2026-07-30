@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createShutdown } from "#shared/shutdown.ts";
+import { createShutdown } from "#shared/lifecycle/shutdown.ts";
 
 
 const ONCE = 1;

@@ -1,5 +1,5 @@
 import type { CardRepository } from "#shared/repository/repository-contract.ts";
-import type { CallbackTap, Command, TextMessage } from "#shared/telegram-contexts.ts";
+import type { CallbackTap, Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import { normalizeName, parseLineup, rotateToLowestId } from "#live-game/domain/lineup-parsing.ts";
 import type { Seat } from "#live-game/domain/card-state.ts";
 import { decodeCallback } from "#live-game/render/callback-data-codec.ts";
