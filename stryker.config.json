@@ -4,9 +4,13 @@
   "testRunner": "vitest",
   "reporters": [
     "html",
+    "json",
     "clear-text",
     "progress"
   ],
+  "jsonReporter": {
+    "fileName": "reports/mutation/mutation.json"
+  },
   "tempDirName": "reports/.stryker-tmp",
   "htmlReporter": {
     "fileName": "reports/mutation/index.html"
@@ -18,9 +22,9 @@
     "src/**/*.ts",
     "!src/**/*.spec.ts",
     "!src/**/*.stub.ts",
-    "!src/shared/sqlite-connection.ts",
-    "!src/shared/repository/repository-instance.ts",
-    "!src/shared/repository/repository-contract.ts"
+    "!src/**/sqlite-connection.ts",
+    "!src/**/repository-instance.ts",
+    "!src/**/repository-contract.ts"
   ],
   "thresholds": {
     "high": 90,
