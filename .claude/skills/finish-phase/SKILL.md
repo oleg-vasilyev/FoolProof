@@ -46,7 +46,7 @@ Ask of every touched file:
 
 - Does it still read as a skeleton — the idea before the detail?
 - Is every closed union dispatched with `switch`, not a chain of `if`?
-- Is there a user-facing string outside `features/render/strings.ts`?
+- Is there a user-facing string outside the owning feature's `strings.ts`?
 - Does every stub sit beside its subject, or beside its only consumer when the
   subject is someone else's code?
 - Does the file's name still describe what is in it?

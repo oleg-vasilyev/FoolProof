@@ -37,20 +37,23 @@ export interface Finalist {
   position: number;
 }
 
-export interface PlayerTally {
+export interface PlayerColumn {
   playerId: number;
   displayName: string;
-  games: number;
-  wins: number;
-  fools: number;
 }
 
-export interface SeriesStats {
-  games: number;
-  players: readonly PlayerTally[];
+export interface ChronologyGame {
+  gameId: number;
+  placements: readonly Finalist[];
 }
 
-export interface Repository {
+export interface SeriesChronology {
+  startedOn: string;
+  players: readonly PlayerColumn[];
+  games: readonly ChronologyGame[];
+}
+
+export interface CardRepository {
   playersInChat(chatId: number): readonly PlayerRecord[];
   createPlayer(chatId: number, displayName: string): PlayerRecord;
 
@@ -70,5 +73,10 @@ export interface Repository {
 
   idleCards(idleSeconds: number): readonly GameRecord[];
   gameNumberInSeries(chatId: number): number;
-  seriesStats(chatId: number): SeriesStats;
 }
+
+export interface SessionRepository {
+  seriesChronology(chatId: number): SeriesChronology | null;
+}
+
+export interface Repository extends CardRepository, SessionRepository {}

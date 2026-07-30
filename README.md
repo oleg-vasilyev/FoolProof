@@ -28,7 +28,7 @@ Dealt first: Oleg
 | `/game Oleg, Anya, Roma` | Opens a card. The list is the seating order, clockwise |
 | `/game` | Same, but asks for the names — for when you tapped the command from the menu |
 | `/next` | A new card with the same line-up |
-| `/stats` | How the current session is going, as a text bar chart |
+| `/stats` | How the current session is going, as a rendered picture |
 | `/help` | What the commands do and how the card works |
 
 ## Running it
@@ -57,6 +57,13 @@ exactly what this one needs, and it never reads the rest of the conversation.
 The database is a single SQLite file under `data/` (gitignored). Backing it up is
 copying that file.
 
+`/stats` draws a PNG, which needs the two font files in `assets/fonts/`. They are
+committed, so a clone has them; the bot refuses to start without them, because a
+missing font makes the renderer draw the picture with no text on it rather than
+fail. Rasterizing uses `@resvg/resvg-js`, which ships a prebuilt binary per
+platform — still no build step, but `npm install` now needs to be run on the
+machine that will run the bot rather than copied from another one.
+
 ## Scripts
 
 | Script | What it runs |
@@ -73,17 +80,36 @@ copying that file.
 
 ## Layout
 
+A feature is a folder you can delete: nothing outside it imports it except the
+composition root, which names the roster.
+
 ```
 src/
-  main.ts        the composition root: builds everything, wires it, starts polling
+  main.ts        names the features and wires them; starts polling
+  router.ts      registers whatever features it was given
   features/
-    game/        the state machine — a pure reducer, no I/O of any kind
-    render/      state in, message text and inline keyboard out; also pure
-    bot/         the impure layer: grammY handlers, debounced edits, the idle sweep
-  shared/        env, logger, debounce, database and the repository
+    card/        playing a game on a live card
+    session/     the /stats scoresheet
+  shared/        env, logger, debounce, escaping, database, repository
+assets/fonts/    the two faces the scoresheet is drawn with
 ```
 
-Imports point only downward, and ESLint enforces it.
+Inside a feature the same three layers every time, and imports point only
+downward:
+
+```
+features/session/
+  domain/        the pure core — no framework, no I/O
+  render/        state in, SVG out; still pure
+  bot/           the impure edge: grammY, rasterizing
+  strings.ts     this feature's own copy
+```
+
+Specs (`*.spec.ts`) and stubs (`*.stub.ts`) sit next to the file they stand for,
+so a feature carries its own tests with it.
+
+ESLint enforces all of it: a cross-feature import and a framework import in
+`domain/` are both build errors.
 
 ## The other two documents
 

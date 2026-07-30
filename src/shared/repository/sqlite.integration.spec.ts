@@ -25,6 +25,10 @@ const NONE = 0;
 
 const ONCE = 1;
 
+const TWO = 2;
+
+const THREE = 3;
+
 const seedPlayers = (...names: readonly string[]): readonly number[] =>
   names.map((name) => repo.createPlayer(CHAT_ID, name).id);
 
@@ -397,66 +401,100 @@ describe("gameNumberInSeries()", () => {
   });
 });
 
-describe("seriesStats()", () => {
-  it("should report nothing for an empty chat", () => {
-    expect(repo.seriesStats(CHAT_ID)).toEqual({ games: NONE, players: [] });
+describe("seriesChronology()", () => {
+  const namesOf = (chatId: number): readonly string[] =>
+    repo.seriesChronology(chatId)?.players.map((player) => player.displayName) ?? [];
+
+  it("should report nothing for a chat that has never played", () => {
+    expect(repo.seriesChronology(CHAT_ID)).toBeNull();
   });
 
-  it("should count the games of the current session", () => {
+  it("should return one entry per game of the current session", () => {
     const ids = seedPlayers("Oleg", "Anya", "Roma");
     playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
     playFullGame(ids, [ids[1] ?? NONE, ids[0] ?? NONE], [ids[2] ?? NONE]);
 
-    expect(repo.seriesStats(CHAT_ID).games).toBe(2);
+    expect(repo.seriesChronology(CHAT_ID)?.games).toHaveLength(TWO);
   });
 
-  it("should credit a win to whoever went out first", () => {
+  it("should keep the games in the order they were played", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    const first = playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
+    const second = playFullGame(ids, [ids[1] ?? NONE, ids[0] ?? NONE], [ids[2] ?? NONE]);
+
+    expect(repo.seriesChronology(CHAT_ID)?.games.map((game) => game.gameId)).toEqual([
+      first,
+      second,
+    ]);
+  });
+
+  it("should carry every player's finishing position", () => {
     const ids = seedPlayers("Oleg", "Anya", "Roma");
     playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
-    const oleg = repo.seriesStats(CHAT_ID).players.find((p) => p.displayName === "Oleg");
 
-    expect(oleg?.wins).toBe(ONCE);
+    expect(repo.seriesChronology(CHAT_ID)?.games[0]?.placements).toEqual([
+      { playerId: ids[0], position: 1 },
+      { playerId: ids[1], position: TWO },
+      { playerId: ids[2], position: THREE },
+    ]);
   });
 
-  it("should credit the fool to whoever was left", () => {
+  it("should give both players of a draw the same position", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE, ids[2] ?? NONE]);
+    const shared = repo.seriesChronology(CHAT_ID)?.games[0]?.placements.filter(
+      (placement) => placement.position === TWO
+    );
+
+    expect(shared).toHaveLength(TWO);
+  });
+
+  it("should leave a player out of a game they sat out", () => {
     const ids = seedPlayers("Oleg", "Anya", "Roma");
     playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
-    const roma = repo.seriesStats(CHAT_ID).players.find((p) => p.displayName === "Roma");
+    playFullGame([ids[0] ?? NONE, ids[1] ?? NONE], [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    const second = repo.seriesChronology(CHAT_ID)?.games[1]?.placements ?? [];
 
-    expect(roma?.fools).toBe(ONCE);
+    expect(second.some((placement) => placement.playerId === ids[2])).toBe(false);
   });
 
-  it("should count no fool when the last place was shared", () => {
+  it("should list every player who took part in the session", () => {
     const ids = seedPlayers("Oleg", "Anya", "Roma");
-    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE, ids[2] ?? NONE]);
-    const tallies = repo.seriesStats(CHAT_ID).players;
+    playFullGame([ids[0] ?? NONE, ids[1] ?? NONE], [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
 
-    expect(tallies.every((player) => player.fools === NONE)).toBe(true);
+    expect(namesOf(CHAT_ID)).toEqual(["Oleg", "Anya", "Roma"]);
   });
 
-  it("should still credit the winner of a drawn game", () => {
+  it("should order the columns by seat, so a latecomer lands on the right", () => {
     const ids = seedPlayers("Oleg", "Anya", "Roma");
-    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE, ids[2] ?? NONE]);
-    const oleg = repo.seriesStats(CHAT_ID).players.find((p) => p.displayName === "Oleg");
+    playFullGame([ids[2] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE], [ids[1] ?? NONE]);
+    playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
 
-    expect(oleg?.wins).toBe(ONCE);
+    expect(namesOf(CHAT_ID)).toEqual(["Roma", "Anya", "Oleg"]);
   });
 
-  it("should leave an older session out of the numbers", () => {
+  it("should date the session by its first game", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    const today = db.prepare("SELECT date('now') AS today").get()?.today;
+
+    expect(repo.seriesChronology(CHAT_ID)?.startedOn).toBe(today);
+  });
+
+  it("should leave an older session out", () => {
     const ids = seedPlayers("Oleg", "Anya", "Roma");
     playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
     ageAllGames("-2 days");
     playFullGame(ids, [ids[1] ?? NONE, ids[0] ?? NONE], [ids[2] ?? NONE]);
 
-    expect(repo.seriesStats(CHAT_ID).games).toBe(ONCE);
+    expect(repo.seriesChronology(CHAT_ID)?.games).toHaveLength(ONCE);
   });
 
-  it("should count how many games each player took part in", () => {
-    const ids = seedPlayers("Oleg", "Anya", "Roma");
-    playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
-    playFullGame(ids, [ids[1] ?? NONE, ids[0] ?? NONE], [ids[2] ?? NONE]);
-    const anya = repo.seriesStats(CHAT_ID).players.find((p) => p.displayName === "Anya");
+  it("should not mix another chat's session in", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
 
-    expect(anya?.games).toBe(2);
+    expect(repo.seriesChronology(OTHER_CHAT_ID)).toBeNull();
   });
 });

@@ -1,6 +1,7 @@
 import { db, SERIES_GAP_SECONDS } from "../db.ts";
 import type {
   CardRecord,
+  ChronologyGame,
   ExitRecord,
   Finalist,
   GameRecord,
@@ -11,6 +12,12 @@ import type {
 
 
 type Row = Record<string, unknown>;
+
+const LAST = -1;
+
+const LATEST_SERIES = `SELECT id, started_at FROM game_series
+   WHERE chat_id = ?
+     AND series_no = (SELECT MAX(series_no) FROM game_series WHERE chat_id = ?)`;
 
 const num = (value: unknown): number => {
   if (typeof value === "number") {
@@ -72,6 +79,22 @@ const toExit = (row: Row): ExitRecord => ({
   player_id: num(row.player_id),
   position: num(row.position),
 });
+
+const groupByGame = (rows: readonly Row[]): readonly ChronologyGame[] =>
+  rows.reduce<readonly ChronologyGame[]>((games, row) => {
+    const gameId = num(row.game_id);
+    const placement = { playerId: num(row.player_id), position: num(row.position) };
+    const open = games.at(LAST);
+
+    if (open?.gameId !== gameId) {
+      return [...games, { gameId, placements: [placement] }];
+    }
+
+    return [
+      ...games.slice(0, LAST),
+      { gameId, placements: [...open.placements, placement] },
+    ];
+  }, []);
 
 const seatsOf = (gameId: number): readonly SeatRecord[] =>
   db
@@ -247,55 +270,44 @@ export const sqliteRepository: Repository = {
     return row === undefined ? 1 : num(row.game_no);
   },
 
-  seriesStats(chatId) {
-    const counted = db
+  seriesChronology(chatId) {
+    const played = db
       .prepare(
-        `SELECT COUNT(*) AS games FROM game_series
-         WHERE chat_id = ?
-           AND series_no = (SELECT MAX(series_no) FROM game_series WHERE chat_id = ?)`
+        `SELECT g.id AS game_id,
+                date(g.started_at) AS started_on,
+                ge.player_id,
+                ge.position
+         FROM (${LATEST_SERIES}) g
+         JOIN game_events ge ON ge.game_id = g.id
+         ORDER BY g.started_at, g.id, ge.position, ge.player_id`
       )
-      .get(chatId, chatId);
+      .all(chatId, chatId);
 
-    const games = counted === undefined ? 0 : num(counted.games);
-    if (games === 0) {
-      return { games: 0, players: [] };
+    const startedOn = played[0]?.started_on;
+    if (startedOn === undefined) {
+      return null;
     }
 
     const players = db
       .prepare(
-        `WITH placed AS (
-           SELECT ge.player_id,
-                  ge.position,
-                  COUNT(*) OVER (PARTITION BY ge.game_id, ge.position) AS sharing,
-                  MAX(ge.position) OVER (PARTITION BY ge.game_id) AS last_position
-           FROM game_events ge
-           WHERE ge.game_id IN (
-             SELECT id FROM game_series
-             WHERE chat_id = ?
-               AND series_no = (SELECT MAX(series_no) FROM game_series WHERE chat_id = ?)
-           )
+        `SELECT player_id, display_name FROM (
+           SELECT p.id AS player_id,
+                  p.display_name,
+                  g.started_at,
+                  g.id AS game_id,
+                  gp.seat_index,
+                  ROW_NUMBER() OVER (PARTITION BY p.id ORDER BY g.started_at, g.id) AS appearance
+           FROM (${LATEST_SERIES}) g
+           JOIN game_players gp ON gp.game_id = g.id
+           JOIN players p ON p.id = gp.player_id
          )
-         SELECT p.id AS player_id,
-                p.display_name,
-                COUNT(*) AS games,
-                SUM(CASE WHEN placed.position = 1 AND placed.sharing = 1 THEN 1 ELSE 0 END) AS wins,
-                SUM(CASE WHEN placed.position = placed.last_position AND placed.sharing = 1
-                         THEN 1 ELSE 0 END) AS fools
-         FROM placed
-         JOIN players p ON p.id = placed.player_id
-         GROUP BY p.id, p.display_name
-         ORDER BY fools DESC, wins DESC, p.display_name`
+         WHERE appearance = 1
+         ORDER BY started_at, game_id, seat_index`
       )
       .all(chatId, chatId)
-      .map((row) => ({
-        playerId: num(row.player_id),
-        displayName: text(row.display_name),
-        games: num(row.games),
-        wins: num(row.wins),
-        fools: num(row.fools),
-      }));
+      .map((row) => ({ playerId: num(row.player_id), displayName: text(row.display_name) }));
 
-    return { games, players };
+    return { startedOn: text(startedOn), players, games: groupByGame(played) };
   },
 };
 

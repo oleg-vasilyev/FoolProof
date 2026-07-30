@@ -68,7 +68,7 @@ Latin characters and lower case only — a Telegram requirement.
 | `/game Oleg, Anya, Roma` | Open a game. The list is the seating order around the table, clockwise |
 | `/next` | A new game with the same line-up |
 | `/help` | What the commands do and how the card works |
-| `/stats` | Statistics for the latest session |
+| `/stats` | The latest session as a rendered image — chronology plus running score |
 
 The bot publishes this list through `setMyCommands` on every start, so the
 commands show up in Telegram's `/` menu instead of having to be typed from
@@ -362,32 +362,70 @@ ends up in position zero**. Without this, neighbour analytics falls apart.
 
 ### `/stats`
 
-Two counts for the current session, each as a text bar chart. No image is
-rendered: a PNG would mean either a native dependency and a build step, or
-shipping the players' names to a third-party chart service on every call, and
-neither is worth it for two rows of numbers.
+A rendered PNG of the current session, sent with `sendPhoto`. Two stacked parts:
 
-```
-<b>Session</b> · 9 games
+- **The chronology.** One column per player, one row per game. The cell holds the
+  place that player took; black means they sat that game out, red means they were
+  the fool, teal means the game was drawn. Reading down a column is one person's
+  evening; reading across a row is one game.
+- **The cumulative score.** One line per player against game number, so the shape
+  of the evening — who pulled away, who never recovered — is visible at a glance.
 
-<b>Fool</b>
-████ 4 — Roma
-██ 2 — Oleg
-█ 1 — Anya
+A text bar chart came first and was replaced. It was accurate and unreadable: two
+tallies cannot show *when* anything happened, and the evening's story is entirely
+in the sequence. The earlier tombstone against images cited a native dependency
+and a third-party chart service; only the first is still true, and it is now
+accepted deliberately. Nothing about the players leaves the machine.
 
-<b>Wins</b>
-███ 3 — Anya
-██ 2 — Oleg
-```
+**A place is worth `players_in_that_game − place`.** The fool always scores zero,
+a win at a table of six is worth more than a win at a table of three, and both
+players of a draw score the same. A fixed scale was rejected: it would pay the
+same for beating two people as for beating five.
 
-The bar is drawn **before** the name so the bars share a left edge — Telegram's
-proportional font would stagger them otherwise. One cell means one game while the
-leader has twelve or fewer; past that the bars scale to the leader. Scaling
-always would draw a full-width bar for a single game and overstate it.
+**A draw counts as neither a win nor a fool.** A shared last place means nobody
+was the fool that game, so the cell is teal rather than red.
 
-**A draw counts as neither a win nor a fool.** Both counts only credit a player
-who held the position alone, so a shared last place leaves the fool tally
-untouched — nobody was the fool that game.
+#### What Telegram does to the image
+
+Measured against the Bot API rather than taken from the documentation, because the
+failure is silent:
+
+| Sent | Kept |
+|---|---|
+| 1440×2275 | unchanged |
+| **1620×2560** | **unchanged** |
+| 2000×3160 | downscaled to 1620×2560 |
+| 320×6400 | downscaled to 128×2560 |
+| 4000×6320 | rejected, `PHOTO_INVALID_DIMENSIONS` |
+
+Three limits: **the long side must not exceed 2560**, the aspect ratio must not
+exceed 20, and the sides must sum to under 10000. `sendPhoto` always re-encodes to
+JPEG; at 1620 wide the loss measures 46.8 dB against the source, against 37.7 dB
+at 1080, so the artefacts that are visible on a phone at 1080 are effectively gone
+at 1620.
+
+**Do not render larger than 1620×2560 hoping for more detail.** Anything longer is
+downscaled by the server, which costs real pixels of text. Oversampling on purpose
+— rendering at 3240 and letting Telegram halve it — was measured and produces
+identical sharpness with 6 dB worse fidelity and 2.3× the upload, so it buys
+nothing.
+
+`sendDocument` was measured too: it returns the PNG byte-identical at any size,
+including 4000×6320. It is rejected anyway, because the chat shows a file card
+with a 203×320 thumbnail instead of the picture, and the point of the sheet is to
+be glanceable without a tap.
+
+#### Fitting a long evening
+
+The height budget is fixed at 2560, so the number of games is what has to give.
+Row height is `clamp(available ÷ games, 26, 56)` pixels: at 22 games the rows are
+full size, at 40 they are 30. Past roughly 47 games the rows would fall below the
+floor, so the sheet keeps the **most recent** 47 and says so in the corner. Being
+honest about the omission matters more than fitting everything.
+
+The header date is the UTC date of the session's first game. Late-evening games
+can therefore be stamped with the following day. A configured timezone is the fix
+on the day it bothers anyone; inventing one would be worse.
 
 ### A session is computed, not a table
 
@@ -449,7 +487,6 @@ bundled with Node 24 is well past both.
 ## Out of scope for the first version
 
 - `/stats` beyond the current session — no arbitrary periods, no all-time table
-- Rendered image charts, for the dependency and privacy reasons above
 - A Telegram Mini App and a dashboard
 - AI analytics
 - The trump suit and validation of the first move

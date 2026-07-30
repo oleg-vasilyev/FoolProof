@@ -22,7 +22,7 @@ Three consequences, the first absolute:
    `CardState` and checking the whole rendered string — that spec fails when
    `finalPlacements` changes, which is `state.ts`'s business. Mock the helper,
    drive the file by what it returns, and the failure lands where the fault is.
-3. **Leave data tables real.** `features/render/strings.ts` is keys and text, not
+3. **Leave data tables real.** A feature's `strings.ts` is keys and text, not
    behaviour; mocking it would compare a constant against itself. Everything with
    a body gets mocked.
 
@@ -73,7 +73,7 @@ default return values there, so each case overrides one thing.
 testing folder — `repository.stub.ts` next to `sqlite.ts`, `state.stub.ts` next
 to the reducer. A stub for something we did not write (grammY's `Api`, a
 synthetic `Update`, a `Context`) sits next to its only consumer instead, which is
-usually `features/bot/`.
+usually a feature's `bot/` folder.
 
 A stub is a **class** whose public `*Spy` fields are `vi.fn()`s, with sensible
 defaults set in the constructor, and whose methods delegate to those spies. Tests
@@ -118,7 +118,7 @@ it beside the code like every other spec. `npm run test:unit` and
 
 Two exist, and the bar for a third is a bug that got through the units:
 
-- **`features/bot/router.integration.spec.ts`** drives a real grammY `Bot`
+- **`src/router.integration.spec.ts`** drives a real grammY `Bot`
   through `bot.handleUpdate()`, intercepting the network at
   `bot.api.config.use()`. Pass `botInfo` so no `getMe` call is needed. **Flush the
   card service in `afterEach`** — the real debouncer schedules a real 350 ms

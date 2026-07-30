@@ -7,7 +7,7 @@ const TOKEN_FROM_ENV = "424242:token-from-env";
 
 const order: string[] = [];
 
-const botApi = { setMyCommands: vi.fn() };
+const botApi = { marker: "the-api" };
 
 const startSpy = vi.fn(async (): Promise<void> => {
   order.push("start");
@@ -15,20 +15,29 @@ const startSpy = vi.fn(async (): Promise<void> => {
 
 const stopSpy = vi.fn(async (): Promise<void> => undefined);
 
-const cardsShutdownSpy = vi.fn(async (): Promise<void> => undefined);
+const botSpy = vi.fn();
 
-const createBotSpy = vi.fn((_token: string, _deps: { repo: unknown; log: unknown }) => ({
-  bot: { api: botApi, start: startSpy, stop: stopSpy },
-  cards: { shutdown: cardsShutdownSpy },
-}));
-
-const publishCommandMenuSpy = vi.fn(async (_api: unknown): Promise<void> => {
-  order.push("menu");
+const cardStopSpy = vi.fn(async (): Promise<void> => {
+  order.push("card-stopped");
 });
 
-const stopReaperSpy = vi.fn();
+const CARD_FEATURE = { commands: [{ command: "game" }], stop: cardStopSpy };
 
-const startReaperSpy = vi.fn((_cards: unknown, _log: unknown) => stopReaperSpy);
+const SESSION_FEATURE = { commands: [{ command: "stats" }] };
+
+const createCardFeatureSpy = vi.fn((_deps: unknown) => CARD_FEATURE);
+
+const createSessionFeatureSpy = vi.fn((_deps: unknown) => SESSION_FEATURE);
+
+const installFeaturesSpy = vi.fn((_bot: unknown, _features: unknown, _log: unknown) => {
+  order.push("install");
+
+  return [cardStopSpy];
+});
+
+const publishCommandMenuSpy = vi.fn(async (_api: unknown, _features: unknown): Promise<void> => {
+  order.push("menu");
+});
 
 const signalHandlers = new Map<string, () => void>();
 
@@ -41,18 +50,42 @@ const createLoggerSpy = vi.fn((_scope: string) => ({
   error: vi.fn(),
 }));
 
+vi.mock("grammy", () => ({
+  Bot: class {
+    public readonly api = botApi;
+    public start = startSpy;
+    public stop = stopSpy;
+
+    public constructor(token: string) {
+      botSpy(token);
+    }
+  },
+}));
+
 vi.mock("./shared/logger.ts", () => ({
   createLogger: (scope: string) => createLoggerSpy(scope),
 }));
 
-vi.mock("./features/bot/router.ts", () => ({
-  createBot: (token: string, deps: { repo: unknown; log: unknown }) =>
-    createBotSpy(token, deps),
-  publishCommandMenu: (api: unknown) => publishCommandMenuSpy(api),
+vi.mock("./router.ts", () => ({
+  installFeatures: (bot: unknown, features: unknown, log: unknown) =>
+    installFeaturesSpy(bot, features, log),
+  publishCommandMenu: (api: unknown, features: unknown) => publishCommandMenuSpy(api, features),
 }));
 
-vi.mock("./features/bot/reaper.ts", () => ({
-  startReaper: (cards: unknown, log: unknown) => startReaperSpy(cards, log),
+vi.mock("./features/card/bot/feature.ts", () => ({
+  createCardFeature: (deps: unknown) => createCardFeatureSpy(deps),
+}));
+
+vi.mock("./features/session/bot/feature.ts", () => ({
+  createSessionFeature: (deps: unknown) => createSessionFeatureSpy(deps),
+}));
+
+vi.mock("./shared/lifecycle.ts", () => ({
+  createShutdown: (stops: readonly (() => Promise<void>)[]) => async () => {
+    for (const stop of stops) {
+      await stop();
+    }
+  },
 }));
 
 vi.mock("./shared/env.ts", () => ({
@@ -74,25 +107,39 @@ describe("main.ts", () => {
   });
 
   it("should build the bot with the token from the environment", () => {
-    expect(createBotSpy.mock.calls[0]?.[0]).toBe(TOKEN_FROM_ENV);
+    expect(botSpy).toHaveBeenCalledWith(TOKEN_FROM_ENV);
   });
 
-  it("should hand the bot the real repository", () => {
-    expect(createBotSpy.mock.calls[0]?.[1]).toMatchObject({
-      repo: { marker: "the-repository" },
-    });
+  it("should hand the card feature the real repository", () => {
+    expect(createCardFeatureSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ repo: { marker: "the-repository" } })
+    );
   });
 
-  it("should start the idle sweep", () => {
-    expect(startReaperSpy).toHaveBeenCalledTimes(ONCE);
+  it("should hand the card feature the bot's own api, so its edits go somewhere", () => {
+    expect(createCardFeatureSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ api: botApi })
+    );
   });
 
-  it("should publish the command menu", () => {
-    expect(publishCommandMenuSpy).toHaveBeenCalledWith(botApi);
+  it("should hand the session feature the real repository", () => {
+    expect(createSessionFeatureSpy).toHaveBeenCalledWith({ repo: { marker: "the-repository" } });
+  });
+
+  it("should install both features", () => {
+    expect(installFeaturesSpy.mock.calls[0]?.[1]).toEqual([CARD_FEATURE, SESSION_FEATURE]);
+  });
+
+  it("should install the features before publishing the menu", () => {
+    expect(order.indexOf("install")).toBeLessThan(order.indexOf("menu"));
   });
 
   it("should publish the menu before accepting updates", () => {
-    expect(order).toEqual(["menu", "start"]);
+    expect(order.indexOf("menu")).toBeLessThan(order.indexOf("start"));
+  });
+
+  it("should publish a menu built from the installed features", () => {
+    expect(publishCommandMenuSpy).toHaveBeenCalledWith(botApi, [CARD_FEATURE, SESSION_FEATURE]);
   });
 
   it("should drop updates that piled up while it was down", () => {
@@ -115,16 +162,15 @@ describe("main.ts", () => {
     expect(signalHandlers.has("SIGTERM")).toBe(true);
   });
 
-  it("should shut down cleanly on SIGINT", async () => {
-    cardsShutdownSpy.mockClear();
+  it("should stop the features on SIGINT", async () => {
+    cardStopSpy.mockClear();
 
     await signalHandlers.get("SIGINT")?.();
 
-    expect(cardsShutdownSpy).toHaveBeenCalledTimes(ONCE);
+    expect(cardStopSpy).toHaveBeenCalledTimes(ONCE);
   });
 
-  it("should shut down cleanly on SIGTERM", async () => {
-    cardsShutdownSpy.mockClear();
+  it("should stop polling on SIGTERM", async () => {
     stopSpy.mockClear();
 
     await signalHandlers.get("SIGTERM")?.();
@@ -132,11 +178,11 @@ describe("main.ts", () => {
     expect(stopSpy).toHaveBeenCalledTimes(ONCE);
   });
 
-  it("should stop the sweep as part of shutting down", async () => {
-    stopReaperSpy.mockClear();
+  it("should stop the features before dropping the connection", async () => {
+    order.length = 0;
 
     await signalHandlers.get("SIGINT")?.();
 
-    expect(stopReaperSpy).toHaveBeenCalledTimes(ONCE);
+    expect(order).toEqual(["card-stopped"]);
   });
 });

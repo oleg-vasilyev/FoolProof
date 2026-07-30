@@ -6,7 +6,7 @@ import type {
   PlayerRecord,
   Repository,
   SeatRecord,
-  SeriesStats,
+  SeriesChronology,
 } from "./types.ts";
 
 
@@ -27,7 +27,7 @@ export class RepositoryStub implements Repository {
   public deleteGameSpy = vi.fn();
   public idleCardsSpy = vi.fn();
   public gameNumberInSeriesSpy = vi.fn();
-  public seriesStatsSpy = vi.fn();
+  public seriesChronologySpy = vi.fn();
 
   public constructor() {
     this.playersInChatSpy.mockReturnValue([]);
@@ -42,7 +42,7 @@ export class RepositoryStub implements Repository {
     this.openGameSpy.mockReturnValue(1);
     this.idleCardsSpy.mockReturnValue([]);
     this.gameNumberInSeriesSpy.mockReturnValue(FIRST_GAME_NUMBER);
-    this.seriesStatsSpy.mockReturnValue({ games: 0, players: [] });
+    this.seriesChronologySpy.mockReturnValue(null);
   }
 
   public playersInChat(chatId: number): readonly PlayerRecord[] {
@@ -116,7 +116,7 @@ export class RepositoryStub implements Repository {
     return this.gameNumberInSeriesSpy(chatId);
   }
 
-  public seriesStats(chatId: number): SeriesStats {
-    return this.seriesStatsSpy(chatId);
+  public seriesChronology(chatId: number): SeriesChronology | null {
+    return this.seriesChronologySpy(chatId);
   }
 }
