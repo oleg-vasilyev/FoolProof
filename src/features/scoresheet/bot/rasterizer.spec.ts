@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { EnvStub } from "#shared/config/env.stub.ts";
 
 
 const FONT_FAMILY = "Test Sans";
 
-const ROOT = "/repo";
+const env = new EnvStub();
 
 const PNG = Buffer.from("png-bytes");
 
@@ -37,9 +38,7 @@ vi.mock("node:path", () => ({
   resolve: (...parts: readonly string[]) => parts.join("/"),
 }));
 
-vi.mock("#shared/config/env.ts", () => ({
-  rootDir: ROOT,
-}));
+vi.mock("#shared/config/env.ts", () => env.module);
 
 vi.mock("#scoresheet/render/sheet-layout.ts", () => ({
   FONT_FAMILY,
@@ -80,8 +79,8 @@ describe("rasterize()", () => {
     rasterize(SVG);
 
     expect(optionsUsed().font.fontFiles).toEqual([
-      `${ROOT}/assets/fonts/NotoSans-Regular.ttf`,
-      `${ROOT}/assets/fonts/NotoSans-Bold.ttf`,
+      `${env.rootDir}/assets/fonts/NotoSans-Regular.ttf`,
+      `${env.rootDir}/assets/fonts/NotoSans-Bold.ttf`,
     ]);
   });
 

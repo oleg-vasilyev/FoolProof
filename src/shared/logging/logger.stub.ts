@@ -2,6 +2,9 @@ import { vi } from "vitest";
 import type { Logger } from "#shared/logging/logger.ts";
 
 
+type LoggerModule = typeof import("#shared/logging/logger.ts");
+
+
 export class LoggerStub implements Logger {
   public debugSpy = vi.fn();
   public infoSpy = vi.fn();
@@ -22,5 +25,23 @@ export class LoggerStub implements Logger {
 
   public error(message: string): void {
     this.errorSpy(message);
+  }
+}
+
+export class LoggingStub {
+  public createLoggerSpy = vi.fn<LoggerModule["createLogger"]>();
+
+  public readonly logger = new LoggerStub();
+
+  public readonly module: LoggerModule;
+
+  public constructor() {
+    this.createLoggerSpy.mockReturnValue(this.logger);
+
+    this.module = { createLogger: (scope) => this.createLoggerSpy(scope) };
+  }
+
+  public scopeGiven(): string | undefined {
+    return this.createLoggerSpy.mock.calls[0]?.[0];
   }
 }

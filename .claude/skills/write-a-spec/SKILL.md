@@ -67,11 +67,65 @@ That is why specs here import their subject at the bottom of the header rather
 than at the top. Reset with `vi.clearAllMocks()` in `beforeEach` and set the
 default return values there, so each case overrides one thing.
 
+## A fake never reimplements what it replaces
+
+This is the mistake to watch for, and it hides in a one-liner:
+
+```ts
+// wrong: the spec now knows how requireEnv resolves a key
+requireEnv: (env: Record<string, string>, key: string) => env[key],
+```
+
+The test then passes because the *fake* works. Replace the behaviour with a spy
+and assert the fact you actually care about — that the subject asked for the right
+key out of the environment it loaded:
+
+```ts
+expect(env.requireEnvSpy).toHaveBeenCalledWith(env.loaded, "BOT_TOKEN");
+```
+
+If a fake needs an `if`, a lookup or a loop to satisfy its caller, it has stopped
+being a fake and started being a second implementation.
+
 ## Stubs
+
+**Every module in `shared/` has a stub, and a spec uses it rather than writing a
+fake by hand.** The stub carries a `module` field typed
+`typeof import("…")`, so mocking is one line:
+
+```ts
+const env = new EnvStub({ BOT_TOKEN: TOKEN_FROM_ENV });
+
+vi.mock("#shared/config/env.ts", () => env.module);
+```
+
+An imported stub works inside a hoisted `vi.mock`: the factory body runs when the
+mocked module is first requested, which is after the spec's own consts are
+initialized.
+
+The rule exists because inline fakes had already failed twice, both silently:
+
+- `main.spec.ts` faked `createShutdown` by **rewriting its loop**. The
+  ordering assertions were exercising the fake, not `main.ts`. With a stub the
+  spec instead asserts what `main.ts` composed — the feature stops first, the
+  connection last — which is the actual fact about the file.
+- `row-records.spec.ts` had `num` return `"num(1)"`. A `vi.mock` factory is
+  **untyped**, so nothing objected; the typed stub made it a compile error, because
+  `num` returns a `number`. The markers became distinct in-type return values plus
+  assertions on which column reached which coercion.
+
+A stub also fakes a **collaborator handed to the subject** — `Logger`,
+`Repository`, `Listeners`. Same file, one class per role: `logger.stub.ts` holds
+`LoggerStub` (the interface) and `LoggingStub` (the module that makes one).
+
+Fixtures live beside stubs and read as builders, not classes:
+`database-records.stub.ts` has `cardRecordOf`, `feature-contract.stub.ts` has
+`featureOf`.
 
 `*.stub.ts` lives **beside the thing it stands in for**, never in a central
 testing folder — `repository.stub.ts` next to `sqlite-repository.ts`,
-`card-state.stub.ts` next to the reducer. A stub for something we did not write (grammY's `Api`, a
+`card-state.stub.ts` next to the reducer, `env.stub.ts` next to `env.ts`. A stub
+for something we did not write (grammY's `Api`, a
 synthetic `Update`, a `Context`) sits next to its only consumer instead, which is
 usually a feature's `bot/` folder.
 

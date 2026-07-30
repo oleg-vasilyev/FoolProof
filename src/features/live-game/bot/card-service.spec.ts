@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cardRecordOf, playerIdOf } from "#shared/repository/database-records.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
+import { DebounceStub } from "#shared/timing/debounce.stub.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
 import { seatsOf } from "#live-game/domain/card-state.stub.ts";
 import type { CallbackAction, CallbackPayload } from "#live-game/render/callback-data-codec.ts";
@@ -8,13 +9,7 @@ import { copy } from "#live-game/copy.en.ts";
 import { TelegramApiStub } from "#live-game/bot/grammy-api.stub.ts";
 
 
-const scheduleSpy = vi.fn();
-
-const cancelSpy = vi.fn();
-
-const flushAllSpy = vi.fn();
-
-const createDebouncerSpy = vi.fn();
+const debounce = new DebounceStub();
 
 const applySpy = vi.fn();
 
@@ -34,9 +29,7 @@ const renderResultSpy = vi.fn();
 
 const renderKeyboardSpy = vi.fn();
 
-vi.mock("#shared/timing/debounce.ts", () => ({
-  createDebouncer: (delayMs: number, run: unknown) => createDebouncerSpy(delayMs, run),
-}));
+vi.mock("#shared/timing/debounce.ts", () => debounce.module);
 
 vi.mock("#live-game/domain/card-state.ts", () => ({
   apply: (state: unknown, action: unknown) => applySpy(state, action),
@@ -117,7 +110,7 @@ describe("createCardService()", () => {
 
   const build = () => {
     cards = createCardService({ repo, api: telegram.api, log });
-    runScheduledEdit = createDebouncerSpy.mock.calls[0]?.[1] as (r: unknown) => Promise<void>;
+    runScheduledEdit = debounce.runGiven() as (request: unknown) => Promise<void>;
   };
 
   beforeEach(() => {
@@ -126,13 +119,6 @@ describe("createCardService()", () => {
     repo = new RepositoryStub();
     telegram = new TelegramApiStub();
     log = new LoggerStub();
-
-    createDebouncerSpy.mockReturnValue({
-      schedule: scheduleSpy,
-      cancel: cancelSpy,
-      flush: vi.fn(),
-      flushAll: flushAllSpy,
-    });
 
     renderCardSpy.mockReturnValue(CARD_TEXT);
     renderResultSpy.mockReturnValue(RESULT_TEXT);
@@ -150,8 +136,8 @@ describe("createCardService()", () => {
 
   describe("the debounced editor", () => {
     it("should debounce edits inside the range the Bot API tolerates", () => {
-      expect(createDebouncerSpy.mock.calls[0]?.[0]).toBeGreaterThanOrEqual(SHORTEST_DEBOUNCE_MS);
-      expect(createDebouncerSpy.mock.calls[0]?.[0]).toBeLessThanOrEqual(LONGEST_DEBOUNCE_MS);
+      expect(debounce.delayGiven()).toBeGreaterThanOrEqual(SHORTEST_DEBOUNCE_MS);
+      expect(debounce.delayGiven()).toBeLessThanOrEqual(LONGEST_DEBOUNCE_MS);
     });
 
     it("should send a scheduled edit as HTML", async () => {
@@ -368,7 +354,7 @@ describe("createCardService()", () => {
       it("should drop any edit still pending for that card", async () => {
         await cards.tap(payload("cancel", null), ACTOR_ID);
 
-        expect(cancelSpy).toHaveBeenCalledWith(String(GAME_ID));
+        expect(debounce.debouncer.cancelSpy).toHaveBeenCalledWith(String(GAME_ID));
       });
 
       it("should replace the card with the cancelled notice and no keyboard", async () => {
@@ -488,14 +474,14 @@ describe("createCardService()", () => {
       it("should schedule the edit rather than send it at once", async () => {
         await cards.tap(payload("pick", OLEG), ACTOR_ID);
 
-        expect(scheduleSpy).toHaveBeenCalledTimes(ONCE);
+        expect(debounce.debouncer.scheduleSpy).toHaveBeenCalledTimes(ONCE);
         expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(NEVER);
       });
 
       it("should schedule the edit under the card's own key", async () => {
         await cards.tap(payload("pick", OLEG), ACTOR_ID);
 
-        expect(scheduleSpy.mock.calls[0]?.[0]).toBe(String(GAME_ID));
+        expect(debounce.debouncer.scheduleSpy.mock.calls[0]?.[0]).toBe(String(GAME_ID));
       });
 
       it("should redraw the keyboard at the version the tap produced", async () => {
@@ -574,7 +560,7 @@ describe("createCardService()", () => {
 
       await cards.sweepIdle(IDLE_SECONDS);
 
-      expect(cancelSpy).toHaveBeenCalledWith(String(GAME_ID));
+      expect(debounce.debouncer.cancelSpy).toHaveBeenCalledWith(String(GAME_ID));
     });
 
     it("should replace the card with the abandoned notice and no keyboard", async () => {
@@ -599,7 +585,7 @@ describe("createCardService()", () => {
     it("should flush every pending edit so nothing is lost on exit", async () => {
       await cards.shutdown();
 
-      expect(flushAllSpy).toHaveBeenCalledTimes(ONCE);
+      expect(debounce.debouncer.flushAllSpy).toHaveBeenCalledTimes(ONCE);
     });
   });
 

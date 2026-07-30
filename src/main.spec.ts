@@ -1,9 +1,27 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
+import { EnvStub } from "#shared/config/env.stub.ts";
+import { LoggingStub } from "#shared/logging/logger.stub.ts";
+import { RepositoryInstanceStub } from "#shared/repository/repository-instance.stub.ts";
+import { ShutdownStub } from "#shared/lifecycle/shutdown.stub.ts";
 
 
 const ONCE = 1;
 
+const FIRST = 0;
+
+const LAST = -1;
+
+const TWO = 2;
+
 const TOKEN_FROM_ENV = "424242:token-from-env";
+
+const env = new EnvStub({ BOT_TOKEN: TOKEN_FROM_ENV });
+
+const shutdown = new ShutdownStub();
+
+const logging = new LoggingStub();
+
+const repository = new RepositoryInstanceStub();
 
 const order: string[] = [];
 
@@ -17,9 +35,7 @@ const stopSpy = vi.fn(async (): Promise<void> => undefined);
 
 const botSpy = vi.fn();
 
-const cardStopSpy = vi.fn(async (): Promise<void> => {
-  order.push("card-stopped");
-});
+const cardStopSpy = vi.fn(async (): Promise<void> => undefined);
 
 const CARD_FEATURE = { commands: [{ command: "game" }], stop: cardStopSpy };
 
@@ -41,15 +57,6 @@ const publishCommandMenuSpy = vi.fn(async (_api: unknown, _features: unknown): P
 
 const signalHandlers = new Map<string, () => void>();
 
-const logInfoSpy = vi.fn();
-
-const createLoggerSpy = vi.fn((_scope: string) => ({
-  debug: vi.fn(),
-  info: logInfoSpy,
-  warn: vi.fn(),
-  error: vi.fn(),
-}));
-
 vi.mock("grammy", () => ({
   Bot: class {
     public readonly api = botApi;
@@ -62,9 +69,7 @@ vi.mock("grammy", () => ({
   },
 }));
 
-vi.mock("#shared/logging/logger.ts", () => ({
-  createLogger: (scope: string) => createLoggerSpy(scope),
-}));
+vi.mock("#shared/logging/logger.ts", () => logging.module);
 
 vi.mock("#app/feature-installer.ts", () => ({
   installFeatures: (bot: unknown, features: unknown, log: unknown) =>
@@ -80,23 +85,15 @@ vi.mock("#scoresheet/bot/scoresheet-feature.ts", () => ({
   createScoresheetFeature: (deps: unknown) => createScoresheetFeatureSpy(deps),
 }));
 
-vi.mock("#shared/lifecycle/shutdown.ts", () => ({
-  createShutdown: (stops: readonly (() => Promise<void>)[]) => async () => {
-    for (const stop of stops) {
-      await stop();
-    }
-  },
-}));
+vi.mock("#shared/lifecycle/shutdown.ts", () => shutdown.module);
 
-vi.mock("#shared/config/env.ts", () => ({
-  loadEnv: () => ({ BOT_TOKEN: TOKEN_FROM_ENV }),
-  requireEnv: (env: Record<string, string>, key: string) => env[key],
-}));
+vi.mock("#shared/config/env.ts", () => env.module);
 
-vi.mock("#shared/repository/repository-instance.ts", () => ({ repository: { marker: "the-repository" } }));
+vi.mock("#shared/repository/repository-instance.ts", () => repository.module);
 
 describe("main.ts", () => {
   beforeAll(async () => {
+    env.requireEnvSpy.mockReturnValue(TOKEN_FROM_ENV);
     vi.spyOn(process, "once").mockImplementation(((event: string, handler: () => void) => {
       signalHandlers.set(event, handler);
 
@@ -110,9 +107,13 @@ describe("main.ts", () => {
     expect(botSpy).toHaveBeenCalledWith(TOKEN_FROM_ENV);
   });
 
+  it("should ask for BOT_TOKEN out of the loaded environment, not read it itself", () => {
+    expect(env.requireEnvSpy).toHaveBeenCalledWith(env.loaded, "BOT_TOKEN");
+  });
+
   it("should hand the card feature the real repository", () => {
     expect(createLiveGameFeatureSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ repo: { marker: "the-repository" } })
+      expect.objectContaining({ repo: repository.stub })
     );
   });
 
@@ -123,7 +124,7 @@ describe("main.ts", () => {
   });
 
   it("should hand the scoresheet feature the real repository", () => {
-    expect(createScoresheetFeatureSpy).toHaveBeenCalledWith({ repo: { marker: "the-repository" } });
+    expect(createScoresheetFeatureSpy).toHaveBeenCalledWith({ repo: repository.stub });
   });
 
   it("should install both features", () => {
@@ -147,11 +148,11 @@ describe("main.ts", () => {
   });
 
   it("should name the log scope after the delivery mode", () => {
-    expect(createLoggerSpy).toHaveBeenCalledWith("polling");
+    expect(logging.scopeGiven()).toBe("polling");
   });
 
   it("should announce that it is listening", () => {
-    expect(logInfoSpy).toHaveBeenCalledWith("listening for updates by long polling");
+    expect(logging.logger.infoSpy).toHaveBeenCalledWith("listening for updates by long polling");
   });
 
   it("should register a handler for SIGINT", () => {
@@ -162,27 +163,35 @@ describe("main.ts", () => {
     expect(signalHandlers.has("SIGTERM")).toBe(true);
   });
 
-  it("should stop the features on SIGINT", async () => {
-    cardStopSpy.mockClear();
-
-    await signalHandlers.get("SIGINT")?.();
-
-    expect(cardStopSpy).toHaveBeenCalledTimes(ONCE);
+  it("should compose the feature stops with one more for the connection", () => {
+    expect(shutdown.stopsGiven()).toHaveLength(TWO);
   });
 
-  it("should stop polling on SIGTERM", async () => {
+  it("should put the feature stops first, so nothing edits after the socket closes", () => {
+    expect(shutdown.stopsGiven()[FIRST]).toBe(cardStopSpy);
+  });
+
+  it("should make the last stop the one that drops the connection", async () => {
     stopSpy.mockClear();
 
-    await signalHandlers.get("SIGTERM")?.();
+    await shutdown.stopsGiven().at(LAST)?.();
 
     expect(stopSpy).toHaveBeenCalledTimes(ONCE);
   });
 
-  it("should stop the features before dropping the connection", async () => {
-    order.length = 0;
+  it("should run the composed shutdown on SIGINT", async () => {
+    shutdown.shutdownSpy.mockClear();
 
     await signalHandlers.get("SIGINT")?.();
 
-    expect(order).toEqual(["card-stopped"]);
+    expect(shutdown.shutdownSpy).toHaveBeenCalledTimes(ONCE);
+  });
+
+  it("should run the same shutdown on SIGTERM", async () => {
+    shutdown.shutdownSpy.mockClear();
+
+    await signalHandlers.get("SIGTERM")?.();
+
+    expect(shutdown.shutdownSpy).toHaveBeenCalledTimes(ONCE);
   });
 });

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { HtmlEscapeStub } from "#shared/text/html-escape.stub.ts";
 import type { CardState } from "#live-game/domain/card-state.ts";
 
 
@@ -8,7 +9,7 @@ const finalPlacementsSpy = vi.fn();
 
 const remainingSlotsSpy = vi.fn();
 
-const escapeHtmlSpy = vi.fn();
+const html = new HtmlEscapeStub();
 
 vi.mock("#live-game/domain/card-state.ts", () => ({
   nameAt: (state: unknown, slot: number) => nameAtSpy(state, slot),
@@ -16,9 +17,7 @@ vi.mock("#live-game/domain/card-state.ts", () => ({
   remainingSlots: (state: unknown) => remainingSlotsSpy(state),
 }));
 
-vi.mock("#shared/text/html-escape.ts", () => ({
-  escapeHtml: (value: string) => escapeHtmlSpy(value),
-}));
+vi.mock("#shared/text/html-escape.ts", () => html.module);
 
 const { renderCard, renderResult } = await import("#live-game/render/card-message.ts");
 
@@ -48,7 +47,7 @@ describe("renderCard()", () => {
     vi.clearAllMocks();
 
     nameAtSpy.mockImplementation(namesBySlot);
-    escapeHtmlSpy.mockImplementation(identity);
+    html.escapeHtmlSpy.mockImplementation(identity);
     finalPlacementsSpy.mockReturnValue([]);
     remainingSlotsSpy.mockReturnValue([]);
   });
@@ -99,11 +98,11 @@ describe("renderCard()", () => {
 
     renderCard(stateWith({}), GAME_NUMBER);
 
-    expect(escapeHtmlSpy).toHaveBeenCalledWith("Аня & Оля");
+    expect(html.escapeHtmlSpy).toHaveBeenCalledWith("Аня & Оля");
   });
 
   it("should print what the escaper returned, not the raw name", () => {
-    escapeHtmlSpy.mockReturnValue("ESCAPED");
+    html.escapeHtmlSpy.mockReturnValue("ESCAPED");
 
     expect(renderCard(stateWith({}), GAME_NUMBER)).toContain("ESCAPED");
   });
@@ -120,7 +119,7 @@ describe("renderResult()", () => {
     vi.clearAllMocks();
 
     nameAtSpy.mockImplementation(namesBySlot);
-    escapeHtmlSpy.mockImplementation(identity);
+    html.escapeHtmlSpy.mockImplementation(identity);
     remainingSlotsSpy.mockReturnValue([]);
   });
 
@@ -185,13 +184,13 @@ describe("renderResult()", () => {
 
     renderResult(stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
 
-    expect(escapeHtmlSpy).toHaveBeenCalledTimes(TWICE);
+    expect(html.escapeHtmlSpy).toHaveBeenCalledTimes(TWICE);
   });
 
   it("should print no raw markup a player smuggled into their name", () => {
     finalPlacementsSpy.mockReturnValue([{ slot: ANYA, position: 2 }]);
     nameAtSpy.mockReturnValue("<i>x</i>");
-    escapeHtmlSpy.mockReturnValue("&lt;i&gt;x&lt;/i&gt;");
+    html.escapeHtmlSpy.mockReturnValue("&lt;i&gt;x&lt;/i&gt;");
 
     const rendered = renderResult(stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
 

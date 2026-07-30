@@ -1,11 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { HtmlEscapeStub } from "#shared/text/html-escape.stub.ts";
 
 
-const escapeHtmlSpy = vi.fn();
+const html = new HtmlEscapeStub();
 
-vi.mock("#shared/text/html-escape.ts", () => ({
-  escapeHtml: (value: string) => escapeHtmlSpy(value),
-}));
+vi.mock("#shared/text/html-escape.ts", () => html.module);
 
 const { line, path, polyline, rect, svgOf, text } = await import("#scoresheet/render/svg-tags.ts");
 
@@ -15,7 +14,7 @@ describe("svg primitives", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    escapeHtmlSpy.mockReturnValue(ESCAPED);
+    html.escapeHtmlSpy.mockReturnValue(ESCAPED);
   });
 
   describe("rect()", () => {
@@ -62,7 +61,7 @@ describe("svg primitives", () => {
     it("should escape the value it prints", () => {
       text("Аня & Оля", { x: 0 });
 
-      expect(escapeHtmlSpy).toHaveBeenCalledWith("Аня & Оля");
+      expect(html.escapeHtmlSpy).toHaveBeenCalledWith("Аня & Оля");
     });
 
     it("should print what the escaper returned, never the raw value", () => {

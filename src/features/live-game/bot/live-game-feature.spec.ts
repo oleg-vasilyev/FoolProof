@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
+import { ListenersStub } from "#shared/telegram/feature-contract.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 
@@ -141,30 +142,29 @@ describe("createLiveGameFeature()", () => {
   });
 
   describe("what it listens to", () => {
+    let listeners: ListenersStub;
+
+    beforeEach(() => {
+      listeners = new ListenersStub();
+    });
+
     it("should register a text listener and a tap listener", () => {
-      const onText = vi.fn();
-      const onTap = vi.fn();
+      build().listen?.(listeners);
 
-      build().listen?.({ onText, onTap });
-
-      expect(onText).toHaveBeenCalledTimes(ONCE);
-      expect(onTap).toHaveBeenCalledTimes(ONCE);
+      expect(listeners.onTextSpy).toHaveBeenCalledTimes(ONCE);
+      expect(listeners.onTapSpy).toHaveBeenCalledTimes(ONCE);
     });
 
     it("should send a text message to the names handler", async () => {
-      const onText = vi.fn();
-
-      build().listen?.({ onText, onTap: vi.fn() });
-      await (onText.mock.calls[0]?.[0] as (ctx: unknown) => Promise<void>)("the-message");
+      build().listen?.(listeners);
+      await listeners.textListener()?.("the-message" as never);
 
       expect(onNamesReplySpy).toHaveBeenCalledWith(expect.anything(), "the-message");
     });
 
     it("should send a tap to the tap handler", async () => {
-      const onTap = vi.fn();
-
-      build().listen?.({ onText: vi.fn(), onTap });
-      await (onTap.mock.calls[0]?.[0] as (ctx: unknown) => Promise<void>)("the-tap");
+      build().listen?.(listeners);
+      await listeners.tapListener()?.("the-tap" as never);
 
       expect(onTapSpy).toHaveBeenCalledWith(expect.anything(), "the-tap");
     });

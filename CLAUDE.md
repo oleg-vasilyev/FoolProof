@@ -302,6 +302,17 @@ Two facts about where things live, because they shape the source tree:
   folder. A stub for something we did not write (grammY's `Api`, a `Context`) sits
   next to its only consumer instead. Stub imports point downward like every other
   import.
+- **Everything in `shared/` has a stub, and specs use it instead of a hand-written
+  fake.** A stub exposes a `module` field typed `typeof import("…")`, so
+  `vi.mock("#shared/…", () => stub.module)` is the whole call site. This is not
+  tidiness: a `vi.mock` factory is **untyped**, so an inline fake drifts from the
+  real module in silence, and — worse — it invites reimplementing the thing being
+  replaced. Both had already happened here; see the `write-a-spec` skill for the
+  two cases and what they cost.
+- **A fake never contains logic.** If it needs an `if`, a lookup or a loop to
+  satisfy its caller, it has become a second implementation and the test now passes
+  because the fake works. Return a value from a spy, and assert what the subject
+  did with it.
 - **A spec tests one file, and everything that file imports is mocked.** Third-
   party code is never exercised in a unit — that is the one rule with no
   exceptions. An integration spec is written only when the seam between systems is

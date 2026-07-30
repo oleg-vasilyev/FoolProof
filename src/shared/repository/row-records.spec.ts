@@ -1,20 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ColumnValuesStub } from "#shared/repository/column-values.stub.ts";
 
 
-const numSpy = vi.fn();
+const values = new ColumnValuesStub();
 
-const nullableNumSpy = vi.fn();
-
-const textSpy = vi.fn();
-
-const nullableTextSpy = vi.fn();
-
-vi.mock("#shared/repository/column-values.ts", () => ({
-  num: (value: unknown) => numSpy(value),
-  nullableNum: (value: unknown) => nullableNumSpy(value),
-  text: (value: unknown) => textSpy(value),
-  nullableText: (value: unknown) => nullableTextSpy(value),
-}));
+vi.mock("#shared/repository/column-values.ts", () => values.module);
 
 const { groupByGame, toExit, toGame, toPlayer, toPlayerColumn, toSeat } = await import(
   "#shared/repository/row-records.ts"
@@ -28,25 +18,43 @@ const THREE = 3;
 
 const STARTER_ID = 9;
 
-const marked = (kind: string) => (value: unknown) => `${kind}(${String(value)})`;
+const AS_NUMBER = 111;
+
+const AS_NULLABLE_NUMBER = 222;
+
+const AS_TEXT = "as-text";
+
+const AS_NULLABLE_TEXT = "as-nullable-text";
 
 describe("row mappers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    numSpy.mockImplementation(marked("num"));
-    nullableNumSpy.mockImplementation(marked("nullableNum"));
-    textSpy.mockImplementation(marked("text"));
-    nullableTextSpy.mockImplementation(marked("nullableText"));
+    values.numSpy.mockReturnValue(AS_NUMBER);
+    values.nullableNumSpy.mockReturnValue(AS_NULLABLE_NUMBER);
+    values.textSpy.mockReturnValue(AS_TEXT);
+    values.nullableTextSpy.mockReturnValue(AS_NULLABLE_TEXT);
   });
 
   describe("toPlayer()", () => {
     it("should take each column through the coercion its type needs", () => {
       expect(toPlayer({ id: ONE, chat_id: TWO, display_name: "Oleg" })).toEqual({
-        id: "num(1)",
-        chat_id: "num(2)",
-        display_name: "text(Oleg)",
+        id: AS_NUMBER,
+        chat_id: AS_NUMBER,
+        display_name: AS_TEXT,
       });
+    });
+
+    it("should feed the numeric coercion the id and the chat, in that order", () => {
+      toPlayer({ id: ONE, chat_id: TWO, display_name: "Oleg" });
+
+      expect(values.numSpy.mock.calls).toEqual([[ONE], [TWO]]);
+    });
+
+    it("should feed the text coercion the name", () => {
+      toPlayer({ id: ONE, chat_id: TWO, display_name: "Oleg" });
+
+      expect(values.textSpy).toHaveBeenCalledWith("Oleg");
     });
 
     it("should ignore columns the record does not promise", () => {
@@ -72,53 +80,59 @@ describe("row mappers", () => {
 
     it("should take each column through the coercion its type needs", () => {
       expect(toGame(row)).toEqual({
-        id: "num(1)",
-        chat_id: "num(2)",
-        message_id: "num(3)",
-        state: "text(PICK_STARTER)",
-        state_version: "num(2)",
-        starter_player_id: "nullableNum(9)",
-        started_at: "text(2026-07-24 20:00:00)",
-        confirmed_at: "nullableText(null)",
+        id: AS_NUMBER,
+        chat_id: AS_NUMBER,
+        message_id: AS_NUMBER,
+        state: AS_TEXT,
+        state_version: AS_NUMBER,
+        starter_player_id: AS_NULLABLE_NUMBER,
+        started_at: AS_TEXT,
+        confirmed_at: AS_NULLABLE_TEXT,
       });
     });
 
     it("should read the starter as nullable, since nobody may have dealt yet", () => {
       toGame(row);
 
-      expect(nullableNumSpy).toHaveBeenCalledWith(STARTER_ID);
-      expect(numSpy).not.toHaveBeenCalledWith(STARTER_ID);
+      expect(values.nullableNumSpy).toHaveBeenCalledWith(STARTER_ID);
+      expect(values.numSpy).not.toHaveBeenCalledWith(STARTER_ID);
     });
 
     it("should read confirmed_at as nullable, since a live card has none", () => {
       toGame(row);
 
-      expect(nullableTextSpy).toHaveBeenCalledWith(null);
+      expect(values.nullableTextSpy).toHaveBeenCalledWith(null);
     });
 
     it("should read started_at as plain text, since a game always has one", () => {
       toGame(row);
 
-      expect(textSpy).toHaveBeenCalledWith("2026-07-24 20:00:00");
-      expect(nullableTextSpy).not.toHaveBeenCalledWith("2026-07-24 20:00:00");
+      expect(values.textSpy).toHaveBeenCalledWith("2026-07-24 20:00:00");
+      expect(values.nullableTextSpy).not.toHaveBeenCalledWith("2026-07-24 20:00:00");
     });
   });
 
   describe("toSeat()", () => {
     it("should take each column through the coercion its type needs", () => {
       expect(toSeat({ player_id: ONE, seat_index: TWO, display_name: "Anya" })).toEqual({
-        player_id: "num(1)",
-        seat_index: "num(2)",
-        display_name: "text(Anya)",
+        player_id: AS_NUMBER,
+        seat_index: AS_NUMBER,
+        display_name: AS_TEXT,
       });
+    });
+
+    it("should feed the numeric coercion the player and the seat, in that order", () => {
+      toSeat({ player_id: ONE, seat_index: TWO, display_name: "Anya" });
+
+      expect(values.numSpy.mock.calls).toEqual([[ONE], [TWO]]);
     });
   });
 
   describe("toExit()", () => {
     it("should take each column through the coercion its type needs", () => {
       expect(toExit({ player_id: ONE, position: TWO })).toEqual({
-        player_id: "num(1)",
-        position: "num(2)",
+        player_id: AS_NUMBER,
+        position: AS_NUMBER,
       });
     });
   });
@@ -126,8 +140,8 @@ describe("row mappers", () => {
   describe("toPlayerColumn()", () => {
     it("should rename the columns to the camel case the contract promises", () => {
       expect(toPlayerColumn({ player_id: ONE, display_name: "Roma" })).toEqual({
-        playerId: "num(1)",
-        displayName: "text(Roma)",
+        playerId: AS_NUMBER,
+        displayName: AS_TEXT,
       });
     });
   });
@@ -143,7 +157,7 @@ describe("groupByGame()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    numSpy.mockImplementation((value: unknown) => value);
+    values.numSpy.mockImplementation((value) => Number(value));
   });
 
   it("should return nothing for no rows", () => {
@@ -189,6 +203,6 @@ describe("groupByGame()", () => {
   it("should take every column through the numeric coercion", () => {
     groupByGame([rowOf(ONE, TWO, THREE)]);
 
-    expect(numSpy.mock.calls).toEqual([[ONE], [TWO], [THREE]]);
+    expect(values.numSpy.mock.calls).toEqual([[ONE], [TWO], [THREE]]);
   });
 });
