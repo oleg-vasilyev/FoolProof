@@ -1,5 +1,6 @@
 {
   "name": "foolproof",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -12,7 +13,8 @@
     "#scoresheet/*": "./src/features/scoresheet/*"
   },
   "scripts": {
-    "start": "node src/main.ts",
+    "start": "node --env-file-if-exists=.env src/main.ts",
+    "start:prod": "node --env-file=.env.production src/main.ts",
     "test": "vitest run",
     "test:unit": "vitest run --exclude \"**/*.integration.spec.ts\"",
     "test:integration": "vitest run integration.spec",

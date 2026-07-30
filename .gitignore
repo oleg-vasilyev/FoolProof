@@ -1,5 +1,8 @@
-# secrets — .env.example is the shareable template
+# secrets — .env.example is the only one that may be committed.
+# `.env` alone would NOT have matched .env.production, so the pattern is a glob.
 .env
+.env.*
+!.env.example
 secrets/
 
 # the SQLite database and its WAL sidecars

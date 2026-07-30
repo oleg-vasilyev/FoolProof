@@ -54,8 +54,42 @@ Add the bot to the group and leave BotFather's privacy mode at its default. In
 that mode a bot sees only commands and replies to its own messages — which is
 exactly what this one needs, and it never reads the rest of the conversation.
 
-The database is a single SQLite file under `data/` (gitignored). Backing it up is
-copying that file.
+## Two environments, two databases
+
+Real evenings and experiments must not land in the same file, so each run names
+its own configuration:
+
+| Command | Env file | Database |
+|---|---|---|
+| `npm start` | `.env`, skipped if absent | `data/foolproof.dev.db` |
+| `npm run start:prod` | `.env.production`, **required** | `data/foolproof.db` |
+
+```bash
+cp .env.example .env.production   # then put the token in it
+npm run start:prod
+```
+
+Node loads the file itself (`--env-file`), so there is no dependency and nothing
+to remember about shell syntax. Three properties are worth knowing:
+
+- **Each file is the whole configuration for its run.** Nothing is inherited from
+  `.env`, so a key missing from `.env.production` is missing rather than silently
+  taken from dev — which is how a real Friday would otherwise end up written to the
+  dev database.
+- **`npm run start:prod` refuses to start without `.env.production`.** The dev
+  command tolerates a missing `.env` and then fails on the first missing key, which
+  is the friendlier order for a fresh clone.
+- **The default database is the dev one.** Reaching production takes an explicit
+  command; forgetting a variable cannot.
+
+One bot token serves both, as long as only one process runs at a time — two
+pollers on one token make Telegram hand each update to whichever asked first. The
+same bot answering in the same group is also why dev is best driven from a private
+chat with it: the chat cannot tell you which database is behind it.
+
+Both databases are SQLite files under `data/` (gitignored). Back one up by copying
+the `.db` file **together with its `-wal` and `-shm` sidecars**, or after stopping
+the bot — the write-ahead log can hold games the main file does not have yet.
 
 `/stats` draws a PNG, which needs the two font files in `assets/fonts/`. They are
 committed, so a clone has them; the bot refuses to start without them, because a
@@ -68,7 +102,8 @@ machine that will run the bot rather than copied from another one.
 
 | Script | What it runs |
 |---|---|
-| `npm start` | The bot |
+| `npm start` | The bot on the dev database |
+| `npm run start:prod` | The bot on the production database |
 | `npm test` | Vitest, once — units and integration together |
 | `npm run test:unit` | Only the unit specs, where everything outside the file is mocked |
 | `npm run test:integration` | Only `*.integration.spec.ts` — the real grammY bot and a real SQLite file |

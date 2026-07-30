@@ -6,7 +6,7 @@ import { rootDir, loadEnv } from "#shared/config/env.ts";
 
 export const SERIES_GAP_SECONDS = 3 * 60 * 60;
 
-const DEFAULT_DB_PATH = "data/foolproof.db";
+const DEFAULT_DB_PATH = "data/foolproof.dev.db";
 
 const BUSY_TIMEOUT_MS = 5000;
 

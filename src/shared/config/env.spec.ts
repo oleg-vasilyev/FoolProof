@@ -1,22 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { readFileSync } from "node:fs";
+import { afterEach, describe, expect, it } from "vitest";
 import { join } from "node:path";
 import { loadEnv, requireEnv, rootDir } from "#shared/config/env.ts";
 
 
-vi.mock("node:fs", () => ({ readFileSync: vi.fn() }));
+const PROBE = "FOOLPROOF_PROBE_KEY";
 
-const readFileSyncMock = vi.mocked(readFileSync);
-
-const givenEnvFile = (contents: string): void => {
-  readFileSyncMock.mockReturnValue(contents);
-};
-
-const givenNoEnvFile = (): void => {
-  readFileSyncMock.mockImplementation(() => {
-    throw new Error("ENOENT");
-  });
-};
+const OTHER_PROBE = "FOOLPROOF_OTHER_PROBE_KEY";
 
 describe("rootDir", () => {
   it("should point at the project root, however deep this file is nested", () => {
@@ -29,139 +18,84 @@ describe("requireEnv()", () => {
     expect(requireEnv({ BOT_TOKEN: "secret" }, "BOT_TOKEN")).toBe("secret");
   });
 
-  it("should throw when the key is missing", () => {
-    expect(() => requireEnv({}, "BOT_TOKEN")).toThrow("BOT_TOKEN");
+  it("should throw when the key is absent", () => {
+    expect(() => requireEnv({}, "BOT_TOKEN")).toThrow();
   });
 
-  it("should throw on an empty value rather than pass it on", () => {
+  it("should throw when the key is present but empty, which a half-filled file gives", () => {
     expect(() => requireEnv({ BOT_TOKEN: "" }, "BOT_TOKEN")).toThrow();
   });
 
-  it("should name the missing key so the failure is actionable", () => {
-    expect(() => requireEnv({}, "WEBHOOK_URL")).toThrow(/WEBHOOK_URL/);
+  it("should name the missing key, so the message says what to fix", () => {
+    expect(() => requireEnv({}, "BOT_TOKEN")).toThrow(/BOT_TOKEN/);
+  });
+
+  it("should point at the env file, since that is where the value comes from", () => {
+    expect(() => requireEnv({}, "BOT_TOKEN")).toThrow(/env file/);
+  });
+
+  it("should not confuse one key with another", () => {
+    expect(() => requireEnv({ LOG_LEVEL: "info" }, "BOT_TOKEN")).toThrow(/BOT_TOKEN/);
   });
 });
 
 describe("loadEnv()", () => {
-  const originalEnv = { ...process.env };
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    givenEnvFile("");
-  });
-
   afterEach(() => {
-    process.env = { ...originalEnv };
+    delete process.env[PROBE];
+    delete process.env[OTHER_PROBE];
   });
 
-  it("should read a key and value from the file", () => {
-    givenEnvFile("BOT_TOKEN=abc123");
+  it("should read what the runtime was given, which is where --env-file puts it", () => {
+    process.env[PROBE] = "from-the-env-file";
 
-    expect(loadEnv().BOT_TOKEN).toBe("abc123");
+    expect(loadEnv()[PROBE]).toBe("from-the-env-file");
   });
 
-  it("should read the .env file at the project root", () => {
-    givenEnvFile("");
-
-    loadEnv();
-
-    expect(readFileSyncMock.mock.calls[0]?.[0]).toBe(join(rootDir, ".env"));
-  });
-
-  it("should read it as utf8 so non-latin values survive", () => {
-    givenEnvFile("");
-
-    loadEnv();
-
-    expect(readFileSyncMock.mock.calls[0]?.[1]).toBe("utf8");
-  });
-
-  it("should trim whitespace around keys and values", () => {
-    givenEnvFile("  BOT_TOKEN  =  abc123  ");
-
-    expect(loadEnv().BOT_TOKEN).toBe("abc123");
-  });
-
-  it("should skip comment lines", () => {
-    givenEnvFile("# BOT_TOKEN=commented\nDB_PATH=data/x.db");
-
-    expect(loadEnv().BOT_TOKEN).toBeUndefined();
-  });
-
-  it("should skip an indented comment", () => {
-    givenEnvFile("   # BOT_TOKEN=commented\nDB_PATH=data/x.db");
-
-    expect(loadEnv().BOT_TOKEN).toBeUndefined();
-  });
-
-  it("should keep a hash that appears inside a value", () => {
-    givenEnvFile("TOKEN=abc#123");
-
-    expect(loadEnv().TOKEN).toBe("abc#123");
-  });
-
-  it("should skip lines without an equals sign", () => {
-    givenEnvFile("nonsense\nDB_PATH=data/x.db");
-
-    expect(loadEnv().DB_PATH).toBe("data/x.db");
-  });
-
-  it("should not invent a key from a line without an equals sign", () => {
-    givenEnvFile("nonsense\nDB_PATH=data/x.db");
-    const fromFile = Object.keys(loadEnv()).filter((key) => key.startsWith("nonsen"));
-
-    expect(fromFile).toEqual([]);
-  });
-
-  it("should not invent a key from a blank line", () => {
-    givenEnvFile("A=1\n\nB=2");
-
-    expect(loadEnv()[""]).toBeUndefined();
-  });
-
-  it("should keep equals signs inside a value", () => {
-    givenEnvFile("TOKEN=a=b=c");
-
-    expect(loadEnv().TOKEN).toBe("a=b=c");
-  });
-
-  it("should read several keys", () => {
-    givenEnvFile("A=1\nB=2");
+  it("should carry every key, not only the ones the app knows about", () => {
+    process.env[PROBE] = "one";
+    process.env[OTHER_PROBE] = "two";
     const env = loadEnv();
 
-    expect([env.A, env.B]).toEqual(["1", "2"]);
+    expect([env[PROBE], env[OTHER_PROBE]]).toEqual(["one", "two"]);
   });
 
-  it("should handle carriage returns", () => {
-    givenEnvFile("A=1\r\nB=2");
+  it("should leave out a key that was deleted rather than reporting it as empty", () => {
+    process.env[PROBE] = "gone";
+    delete process.env[PROBE];
 
-    expect(loadEnv().B).toBe("2");
+    expect(PROBE in loadEnv()).toBe(false);
   });
 
-  it("should survive a missing .env file", () => {
-    givenNoEnvFile();
-
-    expect(() => loadEnv()).not.toThrow();
+  it("should drop a key whose value is undefined, which the type allows", () => {
+    expect(PROBE in loadEnv({ [PROBE]: undefined })).toBe(false);
   });
 
-  it("should still expose process env when the file is missing", () => {
-    givenNoEnvFile();
-    process.env.FROM_PROCESS = "yes";
-
-    expect(loadEnv().FROM_PROCESS).toBe("yes");
+  it("should keep the defined keys alongside a dropped one", () => {
+    expect(loadEnv({ [PROBE]: undefined, [OTHER_PROBE]: "kept" })).toEqual({
+      [OTHER_PROBE]: "kept",
+    });
   });
 
-  it("should let the real environment win over the file", () => {
-    givenEnvFile("BOT_TOKEN=from-file");
-    process.env.BOT_TOKEN = "from-process";
+  it("should keep an empty value, so requireEnv is the one that rejects it", () => {
+    process.env[PROBE] = "";
 
-    expect(loadEnv().BOT_TOKEN).toBe("from-process");
+    expect(loadEnv()[PROBE]).toBe("");
   });
 
-  it("should drop undefined process values instead of exposing them", () => {
-    givenEnvFile("");
-    delete process.env.DEFINITELY_UNSET;
+  it("should take a fresh reading on every call", () => {
+    process.env[PROBE] = "before";
+    const first = loadEnv()[PROBE];
+    process.env[PROBE] = "after";
 
-    expect(Object.keys(loadEnv())).not.toContain("DEFINITELY_UNSET");
+    expect([first, loadEnv()[PROBE]]).toEqual(["before", "after"]);
+  });
+
+  it("should hand back a copy, so a caller cannot edit the process environment", () => {
+    process.env[PROBE] = "original";
+    const env = loadEnv();
+
+    env[PROBE] = "tampered";
+
+    expect(process.env[PROBE]).toBe("original");
   });
 });

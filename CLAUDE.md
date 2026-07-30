@@ -386,6 +386,23 @@ to be compared against.
 
 ## Configuration
 
-Secrets live in `.env` (gitignored) next to `.env.example`, which is the
-shareable template and must list every key the app reads. Read them in one place
-— `shared/config/env.ts` — and pass values down; no `process.env` in feature code.
+Secrets live in `.env` and `.env.production`, both gitignored, next to
+`.env.example` — the shareable template, which must list every key the app reads.
+Read them in one place — `shared/config/env.ts` — and pass values down; no
+`process.env` in feature code.
+
+**Node loads the file, we do not parse it.** `npm start` and `npm run start:prod`
+pass `--env-file`, so `loadEnv()` is a copy of `process.env` and nothing else. The
+hand-rolled reader that used to live here is gone: it meant `.env` was read even
+during a production run, so a key missing from `.env.production` was inherited
+instead of missing. Two consequences to keep:
+
+- **One file is the whole configuration for its run.** No fallback between them.
+- **The unsafe target needs an explicit command.** `DB_PATH` defaults to the dev
+  database, so forgetting a variable cannot reach production; `--env-file` (not
+  `--env-file-if-exists`) makes the production command refuse to start without its
+  file.
+
+`loadEnv(source = process.env)` takes its source as an argument. That is not
+configurability — it is the only way to exercise the `undefined` branch its type
+demands, since `process.env` never holds one.
