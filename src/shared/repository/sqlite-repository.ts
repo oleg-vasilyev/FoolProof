@@ -1,43 +1,27 @@
 import { db, SERIES_GAP_SECONDS } from "#shared/sqlite-connection.ts";
+import { num, numberOr, text } from "#shared/repository/column-values.ts";
+import {
+  groupByGame,
+  toExit,
+  toGame,
+  toPlayer,
+  toPlayerColumn,
+  toSeat,
+  type Row,
+} from "#shared/repository/row-records.ts";
 import type {
   CardRecord,
-  ChronologyGame,
   ExitRecord,
-  Finalist,
-  GameRecord,
-  PlayerRecord,
   Repository,
   SeatRecord,
 } from "#shared/repository/repository-contract.ts";
 
 
-type Row = Record<string, unknown>;
-
-const LAST = -1;
+const FIRST_GAME = 1;
 
 const LATEST_SERIES = `SELECT id, started_at FROM game_series
    WHERE chat_id = ?
      AND series_no = (SELECT MAX(series_no) FROM game_series WHERE chat_id = ?)`;
-
-const num = (value: unknown): number => {
-  if (typeof value === "number") {
-    return value;
-  }
-
-  if (typeof value === "bigint") {
-    return Number(value);
-  }
-
-  return 0;
-};
-
-const nullableNum = (value: unknown): number | null =>
-  value === null || value === undefined ? null : num(value);
-
-const text = (value: unknown): string => (typeof value === "string" ? value : "");
-
-const nullableText = (value: unknown): string | null =>
-  typeof value === "string" ? value : null;
 
 const transact = <T>(run: () => T): T => {
   db.exec("BEGIN");
@@ -51,50 +35,6 @@ const transact = <T>(run: () => T): T => {
     throw error;
   }
 };
-
-const toPlayer = (row: Row): PlayerRecord => ({
-  id: num(row.id),
-  chat_id: num(row.chat_id),
-  display_name: text(row.display_name),
-});
-
-const toGame = (row: Row): GameRecord => ({
-  id: num(row.id),
-  chat_id: num(row.chat_id),
-  message_id: num(row.message_id),
-  state: text(row.state),
-  state_version: num(row.state_version),
-  starter_player_id: nullableNum(row.starter_player_id),
-  started_at: text(row.started_at),
-  confirmed_at: nullableText(row.confirmed_at),
-});
-
-const toSeat = (row: Row): SeatRecord => ({
-  player_id: num(row.player_id),
-  seat_index: num(row.seat_index),
-  display_name: text(row.display_name),
-});
-
-const toExit = (row: Row): ExitRecord => ({
-  player_id: num(row.player_id),
-  position: num(row.position),
-});
-
-const groupByGame = (rows: readonly Row[]): readonly ChronologyGame[] =>
-  rows.reduce<readonly ChronologyGame[]>((games, row) => {
-    const gameId = num(row.game_id);
-    const placement = { playerId: num(row.player_id), position: num(row.position) };
-    const open = games.at(LAST);
-
-    if (open?.gameId !== gameId) {
-      return [...games, { gameId, placements: [placement] }];
-    }
-
-    return [
-      ...games.slice(0, LAST),
-      { gameId, placements: [...open.placements, placement] },
-    ];
-  }, []);
 
 const seatsOf = (gameId: number): readonly SeatRecord[] =>
   db
@@ -146,9 +86,7 @@ export const sqliteRepository: Repository = {
 
   liveCardInChat(chatId) {
     return cardFrom(
-      db
-        .prepare("SELECT * FROM games WHERE chat_id = ? AND confirmed_at IS NULL")
-        .get(chatId)
+      db.prepare("SELECT * FROM games WHERE chat_id = ? AND confirmed_at IS NULL").get(chatId)
     );
   },
 
@@ -267,7 +205,7 @@ export const sqliteRepository: Repository = {
       )
       .get(chatId, chatId, chatId, SERIES_GAP_SECONDS);
 
-    return row === undefined ? 1 : num(row.game_no);
+    return numberOr(row?.game_no, FIRST_GAME);
   },
 
   seriesChronology(chatId) {
@@ -305,10 +243,8 @@ export const sqliteRepository: Repository = {
          ORDER BY started_at, game_id, seat_index`
       )
       .all(chatId, chatId)
-      .map((row) => ({ playerId: num(row.player_id), displayName: text(row.display_name) }));
+      .map(toPlayerColumn);
 
     return { startedOn: text(startedOn), players, games: groupByGame(played) };
   },
 };
-
-export type { Finalist };

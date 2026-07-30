@@ -1,6 +1,6 @@
 ---
 name: add-repository-method
-description: Add a query or write to the FoolProof repository layer. Use whenever a feature needs data it cannot currently get — new SQL, a new domain method, a new column read. Covers the four files that must change together and the two rules that make the layer worth having.
+description: Add a query or write to the FoolProof repository layer. Use whenever a feature needs data it cannot currently get — new SQL, a new domain method, a new column read. Covers the files that must change together and the two rules that make the layer worth having.
 ---
 
 # Adding a repository method
@@ -9,7 +9,8 @@ Features never touch the database. They depend on the interface and call named
 domain methods, so adding a query means adding a method — never a query built at
 the call site.
 
-Four files change together. Skipping one is what breaks the layer.
+Four files change together, and a fifth if the method returns a new shape.
+Skipping one is what breaks the layer.
 
 ## 1. `src/shared/repository/repository-contract.ts`
 
@@ -29,6 +30,22 @@ here.
   failure leaves nothing partial behind.
 - No knowledge of column names may leak out of this file. Map rows to the shape
   the interface promised before returning them.
+
+Keep this file to SQL. A row reaches its record shape through
+`row-records.ts`, and a column value reaches its type through `column-values.ts`
+— nothing here reads `typeof` or picks a fallback.
+
+## 2a. `src/shared/repository/row-records.ts` — only for a new shape
+
+If the method returns a record shape that has no mapper yet, add one here
+(`toGame`, `toSeat`, `toPlayerColumn` are the pattern) and give it a case in
+`row-records.spec.ts`, which mocks `column-values.ts` so the assertion is *which
+coercion each column got*.
+
+This split is the reason the layer is testable at all: anything importing the
+connection can only be exercised against a real SQLite, and a real SQLite never
+returns the wrong type for a column — so a defensive branch written in the SQL
+file is unreachable from its own spec, and the mutation score will say so.
 
 ## 3. `src/shared/repository/repository.stub.ts`
 

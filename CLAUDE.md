@@ -261,8 +261,21 @@ const card = repository.liveCardInChat(chatId);
   and the timestamp format that `PLAN.md` describes; nothing else may assume them.
 - `shared/repository/sqlite-repository.ts` — the **only** file allowed to contain
   SQL or to import the connection.
+- `shared/repository/column-values.ts` — `node:sqlite` hands back `unknown`, so
+  every column goes through one coercion here (`num`, `nullableNum`, `text`,
+  `nullableText`). Pure.
+- `shared/repository/row-records.ts` — turns rows into the record shapes the
+  contract promises, and nothing else. Pure.
 - `shared/repository/repository-instance.ts` — binds the contract to the SQLite
   implementation. It is the one file a feature imports.
+
+**Keep the coercions and the mappers out of the SQL file**, even though they are
+about the database. A file that imports the connection can only be tested against
+a real one, and a real SQLite never returns the wrong type for a column — so every
+defensive branch inside it is unreachable from its own spec. Split out, the same
+branches are ordinary unit tests. That is what took this layer's mutation score
+from 90.48% to 98.51%: not one new SQL test, just moving the pure part somewhere a
+unit could reach it.
 
 No raw SQL, no query building, and no knowledge of column names outside the
 repository. Swapping storage engines should mean writing one new file. Adding a
