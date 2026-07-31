@@ -9,6 +9,7 @@ import { createShutdown } from "#shared/lifecycle/shutdown.ts";
 import { createLogger } from "#shared/logging/logger.ts";
 import { repository } from "#shared/repository/repository-instance.ts";
 import { createApiRetry } from "#shared/telegram/api-retry.ts";
+import { botClientOptions } from "#shared/telegram/bot-client-options.ts";
 
 
 const DEFAULT_LOG_LEVEL = "info";
@@ -18,7 +19,7 @@ const FIRST_START = 1;
 const log = createLogger("polling");
 const env = loadEnv();
 
-const bot = new Bot(requireEnv(env, "BOT_TOKEN"));
+const bot = new Bot(requireEnv(env, "BOT_TOKEN"), botClientOptions(env, log));
 
 bot.api.config.use(createApiRetry(log));
 

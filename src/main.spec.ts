@@ -5,6 +5,7 @@ import { RepositoryInstanceStub } from "#shared/repository/repository-instance.s
 import { ShutdownStub } from "#shared/lifecycle/shutdown.stub.ts";
 import { CrashExitStub } from "#shared/lifecycle/crash-exit.stub.ts";
 import { ApiRetryStub } from "#shared/telegram/api-retry.stub.ts";
+import { BotClientOptionsStub } from "#shared/telegram/bot-client-options.stub.ts";
 
 
 const ONCE = 1;
@@ -42,6 +43,10 @@ const repository = new RepositoryInstanceStub();
 const crashExit = new CrashExitStub();
 
 const apiRetry = new ApiRetryStub();
+
+const clientOptions = new BotClientOptionsStub();
+
+const CLIENT_OPTIONS = { client: { apiRoot: "http://127.0.0.1:8081" } };
 
 const order: string[] = [];
 
@@ -95,8 +100,8 @@ vi.mock("grammy", () => ({
     public start = startSpy;
     public stop = stopSpy;
 
-    public constructor(token: string) {
-      botSpy(token);
+    public constructor(token: string, options: unknown) {
+      botSpy(token, options);
     }
   },
 }));
@@ -114,6 +119,8 @@ vi.mock("#app/feature-installer.ts", () => ({
 vi.mock("#shared/lifecycle/crash-exit.ts", () => crashExit.module);
 
 vi.mock("#shared/telegram/api-retry.ts", () => apiRetry.module);
+
+vi.mock("#shared/telegram/bot-client-options.ts", () => clientOptions.module);
 
 vi.mock("#live-game/live-game-feature.ts", () => ({
   createLiveGameFeature: (deps: unknown) => createLiveGameFeatureSpy(deps),
@@ -136,6 +143,7 @@ vi.mock("#shared/repository/repository-instance.ts", () => repository.module);
 describe("main.ts", () => {
   beforeAll(async () => {
     env.requireEnvSpy.mockReturnValue(TOKEN_FROM_ENV);
+    clientOptions.botClientOptionsSpy.mockReturnValue(CLIENT_OPTIONS);
     vi.spyOn(process, "once").mockImplementation(((event: string, handler: () => void) => {
       signalHandlers.set(event, handler);
 
@@ -146,11 +154,23 @@ describe("main.ts", () => {
   });
 
   it("should build the bot with the token from the environment", () => {
-    expect(botSpy).toHaveBeenCalledWith(TOKEN_FROM_ENV);
+    expect(botSpy).toHaveBeenCalledWith(TOKEN_FROM_ENV, expect.anything());
   });
 
   it("should ask for BOT_TOKEN out of the loaded environment, not read it itself", () => {
     expect(env.requireEnvSpy).toHaveBeenCalledWith(env.loaded, "BOT_TOKEN");
+  });
+
+  it("should build the bot with the client options it was handed", () => {
+    expect(botSpy).toHaveBeenCalledWith(expect.anything(), CLIENT_OPTIONS);
+  });
+
+  it("should read the client options out of the loaded environment", () => {
+    expect(clientOptions.envGiven()).toBe(env.loaded);
+  });
+
+  it("should let the client options warn through the same logger", () => {
+    expect(clientOptions.logGiven()).toBe(logging.logger);
   });
 
   it("should hand the card feature the real repository", () => {
