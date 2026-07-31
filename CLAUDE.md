@@ -109,6 +109,7 @@ noun: `live-game/` is the game running right now on a card of buttons,
 
 ```
 src/
+  supervisor.ts         starts main.ts again when it dies
   main.ts               names the features and wires them
   feature-installer.ts  registers whatever it was given
   features/
@@ -116,7 +117,7 @@ src/
     scoresheet/         the /stats picture
   shared/
     config/             reading .env, and where the project root is
-    lifecycle/          draining the stops, and exiting loudly on a crash
+    lifecycle/          draining the stops, restarting after a crash
     logging/            the scoped logger
     repository/         the connection, the contract, the SQL
     telegram/           Bot API context types, the feature contract, api retries
@@ -124,13 +125,20 @@ src/
     timing/             the edit debouncer
 ```
 
+**There are two entry points, and the outer one owns no behaviour.**
+`supervisor.ts` resolves a path, names a log scope and hands both to
+`shared/lifecycle/child-supervisor.ts`; the decision of *whether* to restart is a
+pure function in `restart-policy.ts`. Splitting it three ways is what makes a
+restart loop testable at all — the policy is exercised as arithmetic, and the
+supervisor is exercised against a fake child process.
+
 `shared/lifecycle/crash-exit.ts` is why a death has a reason in the log. It matters
 more than it looks: `main.ts` ends in a **top-level `await bot.start()`**, and a
 rejection there arrives as **`uncaughtException`**, not `unhandledRejection` — so a
 handler for only the latter would print a bare stack with no scope and no clue.
 Both are installed, both log through the scoped logger, and both exit non-zero so
-whatever started the process can tell a crash from a shutdown. Neither tries to
-carry on: the state is unknown by definition.
+the supervisor treats it as a crash. Neither tries to carry on: the state is unknown
+by definition.
 
 **Everything in `shared/` lives in a folder named after its subject**, including
 the ones holding a single module plus its spec. The alternative was a folder for

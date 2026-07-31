@@ -104,6 +104,16 @@ machine that will run the bot rather than copied from another one.
 
 ## When something goes wrong
 
+Both commands start a **supervisor**, which runs the bot as a child process and
+starts it again if it dies — 1 s, then 2, 4, 8, up to a minute apart. Everything the
+bot prints still goes straight to your terminal; the extra lines say `supervisor:`.
+
+```
+INFO  supervisor: starting the bot
+INFO  polling: listening for updates by long polling
+WARN  supervisor: the bot died (exit code 1), starting it again in 1000ms
+```
+
 Lose the wifi and nothing needs doing: every call to Telegram is retried, the card
 catches up when the connection comes back, and the log says so once at each end
 rather than once per retry.
@@ -118,14 +128,24 @@ what is on screen is always what was actually recorded. A tap that arrives again
 card whose buttons are out of date redraws it too, instead of refusing every further
 tap.
 
-`PLAN.md` explains what each failure costs.
+A bot that has never managed to run for a minute is given five tries and then
+abandoned, so a missing token or a locked database is one clear message instead of a
+loop:
+
+```
+ERROR supervisor: the bot never got going (exit code 1) — fix what the log above says and start it again
+```
+
+`Ctrl+C` stops both, and lets the bot finish the edit it was in the middle of.
+`PLAN.md` explains what each failure costs and why the supervisor does not forward
+the signal itself.
 
 ## Scripts
 
 | Script | What it runs |
 |---|---|
-| `npm start` | The bot on the dev database |
-| `npm run start:prod` | The bot on the production database |
+| `npm start` | The bot on the dev database, under the supervisor |
+| `npm run start:prod` | The bot on the production database, under the supervisor |
 | `npm test` | Vitest, once — units and integration together |
 | `npm run test:unit` | Only the unit specs, where everything outside the file is mocked |
 | `npm run test:integration` | Only `*.integration.spec.ts` — the real grammY bot and a real SQLite file |
@@ -145,6 +165,7 @@ composition root, which names the roster.
 
 ```
 src/
+  supervisor.ts         runs main.ts and starts it again if it dies
   main.ts               names the features and wires them; starts polling
   feature-installer.ts  registers whatever features it was given
   features/

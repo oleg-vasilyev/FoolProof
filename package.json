@@ -13,8 +13,8 @@
     "#scoresheet/*": "./src/features/scoresheet/*"
   },
   "scripts": {
-    "start": "node --env-file-if-exists=.env src/main.ts",
-    "start:prod": "node --env-file=.env.production src/main.ts",
+    "start": "node --env-file-if-exists=.env src/supervisor.ts",
+    "start:prod": "node --env-file=.env.production src/supervisor.ts",
     "test": "vitest run",
     "test:unit": "vitest run --exclude \"**/*.integration.spec.ts\"",
     "test:integration": "vitest run integration.spec",

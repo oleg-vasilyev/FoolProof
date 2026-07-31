@@ -515,10 +515,32 @@ promise is logged through the scoped logger and the process exits non-zero, so t
 last line of the log says what happened rather than the console printing a bare
 stack.
 
+Restarting is a supervisor's job, not the bot's: `src/supervisor.ts` runs the bot as
+a child process and starts it again when it dies, waiting 1 s, then 2, 4, 8 … up to
+a minute. A minute of quiet is treated as a working run, so an unrelated crash an
+hour later gets the fast retry again rather than an inherited backoff. An exit code
+of 0 is a shutdown and is never restarted.
+
+**The setup is wrong.** A bot that has *never* run for a full minute is given five
+tries and then abandoned with an explicit line in the log. A missing token or a
+database locked by the dev process would otherwise restart forever, printing the
+same failure once a minute and hiding the one message that says what to fix. Once
+the bot has worked, it is retried indefinitely — during a game, giving up is the
+worse answer.
+
+**Stopping it.** `Ctrl+C` in the terminal reaches both processes, because the console
+sends it to the whole group: the bot flushes its pending edit and exits, and the
+supervisor sees a stop was asked for and does not start it again. The supervisor
+therefore does **not** forward the signal itself — a second `SIGINT` would arrive
+after the bot's own one-shot handler had gone and kill it outright, losing the flush.
+It only waits, and kills the child after five seconds if it is still there, which is
+what happens when a signal reaches the parent alone.
+
 Nothing in the recovery path may become a new reason to fail: a feature that throws
 while catching up on startup is logged and skipped, the command menu is allowed to
 fail unpublished, and the bot starts anyway. A bot that will not start is worse than
-a bot with a stale `/` menu.
+a bot with a stale `/` menu — and a supervisor that keeps restarting a bot which
+cannot start is worse than both, which is why it counts its failures.
 
 ---
 
@@ -528,6 +550,7 @@ a bot with a stale `/` menu.
 |---|---|
 | The wifi drops mid-game | Taps queue on Telegram's side; the card catches up when it returns |
 | The bot is restarted mid-game | The card is redrawn from the database as it starts |
+| Two processes on one token | Telegram splits the updates; 409 ends polling, so run one |
 | A player sits a game out | A new `/game` without them; there must be no live card |
 | Two players go out at once mid-game | Record them in tap order. Acceptable noise |
 | A draw in a two-player game | The button is available from the very start |
