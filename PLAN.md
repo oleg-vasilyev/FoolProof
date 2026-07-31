@@ -542,6 +542,40 @@ fail unpublished, and the bot starts anyway. A bot that will not start is worse 
 a bot with a stale `/` menu — and a supervisor that keeps restarting a bot which
 cannot start is worse than both, which is why it counts its failures.
 
+### Asking the bot how it is doing
+
+The bot runs on a laptop at home; the person responsible for it has a phone. So the
+bot has to be able to answer the questions the terminal would have answered:
+
+- **which database is open** — the file name, its size, and what is recorded in it.
+  This is the one that earns the command: a production evening that came up on the
+  dev database looks completely normal in the chat, and nothing else would reveal it
+- **how long this process has been up**, which start it is, and how the previous one
+  ended — a restart nobody saw is otherwise invisible
+- **the log level**, since it decides what the log could even hold
+- **how many warnings and errors** have happened since the start, and the last
+  handful of them verbatim
+
+`/status` is **hidden**: registered like any command, but left out of `/help` and out
+of `setMyCommands`, so the group never learns it exists. `OPERATOR_TG_ID` may name
+the one Telegram user it answers; with no id set it answers anyone, because nothing
+in the report is a secret. **No environment value is ever printed** — not the token,
+not any other key: the report is built from a typed snapshot, not from the
+environment.
+
+The report is sent as **plain text, with no `parse_mode`**. A log line can contain
+anything, including angle brackets from an error message, and HTML parsing would
+either mangle it or fail the send outright.
+
+A refusal is logged at **info**, not as a warning: somebody else typing `/status`
+is not a fault of the bot's, and counting it would let anyone push the real problems
+out of the list of eight.
+
+The bot keeps the **last eight** problems in memory, alongside running counts. Eight
+is enough to see what a bad evening looked like and small enough that a bot left
+running for a month cannot grow into it. The list dies with the process — which is
+exactly why the supervisor tells the new process how the old one ended.
+
 ---
 
 ## Edge cases

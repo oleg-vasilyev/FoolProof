@@ -6,9 +6,10 @@ const values = new ColumnValuesStub();
 
 vi.mock("#shared/repository/column-values.ts", () => values.module);
 
-const { groupByGame, toExit, toGame, toPlayer, toPlayerColumn, toSeat } = await import(
-  "#shared/repository/row-records.ts"
-);
+const { groupByGame, toExit, toGame, toPlayer, toPlayerColumn, toSeat, toStorageSummary } =
+  await import("#shared/repository/row-records.ts");
+
+const DB_FILE = "/repo/data/foolproof.db";
 
 const ONE = 1;
 
@@ -143,6 +144,35 @@ describe("row mappers", () => {
         playerId: AS_NUMBER,
         displayName: AS_TEXT,
       });
+    });
+  });
+
+  describe("toStorageSummary()", () => {
+    const row = { size_bytes: ONE, players: TWO, games: THREE, live_cards: ONE, last_game_at: "x" };
+
+    it("should take each column through the coercion its type needs", () => {
+      expect(toStorageSummary(row, DB_FILE)).toEqual({
+        file: DB_FILE,
+        sizeBytes: AS_NUMBER,
+        players: AS_NUMBER,
+        games: AS_NUMBER,
+        liveCards: AS_NUMBER,
+        lastGameAt: AS_NULLABLE_TEXT,
+      });
+    });
+
+    it("should carry the file through untouched, since no column holds it", () => {
+      expect(toStorageSummary(row, DB_FILE).file).toBe(DB_FILE);
+    });
+
+    it("should treat a missing row as a database with nothing in it", () => {
+      toStorageSummary(undefined, DB_FILE);
+
+      expect(values.numSpy).toHaveBeenCalledWith(undefined);
+    });
+
+    it("should still name the file when there is no row", () => {
+      expect(toStorageSummary(undefined, DB_FILE).file).toBe(DB_FILE);
     });
   });
 });

@@ -10,7 +10,7 @@ const DEFAULT_DB_PATH = "data/foolproof.dev.db";
 
 const BUSY_TIMEOUT_MS = 5000;
 
-const dbFile = resolve(rootDir, loadEnv().DB_PATH ?? DEFAULT_DB_PATH);
+export const dbFile = resolve(rootDir, loadEnv().DB_PATH ?? DEFAULT_DB_PATH);
 mkdirSync(dirname(dbFile), { recursive: true });
 
 export const db = new DatabaseSync(dbFile);

@@ -1,4 +1,4 @@
-import { db, SERIES_GAP_SECONDS } from "#shared/repository/sqlite-connection.ts";
+import { db, dbFile, SERIES_GAP_SECONDS } from "#shared/repository/sqlite-connection.ts";
 import { num, numberOr, text } from "#shared/repository/column-values.ts";
 import {
   groupByGame,
@@ -7,6 +7,7 @@ import {
   toPlayer,
   toPlayerColumn,
   toSeat,
+  toStorageSummary,
   type Row,
 } from "#shared/repository/row-records.ts";
 import type {
@@ -87,6 +88,22 @@ export const sqliteRepository: Repository = {
     return cardFrom(
       db.prepare("SELECT * FROM games WHERE chat_id = ? AND confirmed_at IS NULL").get(chatId)
     );
+  },
+
+  storageSummary() {
+    const row = db
+      .prepare(
+        `SELECT
+           (SELECT page_count * page_size FROM pragma_page_count(), pragma_page_size())
+             AS size_bytes,
+           (SELECT COUNT(*) FROM players) AS players,
+           (SELECT COUNT(*) FROM games) AS games,
+           (SELECT COUNT(*) FROM games WHERE confirmed_at IS NULL) AS live_cards,
+           (SELECT MAX(started_at) FROM games) AS last_game_at`
+      )
+      .get();
+
+    return toStorageSummary(row, dbFile);
   },
 
   liveCards() {

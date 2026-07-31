@@ -91,6 +91,13 @@ the table flat and keyed, and put anything with a count behind a function rather
 than concatenating at the call site: that is the seam that makes a second locale
 a small change — the `.en` in the filename is what names that seam.
 
+**A copy function interpolates; it never decides.** Choosing between `1 warning` and
+`2 warnings` is a `render/` job (`diagnostics/render/human-units.ts`), and the copy
+function takes the finished fragment. The reason is mechanical: specs leave the copy
+table real on purpose, so a decision made inside it is compared against itself and no
+test can catch it breaking — see the `write-a-spec` skill for the five mutants that
+proved it.
+
 Player names are user data, not copy. Matching normalises via Unicode NFC and
 lower case, plus `ё` → `е`; the parser must not assume latin
 (`features/live-game/domain/lineup-parsing.ts`).
@@ -105,7 +112,11 @@ only file that changes.
 
 **A feature folder is named after what the player gets**, not after an internal
 noun: `live-game/` is the game running right now on a card of buttons,
-`scoresheet/` is the picture `/stats` sends back.
+`scoresheet/` is the picture `/stats` sends back. `diagnostics/` is the exception
+that proves the rule rather than breaking it — its reader is whoever runs the bot,
+and what they get is a diagnosis. It also has **no `domain/`**: there is nothing to
+decide, only storage and process facts to gather (`bot/`) and a message to lay out
+(`render/`). An empty folder would be worse than a missing one.
 
 ```
 src/
@@ -115,6 +126,7 @@ src/
   features/
     live-game/          playing a game on a live card
     scoresheet/         the /stats picture
+    diagnostics/        the /status report about the bot itself
   shared/
     config/             reading .env, and where the project root is
     lifecycle/          draining the stops, restarting after a crash
@@ -236,6 +248,11 @@ So a feature does **not** get the `Bot`. It declares `commands`, and optionally 
 feature's commands first, then the listeners. A feature physically cannot register a command late.
 `/help` and the `/` menu are both generated from the same command list, so they
 cannot drift from what is installed.
+
+A command may be **hidden**: `hidden: true` on the route keeps it out of `/help` and
+out of `setMyCommands` while still registering it. The installer therefore filters
+twice from one list — everything gets registered, only the listed ones get published
+— which is what stops a hidden command from drifting into the menu later.
 
 A feature may also declare `resume`, called once by `resumeFeatures()` after the
 commands are installed and before polling starts — the seam for catching up on

@@ -4,6 +4,8 @@ import type { ChildProcess } from "node:child_process";
 
 type Listener = (...args: readonly unknown[]) => void;
 
+const FIRST_SPAWN = 0;
+
 
 export class SpawnStub {
   public spawnSpy = vi.fn();
@@ -32,8 +34,10 @@ export class SpawnStub {
     return this.spawnSpy.mock.calls[0]?.[1];
   }
 
-  public optionsGiven(): { stdio?: string } | undefined {
-    return this.spawnSpy.mock.calls[0]?.[2];
+  public optionsGiven(spawn = FIRST_SPAWN):
+    | { stdio?: string; env?: Record<string, string | undefined> }
+    | undefined {
+    return this.spawnSpy.mock.calls[spawn]?.[2];
   }
 
   public exitWith(code: number | null, signal: string | null = null): void {

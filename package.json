@@ -10,7 +10,8 @@
     "#app/*": "./src/*",
     "#shared/*": "./src/shared/*",
     "#live-game/*": "./src/features/live-game/*",
-    "#scoresheet/*": "./src/features/scoresheet/*"
+    "#scoresheet/*": "./src/features/scoresheet/*",
+    "#diagnostics/*": "./src/features/diagnostics/*"
   },
   "scripts": {
     "start": "node --env-file-if-exists=.env src/supervisor.ts",

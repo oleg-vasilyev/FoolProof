@@ -140,6 +140,35 @@ ERROR supervisor: the bot never got going (exit code 1) — fix what the log abo
 `PLAN.md` explains what each failure costs and why the supervisor does not forward
 the signal itself.
 
+## Asking the bot how it is doing
+
+The laptop is at home and you are not. **`/status`** answers from the chat with
+everything the terminal would have told you:
+
+```
+Bot status
+
+Database: foolproof.db (44 KB)
+Recorded: 6 players, 28 games, 0 live
+Last game: 2026-07-31 19:42:10 UTC
+
+Up for 3h 12m
+Start #2 — the one before it ended with exit code 1
+Log level: info
+Since this start: 1 warning, 0 errors
+
+Latest:
+19:31:04 WARN polling: could not edit message 500: message to edit not found
+```
+
+The database line is the one that matters most: it names the file, so a production
+run that quietly came up on the dev database is one glance away from being caught.
+
+The command is **hidden** — it is not in `/help` and not in the `/` menu, so the
+group never sees it. Set `OPERATOR_TG_ID` in the env file to make it answer only
+you; leave it empty and anyone may run it. Nothing in the report is a secret: the
+token is never printed, and neither is any other environment value.
+
 ## Scripts
 
 | Script | What it runs |

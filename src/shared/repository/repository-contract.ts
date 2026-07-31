@@ -80,4 +80,20 @@ export interface ScoresheetRepository {
   seriesChronology(chatId: number): SeriesChronology | null;
 }
 
-export interface Repository extends CardRepository, ScoresheetRepository {}
+export interface StorageSummary {
+  file: string;
+  sizeBytes: number;
+  players: number;
+  games: number;
+  liveCards: number;
+  lastGameAt: string | null;
+}
+
+export interface DiagnosticsRepository {
+  storageSummary(): StorageSummary;
+}
+
+export interface Repository
+  extends CardRepository,
+    ScoresheetRepository,
+    DiagnosticsRepository {}

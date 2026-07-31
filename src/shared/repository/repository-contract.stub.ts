@@ -7,10 +7,22 @@ import type {
   Repository,
   SeatRecord,
   SeriesChronology,
+  StorageSummary,
 } from "#shared/repository/repository-contract.ts";
 
 
 const FIRST_GAME_NUMBER = 1;
+
+const NOTHING = 0;
+
+const EMPTY_STORAGE: StorageSummary = {
+  file: "/repo/data/stub.db",
+  sizeBytes: NOTHING,
+  players: NOTHING,
+  games: NOTHING,
+  liveCards: NOTHING,
+  lastGameAt: null,
+};
 
 export class RepositoryStub implements Repository {
   public playersInChatSpy = vi.fn();
@@ -29,6 +41,7 @@ export class RepositoryStub implements Repository {
   public idleCardsSpy = vi.fn();
   public gameNumberInSeriesSpy = vi.fn();
   public seriesChronologySpy = vi.fn();
+  public storageSummarySpy = vi.fn();
 
   public constructor() {
     this.playersInChatSpy.mockReturnValue([]);
@@ -45,6 +58,7 @@ export class RepositoryStub implements Repository {
     this.idleCardsSpy.mockReturnValue([]);
     this.gameNumberInSeriesSpy.mockReturnValue(FIRST_GAME_NUMBER);
     this.seriesChronologySpy.mockReturnValue(null);
+    this.storageSummarySpy.mockReturnValue(EMPTY_STORAGE);
   }
 
   public playersInChat(chatId: number): readonly PlayerRecord[] {
@@ -116,6 +130,10 @@ export class RepositoryStub implements Repository {
 
   public idleCards(idleSeconds: number): readonly GameRecord[] {
     return this.idleCardsSpy(idleSeconds);
+  }
+
+  public storageSummary(): StorageSummary {
+    return this.storageSummarySpy();
   }
 
   public gameNumberInSeries(chatId: number): number {

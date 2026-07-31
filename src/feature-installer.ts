@@ -8,11 +8,14 @@ const HELP = "help";
 
 const routesOf = (features: readonly Feature[]) => features.flatMap((feature) => feature.commands);
 
+const listedRoutesOf = (features: readonly Feature[]) =>
+  routesOf(features).filter((route) => route.hidden !== true);
+
 const helpBody = (features: readonly Feature[]): string =>
   [
     copy.helpLead,
     "",
-    ...routesOf(features).map((route) => route.help),
+    ...listedRoutesOf(features).map((route) => route.help),
     copy.helpSelf,
     "",
     ...features.flatMap((feature) => feature.notes ?? []),
@@ -34,7 +37,7 @@ export const publishCommandMenu = async (
 ): Promise<void> => {
   try {
     await api.setMyCommands([
-      ...routesOf(features).map((route) => ({
+      ...listedRoutesOf(features).map((route) => ({
         command: route.command,
         description: route.menuDescription,
       })),

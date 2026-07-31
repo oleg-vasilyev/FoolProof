@@ -190,6 +190,47 @@ describe("liveCardInChat()", () => {
   });
 });
 
+describe("storageSummary()", () => {
+  it("should name the file it is actually writing to", () => {
+    expect(repo.storageSummary().file).toContain("foolproof-sqlite-spec");
+  });
+
+  it("should report a real size, so an empty file is distinguishable", () => {
+    expect(repo.storageSummary().sizeBytes).toBeGreaterThan(NONE);
+  });
+
+  it("should count the players", () => {
+    seedPlayers("Oleg", "Anya");
+
+    expect(repo.storageSummary().players).toBe(TWO);
+  });
+
+  it("should count every game, finished or not", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    repo.openGame(CHAT_ID, ids);
+
+    expect(repo.storageSummary().games).toBe(TWO);
+  });
+
+  it("should count the live cards separately", () => {
+    repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));
+
+    expect(repo.storageSummary().liveCards).toBe(ONCE);
+  });
+
+  it("should have nothing to report about a database with no games", () => {
+    expect(repo.storageSummary().lastGameAt).toBeNull();
+  });
+
+  it("should date the newest game, which is how you tell tonight from last week", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+
+    expect(repo.storageSummary().lastGameAt).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+  });
+});
+
 describe("liveCards()", () => {
   it("should be empty when nothing is open anywhere", () => {
     expect(repo.liveCards()).toEqual([]);

@@ -26,6 +26,15 @@ Three consequences, the first absolute:
    behaviour; mocking it would compare a constant against itself. Everything with
    a body gets mocked.
 
+**The corollary bites: no logic may live in a data table.** Because `copy.en.ts` is
+deliberately never mocked, a decision taken inside it is asserted against itself and
+is therefore **unkillable** — a spec comparing `report` to `copy.problemTally(…)`
+proves nothing about either. This has already happened: a pluraliser
+(`1 warning` / `2 warnings`) put in `diagnostics/copy.en.ts` left five surviving
+mutants until it moved to `render/human-units.ts`, where it is a unit with its own
+cases and the copy function takes the finished fragment. A count still belongs behind
+a copy function — the *choice of word* belongs in `render/`.
+
 ## Mocking is usually the more direct test
 
 It is not a weaker substitute for the real thing. It is often the only way to

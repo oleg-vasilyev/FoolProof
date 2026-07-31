@@ -17,7 +17,21 @@ const TWO = 2;
 
 const TOKEN_FROM_ENV = "424242:token-from-env";
 
-const env = new EnvStub({ BOT_TOKEN: TOKEN_FROM_ENV });
+const LOG_LEVEL_FROM_ENV = "debug";
+
+const START_ATTEMPT = 3;
+
+const PREVIOUS_EXIT = "exit code 1";
+
+const OPERATOR_TG_ID = "777";
+
+const env = new EnvStub({
+  BOT_TOKEN: TOKEN_FROM_ENV,
+  LOG_LEVEL: LOG_LEVEL_FROM_ENV,
+  BOT_START_ATTEMPT: String(START_ATTEMPT),
+  BOT_PREVIOUS_EXIT: PREVIOUS_EXIT,
+  OPERATOR_TG_ID,
+});
 
 const shutdown = new ShutdownStub();
 
@@ -48,6 +62,10 @@ const cardStopSpy = vi.fn(async (): Promise<void> => undefined);
 const CARD_FEATURE = { commands: [{ command: "game" }], stop: cardStopSpy };
 
 const SESSION_FEATURE = { commands: [{ command: "stats" }] };
+
+const DIAGNOSTICS_FEATURE = { commands: [{ command: "status", hidden: true }] };
+
+const createDiagnosticsFeatureSpy = vi.fn((_deps: unknown) => DIAGNOSTICS_FEATURE);
 
 const createLiveGameFeatureSpy = vi.fn((_deps: unknown) => CARD_FEATURE);
 
@@ -105,6 +123,10 @@ vi.mock("#scoresheet/scoresheet-feature.ts", () => ({
   createScoresheetFeature: (deps: unknown) => createScoresheetFeatureSpy(deps),
 }));
 
+vi.mock("#diagnostics/diagnostics-feature.ts", () => ({
+  createDiagnosticsFeature: (deps: unknown) => createDiagnosticsFeatureSpy(deps),
+}));
+
 vi.mock("#shared/lifecycle/shutdown.ts", () => shutdown.module);
 
 vi.mock("#shared/config/env.ts", () => env.module);
@@ -147,8 +169,42 @@ describe("main.ts", () => {
     expect(createScoresheetFeatureSpy).toHaveBeenCalledWith({ repo: repository.stub });
   });
 
-  it("should install both features", () => {
-    expect(installFeaturesSpy.mock.calls[0]?.[1]).toEqual([CARD_FEATURE, SESSION_FEATURE]);
+  it("should install every feature", () => {
+    expect(installFeaturesSpy.mock.calls[0]?.[1]).toEqual([
+      CARD_FEATURE,
+      SESSION_FEATURE,
+      DIAGNOSTICS_FEATURE,
+    ]);
+  });
+
+  it("should hand diagnostics the real repository, so /status reads the live database", () => {
+    expect(createDiagnosticsFeatureSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ repo: repository.stub })
+    );
+  });
+
+  it("should tell diagnostics which log level is in force", () => {
+    expect(createDiagnosticsFeatureSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ logLevel: LOG_LEVEL_FROM_ENV })
+    );
+  });
+
+  it("should tell diagnostics which start this is, so a restart is visible", () => {
+    expect(createDiagnosticsFeatureSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ startAttempt: START_ATTEMPT })
+    );
+  });
+
+  it("should pass on how the previous start ended", () => {
+    expect(createDiagnosticsFeatureSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ previousExit: PREVIOUS_EXIT })
+    );
+  });
+
+  it("should pass on who may ask for the status", () => {
+    expect(createDiagnosticsFeatureSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ operatorTgId: OPERATOR_TG_ID })
+    );
   });
 
   it("should install the features before publishing the menu", () => {
@@ -162,7 +218,7 @@ describe("main.ts", () => {
   it("should publish a menu built from the installed features", () => {
     expect(publishCommandMenuSpy).toHaveBeenCalledWith(
       botApi,
-      [CARD_FEATURE, SESSION_FEATURE],
+      [CARD_FEATURE, SESSION_FEATURE, DIAGNOSTICS_FEATURE],
       logging.logger
     );
   });
@@ -187,7 +243,7 @@ describe("main.ts", () => {
 
   it("should let the features pick up what the last run left behind", () => {
     expect(resumeFeaturesSpy).toHaveBeenCalledWith(
-      [CARD_FEATURE, SESSION_FEATURE],
+      [CARD_FEATURE, SESSION_FEATURE, DIAGNOSTICS_FEATURE],
       logging.logger
     );
   });

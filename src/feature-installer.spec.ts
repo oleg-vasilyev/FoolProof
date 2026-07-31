@@ -49,13 +49,24 @@ const listensToText = (name: string): Feature =>
 describe("installFeatures()", () => {
   let bot: BotMock;
 
+  const replySpy = vi.fn();
+
   const install = (features: readonly Feature[]) =>
     installFeatures(bot as never, features, logStub);
+
+  const helpText = async (features: readonly Feature[]): Promise<string> => {
+    install(features);
+    const registered = bot.commandSpy.mock.calls.find((call) => call[0] === "help")?.[1];
+    await (registered as (ctx: unknown) => Promise<void>)({ reply: replySpy });
+
+    return String(replySpy.mock.calls[0]?.[0]);
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     bot = new BotMock();
+    replySpy.mockResolvedValue(undefined);
   });
 
   describe("registration order", () => {
@@ -145,21 +156,6 @@ describe("installFeatures()", () => {
   });
 
   describe("help", () => {
-    const replySpy = vi.fn();
-
-    const helpText = async (features: readonly Feature[]): Promise<string> => {
-      install(features);
-      const registered = bot.commandSpy.mock.calls.find((call) => call[0] === "help")?.[1];
-      await (registered as (ctx: unknown) => Promise<void>)({ reply: replySpy });
-
-      return String(replySpy.mock.calls[0]?.[0]);
-    };
-
-    beforeEach(() => {
-      replySpy.mockClear();
-      replySpy.mockResolvedValue(undefined);
-    });
-
     it("should open with the lead line", async () => {
       expect(await helpText([featureOf({ name: "game" })])).toContain(copy.helpLead);
     });
@@ -208,6 +204,37 @@ describe("installFeatures()", () => {
       const lines = (await helpText([featureOf({ name: "game" })])).split("\n");
 
       expect(lines[1]).toBe("");
+    });
+  });
+
+  describe("a hidden command", () => {
+    const hiddenFeature = featureOf({
+      name: "status",
+      commands: [
+        {
+          command: "status",
+          menuDescription: "how the bot is doing",
+          help: "/status — how the bot is doing",
+          hidden: true,
+          run: vi.fn(async () => undefined),
+        },
+      ],
+    });
+
+    it("should still be registered, or it could not be used at all", () => {
+      install([hiddenFeature]);
+
+      expect(bot.commandSpy).toHaveBeenCalledWith("status", expect.anything());
+    });
+
+    it("should stay out of /help", async () => {
+      expect(await helpText([hiddenFeature])).not.toContain("/status");
+    });
+
+    it("should not hide the commands that are not hidden", async () => {
+      const text = await helpText([featureOf({ name: "game" }), hiddenFeature]);
+
+      expect(text).toContain("/game");
     });
   });
 

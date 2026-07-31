@@ -14,6 +14,8 @@ const CRASH_EXIT = 1;
 
 const NO_DELAY = 0;
 
+const SECOND_SPAWN = 1;
+
 const ONE_FAILURE = { failures: 1, everRan: false };
 
 const HISTORY_SO_FAR = { failures: 3, everRan: true };
@@ -106,6 +108,54 @@ describe("superviseChild()", () => {
       await supervision;
 
       expect(spawnStub.optionsGiven()?.stdio).toBe("inherit");
+    });
+
+    it("should tell the bot which start this is, so /status can report a restart", async () => {
+      const supervision = supervise();
+      spawnStub.exitWith(CLEAN_EXIT);
+      await supervision;
+
+      expect(spawnStub.optionsGiven()?.env?.BOT_START_ATTEMPT).toBe("1");
+    });
+
+    it("should not invent a previous exit on the first start", async () => {
+      const supervision = supervise();
+      spawnStub.exitWith(CLEAN_EXIT);
+      await supervision;
+
+      expect(spawnStub.optionsGiven()?.env).not.toHaveProperty("BOT_PREVIOUS_EXIT");
+    });
+
+    it("should pass the whole environment on, or the bot would lose its token", async () => {
+      const supervision = supervise();
+      spawnStub.exitWith(CLEAN_EXIT);
+      await supervision;
+
+      expect(spawnStub.optionsGiven()?.env?.PATH).toBe(process.env.PATH);
+    });
+
+    it("should tell the restarted bot how the one before it died", async () => {
+      restartsOnce();
+
+      const supervision = supervise();
+      spawnStub.exitWith(CRASH_EXIT);
+      await vi.waitFor(() => expect(spawnStub.spawnSpy).toHaveBeenCalledTimes(TWICE));
+      spawnStub.exitWith(CLEAN_EXIT);
+      await supervision;
+
+      expect(spawnStub.optionsGiven(SECOND_SPAWN)?.env?.BOT_PREVIOUS_EXIT).toBe(DEATH_TEXT);
+    });
+
+    it("should count the restart in what it tells the new process", async () => {
+      restartsOnce();
+
+      const supervision = supervise();
+      spawnStub.exitWith(CRASH_EXIT);
+      await vi.waitFor(() => expect(spawnStub.spawnSpy).toHaveBeenCalledTimes(TWICE));
+      spawnStub.exitWith(CLEAN_EXIT);
+      await supervision;
+
+      expect(spawnStub.optionsGiven(SECOND_SPAWN)?.env?.BOT_START_ATTEMPT).toBe("2");
     });
 
     it("should say that it started something", async () => {

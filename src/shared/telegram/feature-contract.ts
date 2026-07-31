@@ -5,6 +5,7 @@ export interface CommandRoute {
   readonly command: string;
   readonly menuDescription: string;
   readonly help: string;
+  readonly hidden?: boolean;
   readonly run: (ctx: Command) => Promise<void>;
 }
 

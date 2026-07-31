@@ -1,3 +1,6 @@
+import { recordProblem } from "#shared/logging/log-history.ts";
+
+
 const LEVELS = { debug: 10, info: 20, warn: 30, error: 40 } as const;
 
 type Level = keyof typeof LEVELS;
@@ -16,6 +19,10 @@ export interface Logger {
 
 export function createLogger(scope: string): Logger {
   const emit = (level: Level, message: string): void => {
+    if (level === "warn" || level === "error") {
+      recordProblem(level, `${scope}: ${message}`);
+    }
+
     if (LEVELS[level] < threshold) {
       return;
     }

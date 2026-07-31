@@ -27,12 +27,24 @@ interface Supervision {
   child: ChildProcess | null;
   stopping: boolean;
   history: RestartHistory;
+  lastExit: string | null;
 }
+
+const STARTS_BEFORE_THIS = 1;
+
+const childEnv = (state: Supervision): NodeJS.ProcessEnv => ({
+  ...process.env,
+  BOT_START_ATTEMPT: String(state.history.failures + STARTS_BEFORE_THIS),
+  ...(state.lastExit === null ? {} : { BOT_PREVIOUS_EXIT: state.lastExit }),
+});
 
 const startChild = (supervised: SupervisedProcess, state: Supervision): Promise<Death> =>
   new Promise<Death>((settle) => {
     const startedAt = Date.now();
-    const child = spawn(process.execPath, [supervised.entry], { stdio: "inherit" });
+    const child = spawn(process.execPath, [supervised.entry], {
+      stdio: "inherit",
+      env: childEnv(state),
+    });
 
     state.child = child;
 
@@ -93,7 +105,12 @@ const listenForStop = (state: Supervision, log: Logger): void => {
 
 export const superviseChild = async (supervised: SupervisedProcess): Promise<void> => {
   const { log } = supervised;
-  const state: Supervision = { child: null, stopping: false, history: NO_RUNS };
+  const state: Supervision = {
+    child: null,
+    stopping: false,
+    history: NO_RUNS,
+    lastExit: null,
+  };
 
   listenForStop(state, log);
 
@@ -104,6 +121,7 @@ export const superviseChild = async (supervised: SupervisedProcess): Promise<voi
     const plan = planRestart(death, state.history, state.stopping);
 
     state.history = plan.history;
+    state.lastExit = describeDeath(death);
 
     if (!plan.restart) {
       reportGivingUp(plan.reason, death, log);
