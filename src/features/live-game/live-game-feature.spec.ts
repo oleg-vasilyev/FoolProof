@@ -52,6 +52,10 @@ vi.mock("#live-game/bot/update-handlers.ts", () => ({
   onTap: (context: unknown, ctx: unknown) => onTapSpy(context, ctx),
 }));
 
+const CARD_TAPS = /^the-card-taps$/;
+
+vi.mock("#live-game/render/callback-data-codec.ts", () => ({ CARD_TAPS }));
+
 const { createLiveGameFeature } = await import("#live-game/live-game-feature.ts");
 
 const ONCE = 1;
@@ -155,6 +159,12 @@ describe("createLiveGameFeature()", () => {
 
       expect(listeners.onTextSpy).toHaveBeenCalledTimes(ONCE);
       expect(listeners.onTapSpy).toHaveBeenCalledTimes(ONCE);
+    });
+
+    it("should claim only the taps the card codec encodes", () => {
+      build().listen?.(listeners);
+
+      expect(listeners.tapPattern()).toBe(CARD_TAPS);
     });
 
     it("should send a text message to the names handler", async () => {

@@ -39,7 +39,7 @@ describeScenario("/status answers the operator and nobody else", (chat) => {
 
 describeScenario("/help and the / menu agree", (chat) => {
   it("should publish the commands people use, and not the hidden one", () => {
-    expect(chat.commands()).toEqual(["game", "next", "stats", "help"]);
+    expect(chat.commands()).toEqual(["game", "next", "merge", "stats", "help"]);
   });
 
   it("should explain every published command", async () => {

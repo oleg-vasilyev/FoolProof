@@ -29,7 +29,34 @@ Dealt first: Oleg
 | `/game` | Same, but asks for the names — for when you tapped the command from the menu |
 | `/next` | A new card with the same line-up |
 | `/stats` | How the current session is going, as a rendered picture |
+| `/merge` | Folds a name typed twice into the right one |
 | `/help` | What the commands do and how the card works |
+
+### When one player ends up under two names
+
+Somebody types `Анна` once and `Аня` the rest of the evening, and `/stats` grows a
+sixth player who played one game. `/merge` shows every name with the games behind
+it, and the **first name you tap is the one that stays**:
+
+```
+Merging names
+Анна → Аня
+Аня will have 13 games.
+
+┌──────────────────────────────┐
+│        ⭐ Аня · 12           │
+├──────────────────────────────┤
+│        ➕ Анна · 1           │
+├──────────────────────────────┤
+│           Oleg · 12          │
+├──────────────┬───────────────┤
+│  ↩️ Back      │  ✅ Confirm   │
+└──────────────┴───────────────┘
+```
+
+Two names that sat in the same game are two people, so that merge is refused with
+the reason. So is a merge while a game is being played — confirm the card first.
+There is no undo, which is what the Confirm button is for.
 
 ## Running it
 

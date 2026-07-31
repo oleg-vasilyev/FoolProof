@@ -10,6 +10,7 @@
     "#app/*": "./src/*",
     "#shared/*": "./src/shared/*",
     "#live-game/*": "./src/features/live-game/*",
+    "#merge-names/*": "./src/features/merge-names/*",
     "#scoresheet/*": "./src/features/scoresheet/*",
     "#diagnostics/*": "./src/features/diagnostics/*"
   },

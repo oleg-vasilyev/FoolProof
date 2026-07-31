@@ -4,6 +4,7 @@ import type {
   Finalist,
   GameRecord,
   PlayerRecord,
+  PlayerTally,
   Repository,
   SeatRecord,
   SeriesChronology,
@@ -28,6 +29,9 @@ export class RepositoryStub implements Repository {
   public playersInChatSpy = vi.fn();
   public createPlayerSpy = vi.fn();
   public liveCardInChatSpy = vi.fn();
+  public rosterInChatSpy = vi.fn();
+  public playedTogetherSpy = vi.fn();
+  public mergePlayersSpy = vi.fn();
   public liveCardsSpy = vi.fn();
   public cardByIdSpy = vi.fn();
   public lastLineupSpy = vi.fn();
@@ -51,6 +55,8 @@ export class RepositoryStub implements Repository {
       display_name: displayName,
     }));
     this.liveCardInChatSpy.mockReturnValue(null);
+    this.rosterInChatSpy.mockReturnValue([]);
+    this.playedTogetherSpy.mockReturnValue(false);
     this.liveCardsSpy.mockReturnValue([]);
     this.cardByIdSpy.mockReturnValue(null);
     this.lastLineupSpy.mockReturnValue(null);
@@ -71,6 +77,18 @@ export class RepositoryStub implements Repository {
 
   public liveCardInChat(chatId: number): CardRecord | null {
     return this.liveCardInChatSpy(chatId);
+  }
+
+  public rosterInChat(chatId: number): readonly PlayerTally[] {
+    return this.rosterInChatSpy(chatId);
+  }
+
+  public playedTogether(playerIds: readonly number[]): boolean {
+    return this.playedTogetherSpy(playerIds);
+  }
+
+  public mergePlayers(keeperId: number, absorbedIds: readonly number[]): void {
+    this.mergePlayersSpy(keeperId, absorbedIds);
   }
 
   public liveCards(): readonly CardRecord[] {

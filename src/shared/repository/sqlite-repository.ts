@@ -6,6 +6,7 @@ import {
   toGame,
   toPlayer,
   toPlayerColumn,
+  toPlayerTally,
   toSeat,
   toStorageSummary,
   type Row,
@@ -19,6 +20,10 @@ import type {
 
 
 const FIRST_GAME = 1;
+
+const NO_PLAYERS = 0;
+
+const placeholdersFor = (values: readonly number[]): string => values.map(() => "?").join(",");
 
 const LATEST_SERIES = `SELECT id, started_at FROM game_series
    WHERE chat_id = ?
@@ -82,6 +87,63 @@ export const sqliteRepository: Repository = {
       .run(chatId, displayName);
 
     return { id: num(result.lastInsertRowid), chat_id: chatId, display_name: displayName };
+  },
+
+  rosterInChat(chatId) {
+    return db
+      .prepare(
+        `SELECT p.id AS player_id, p.display_name, COUNT(g.id) AS games
+         FROM players p
+         LEFT JOIN game_players gp ON gp.player_id = p.id
+         LEFT JOIN games g ON g.id = gp.game_id AND g.confirmed_at IS NOT NULL
+         WHERE p.chat_id = ?
+         GROUP BY p.id, p.display_name
+         ORDER BY p.display_name, p.id`
+      )
+      .all(chatId)
+      .map(toPlayerTally);
+  },
+
+  playedTogether(playerIds) {
+    if (playerIds.length === NO_PLAYERS) {
+      return false;
+    }
+
+    const shared = db
+      .prepare(
+        `SELECT game_id FROM game_players
+         WHERE player_id IN (${placeholdersFor(playerIds)})
+         GROUP BY game_id
+         HAVING COUNT(*) > 1
+         LIMIT 1`
+      )
+      .get(...playerIds);
+
+    return shared !== undefined;
+  },
+
+  mergePlayers(keeperId, absorbedIds) {
+    if (absorbedIds.length === NO_PLAYERS) {
+      return;
+    }
+
+    const holes = placeholdersFor(absorbedIds);
+
+    transact(() => {
+      db.prepare(`UPDATE game_players SET player_id = ? WHERE player_id IN (${holes})`).run(
+        keeperId,
+        ...absorbedIds
+      );
+      db.prepare(`UPDATE game_events SET player_id = ? WHERE player_id IN (${holes})`).run(
+        keeperId,
+        ...absorbedIds
+      );
+      db.prepare(`UPDATE games SET starter_player_id = ? WHERE starter_player_id IN (${holes})`).run(
+        keeperId,
+        ...absorbedIds
+      );
+      db.prepare(`DELETE FROM players WHERE id IN (${holes})`).run(...absorbedIds);
+    });
   },
 
   liveCardInChat(chatId) {

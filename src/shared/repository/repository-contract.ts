@@ -37,6 +37,12 @@ export interface Finalist {
   position: number;
 }
 
+export interface PlayerTally {
+  playerId: number;
+  displayName: string;
+  games: number;
+}
+
 export interface PlayerColumn {
   playerId: number;
   displayName: string;
@@ -76,6 +82,13 @@ export interface CardRepository {
   gameNumberInSeries(chatId: number): number;
 }
 
+export interface RosterRepository {
+  liveCardInChat(chatId: number): CardRecord | null;
+  rosterInChat(chatId: number): readonly PlayerTally[];
+  playedTogether(playerIds: readonly number[]): boolean;
+  mergePlayers(keeperId: number, absorbedIds: readonly number[]): void;
+}
+
 export interface ScoresheetRepository {
   seriesChronology(chatId: number): SeriesChronology | null;
 }
@@ -95,5 +108,6 @@ export interface DiagnosticsRepository {
 
 export interface Repository
   extends CardRepository,
+    RosterRepository,
     ScoresheetRepository,
     DiagnosticsRepository {}

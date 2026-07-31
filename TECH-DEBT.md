@@ -18,7 +18,7 @@ Two rules for this file, so it stays useful:
 ## Parked: the end-to-end harness
 
 `e2e/` plays whole scenarios against a real bot process and a fake Telegram, in the
-browser. It works — 48 cases across 6 scenario files, `npm run e2e`, and
+browser. It works — 62 cases across 7 scenario files, `npm run e2e`, and
 `README.md` says how to watch it. It is **parked**, which specifically means:
 
 - it is **not a release gate**. `npm run check` does not run it, and the four gates
@@ -89,6 +89,27 @@ whole bot and could not have been found by a unit:
   cannot hide. That is asserted by a scenario, and it is the reason the seam is
   safe to leave in `src/`.
 
+**Parked is not abandoned.** `/merge` arrived with scenarios of its own, because a
+second screen with buttons was the first thing units could not check: whether a tap
+reaches the feature that owns it is a fact about real grammY. Writing them cost an
+hour and immediately found two wrong assumptions about the bot's own behaviour. So
+the rule is narrower than "do not touch it": **a feature with an inline keyboard
+gets scenarios; nothing else has to.**
+
+---
+
+## An inline keyboard is described twice
+
+`live-game/render/inline-keyboard.ts` and `merge-names/render/merge-keyboard.ts`
+each declare their own `InlineButton` and `InlineKeyboardRows`, and each feature's
+`bot/` layer has its own `toMarkup` that copies the rows into the mutable shape
+grammY wants. The types are duplicated on purpose — `render/` may not import grammY,
+and a feature may not import another feature — so the alternative is
+`shared/telegram/`.
+
+**Move them when a third feature grows a keyboard.** Two copies of a six-line type
+is cheaper than a shared module nobody else needs; three is not.
+
 ---
 
 ## Files that may be worth splitting
@@ -118,3 +139,9 @@ Listed so nobody "fixes" them:
 - **The chat page renders the bot's HTML raw.** That is what Telegram does with
   `parse_mode: "HTML"`, and it is what makes a missing escape visible as markup.
 - **`diagnostics/` has no `domain/`.** There is nothing to decide there.
+- **`merge-callback-codec.spec.ts` imports `MOST_NAMES_AT_ONCE` from the domain**
+  instead of mocking it, which every other spec would. The case it serves — that a
+  full selection still fits in 64 bytes — is meaningless against a mocked cap: it
+  would assert the spec's own number. The real coupling is that the codec's byte
+  budget bounds the domain's cap, and this is the one place both are visible. It
+  already earned its keep by failing at eight names.

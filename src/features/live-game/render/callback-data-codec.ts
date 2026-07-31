@@ -2,7 +2,7 @@ const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
 const BASE = 62;
 
-const CALLBACK_PATTERN = /^([0-9A-Za-z]+):([a-z]):(-|[0-9]+):([0-9]+)$/;
+export const CARD_TAPS = /^([0-9A-Za-z]+):([a-z]):(-|[0-9]+):([0-9]+)$/;
 
 const NO_SLOT = "-";
 
@@ -44,7 +44,7 @@ export const encodeCallback = (payload: CallbackPayload): string =>
   ].join(":");
 
 export const decodeCallback = (data: string): CallbackPayload | null => {
-  const match = CALLBACK_PATTERN.exec(data);
+  const match = CARD_TAPS.exec(data);
   if (match === null) {
     return null;
   }

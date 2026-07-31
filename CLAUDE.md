@@ -21,7 +21,9 @@ wins on behaviour and this file wins on style.
 **`e2e/` is parked** — it works and `npm run e2e` runs it, but it is not a release
 gate and nothing depends on it. The rules below still describe it, because a parked
 thing that gets picked up should not have to be re-derived; `TECH-DEBT.md` says what
-is wrong with it and when to come back.
+is wrong with it and when to come back. One thing does still oblige it: **a feature
+with an inline keyboard gets scenarios**, because whether a tap reaches the feature
+that owns it is a fact about real grammY that no unit can reach.
 
 ## Code style
 
@@ -133,6 +135,7 @@ src/
   feature-installer.ts  registers whatever it was given
   features/
     live-game/          playing a game on a live card
+    merge-names/        the /merge screen that makes two names one player
     scoresheet/         the /stats picture
     diagnostics/        the /status report about the bot itself
   shared/
@@ -257,6 +260,19 @@ So a feature does **not** get the `Bot`. It declares `commands`, and optionally 
 feature's commands first, then the listeners. A feature physically cannot register a command late.
 `/help` and the `/` menu are both generated from the same command list, so they
 cannot drift from what is installed.
+
+**`onTap` takes the pattern the feature owns, not just a handler.** The second
+feature with an inline keyboard exposed the same hazard one level down: a tap
+listener is `bot.on("callback_query:data")`, so the first feature registered saw
+every tap and answered "Card updated" for data that was never its own — the second
+feature's buttons were dead before they were written. So a feature hands over the
+regular expression its codec produces (`CARD_TAPS`, `MERGE_TAPS`) and the installer
+registers `bot.callbackQuery(pattern)`. A tap can then only reach the screen that
+encoded it, and the two patterns are disjoint by construction — the merge screen's
+data starts `m:` and its second field is never a bare letter. A tap matching
+nothing is answered by the installer itself, because an unanswered callback query
+spins forever, and that copy belongs to the app shell rather than to whichever
+feature happened to be first.
 
 A command may be **hidden**: `hidden: true` on the route keeps it out of `/help` and
 out of `setMyCommands` while still registering it. The installer therefore filters

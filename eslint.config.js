@@ -167,7 +167,7 @@ const forbid = (bans, message) => {
 
 const FRAMEWORK = ["grammy", "grammy/*", "@resvg/*", "node:*"];
 
-const FEATURES = ["live-game", "scoresheet", "diagnostics"];
+const FEATURES = ["live-game", "merge-names", "scoresheet", "diagnostics"];
 
 // Imports are written as Node subpath aliases (`#live-game/bot/x.ts`), so that is
 // the shape the bans have to name. The relative globs stay listed as well, so a

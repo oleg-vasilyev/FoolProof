@@ -6,8 +6,16 @@ const values = new ColumnValuesStub();
 
 vi.mock("#shared/repository/column-values.ts", () => values.module);
 
-const { groupByGame, toExit, toGame, toPlayer, toPlayerColumn, toSeat, toStorageSummary } =
-  await import("#shared/repository/row-records.ts");
+const {
+  groupByGame,
+  toExit,
+  toGame,
+  toPlayer,
+  toPlayerColumn,
+  toPlayerTally,
+  toSeat,
+  toStorageSummary,
+} = await import("#shared/repository/row-records.ts");
 
 const DB_FILE = "/repo/data/foolproof.db";
 
@@ -135,6 +143,24 @@ describe("row mappers", () => {
         player_id: AS_NUMBER,
         position: AS_NUMBER,
       });
+    });
+  });
+
+  describe("toPlayerTally()", () => {
+    const row = { player_id: ONE, display_name: "Anya", games: THREE };
+
+    it("should rename the columns to the camel case the contract promises", () => {
+      expect(toPlayerTally(row)).toEqual({
+        playerId: AS_NUMBER,
+        displayName: AS_TEXT,
+        games: AS_NUMBER,
+      });
+    });
+
+    it("should count games as a number, not as text", () => {
+      toPlayerTally(row);
+
+      expect(values.numSpy).toHaveBeenCalledWith(THREE);
     });
   });
 

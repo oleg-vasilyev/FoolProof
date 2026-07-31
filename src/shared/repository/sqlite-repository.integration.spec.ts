@@ -104,6 +104,189 @@ describe("players", () => {
   });
 });
 
+describe("the roster of a chat", () => {
+  const tally = (name: string) =>
+    repo.rosterInChat(CHAT_ID).find((player) => player.displayName === name);
+
+  it("should count the games a player has played", () => {
+    const [oleg = NONE, anya = NONE] = seedPlayers("Oleg", "Anya");
+    playFullGame([oleg, anya], [oleg], [anya]);
+    playFullGame([oleg, anya], [anya], [oleg]);
+
+    expect(tally("Oleg")?.games).toBe(TWO);
+  });
+
+  it("should list a player who has never played", () => {
+    seedPlayers("Ghost");
+
+    expect(tally("Ghost")?.games).toBe(NONE);
+  });
+
+  it("should not count a game that is still live", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    repo.openGame(CHAT_ID, ids);
+
+    expect(tally("Oleg")?.games).toBe(NONE);
+  });
+
+  it("should order by name so a name typed twice sits beside the right one", () => {
+    seedPlayers("Оля", "Аня", "Анна");
+
+    expect(repo.rosterInChat(CHAT_ID).map((player) => player.displayName)).toEqual([
+      "Анна",
+      "Аня",
+      "Оля",
+    ]);
+  });
+
+  it("should keep chats apart", () => {
+    seedPlayers("Oleg");
+    repo.createPlayer(OTHER_CHAT_ID, "Stranger");
+
+    expect(repo.rosterInChat(CHAT_ID)).toHaveLength(ONCE);
+  });
+});
+
+describe("players who cannot be the same person", () => {
+  it("should report two players who sat in one game", () => {
+    const [oleg = NONE, anya = NONE] = seedPlayers("Oleg", "Anya");
+    playFullGame([oleg, anya], [oleg], [anya]);
+
+    expect(repo.playedTogether([oleg, anya])).toBe(true);
+  });
+
+  it("should report a pair that shares a game still being played", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    repo.openGame(CHAT_ID, ids);
+
+    expect(repo.playedTogether(ids)).toBe(true);
+  });
+
+  it("should clear a pair that never met at the table", () => {
+    const [oleg = NONE, anya = NONE, roma = NONE] = seedPlayers("Oleg", "Anya", "Roma");
+    playFullGame([oleg, anya], [oleg], [anya]);
+
+    expect(repo.playedTogether([oleg, roma])).toBe(false);
+  });
+
+  it("should clear a single player however much they played", () => {
+    const [oleg = NONE, anya = NONE] = seedPlayers("Oleg", "Anya");
+    playFullGame([oleg, anya], [oleg], [anya]);
+    playFullGame([oleg, anya], [anya], [oleg]);
+
+    expect(repo.playedTogether([oleg])).toBe(false);
+  });
+
+  it("should clear an empty list rather than reach the database", () => {
+    expect(repo.playedTogether([])).toBe(false);
+  });
+});
+
+describe("merging one name into another", () => {
+  const seedTypo = (): { keeper: number; typo: number; gameId: number } => {
+    const [anya = NONE, oleg = NONE, anna = NONE] = seedPlayers("Аня", "Oleg", "Анна");
+    playFullGame([anya, oleg], [anya], [oleg]);
+    const gameId = playFullGame([anna, oleg], [oleg], [anna]);
+    repo.updateCard(gameId, "FROZEN", TWO, anna);
+
+    return { keeper: anya, typo: anna, gameId };
+  };
+
+  it("should seat the keeper where the absorbed name sat", () => {
+    const { keeper, typo, gameId } = seedTypo();
+
+    repo.mergePlayers(keeper, [typo]);
+
+    expect(repo.cardById(gameId)?.seats.map((seat) => seat.player_id)).toContain(keeper);
+  });
+
+  it("should carry the absorbed name's results over", () => {
+    const { keeper, typo, gameId } = seedTypo();
+
+    repo.mergePlayers(keeper, [typo]);
+
+    expect(repo.cardById(gameId)?.exits.map((exit) => exit.player_id)).toContain(keeper);
+  });
+
+  it("should hand over who dealt first", () => {
+    const { keeper, typo, gameId } = seedTypo();
+
+    repo.mergePlayers(keeper, [typo]);
+
+    expect(repo.cardById(gameId)?.game.starter_player_id).toBe(keeper);
+  });
+
+  it("should leave the absorbed name out of the roster", () => {
+    const { keeper, typo } = seedTypo();
+
+    repo.mergePlayers(keeper, [typo]);
+
+    expect(repo.rosterInChat(CHAT_ID).map((player) => player.displayName)).toEqual(["Oleg", "Аня"]);
+  });
+
+  it("should give the keeper both histories", () => {
+    const { keeper, typo } = seedTypo();
+
+    repo.mergePlayers(keeper, [typo]);
+
+    expect(repo.rosterInChat(CHAT_ID).find((player) => player.playerId === keeper)?.games).toBe(TWO);
+  });
+
+  it("should fold several names in at once", () => {
+    const [anya = NONE, oleg = NONE, anna = NONE, anyuta = NONE] = seedPlayers(
+      "Аня",
+      "Oleg",
+      "Анна",
+      "Анюта"
+    );
+    playFullGame([anna, oleg], [oleg], [anna]);
+    playFullGame([anyuta, oleg], [oleg], [anyuta]);
+
+    repo.mergePlayers(anya, [anna, anyuta]);
+
+    expect(repo.rosterInChat(CHAT_ID)).toHaveLength(TWO);
+  });
+
+  it("should give the keeper every absorbed history at once", () => {
+    const [anya = NONE, oleg = NONE, anna = NONE, anyuta = NONE] = seedPlayers(
+      "Аня",
+      "Oleg",
+      "Анна",
+      "Анюта"
+    );
+    playFullGame([anna, oleg], [oleg], [anna]);
+    playFullGame([anyuta, oleg], [oleg], [anyuta]);
+
+    repo.mergePlayers(anya, [anna, anyuta]);
+
+    expect(repo.rosterInChat(CHAT_ID).find((player) => player.playerId === anya)?.games).toBe(TWO);
+  });
+
+  it("should do nothing when nothing was named", () => {
+    const { keeper } = seedTypo();
+
+    repo.mergePlayers(keeper, []);
+
+    expect(repo.rosterInChat(CHAT_ID)).toHaveLength(THREE);
+  });
+
+  it("should refuse to seat one player twice in one game", () => {
+    const [oleg = NONE, anya = NONE] = seedPlayers("Oleg", "Anya");
+    playFullGame([oleg, anya], [oleg], [anya]);
+
+    expect(() => repo.mergePlayers(oleg, [anya])).toThrow();
+  });
+
+  it("should leave both names in place when it refuses", () => {
+    const [oleg = NONE, anya = NONE] = seedPlayers("Oleg", "Anya");
+    playFullGame([oleg, anya], [oleg], [anya]);
+
+    expect(() => repo.mergePlayers(oleg, [anya])).toThrow();
+
+    expect(repo.rosterInChat(CHAT_ID)).toHaveLength(TWO);
+  });
+});
+
 describe("opening a card", () => {
   it("should return the new game id", () => {
     const gameId = repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));

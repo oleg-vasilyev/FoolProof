@@ -1,5 +1,6 @@
 import { Bot } from "grammy";
 import { createLiveGameFeature } from "#live-game/live-game-feature.ts";
+import { createMergeNamesFeature } from "#merge-names/merge-names-feature.ts";
 import { createScoresheetFeature } from "#scoresheet/scoresheet-feature.ts";
 import { createDiagnosticsFeature } from "#diagnostics/diagnostics-feature.ts";
 import { installFeatures, publishCommandMenu, resumeFeatures } from "#app/feature-installer.ts";
@@ -27,6 +28,7 @@ installCrashExit(log);
 
 const features = [
   createLiveGameFeature({ repo: repository, api: bot.api, log }),
+  createMergeNamesFeature({ repo: repository }),
   createScoresheetFeature({ repo: repository }),
   createDiagnosticsFeature({
     repo: repository,

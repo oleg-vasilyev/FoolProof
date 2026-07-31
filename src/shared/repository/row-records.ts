@@ -5,6 +5,7 @@ import type {
   GameRecord,
   PlayerColumn,
   PlayerRecord,
+  PlayerTally,
   SeatRecord,
   StorageSummary,
 } from "#shared/repository/repository-contract.ts";
@@ -40,6 +41,12 @@ export const toSeat = (row: Row): SeatRecord => ({
 export const toExit = (row: Row): ExitRecord => ({
   player_id: num(row.player_id),
   position: num(row.position),
+});
+
+export const toPlayerTally = (row: Row): PlayerTally => ({
+  playerId: num(row.player_id),
+  displayName: text(row.display_name),
+  games: num(row.games),
 });
 
 export const toPlayerColumn = (row: Row): PlayerColumn => ({

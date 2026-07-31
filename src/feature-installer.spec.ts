@@ -15,6 +15,7 @@ const UPDATE_ID = 4242;
 class BotMock {
   public registrations: string[] = [];
   public commandSpy = vi.fn();
+  public callbackQuerySpy = vi.fn();
   public onSpy = vi.fn();
   public catchSpy = vi.fn();
   public setMyCommandsSpy = vi.fn();
@@ -24,6 +25,11 @@ class BotMock {
   public command(name: string, run: unknown): void {
     this.registrations.push(`command:${name}`);
     this.commandSpy(name, run);
+  }
+
+  public callbackQuery(owns: RegExp, run: unknown): void {
+    this.registrations.push(`taps:${owns.source}`);
+    this.callbackQuerySpy(owns, run);
   }
 
   public on(filter: string, run: unknown): void {
@@ -37,6 +43,16 @@ class BotMock {
 }
 
 const logStub = new LoggerStub();
+
+const OWN_TAPS = /^own:/;
+
+const listensToTaps = (name: string): Feature =>
+  featureOf({
+    name,
+    listen: (listeners) => {
+      listeners.onTap(OWN_TAPS, async () => undefined);
+    },
+  });
 
 const listensToText = (name: string): Feature =>
   featureOf({
@@ -76,12 +92,14 @@ describe("installFeatures()", () => {
           name: "game",
           listen: (listeners) => {
             listeners.onText(async () => undefined);
-            listeners.onTap(async () => undefined);
+            listeners.onTap(OWN_TAPS, async () => undefined);
           },
         }),
         featureOf({ name: "stats" }),
       ]);
-      const firstListener = bot.registrations.findIndex((entry) => entry.startsWith("on:"));
+      const firstListener = bot.registrations.findIndex(
+        (entry) => entry.startsWith("on:") || entry.startsWith("taps:")
+      );
       const lastCommand = bot.registrations.findLastIndex((entry) => entry.startsWith("command:"));
 
       expect(lastCommand).toBeLessThan(firstListener);
@@ -125,23 +143,22 @@ describe("installFeatures()", () => {
       expect(bot.onSpy).toHaveBeenCalledWith("message:text", expect.any(Function));
     });
 
-    it("should wire a tap listener to callback_query:data", () => {
-      install([
-        featureOf({
-          name: "game",
-          listen: (listeners) => {
-            listeners.onTap(async () => undefined);
-          },
-        }),
-      ]);
+    it("should wire a tap listener to the pattern the feature says it owns", () => {
+      install([listensToTaps("game")]);
 
-      expect(bot.onSpy).toHaveBeenCalledWith("callback_query:data", expect.any(Function));
+      expect(bot.callbackQuerySpy).toHaveBeenCalledWith(OWN_TAPS, expect.any(Function));
     });
 
-    it("should register nothing extra for a feature that only has commands", () => {
+    it("should register no text listener for a feature that only has commands", () => {
       install([featureOf({ name: "stats" })]);
 
-      expect(bot.onSpy).toHaveBeenCalledTimes(NEVER);
+      expect(bot.onSpy).not.toHaveBeenCalledWith("message:text", expect.anything());
+    });
+
+    it("should claim no taps for a feature that only has commands", () => {
+      install([featureOf({ name: "stats" })]);
+
+      expect(bot.callbackQuerySpy).toHaveBeenCalledTimes(NEVER);
     });
 
     it("should run the route's own handler when its command fires", async () => {
@@ -152,6 +169,31 @@ describe("installFeatures()", () => {
       await (registered as (ctx: unknown) => Promise<void>)("the-context");
 
       expect(route.commands[0]?.run).toHaveBeenCalledWith("the-context");
+    });
+  });
+
+  describe("a tap no feature claimed", () => {
+    const answerSpy = vi.fn();
+
+    const unclaimedListener = (): ((ctx: unknown) => Promise<void>) =>
+      bot.onSpy.mock.calls.find((call) => call[0] === "callback_query:data")?.[1] as (
+        ctx: unknown
+      ) => Promise<void>;
+
+    it("should be answered rather than left spinning", async () => {
+      install([listensToTaps("game")]);
+
+      await unclaimedListener()({ answerCallbackQuery: answerSpy });
+
+      expect(answerSpy).toHaveBeenCalledWith(copy.tapUnclaimed);
+    });
+
+    it("should be answered only after every feature had its chance", () => {
+      install([listensToTaps("game")]);
+
+      expect(bot.registrations.indexOf(`taps:${OWN_TAPS.source}`)).toBeLessThan(
+        bot.registrations.indexOf("on:callback_query:data")
+      );
     });
   });
 

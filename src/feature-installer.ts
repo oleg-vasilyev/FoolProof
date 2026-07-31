@@ -25,8 +25,8 @@ const listenersOn = (bot: Bot): Listeners => ({
   onText: (run) => {
     bot.on("message:text", (ctx) => run(ctx));
   },
-  onTap: (run) => {
-    bot.on("callback_query:data", (ctx) => run(ctx));
+  onTap: (owns, run) => {
+    bot.callbackQuery(owns, (ctx) => run(ctx));
   },
 });
 
@@ -78,6 +78,10 @@ export const installFeatures = (
   for (const feature of features) {
     feature.listen?.(listenersOn(bot));
   }
+
+  bot.on("callback_query:data", async (ctx) => {
+    await ctx.answerCallbackQuery(copy.tapUnclaimed);
+  });
 
   bot.catch((error) => {
     log.error(copy.updateFailed(error.ctx.update.update_id, String(error.error)));

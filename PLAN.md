@@ -75,6 +75,7 @@ Latin characters and lower case only — a Telegram requirement.
 | `/next` | A new game with the same line-up |
 | `/help` | What the commands do and how the card works |
 | `/stats` | The latest session as a rendered image — chronology plus running score |
+| `/merge` | One player written under two names becomes one player again |
 
 The bot publishes this list through `setMyCommands` on every start, so the
 commands show up in Telegram's `/` menu instead of having to be typed from
@@ -291,6 +292,62 @@ where the name was last time.
   a second time
 - Debounce edits by 300–500 ms. In groups Telegram throttles at roughly 20 messages
   per minute, and `editMessageText` counts
+- A tap reaches the screen that owns it, never the one registered first. Each
+  screen's data has a shape of its own — the live card's `<game_id_b62>:…` and the
+  merge screen's `m:…` cannot be mistaken for each other — and the bot routes on
+  that shape. A tap matching no shape is answered anyway, so a button from an
+  older version of the bot says so instead of spinning forever
+
+---
+
+## Merging two names into one
+
+Somebody types `Анна` once and `Аня` every other time, and the evening ends with a
+sixth player who played one game. The chart is then wrong in a way no amount of
+care during the game prevents, because the typo is only visible afterwards.
+
+`/merge` puts the whole roster on screen as one button per name, each carrying how
+many games that name has played — `Аня · 12` beside `Анна · 1` is the diagnosis.
+**The first tap names the player that stays**; every later tap names one being
+folded into it. That is the whole mechanic, and it needs no second screen: the
+order of the taps carries the information that a second screen would have asked
+for. The message reads the decision back as a sentence — `Анна → Аня` — before
+anything is confirmed.
+
+The roster is sorted by name, which puts variants of one name next to each other
+for free.
+
+| State | Screen | Controls |
+|---|---|---|
+| Nothing picked | Asks for the name to keep | `❌ Cancel` |
+| One name picked | Says that name keeps its own | `↩️ Back` |
+| Two or more | `Анна → Аня` plus what Аня will have | `↩️ Back` `✅ Confirm` |
+
+`↩️ Back` drops the last name picked, the same meaning it has on the card.
+Tapping an already-picked name lets it go; if that name was the keeper, the next
+one picked becomes the keeper — the sentence on screen simply changes.
+
+**The selection lives in `callback_data`, not in the database.** The screen is
+rebuilt from the buttons that were tapped, so it survives a restart exactly the
+way a live card does, and there is no new table and no state to go stale. The cost
+is the 64-byte limit: at most **six names** in one merge, refused with a notice
+past that. Six is what fits with room for seven-digit player ids, and merging six
+misspellings of one name in one sitting is already beyond anything real.
+
+Two refusals, both stated in words rather than swallowed:
+
+- **They played the same game.** Then they are two people, whatever the names look
+  like. This is not a nicety: `game_players` is keyed on `(game_id, player_id)`, so
+  the merge would be refused by the schema anyway — the point is that the person
+  tapping learns why instead of seeing a crash.
+- **A game is running.** A live card is rebuilt from `game_players` on every tap,
+  so moving a player underneath it changes the game in progress. `/merge` waits
+  until the card is confirmed; the check runs again at `✅ Confirm`, because a game
+  can start while the screen sits open.
+
+A merge repoints `game_players`, `game_events` and `games.starter_player_id` to the
+keeper and deletes the absorbed rows from `players`, all in one transaction. There
+is no undo: the confirmation step is the undo.
 
 ---
 

@@ -6,6 +6,10 @@ import { ShutdownStub } from "#shared/lifecycle/shutdown.stub.ts";
 import { CrashExitStub } from "#shared/lifecycle/crash-exit.stub.ts";
 import { ApiRetryStub } from "#shared/telegram/api-retry.stub.ts";
 import { BotClientOptionsStub } from "#shared/telegram/bot-client-options.stub.ts";
+import { LiveGameFeatureStub } from "#live-game/live-game-feature.stub.ts";
+import { MergeNamesFeatureStub } from "#merge-names/merge-names-feature.stub.ts";
+import { ScoresheetFeatureStub } from "#scoresheet/scoresheet-feature.stub.ts";
+import { DiagnosticsFeatureStub } from "#diagnostics/diagnostics-feature.stub.ts";
 
 
 const ONCE = 1;
@@ -62,24 +66,18 @@ const stopSpy = vi.fn(async (): Promise<void> => undefined);
 
 const botSpy = vi.fn();
 
-const cardStopSpy = vi.fn(async (): Promise<void> => undefined);
+const liveGame = new LiveGameFeatureStub();
 
-const CARD_FEATURE = { commands: [{ command: "game" }], stop: cardStopSpy };
+const mergeNames = new MergeNamesFeatureStub();
 
-const SESSION_FEATURE = { commands: [{ command: "stats" }] };
+const scoresheet = new ScoresheetFeatureStub();
 
-const DIAGNOSTICS_FEATURE = { commands: [{ command: "status", hidden: true }] };
-
-const createDiagnosticsFeatureSpy = vi.fn((_deps: unknown) => DIAGNOSTICS_FEATURE);
-
-const createLiveGameFeatureSpy = vi.fn((_deps: unknown) => CARD_FEATURE);
-
-const createScoresheetFeatureSpy = vi.fn((_deps: unknown) => SESSION_FEATURE);
+const diagnostics = new DiagnosticsFeatureStub();
 
 const installFeaturesSpy = vi.fn((_bot: unknown, _features: unknown, _log: unknown) => {
   order.push("install");
 
-  return [cardStopSpy];
+  return [liveGame.stopSpy];
 });
 
 const publishCommandMenuSpy = vi.fn(
@@ -122,17 +120,13 @@ vi.mock("#shared/telegram/api-retry.ts", () => apiRetry.module);
 
 vi.mock("#shared/telegram/bot-client-options.ts", () => clientOptions.module);
 
-vi.mock("#live-game/live-game-feature.ts", () => ({
-  createLiveGameFeature: (deps: unknown) => createLiveGameFeatureSpy(deps),
-}));
+vi.mock("#live-game/live-game-feature.ts", () => liveGame.module);
 
-vi.mock("#scoresheet/scoresheet-feature.ts", () => ({
-  createScoresheetFeature: (deps: unknown) => createScoresheetFeatureSpy(deps),
-}));
+vi.mock("#merge-names/merge-names-feature.ts", () => mergeNames.module);
 
-vi.mock("#diagnostics/diagnostics-feature.ts", () => ({
-  createDiagnosticsFeature: (deps: unknown) => createDiagnosticsFeatureSpy(deps),
-}));
+vi.mock("#scoresheet/scoresheet-feature.ts", () => scoresheet.module);
+
+vi.mock("#diagnostics/diagnostics-feature.ts", () => diagnostics.module);
 
 vi.mock("#shared/lifecycle/shutdown.ts", () => shutdown.module);
 
@@ -174,57 +168,48 @@ describe("main.ts", () => {
   });
 
   it("should hand the card feature the real repository", () => {
-    expect(createLiveGameFeatureSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ repo: repository.stub })
-    );
+    expect(liveGame.depsGiven()?.repo).toBe(repository.stub);
   });
 
   it("should hand the card feature the bot's own api, so its edits go somewhere", () => {
-    expect(createLiveGameFeatureSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ api: botApi })
-    );
+    expect(liveGame.depsGiven()?.api).toBe(botApi);
   });
 
   it("should hand the scoresheet feature the real repository", () => {
-    expect(createScoresheetFeatureSpy).toHaveBeenCalledWith({ repo: repository.stub });
+    expect(scoresheet.depsGiven()?.repo).toBe(repository.stub);
+  });
+
+  it("should hand the merge feature the real repository", () => {
+    expect(mergeNames.depsGiven()?.repo).toBe(repository.stub);
   });
 
   it("should install every feature", () => {
     expect(installFeaturesSpy.mock.calls[0]?.[1]).toEqual([
-      CARD_FEATURE,
-      SESSION_FEATURE,
-      DIAGNOSTICS_FEATURE,
+      liveGame.feature,
+      mergeNames.feature,
+      scoresheet.feature,
+      diagnostics.feature,
     ]);
   });
 
   it("should hand diagnostics the real repository, so /status reads the live database", () => {
-    expect(createDiagnosticsFeatureSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ repo: repository.stub })
-    );
+    expect(diagnostics.depsGiven()?.repo).toBe(repository.stub);
   });
 
   it("should tell diagnostics which log level is in force", () => {
-    expect(createDiagnosticsFeatureSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ logLevel: LOG_LEVEL_FROM_ENV })
-    );
+    expect(diagnostics.depsGiven()?.logLevel).toBe(LOG_LEVEL_FROM_ENV);
   });
 
   it("should tell diagnostics which start this is, so a restart is visible", () => {
-    expect(createDiagnosticsFeatureSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ startAttempt: START_ATTEMPT })
-    );
+    expect(diagnostics.depsGiven()?.startAttempt).toBe(START_ATTEMPT);
   });
 
   it("should pass on how the previous start ended", () => {
-    expect(createDiagnosticsFeatureSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ previousExit: PREVIOUS_EXIT })
-    );
+    expect(diagnostics.depsGiven()?.previousExit).toBe(PREVIOUS_EXIT);
   });
 
   it("should pass on who may ask for the status", () => {
-    expect(createDiagnosticsFeatureSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ operatorTgId: OPERATOR_TG_ID })
-    );
+    expect(diagnostics.depsGiven()?.operatorTgId).toBe(OPERATOR_TG_ID);
   });
 
   it("should install the features before publishing the menu", () => {
@@ -238,7 +223,7 @@ describe("main.ts", () => {
   it("should publish a menu built from the installed features", () => {
     expect(publishCommandMenuSpy).toHaveBeenCalledWith(
       botApi,
-      [CARD_FEATURE, SESSION_FEATURE, DIAGNOSTICS_FEATURE],
+      [liveGame.feature, mergeNames.feature, scoresheet.feature, diagnostics.feature],
       logging.logger
     );
   });
@@ -263,7 +248,7 @@ describe("main.ts", () => {
 
   it("should let the features pick up what the last run left behind", () => {
     expect(resumeFeaturesSpy).toHaveBeenCalledWith(
-      [CARD_FEATURE, SESSION_FEATURE, DIAGNOSTICS_FEATURE],
+      [liveGame.feature, mergeNames.feature, scoresheet.feature, diagnostics.feature],
       logging.logger
     );
   });
@@ -297,7 +282,7 @@ describe("main.ts", () => {
   });
 
   it("should put the feature stops first, so nothing edits after the socket closes", () => {
-    expect(shutdown.stopsGiven()[FIRST]).toBe(cardStopSpy);
+    expect(shutdown.stopsGiven()[FIRST]).toBe(liveGame.stopSpy);
   });
 
   it("should make the last stop the one that drops the connection", async () => {

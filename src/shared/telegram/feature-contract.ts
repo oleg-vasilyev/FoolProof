@@ -11,7 +11,7 @@ export interface CommandRoute {
 
 export interface Listeners {
   readonly onText: (run: (ctx: TextMessage) => Promise<void>) => void;
-  readonly onTap: (run: (ctx: CallbackTap) => Promise<void>) => void;
+  readonly onTap: (owns: RegExp, run: (ctx: CallbackTap) => Promise<void>) => void;
 }
 
 export interface Feature {
