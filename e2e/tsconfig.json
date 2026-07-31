@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // The harness talks to the bot over HTTP only, so it needs none of the
+    // project's subpath aliases and imports nothing from src/.
+    "types": ["node"]
+  },
+  "include": ["**/*.ts"]
+}

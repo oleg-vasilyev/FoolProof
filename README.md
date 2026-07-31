@@ -183,9 +183,49 @@ token is never printed, and neither is any other environment value.
 | `npm run check` | Lint, types and tests — the gate to keep at zero |
 | `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
 | `npm run typecheck` | `tsc --noEmit` |
+| `npm run e2e` | Whole scenarios against the real bot and a fake Telegram |
+| `npm run e2e:watch` | The same run, slowed down, in the browser |
+| `npm run e2e:play` | A chat in the browser to try things by hand |
 
 Coverage and mutation write their reports into `reports/`, which is gitignored
 whole — nothing about testing lands next to the source.
+
+## Watching it play
+
+`npm test` proves the pieces. `npm run e2e` proves the bot: it starts
+`src/main.ts` as a real process against a real SQLite file, and puts a **fake
+Telegram** on the other end of it — a small Bot API server that records the chat
+instead of sending it anywhere. A scenario then plays a whole evening the way a
+person would: type `/game Oleg, Anya, Roma`, tap the names, tap Confirm, ask for
+`/stats`. No token, no network, no rate limits.
+
+```bash
+npm run e2e
+```
+
+Every scenario gets its own bot process, its own database and its own port, so
+they run at the same time — one per worker.
+
+```bash
+npm run e2e:watch
+```
+
+The same run with a pause after every action, a browser opened on
+<http://127.0.0.1:8080>, and every scenario on the page at once: the messages as
+Telegram would show them, the inline keyboard, the callback answers as toasts,
+and the `/stats` picture. The frame turns red on the scenario that failed.
+
+```bash
+npm run e2e:play
+```
+
+One chat, nobody driving it, pointed at the dev database. Type in the box and tap
+the buttons — it is the same fake Telegram, so the bot cannot tell the difference.
+Add `--db=data/somewhere.db` to keep an experiment out of the dev database.
+
+The whole harness lives in `e2e/`, imports nothing from `src/`, and has its own
+`tsconfig.json` and Vitest configuration — `npm test`, coverage and mutation never
+see it.
 
 ## Layout
 
@@ -203,6 +243,7 @@ src/
   shared/               config, lifecycle, logging, repository,
                         telegram, text, timing — a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
+e2e/                    the fake Telegram and the scenarios played against it
 ```
 
 Inside a feature the same three layers every time, and imports point only

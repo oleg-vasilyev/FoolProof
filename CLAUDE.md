@@ -132,7 +132,8 @@ src/
     lifecycle/          draining the stops, restarting after a crash
     logging/            the scoped logger
     repository/         the connection, the contract, the SQL
-    telegram/           Bot API context types, the feature contract, api retries
+    telegram/           Bot API context types, the feature contract, api retries,
+                        the client options that let a run be pointed elsewhere
     text/               HTML escaping
     timing/             the edit debouncer
 ```
@@ -387,6 +388,63 @@ Everything else about testing — what to mock, how to shape a stub, how to name
 and structure cases, the traps in the two integration specs, and how to judge a
 spec you did not write — lives in the **`write-a-spec` skill**. Load it before
 writing or changing any spec.
+
+### `e2e/` is a different world, and stays outside
+
+Units prove the pieces and mock everything around them. That is the right default
+and it can never prove the bot works, because the one thing it refuses to run is
+the whole thing. So `e2e/` plays whole scenarios against a **real `src/main.ts`
+process** on a real SQLite file, with a fake Telegram on the other end.
+
+The separation is the point, and it is structural rather than a convention to
+remember:
+
+- It lives in `e2e/` at the root — not in `src/`, not in `scripts/`. It has its own
+  `tsconfig.json` and its own `vitest.e2e.config.ts`, so `npm test`, coverage and
+  mutation cannot pick it up. `npm run e2e` is the only way in.
+- **It imports nothing from `src/`.** Not a type, not a constant, not `copy.en.ts`.
+  It knows the bot the way Telegram knows it: commands in, Bot API calls out. A
+  harness that imported the copy table would assert a constant against itself.
+  That is also why `e2e/` uses relative imports — the aliases are the app's, and
+  this is not the app.
+- The runner is **Vitest**, which the project already depends on. Scenarios are
+  `*.e2e.spec.ts` and read as `describeScenario(name, …)` with ordinary
+  `describe`/`it`/`expect`; the cases inside a file share one chat and run in
+  order, which is what makes a scenario a scenario rather than a pile of tests.
+- **One world per worker.** A world is a port, a bot process and a database file,
+  so scenario files run at the same time and each has a browser tab of its own.
+  The worker id names all three, which is why nothing collides.
+- **A world outlives the file, and the chat keeps its history.** Every scenario
+  wipes the database and restarts the bot, but the message log carries on and each
+  message is stamped with the scenario that produced it — so the page reads as one
+  long conversation with a divider per scenario, the way Telegram does, while a
+  query still only sees the scenario running now. This is why the e2e config sets
+  `isolate: false`: with isolation the world would be rebuilt per file, losing the
+  history and racing itself for the port.
+
+Two rules that keep the harness honest, both learned by getting them wrong:
+
+- **The fake Telegram records; it never decides.** It stores messages, edits,
+  deletions and callback answers, and answers queries about them. Nothing in it
+  knows what a game is. The moment it needs to know, the scenario is asserting
+  against a second implementation.
+- **It must refuse everything the real one refuses.** The first version accepted an
+  edit to a message it had never seen and answered `ok: true`, so a lost message
+  passed. It now answers `400` for an unknown message, and for an edit that changes
+  nothing — which is what Telegram does, and what a redraw of an in-sync card
+  actually gets. That immediately broke two scenarios asserting "the card was
+  edited again": the honest observable is that the bot **attempted** the edit, so
+  the fake counts attempts separately from applied edits.
+
+The chat page renders the bot's message text as **raw HTML**, which is what
+Telegram does with `parse_mode: "HTML"`. That is deliberate: a name the bot failed
+to escape shows up as markup on the page instead of hiding in a string comparison.
+
+The seam that makes any of this possible is one env key: `BOT_API_ROOT`, read in
+`shared/telegram/bot-client-options.ts` and passed to grammY as `apiRoot`. It is
+absent from both env files, `npm run e2e` sets it only on the process it spawns,
+and a run pointed anywhere but Telegram **warns on startup** — which `/status`
+then reports, so a misdirected bot cannot hide.
 
 ## Checks
 
