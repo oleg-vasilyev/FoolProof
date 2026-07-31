@@ -95,7 +95,7 @@ const script = `
     '<div class="msg' + (m.fromBot ? '' : ' mine') + '">' +
       '<div class="who">' + m.author + " · #" + m.messageId + "</div>" +
       '<div class="body">' + m.text + "</div>" +
-      (m.photo === null ? "" : '<img src="/photo/' + m.photo + '" alt="scoresheet">') +
+      (m.photo === null ? "" : '<img src="photo/' + m.photo + '" alt="scoresheet">') +
       keyboard(m.buttons, m.messageId) +
       (m.edits > 0 ? '<div class="edits">edited ' + m.edits + "×</div>" : "") +
     "</div>";
@@ -105,6 +105,9 @@ const script = `
       banner.className = state.banner.verdict;
       banner.innerHTML = "<b>" + state.banner.scenario + "</b><span>" +
         (state.banner.detail ?? state.banner.step) + "</span>";
+
+      const mark = { passed: "✓ ", failed: "✗ ", running: "", waiting: "" }[state.banner.verdict] ?? "";
+      document.title = mark + state.banner.scenario;
     }
 
     let shownScenario = -1;
@@ -142,21 +145,21 @@ const script = `
   feed.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-tap]");
     if (!button) return;
-    post("/chat/tap", { messageId: Number(button.dataset.message), data: button.dataset.tap });
+    post("chat/tap", { messageId: Number(button.dataset.message), data: button.dataset.tap });
   });
 
   const send = () => {
     const text = box.value.trim();
     if (!text) return;
     box.value = "";
-    post("/chat/say", { text, replyTo: prompt ? prompt.messageId : undefined });
+    post("chat/say", { text, replyTo: prompt ? prompt.messageId : undefined });
   };
 
   document.getElementById("send").addEventListener("click", send);
   box.addEventListener("keydown", (event) => { if (event.key === "Enter") send(); });
 
   const POLL_MS = 350;
-  const tick = () => fetch("/chat/state").then((r) => r.json()).then(draw).catch(() => undefined);
+  const tick = () => fetch("chat/state").then((r) => r.json()).then(draw).catch(() => undefined);
   setInterval(tick, POLL_MS);
   tick();
 `;

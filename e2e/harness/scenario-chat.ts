@@ -22,6 +22,10 @@ const NOTHING = 0;
 
 const NO_PACE = 0;
 
+// The hub keeps the last state it managed to read, so the final verdict has to be
+// readable for one of its rounds before the world goes away with its worker.
+const HANDOVER_MS = 700;
+
 const OPERATOR_TG_ID = "777";
 
 const LOG_LEVEL = "warn";
@@ -162,7 +166,10 @@ export const createChat = (): Chat => {
       await settle();
     },
 
-    close: () => world.stop(),
+    close: async () => {
+      await sleep(HANDOVER_MS);
+      await world.stop();
+    },
 
     say: async (text, options) => {
       world.step(`said "${text}"`);

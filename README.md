@@ -210,10 +210,17 @@ they run at the same time — one per worker.
 npm run e2e:watch
 ```
 
-The same run with a pause after every action, a browser opened on
-<http://127.0.0.1:8080>, and every scenario on the page at once: the messages as
-Telegram would show them, the inline keyboard, the callback answers as toasts,
-and the `/stats` picture. The frame turns red on the scenario that failed.
+The same run with a pause after every action, and **a browser tab per world** as
+each one starts — the tab is titled after the scenario running in it, with a `✓` or
+a `✗` once it is done. Each tab is the chat: the messages as Telegram would show
+them, the inline keyboard, the callback answers as toasts, the `/stats` picture, and
+a divider between scenarios so nothing scrolls away.
+<http://127.0.0.1:8080> shows all of them together if you want one page.
+
+**The chats stay up after the run ends.** The hub keeps the last state of every
+world and the pictures it drew, so the tabs are still there to read when the
+scenarios have finished and their bots are gone. Ctrl+C in the terminal lets them
+go.
 
 ```bash
 npm run e2e:play

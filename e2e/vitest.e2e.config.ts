@@ -33,7 +33,7 @@ export default defineConfig({
     include: ["e2e/**/*.e2e.spec.ts"],
     root: resolve(import.meta.dirname, ".."),
     environment: "node",
-    globalSetup: ["e2e/harness/watch-hub.ts"],
+    globalSetup: ["e2e/harness/run-lifecycle.ts"],
     fileParallelism: true,
     maxWorkers: 4,
     isolate: false,

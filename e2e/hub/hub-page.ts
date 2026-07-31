@@ -17,8 +17,11 @@ const styles = `
   .step { color: #8fc7ff; font-size: 12px; }
   .running { border-color: #2c4f74; }
   .failed { border-color: #a33; }
+  .passed { border-color: #2d6a4a; }
   .failed .top { background: #2a1416; }
   .waiting { opacity: .55; }
+  .finished { border-color: #2a3a48; }
+  .finished .top b::after { content: " · finished"; color: #6d7f8f; font-weight: 400; }
   iframe { flex: 1; border: 0; background: #0e1621; }
   #none { padding: 40px; color: #6d7f8f; }
 `;
@@ -45,7 +48,7 @@ const script = `
     for (const world of worlds) {
       const box = drawn.get(world.port) ?? frame(world);
       drawn.set(world.port, box);
-      box.className = "world " + world.banner.verdict;
+      box.className = "world " + (world.live ? world.banner.verdict : "finished");
       box.querySelector("b").textContent = world.banner.scenario;
       box.querySelector(".step").textContent = world.banner.detail ?? world.banner.step;
     }
@@ -77,7 +80,7 @@ export const hubPage = (): string => `<!doctype html>
   <span>one chat per worker · the real bot on each · nothing reaches a real Telegram</span>
 </header>
 <div id="grid"></div>
-<div id="none">No world is running yet. Scenarios appear here as workers pick them up.</div>
+<div id="none">No world is running yet. Scenarios appear here as workers pick them up, and stay after the run ends.</div>
 <script>${script}</script>
 </body>
 </html>

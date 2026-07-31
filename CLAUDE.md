@@ -436,6 +436,16 @@ Two rules that keep the harness honest, both learned by getting them wrong:
   edited again": the honest observable is that the bot **attempted** the edit, so
   the fake counts attempts separately from applied edits.
 
+**The hub proxies the worlds rather than linking to them**, and that is what makes
+watching useful. A world lives inside a Vitest worker and dies with it, so a page
+pointed straight at its port goes blank the moment the run ends — which is exactly
+when you want to look at the `/stats` picture. So `e2e/hub/` serves every world
+under `/world/<port>/`, remembering the last state and every picture it saw; when
+the port stops answering it serves the remembered copy. That is also why the hub
+lives in `watch-live.ts` and not in `globalSetup`: it has to outlive the runner.
+Everything the page requests is a relative path, so the same page works served by a
+world directly or by the hub one level down.
+
 The chat page renders the bot's message text as **raw HTML**, which is what
 Telegram does with `parse_mode: "HTML"`. That is deliberate: a name the bot failed
 to escape shows up as markup on the page instead of hiding in a string comparison.
