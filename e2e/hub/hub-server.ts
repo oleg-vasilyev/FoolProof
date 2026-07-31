@@ -125,7 +125,7 @@ const serveWorld = async (
     response.writeHead(cache.stateOf(port) === undefined ? NOT_FOUND : OK, {
       "content-type": HTML_TYPE,
     });
-    response.end(chatPage());
+    response.end(chatPage(`/world/${String(port)}/`));
 
     return;
   }

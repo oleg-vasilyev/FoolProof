@@ -1,6 +1,6 @@
 # FoolProof — how the code here is written
 
-Three documents, one job each:
+Four documents, one job each:
 
 - **`README.md`** — what the bot is and how to run it. For someone arriving at
   the repository.
@@ -8,12 +8,20 @@ Three documents, one job each:
   invariants, edge cases, and the design dead ends already paid for.
 - **`CLAUDE.md`** — this file. How code is written here: style, layering,
   testing, gates.
+- **`TECH-DEBT.md`** — what is deliberately unfinished, and the trigger that would
+  make each item worth picking up. It is a to-do list, so an entry is deleted when
+  it is done rather than marked done.
 
 The dividing question is *would this still be true if the bot were rewritten in
 Python?* If yes, it belongs in `PLAN.md` — the Bot API's limits, the state
 machine, the schema. If no, it belongs here. A fact lives where its reason lives;
 the other file gets a pointer, never a retelling. When the two disagree, `PLAN.md`
 wins on behaviour and this file wins on style.
+
+**`e2e/` is parked** — it works and `npm run e2e` runs it, but it is not a release
+gate and nothing depends on it. The rules below still describe it, because a parked
+thing that gets picked up should not have to be re-derived; `TECH-DEBT.md` says what
+is wrong with it and when to come back.
 
 ## Code style
 

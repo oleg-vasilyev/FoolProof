@@ -59,7 +59,9 @@ const styles = `
   #banner.failed span { color: #ff9b9b; }
 `;
 
-const script = `
+const script = (base: string): string => `
+  const BASE = ${JSON.stringify(base)};
+
   const feed = document.getElementById("feed");
   const box = document.getElementById("box");
   const toast = document.getElementById("toast");
@@ -95,7 +97,7 @@ const script = `
     '<div class="msg' + (m.fromBot ? '' : ' mine') + '">' +
       '<div class="who">' + m.author + " · #" + m.messageId + "</div>" +
       '<div class="body">' + m.text + "</div>" +
-      (m.photo === null ? "" : '<img src="photo/' + m.photo + '" alt="scoresheet">') +
+      (m.photo === null ? "" : '<img src="' + BASE + 'photo/' + m.photo + '" alt="scoresheet">') +
       keyboard(m.buttons, m.messageId) +
       (m.edits > 0 ? '<div class="edits">edited ' + m.edits + "×</div>" : "") +
     "</div>";
@@ -145,14 +147,14 @@ const script = `
   feed.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-tap]");
     if (!button) return;
-    post("chat/tap", { messageId: Number(button.dataset.message), data: button.dataset.tap });
+    post(BASE + "chat/tap", { messageId: Number(button.dataset.message), data: button.dataset.tap });
   });
 
   const send = () => {
     const text = box.value.trim();
     if (!text) return;
     box.value = "";
-    post("chat/say", { text, replyTo: prompt ? prompt.messageId : undefined });
+    post(BASE + "chat/say", { text, replyTo: prompt ? prompt.messageId : undefined });
   };
 
   document.getElementById("send").addEventListener("click", send);
@@ -166,14 +168,14 @@ const script = `
 
   const POLL_MS = 350;
   const tick = () =>
-    fetch("chat/state")
+    fetch(BASE + "chat/state")
       .then((r) => (r.ok ? r.json().then(draw) : nothingHere("no world is running on this port")))
       .catch(() => nothingHere("the fake Telegram is not answering"));
   setInterval(tick, POLL_MS);
   tick();
 `;
 
-export const chatPage = (): string => `<!doctype html>
+export const chatPage = (base = "/"): string => `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -207,7 +209,7 @@ export const chatPage = (): string => `<!doctype html>
   </section>
 </aside>
 <div id="toast"></div>
-<script>${script}</script>
+<script>${script(base)}</script>
 </body>
 </html>
 `;

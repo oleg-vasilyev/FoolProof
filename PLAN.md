@@ -9,6 +9,12 @@ The dividing question is whether a fact would survive a rewrite in another
 language. The Bot API's limits, the transitions and the schema would — so they
 are here. Naming, layering and test conventions would not — so they are not.
 
+What is deliberately unfinished lives in **`TECH-DEBT.md`**: the end-to-end
+harness, which is parked rather than abandoned, and the files most likely to be
+awkward to change next. A thing is only in that file if it has a trigger saying
+when it becomes worth doing — otherwise it belongs here as an edge case, or it
+belongs in a commit.
+
 ## Purpose
 
 The bot lives in a group chat of friends. It records games of Podkidnoy Durak:
@@ -591,6 +597,14 @@ exactly why the supervisor tells the new process how the old one ended.
 | A single player in the list | Reject, a minimum of two |
 | Duplicate names in one `/game` | Reject with a message |
 | An unknown name | Create the player silently. Merging is manual |
+
+Two the bot does **not** handle yet, both found while building the end-to-end
+harness rather than in a game:
+
+| Situation | What happens today |
+|---|---|
+| Somebody deletes the bot's card message in Telegram | The row stays live, so there is nothing to tap and nothing to cancel, and `/game` is refused until the idle sweep abandons it three hours later. The startup redraw deletes a game whose message was never posted, but not one whose message is gone |
+| `Ctrl+C` reaches the bot on Windows through a parent process | It cannot: a spawned parent cannot deliver `SIGINT`, so the graceful flush is skipped and the last debounced edit is lost. In a terminal the console sends the signal to the whole group, which is the case that matters |
 
 ---
 
