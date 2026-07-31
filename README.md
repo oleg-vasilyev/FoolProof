@@ -206,7 +206,8 @@ token is never printed, and neither is any other environment value.
 | `npm run test:unit` | Only the unit specs, where everything outside the file is mocked |
 | `npm run test:integration` | Only `*.integration.spec.ts` — the real grammY bot and a real SQLite file |
 | `npm run test:coverage` | Vitest with coverage; fails below 70% on any metric |
-| `npm run test:mutation` | Stryker, about two minutes; fails below 85% |
+| `npm run test:mutation:changed` | Stryker over the files that differ from `origin/main`, about a minute |
+| `npm run test:mutation` | Stryker over everything, about five minutes; both fail below 85% |
 | `npm run check` | Lint, types and tests — the gate to keep at zero |
 | `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
 | `npm run typecheck` | `tsc --noEmit` |

@@ -18,7 +18,7 @@ const project = {
         type: "problem",
         schema: [],
         messages: {
-          found: "No comments in src/ — say it in a name, or in PLAN.md.",
+          found: "No comments in src/ or scripts/ — say it in a name, or in PLAN.md.",
         },
       },
       create(context) {
@@ -212,7 +212,9 @@ export default [
     ignores: ["node_modules/**", "data/**", "reports/**"],
   },
   {
-    files: ["src/**/*.ts"],
+    // scripts/ shares the style rules but not the app rules below: a dev utility
+    // may print to the console, and it imports no feature.
+    files: ["src/**/*.ts", "scripts/**/*.ts"],
     languageOptions: {
       parser: tsParser,
       ecmaVersion: "latest",

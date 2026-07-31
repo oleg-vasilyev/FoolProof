@@ -502,11 +502,11 @@ with no core equivalent that are defined inline there:
 
 | Rule | Enforced by |
 |---|---|
-| No comments in `src/` | `project/no-comments` |
+| No comments in `src/` and `scripts/` | `project/no-comments` |
 | Two blank lines after the last import | `project/blank-lines-after-imports` (autofixed) |
 | A number must be named by a `const` | `project/named-numbers` |
 | Braces on every `if`, `const` over `let` | `curly`, `prefer-const`, `no-var` |
-| No `console.*` outside `shared/logging/logger.ts` | `no-console` |
+| No `console.*` outside `shared/logging/logger.ts` (and `scripts/`) | `no-console` |
 | Imports point only downward, features stay independent | `no-restricted-imports`, one zone per feature layer |
 | An alias ban (`#live-game/**`) actually fires | the same rule, compiled to a `regex` pattern |
 
@@ -531,6 +531,35 @@ phase's whole diff. The procedure lives in the `finish-phase` skill, and the
 review pass has a subagent (`phase-reviewer`). The resulting numbers go in the
 final commit message — a score is only useful if a later regression has something
 to be compared against.
+
+**Mutation runs over the phase's diff, not the whole tree**:
+`npm run test:mutation:changed` mutates the `src/` files that differ from
+`origin/main` (about a minute), and the full `npm run test:mutation` runs once
+before a tag. A mutant in a file this phase never opened was killed in the phase
+that wrote it.
+
+### A phase costs what it costs — spend it on the parts that are hard
+
+The rules above are worth their price, but the price is real: `/merge` was a screen
+with two refusals and it still produced 129 unit tests, 14 scenarios, four stubs and
+sections in three documents. Three habits keep that from doubling for no reason:
+
+- **Settle every signature that crosses a layer before the first `Write`** — what a
+  repository method returns, what a transition carries. Re-deciding one afterwards
+  costs every file that already spoke it. `/merge` paid for `sqlite-repository.ts`,
+  the stub and the integration spec twice over one `number` that turned out to be
+  `void`.
+- **Read a gate's report; never re-run a gate to see its output again.** Everything
+  lands under `reports/`.
+- **Mechanical work goes to a subagent on a cheaper model.** Writing five specs from
+  a settled design is transcription; a cross-feature hazard is not. The brief has to
+  be complete, because the agent starts cold — see the `finish-phase` skill for what
+  it must contain.
+
+**Say how big the phase is before starting it**, in a line, so it can be argued
+down: a phase inside one feature folder that adds no repository method and changes
+no `shared/` type does not need a `PLAN.md` section or a `TECH-DEBT.md` entry. The
+`finish-phase` skill has the table.
 
 ## Configuration
 

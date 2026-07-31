@@ -23,13 +23,14 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:mutation": "stryker run",
+    "test:mutation:changed": "node scripts/mutate-changed.ts",
     "e2e": "vitest run --config e2e/vitest.e2e.config.ts",
     "e2e:watch": "node e2e/watch-live.ts",
     "e2e:play": "node e2e/play.ts",
     "e2e:typecheck": "tsc -p e2e --noEmit",
     "check": "npm run lint && npm run typecheck && npm run test",
-    "lint": "eslint src",
-    "lint:fix": "eslint --fix src",
+    "lint": "eslint src scripts",
+    "lint:fix": "eslint --fix src scripts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

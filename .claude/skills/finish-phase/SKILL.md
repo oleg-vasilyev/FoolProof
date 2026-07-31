@@ -22,19 +22,34 @@ disable comment, which is itself banned in `src/`.
 70% floor on every metric. A file that dropped is a file whose new branches
 nobody exercised. Find the branch, not a way to reach the number.
 
-## 3. `npm run test:mutation`
+## 3. `npm run test:mutation:changed`
 
-Stryker, roughly two minutes. Breaks below 85%. Coverage says a line ran; this
-says a test would have noticed it break.
+Stryker over the files this phase touched — about a minute. The **full**
+`npm run test:mutation` runs once, before a tag, not during a phase: a mutant in a
+file the phase never opened was already killed in the phase that wrote it, and
+re-proving it costs four minutes of every phase. Breaks below 85% either way.
+Coverage says a line ran; this says a test would have noticed it break.
 
 A file that dropped is a file whose new tests assert too little — strengthen the
-tests, never lower the bar. Read `reports/mutation/mutation.html` for the
-survivors, or run `npx stryker run --mutate <file> --reporters clear-text` to
-list them for one file. The instructive ones are usually a spy left dirty by the
-test above, or an optional chain hiding a value that was never set.
+tests, never lower the bar. The instructive ones are usually a spy left dirty by
+the test above, or an optional chain hiding a value that was never set.
 
 Strengthening a spec is the `write-a-spec` skill's job — load it rather than
 reaching for the nearest assertion that turns the mutant red.
+
+Two rules about *running* it, both learned by burning most of a phase's budget on
+them:
+
+- **Never re-run a gate to re-read its output.** Every run writes
+  `reports/mutation/mutation.json` and `reports/mutation/index.html`, and a
+  backgrounded run keeps its own log — read those. `/merge` was closed with eight
+  Stryker invocations where two would have done, three of them the same full run
+  repeated to look at three slices of one table.
+- **One round of survivor-killing per phase, and only for mutants whose death
+  would prevent a bug a player could see.** Above roughly 95% the survivors are
+  mostly equivalent mutants and type-narrowing guards; the threshold is 85. A
+  survivor left alive on purpose is worth a sentence in the commit message, not
+  another two rounds.
 
 ## 4. A review pass over the phase's whole diff
 
@@ -50,6 +65,49 @@ Ask of every touched file:
 - Does every stub sit beside its subject, or beside its only consumer when the
   subject is someone else's code?
 - Does the file's name still describe what is in it?
+
+## Scaling the ritual to the change
+
+The four gates are not negotiable. What the phase *produces around them* is, and
+the default was written for a phase that changes a contract. A **small** phase —
+one that stays inside a single feature folder, adds no repository method, changes
+no schema and no `shared/` type — earns a shorter path:
+
+| | Small phase | Contract-changing phase |
+|---|---|---|
+| `PLAN.md` | a row in the commands table | a section: states, refusals, the reasons |
+| `README.md` | a row in the commands table | a row, plus a screen if the shape is new |
+| `CLAUDE.md` | untouched | edited only when a *rule* changed |
+| `TECH-DEBT.md` | untouched | an entry only if something is actually owed |
+| `e2e/` | scenarios only if it has an inline keyboard | same |
+| Gates | all four, mutation over the diff | all four, mutation over the diff |
+
+The test rules do not bend: every file still gets a spec, because that is what
+holds the mutation score up and it is the cheapest part to write. What bends is
+prose about a change that has nothing new to say.
+
+The judgement call is honest sizing, so name the size **before** starting, in one
+line, and let the user shrink it.
+
+## Where the budget actually goes
+
+A phase's cost is dominated by two things, and neither of them is thinking:
+
+- **Re-deciding a shape after writing it.** Settle every signature that crosses a
+  layer — what a repository method returns, what a transition carries — in one
+  short design note before the first `Write`. `/merge` flipped `mergePlayers`
+  between `number` and `void` after the SQL, the stub and the integration spec were
+  already written, and paid for those three files twice.
+- **Waiting on gates that did not need running.** See gate 3.
+
+**Mechanical work goes to a subagent on a cheaper model.** Once the design is
+settled, writing five spec files, adding a stub, or updating an expectation is
+transcription, not judgement. Delegate it as one batch with `model: "sonnet"`, and
+because the agent starts cold, the brief has to carry everything: the exact files
+to write, the subject each spec tests, the stubs to use by name, and the
+instruction to load the `write-a-spec` skill first. Keep for yourself the parts
+where being wrong is expensive — the mechanic a player will feel, a cross-feature
+hazard, anything touching `shared/` or the schema.
 
 ## The final commit message
 
