@@ -14,7 +14,7 @@ const FIRST_WORLD_PORT = 8090;
 
 const MOST_WORLDS = 9;
 
-const PROBE_TIMEOUT_MS = 500;
+const PROBE_TIMEOUT_MS = 3000;
 
 const WATCH_INTERVAL_MS = 400;
 
@@ -122,7 +122,9 @@ const serveWorld = async (
   response: ServerResponse
 ): Promise<void> => {
   if (path === "/") {
-    response.writeHead(OK, { "content-type": HTML_TYPE });
+    response.writeHead(cache.stateOf(port) === undefined ? NOT_FOUND : OK, {
+      "content-type": HTML_TYPE,
+    });
     response.end(chatPage());
 
     return;

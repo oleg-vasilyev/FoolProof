@@ -34,13 +34,22 @@ const hub = await startHub(HUB_PORT);
 
 const opened = new Set<number>();
 
+interface WorldCard {
+  readonly port: number;
+  readonly url: string;
+  readonly banner: { readonly verdict: string } | null;
+}
+
+// A world starts listening before its bot is up and before a scenario has named
+// itself, so a tab opened at that moment shows an empty chat and looks broken.
+// Wait until something is actually running in it.
 const openEachNewWorld = async (): Promise<void> => {
   try {
     const answer = await fetch(`${hubUrl}/worlds`);
-    const worlds = (await answer.json()) as readonly { port: number; url: string }[];
+    const worlds = (await answer.json()) as readonly WorldCard[];
 
     for (const world of worlds) {
-      if (!opened.has(world.port)) {
+      if (!opened.has(world.port) && world.banner?.verdict === "running") {
         opened.add(world.port);
         openInBrowser(`${hubUrl}${world.url}`);
       }

@@ -103,7 +103,7 @@ const script = `
   const draw = (state) => {
     if (state.banner) {
       banner.className = state.banner.verdict;
-      banner.innerHTML = "<b>" + state.banner.scenario + "</b><span>" +
+      banner.innerHTML = "<b>" + state.banner.scenario + "</b> <span>" +
         (state.banner.detail ?? state.banner.step) + "</span>";
 
       const mark = { passed: "✓ ", failed: "✗ ", running: "", waiting: "" }[state.banner.verdict] ?? "";
@@ -158,8 +158,17 @@ const script = `
   document.getElementById("send").addEventListener("click", send);
   box.addEventListener("keydown", (event) => { if (event.key === "Enter") send(); });
 
+  const nothingHere = (why) => {
+    banner.className = "waiting";
+    banner.innerHTML = "<b>" + why + "</b>";
+    if (feed.innerHTML === "") feed.innerHTML = '<div class="divider"><span>' + why + "</span></div>";
+  };
+
   const POLL_MS = 350;
-  const tick = () => fetch("chat/state").then((r) => r.json()).then(draw).catch(() => undefined);
+  const tick = () =>
+    fetch("chat/state")
+      .then((r) => (r.ok ? r.json().then(draw) : nothingHere("no world is running on this port")))
+      .catch(() => nothingHere("the fake Telegram is not answering"));
   setInterval(tick, POLL_MS);
   tick();
 `;
