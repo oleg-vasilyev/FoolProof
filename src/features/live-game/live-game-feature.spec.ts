@@ -19,6 +19,8 @@ const startIdleSweepSpy = vi.fn((_cards: unknown, _log: unknown) => stopSweepSpy
 
 const shutdownSpy = vi.fn(async (): Promise<void> => undefined);
 
+const redrawLiveSpy = vi.fn(async (): Promise<number> => 0);
+
 const onGameSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
 
 const onNextSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
@@ -31,7 +33,7 @@ vi.mock("#live-game/bot/card-service.ts", () => ({
   createCardService: (deps: unknown) => {
     createCardServiceSpy(deps);
 
-    return { ...CARD_SERVICE, shutdown: shutdownSpy };
+    return { ...CARD_SERVICE, shutdown: shutdownSpy, redrawLive: redrawLiveSpy };
   },
 }));
 
@@ -167,6 +169,38 @@ describe("createLiveGameFeature()", () => {
       await listeners.tapListener()?.("the-tap" as never);
 
       expect(onTapSpy).toHaveBeenCalledWith(expect.anything(), "the-tap");
+    });
+  });
+
+  describe("how it picks up after a restart", () => {
+    const REDRAWN = 2;
+
+    it("should put every live card back on screen", async () => {
+      await build().resume?.();
+
+      expect(redrawLiveSpy).toHaveBeenCalledTimes(ONCE);
+    });
+
+    it("should say how many cards it recovered", async () => {
+      redrawLiveSpy.mockResolvedValue(REDRAWN);
+
+      await build().resume?.();
+
+      expect(log.infoSpy.mock.calls[0]?.[0]).toContain(String(REDRAWN));
+    });
+
+    it("should stay quiet on a start with nothing live, which is the usual one", async () => {
+      redrawLiveSpy.mockResolvedValue(0);
+
+      await build().resume?.();
+
+      expect(log.infoSpy).not.toHaveBeenCalled();
+    });
+
+    it("should not redraw anything merely by being built", () => {
+      build();
+
+      expect(redrawLiveSpy).toHaveBeenCalledTimes(NEVER);
     });
   });
 

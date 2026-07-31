@@ -190,6 +190,41 @@ describe("liveCardInChat()", () => {
   });
 });
 
+describe("liveCards()", () => {
+  it("should be empty when nothing is open anywhere", () => {
+    expect(repo.liveCards()).toEqual([]);
+  });
+
+  it("should find an open card in every chat, since a restart has to redraw them all", () => {
+    repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));
+    repo.openGame(OTHER_CHAT_ID, seedPlayers("Roma", "Dima"));
+
+    expect(repo.liveCards()).toHaveLength(TWO);
+  });
+
+  it("should carry the seats, so a card can be redrawn from what it returns", () => {
+    repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));
+
+    expect(repo.liveCards()[0]?.seats).toHaveLength(TWO);
+  });
+
+  it("should carry the exits already recorded", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    const gameId = repo.openGame(CHAT_ID, ids);
+
+    repo.appendExit(gameId, ids[1] ?? NONE, ONCE, ACTOR_ID);
+
+    expect(repo.liveCards()[0]?.exits).toHaveLength(ONCE);
+  });
+
+  it("should leave out a finished game", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+
+    expect(repo.liveCards()).toEqual([]);
+  });
+});
+
 describe("cardById()", () => {
   it("should be null for an unknown id", () => {
     const missingId = 9999;

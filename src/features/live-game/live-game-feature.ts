@@ -9,6 +9,8 @@ import { createPromptRegistry } from "#live-game/bot/prompt-registry.ts";
 import { startIdleSweep } from "#live-game/bot/idle-sweep.ts";
 
 
+const NOTHING_LIVE = 0;
+
 export interface LiveGameDeps {
   readonly repo: CardRepository;
   readonly api: Api;
@@ -48,6 +50,14 @@ export const createLiveGameFeature = (deps: LiveGameDeps): Feature => {
     listen: (listeners: Listeners) => {
       listeners.onText((ctx) => onNamesReply(context, ctx));
       listeners.onTap((ctx) => onTap(context, ctx));
+    },
+
+    resume: async () => {
+      const redrawn = await cards.redrawLive();
+
+      if (redrawn > NOTHING_LIVE) {
+        log.info(`${redrawn} card(s) were still live, redrawing them`);
+      }
     },
 
     stop: async () => {

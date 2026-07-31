@@ -90,6 +90,12 @@ const RESULT_TEXT = "the rendered standings";
 
 const KEYBOARD = [[{ text: "Oleg", callback_data: "1:p:0:0" }]];
 
+const STORED_VERSION = 5;
+
+const EDIT_REFUSED = "Bad Request: message to edit not found";
+
+const ALREADY_SHOWN = "Bad Request: message is not modified";
+
 const payload = (action: CallbackAction, slot: number | null, version = FIRST_VERSION):
   CallbackPayload => ({ gameId: GAME_ID, action, slot, version });
 
@@ -168,12 +174,28 @@ describe("createCardService()", () => {
     });
 
     it("should warn rather than throw when Telegram refuses the edit", async () => {
-      telegram.editMessageTextSpy.mockRejectedValue(new Error("message is not modified"));
+      telegram.editMessageTextSpy.mockRejectedValue(new Error(EDIT_REFUSED));
 
       await expect(
         runScheduledEdit({ chatId: CHAT_ID, messageId: MESSAGE_ID, text: "x", keyboard: null })
       ).resolves.toBeUndefined();
       expect(log.warnSpy).toHaveBeenCalledTimes(ONCE);
+    });
+
+    it("should not warn about an edit that changed nothing, which a repair often is", async () => {
+      telegram.editMessageTextSpy.mockRejectedValue(new Error(ALREADY_SHOWN));
+
+      await runScheduledEdit({ chatId: CHAT_ID, messageId: MESSAGE_ID, text: "x", keyboard: null });
+
+      expect(log.warnSpy).not.toHaveBeenCalled();
+    });
+
+    it("should still record an edit that changed nothing, at debug level", async () => {
+      telegram.editMessageTextSpy.mockRejectedValue(new Error(ALREADY_SHOWN));
+
+      await runScheduledEdit({ chatId: CHAT_ID, messageId: MESSAGE_ID, text: "x", keyboard: null });
+
+      expect(log.debugSpy).toHaveBeenCalledTimes(ONCE);
     });
   });
 
@@ -270,6 +292,29 @@ describe("createCardService()", () => {
         await cards.tap(payload("pick", OLEG), ACTOR_ID);
 
         expect(applySpy).toHaveBeenCalledTimes(NEVER);
+      });
+
+      it("should redraw a stale card, since its buttons may be the ones that are wrong", async () => {
+        repo.cardByIdSpy.mockReturnValue(
+          cardRecordOf(THREE, { id: GAME_ID, message_id: MESSAGE_ID, state_version: STORED_VERSION })
+        );
+
+        await cards.tap(payload("pick", OLEG), ACTOR_ID);
+
+        expect(debounce.debouncer.scheduleSpy).toHaveBeenCalledWith(
+          String(GAME_ID),
+          expect.objectContaining({ messageId: MESSAGE_ID, text: CARD_TEXT })
+        );
+      });
+
+      it("should put the stored version on the repaired buttons, not the tapped one", async () => {
+        repo.cardByIdSpy.mockReturnValue(
+          cardRecordOf(THREE, { id: GAME_ID, message_id: MESSAGE_ID, state_version: STORED_VERSION })
+        );
+
+        await cards.tap(payload("pick", OLEG), ACTOR_ID);
+
+        expect(renderKeyboardSpy).toHaveBeenCalledWith(expect.anything(), GAME_ID, STORED_VERSION);
       });
 
       it("should refuse a tap the reducer rejected", async () => {
@@ -530,6 +575,84 @@ describe("createCardService()", () => {
     });
   });
 
+  describe("redrawLive()", () => {
+    const liveCards = (over: Record<string, unknown> = {}) => [
+      cardRecordOf(THREE, {
+        id: GAME_ID,
+        chat_id: CHAT_ID,
+        message_id: MESSAGE_ID,
+        state_version: STORED_VERSION,
+        ...over,
+      }),
+    ];
+
+    it("should report that there was nothing to pick up", async () => {
+      repo.liveCardsSpy.mockReturnValue([]);
+
+      expect(await cards.redrawLive()).toBe(NEVER);
+    });
+
+    it("should report how many cards it put back on screen", async () => {
+      repo.liveCardsSpy.mockReturnValue(liveCards());
+
+      expect(await cards.redrawLive()).toBe(ONCE);
+    });
+
+    it("should redraw the card from what the database holds", async () => {
+      repo.liveCardsSpy.mockReturnValue(liveCards());
+
+      await cards.redrawLive();
+
+      expect(telegram.lastEdit().text).toBe(CARD_TEXT);
+    });
+
+    it("should give the card working buttons, carrying the stored version", async () => {
+      repo.liveCardsSpy.mockReturnValue(liveCards());
+
+      await cards.redrawLive();
+
+      expect(renderKeyboardSpy).toHaveBeenCalledWith(expect.anything(), GAME_ID, STORED_VERSION);
+    });
+
+    it("should send the redraw itself rather than wait for the debouncer", async () => {
+      repo.liveCardsSpy.mockReturnValue(liveCards());
+
+      await cards.redrawLive();
+
+      expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(ONCE);
+    });
+
+    it("should delete a card whose message never made it to the chat", async () => {
+      repo.liveCardsSpy.mockReturnValue(liveCards({ message_id: 0 }));
+
+      await cards.redrawLive();
+
+      expect(repo.deleteGameSpy).toHaveBeenCalledWith(GAME_ID);
+    });
+
+    it("should not try to edit a message that was never sent", async () => {
+      repo.liveCardsSpy.mockReturnValue(liveCards({ message_id: 0 }));
+
+      await cards.redrawLive();
+
+      expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should not count a card it deleted as one it redrew", async () => {
+      repo.liveCardsSpy.mockReturnValue(liveCards({ message_id: 0 }));
+
+      expect(await cards.redrawLive()).toBe(NEVER);
+    });
+
+    it("should keep a card that was posted", async () => {
+      repo.liveCardsSpy.mockReturnValue(liveCards());
+
+      await cards.redrawLive();
+
+      expect(repo.deleteGameSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe("sweepIdle()", () => {
     const idle = [{ id: GAME_ID, chat_id: CHAT_ID, message_id: MESSAGE_ID }];
 
@@ -658,7 +781,7 @@ describe("createCardService()", () => {
     });
 
     it("should name the message and the cause when an edit is refused", async () => {
-      telegram.editMessageTextSpy.mockRejectedValue(new Error("message is not modified"));
+      telegram.editMessageTextSpy.mockRejectedValue(new Error(EDIT_REFUSED));
 
       await runScheduledEdit({
         chatId: CHAT_ID,
@@ -668,7 +791,7 @@ describe("createCardService()", () => {
       });
 
       expect(log.warnSpy.mock.calls[0]?.[0]).toContain(String(MESSAGE_ID));
-      expect(log.warnSpy.mock.calls[0]?.[0]).toContain("message is not modified");
+      expect(log.warnSpy.mock.calls[0]?.[0]).toContain(EDIT_REFUSED);
     });
   });
 

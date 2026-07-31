@@ -58,6 +58,7 @@ export interface CardRepository {
   createPlayer(chatId: number, displayName: string): PlayerRecord;
 
   liveCardInChat(chatId: number): CardRecord | null;
+  liveCards(): readonly CardRecord[];
   cardById(gameId: number): CardRecord | null;
   lastLineup(chatId: number): readonly SeatRecord[] | null;
 

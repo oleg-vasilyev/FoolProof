@@ -16,6 +16,7 @@ export class RepositoryStub implements Repository {
   public playersInChatSpy = vi.fn();
   public createPlayerSpy = vi.fn();
   public liveCardInChatSpy = vi.fn();
+  public liveCardsSpy = vi.fn();
   public cardByIdSpy = vi.fn();
   public lastLineupSpy = vi.fn();
   public openGameSpy = vi.fn();
@@ -37,6 +38,7 @@ export class RepositoryStub implements Repository {
       display_name: displayName,
     }));
     this.liveCardInChatSpy.mockReturnValue(null);
+    this.liveCardsSpy.mockReturnValue([]);
     this.cardByIdSpy.mockReturnValue(null);
     this.lastLineupSpy.mockReturnValue(null);
     this.openGameSpy.mockReturnValue(1);
@@ -55,6 +57,10 @@ export class RepositoryStub implements Repository {
 
   public liveCardInChat(chatId: number): CardRecord | null {
     return this.liveCardInChatSpy(chatId);
+  }
+
+  public liveCards(): readonly CardRecord[] {
+    return this.liveCardsSpy();
   }
 
   public cardById(gameId: number): CardRecord | null {

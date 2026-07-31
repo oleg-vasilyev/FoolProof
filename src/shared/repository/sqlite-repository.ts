@@ -58,15 +58,14 @@ const exitsOf = (gameId: number): readonly ExitRecord[] =>
     .all(gameId)
     .map(toExit);
 
-const cardFrom = (row: Row | undefined): CardRecord | null => {
-  if (row === undefined) {
-    return null;
-  }
-
+const cardOf = (row: Row): CardRecord => {
   const game = toGame(row);
 
   return { game, seats: seatsOf(game.id), exits: exitsOf(game.id) };
 };
+
+const cardFrom = (row: Row | undefined): CardRecord | null =>
+  row === undefined ? null : cardOf(row);
 
 export const sqliteRepository: Repository = {
   playersInChat(chatId) {
@@ -88,6 +87,13 @@ export const sqliteRepository: Repository = {
     return cardFrom(
       db.prepare("SELECT * FROM games WHERE chat_id = ? AND confirmed_at IS NULL").get(chatId)
     );
+  },
+
+  liveCards() {
+    return db
+      .prepare("SELECT * FROM games WHERE confirmed_at IS NULL ORDER BY id")
+      .all()
+      .map(cardOf);
   },
 
   cardById(gameId) {

@@ -3,6 +3,8 @@ import { EnvStub } from "#shared/config/env.stub.ts";
 import { LoggingStub } from "#shared/logging/logger.stub.ts";
 import { RepositoryInstanceStub } from "#shared/repository/repository-instance.stub.ts";
 import { ShutdownStub } from "#shared/lifecycle/shutdown.stub.ts";
+import { CrashExitStub } from "#shared/lifecycle/crash-exit.stub.ts";
+import { ApiRetryStub } from "#shared/telegram/api-retry.stub.ts";
 
 
 const ONCE = 1;
@@ -23,9 +25,15 @@ const logging = new LoggingStub();
 
 const repository = new RepositoryInstanceStub();
 
+const crashExit = new CrashExitStub();
+
+const apiRetry = new ApiRetryStub();
+
 const order: string[] = [];
 
-const botApi = { marker: "the-api" };
+const useSpy = vi.fn();
+
+const botApi = { marker: "the-api", config: { use: useSpy } };
 
 const startSpy = vi.fn(async (): Promise<void> => {
   order.push("start");
@@ -51,8 +59,14 @@ const installFeaturesSpy = vi.fn((_bot: unknown, _features: unknown, _log: unkno
   return [cardStopSpy];
 });
 
-const publishCommandMenuSpy = vi.fn(async (_api: unknown, _features: unknown): Promise<void> => {
-  order.push("menu");
+const publishCommandMenuSpy = vi.fn(
+  async (_api: unknown, _features: unknown, _log: unknown): Promise<void> => {
+    order.push("menu");
+  }
+);
+
+const resumeFeaturesSpy = vi.fn(async (_features: unknown, _log: unknown): Promise<void> => {
+  order.push("resume");
 });
 
 const signalHandlers = new Map<string, () => void>();
@@ -74,8 +88,14 @@ vi.mock("#shared/logging/logger.ts", () => logging.module);
 vi.mock("#app/feature-installer.ts", () => ({
   installFeatures: (bot: unknown, features: unknown, log: unknown) =>
     installFeaturesSpy(bot, features, log),
-  publishCommandMenu: (api: unknown, features: unknown) => publishCommandMenuSpy(api, features),
+  publishCommandMenu: (api: unknown, features: unknown, log: unknown) =>
+    publishCommandMenuSpy(api, features, log),
+  resumeFeatures: (features: unknown, log: unknown) => resumeFeaturesSpy(features, log),
 }));
+
+vi.mock("#shared/lifecycle/crash-exit.ts", () => crashExit.module);
+
+vi.mock("#shared/telegram/api-retry.ts", () => apiRetry.module);
 
 vi.mock("#live-game/live-game-feature.ts", () => ({
   createLiveGameFeature: (deps: unknown) => createLiveGameFeatureSpy(deps),
@@ -140,7 +160,40 @@ describe("main.ts", () => {
   });
 
   it("should publish a menu built from the installed features", () => {
-    expect(publishCommandMenuSpy).toHaveBeenCalledWith(botApi, [CARD_FEATURE, SESSION_FEATURE]);
+    expect(publishCommandMenuSpy).toHaveBeenCalledWith(
+      botApi,
+      [CARD_FEATURE, SESSION_FEATURE],
+      logging.logger
+    );
+  });
+
+  it("should teach the api to retry, so one lost packet does not lose a tap", () => {
+    expect(useSpy).toHaveBeenCalledWith(apiRetry.transformer);
+  });
+
+  it("should give the retries the same logger, so an outage is visible", () => {
+    expect(apiRetry.logGiven()).toBe(logging.logger);
+  });
+
+  it("should install the retries before any feature can call the api", () => {
+    expect(useSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
+      installFeaturesSpy.mock.invocationCallOrder[FIRST] ?? 0
+    );
+  });
+
+  it("should arrange for a crash to be logged rather than silent", () => {
+    expect(crashExit.logGiven()).toBe(logging.logger);
+  });
+
+  it("should let the features pick up what the last run left behind", () => {
+    expect(resumeFeaturesSpy).toHaveBeenCalledWith(
+      [CARD_FEATURE, SESSION_FEATURE],
+      logging.logger
+    );
+  });
+
+  it("should resume before accepting updates, so a stale card is fixed first", () => {
+    expect(order.indexOf("resume")).toBeLessThan(order.indexOf("start"));
   });
 
   it("should drop updates that piled up while it was down", () => {

@@ -64,6 +64,10 @@ its own configuration:
 | `npm start` | `.env`, skipped if absent | `data/foolproof.dev.db` |
 | `npm run start:prod` | `.env.production`, **required** | `data/foolproof.db` |
 
+The two commands run the same code the same way — **the env file, and therefore the
+database, is the only difference**. Whatever you try in dev is what happens on a
+Friday.
+
 ```bash
 cp .env.example .env.production   # then put the token in it
 npm run start:prod
@@ -97,6 +101,24 @@ missing font makes the renderer draw the picture with no text on it rather than
 fail. Rasterizing uses `@resvg/resvg-js`, which ships a prebuilt binary per
 platform — still no build step, but `npm install` now needs to be run on the
 machine that will run the bot rather than copied from another one.
+
+## When something goes wrong
+
+Lose the wifi and nothing needs doing: every call to Telegram is retried, the card
+catches up when the connection comes back, and the log says so once at each end
+rather than once per retry.
+
+```
+WARN  polling: telegram is unreachable during getUpdates (…) — retrying until it answers
+INFO  polling: telegram is answering again
+```
+
+Restart it mid-game and the live card is redrawn from the database as it starts, so
+what is on screen is always what was actually recorded. A tap that arrives against a
+card whose buttons are out of date redraws it too, instead of refusing every further
+tap.
+
+`PLAN.md` explains what each failure costs.
 
 ## Scripts
 

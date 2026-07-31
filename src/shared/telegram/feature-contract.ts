@@ -17,5 +17,6 @@ export interface Feature {
   readonly commands: readonly CommandRoute[];
   readonly notes?: readonly string[];
   readonly listen?: (listeners: Listeners) => void;
+  readonly resume?: () => Promise<void>;
   readonly stop?: () => Promise<void>;
 }

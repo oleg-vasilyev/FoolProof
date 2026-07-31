@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { installFeatures, publishCommandMenu } from "#app/feature-installer.ts";
+import { installFeatures, publishCommandMenu, resumeFeatures } from "#app/feature-installer.ts";
 import type { Feature } from "#shared/telegram/feature-contract.ts";
 import { featureOf } from "#shared/telegram/feature-contract.stub.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
@@ -243,21 +243,88 @@ describe("installFeatures()", () => {
   });
 });
 
+describe("resumeFeatures()", () => {
+  let log: LoggerStub;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    log = new LoggerStub();
+  });
+
+  it("should let a feature pick up where the last run stopped", async () => {
+    const resume = vi.fn(async () => undefined);
+
+    await resumeFeatures([featureOf({ name: "game", resume })], log);
+
+    expect(resume).toHaveBeenCalledTimes(ONCE);
+  });
+
+  it("should skip a feature that has nothing to recover", async () => {
+    await expect(resumeFeatures([featureOf({ name: "stats" })], log)).resolves.toBeUndefined();
+  });
+
+  it("should not treat having nothing to recover as a failure", async () => {
+    await resumeFeatures([featureOf({ name: "stats" })], log);
+
+    expect(log.warnSpy).not.toHaveBeenCalled();
+  });
+
+  it("should resume the features in the order they were named", async () => {
+    const order: string[] = [];
+    const first = featureOf({ name: "game", resume: async () => void order.push("game") });
+    const second = featureOf({ name: "stats", resume: async () => void order.push("stats") });
+
+    await resumeFeatures([first, second], log);
+
+    expect(order).toEqual(["game", "stats"]);
+  });
+
+  it("should carry on when a feature fails to recover, since starting matters more", async () => {
+    const resume = vi.fn(async () => undefined);
+    const broken = featureOf({ name: "game", resume: async () => Promise.reject(new Error("no")) });
+
+    await resumeFeatures([broken, featureOf({ name: "stats", resume })], log);
+
+    expect(resume).toHaveBeenCalledTimes(ONCE);
+  });
+
+  it("should report the feature that could not recover", async () => {
+    const broken = featureOf({ name: "game", resume: async () => Promise.reject(new Error("no")) });
+
+    await resumeFeatures([broken], log);
+
+    expect(log.warnSpy).toHaveBeenCalledTimes(ONCE);
+  });
+
+  it("should carry the cause into that report, since nothing else will show it", async () => {
+    const cause = "the message was deleted";
+    const broken = featureOf({ name: "game", resume: async () => Promise.reject(new Error(cause)) });
+
+    await resumeFeatures([broken], log);
+
+    expect(log.warnSpy.mock.calls[0]?.[0]).toContain(cause);
+  });
+});
+
 describe("publishCommandMenu()", () => {
   let bot: BotMock;
+  let log: LoggerStub;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     bot = new BotMock();
+    log = new LoggerStub();
     bot.setMyCommandsSpy.mockResolvedValue(true);
   });
 
   it("should publish one entry per command plus help", async () => {
-    await publishCommandMenu(bot.api as never, [
-      featureOf({ name: "game" }),
-      featureOf({ name: "stats" }),
-    ]);
+    await publishCommandMenu(
+      bot.api as never,
+      [featureOf({ name: "game" }), featureOf({ name: "stats" })],
+      log
+    );
 
     expect(bot.setMyCommandsSpy).toHaveBeenCalledWith([
       { command: "game", description: "does game" },
@@ -267,9 +334,26 @@ describe("publishCommandMenu()", () => {
   });
 
   it("should leave an uninstalled feature out of the menu", async () => {
-    await publishCommandMenu(bot.api as never, [featureOf({ name: "game" })]);
+    await publishCommandMenu(bot.api as never, [featureOf({ name: "game" })], log);
     const published = bot.setMyCommandsSpy.mock.calls[0]?.[0] as readonly { command: string }[];
 
     expect(published.map((entry) => entry.command)).toEqual(["game", "help"]);
+  });
+
+  it("should not stop the bot starting when Telegram is unreachable", async () => {
+    bot.setMyCommandsSpy.mockRejectedValue(new Error("fetch failed"));
+
+    await expect(
+      publishCommandMenu(bot.api as never, [featureOf({ name: "game" })], log)
+    ).resolves.toBeUndefined();
+  });
+
+  it("should report a menu it could not publish", async () => {
+    const cause = "fetch failed";
+    bot.setMyCommandsSpy.mockRejectedValue(new Error(cause));
+
+    await publishCommandMenu(bot.api as never, [featureOf({ name: "game" })], log);
+
+    expect(log.warnSpy.mock.calls[0]?.[0]).toContain(cause);
   });
 });

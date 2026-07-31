@@ -27,14 +27,35 @@ const listenersOn = (bot: Bot): Listeners => ({
   },
 });
 
-export const publishCommandMenu = async (api: Api, features: readonly Feature[]): Promise<void> => {
-  await api.setMyCommands([
-    ...routesOf(features).map((route) => ({
-      command: route.command,
-      description: route.menuDescription,
-    })),
-    { command: HELP, description: copy.commandHelp },
-  ]);
+export const publishCommandMenu = async (
+  api: Api,
+  features: readonly Feature[],
+  log: Logger
+): Promise<void> => {
+  try {
+    await api.setMyCommands([
+      ...routesOf(features).map((route) => ({
+        command: route.command,
+        description: route.menuDescription,
+      })),
+      { command: HELP, description: copy.commandHelp },
+    ]);
+  } catch (error) {
+    log.warn(`could not publish the command menu: ${String(error)}`);
+  }
+};
+
+export const resumeFeatures = async (
+  features: readonly Feature[],
+  log: Logger
+): Promise<void> => {
+  for (const feature of features) {
+    try {
+      await feature.resume?.();
+    } catch (error) {
+      log.warn(`a feature could not pick up where it left off: ${String(error)}`);
+    }
+  }
 };
 
 export const installFeatures = (

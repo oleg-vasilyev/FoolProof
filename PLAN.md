@@ -277,7 +277,9 @@ where the name was last time.
 - `state_version` is incremented on every transition. A callback that arrives with
   an old version → `answerCallbackQuery` with the text "Card updated", and the
   state is left unchanged. This protects against double taps under lag and against
-  simultaneous taps from several people
+  simultaneous taps from several people. The card is also redrawn, because the
+  mismatch may mean the *message* is the stale one — see
+  [What survives a failure](#what-survives-a-failure)
 - Every accepted tap gets an `answerCallbackQuery` with a short text ("Oleg — 1").
   Without it, lag makes it look like the tap did not register and the person taps
   a second time
@@ -471,10 +473,61 @@ bundled with Node 24 is well past both.
 
 ---
 
+## What survives a failure
+
+A game happens once a week, on a laptop, over home wifi. Every part of the evening
+that a failure could take away has to come back on its own, because nobody is going
+to read a log during a hand of cards. Four failures, four answers:
+
+**The connection drops.** Long polling already survives it: grammY retries
+`getUpdates` every three seconds forever, and only an invalid token (401) or a
+second poller on the same token (409) ends the loop. What it does *not* protect is
+an outgoing call — an `editMessageText` that fails is an update to the card that
+never appears. So every call goes through a retry: a network error, a 5xx or a 429
+is tried again with a growing pause (four attempts, under four seconds in total),
+and a 4xx never is, because it would fail identically. A flood limit is obeyed to
+the second, unless Telegram asks for longer than a tap can wait.
+
+The outage itself is reported **once**, not once per retry, and its end is reported
+too. A run of `getUpdates` failures during a ten-minute outage is one line in the
+log, followed later by one more saying Telegram answers again.
+
+**A tap arrives against a card that has moved on.** The state is left unchanged and
+the answer is still "Card updated" — but the card is now also **redrawn from the
+database**. The old behaviour treated the message as right and the tap as late,
+which is backwards when the reason for the mismatch is that an edit was lost: the
+buttons then carry a version that no longer exists and every further tap is refused,
+which is a dead card in the middle of a game. Redrawing costs one edit and makes
+the failure self-correcting. The cost is a redundant edit on a genuine double tap,
+which Telegram rejects as "message is not modified" — expected, and logged at debug
+rather than as a warning.
+
+**The process dies.** A card is rebuilt from `game_players` and `game_events` on
+every tap, so a restart loses nothing that was confirmed. What it can lose is the
+last debounced edit — up to 350 ms of taps that reached the database but not the
+screen. So **every live card is redrawn as the bot starts**, before polling begins:
+whatever the last run left on screen is replaced by the truth. A live row whose
+message was never posted (the process died between the insert and `sendMessage`) is
+deleted instead — it can never be shown or tapped.
+
+A death also has to leave a reason behind. An uncaught exception or a rejected
+promise is logged through the scoped logger and the process exits non-zero, so the
+last line of the log says what happened rather than the console printing a bare
+stack.
+
+Nothing in the recovery path may become a new reason to fail: a feature that throws
+while catching up on startup is logged and skipped, the command menu is allowed to
+fail unpublished, and the bot starts anyway. A bot that will not start is worse than
+a bot with a stale `/` menu.
+
+---
+
 ## Edge cases
 
 | Situation | Behaviour |
 |---|---|
+| The wifi drops mid-game | Taps queue on Telegram's side; the card catches up when it returns |
+| The bot is restarted mid-game | The card is redrawn from the database as it starts |
 | A player sits a game out | A new `/game` without them; there must be no live card |
 | Two players go out at once mid-game | Record them in tap order. Acceptable noise |
 | A draw in a two-player game | The button is available from the very start |

@@ -25,6 +25,10 @@ const FIRST_VERSION = 0;
 
 const NO_SLOT = -1;
 
+const NO_MESSAGE = 0;
+
+const ALREADY_SHOWN = "message is not modified";
+
 export interface CardServiceDeps {
   readonly repo: CardRepository;
   readonly api: Api;
@@ -34,6 +38,7 @@ export interface CardServiceDeps {
 export interface CardService {
   open(chatId: number, seats: readonly Seat[]): Promise<void>;
   tap(payload: CallbackPayload, actorTgId: number): Promise<string>;
+  redrawLive(): Promise<number>;
   sweepIdle(idleSeconds: number): Promise<number>;
   shutdown(): Promise<void>;
 }
@@ -61,8 +66,9 @@ interface Tap {
 }
 
 type CardLookup =
-  | { readonly ok: true; readonly card: CardRecord }
-  | { readonly ok: false; readonly notice: string };
+  | { readonly kind: "tappable"; readonly card: CardRecord }
+  | { readonly kind: "gone" }
+  | { readonly kind: "outrun"; readonly card: CardRecord };
 
 const toMarkup = (rows: InlineKeyboardRows) => ({
   inline_keyboard: rows.map((row) => row.map((button) => ({ ...button }))),
@@ -104,14 +110,14 @@ const findTappableCard = (repo: CardRepository, payload: CallbackPayload): CardL
   const card = repo.cardById(payload.gameId);
 
   if (card === null || card.game.confirmed_at !== null) {
-    return { ok: false, notice: copy.cardGone };
+    return { kind: "gone" };
   }
 
   if (card.game.state_version !== payload.version) {
-    return { ok: false, notice: copy.cardStale };
+    return { kind: "outrun", card };
   }
 
-  return { ok: true, card };
+  return { kind: "tappable", card };
 };
 
 const noticeFor = (before: CardState, after: CardState): string => {
@@ -149,6 +155,16 @@ const editOf = (card: CardRecord, text: string, keyboard: InlineKeyboardRows | n
   keyboard,
 });
 
+const redrawOf = (context: CardContext, card: CardRecord): EditRequest => {
+  const state = toCardState(card);
+
+  return editOf(
+    card,
+    renderCard(state, context.repo.gameNumberInSeries(card.game.chat_id)),
+    renderKeyboard(state, card.game.id, card.game.state_version)
+  );
+};
+
 const createEditSender =
   (api: Api, log: Logger) =>
   async (request: EditRequest): Promise<void> => {
@@ -158,7 +174,14 @@ const createEditSender =
         reply_markup: request.keyboard === null ? undefined : toMarkup(request.keyboard),
       });
     } catch (error) {
-      log.warn(`could not edit message ${request.messageId}: ${String(error)}`);
+      const reason = String(error);
+      const line = `could not edit message ${request.messageId}: ${reason}`;
+
+      if (reason.includes(ALREADY_SHOWN)) {
+        log.debug(line);
+      } else {
+        log.warn(line);
+      }
     }
   };
 
@@ -237,25 +260,43 @@ const advanceCard = (context: CardContext, tap: Tap, after: CardState): string =
   return noticeFor(tap.before, after);
 };
 
-const tapCard = async (
+const repairOutrunCard = (context: CardContext, card: CardRecord): string => {
+  context.edits.schedule(String(card.game.id), redrawOf(context, card));
+
+  return copy.cardStale;
+};
+
+const redrawLiveCards = async (context: CardContext): Promise<number> => {
+  const cards = context.repo.liveCards();
+  const unsent = cards.filter((card) => card.game.message_id === NO_MESSAGE);
+  const posted = cards.filter((card) => card.game.message_id !== NO_MESSAGE);
+
+  for (const card of unsent) {
+    context.repo.deleteGame(card.game.id);
+  }
+
+  for (const card of posted) {
+    await context.sendEdit(redrawOf(context, card));
+  }
+
+  return posted.length;
+};
+
+const tapKnownCard = async (
   context: CardContext,
+  card: CardRecord,
   payload: CallbackPayload,
   actorTgId: number
 ): Promise<string> => {
-  const lookup = findTappableCard(context.repo, payload);
-  if (!lookup.ok) {
-    return lookup.notice;
-  }
-
-  const before = toCardState(lookup.card);
+  const before = toCardState(card);
   const transition = apply(before, toAction(payload));
 
   const tap: Tap = {
-    card: lookup.card,
+    card,
     before,
     actorTgId,
-    version: lookup.card.game.state_version + 1,
-    gameNumber: context.repo.gameNumberInSeries(lookup.card.game.chat_id),
+    version: card.game.state_version + 1,
+    gameNumber: context.repo.gameNumberInSeries(card.game.chat_id),
   };
 
   switch (transition.outcome) {
@@ -270,6 +311,25 @@ const tapCard = async (
 
     case "updated":
       return advanceCard(context, tap, transition.state);
+  }
+};
+
+const tapCard = async (
+  context: CardContext,
+  payload: CallbackPayload,
+  actorTgId: number
+): Promise<string> => {
+  const lookup = findTappableCard(context.repo, payload);
+
+  switch (lookup.kind) {
+    case "gone":
+      return copy.cardGone;
+
+    case "outrun":
+      return repairOutrunCard(context, lookup.card);
+
+    case "tappable":
+      return tapKnownCard(context, lookup.card, payload, actorTgId);
   }
 };
 
@@ -298,6 +358,7 @@ export function createCardService(deps: CardServiceDeps): CardService {
   return {
     open: (chatId, seats) => openCard(context, chatId, seats),
     tap: (payload, actorTgId) => tapCard(context, payload, actorTgId),
+    redrawLive: () => redrawLiveCards(context),
     sweepIdle: (idleSeconds) => sweepIdleCards(context, idleSeconds),
     shutdown: () => edits.flushAll(),
   };

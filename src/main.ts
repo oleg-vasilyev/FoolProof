@@ -1,17 +1,23 @@
 import { Bot } from "grammy";
 import { createLiveGameFeature } from "#live-game/live-game-feature.ts";
 import { createScoresheetFeature } from "#scoresheet/scoresheet-feature.ts";
-import { installFeatures, publishCommandMenu } from "#app/feature-installer.ts";
+import { installFeatures, publishCommandMenu, resumeFeatures } from "#app/feature-installer.ts";
 import { loadEnv, requireEnv } from "#shared/config/env.ts";
+import { installCrashExit } from "#shared/lifecycle/crash-exit.ts";
 import { createShutdown } from "#shared/lifecycle/shutdown.ts";
 import { createLogger } from "#shared/logging/logger.ts";
 import { repository } from "#shared/repository/repository-instance.ts";
+import { createApiRetry } from "#shared/telegram/api-retry.ts";
 
 
 const log = createLogger("polling");
 const env = loadEnv();
 
 const bot = new Bot(requireEnv(env, "BOT_TOKEN"));
+
+bot.api.config.use(createApiRetry(log));
+
+installCrashExit(log);
 
 const features = [
   createLiveGameFeature({ repo: repository, api: bot.api, log }),
@@ -25,7 +31,8 @@ const shutdown = createShutdown([...stops, () => bot.stop()]);
 process.once("SIGINT", () => void shutdown());
 process.once("SIGTERM", () => void shutdown());
 
-await publishCommandMenu(bot.api, features);
+await publishCommandMenu(bot.api, features, log);
+await resumeFeatures(features, log);
 
 log.info("listening for updates by long polling");
 await bot.start({ drop_pending_updates: true });

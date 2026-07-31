@@ -116,13 +116,21 @@ src/
     scoresheet/         the /stats picture
   shared/
     config/             reading .env, and where the project root is
-    lifecycle/          draining the stops on a signal
+    lifecycle/          draining the stops, and exiting loudly on a crash
     logging/            the scoped logger
     repository/         the connection, the contract, the SQL
-    telegram/           Bot API context types, and the feature contract
+    telegram/           Bot API context types, the feature contract, api retries
     text/               HTML escaping
     timing/             the edit debouncer
 ```
+
+`shared/lifecycle/crash-exit.ts` is why a death has a reason in the log. It matters
+more than it looks: `main.ts` ends in a **top-level `await bot.start()`**, and a
+rejection there arrives as **`uncaughtException`**, not `unhandledRejection` — so a
+handler for only the latter would print a bare stack with no scope and no clue.
+Both are installed, both log through the scoped logger, and both exit non-zero so
+whatever started the process can tell a crash from a shutdown. Neither tries to
+carry on: the state is unknown by definition.
 
 **Everything in `shared/` lives in a folder named after its subject**, including
 the ones holding a single module plus its spec. The alternative was a folder for
@@ -221,6 +229,13 @@ feature's commands first, then the listeners. A feature physically cannot regist
 `/help` and the `/` menu are both generated from the same command list, so they
 cannot drift from what is installed.
 
+A feature may also declare `resume`, called once by `resumeFeatures()` after the
+commands are installed and before polling starts — the seam for catching up on
+whatever the previous run left behind (`live-game` redraws its live cards there).
+**Recovery may never be the reason the bot fails to start**: a `resume` that throws
+is logged and skipped, and the remaining features still run. A restart loop caused
+by the code meant to survive restarts is the one failure this layer cannot afford.
+
 ### The domain layer is a pure reducer
 
 `features/live-game/domain/` holds `(state, action) => state` and nothing else. **No
@@ -264,6 +279,22 @@ Two Bot API facts that are easy to get backwards in code, both explained in
   Commands are text messages too, so a text handler that returns without calling
   `next()` silently swallows every command below it. `feature-installer.ts` is
   built so a feature cannot get this wrong — see above.
+
+### Retrying belongs in one transformer, not at the call sites
+
+`shared/telegram/api-retry.ts` is installed once with `bot.api.config.use()` in the
+composition root, so **no feature ever writes a retry**. A grammY transformer sees
+every outgoing call, which is the only place that can be true of; the alternative
+was a `try`/`catch` around each `editMessageText`, which is four copies of one
+policy and no coverage of the fifth call added later.
+
+Two shapes of failure reach it and they are not interchangeable: a network error
+**throws**, while a refusal from Telegram **resolves** as `{ ok: false, error_code }`.
+The decision of what to do with either is the pure `planFor()`; the transformer only
+carries it out. `getUpdates` is not excluded — grammY retries it too, and the two
+loops compose without either needing to know about the other.
+
+Which calls may be retried is a `PLAN.md` question, not a style one.
 
 ### Data access
 
