@@ -28,10 +28,11 @@
     "e2e:watch": "node e2e/watch-live.ts",
     "e2e:play": "node e2e/play.ts",
     "e2e:typecheck": "tsc -p e2e --noEmit",
-    "check": "npm run lint && npm run typecheck && npm run test",
+    "check": "npm run lint && npm run typecheck && npm run docs:check && npm run test",
     "lint": "eslint src scripts",
     "lint:fix": "eslint --fix src scripts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "docs:check": "node scripts/check-docs.ts"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

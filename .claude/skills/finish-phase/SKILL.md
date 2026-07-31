@@ -66,6 +66,15 @@ Ask of every touched file:
   subject is someone else's code?
 - Does the file's name still describe what is in it?
 
+## The documents the phase owes
+
+Load the **`write-a-doc`** skill before touching any of them: it routes a fact to
+one file and says how to add it without creating the second copy that will drift.
+Two steps from it matter most at the end of a phase — search the other documents for
+what you are about to write, and search for the sentence the phase just made false.
+`npm run docs:check` runs inside `npm run check`, so a broken link or a stale tree
+fails gate 1 rather than surviving to the next cleanup.
+
 ## Scaling the ritual to the change
 
 The four gates are not negotiable. What the phase *produces around them* is, and

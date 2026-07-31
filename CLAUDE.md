@@ -10,6 +10,7 @@ beside the code it describes:
 | Adding a query | `add-repository-method` skill |
 | Writing or changing any spec | `write-a-spec` skill |
 | Closing a phase, running the gates | `finish-phase` skill |
+| Writing or changing any document | `write-a-doc` skill |
 | Touching `e2e/` | [`e2e/README.md`](e2e/README.md) |
 
 Four documents, one job each:
@@ -28,6 +29,14 @@ Python?* If yes it belongs in `PLAN.md` — the Bot API's limits, the state mach
 the schema. If no, it belongs here. **A fact lives where its reason lives; the other
 file gets a pointer, never a retelling.** When the two disagree, `PLAN.md` wins on
 behaviour and this file wins on style.
+
+That rule has needed enforcing twice, so it is now enforced: `npm run docs:check`
+(part of `npm run check`) resolves every cross-document link and anchor, checks this
+tree against the real folders, checks `README.md`'s script table against
+`package.json`, and holds **this file to a line budget**. The budget is what makes
+appending cost something — when a new rule pushes it over, move an old paragraph
+into the skill it belongs to instead of raising the number. The `write-a-doc` skill
+routes a fact to its file.
 
 ## Code style
 

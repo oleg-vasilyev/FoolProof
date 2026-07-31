@@ -207,6 +207,7 @@ environment value is ever printed.
 | `npm test` | Vitest, once — units and integration together |
 | `npm run test:unit` | Only the unit specs, where everything outside the file is mocked |
 | `npm run test:integration` | Only `*.integration.spec.ts` — the real grammY bot and a real SQLite file |
+| `npm run test:watch` | Vitest left running while you edit |
 | `npm run test:coverage` | Vitest with coverage; fails below 70% on any metric |
 | `npm run test:mutation:changed` | Stryker over the files that differ from `origin/main`, about a minute |
 | `npm run test:mutation` | Stryker over everything, about five minutes; both fail below 85% |
@@ -216,6 +217,8 @@ environment value is ever printed.
 | `npm run e2e` | Whole scenarios against the real bot and a fake Telegram |
 | `npm run e2e:watch` | The same run, slowed down, in the browser |
 | `npm run e2e:play` | A chat in the browser to try things by hand |
+| `npm run e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
+| `npm run docs:check` | Links, anchors, the source tree and the script table above |
 
 Coverage and mutation write their reports into `reports/`, which is gitignored
 whole — nothing about testing lands next to the source.

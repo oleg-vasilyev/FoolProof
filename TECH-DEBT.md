@@ -139,6 +139,9 @@ Listed so nobody "fixes" them:
 - **The chat page renders the bot's HTML raw.** That is what Telegram does with
   `parse_mode: "HTML"`, and it is what makes a missing escape visible as markup.
 - **`diagnostics/` has no `domain/`.** There is nothing to decide there.
+- **The same product constraint opens `README.md` and `PLAN.md`.** A visitor must
+  not have to open the spec to learn why the bot is a keyboard. It is the one
+  overlap `docs:check` and the `write-a-doc` skill deliberately allow.
 - **`merge-callback-codec.spec.ts` imports `MOST_NAMES_AT_ONCE` from the domain**
   instead of mocking it, which every other spec would. The case it serves — that a
   full selection still fits in 64 bytes — is meaningless against a mocked cap: it
