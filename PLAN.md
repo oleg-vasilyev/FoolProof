@@ -67,17 +67,13 @@ displayed exactly as typed.
 
 ## Commands
 
-Latin characters and lower case only — a Telegram requirement.
+**The command list itself lives in [README.md](README.md#commands)** — one table, in
+the file where a person looks it up. This section owns what each one has to *do*,
+and the rules that apply to all of them.
 
-| Command | Behaviour |
-|---|---|
-| `/game Oleg, Anya, Roma` | Open a game. The list is the seating order around the table, clockwise |
-| `/next` | A new game with the same line-up |
-| `/help` | What the commands do and how the card works |
-| `/stats` | The latest session as a rendered image — chronology plus running score |
-| `/merge` | One player written under two names becomes one player again |
+Names are Latin characters and lower case only — a Telegram requirement.
 
-The bot publishes this list through `setMyCommands` on every start, so the
+The bot publishes the list through `setMyCommands` on every start, so the
 commands show up in Telegram's `/` menu instead of having to be typed from
 memory. A command that is not implemented yet stays out of the menu.
 
@@ -127,8 +123,9 @@ Separators: `,`, `->`, `→`, `>`, newline. Trim every name.
 
 Names may be in any script — the parser must not assume latin. Normalisation when
 matching against existing players: Unicode NFC, lower case, and `ё` → `е` for
-Cyrillic input. Merging duplicate players is done by hand in the database and is
-not automated in the first version.
+Cyrillic input. Normalisation catches a different case, not a different spelling:
+`Анна` and `Аня` are two players until somebody merges them — see
+[Merging two names into one](#merging-two-names-into-one).
 
 ### `/game` and `/next` while a card is live
 
@@ -528,8 +525,8 @@ bundled with Node 24 is well past both.
    forbidden. Do not add `UNIQUE(game_id, position)`
 3. **Removing an exit recomputes the positions.** A position is an ordinal, not an
    identifier. Remove the second player and the third becomes the second
-4. **`game_events` holds a `player_id`, never a name.** This makes manual merging of
-   duplicate players trivial: repoint the foreign key
+4. **`game_events` holds a `player_id`, never a name.** This is what makes merging
+   two names one player a repointed foreign key rather than a rewrite
 5. **`actor_tg_id` is written on every event.** It gives the "who keeps the records"
    metric
 6. **A game in `FROZEN` is immutable**
@@ -653,7 +650,7 @@ exactly why the supervisor tells the new process how the old one ended.
 | A draw in a two-player game | The button is available from the very start |
 | A single player in the list | Reject, a minimum of two |
 | Duplicate names in one `/game` | Reject with a message |
-| An unknown name | Create the player silently. Merging is manual |
+| An unknown name | Create the player silently — a typo becomes a player, and `/merge` is how it is undone |
 
 Two the bot does **not** handle yet, both found while building the end-to-end
 harness rather than in a game:
@@ -671,7 +668,9 @@ harness rather than in a game:
 - A Telegram Mini App and a dashboard
 - AI analytics
 - The trump suit and validation of the first move
-- Automatic merging of duplicate players
+- **Spotting** duplicate names by itself. `/merge` folds them once a person says so;
+  guessing that `Аня` and `Анна` are one player, or that `Оля` and `Коля` are not,
+  is a mistake nobody would forgive in a scoreboard
 
 ## On AI analytics, once we get to it
 

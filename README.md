@@ -32,6 +32,9 @@ Dealt first: Oleg
 | `/merge` | Folds a name typed twice into the right one |
 | `/help` | What the commands do and how the card works |
 
+This table is the one place the commands are listed; `PLAN.md` says what each one
+has to do.
+
 ### When one player ends up under two names
 
 Somebody types `Анна` once and `Аня` the rest of the evening, and `/stats` grows a
@@ -54,9 +57,8 @@ Merging names
 └──────────────┴───────────────┘
 ```
 
-Two names that sat in the same game are two people, so that merge is refused with
-the reason. So is a merge while a game is being played — confirm the card first.
-There is no undo, which is what the Confirm button is for.
+There is no undo, which is what the Confirm button is for. Two merges are refused
+with the reason, and [PLAN.md](PLAN.md#merging-two-names-into-one) says why.
 
 ## Running it
 
@@ -164,8 +166,8 @@ ERROR supervisor: the bot never got going (exit code 1) — fix what the log abo
 ```
 
 `Ctrl+C` stops both, and lets the bot finish the edit it was in the middle of.
-`PLAN.md` explains what each failure costs and why the supervisor does not forward
-the signal itself.
+[PLAN.md](PLAN.md#what-survives-a-failure) explains what each failure costs and why
+the supervisor does not forward the signal itself.
 
 ## Asking the bot how it is doing
 
@@ -191,10 +193,10 @@ Latest:
 The database line is the one that matters most: it names the file, so a production
 run that quietly came up on the dev database is one glance away from being caught.
 
-The command is **hidden** — it is not in `/help` and not in the `/` menu, so the
-group never sees it. Set `OPERATOR_TG_ID` in the env file to make it answer only
-you; leave it empty and anyone may run it. Nothing in the report is a secret: the
-token is never printed, and neither is any other environment value.
+The command is **hidden** — not in `/help`, not in the `/` menu — and
+`OPERATOR_TG_ID` in the env file makes it answer only you. `PLAN.md` explains
+[what it reports and why](PLAN.md#asking-the-bot-how-it-is-doing), including why no
+environment value is ever printed.
 
 ## Scripts
 
@@ -258,9 +260,9 @@ One chat, nobody driving it, pointed at the dev database. Type in the box and ta
 the buttons — it is the same fake Telegram, so the bot cannot tell the difference.
 Add `--db=data/somewhere.db` to keep an experiment out of the dev database.
 
-The whole harness lives in `e2e/`, imports nothing from `src/`, and has its own
-`tsconfig.json` and Vitest configuration — `npm test`, coverage and mutation never
-see it.
+The harness is deliberately walled off from the app and is **parked** — not a
+release gate, nothing depends on it. [`e2e/README.md`](e2e/README.md) has its rules,
+`TECH-DEBT.md` says what is wrong with it and when to come back.
 
 ## Layout
 
@@ -274,44 +276,30 @@ src/
   feature-installer.ts  registers whatever features it was given
   features/
     live-game/          playing a game on a live card of buttons
+    merge-names/        the /merge screen
     scoresheet/         the picture /stats sends back
+    diagnostics/        the /status report about the bot itself
   shared/               config, lifecycle, logging, repository,
                         telegram, text, timing — a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
+scripts/                dev utilities that are not part of the bot
 e2e/                    the fake Telegram and the scenarios played against it
 ```
 
-Inside a feature the same three layers every time, and imports point only
-downward:
+Inside every feature the same three layers — `domain/` pure, `render/` pure,
+`bot/` the impure edge — with imports pointing only downward, and specs and stubs
+sitting next to the file they stand for. ESLint enforces it: a cross-feature import
+and a framework import in `domain/` are both build errors.
+[CLAUDE.md](CLAUDE.md#layers-live-inside-a-feature) has the rest.
 
-```
-features/scoresheet/
-  scoresheet-feature.ts  the entry point: what this feature offers the bot
-  copy.en.ts             every string this feature shows a user
-  domain/                the pure core — no framework, no I/O
-  render/                state in, SVG out; still pure
-  bot/                   the impure edge: grammY, rasterizing
-```
+## The other three documents
 
-Specs (`*.spec.ts`) and stubs (`*.stub.ts`) sit next to the file they stand for,
-so a feature carries its own tests with it.
+- **[PLAN.md](PLAN.md)** — what the bot does and why: the state machine, the data
+  model, the invariants, the edge cases, and the design dead ends already paid for.
+  Read it before changing behaviour.
+- **[CLAUDE.md](CLAUDE.md)** — how the code here is written: style, layering,
+  testing, and the gates a phase has to pass. Read it before writing code.
+- **[TECH-DEBT.md](TECH-DEBT.md)** — what is deliberately unfinished, and the
+  trigger that would make each item worth picking up.
 
-Nothing in `src/` imports by relative path. Every import goes through an alias
-declared in `package.json` — `#shared/logging/logger.ts`,
-`#live-game/bot/prompt-registry.ts` — so a line says which zone it reached into.
-These are Node's own subpath imports, which is why they work with no build step
-and no loader flag.
-
-ESLint enforces all of it: a cross-feature import and a framework import in
-`domain/` are both build errors.
-
-## The other two documents
-
-- **[PLAN.md](PLAN.md)** — what the bot does and why. The state machine, the data
-  model, the invariants, the edge cases, and the design dead ends already paid
-  for. Read this before changing behaviour.
-- **[CLAUDE.md](CLAUDE.md)** — how the code here is written. Style, layering,
-  testing, and the gates a phase has to pass. Read this before writing code.
-
-The split is one question: *would this still be true if the bot were rewritten in
-Python?* If yes it is in `PLAN.md`; if no it is in `CLAUDE.md`.
+`CLAUDE.md` opens with the question that decides which file a fact goes in.
