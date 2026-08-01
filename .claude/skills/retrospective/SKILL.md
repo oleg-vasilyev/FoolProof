@@ -23,10 +23,13 @@ count is asked for, count. An answer with no number in it is a guess.
    mutation, e2e — and how many of those runs produced information already on
    disk under `reports/`? Re-running a gate to re-read its own report is the
    canonical waste.
-3. **Subagents.** How many, and was each brief complete enough that the agent did
-   not re-derive context you already had? Name work you kept that was mechanical
-   transcription from a settled design, and work you delegated where being wrong
-   was expensive.
+3. **Subagents — did they pay for themselves?** Not "was the brief good". Add up
+   what each one spent, say what it produced, and give a verdict per kind of work:
+   review, spec transcription, exploration. A subagent starts cold and re-reads the
+   subject, the skill and the existing spec, so it always costs *more total tokens*
+   than doing it yourself — what it buys is room in your own context and wall-clock
+   spent in parallel. Say whether that trade was worth taking this time, and name
+   the agent that was not.
 4. **Sequencing.** Did an agent write against a subject you were still changing?
    Did you block on one whose files were disjoint from yours and could have run
    alongside?
@@ -40,6 +43,12 @@ rule in `finish-phase`, `write-a-spec` or `add-a-feature`, a line in `CLAUDE.md`
 a memory file — and you name the file you changed. CLAUDE.md is under a line
 budget checked by `npm run docs:check`, so adding to it means moving something out
 of it.
+
+**A verdict that changes no default is not a conclusion.** "The subagents were
+fine" is an observation; "stop delegating spec files while the context is still
+roomy" is a change. If an answer above came out negative, the rule that follows
+from it must say what you will do differently, in a form the next phase reads
+before it repeats the mistake.
 
 A lesson left as prose in the conversation is gone at the next compaction, so it
 does not count. Drop any lesson that does not generalise beyond this session

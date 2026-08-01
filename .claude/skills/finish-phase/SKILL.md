@@ -161,6 +161,24 @@ them before deciding they are not its business. Keep for yourself the parts
 where being wrong is expensive — the mechanic a player will feel, a cross-feature
 hazard, anything touching `shared/` or the schema.
 
+**What delegation actually costs, measured over two phases.** P30 spent 493k
+tokens across six agents. It did not save tokens and never will: a cold agent
+re-reads the subject, the skill and the spec that are already in your context. It
+buys two things — room in your own window, and wall-clock while you work on
+something disjoint. So the policy is not "delegate the mechanical work", it is:
+
+- **The review pass is the one that always pays.** 89k tokens found three things
+  that were about to ship, including a false sentence written earlier in the same
+  phase by the same person who then re-read it and approved it. You cannot review
+  your own work by reading it again.
+- **Delegate transcription only when your context is the scarce resource** — after
+  a compaction, or with one clearly coming. With room to spare it is cheaper to
+  type the specs than to brief someone to type them.
+- **Never delegate against a subject that is not settled.** Delegation multiplies
+  the cost of rework: a placement decision you would fix in five minutes yourself
+  cost a whole second agent here, and cost a stopped agent in the phase before.
+  Two phases, same cause. If a design question is still open, answer it first.
+
 ## The final commit message
 
 Put the resulting numbers in it — test count, coverage, mutation score. A score
