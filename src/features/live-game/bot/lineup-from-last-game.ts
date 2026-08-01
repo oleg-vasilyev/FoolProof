@@ -12,6 +12,7 @@ import {
   type CardContext,
 } from "#live-game/bot/card-context.ts";
 import { resolveSeats, toSeats } from "#live-game/bot/seat-lookup.ts";
+import { askSeating } from "#live-game/bot/seating-screen.ts";
 
 
 type NamesProblem = Exclude<NamesResult, { ok: true }>;
@@ -104,10 +105,9 @@ const seatJoiners = async (
     return;
   }
 
-  const chatId = ctx.chat.id;
-  const joining = resolveSeats(context.repo, chatId, names);
+  const joining = resolveSeats(context.repo, ctx.chat.id, names);
 
-  await context.cards.open(chatId, rotateToLowestId([...seated, ...joining]), PICKED_BY_HAND);
+  await askSeating(ctx, [...seated, ...joining]);
 };
 
 const seatWithout = async (

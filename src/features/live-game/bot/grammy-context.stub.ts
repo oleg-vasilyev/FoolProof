@@ -18,13 +18,22 @@ interface QuotedMessage {
   readonly senderless?: boolean;
 }
 
+const lastCall = (spy: ReturnType<typeof vi.fn>): { text: string; options: Record<string, unknown> } => {
+  const calls = spy.mock.calls;
+  const last = calls[calls.length - 1];
+
+  return { text: last?.[0] ?? "", options: last?.[1] ?? {} };
+};
+
 export class ContextStub {
   public replySpy = vi.fn();
   public answerCallbackQuerySpy = vi.fn();
+  public editMessageTextSpy = vi.fn();
 
   public constructor() {
     this.replySpy.mockResolvedValue({ message_id: SENT_MESSAGE_ID });
     this.answerCallbackQuerySpy.mockResolvedValue(true);
+    this.editMessageTextSpy.mockResolvedValue(true);
   }
 
   public command(text: string): Command {
@@ -70,13 +79,25 @@ export class ContextStub {
       from: { id: USER_ID },
       callbackQuery: { data },
       answerCallbackQuery: this.answerCallbackQuerySpy,
+      editMessageText: this.editMessageTextSpy,
+    } as unknown as CallbackTap;
+  }
+
+  public chatlessTap(data: string): CallbackTap {
+    return {
+      chat: undefined,
+      from: { id: USER_ID },
+      callbackQuery: { data },
+      answerCallbackQuery: this.answerCallbackQuerySpy,
+      editMessageText: this.editMessageTextSpy,
     } as unknown as CallbackTap;
   }
 
   public lastReply(): { text: string; options: Record<string, unknown> } {
-    const calls = this.replySpy.mock.calls;
-    const last = calls[calls.length - 1];
+    return lastCall(this.replySpy);
+  }
 
-    return { text: last?.[0] ?? "", options: last?.[1] ?? {} };
+  public lastEdit(): { text: string; options: Record<string, unknown> } {
+    return lastCall(this.editMessageTextSpy);
   }
 }

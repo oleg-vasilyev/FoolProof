@@ -1,0 +1,63 @@
+import type { Seat } from "#live-game/domain/card-state.ts";
+
+
+export interface SeatingPlan {
+  readonly roster: readonly Seat[];
+  readonly placed: number;
+}
+
+export type SeatingAction =
+  | { readonly kind: "pick"; readonly playerId: number }
+  | { readonly kind: "back" }
+  | { readonly kind: "cancel" };
+
+export type SeatingTransition =
+  | { readonly outcome: "updated"; readonly plan: SeatingPlan; readonly seated: Seat }
+  | { readonly outcome: "stepped_back"; readonly plan: SeatingPlan }
+  | { readonly outcome: "seated"; readonly seats: readonly Seat[] }
+  | { readonly outcome: "cancelled" }
+  | { readonly outcome: "rejected" };
+
+const NONE_PLACED = 0;
+
+const ONE_SEAT = 1;
+
+const LAST_IS_FORCED = 1;
+
+export const seatNumberOf = (plan: SeatingPlan, slot: number): number | null =>
+  slot < plan.placed ? slot + ONE_SEAT : null;
+
+const seatedNext = (plan: SeatingPlan, playerId: number): SeatingTransition => {
+  const from = plan.roster.findIndex((seat) => seat.playerId === playerId);
+  const picked = plan.roster[from];
+
+  if (from < plan.placed || picked === undefined) {
+    return { outcome: "rejected" };
+  }
+
+  const others = plan.roster.filter((_, slot) => slot !== from);
+  const roster = [...others.slice(NONE_PLACED, plan.placed), picked, ...others.slice(plan.placed)];
+  const placed = plan.placed + ONE_SEAT;
+
+  return placed >= roster.length - LAST_IS_FORCED
+    ? { outcome: "seated", seats: roster }
+    : { outcome: "updated", plan: { roster, placed }, seated: picked };
+};
+
+const steppedBack = (plan: SeatingPlan): SeatingTransition =>
+  plan.placed === NONE_PLACED
+    ? { outcome: "rejected" }
+    : { outcome: "stepped_back", plan: { ...plan, placed: plan.placed - ONE_SEAT } };
+
+export const applySeating = (plan: SeatingPlan, action: SeatingAction): SeatingTransition => {
+  switch (action.kind) {
+    case "cancel":
+      return { outcome: "cancelled" };
+
+    case "back":
+      return steppedBack(plan);
+
+    case "pick":
+      return seatedNext(plan, action.playerId);
+  }
+};

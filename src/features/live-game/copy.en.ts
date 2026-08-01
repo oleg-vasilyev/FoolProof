@@ -18,6 +18,12 @@ export const copy = {
   notAtTable: (names: readonly string[]) =>
     `Not at the table: ${names.join(", ")}. Name only the players who were playing.`,
 
+  seatingHeader: "<b>Taking seats</b>",
+  seatingAsk: "Tap everyone in the order they sit around the table.",
+  seatedBody: (ring: string) => `Seated: ${ring}`,
+  seatingCancelledBody: "Cancelled — no game started.",
+  seatingStale: "This seating is out of date — start again",
+
   commandGame: "Open a game — /game Oleg, Anya, Roma",
   commandNext: "Another game, same line-up",
   commandNextWith: "Another game, plus more players — /next_with Zhenya",
@@ -27,7 +33,7 @@ export const copy = {
   helpNext:
     "/next — another game with the same line-up; the fool is attacked first, so their neighbour deals",
   helpNextWith:
-    "/next_with Zhenya, Sasha — the same line-up plus these, seated after the others; deal is picked by hand",
+    "/next_with Zhenya, Sasha — the same line-up plus these; you then tap everyone in seating order, and the deal is picked by hand",
   helpNextWithout:
     "/next_without Oleg — the same line-up minus these; deal is picked by hand",
   helpCard: [
@@ -47,12 +53,14 @@ export const copy = {
   markExit: "✅",
   markFool: "💀",
   markDraw: "🤝",
+  markSeat: "🪑",
 
   buttonDraw: "🤝 Draw",
   buttonConfirm: "✅ Confirm",
   buttonBack: "↩️ Back",
   buttonCancel: "❌ Cancel",
 
+  tapSeated: (name: string, seat: number) => `${name} — seat ${seat}`,
   tapRecorded: (name: string, position: number) => `${name} — ${position}`,
   tapStarter: (name: string) => `${name} dealt first`,
   tapDraw: "Draw",
@@ -61,6 +69,7 @@ export const copy = {
   cardStale: "Card updated — look again",
   cardGone: "This game is already over",
 
+  seatedNotice: "Seated",
   confirmedNotice: "Recorded",
   cancelledNotice: "Cancelled",
   cancelledBody: "Cancelled — nothing recorded.",

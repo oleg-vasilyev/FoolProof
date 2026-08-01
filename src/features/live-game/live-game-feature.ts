@@ -9,8 +9,10 @@ import { onGame } from "#live-game/bot/lineup-from-names.ts";
 import { onNext, onNextWith, onNextWithout } from "#live-game/bot/lineup-from-last-game.ts";
 import { onNamesReply } from "#live-game/bot/names-reply.ts";
 import { onTap } from "#live-game/bot/tap-handler.ts";
+import { onSeatingTap } from "#live-game/bot/seating-screen.ts";
 import { createPromptRegistry } from "#live-game/bot/prompt-registry.ts";
 import { CARD_TAPS } from "#live-game/render/callback-data-codec.ts";
+import { SEATING_TAPS } from "#live-game/render/seating-callback-codec.ts";
 import { startIdleSweep } from "#live-game/bot/idle-sweep.ts";
 
 
@@ -67,6 +69,7 @@ export const createLiveGameFeature = (deps: LiveGameDeps): Feature => {
     listen: (listeners: Listeners) => {
       listeners.onText((ctx) => onNamesReply(context, ctx));
       listeners.onTap(CARD_TAPS, (ctx) => onTap(context, ctx));
+      listeners.onTap(SEATING_TAPS, (ctx) => onSeatingTap(context, ctx));
     },
 
     resume: async () => {

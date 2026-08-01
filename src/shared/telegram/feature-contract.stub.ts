@@ -3,6 +3,8 @@ import type { CallbackTap, TextMessage } from "#shared/telegram/telegram-context
 import type { Feature, Listeners } from "#shared/telegram/feature-contract.ts";
 
 
+const FIRST_LISTENER = 0;
+
 export class ListenersStub implements Listeners {
   public onTextSpy = vi.fn((_run: (ctx: TextMessage) => Promise<void>) => undefined);
   public onTapSpy = vi.fn(
@@ -21,12 +23,12 @@ export class ListenersStub implements Listeners {
     return this.onTextSpy.mock.calls[0]?.[0];
   }
 
-  public tapListener(): ((ctx: CallbackTap) => Promise<void>) | undefined {
-    return this.onTapSpy.mock.calls[0]?.[1];
+  public tapListener(registered = FIRST_LISTENER): ((ctx: CallbackTap) => Promise<void>) | undefined {
+    return this.onTapSpy.mock.calls[registered]?.[1];
   }
 
-  public tapPattern(): RegExp | undefined {
-    return this.onTapSpy.mock.calls[0]?.[0];
+  public tapPattern(registered = FIRST_LISTENER): RegExp | undefined {
+    return this.onTapSpy.mock.calls[registered]?.[0];
   }
 }
 

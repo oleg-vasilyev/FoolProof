@@ -50,6 +50,12 @@ vi.mock("#live-game/bot/card-service.ts", () => ({
   PICKED_BY_HAND: null,
 }));
 
+const askSeatingSpy = vi.fn();
+
+vi.mock("#live-game/bot/seating-screen.ts", () => ({
+  askSeating: (ctx: unknown, seats: unknown) => askSeatingSpy(ctx, seats),
+}));
+
 const resolveSeatsSpy = vi.fn();
 
 const toSeatsSpy = vi.fn();
@@ -291,20 +297,26 @@ describe("a line-up taken from the last game", () => {
       expect(resolveSeatsSpy).toHaveBeenCalledWith(repo, CHAT_ID, ["Dima"]);
     });
 
-    it("should seat the previous line-up first and the joiners after, then rotate", async () => {
+    it("should offer the previous line-up first and the joiners after", async () => {
       parseNamesSpy.mockReturnValue({ ok: true, names: ["Dima"] });
 
       await onNextWith(context(), ctx.command("/next_with Dima"));
 
-      expect(rotateToLowestIdSpy).toHaveBeenCalledWith([...MAPPED_SEATS, ...JOINER_SEATS]);
+      expect(askSeatingSpy).toHaveBeenCalledWith(expect.anything(), [
+        ...MAPPED_SEATS,
+        ...JOINER_SEATS,
+      ]);
     });
 
-    it("should open the rotated seating with the deal picked by hand", async () => {
+    it("should ask where everyone sits rather than open a card, since a joiner sits anywhere", async () => {
       parseNamesSpy.mockReturnValue({ ok: true, names: ["Dima"] });
 
-      await onNextWith(context(), ctx.command("/next_with Dima"));
+      const command = ctx.command("/next_with Dima");
 
-      expect(cards.openSpy).toHaveBeenCalledWith(CHAT_ID, ROTATED, null);
+      await onNextWith(context(), command);
+
+      expect(askSeatingSpy).toHaveBeenCalledWith(command, expect.anything());
+      expect(cards.openSpy).toHaveBeenCalledTimes(NEVER);
     });
   });
 
@@ -462,12 +474,15 @@ describe("a line-up taken from the last game", () => {
       expect(ctx.lastReply().text).toBe(copy.lineupDuplicates(["Dima"]));
     });
 
-    it("should reach the same seating a good command would", async () => {
+    it("should reach the same seating question a good command would", async () => {
       parseNamesSpy.mockReturnValue({ ok: true, names: ["Dima"] });
 
       await joinFromNames(context(), ctx.textMessage("Dima"));
 
-      expect(cards.openSpy).toHaveBeenCalledWith(CHAT_ID, ROTATED, null);
+      expect(askSeatingSpy).toHaveBeenCalledWith(expect.anything(), [
+        ...MAPPED_SEATS,
+        ...JOINER_SEATS,
+      ]);
     });
 
     it("should never drop an unanswered prompt", async () => {
