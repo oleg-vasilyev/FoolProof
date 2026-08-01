@@ -7,7 +7,11 @@ export const copy = {
     `These names appear twice: ${names.join(", ")}. Give everyone a name of their own.`,
   gameAlreadyRunning: "A game is already in progress.",
   noLineupToRepeat: "No previous line-up here yet. Start with /game and the names.",
+  joinersPrompt: "Who is joining? Send their names.",
+  joinersPlaceholder: "Zhenya, Sasha",
   joinersMissing: "Who is joining? For example: /next_with Zhenya, Sasha",
+  leaversPrompt: "Who is sitting out? Send their names.",
+  leaversPlaceholder: "Oleg",
   leaversMissing: "Who is sitting out? For example: /next_without Oleg",
   alreadyAtTable: (names: readonly string[]) =>
     `Already at the table: ${names.join(", ")}. Name only the players joining.`,

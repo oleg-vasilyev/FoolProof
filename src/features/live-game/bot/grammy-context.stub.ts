@@ -15,6 +15,7 @@ export const SENT_MESSAGE_ID = 500;
 interface QuotedMessage {
   readonly text: string;
   readonly fromBot: boolean;
+  readonly senderless?: boolean;
 }
 
 export class ContextStub {
@@ -51,7 +52,13 @@ export class ContextStub {
         reply_to_message:
           quoted === undefined
             ? undefined
-            : { text: quoted.text, from: { id: quoted.fromBot ? BOT_ID : USER_ID } },
+            : {
+                text: quoted.text,
+                from:
+                  quoted.senderless === true
+                    ? undefined
+                    : { id: quoted.fromBot ? BOT_ID : USER_ID },
+              },
       },
       reply: this.replySpy,
     } as unknown as TextMessage;

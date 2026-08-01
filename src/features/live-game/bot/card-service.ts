@@ -35,6 +35,8 @@ export interface CardServiceDeps {
   readonly log: Logger;
 }
 
+export const PICKED_BY_HAND = null;
+
 export interface CardService {
   open(chatId: number, seats: readonly Seat[], starterSlot: number | null): Promise<void>;
   tap(payload: CallbackPayload, actorTgId: number): Promise<string>;
@@ -50,7 +52,7 @@ interface EditRequest {
   readonly keyboard: InlineKeyboardRows | null;
 }
 
-interface CardContext {
+interface EditingContext {
   readonly repo: CardRepository;
   readonly api: Api;
   readonly edits: Debouncer<EditRequest>;
@@ -155,7 +157,7 @@ const editOf = (card: CardRecord, text: string, keyboard: InlineKeyboardRows | n
   keyboard,
 });
 
-const redrawOf = (context: CardContext, card: CardRecord): EditRequest => {
+const redrawOf = (context: EditingContext, card: CardRecord): EditRequest => {
   const state = toCardState(card);
 
   return editOf(
@@ -186,7 +188,7 @@ const createEditSender =
   };
 
 const openCard = async (
-  context: CardContext,
+  context: EditingContext,
   chatId: number,
   seats: readonly Seat[],
   starterSlot: number | null
@@ -216,7 +218,7 @@ const openCard = async (
   }
 };
 
-const cancelCard = async (context: CardContext, tap: Tap): Promise<string> => {
+const cancelCard = async (context: EditingContext, tap: Tap): Promise<string> => {
   context.edits.cancel(String(tap.card.game.id));
   context.repo.discardGame(tap.card.game.id);
   await context.sendEdit(editOf(tap.card, copy.cancelledBody, null));
@@ -224,7 +226,7 @@ const cancelCard = async (context: CardContext, tap: Tap): Promise<string> => {
   return copy.cancelledNotice;
 };
 
-const confirmCard = async (context: CardContext, tap: Tap): Promise<string> => {
+const confirmCard = async (context: EditingContext, tap: Tap): Promise<string> => {
   context.repo.confirmGame(tap.card.game.id, finalistsOf(tap.before), tap.actorTgId, tap.version);
   context.edits.cancel(String(tap.card.game.id));
   await context.sendEdit(editOf(tap.card, renderResult(tap.before, tap.gameNumber), null));
@@ -232,7 +234,7 @@ const confirmCard = async (context: CardContext, tap: Tap): Promise<string> => {
   return copy.confirmedNotice;
 };
 
-const persist = (context: CardContext, tap: Tap, after: CardState): void => {
+const persist = (context: EditingContext, tap: Tap, after: CardState): void => {
   const { repo } = context;
   const gameId = tap.card.game.id;
 
@@ -250,7 +252,7 @@ const persist = (context: CardContext, tap: Tap, after: CardState): void => {
   repo.updateCard(gameId, phaseOf(after), tap.version, starterPlayerId(after));
 };
 
-const advanceCard = (context: CardContext, tap: Tap, after: CardState): string => {
+const advanceCard = (context: EditingContext, tap: Tap, after: CardState): string => {
   persist(context, tap, after);
 
   context.edits.schedule(
@@ -265,13 +267,13 @@ const advanceCard = (context: CardContext, tap: Tap, after: CardState): string =
   return noticeFor(tap.before, after);
 };
 
-const repairOutrunCard = (context: CardContext, card: CardRecord): string => {
+const repairOutrunCard = (context: EditingContext, card: CardRecord): string => {
   context.edits.schedule(String(card.game.id), redrawOf(context, card));
 
   return copy.cardStale;
 };
 
-const redrawLiveCards = async (context: CardContext): Promise<number> => {
+const redrawLiveCards = async (context: EditingContext): Promise<number> => {
   const cards = context.repo.liveCards();
   const unsent = cards.filter((card) => card.game.message_id === NO_MESSAGE);
   const posted = cards.filter((card) => card.game.message_id !== NO_MESSAGE);
@@ -288,7 +290,7 @@ const redrawLiveCards = async (context: CardContext): Promise<number> => {
 };
 
 const tapKnownCard = async (
-  context: CardContext,
+  context: EditingContext,
   card: CardRecord,
   payload: CallbackPayload,
   actorTgId: number
@@ -320,7 +322,7 @@ const tapKnownCard = async (
 };
 
 const tapCard = async (
-  context: CardContext,
+  context: EditingContext,
   payload: CallbackPayload,
   actorTgId: number
 ): Promise<string> => {
@@ -338,7 +340,7 @@ const tapCard = async (
   }
 };
 
-const sweepIdleCards = async (context: CardContext, idleSeconds: number): Promise<number> => {
+const sweepIdleCards = async (context: EditingContext, idleSeconds: number): Promise<number> => {
   const stale = context.repo.idleCards(idleSeconds);
 
   for (const game of stale) {
@@ -358,7 +360,7 @@ const sweepIdleCards = async (context: CardContext, idleSeconds: number): Promis
 export function createCardService(deps: CardServiceDeps): CardService {
   const sendEdit = createEditSender(deps.api, deps.log);
   const edits = createDebouncer<EditRequest>(EDIT_DEBOUNCE_MS, sendEdit);
-  const context: CardContext = { repo: deps.repo, api: deps.api, edits, sendEdit };
+  const context: EditingContext = { repo: deps.repo, api: deps.api, edits, sendEdit };
 
   return {
     open: (chatId, seats, starterSlot) => openCard(context, chatId, seats, starterSlot),

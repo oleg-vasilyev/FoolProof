@@ -51,12 +51,21 @@ vi.mock("#live-game/bot/idle-sweep.ts", () => ({
   startIdleSweep: (cards: unknown, log: unknown) => startIdleSweepSpy(cards, log),
 }));
 
-vi.mock("#live-game/bot/update-handlers.ts", () => ({
+vi.mock("#live-game/bot/lineup-from-names.ts", () => ({
   onGame: (context: unknown, ctx: unknown) => onGameSpy(context, ctx),
+}));
+
+vi.mock("#live-game/bot/lineup-from-last-game.ts", () => ({
   onNext: (context: unknown, ctx: unknown) => onNextSpy(context, ctx),
   onNextWith: (context: unknown, ctx: unknown) => onNextWithSpy(context, ctx),
   onNextWithout: (context: unknown, ctx: unknown) => onNextWithoutSpy(context, ctx),
+}));
+
+vi.mock("#live-game/bot/names-reply.ts", () => ({
   onNamesReply: (context: unknown, ctx: unknown) => onNamesReplySpy(context, ctx),
+}));
+
+vi.mock("#live-game/bot/tap-handler.ts", () => ({
   onTap: (context: unknown, ctx: unknown) => onTapSpy(context, ctx),
 }));
 

@@ -88,7 +88,7 @@ handler**. A text handler that returns without passing the update along silently
 swallows every command below it. This has already happened here once, and the
 symptom is the worst kind — nothing fails, the commands simply stop existing.
 
-### `/game` with no names
+### A command with no names asks for them
 
 Tapping a command in Telegram's `/` menu sends it immediately — the client gives
 no chance to type arguments, and no Bot API setting changes that. So a bare
@@ -97,8 +97,17 @@ opens the input field with that message quoted, and the names arrive in the next
 message. This also survives privacy mode, which hides ordinary group chatter from
 bots but always delivers replies to the bot's own messages.
 
+`/next_with` and `/next_without` do the same, with their own question and their
+own placeholder, because a menu tap is exactly how they will usually be sent.
+
 The answer is recognised by matching `reply_to_message` against the bot's own id
-and the exact prompt text, so no state is needed to read it.
+and then looking the **exact prompt text** up in a table of the three questions —
+which is what makes three questions share one slot per chat without any state:
+the quote inside the player's own reply says which one is being answered.
+
+A reply that still names nobody is refused in words rather than asked again. A
+second `force_reply` on the same question reads as a bot stuck in a loop, and in
+a group it drags everyone else's input field open with it.
 
 Two rules keep the prompt from becoming litter, both learned the hard way:
 
@@ -162,16 +171,14 @@ matters, `/game` with the real order is the fix.
 Both refuse rather than guess, because a name is how the bot identifies a person
 and a silently accepted typo becomes a second player:
 
-- nobody named, a name repeated in the argument
+- a name repeated in the argument
 - `/next_with` naming somebody already at the table
 - `/next_without` naming somebody who was not
 - `/next_without` leaving fewer than two players
 
-Tapped from the `/` menu, both arrive with no argument and get the first refusal
-rather than the `force_reply` prompt `/game` answers with. A prompt is one slot
-per chat, recognised by matching its own text, so a second kind would need the
-reply handler to know which question it is answering — and unlike `/game`, these
-two are typed *because* a specific name is on the tip of the tongue.
+Tapped from the `/` menu they arrive with no argument, and each answers with its
+own `force_reply` question — see [A command with no names asks for
+them](#a-command-with-no-names-asks-for-them).
 
 **The refusal happens before any player row is created.** `/next_with Zhenya,
 Oleg` with Oleg already seated must not leave a new `Zhenya` behind — that is

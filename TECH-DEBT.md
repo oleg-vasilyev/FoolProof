@@ -126,6 +126,23 @@ lines twice is cheaper than a shared module with two callers.
 
 ---
 
+## `card-context.ts` is mocked by hand in three places
+
+`lineup-from-names.spec.ts`, `lineup-from-last-game.spec.ts` and `names-reply.spec.ts` each write their
+own `vi.mock` factory for it rather than using a stub. That is inside the letter of
+the rule — `CLAUDE.md` requires stubs for `shared/` modules and feature entry points,
+and this is neither — but a `vi.mock` factory is **untyped**, which is the exact
+failure the stub rule exists to stop: add a parameter to `askForNames` and all three
+fakes keep compiling and keep passing.
+
+It is not written yet because the file just shed `toSeats` and `resolveSeats` to
+`seat-lookup.ts`, and three small fakes are cheaper than a stub with three callers.
+
+**Write `card-context.stub.ts` when a fourth consumer appears**, or the first time
+one of the three fakes is caught disagreeing with the real signature.
+
+---
+
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to
@@ -134,7 +151,6 @@ be awkward, with the trigger that would make the split pay for itself.
 | File | Lines | Why it is on the list | Split it when |
 |---|---|---|---|
 | `features/live-game/bot/card-service.ts` | 370 | The largest file in `src/`, and the only one doing four jobs: looking a card up, applying a tap, scheduling the debounced edit, and sweeping idle cards. It reads as a skeleton, which is why it has survived. | A fifth job arrives, or something other than the card service needs the debouncer |
-| `features/live-game/bot/update-handlers.ts` | 280 | Six exported handlers plus the preamble they share. The three `/next*` commands differ only in how they build the line-up, and that difference is already pure and elsewhere — what is left here is Telegram plumbing repeated three times. | A fourth way to open a card arrives — then the `/next*` family earns a file of its own |
 | `shared/repository/sqlite-repository.ts` | 365 | Every query in the app. It is meant to be the only file with SQL, so length is the price of that rule, not a smell. | The scoresheet's queries and the live card's queries stop overlapping — then two files behind one contract |
 | `e2e/fake-telegram/fake-telegram.ts` | 371 | One `switch` over nine Bot API methods, mixing protocol shapes with the chat log. A `bot-api-methods.ts` was planned and folded in to save a file; that was probably the wrong trade. | A tenth method is needed, or the fake starts refusing more than two things |
 | `e2e/harness/scenario-chat.ts` | 266 | Module-level singletons plus a 24-member `Chat` interface that scenarios use as a language. The interface grows every time a scenario wants a new question answered. | The interface passes ~30 members — then split the driving verbs from the queries |

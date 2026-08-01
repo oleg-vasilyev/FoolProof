@@ -2,6 +2,10 @@ import { expect, it } from "vitest";
 import { describeScenario } from "../harness/describe-scenario.ts";
 
 
+const JOINERS_PROMPT = "Who is joining? Send their names.";
+
+const LEAVERS_PROMPT = "Who is sitting out? Send their names.";
+
 describeScenario("somebody arrives, somebody goes home", (chat) => {
   it("should play a first game to have a line-up to change", async () => {
     await chat.say("/game Oleg, Anya, Roma");
@@ -54,9 +58,37 @@ describeScenario("somebody arrives, somebody goes home", (chat) => {
     expect(chat.lastText()).toBe("A game needs at least two players.");
   });
 
-  it("should ask who is joining when nobody was named", async () => {
+  it("should ask who is joining when the command carried no names", async () => {
     await chat.say("/next_with");
 
+    expect(chat.lastText()).toBe(JOINERS_PROMPT);
+    expect(chat.promptId()).not.toBeNull();
+    expect(chat.captions()).toEqual([]);
+  });
+
+  it("should seat the joiner named in the reply", async () => {
+    await chat.replyToPrompt("Kim");
+
+    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "Kim", "❌ Cancel"]);
+  });
+
+  it("should ask who is sitting out, and take the answer from the reply", async () => {
+    await chat.tap("❌ Cancel");
+    await chat.say("/next_without");
+
+    expect(chat.lastText()).toBe(LEAVERS_PROMPT);
+
+    await chat.replyToPrompt("Anya");
+
+    expect(chat.captions()).toEqual(["Oleg", "Roma", "❌ Cancel"]);
+  });
+
+  it("should refuse a reply that still names nobody, rather than ask again", async () => {
+    await chat.tap("❌ Cancel");
+    await chat.say("/next_with");
+    await chat.replyToPrompt(",");
+
     expect(chat.lastText()).toBe("Who is joining? For example: /next_with Zhenya, Sasha");
+    expect(chat.captions()).toEqual([]);
   });
 });
