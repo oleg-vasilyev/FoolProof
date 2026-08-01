@@ -28,6 +28,7 @@ const EMPTY_STORAGE: StorageSummary = {
 export class RepositoryStub implements Repository {
   public playersInChatSpy = vi.fn();
   public createPlayerSpy = vi.fn();
+  public forgetUnplayedPlayersSpy = vi.fn();
   public liveCardInChatSpy = vi.fn();
   public rosterInChatSpy = vi.fn();
   public playedTogetherSpy = vi.fn();
@@ -73,6 +74,10 @@ export class RepositoryStub implements Repository {
 
   public createPlayer(chatId: number, displayName: string): PlayerRecord {
     return this.createPlayerSpy(chatId, displayName);
+  }
+
+  public forgetUnplayedPlayers(chatId: number): void {
+    this.forgetUnplayedPlayersSpy(chatId);
   }
 
   public liveCardInChat(chatId: number): CardRecord | null {

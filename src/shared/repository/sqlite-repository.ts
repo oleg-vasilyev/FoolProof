@@ -108,6 +108,10 @@ export const sqliteRepository: Repository = {
     return { id: num(result.lastInsertRowid), chat_id: chatId, display_name: displayName };
   },
 
+  forgetUnplayedPlayers(chatId) {
+    db.prepare(UNREFERENCED_PLAYERS).run(chatId);
+  },
+
   rosterInChat(chatId) {
     return db
       .prepare(

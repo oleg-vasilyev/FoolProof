@@ -67,6 +67,7 @@ export interface SeriesChronology {
 export interface CardRepository {
   playersInChat(chatId: number): readonly PlayerRecord[];
   createPlayer(chatId: number, displayName: string): PlayerRecord;
+  forgetUnplayedPlayers(chatId: number): void;
 
   liveCardInChat(chatId: number): CardRecord | null;
   liveCards(): readonly CardRecord[];

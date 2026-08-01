@@ -17,12 +17,12 @@ const OLEG = { playerId: 3, displayName: "Oleg" };
 
 const ANYA = { playerId: 7, displayName: "Anya" };
 
-const SAFE = "safe";
+const escaped = (name: string): string => `<escaped ${name}>`;
 
 describe("seating-message", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    escapeHtmlSpy.mockReturnValue(SAFE);
+    escapeHtmlSpy.mockImplementation((name: string) => escaped(name));
   });
 
   describe("renderSeatingScreen()", () => {
@@ -32,11 +32,11 @@ describe("seating-message", () => {
   });
 
   describe("renderSeated()", () => {
-    it("should show the ring in the order it was tapped", () => {
-      escapeHtmlSpy.mockImplementation(() => SAFE);
-
+    it("should show the ring in the order it was tapped, not in any other", () => {
       expect(renderSeated([OLEG, ANYA])).toBe(
-        `${copy.seatingHeader}\n${copy.seatedBody(`${SAFE} → ${SAFE}`)}`
+        `${copy.seatingHeader}\n${copy.seatedBody(
+          `${escaped(OLEG.displayName)}${copy.betweenSeats}${escaped(ANYA.displayName)}`
+        )}`
       );
     });
 

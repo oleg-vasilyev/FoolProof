@@ -35,13 +35,23 @@ const FIRST_SEAT = 1;
 
 const FIRST_ROW = 0;
 
+const SECOND_ROW = 1;
+
+const FIRST_BUTTON = 0;
+
+const FIRST_SLOT = 0;
+
+const SECOND_SLOT = 1;
+
 const LAST_ROW = -1;
 
-const ONLY_BUTTON = 1;
+const A_CONTROL_ROW = 1;
 
 const DATA = "encoded";
 
 const rowsOf = (placed: number) => renderSeatingKeyboard({ roster: ROSTER, placed });
+
+const seatRows = (placed: number) => rowsOf(placed).slice(FIRST_ROW, LAST_ROW);
 
 const controlRow = (placed: number) => rowsOf(placed).slice(LAST_ROW)[FIRST_ROW] ?? [];
 
@@ -53,9 +63,7 @@ describe("renderSeatingKeyboard()", () => {
   });
 
   it("should give every player a row of their own, in roster order", () => {
-    const rows = rowsOf(NONE_PLACED);
-
-    expect(rows.slice(FIRST_ROW, LAST_ROW).map((row) => row.map((button) => button.text))).toEqual([
+    expect(seatRows(NONE_PLACED).map((row) => row.map((button) => button.text))).toEqual([
       [OLEG.displayName],
       [ANYA.displayName],
       [ROMA.displayName],
@@ -67,7 +75,7 @@ describe("renderSeatingKeyboard()", () => {
 
     const rows = rowsOf(ONE_PLACED);
 
-    expect(rows[FIRST_ROW]?.[FIRST_ROW]?.text).toBe(
+    expect(rows[FIRST_ROW]?.[FIRST_BUTTON]?.text).toBe(
       `${copy.markSeat} ${FIRST_SEAT} ${OLEG.displayName}`
     );
   });
@@ -75,7 +83,7 @@ describe("renderSeatingKeyboard()", () => {
   it("should ask the plan which seat each slot holds", () => {
     rowsOf(ONE_PLACED);
 
-    expect(seatNumberOfSpy).toHaveBeenCalledWith({ roster: ROSTER, placed: ONE_PLACED }, FIRST_ROW);
+    expect(seatNumberOfSpy).toHaveBeenCalledWith({ roster: ROSTER, placed: ONE_PLACED }, FIRST_SLOT);
   });
 
   it("should send the whole roster and a pick back with each name", () => {
@@ -88,8 +96,18 @@ describe("renderSeatingKeyboard()", () => {
     });
   });
 
+  it("should ask for a pick of the player whose row it is, not always the first", () => {
+    rowsOf(NONE_PLACED);
+
+    expect(encodeSeatingCallbackSpy.mock.calls[SECOND_ROW]?.[FIRST_BUTTON]).toEqual({
+      order: ORDER,
+      placed: NONE_PLACED,
+      action: { kind: "pick", playerId: ROSTER[SECOND_SLOT]?.playerId },
+    });
+  });
+
   it("should carry the encoded data onto the button", () => {
-    expect(rowsOf(NONE_PLACED)[FIRST_ROW]?.[FIRST_ROW]?.callback_data).toBe(DATA);
+    expect(rowsOf(NONE_PLACED)[FIRST_ROW]?.[FIRST_BUTTON]?.callback_data).toBe(DATA);
   });
 
   it("should offer only Cancel while nobody is seated, since there is nothing to undo", () => {
@@ -124,6 +142,6 @@ describe("renderSeatingKeyboard()", () => {
   });
 
   it("should put the controls in the last row, below every player", () => {
-    expect(rowsOf(NONE_PLACED)).toHaveLength(ROSTER.length + ONLY_BUTTON);
+    expect(rowsOf(NONE_PLACED)).toHaveLength(ROSTER.length + A_CONTROL_ROW);
   });
 });

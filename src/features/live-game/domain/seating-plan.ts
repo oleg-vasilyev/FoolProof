@@ -12,7 +12,12 @@ export type SeatingAction =
   | { readonly kind: "cancel" };
 
 export type SeatingTransition =
-  | { readonly outcome: "updated"; readonly plan: SeatingPlan; readonly seated: Seat }
+  | {
+      readonly outcome: "updated";
+      readonly plan: SeatingPlan;
+      readonly seated: Seat;
+      readonly seat: number;
+    }
   | { readonly outcome: "stepped_back"; readonly plan: SeatingPlan }
   | { readonly outcome: "seated"; readonly seats: readonly Seat[] }
   | { readonly outcome: "cancelled" }
@@ -24,8 +29,10 @@ const ONE_SEAT = 1;
 
 const LAST_IS_FORCED = 1;
 
+const seatNumber = (slot: number): number => slot + ONE_SEAT;
+
 export const seatNumberOf = (plan: SeatingPlan, slot: number): number | null =>
-  slot < plan.placed ? slot + ONE_SEAT : null;
+  slot < plan.placed ? seatNumber(slot) : null;
 
 const seatedNext = (plan: SeatingPlan, playerId: number): SeatingTransition => {
   const unplaced = plan.roster.slice(plan.placed);
@@ -45,7 +52,12 @@ const seatedNext = (plan: SeatingPlan, playerId: number): SeatingTransition => {
 
   return placed >= roster.length - LAST_IS_FORCED
     ? { outcome: "seated", seats: roster }
-    : { outcome: "updated", plan: { roster, placed }, seated: picked };
+    : {
+        outcome: "updated",
+        plan: { roster, placed },
+        seated: picked,
+        seat: seatNumber(plan.placed),
+      };
 };
 
 const steppedBack = (plan: SeatingPlan): SeatingTransition =>

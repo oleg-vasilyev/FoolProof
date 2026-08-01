@@ -23,12 +23,12 @@ export class ListenersStub implements Listeners {
     return this.onTextSpy.mock.calls[0]?.[0];
   }
 
-  public tapListener(registered = FIRST_LISTENER): ((ctx: CallbackTap) => Promise<void>) | undefined {
-    return this.onTapSpy.mock.calls[registered]?.[1];
+  public tapListener(nth = FIRST_LISTENER): ((ctx: CallbackTap) => Promise<void>) | undefined {
+    return this.onTapSpy.mock.calls[nth]?.[1];
   }
 
-  public tapPattern(registered = FIRST_LISTENER): RegExp | undefined {
-    return this.onTapSpy.mock.calls[registered]?.[0];
+  public tapPattern(nth = FIRST_LISTENER): RegExp | undefined {
+    return this.onTapSpy.mock.calls[nth]?.[0];
   }
 }
 

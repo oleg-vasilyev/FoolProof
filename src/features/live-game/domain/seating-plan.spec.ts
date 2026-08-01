@@ -16,46 +16,60 @@ const KIM = { playerId: 41, displayName: "Kim" };
 
 const STRANGER_ID = 99;
 
-const NONE = 0;
+const NOBODY_SEATED = 0;
 
-const ONE = 1;
+const ONE_SEATED = 1;
 
-const TWO = 2;
+const TWO_SEATED = 2;
 
-const FOUR = 4;
+const WHOLE_TABLE_SEATED = 4;
+
+const FIRST_SLOT = 0;
+
+const SECOND_SLOT = 1;
+
+const THIRD_SLOT = 2;
+
+const FIRST_SEAT = 1;
+
+const SECOND_SEAT = 2;
+
+const THIRD_SEAT = 3;
 
 const planOf = (roster: readonly typeof OLEG[], placed: number): SeatingPlan => ({ roster, placed });
 
 describe("seating-plan", () => {
   describe("applySeating, picking a seat", () => {
     it("should move the picked player ahead of everyone unplaced", () => {
-      const transition = applySeating(planOf([OLEG, ANYA, ROMA, KIM], NONE), {
+      const transition = applySeating(planOf([OLEG, ANYA, ROMA, KIM], NOBODY_SEATED), {
         kind: "pick",
         playerId: ANYA.playerId,
       });
 
       expect(transition).toEqual({
         outcome: "updated",
-        plan: { roster: [ANYA, OLEG, ROMA, KIM], placed: ONE },
+        plan: { roster: [ANYA, OLEG, ROMA, KIM], placed: ONE_SEATED },
         seated: ANYA,
+        seat: FIRST_SEAT,
       });
     });
 
     it("should leave the unplaced players in the order they already had", () => {
-      const transition = applySeating(planOf([ANYA, OLEG, ROMA, KIM], ONE), {
+      const transition = applySeating(planOf([ANYA, OLEG, ROMA, KIM], ONE_SEATED), {
         kind: "pick",
         playerId: KIM.playerId,
       });
 
       expect(transition).toEqual({
         outcome: "updated",
-        plan: { roster: [ANYA, KIM, OLEG, ROMA], placed: TWO },
+        plan: { roster: [ANYA, KIM, OLEG, ROMA], placed: TWO_SEATED },
         seated: KIM,
+        seat: SECOND_SEAT,
       });
     });
 
     it("should seat everyone once only one player is left, because that seat is forced", () => {
-      const transition = applySeating(planOf([ANYA, KIM, OLEG, ROMA], TWO), {
+      const transition = applySeating(planOf([ANYA, KIM, OLEG, ROMA], TWO_SEATED), {
         kind: "pick",
         playerId: OLEG.playerId,
       });
@@ -64,7 +78,7 @@ describe("seating-plan", () => {
     });
 
     it("should reject a player who is already seated", () => {
-      const transition = applySeating(planOf([ANYA, OLEG, ROMA, KIM], ONE), {
+      const transition = applySeating(planOf([ANYA, OLEG, ROMA, KIM], ONE_SEATED), {
         kind: "pick",
         playerId: ANYA.playerId,
       });
@@ -73,7 +87,7 @@ describe("seating-plan", () => {
     });
 
     it("should reject a player who is not in the roster", () => {
-      const transition = applySeating(planOf([OLEG, ANYA, ROMA, KIM], NONE), {
+      const transition = applySeating(planOf([OLEG, ANYA, ROMA, KIM], NOBODY_SEATED), {
         kind: "pick",
         playerId: STRANGER_ID,
       });
@@ -84,7 +98,7 @@ describe("seating-plan", () => {
     it("should not mutate the plan it was given", () => {
       const roster = [OLEG, ANYA, ROMA, KIM];
 
-      applySeating(planOf(roster, NONE), { kind: "pick", playerId: ANYA.playerId });
+      applySeating(planOf(roster, NOBODY_SEATED), { kind: "pick", playerId: ANYA.playerId });
 
       expect(roster).toEqual([OLEG, ANYA, ROMA, KIM]);
     });
@@ -92,16 +106,20 @@ describe("seating-plan", () => {
 
   describe("applySeating, stepping back", () => {
     it("should unseat the player placed last", () => {
-      const transition = applySeating(planOf([ANYA, KIM, OLEG, ROMA], TWO), { kind: "back" });
+      const transition = applySeating(planOf([ANYA, KIM, OLEG, ROMA], TWO_SEATED), {
+        kind: "back",
+      });
 
       expect(transition).toEqual({
         outcome: "stepped_back",
-        plan: { roster: [ANYA, KIM, OLEG, ROMA], placed: ONE },
+        plan: { roster: [ANYA, KIM, OLEG, ROMA], placed: ONE_SEATED },
       });
     });
 
     it("should reject stepping back when nobody is seated yet", () => {
-      const transition = applySeating(planOf([OLEG, ANYA, ROMA, KIM], NONE), { kind: "back" });
+      const transition = applySeating(planOf([OLEG, ANYA, ROMA, KIM], NOBODY_SEATED), {
+        kind: "back",
+      });
 
       expect(transition).toEqual({ outcome: "rejected" });
     });
@@ -109,7 +127,9 @@ describe("seating-plan", () => {
 
   describe("applySeating, cancelling", () => {
     it("should cancel however many seats are taken", () => {
-      const transition = applySeating(planOf([ANYA, KIM, OLEG, ROMA], TWO), { kind: "cancel" });
+      const transition = applySeating(planOf([ANYA, KIM, OLEG, ROMA], TWO_SEATED), {
+        kind: "cancel",
+      });
 
       expect(transition).toEqual({ outcome: "cancelled" });
     });
@@ -117,16 +137,20 @@ describe("seating-plan", () => {
 
   describe("seatNumberOf", () => {
     it("should number a placed slot from one", () => {
-      expect(seatNumberOf(planOf([ANYA, KIM, OLEG, ROMA], TWO), NONE)).toBe(ONE);
-      expect(seatNumberOf(planOf([ANYA, KIM, OLEG, ROMA], TWO), ONE)).toBe(TWO);
+      const plan = planOf([ANYA, KIM, OLEG, ROMA], TWO_SEATED);
+
+      expect(seatNumberOf(plan, FIRST_SLOT)).toBe(FIRST_SEAT);
+      expect(seatNumberOf(plan, SECOND_SLOT)).toBe(SECOND_SEAT);
     });
 
     it("should give an unplaced slot no number", () => {
-      expect(seatNumberOf(planOf([ANYA, KIM, OLEG, ROMA], TWO), TWO)).toBeNull();
+      expect(seatNumberOf(planOf([ANYA, KIM, OLEG, ROMA], TWO_SEATED), THIRD_SLOT)).toBeNull();
     });
 
     it("should number every slot once the whole roster is placed", () => {
-      expect(seatNumberOf(planOf([ANYA, KIM, OLEG, ROMA], FOUR), TWO)).toBe(TWO + ONE);
+      expect(seatNumberOf(planOf([ANYA, KIM, OLEG, ROMA], WHOLE_TABLE_SEATED), THIRD_SLOT)).toBe(
+        THIRD_SEAT
+      );
     });
   });
 });

@@ -21,6 +21,7 @@ export const copy = {
   seatingHeader: "<b>Taking seats</b>",
   seatingAsk: "Tap everyone in the order they sit around the table.",
   seatedBody: (ring: string) => `Seated: ${ring}`,
+  betweenSeats: " → ",
   seatingCancelledBody: "Cancelled — no game started.",
   seatingStale: "This seating is out of date — start again",
 

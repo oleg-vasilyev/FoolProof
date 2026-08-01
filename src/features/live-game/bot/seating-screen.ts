@@ -65,7 +65,12 @@ const openSeatedCard = async (
   await context.cards.open(chatId, rotateToLowestId(seats), PICKED_BY_HAND);
 };
 
-const cancelSeating = async (ctx: CallbackTap): Promise<void> => {
+const cancelSeating = async (
+  context: CardContext,
+  ctx: CallbackTap,
+  chatId: number
+): Promise<void> => {
+  context.repo.forgetUnplayedPlayers(chatId);
   await ctx.editMessageText(renderSeatingCancelled(), AS_HTML);
   await ctx.answerCallbackQuery(copy.cancelledNotice);
 };
@@ -100,7 +105,11 @@ export const onSeatingTap = async (context: CardContext, ctx: CallbackTap): Prom
 
   switch (transition.outcome) {
     case "updated":
-      await redraw(ctx, transition.plan, copy.tapSeated(transition.seated.displayName, transition.plan.placed));
+      await redraw(
+        ctx,
+        transition.plan,
+        copy.tapSeated(transition.seated.displayName, transition.seat)
+      );
 
       return;
 
@@ -115,7 +124,7 @@ export const onSeatingTap = async (context: CardContext, ctx: CallbackTap): Prom
       return;
 
     case "cancelled":
-      await cancelSeating(ctx);
+      await cancelSeating(context, ctx, chatId);
 
       return;
 

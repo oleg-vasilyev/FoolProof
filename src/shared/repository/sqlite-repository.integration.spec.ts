@@ -557,6 +557,36 @@ describe("confirmGame()", () => {
   });
 });
 
+describe("forgetUnplayedPlayers()", () => {
+  it("should forget a player created for a table that never became a game", () => {
+    repo.createPlayer(CHAT_ID, "Kmi");
+
+    repo.forgetUnplayedPlayers(CHAT_ID);
+
+    expect(repo.playersInChat(CHAT_ID)).toHaveLength(NONE);
+  });
+
+  it("should keep a player seated at a card that is still open", () => {
+    repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));
+    repo.createPlayer(CHAT_ID, "Kmi");
+
+    repo.forgetUnplayedPlayers(CHAT_ID);
+
+    expect(repo.playersInChat(CHAT_ID).map((player) => player.display_name)).toEqual([
+      "Oleg",
+      "Anya",
+    ]);
+  });
+
+  it("should leave another chat's players alone", () => {
+    repo.createPlayer(OTHER_CHAT_ID, "Kmi");
+
+    repo.forgetUnplayedPlayers(CHAT_ID);
+
+    expect(repo.playersInChat(OTHER_CHAT_ID)).toHaveLength(ONCE);
+  });
+});
+
 describe("discardGame()", () => {
   it("should remove the game", () => {
     const gameId = repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));

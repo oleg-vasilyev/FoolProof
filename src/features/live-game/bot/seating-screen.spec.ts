@@ -63,6 +63,8 @@ const NONE_PLACED = 0;
 
 const ONE_PLACED = 1;
 
+const DISTINCTIVE_SEAT = 4;
+
 const OLEG = { id: 3, chat_id: CHAT_ID, display_name: "Oleg" };
 
 const ANYA = { id: 7, chat_id: CHAT_ID, display_name: "Anya" };
@@ -188,6 +190,7 @@ describe("seating-screen", () => {
         outcome: "updated",
         plan: NEXT_PLAN,
         seated: SEATS[1],
+        seat: DISTINCTIVE_SEAT,
       });
 
       await onSeatingTap(context(), ctx.callbackTap(DATA));
@@ -195,7 +198,7 @@ describe("seating-screen", () => {
       expect(ctx.lastEdit().text).toBe(SCREEN);
       expect(renderSeatingKeyboardSpy).toHaveBeenCalledWith(NEXT_PLAN);
       expect(ctx.answerCallbackQuerySpy).toHaveBeenCalledWith(
-        copy.tapSeated(ANYA.display_name, ONE_PLACED)
+        copy.tapSeated(ANYA.display_name, DISTINCTIVE_SEAT)
       );
     });
 
@@ -248,6 +251,22 @@ describe("seating-screen", () => {
       expect(ctx.lastEdit().text).toBe(CANCELLED_TEXT);
       expect(ctx.answerCallbackQuerySpy).toHaveBeenCalledWith(copy.cancelledNotice);
       expect(cards.openSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should take a mistyped joiner away with the cancelled screen", async () => {
+      applySeatingSpy.mockReturnValue({ outcome: "cancelled" });
+
+      await onSeatingTap(context(), ctx.callbackTap(DATA));
+
+      expect(repo.forgetUnplayedPlayersSpy).toHaveBeenCalledWith(CHAT_ID);
+    });
+
+    it("should keep a joiner the seating did not cancel", async () => {
+      applySeatingSpy.mockReturnValue({ outcome: "seated", seats: SEATS });
+
+      await onSeatingTap(context(), ctx.callbackTap(DATA));
+
+      expect(repo.forgetUnplayedPlayersSpy).toHaveBeenCalledTimes(NEVER);
     });
 
     it("should say nothing changed when the plan refuses the tap", async () => {

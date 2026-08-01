@@ -203,9 +203,16 @@ where, it precedes the game, and a player who cannot tell the two screens apart 
 record a game that never happened. Hence a heading of its own and 🪑 rather than the
 card's ✅.
 
-**Nothing is written down while the screen is open.** No game row exists, so `/game`
-is not blocked, there is nothing for the idle sweep to abandon, and abandoning the
-screen costs nothing. The order chosen so far lives in `callback_data`, the same way
+**No game is written down while the screen is open.** No game row exists, so `/game`
+is not blocked and there is nothing for the idle sweep to abandon. The joiners are
+the exception and have to be: the screen carries player ids rather than names, so
+their rows exist before it is drawn. Cancel therefore sweeps the chat's unplayed
+players the way cancelling a card does, and a mistyped `/next_with Kmi` leaves
+nothing behind. Walking away without cancelling does leave `Kmi` in the roster until
+some later cancelled card sweeps it — the card has an idle sweep covering that case
+and this screen has nothing to sweep, which is the one place it is weaker.
+
+The order chosen so far lives in `callback_data`, the same way
 [the `/merge` screen](#merge-has-no-state) keeps its selection, which is what makes
 the screen immune to a restart. Player ids are written in base 62 so that a table of
 ten with six-digit ids still fits the Bot API's 64 bytes; the codec's spec asserts
