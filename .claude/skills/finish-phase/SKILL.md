@@ -132,6 +132,15 @@ A phase's cost is dominated by two things, and neither of them is thinking:
   between `number` and `void` after the SQL, the stub and the integration spec were
   already written, and paid for those three files twice.
 - **Waiting on gates that did not need running.** See gate 3.
+- **Deciding where a rule lives after writing it.** Settling the signatures is not
+  the whole design note: also ask, for every rule the phase adds, whether it is
+  pure — and if one of them already earned a `domain/` module, its siblings almost
+  certainly belong beside it. A phase wrote `starter-rule.ts` and then left the
+  line-up arithmetic inline in two handlers ten lines away; the review sent it to
+  `domain/`, and the specs for those handlers had to be written twice. The same
+  question in reverse: a predicate added to `domain/` that gates a button is not
+  finished until the `render/` side reads it, or the new rule is unreachable and
+  nothing fails.
 - **Guessing a decision that was the user's.** Anything they will *look at* — a
   picture, a layout, a wording — gets rendered and shown before the first spec is
   written against it, and a choice between two defensible shapes gets asked rather
@@ -145,7 +154,10 @@ settled, writing five spec files, adding a stub, or updating an expectation is
 transcription, not judgement. Delegate it as one batch with `model: "sonnet"`, and
 because the agent starts cold, the brief has to carry everything: the exact files
 to write, the subject each spec tests, the stubs to use by name, and the
-instruction to load the `write-a-spec` skill first. Keep for yourself the parts
+instruction to load the `write-a-spec` skill first. **Tell each agent to run only
+its own files** — a brief that ends "run the folder" makes the agent report your
+own half-finished edits as its failures, and it will spend a turn investigating
+them before deciding they are not its business. Keep for yourself the parts
 where being wrong is expensive — the mechanic a player will feel, a cross-feature
 hazard, anything touching `shared/` or the schema.
 
