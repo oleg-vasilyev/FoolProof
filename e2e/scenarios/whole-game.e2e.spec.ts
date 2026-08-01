@@ -19,9 +19,9 @@ describeScenario("a whole game, from /game to Confirm", (chat) => {
     expect(chat.cardText()).not.toContain("Who dealt first?");
   });
 
-  it("should swap Cancel for Back once there is something to undo", () => {
+  it("should add Back while keeping the card throwable", () => {
     expect(chat.captions()).toContain("↩️ Back");
-    expect(chat.captions()).not.toContain("❌ Cancel");
+    expect(chat.captions()).toContain("❌ Cancel");
   });
 
   it("should answer a tap with the position it recorded", async () => {
@@ -29,6 +29,10 @@ describeScenario("a whole game, from /game to Confirm", (chat) => {
 
     expect(chat.lastAnswer()).toBe("Anya — 1");
     expect(chat.captions()).toContain("✅ 1 Anya");
+  });
+
+  it("should stop offering Cancel once a place is recorded", () => {
+    expect(chat.captions()).not.toContain("❌ Cancel");
   });
 
   it("should offer a draw once two players are left", () => {

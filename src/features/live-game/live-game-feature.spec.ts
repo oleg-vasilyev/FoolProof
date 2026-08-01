@@ -25,6 +25,12 @@ const onGameSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> 
 
 const onNextSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
 
+const onNextWithSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
+
+const onNextWithoutSpy = vi.fn(
+  async (_context: unknown, _ctx: unknown): Promise<void> => undefined
+);
+
 const onNamesReplySpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
 
 const onTapSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
@@ -48,6 +54,8 @@ vi.mock("#live-game/bot/idle-sweep.ts", () => ({
 vi.mock("#live-game/bot/update-handlers.ts", () => ({
   onGame: (context: unknown, ctx: unknown) => onGameSpy(context, ctx),
   onNext: (context: unknown, ctx: unknown) => onNextSpy(context, ctx),
+  onNextWith: (context: unknown, ctx: unknown) => onNextWithSpy(context, ctx),
+  onNextWithout: (context: unknown, ctx: unknown) => onNextWithoutSpy(context, ctx),
   onNamesReply: (context: unknown, ctx: unknown) => onNamesReplySpy(context, ctx),
   onTap: (context: unknown, ctx: unknown) => onTapSpy(context, ctx),
 }));
@@ -106,14 +114,21 @@ describe("createLiveGameFeature()", () => {
   });
 
   describe("the commands it declares", () => {
-    it("should offer game and next, in that order", () => {
-      expect(build().commands.map((route) => route.command)).toEqual(["game", "next"]);
+    it("should offer game, next, next_with and next_without, in that order", () => {
+      expect(build().commands.map((route) => route.command)).toEqual([
+        "game",
+        "next",
+        "next_with",
+        "next_without",
+      ]);
     });
 
     it("should take its menu descriptions from its own copy", () => {
       expect(build().commands.map((route) => route.menuDescription)).toEqual([
         copy.commandGame,
         copy.commandNext,
+        copy.commandNextWith,
+        copy.commandNextWithout,
       ]);
     });
 
@@ -121,6 +136,8 @@ describe("createLiveGameFeature()", () => {
       expect(build().commands.map((route) => route.help)).toEqual([
         copy.helpGame,
         copy.helpNext,
+        copy.helpNextWith,
+        copy.helpNextWithout,
       ]);
     });
 
@@ -138,6 +155,18 @@ describe("createLiveGameFeature()", () => {
       await build().commands[1]?.run("the-context" as never);
 
       expect(onNextSpy).toHaveBeenCalledWith(expect.anything(), "the-context");
+    });
+
+    it("should route next_with to its own handler", async () => {
+      await build().commands[2]?.run("the-context" as never);
+
+      expect(onNextWithSpy).toHaveBeenCalledWith(expect.anything(), "the-context");
+    });
+
+    it("should route next_without to its own handler", async () => {
+      await build().commands[3]?.run("the-context" as never);
+
+      expect(onNextWithoutSpy).toHaveBeenCalledWith(expect.anything(), "the-context");
     });
 
     it("should hand its handlers a context carrying the repository", async () => {

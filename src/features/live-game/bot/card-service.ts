@@ -36,7 +36,7 @@ export interface CardServiceDeps {
 }
 
 export interface CardService {
-  open(chatId: number, seats: readonly Seat[]): Promise<void>;
+  open(chatId: number, seats: readonly Seat[], starterSlot: number | null): Promise<void>;
   tap(payload: CallbackPayload, actorTgId: number): Promise<string>;
   redrawLive(): Promise<number>;
   sweepIdle(idleSeconds: number): Promise<number>;
@@ -188,7 +188,8 @@ const createEditSender =
 const openCard = async (
   context: CardContext,
   chatId: number,
-  seats: readonly Seat[]
+  seats: readonly Seat[],
+  starterSlot: number | null
 ): Promise<void> => {
   const { repo, api } = context;
   const gameId = repo.openGame(
@@ -196,7 +197,11 @@ const openCard = async (
     seats.map((seat) => seat.playerId)
   );
 
-  const state: CardState = { seats, starterSlot: null, exits: [], drawAccepted: false };
+  const state: CardState = { seats, starterSlot, exits: [], drawAccepted: false };
+
+  if (starterSlot !== null) {
+    repo.updateCard(gameId, phaseOf(state), FIRST_VERSION, starterPlayerId(state));
+  }
 
   try {
     const message = await api.sendMessage(chatId, renderCard(state, repo.gameNumberInSeries(chatId)), {
@@ -356,7 +361,7 @@ export function createCardService(deps: CardServiceDeps): CardService {
   const context: CardContext = { repo: deps.repo, api: deps.api, edits, sendEdit };
 
   return {
-    open: (chatId, seats) => openCard(context, chatId, seats),
+    open: (chatId, seats, starterSlot) => openCard(context, chatId, seats, starterSlot),
     tap: (payload, actorTgId) => tapCard(context, payload, actorTgId),
     redrawLive: () => redrawLiveCards(context),
     sweepIdle: (idleSeconds) => sweepIdleCards(context, idleSeconds),

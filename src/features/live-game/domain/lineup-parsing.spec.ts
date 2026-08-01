@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { normalizeName, parseLineup, rotateToLowestId, stripCommand } from "#live-game/domain/lineup-parsing.ts";
+import {
+  normalizeName,
+  parseLineup,
+  parseNames,
+  rotateToLowestId,
+  stripCommand,
+} from "#live-game/domain/lineup-parsing.ts";
 
 
 const THREE_NAMES = ["Oleg", "Anya", "Roma"];
@@ -39,6 +45,28 @@ describe("normalizeName()", () => {
 
   it("should not assume latin", () => {
     expect(normalizeName("たなか")).toBe("たなか");
+  });
+});
+
+describe("parseNames()", () => {
+  it("should accept a single name", () => {
+    expect(parseNames("/next_with Zhenya")).toEqual({ ok: true, names: ["Zhenya"] });
+  });
+
+  it("should strip the command prefix", () => {
+    expect(parseNames("/next_with@foolproof_bot Zhenya")).toEqual({ ok: true, names: ["Zhenya"] });
+  });
+
+  it("should report an empty argument as empty", () => {
+    expect(parseNames("/next_with")).toEqual({ ok: false, problem: "empty" });
+  });
+
+  it("should report repeated names as duplicates carrying the repeated names", () => {
+    expect(parseNames("/next_with Oleg, Anya, Oleg")).toEqual({
+      ok: false,
+      problem: "duplicates",
+      names: ["Oleg"],
+    });
   });
 });
 

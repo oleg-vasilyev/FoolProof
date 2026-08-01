@@ -3,10 +3,10 @@ import type {
   CardRecord,
   Finalist,
   GameRecord,
+  LastGame,
   PlayerRecord,
   PlayerTally,
   Repository,
-  SeatRecord,
   SeriesChronology,
   StorageSummary,
 } from "#shared/repository/repository-contract.ts";
@@ -34,7 +34,7 @@ export class RepositoryStub implements Repository {
   public mergePlayersSpy = vi.fn();
   public liveCardsSpy = vi.fn();
   public cardByIdSpy = vi.fn();
-  public lastLineupSpy = vi.fn();
+  public lastGameSpy = vi.fn();
   public openGameSpy = vi.fn();
   public attachMessageSpy = vi.fn();
   public updateCardSpy = vi.fn();
@@ -59,7 +59,7 @@ export class RepositoryStub implements Repository {
     this.playedTogetherSpy.mockReturnValue(false);
     this.liveCardsSpy.mockReturnValue([]);
     this.cardByIdSpy.mockReturnValue(null);
-    this.lastLineupSpy.mockReturnValue(null);
+    this.lastGameSpy.mockReturnValue(null);
     this.openGameSpy.mockReturnValue(1);
     this.idleCardsSpy.mockReturnValue([]);
     this.gameNumberInSeriesSpy.mockReturnValue(FIRST_GAME_NUMBER);
@@ -99,8 +99,8 @@ export class RepositoryStub implements Repository {
     return this.cardByIdSpy(gameId);
   }
 
-  public lastLineup(chatId: number): readonly SeatRecord[] | null {
-    return this.lastLineupSpy(chatId);
+  public lastGame(chatId: number): LastGame | null {
+    return this.lastGameSpy(chatId);
   }
 
   public openGame(chatId: number, playerIds: readonly number[]): number {

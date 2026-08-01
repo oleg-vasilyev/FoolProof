@@ -32,6 +32,11 @@ export interface CardRecord {
   exits: readonly ExitRecord[];
 }
 
+export interface LastGame {
+  seats: readonly SeatRecord[];
+  loserIds: readonly number[];
+}
+
 export interface Finalist {
   playerId: number;
   position: number;
@@ -66,7 +71,7 @@ export interface CardRepository {
   liveCardInChat(chatId: number): CardRecord | null;
   liveCards(): readonly CardRecord[];
   cardById(gameId: number): CardRecord | null;
-  lastLineup(chatId: number): readonly SeatRecord[] | null;
+  lastGame(chatId: number): LastGame | null;
 
   openGame(chatId: number, playerIds: readonly number[]): number;
   attachMessage(gameId: number, messageId: number): void;

@@ -71,7 +71,9 @@ displayed exactly as typed.
 the file where a person looks it up. This section owns what each one has to *do*,
 and the rules that apply to all of them.
 
-Names are Latin characters and lower case only — a Telegram requirement.
+Names are lower-case Latin, digits and `_` only — a Telegram requirement, which is
+why the pair that adds and removes players is `/next_with` and `/next_without`
+rather than anything hyphenated.
 
 The bot publishes the list through `setMyCommands` on every start, so the
 commands show up in Telegram's `/` menu instead of having to be typed from
@@ -106,8 +108,8 @@ Two rules keep the prompt from becoming litter, both learned the hard way:
   reply interface behaves erratically.
 - **Delete a prompt only if it goes unanswered.** There is no API call to withdraw
   a `force_reply`, so a prompt nobody replied to would keep the reply pending in
-  the chat's draft indefinitely. `/game` and `/next` therefore clear any prompt
-  still standing, and at most one is ever live per chat. An **answered** prompt
+  the chat's draft indefinitely. Every command that opens a card therefore clears
+  any prompt still standing, and at most one is ever live per chat. An **answered** prompt
   must be left alone: deleting it turns the quote inside the player's own reply
   into "Deleted message", which is permanent and looks worse than the draft it was
   meant to fix.
@@ -127,18 +129,69 @@ Cyrillic input. Normalisation catches a different case, not a different spelling
 `Анна` and `Аня` are two players until somebody merges them — see
 [Merging two names into one](#merging-two-names-into-one).
 
-### `/game` and `/next` while a card is live
+### Who deals first, and who decides
 
-Both commands behave identically: no new card is created, and the bot answers
+At a new table nobody can know: the deal goes to whoever drew the lowest trump,
+which happens in the room. So `/game` asks, and phase 1 exists.
+
+At a table that has just played, the house rule decides it and the bot can apply
+it. The fool is attacked first, so the player seated **immediately before them**
+deals the next game — one seat back in the ring, wrapping past the start.
+A `/next` card therefore opens already in `RECORDING`, with the deal shown.
+
+It asks anyway whenever it cannot name one loser. A game closed with Draw leaves
+two players sharing last place, and a game confirmed with nothing recorded leaves
+none; either way the answer is "not exactly one", and the card falls back to
+phase 1. Getting it wrong costs one Back, which resets the starter. A merge is
+*not* one of these cases — it repoints the loss onto the keeper before deleting
+the absorbed row, which is invariant 4.
+
+`/next_with` and `/next_without` always ask, because the table changed and a new
+trump was drawn for it.
+
+### Changing the table between games
+
+`/next_with Zhenya, Sasha` and `/next_without Oleg` take the last line-up and add
+or remove names, so the usual "somebody arrived, somebody went home" does not
+force the whole list to be typed again. Joiners are appended after the players
+already seated and the result is re-normalised — see [Seating is
+normalised](#seating-is-normalised). The bot cannot know where somebody actually
+sat, and that order is load-bearing now that `/next` reads the ring: when it
+matters, `/game` with the real order is the fix.
+
+Both refuse rather than guess, because a name is how the bot identifies a person
+and a silently accepted typo becomes a second player:
+
+- nobody named, a name repeated in the argument
+- `/next_with` naming somebody already at the table
+- `/next_without` naming somebody who was not
+- `/next_without` leaving fewer than two players
+
+Tapped from the `/` menu, both arrive with no argument and get the first refusal
+rather than the `force_reply` prompt `/game` answers with. A prompt is one slot
+per chat, recognised by matching its own text, so a second kind would need the
+reply handler to know which question it is answering — and unlike `/game`, these
+two are typed *because* a specific name is on the tip of the tongue.
+
+**The refusal happens before any player row is created.** `/next_with Zhenya,
+Oleg` with Oleg already seated must not leave a new `Zhenya` behind — that is
+invariant 7 in the other direction, and the reason the check reads names rather
+than resolved ids.
+
+### Asking for a card while one is live
+
+Every command that opens a card behaves identically: no new card is created, and
+the bot answers
 **as a reply to the live card** with the text "A game is already in progress". The
 reply serves as both the answer and the navigation — tapping the quote scrolls to
 the card.
 
 A consequence: to change the line-up, the live card has to be closed first — by
 Confirm or by Cancel. In the normal flow there is no friction, since a game ends
-with Confirm anyway. The extra tap only appears if `/next` was already pressed and
-only then does someone remember that Veronika has left: Back down to phase 1,
-Cancel, then `/game`.
+with Confirm anyway. The one awkward moment is pressing `/next` and only then
+remembering that Veronika has left: Cancel, then `/next_without Veronika`. Cancel
+is available immediately because nothing has been recorded yet, which is why it is
+no longer tied to phase 1.
 
 ---
 
@@ -148,6 +201,9 @@ Cancel, then `/game`.
 PICK_STARTER --tap on a name--> RECORDING
 PICK_STARTER --Cancel--------> CANCELLED (terminal)
 
+(a /next card skips PICK_STARTER and opens in RECORDING)
+
+RECORDING --Cancel, nothing recorded--> CANCELLED (terminal)
 RECORDING --tap on a name----> RECORDING (position += 1)
 RECORDING --Back------------> RECORDING (drop the last one, recompute)
 RECORDING --Back, no exits yet--> PICK_STARTER (starter is reset)
@@ -174,7 +230,9 @@ the text. There is no separate rollback command.
 - **Confirm** — once every position is determined. It replaces Draw; the two never
   coexist
 - **Back** — always in phase 2, absent in phase 1
-- **Cancel** — only in phase 1
+- **Cancel** — while nothing is recorded: all of phase 1, and phase 2 until the
+  first exit or a Draw. A card that opened with the deal already filled in would
+  otherwise cost a Back before it could be thrown away
 
 ### Tapping "Draw"
 

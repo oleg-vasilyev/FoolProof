@@ -357,12 +357,24 @@ describe("apply()", () => {
   });
 
   describe("cancel", () => {
-    it("should cancel in PICK_STARTER", () => {
+    it("should cancel when no starter has been picked yet", () => {
       expect(apply(cardStateOf(THREE), { kind: "cancel" }).outcome).toBe("cancelled");
     });
 
-    it("should reject a cancel once recording started", () => {
+    it("should cancel once a starter is picked but no exits are recorded", () => {
       const state = cardStateOf(THREE, { starterSlot: OLEG });
+
+      expect(apply(state, { kind: "cancel" }).outcome).toBe("cancelled");
+    });
+
+    it("should reject a cancel once an exit is recorded", () => {
+      const state = cardStateOf(THREE, { starterSlot: OLEG, exits: [ROMA] });
+
+      expect(apply(state, { kind: "cancel" }).outcome).toBe("rejected");
+    });
+
+    it("should reject a cancel once a draw is accepted", () => {
+      const state = cardStateOf(TWO, { starterSlot: OLEG, drawAccepted: true });
 
       expect(apply(state, { kind: "cancel" }).outcome).toBe("rejected");
     });

@@ -89,6 +89,11 @@ describeScenario("/next repeats the line-up", (chat) => {
     await chat.say("/next");
 
     expect(chat.cardText()).toContain("Game 2");
-    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "❌ Cancel"]);
+    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "↩️ Back", "❌ Cancel"]);
+  });
+
+  it("should have dealt to the player sitting before the fool", () => {
+    expect(chat.cardText()).toContain("Dealt first: <b>Roma</b>");
+    expect(chat.cardText()).not.toContain("Who dealt first?");
   });
 });

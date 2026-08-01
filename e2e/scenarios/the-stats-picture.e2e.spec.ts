@@ -11,13 +11,8 @@ const NOTHING = 0;
 
 const CONFIRM = "✅ Confirm";
 
-const playAnotherGame = async (
-  chat: Chat,
-  starter: string,
-  exits: readonly string[]
-): Promise<void> => {
+const playAnotherGame = async (chat: Chat, exits: readonly string[]): Promise<void> => {
   await chat.say("/next");
-  await chat.tap(starter);
 
   for (const name of exits) {
     await chat.tap(name);
@@ -41,8 +36,8 @@ describeScenario("/stats draws the session as a picture", (chat) => {
     await chat.tap("Roma");
     await chat.tap(CONFIRM);
 
-    await playAnotherGame(chat, "Anya", ["Roma", "Oleg"]);
-    await playAnotherGame(chat, "Roma", ["Oleg", "Anya"]);
+    await playAnotherGame(chat, ["Roma", "Oleg"]);
+    await playAnotherGame(chat, ["Oleg", "Anya"]);
 
     await chat.say("/stats");
 

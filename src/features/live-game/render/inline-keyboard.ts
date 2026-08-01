@@ -1,4 +1,5 @@
 import {
+  cancelAvailable,
   drawAvailable,
   finalPlacements,
   isReady,
@@ -41,32 +42,35 @@ const captionFor = (
 const controlRow = (state: CardState, gameId: number, version: number): readonly InlineButton[] => {
   const phase = phaseOf(state);
 
-  if (phase === "PICK_STARTER") {
-    return [
-      { text: copy.buttonCancel, callback_data: encodeCallback({ gameId, action: "cancel", slot: null, version }) },
-    ];
-  }
+  const cancel: InlineButton = {
+    text: copy.buttonCancel,
+    callback_data: encodeCallback({ gameId, action: "cancel", slot: null, version }),
+  };
 
   const back: InlineButton = {
     text: copy.buttonBack,
     callback_data: encodeCallback({ gameId, action: "back", slot: null, version }),
   };
 
-  if (phase === "READY") {
-    return [
-      back,
-      { text: copy.buttonConfirm, callback_data: encodeCallback({ gameId, action: "confirm", slot: null, version }) },
-    ];
-  }
+  switch (phase) {
+    case "PICK_STARTER":
+      return [cancel];
 
-  if (drawAvailable(state)) {
-    return [
-      back,
-      { text: copy.buttonDraw, callback_data: encodeCallback({ gameId, action: "draw", slot: null, version }) },
-    ];
-  }
+    case "READY":
+      return [
+        back,
+        { text: copy.buttonConfirm, callback_data: encodeCallback({ gameId, action: "confirm", slot: null, version }) },
+      ];
 
-  return [back];
+    case "RECORDING":
+      return [
+        back,
+        ...(drawAvailable(state)
+          ? [{ text: copy.buttonDraw, callback_data: encodeCallback({ gameId, action: "draw", slot: null, version }) }]
+          : []),
+        ...(cancelAvailable(state) ? [cancel] : []),
+      ];
+  }
 };
 
 export const renderKeyboard = (

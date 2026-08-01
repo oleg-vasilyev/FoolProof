@@ -75,6 +75,9 @@ export const finalPlacements = (state: CardState): readonly Placement[] => {
 export const starterPlayerId = (state: CardState): number | null =>
   state.starterSlot === null ? null : (seatAt(state, state.starterSlot)?.playerId ?? null);
 
+export const cancelAvailable = (state: CardState): boolean =>
+  state.exits.length === 0 && !state.drawAccepted;
+
 const isSlot = (state: CardState, slot: number): boolean =>
   Number.isInteger(slot) && slot >= 0 && slot < state.seats.length;
 
@@ -114,7 +117,7 @@ export const apply = (state: CardState, action: Action): Transition => {
 
   switch (action.kind) {
     case "cancel":
-      return phase === "PICK_STARTER" ? { outcome: "cancelled" } : { outcome: "rejected" };
+      return cancelAvailable(state) ? { outcome: "cancelled" } : { outcome: "rejected" };
 
     case "confirm":
       return phase === "READY" ? { outcome: "confirmed", state } : { outcome: "rejected" };

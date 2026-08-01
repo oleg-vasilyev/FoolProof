@@ -7,12 +7,25 @@ export const copy = {
     `These names appear twice: ${names.join(", ")}. Give everyone a name of their own.`,
   gameAlreadyRunning: "A game is already in progress.",
   noLineupToRepeat: "No previous line-up here yet. Start with /game and the names.",
+  joinersMissing: "Who is joining? For example: /next_with Zhenya, Sasha",
+  leaversMissing: "Who is sitting out? For example: /next_without Oleg",
+  alreadyAtTable: (names: readonly string[]) =>
+    `Already at the table: ${names.join(", ")}. Name only the players joining.`,
+  notAtTable: (names: readonly string[]) =>
+    `Not at the table: ${names.join(", ")}. Name only the players who were playing.`,
 
   commandGame: "Open a game — /game Oleg, Anya, Roma",
   commandNext: "Another game, same line-up",
+  commandNextWith: "Another game, plus more players — /next_with Zhenya",
+  commandNextWithout: "Another game, minus some players — /next_without Oleg",
 
   helpGame: "/game Oleg, Anya, Roma — open a game; the list is the seating order around the table",
-  helpNext: "/next — another game with the same line-up",
+  helpNext:
+    "/next — another game with the same line-up; the fool is attacked first, so their neighbour deals",
+  helpNextWith:
+    "/next_with Zhenya, Sasha — the same line-up plus these, seated after the others; deal is picked by hand",
+  helpNextWithout:
+    "/next_without Oleg — the same line-up minus these; deal is picked by hand",
   helpCard: [
     "Tap a name to record who dealt first, then tap players in the order they go out.",
     "The last one left is the fool and gets marked for you. Draw appears once two players",

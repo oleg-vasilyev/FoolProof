@@ -18,10 +18,10 @@ Two rules for this file, so it stays useful:
 ## Parked: the end-to-end harness
 
 `e2e/` plays whole scenarios against a real bot process and a fake Telegram, in the
-browser. It works — 62 cases across 7 scenario files, `npm run e2e`, and
+browser. It works — 75 cases across 8 scenario files, `npm run e2e`, and
 `README.md` says how to watch it. It is **parked**, which specifically means:
 
-- it is **not a release gate**. `npm run check` does not run it, and the four gates
+- it is **not a release gate**. `npm run check` does not run it, and the gates
   in the `finish-phase` skill do not mention it;
 - nothing depends on it, so it can rot without breaking a release;
 - if it breaks and is not worth fixing at that moment, deleting `e2e/` plus three
@@ -133,8 +133,9 @@ be awkward, with the trigger that would make the split pay for itself.
 
 | File | Lines | Why it is on the list | Split it when |
 |---|---|---|---|
-| `features/live-game/bot/card-service.ts` | 365 | The largest file in `src/`, and the only one doing four jobs: looking a card up, applying a tap, scheduling the debounced edit, and sweeping idle cards. It reads as a skeleton, which is why it has survived. | A fifth job arrives, or something other than the card service needs the debouncer |
-| `shared/repository/sqlite-repository.ts` | 350 | Every query in the app. It is meant to be the only file with SQL, so length is the price of that rule, not a smell. | The scoresheet's queries and the live card's queries stop overlapping — then two files behind one contract |
+| `features/live-game/bot/card-service.ts` | 370 | The largest file in `src/`, and the only one doing four jobs: looking a card up, applying a tap, scheduling the debounced edit, and sweeping idle cards. It reads as a skeleton, which is why it has survived. | A fifth job arrives, or something other than the card service needs the debouncer |
+| `features/live-game/bot/update-handlers.ts` | 280 | Six exported handlers plus the preamble they share. The three `/next*` commands differ only in how they build the line-up, and that difference is already pure and elsewhere — what is left here is Telegram plumbing repeated three times. | A fourth way to open a card arrives — then the `/next*` family earns a file of its own |
+| `shared/repository/sqlite-repository.ts` | 365 | Every query in the app. It is meant to be the only file with SQL, so length is the price of that rule, not a smell. | The scoresheet's queries and the live card's queries stop overlapping — then two files behind one contract |
 | `e2e/fake-telegram/fake-telegram.ts` | 371 | One `switch` over nine Bot API methods, mixing protocol shapes with the chat log. A `bot-api-methods.ts` was planned and folded in to save a file; that was probably the wrong trade. | A tenth method is needed, or the fake starts refusing more than two things |
 | `e2e/harness/scenario-chat.ts` | 266 | Module-level singletons plus a 24-member `Chat` interface that scenarios use as a language. The interface grows every time a scenario wants a new question answered. | The interface passes ~30 members — then split the driving verbs from the queries |
 | `e2e/hub/hub-server.ts` | 208 | Proxy, cache, page serving and port probing in one file. | Anything is added to the hub |

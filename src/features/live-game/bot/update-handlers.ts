@@ -1,7 +1,15 @@
-import type { CardRepository } from "#shared/repository/repository-contract.ts";
+import type { CardRepository, LastGame, SeatRecord } from "#shared/repository/repository-contract.ts";
 import type { CallbackTap, Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
-import { normalizeName, parseLineup, rotateToLowestId } from "#live-game/domain/lineup-parsing.ts";
+import {
+  normalizeName,
+  parseLineup,
+  parseNames,
+  rotateToLowestId,
+  type NamesResult,
+} from "#live-game/domain/lineup-parsing.ts";
 import type { Seat } from "#live-game/domain/card-state.ts";
+import { starterAfterLoss } from "#live-game/domain/starter-rule.ts";
+import { alreadySeated, tableWithout, type TableChange } from "#live-game/domain/table-change.ts";
 import { decodeCallback } from "#live-game/render/callback-data-codec.ts";
 import { copy } from "#live-game/copy.en.ts";
 import type { CardService } from "#live-game/bot/card-service.ts";
@@ -10,11 +18,24 @@ import type { PromptRegistry } from "#live-game/bot/prompt-registry.ts";
 
 type LineupProblem = Exclude<ReturnType<typeof parseLineup>, { ok: true }>;
 
+type NamesProblem = Exclude<NamesResult, { ok: true }>;
+
+type NextStart = { readonly ok: true; readonly last: LastGame } | { readonly ok: false };
+
+const NO_SEATS = 0;
+
+const NOBODY = 0;
+
+const PICKED_BY_HAND = null;
+
 export interface CardContext {
   readonly repo: CardRepository;
   readonly cards: CardService;
   readonly prompts: PromptRegistry;
 }
+
+const toSeats = (records: readonly SeatRecord[]): readonly Seat[] =>
+  records.map((record) => ({ playerId: record.player_id, displayName: record.display_name }));
 
 const resolveSeats = (
   repo: CardRepository,
@@ -53,6 +74,26 @@ const lineupProblemText = (result: LineupProblem): string => {
   }
 };
 
+const tableProblemText = (change: Exclude<TableChange, { ok: true }>): string => {
+  switch (change.problem) {
+    case "unknown_names":
+      return copy.notAtTable(change.names);
+
+    case "too_few":
+      return copy.lineupTooFew;
+  }
+};
+
+const namesProblemText = (result: NamesProblem, missing: string): string => {
+  switch (result.problem) {
+    case "empty":
+      return missing;
+
+    case "duplicates":
+      return copy.lineupDuplicates(result.names);
+  }
+};
+
 const refusedBecauseLive = async (
   context: CardContext,
   ctx: Command | TextMessage
@@ -84,7 +125,8 @@ const openFromNames = async (
   const chatId = ctx.chat.id;
   await context.cards.open(
     chatId,
-    rotateToLowestId(resolveSeats(context.repo, chatId, parsed.names))
+    rotateToLowestId(resolveSeats(context.repo, chatId, parsed.names)),
+    PICKED_BY_HAND
   );
 };
 
@@ -102,6 +144,35 @@ const askForNames = async (context: CardContext, ctx: Command): Promise<void> =>
   });
 
   context.prompts.remember(ctx.chat.id, prompt.message_id);
+};
+
+const beginNext = async (context: CardContext, ctx: Command): Promise<NextStart> => {
+  await context.prompts.dropUnanswered(ctx.chat.id);
+
+  if (await refusedBecauseLive(context, ctx)) {
+    return { ok: false };
+  }
+
+  const last = context.repo.lastGame(ctx.chat.id);
+  if (last === null || last.seats.length === NO_SEATS) {
+    await ctx.reply(copy.noLineupToRepeat);
+
+    return { ok: false };
+  }
+
+  return { ok: true, last };
+};
+
+const namesGiven = async (ctx: Command, missing: string): Promise<readonly string[] | null> => {
+  const parsed = parseNames(ctx.msg?.text ?? "");
+
+  if (!parsed.ok) {
+    await ctx.reply(namesProblemText(parsed, missing));
+
+    return null;
+  }
+
+  return parsed.names;
 };
 
 export const onGame = async (context: CardContext, ctx: Command): Promise<void> => {
@@ -124,23 +195,62 @@ export const onGame = async (context: CardContext, ctx: Command): Promise<void> 
 };
 
 export const onNext = async (context: CardContext, ctx: Command): Promise<void> => {
-  await context.prompts.dropUnanswered(ctx.chat.id);
-
-  if (await refusedBecauseLive(context, ctx)) {
+  const start = await beginNext(context, ctx);
+  if (!start.ok) {
     return;
   }
 
-  const lineup = context.repo.lastLineup(ctx.chat.id);
-  if (lineup === null || lineup.length === 0) {
-    await ctx.reply(copy.noLineupToRepeat);
+  const seats = toSeats(start.last.seats);
+
+  await context.cards.open(ctx.chat.id, seats, starterAfterLoss(seats, start.last.loserIds));
+};
+
+export const onNextWith = async (context: CardContext, ctx: Command): Promise<void> => {
+  const start = await beginNext(context, ctx);
+  if (!start.ok) {
+    return;
+  }
+
+  const names = await namesGiven(ctx, copy.joinersMissing);
+  if (names === null) {
+    return;
+  }
+
+  const seated = toSeats(start.last.seats);
+  const repeats = alreadySeated(seated, names);
+
+  if (repeats.length > NOBODY) {
+    await ctx.reply(copy.alreadyAtTable(repeats));
 
     return;
   }
 
-  await context.cards.open(
-    ctx.chat.id,
-    lineup.map((seat) => ({ playerId: seat.player_id, displayName: seat.display_name }))
-  );
+  const chatId = ctx.chat.id;
+  const joining = resolveSeats(context.repo, chatId, names);
+
+  await context.cards.open(chatId, rotateToLowestId([...seated, ...joining]), PICKED_BY_HAND);
+};
+
+export const onNextWithout = async (context: CardContext, ctx: Command): Promise<void> => {
+  const start = await beginNext(context, ctx);
+  if (!start.ok) {
+    return;
+  }
+
+  const names = await namesGiven(ctx, copy.leaversMissing);
+  if (names === null) {
+    return;
+  }
+
+  const change = tableWithout(toSeats(start.last.seats), names);
+
+  if (!change.ok) {
+    await ctx.reply(tableProblemText(change));
+
+    return;
+  }
+
+  await context.cards.open(ctx.chat.id, rotateToLowestId(change.seats), PICKED_BY_HAND);
 };
 
 export const onNamesReply = async (context: CardContext, ctx: TextMessage): Promise<void> => {

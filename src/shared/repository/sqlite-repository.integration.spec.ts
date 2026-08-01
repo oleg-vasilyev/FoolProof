@@ -649,22 +649,46 @@ describe("discardGame()", () => {
   });
 });
 
-describe("lastLineup()", () => {
+describe("lastGame()", () => {
   it("should be null with no confirmed game", () => {
-    expect(repo.lastLineup(CHAT_ID)).toBeNull();
+    expect(repo.lastGame(CHAT_ID)).toBeNull();
   });
 
   it("should ignore a card that is still live", () => {
     repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));
 
-    expect(repo.lastLineup(CHAT_ID)).toBeNull();
+    expect(repo.lastGame(CHAT_ID)).toBeNull();
   });
 
   it("should return the seating of the most recent confirmed game", () => {
     const ids = seedPlayers("Oleg", "Anya");
     playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
 
-    expect(repo.lastLineup(CHAT_ID)?.map((seat) => seat.display_name)).toEqual(["Oleg", "Anya"]);
+    expect(repo.lastGame(CHAT_ID)?.seats.map((seat) => seat.display_name)).toEqual([
+      "Oleg",
+      "Anya",
+    ]);
+  });
+
+  it("should report the single player left at the end as the loser", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+
+    expect(repo.lastGame(CHAT_ID)?.loserIds).toEqual([ids[1]]);
+  });
+
+  it("should report both players of a draw as losers, sorted by id", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[2] ?? NONE, ids[1] ?? NONE]);
+
+    expect(repo.lastGame(CHAT_ID)?.loserIds).toEqual([ids[1], ids[2]]);
+  });
+
+  it("should leave loserIds empty for a game confirmed with no events at all", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [], []);
+
+    expect(repo.lastGame(CHAT_ID)?.loserIds).toEqual([]);
   });
 });
 

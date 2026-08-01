@@ -15,6 +15,8 @@ const isReadySpy = vi.fn();
 
 const drawAvailableSpy = vi.fn();
 
+const cancelAvailableSpy = vi.fn();
+
 const encodeCallbackSpy = vi.fn();
 
 vi.mock("#live-game/domain/card-state.ts", () => ({
@@ -24,6 +26,7 @@ vi.mock("#live-game/domain/card-state.ts", () => ({
   phaseOf: (state: unknown) => phaseOfSpy(state),
   isReady: (state: unknown) => isReadySpy(state),
   drawAvailable: (state: unknown) => drawAvailableSpy(state),
+  cancelAvailable: (state: unknown) => cancelAvailableSpy(state),
 }));
 
 vi.mock("#live-game/render/callback-data-codec.ts", () => ({
@@ -80,6 +83,7 @@ describe("renderKeyboard()", () => {
     phaseOfSpy.mockReturnValue("RECORDING");
     isReadySpy.mockReturnValue(false);
     drawAvailableSpy.mockReturnValue(false);
+    cancelAvailableSpy.mockReturnValue(false);
   });
 
   describe("player rows", () => {
@@ -155,6 +159,26 @@ describe("renderKeyboard()", () => {
 
     it("should never offer Cancel once recording has started", () => {
       expect(controlCaptions(stateWith({ exits: [OLEG] }))).not.toContain("❌ Cancel");
+    });
+
+    it("should keep Cancel beside Back while nothing has been recorded yet", () => {
+      cancelAvailableSpy.mockReturnValue(true);
+
+      expect(controlCaptions(stateWith({}))).toEqual(["↩️ Back", "❌ Cancel"]);
+    });
+
+    it("should keep Cancel last when Draw is offered too", () => {
+      cancelAvailableSpy.mockReturnValue(true);
+      drawAvailableSpy.mockReturnValue(true);
+
+      expect(controlCaptions(stateWith({}))).toEqual(["↩️ Back", "🤝 Draw", "❌ Cancel"]);
+    });
+
+    it("should ignore the cancel rule entirely once every place is known", () => {
+      phaseOfSpy.mockReturnValue("READY");
+      cancelAvailableSpy.mockReturnValue(true);
+
+      expect(controlCaptions(stateWith({}))).not.toContain("❌ Cancel");
     });
 
     it("should offer Draw beside Back once two players remain", () => {

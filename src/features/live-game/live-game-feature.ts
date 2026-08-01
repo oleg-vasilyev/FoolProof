@@ -4,7 +4,15 @@ import type { Logger } from "#shared/logging/logger.ts";
 import type { CardRepository } from "#shared/repository/repository-contract.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { createCardService } from "#live-game/bot/card-service.ts";
-import { onGame, onNamesReply, onNext, onTap, type CardContext } from "#live-game/bot/update-handlers.ts";
+import {
+  onGame,
+  onNamesReply,
+  onNext,
+  onNextWith,
+  onNextWithout,
+  onTap,
+  type CardContext,
+} from "#live-game/bot/update-handlers.ts";
 import { createPromptRegistry } from "#live-game/bot/prompt-registry.ts";
 import { CARD_TAPS } from "#live-game/render/callback-data-codec.ts";
 import { startIdleSweep } from "#live-game/bot/idle-sweep.ts";
@@ -43,6 +51,18 @@ export const createLiveGameFeature = (deps: LiveGameDeps): Feature => {
         menuDescription: copy.commandNext,
         help: copy.helpNext,
         run: (ctx) => onNext(context, ctx),
+      },
+      {
+        command: "next_with",
+        menuDescription: copy.commandNextWith,
+        help: copy.helpNextWith,
+        run: (ctx) => onNextWith(context, ctx),
+      },
+      {
+        command: "next_without",
+        menuDescription: copy.commandNextWithout,
+        help: copy.helpNextWithout,
+        run: (ctx) => onNextWithout(context, ctx),
       },
     ],
 

@@ -201,7 +201,7 @@ describe("createCardService()", () => {
 
   describe("open()", () => {
     it("should open a game with the seated player ids", async () => {
-      await cards.open(CHAT_ID, seatsOf(...THREE));
+      await cards.open(CHAT_ID, seatsOf(...THREE), null);
 
       expect(repo.openGameSpy).toHaveBeenCalledWith(CHAT_ID, [
         playerIdOf(OLEG),
@@ -211,13 +211,13 @@ describe("createCardService()", () => {
     });
 
     it("should send the card the renderer produced", async () => {
-      await cards.open(CHAT_ID, seatsOf(...THREE));
+      await cards.open(CHAT_ID, seatsOf(...THREE), null);
 
       expect(telegram.lastSend().text).toBe(CARD_TEXT);
     });
 
     it("should render a fresh card with no starter and no exits", async () => {
-      await cards.open(CHAT_ID, seatsOf(...THREE));
+      await cards.open(CHAT_ID, seatsOf(...THREE), null);
 
       expect(renderCardSpy).toHaveBeenCalledWith(
         expect.objectContaining({ starterSlot: null, exits: [], drawAccepted: false }),
@@ -226,13 +226,13 @@ describe("createCardService()", () => {
     });
 
     it("should build the keyboard at the first version", async () => {
-      await cards.open(CHAT_ID, seatsOf(...THREE));
+      await cards.open(CHAT_ID, seatsOf(...THREE), null);
 
       expect(renderKeyboardSpy).toHaveBeenCalledWith(expect.anything(), GAME_ID, FIRST_VERSION);
     });
 
     it("should remember which message the card became", async () => {
-      await cards.open(CHAT_ID, seatsOf(...THREE));
+      await cards.open(CHAT_ID, seatsOf(...THREE), null);
 
       expect(repo.attachMessageSpy).toHaveBeenCalledWith(GAME_ID, expect.any(Number));
     });
@@ -240,15 +240,58 @@ describe("createCardService()", () => {
     it("should delete the row when Telegram refuses the message", async () => {
       telegram.sendMessageSpy.mockRejectedValue(new Error("chat not found"));
 
-      await expect(cards.open(CHAT_ID, seatsOf(...THREE))).rejects.toThrow("chat not found");
+      await expect(cards.open(CHAT_ID, seatsOf(...THREE), null)).rejects.toThrow("chat not found");
       expect(repo.discardGameSpy).toHaveBeenCalledWith(GAME_ID);
     });
 
     it("should not leave a card attached to a message that was never sent", async () => {
       telegram.sendMessageSpy.mockRejectedValue(new Error("chat not found"));
 
-      await expect(cards.open(CHAT_ID, seatsOf(...THREE))).rejects.toThrow();
+      await expect(cards.open(CHAT_ID, seatsOf(...THREE), null)).rejects.toThrow();
       expect(repo.attachMessageSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    describe("opening with a starter already picked", () => {
+      it("should not store a phase or starter when no slot was given", async () => {
+        await cards.open(CHAT_ID, seatsOf(...THREE), null);
+
+        expect(repo.updateCardSpy).toHaveBeenCalledTimes(NEVER);
+      });
+
+      it("should store the phase and starter the reducer derived for the given slot", async () => {
+        phaseOfSpy.mockReturnValue("READY");
+        starterPlayerIdSpy.mockReturnValue(playerIdOf(ANYA));
+
+        await cards.open(CHAT_ID, seatsOf(...THREE), OLEG);
+
+        expect(repo.updateCardSpy).toHaveBeenCalledWith(GAME_ID, "READY", FIRST_VERSION, playerIdOf(ANYA));
+      });
+
+      it("should render the card already past the pick-the-starter step", async () => {
+        await cards.open(CHAT_ID, seatsOf(...THREE), OLEG);
+
+        expect(renderCardSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ starterSlot: OLEG }),
+          GAME_NUMBER
+        );
+      });
+
+      it("should build the keyboard for a card already past the pick-the-starter step", async () => {
+        await cards.open(CHAT_ID, seatsOf(...THREE), OLEG);
+
+        expect(renderKeyboardSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ starterSlot: OLEG }),
+          GAME_ID,
+          FIRST_VERSION
+        );
+      });
+
+      it("should still discard the game when Telegram refuses the message", async () => {
+        telegram.sendMessageSpy.mockRejectedValue(new Error("chat not found"));
+
+        await expect(cards.open(CHAT_ID, seatsOf(...THREE), OLEG)).rejects.toThrow("chat not found");
+        expect(repo.discardGameSpy).toHaveBeenCalledWith(GAME_ID);
+      });
     });
   });
 
@@ -758,13 +801,13 @@ describe("createCardService()", () => {
 
   describe("what reaches Telegram", () => {
     it("should send the keyboard as inline buttons, not as the rows it was given", async () => {
-      await cards.open(CHAT_ID, seatsOf(...THREE));
+      await cards.open(CHAT_ID, seatsOf(...THREE), null);
 
       expect(telegram.lastSend().markup).toEqual({ inline_keyboard: KEYBOARD });
     });
 
     it("should send a new card as HTML", async () => {
-      await cards.open(CHAT_ID, seatsOf(...THREE));
+      await cards.open(CHAT_ID, seatsOf(...THREE), null);
 
       expect(telegram.sendMessageSpy.mock.calls[0]?.[2]?.parse_mode).toBe("HTML");
     });

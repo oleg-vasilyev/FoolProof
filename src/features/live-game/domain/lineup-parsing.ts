@@ -5,11 +5,12 @@ const COMMAND_PREFIX = /^\/[a-z_]+(@[\w]+)?\s*/i;
 
 const NAME_SEPARATORS = /,|->|→|>|\r?\n/;
 
-export type LineupResult =
+export type NamesResult =
   | { readonly ok: true; readonly names: readonly string[] }
   | { readonly ok: false; readonly problem: "empty" }
-  | { readonly ok: false; readonly problem: "too_few" }
   | { readonly ok: false; readonly problem: "duplicates"; readonly names: readonly string[] };
+
+export type LineupResult = NamesResult | { readonly ok: false; readonly problem: "too_few" };
 
 export const stripCommand = (text: string): string => text.replace(COMMAND_PREFIX, "");
 
@@ -28,7 +29,7 @@ const duplicatesIn = (names: readonly string[]): readonly string[] => {
   });
 };
 
-export const parseLineup = (rawText: string): LineupResult => {
+export const parseNames = (rawText: string): NamesResult => {
   const names = stripCommand(rawText)
     .split(NAME_SEPARATORS)
     .map((name) => name.trim())
@@ -38,16 +39,22 @@ export const parseLineup = (rawText: string): LineupResult => {
     return { ok: false, problem: "empty" };
   }
 
-  if (names.length < MIN_PLAYERS) {
-    return { ok: false, problem: "too_few" };
-  }
-
   const repeated = duplicatesIn(names);
   if (repeated.length > 0) {
     return { ok: false, problem: "duplicates", names: repeated };
   }
 
   return { ok: true, names };
+};
+
+export const parseLineup = (rawText: string): LineupResult => {
+  const parsed = parseNames(rawText);
+
+  if (parsed.ok && parsed.names.length < MIN_PLAYERS) {
+    return { ok: false, problem: "too_few" };
+  }
+
+  return parsed;
 };
 
 export const rotateToLowestId = <T extends { readonly playerId: number }>(

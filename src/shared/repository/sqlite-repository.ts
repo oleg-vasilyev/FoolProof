@@ -70,6 +70,19 @@ const exitsOf = (gameId: number): readonly ExitRecord[] =>
     .all(gameId)
     .map(toExit);
 
+const losersOf = (gameId: number): readonly number[] => {
+  const rows: readonly Row[] = db
+    .prepare(
+      `SELECT player_id FROM game_events
+       WHERE game_id = ?
+         AND position = (SELECT MAX(position) FROM game_events WHERE game_id = ?)
+       ORDER BY player_id`
+    )
+    .all(gameId, gameId);
+
+  return rows.map((row) => num(row.player_id));
+};
+
 const cardOf = (row: Row): CardRecord => {
   const game = toGame(row);
 
@@ -185,8 +198,8 @@ export const sqliteRepository: Repository = {
     return cardFrom(db.prepare("SELECT * FROM games WHERE id = ?").get(gameId));
   },
 
-  lastLineup(chatId) {
-    const row = db
+  lastGame(chatId) {
+    const row: Row | undefined = db
       .prepare(
         `SELECT id FROM games
          WHERE chat_id = ? AND confirmed_at IS NOT NULL
@@ -199,7 +212,9 @@ export const sqliteRepository: Repository = {
       return null;
     }
 
-    return seatsOf(num(row.id));
+    const gameId = num(row.id);
+
+    return { seats: seatsOf(gameId), loserIds: losersOf(gameId) };
   },
 
   openGame(chatId, playerIds) {
