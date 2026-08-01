@@ -28,15 +28,19 @@ export const seatNumberOf = (plan: SeatingPlan, slot: number): number | null =>
   slot < plan.placed ? slot + ONE_SEAT : null;
 
 const seatedNext = (plan: SeatingPlan, playerId: number): SeatingTransition => {
-  const from = plan.roster.findIndex((seat) => seat.playerId === playerId);
-  const picked = plan.roster[from];
+  const unplaced = plan.roster.slice(plan.placed);
+  const among = unplaced.findIndex((seat) => seat.playerId === playerId);
+  const picked = unplaced[among];
 
-  if (from < plan.placed || picked === undefined) {
+  if (picked === undefined) {
     return { outcome: "rejected" };
   }
 
-  const others = plan.roster.filter((_, slot) => slot !== from);
-  const roster = [...others.slice(NONE_PLACED, plan.placed), picked, ...others.slice(plan.placed)];
+  const roster = [
+    ...plan.roster.slice(NONE_PLACED, plan.placed),
+    picked,
+    ...unplaced.filter((_, slot) => slot !== among),
+  ];
   const placed = plan.placed + ONE_SEAT;
 
   return placed >= roster.length - LAST_IS_FORCED

@@ -19,6 +19,12 @@ const NONE_PLACED = 0;
 
 const TWO_PLACED = 2;
 
+const TWELVE_PLACED = 12;
+
+const SHORTENED_ID = 72;
+
+const ANOTHER_SHORTENED_ID = 135;
+
 const CALLBACK_DATA_LIMIT = 64;
 
 const BIGGEST_TABLE = 10;
@@ -80,6 +86,30 @@ describe("decodeSeatingCallback()", () => {
     expect(decodeSeatingCallback("s:7.f.3.C:2:b:-")).toEqual({
       order: [ANYA, KIM, OLEG, ROMA],
       placed: TWO_PLACED,
+      action: { kind: "back" },
+    });
+  });
+
+  it("should read a shortened id back whole, wherever it sits in the roster", () => {
+    expect(decodeSeatingCallback("s:1A.7.2B:0:b:-")).toEqual({
+      order: [SHORTENED_ID, ANYA, ANOTHER_SHORTENED_ID],
+      placed: NONE_PLACED,
+      action: { kind: "back" },
+    });
+  });
+
+  it("should read a shortened id back whole when it is the one being seated", () => {
+    expect(decodeSeatingCallback("s:3.7:0:p:1A")).toEqual({
+      order: [OLEG, ANYA],
+      placed: NONE_PLACED,
+      action: { kind: "pick", playerId: SHORTENED_ID },
+    });
+  });
+
+  it("should read a seat count past the first ten back whole", () => {
+    expect(decodeSeatingCallback("s:3.7:12:b:-")).toEqual({
+      order: [OLEG, ANYA],
+      placed: TWELVE_PLACED,
       action: { kind: "back" },
     });
   });
