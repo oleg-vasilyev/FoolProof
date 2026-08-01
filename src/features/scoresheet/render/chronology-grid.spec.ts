@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Cell } from "#scoresheet/domain/scoring.ts";
+import type { Cell, ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import type { Sheet } from "#scoresheet/render/sheet-layout.ts";
 
 
@@ -59,24 +59,28 @@ const ONE = 1;
 
 const PLACED: Cell = { kind: "placed", position: 2 };
 
+const playerOf = (cells: readonly Cell[], index: number, name: string): ScoredPlayer => ({
+  playerId: index,
+  displayName: name,
+  cells,
+  running: [],
+  share: NONE,
+  games: NONE,
+});
+
 const sheetOf = (cells: readonly (readonly Cell[])[], names?: readonly string[]): Sheet =>
   ({
     startedOn: "2026-07-24",
-    players: cells.map((own, index) => ({
-      playerId: index,
-      displayName: names?.[index] ?? `P${index}`,
-      cells: own,
-      running: [],
-      total: NONE,
-    })),
+    players: cells.map((own, index) => playerOf(own, index, names?.[index] ?? `P${index}`)),
     rounds: cells[0]?.length ?? NONE,
     omitted: NONE,
     rowHeight: ROW_HEIGHT,
     columnWidth: COLUMN_WIDTH,
     gridHeight: (cells[0]?.length ?? NONE) * ROW_HEIGHT,
+    gridBottom: NONE,
     chartTop: NONE,
     height: NONE,
-  }) as Sheet;
+  }) satisfies Sheet;
 
 const rectFor = (call: number): Record<string, unknown> =>
   (rectSpy.mock.calls[call]?.[0] ?? {}) as Record<string, unknown>;

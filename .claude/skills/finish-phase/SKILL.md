@@ -50,6 +50,22 @@ them:
   mostly equivalent mutants and type-narrowing guards; the threshold is 85. A
   survivor left alive on purpose is worth a sentence in the commit message, not
   another two rounds.
+- **Moving code moves its mutants — re-run the gate after a split or a rename.**
+  Assertions do not always survive being ported: splitting one render file into two
+  silently dropped four that had been killing mutants, including the early return
+  that made a conditional legend conditional. The score is the only thing that
+  notices, so a refactor after the mutation run is a refactor before another one.
+  That is the second round the rule above forbids, and it is the one case where
+  taking it is right.
+- **Read the survivor's own line before believing it is a gap.** Two adjacent
+  ternaries in one reducer differ by one word, and a line number quoted from memory
+  cost a whole extra run here: the rule everyone was worried about was already
+  killed, and the survivor next to it was equivalent. Print the mutant's line and
+  its replacement from `mutation.json`, not the line you remember.
+- **An arithmetic mutant on a nullable accumulator is usually equivalent.**
+  `sum + null` is `sum + 0` in JavaScript, so "add the value even when it is absent"
+  changes nothing observable. Recognising this is cheaper than writing the test that
+  cannot exist.
 
 ## 4. A review pass over the phase's whole diff
 

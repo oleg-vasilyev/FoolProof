@@ -557,11 +557,11 @@ describe("confirmGame()", () => {
   });
 });
 
-describe("deleteGame()", () => {
+describe("discardGame()", () => {
   it("should remove the game", () => {
     const gameId = repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));
 
-    repo.deleteGame(gameId);
+    repo.discardGame(gameId);
 
     expect(repo.cardById(gameId)).toBeNull();
   });
@@ -569,7 +569,7 @@ describe("deleteGame()", () => {
   it("should cascade to the seats", () => {
     const gameId = repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));
 
-    repo.deleteGame(gameId);
+    repo.discardGame(gameId);
     const rows = db.prepare("SELECT COUNT(*) AS c FROM game_players").get();
 
     expect(rows?.c).toBe(NONE);
@@ -580,18 +580,72 @@ describe("deleteGame()", () => {
     const gameId = repo.openGame(CHAT_ID, ids);
     repo.appendExit(gameId, ids[0] ?? NONE, 1, ACTOR_ID);
 
-    repo.deleteGame(gameId);
+    repo.discardGame(gameId);
     const rows = db.prepare("SELECT COUNT(*) AS c FROM game_events").get();
 
     expect(rows?.c).toBe(NONE);
   });
 
-  it("should leave the players alone", () => {
+  it("should forget a player created for the game and never seen anywhere else", () => {
     const gameId = repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));
 
-    repo.deleteGame(gameId);
+    repo.discardGame(gameId);
 
-    expect(repo.playersInChat(CHAT_ID)).toHaveLength(2);
+    expect(repo.playersInChat(CHAT_ID)).toHaveLength(NONE);
+  });
+
+  it("should keep a player who also appears in a confirmed game", () => {
+    const [oleg = NONE, anya = NONE, roma = NONE] = seedPlayers("Oleg", "Anya", "Roma");
+    playFullGame([oleg, anya], [oleg], [anya]);
+    const gameId = repo.openGame(CHAT_ID, [oleg, roma]);
+
+    repo.discardGame(gameId);
+
+    expect(repo.playersInChat(CHAT_ID).map((player) => player.display_name)).toContain("Oleg");
+  });
+
+  it("should keep a player seated in another game that still exists", () => {
+    const oleg = repo.createPlayer(CHAT_ID, "Oleg");
+    repo.openGame(OTHER_CHAT_ID, [oleg.id]);
+    const anya = repo.createPlayer(CHAT_ID, "Anya");
+    const gameId = repo.openGame(CHAT_ID, [anya.id]);
+
+    repo.discardGame(gameId);
+
+    expect(repo.playersInChat(CHAT_ID).map((player) => player.display_name)).toContain("Oleg");
+  });
+
+  it("should keep a player who is only some game's starter_player_id", () => {
+    const oleg = repo.createPlayer(CHAT_ID, "Oleg");
+    const starterGameId = repo.openGame(OTHER_CHAT_ID, [oleg.id]);
+    repo.updateCard(starterGameId, "PICK_STARTER", ONCE, oleg.id);
+    db.prepare("DELETE FROM game_players WHERE game_id = ? AND player_id = ?").run(
+      starterGameId,
+      oleg.id
+    );
+    const anya = repo.createPlayer(CHAT_ID, "Anya");
+    const gameId = repo.openGame(CHAT_ID, [anya.id]);
+
+    repo.discardGame(gameId);
+
+    expect(repo.playersInChat(CHAT_ID).map((player) => player.display_name)).toContain("Oleg");
+  });
+
+  it("should do nothing when the game no longer exists", () => {
+    const missingId = 9999;
+    seedPlayers("Oleg");
+
+    expect(() => repo.discardGame(missingId)).not.toThrow();
+    expect(repo.playersInChat(CHAT_ID)).toHaveLength(ONCE);
+  });
+
+  it("should leave another chat's unreferenced players alone", () => {
+    const gameId = repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));
+    repo.createPlayer(OTHER_CHAT_ID, "Stranger");
+
+    repo.discardGame(gameId);
+
+    expect(repo.playersInChat(OTHER_CHAT_ID)).toHaveLength(ONCE);
   });
 });
 

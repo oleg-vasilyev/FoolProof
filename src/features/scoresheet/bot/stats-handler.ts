@@ -3,6 +3,7 @@ import type { ScoresheetRepository } from "#shared/repository/repository-contrac
 import type { Command } from "#shared/telegram/telegram-contexts.ts";
 import { renderScoresheet } from "#scoresheet/render/scoresheet-svg.ts";
 import { copy } from "#scoresheet/copy.en.ts";
+import { gameTally, playerTally } from "#scoresheet/render/session-tally.ts";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";
 
 
@@ -22,6 +23,9 @@ export const onStats = async (context: ScoresheetContext, ctx: Command): Promise
   }
 
   await ctx.replyWithPhoto(new InputFile(rasterize(renderScoresheet(chronology)), SHEET_FILENAME), {
-    caption: copy.sheetSubtitle(chronology.games.length, chronology.players.length),
+    caption: copy.sheetSubtitle(
+      gameTally(chronology.games.length),
+      playerTally(chronology.players.length)
+    ),
   });
 };

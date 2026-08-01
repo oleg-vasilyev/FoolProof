@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
+import type { ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 
 
 const scoreSeriesSpy = vi.fn();
@@ -19,10 +20,16 @@ const {
   IMAGE_WIDTH,
   MAX_ROWS,
   PAD,
+  PLOT_INSET,
+  PLOT_LEFT,
+  PLOT_RIGHT,
+  PLOT_WIDTH,
   cellFontOf,
+  chartBottomOf,
   columnCentre,
   indexFontOf,
   layoutOf,
+  legendFontOf,
 } = await import("#scoresheet/render/sheet-layout.ts");
 
 const TELEGRAM_LONG_SIDE_LIMIT = 2560;
@@ -57,8 +64,9 @@ describe("layoutOf()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    scoreSeriesSpy.mockImplementation((players: readonly unknown[]) =>
-      players.map((player) => ({ ...(player as object), cells: [], running: [], total: NONE }))
+    scoreSeriesSpy.mockImplementation(
+      (players: readonly { playerId: number; displayName: string }[]): readonly ScoredPlayer[] =>
+        players.map((player) => ({ ...player, cells: [], running: [], share: NONE, games: NONE }))
     );
   });
 
@@ -183,6 +191,40 @@ describe("layoutOf()", () => {
 
       expect(sheet.height).toBeGreaterThan(sheet.chartTop);
     });
+
+    it("should report the grid's own bottom edge, exactly where the grid's rows end", () => {
+      const sheet = layoutOf(chronologyOf(SIX));
+
+      expect(sheet.gridBottom).toBe(GRID_TOP + sheet.gridHeight);
+    });
+
+    it("should hang the chart a fixed gap below the grid's bottom edge, not below the grid's top", () => {
+      const sheet = layoutOf(chronologyOf(SIX));
+
+      expect(sheet.chartTop - sheet.gridBottom).toBe(
+        layoutOf(chronologyOf(ONE)).chartTop - layoutOf(chronologyOf(ONE)).gridBottom
+      );
+    });
+  });
+
+  describe("chartBottomOf()", () => {
+    it("should sit a whole chart's height below the chart's top", () => {
+      const sheet = layoutOf(chronologyOf(SIX));
+
+      expect(chartBottomOf(sheet) - sheet.chartTop).toBe(CHART_HEIGHT);
+    });
+
+    it("should leave the bottom margin between itself and the foot of the sheet", () => {
+      const sheet = layoutOf(chronologyOf(SIX));
+
+      expect(chartBottomOf(sheet)).toBeLessThan(sheet.height);
+    });
+
+    it("should move with the chart when more games push it down", () => {
+      expect(chartBottomOf(layoutOf(chronologyOf(SIX)))).toBeGreaterThan(
+        chartBottomOf(layoutOf(chronologyOf(ONE)))
+      );
+    });
   });
 
   describe("columnCentre()", () => {
@@ -209,8 +251,9 @@ describe("the page geometry", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    scoreSeriesSpy.mockImplementation((players: readonly unknown[]) =>
-      players.map((player) => ({ ...(player as object), cells: [], running: [], total: NONE }))
+    scoreSeriesSpy.mockImplementation(
+      (players: readonly { playerId: number; displayName: string }[]): readonly ScoredPlayer[] =>
+        players.map((player) => ({ ...player, cells: [], running: [], share: NONE, games: NONE }))
     );
   });
 
@@ -242,6 +285,20 @@ describe("the page geometry", () => {
   });
 });
 
+describe("the plot geometry", () => {
+  it("should keep the plot's right edge inside the grid's right edge by exactly PLOT_INSET", () => {
+    expect(GRID_RIGHT - PLOT_RIGHT).toBe(PLOT_INSET);
+  });
+
+  it("should sit the plot's left edge on the grid's own left edge", () => {
+    expect(PLOT_LEFT).toBe(GRID_LEFT);
+  });
+
+  it("should measure the plot's width as the distance between its own two edges", () => {
+    expect(PLOT_WIDTH).toBe(PLOT_RIGHT - PLOT_LEFT);
+  });
+});
+
 describe("type sizes", () => {
   const TALL_ROW = 56;
 
@@ -266,5 +323,21 @@ describe("type sizes", () => {
   it("should return whole pixels, so glyphs land on the grid", () => {
     expect(cellFontOf(SHORT_ROW) % ONE).toBe(NONE);
     expect(indexFontOf(SHORT_ROW) % ONE).toBe(NONE);
+  });
+});
+
+describe("legendFontOf()", () => {
+  const NARROW_SLOT = 120;
+
+  const WIDE_SLOT = 2000;
+
+  it("should shrink with a narrower slot", () => {
+    expect(legendFontOf(NARROW_SLOT)).toBeLessThan(legendFontOf(WIDE_SLOT));
+  });
+
+  it("should never grow past the design's legend size, however wide the slot gets", () => {
+    const DESIGN_SIZE = 30;
+
+    expect(legendFontOf(WIDE_SLOT)).toBe(DESIGN_SIZE);
   });
 });

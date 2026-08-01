@@ -76,7 +76,7 @@ export interface CardRepository {
   dropLastExit(gameId: number): void;
 
   confirmGame(gameId: number, finalists: readonly Finalist[], actorTgId: number, version: number): void;
-  deleteGame(gameId: number): void;
+  discardGame(gameId: number): void;
 
   idleCards(idleSeconds: number): readonly GameRecord[];
   gameNumberInSeries(chatId: number): number;

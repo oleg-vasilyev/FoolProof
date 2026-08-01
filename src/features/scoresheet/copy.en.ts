@@ -22,9 +22,20 @@ export const copy = {
 
   sheetEyebrow: "SESSION LOG",
   sheetTitle: "CHRONOLOGY",
-  sheetScoreLabel: "CUMULATIVE SCORE",
-  sheetSubtitle: (games: number, players: number) =>
-    `${games} ${games === 1 ? "game" : "games"} · ${players} ${players === 1 ? "player" : "players"}`,
+  sheetShareLabel: "TABLE SHARE",
+  sheetShareHint: "50% is mid-table · 100% is winning every game",
+
+  sheetGameSingular: "game",
+  sheetGamePlural: "games",
+  sheetPlayerSingular: "player",
+  sheetPlayerPlural: "players",
+
+  sheetKeyPlaced: "went out",
+  sheetKeyDrawn: "drew for last",
+  sheetKeyFool: "left the fool",
+  sheetKeyAbsent: "did not play",
+
+  sheetSubtitle: (games: string, players: string) => `${games} · ${players}`,
   sheetOmitted: (games: number) => `earliest ${games} not shown`,
   sheetDate: (isoDate: string) => {
     const [year, month, day] = isoDate.split("-");

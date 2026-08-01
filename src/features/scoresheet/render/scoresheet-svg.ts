@@ -1,4 +1,5 @@
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
+import { cellKey } from "#scoresheet/render/cell-key.ts";
 import { chronologyGrid, columnNames } from "#scoresheet/render/chronology-grid.ts";
 import {
   FONT_FAMILY,
@@ -10,9 +11,11 @@ import {
   type Sheet,
 } from "#scoresheet/render/sheet-layout.ts";
 import { palette } from "#scoresheet/render/palette.ts";
-import { scoreChart } from "#scoresheet/render/score-chart.ts";
+import { shareChart } from "#scoresheet/render/share-chart.ts";
+import { shareLegend } from "#scoresheet/render/share-legend.ts";
 import { copy } from "#scoresheet/copy.en.ts";
-import { rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
+import { gameTally, playerTally } from "#scoresheet/render/session-tally.ts";
+import { line, rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
 
 
 const NONE = 0;
@@ -25,7 +28,11 @@ const SUBTITLE_BASELINE = 227;
 
 const OMITTED_BASELINE = 286;
 
-const LABEL_LIFT = 62;
+const LABEL_LIFT = 40;
+
+const DIVIDER_DROP = 92;
+
+const DIVIDER_WIDTH = 1;
 
 const EYEBROW_TRACKING = 3;
 
@@ -57,7 +64,7 @@ const heading = (sheet: Sheet): readonly string[] => [
     "font-size": fontSize.date,
     "text-anchor": "end",
   }),
-  text(copy.sheetSubtitle(sheet.rounds, sheet.players.length), {
+  text(copy.sheetSubtitle(gameTally(sheet.rounds), playerTally(sheet.players.length)), {
     x: GRID_RIGHT,
     y: SUBTITLE_BASELINE,
     fill: palette.inkMuted,
@@ -81,15 +88,34 @@ const omittedNote = (sheet: Sheet): readonly string[] =>
         }),
       ];
 
-const scoreLabel = (sheet: Sheet): string =>
-  text(copy.sheetScoreLabel, {
+const sectionDivider = (sheet: Sheet): string =>
+  line({
+    x1: PAD,
+    y1: sheet.gridBottom + DIVIDER_DROP,
+    x2: GRID_RIGHT,
+    y2: sheet.gridBottom + DIVIDER_DROP,
+    stroke: palette.ruling,
+    "stroke-width": DIVIDER_WIDTH,
+  });
+
+const sectionHeading = (sheet: Sheet): readonly string[] => [
+  text(copy.sheetShareLabel, {
     x: PAD,
     y: sheet.chartTop - LABEL_LIFT,
     fill: palette.inkMuted,
     "font-family": FONT_FAMILY,
     "font-size": fontSize.sectionLabel,
     "letter-spacing": EYEBROW_TRACKING,
-  });
+  }),
+  text(copy.sheetShareHint, {
+    x: GRID_RIGHT,
+    y: sheet.chartTop - LABEL_LIFT,
+    fill: palette.inkFaint,
+    "font-family": FONT_FAMILY,
+    "font-size": fontSize.hint,
+    "text-anchor": "end",
+  }),
+];
 
 export const renderScoresheet = (chronology: SeriesChronology): string => {
   const sheet = layoutOf(chronology);
@@ -100,7 +126,10 @@ export const renderScoresheet = (chronology: SeriesChronology): string => {
     ...omittedNote(sheet),
     ...columnNames(sheet),
     ...chronologyGrid(sheet),
-    scoreLabel(sheet),
-    ...scoreChart(sheet),
+    ...cellKey(sheet),
+    sectionDivider(sheet),
+    ...sectionHeading(sheet),
+    ...shareChart(sheet),
+    ...shareLegend(sheet),
   ]);
 };

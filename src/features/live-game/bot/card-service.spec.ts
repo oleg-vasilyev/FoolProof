@@ -241,7 +241,7 @@ describe("createCardService()", () => {
       telegram.sendMessageSpy.mockRejectedValue(new Error("chat not found"));
 
       await expect(cards.open(CHAT_ID, seatsOf(...THREE))).rejects.toThrow("chat not found");
-      expect(repo.deleteGameSpy).toHaveBeenCalledWith(GAME_ID);
+      expect(repo.discardGameSpy).toHaveBeenCalledWith(GAME_ID);
     });
 
     it("should not leave a card attached to a message that was never sent", async () => {
@@ -393,7 +393,7 @@ describe("createCardService()", () => {
       it("should delete the row, since a cancelled game is never stored", async () => {
         await cards.tap(payload("cancel", null), ACTOR_ID);
 
-        expect(repo.deleteGameSpy).toHaveBeenCalledWith(GAME_ID);
+        expect(repo.discardGameSpy).toHaveBeenCalledWith(GAME_ID);
       });
 
       it("should drop any edit still pending for that card", async () => {
@@ -627,7 +627,7 @@ describe("createCardService()", () => {
 
       await cards.redrawLive();
 
-      expect(repo.deleteGameSpy).toHaveBeenCalledWith(GAME_ID);
+      expect(repo.discardGameSpy).toHaveBeenCalledWith(GAME_ID);
     });
 
     it("should not try to edit a message that was never sent", async () => {
@@ -649,7 +649,7 @@ describe("createCardService()", () => {
 
       await cards.redrawLive();
 
-      expect(repo.deleteGameSpy).not.toHaveBeenCalled();
+      expect(repo.discardGameSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -675,7 +675,7 @@ describe("createCardService()", () => {
 
       await cards.sweepIdle(IDLE_SECONDS);
 
-      expect(repo.deleteGameSpy).toHaveBeenCalledWith(GAME_ID);
+      expect(repo.discardGameSpy).toHaveBeenCalledWith(GAME_ID);
     });
 
     it("should drop any edit still pending for it", async () => {

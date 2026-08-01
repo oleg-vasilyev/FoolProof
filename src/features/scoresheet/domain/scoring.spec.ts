@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scoreSeries, type Round } from "#scoresheet/domain/scoring.ts";
+import { NEUTRAL, scoreSeries, type Round } from "#scoresheet/domain/scoring.ts";
 
 
 const OLEG = { playerId: 1, displayName: "Oleg" };
@@ -24,8 +24,11 @@ const cellsOf = (rounds: readonly Round[], player = OLEG) =>
 const runningOf = (rounds: readonly Round[], player = OLEG) =>
   scoreSeries([player], rounds)[0]?.running ?? [];
 
-const totalOf = (rounds: readonly Round[], player = OLEG) =>
-  scoreSeries([player], rounds)[0]?.total ?? NOTHING;
+const shareOf = (rounds: readonly Round[], player = OLEG) =>
+  scoreSeries([player], rounds)[0]?.share ?? NOTHING;
+
+const gamesOf = (rounds: readonly Round[], player = OLEG) =>
+  scoreSeries([player], rounds)[0]?.games ?? NOTHING;
 
 describe("scoreSeries()", () => {
   describe("the shape of the result", () => {
@@ -47,14 +50,18 @@ describe("scoreSeries()", () => {
       expect(cellsOf(rounds)).toHaveLength(rounds.length);
     });
 
-    it("should give every player one running total per round", () => {
+    it("should give every player one running share per round", () => {
       const rounds = [roundOf([OLEG.playerId, 1]), roundOf([ANYA.playerId, 1])];
 
       expect(runningOf(rounds)).toHaveLength(rounds.length);
     });
 
-    it("should score a player who has played nothing at zero", () => {
-      expect(totalOf([])).toBe(NOTHING);
+    it("should give a player who never played a neutral share", () => {
+      expect(shareOf([])).toBe(NEUTRAL);
+    });
+
+    it("should give a player who never played no games", () => {
+      expect(gamesOf([])).toBe(NOTHING);
     });
   });
 
@@ -90,64 +97,172 @@ describe("scoreSeries()", () => {
     });
   });
 
-  describe("what a place is worth", () => {
-    it("should pay one point per player left behind", () => {
+  describe("what a round is worth", () => {
+    it("should give the front-runner the full share", () => {
       const round = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2], [ROMA.playerId, 3]);
-      const BEATEN_TWO = 2;
+      const FULL_SHARE = 1;
 
-      expect(totalOf([round])).toBe(BEATEN_TWO);
+      expect(shareOf([round])).toBe(FULL_SHARE);
     });
 
-    it("should pay the fool nothing", () => {
+    it("should give the player alone in last place no share", () => {
       const round = roundOf([ANYA.playerId, 1], [ROMA.playerId, 2], [OLEG.playerId, 3]);
 
-      expect(totalOf([round])).toBe(NOTHING);
+      expect(shareOf([round])).toBe(NOTHING);
     });
 
-    it("should pay more for the same place at a bigger table", () => {
-      const small = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2]);
-      const big = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2], [ROMA.playerId, 3]);
+    it("should give the fool's share as exactly zero, not NaN", () => {
+      const round = roundOf([ANYA.playerId, 1], [ROMA.playerId, 2], [OLEG.playerId, 3]);
+      const ZERO_SHARE = 0;
 
-      expect(totalOf([big])).toBeGreaterThan(totalOf([small]));
+      const scored = scoreSeries([OLEG], [round]);
+
+      expect(scored[0]?.cells[0]?.kind).toBe("fool");
+      expect(scored[0]?.share).toBe(ZERO_SHARE);
     });
 
-    it("should pay both players of a draw the same", () => {
+    it("should keep the fool's share and running mean finite numbers", () => {
+      const round = roundOf([ANYA.playerId, 1], [ROMA.playerId, 2], [OLEG.playerId, 3]);
+      const scored = scoreSeries([OLEG], [round]);
+
+      expect(Number.isFinite(scored[0]?.share)).toBe(true);
+      expect(scored[0]?.running.every((mean) => Number.isFinite(mean))).toBe(true);
+    });
+
+    it("should give a shared last place (a draw) a share rather than falling through to nothing", () => {
       const round = roundOf([ROMA.playerId, 1], [OLEG.playerId, 2], [ANYA.playerId, 2]);
-      const scored = scoreSeries([OLEG, ANYA], [round]);
+      const HALF = 0.5;
 
-      expect(scored[0]?.total).toBe(scored[1]?.total);
+      expect(shareOf([round])).toBe(HALF);
     });
 
-    it("should pay nothing for a game that was sat out", () => {
-      expect(totalOf([roundOf([ANYA.playerId, 1], [ROMA.playerId, 2])])).toBe(NOTHING);
+    it("should split a middling finish by rivals beaten over rivals faced", () => {
+      const round = roundOf([ANYA.playerId, 1], [OLEG.playerId, 2], [ROMA.playerId, 3]);
+      const HALF = 0.5;
+
+      expect(shareOf([round])).toBe(HALF);
+    });
+
+    it("should give the same relative finish the same share at a bigger table (first place)", () => {
+      const threeUp = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2], [ROMA.playerId, 3]);
+      const fiveUp = roundOf(
+        [OLEG.playerId, 1],
+        [ANYA.playerId, 2],
+        [ROMA.playerId, 3],
+        [4, 4],
+        [5, 5]
+      );
+
+      expect(shareOf([fiveUp])).toBe(shareOf([threeUp]));
+    });
+
+    it("should give the same relative finish the same share at a bigger table (mid-table)", () => {
+      const threeMid = roundOf([ANYA.playerId, 1], [OLEG.playerId, 2], [ROMA.playerId, 3]);
+      const fiveMid = roundOf(
+        [ANYA.playerId, 1],
+        [ROMA.playerId, 2],
+        [OLEG.playerId, 3],
+        [4, 4],
+        [5, 5]
+      );
+
+      expect(shareOf([fiveMid])).toBe(shareOf([threeMid]));
+    });
+
+    it("should give a fraction not exact in binary rather than round it away", () => {
+      const round = roundOf([ANYA.playerId, 1], [OLEG.playerId, 2], [ROMA.playerId, 3], [4, 4]);
+      const TWO_THIRDS = 2 / 3;
+
+      expect(shareOf([round])).toBeCloseTo(TWO_THIRDS);
+    });
+
+    it("should floor the divisor at one rival, so a single-placement round does not divide by zero", () => {
+      const round = roundOf([OLEG.playerId, 1]);
+
+      expect(() => shareOf([round])).not.toThrow();
+      expect(shareOf([round])).toBe(NOTHING);
     });
   });
 
-  describe("the running total", () => {
-    it("should accumulate across games", () => {
-      const round = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2], [ROMA.playerId, 3]);
+  describe("absence", () => {
+    it("should not drag the mean down for a round the player missed", () => {
+      const played = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2], [ROMA.playerId, 3]);
+      const missed = roundOf([ANYA.playerId, 1], [ROMA.playerId, 2]);
+      const FULL_SHARE = 1;
 
-      expect(runningOf([round, round])).toEqual([2, 4]);
+      expect(shareOf([played, missed])).toBe(FULL_SHARE);
     });
 
-    it("should hold flat through a game that was sat out", () => {
+    it("should hold the running mean flat through a round that was sat out", () => {
+      const played = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2]);
+      const missed = roundOf([ANYA.playerId, 1], [ROMA.playerId, 2]);
+      const FULL_SHARE = 1;
+
+      expect(runningOf([played, missed])).toEqual([FULL_SHARE, FULL_SHARE]);
+    });
+
+    it("should not count an absent round as a game played", () => {
       const played = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2]);
       const missed = roundOf([ANYA.playerId, 1], [ROMA.playerId, 2]);
 
-      expect(runningOf([played, missed, played])).toEqual([ONCE, ONCE, 2]);
+      expect(gamesOf([played, missed, played])).toBe(2);
     });
 
-    it("should start from the first game rather than from zero", () => {
-      const round = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2], [ROMA.playerId, 3]);
+    it("should average only the played rounds when an absence sits between two of them", () => {
+      const win = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2]);
+      const missed = roundOf([ANYA.playerId, 1], [ROMA.playerId, 2]);
+      const loss = roundOf([ANYA.playerId, 1], [OLEG.playerId, 2]);
+      const MEAN_OF_PLAYED_ROUNDS_ONLY = 0.5;
+      const MEAN_IF_THE_ABSENCE_HAD_COUNTED = 1 / 3;
 
-      expect(runningOf([round])[0]).toBe(2);
+      const mean = shareOf([win, missed, loss]);
+
+      expect(mean).toBe(MEAN_OF_PLAYED_ROUNDS_ONLY);
+      expect(mean).toBeGreaterThan(MEAN_IF_THE_ABSENCE_HAD_COUNTED);
     });
 
-    it("should end on the same number as the total", () => {
+    it("should not let a round sat out between two wins inflate the count of rounds played", () => {
+      const firstWin = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2]);
+      const missed = roundOf([ANYA.playerId, 1], [ROMA.playerId, 2]);
+      const secondWin = roundOf([OLEG.playerId, 1], [ROMA.playerId, 2]);
+      const MEAN_OF_THE_TWO_WINS = 1;
+      const MEAN_IF_THE_ABSENCE_HAD_COUNTED = 2 / 3;
+
+      const mean = shareOf([firstWin, missed, secondWin]);
+
+      expect(mean).toBe(MEAN_OF_THE_TWO_WINS);
+      expect(mean).toBeGreaterThan(MEAN_IF_THE_ABSENCE_HAD_COUNTED);
+    });
+  });
+
+  describe("the running mean", () => {
+    it("should sit at NEUTRAL before any round is played", () => {
+      const missed = roundOf([ANYA.playerId, 1], [ROMA.playerId, 2]);
+
+      expect(runningOf([missed])).toEqual([NEUTRAL]);
+    });
+
+    it("should average the shares of the rounds played so far", () => {
+      const first = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2]);
+      const second = roundOf([ANYA.playerId, 1], [OLEG.playerId, 2]);
+      const FULL_SHARE = 1;
+      const AVERAGE = 0.5;
+
+      expect(runningOf([first, second])).toEqual([FULL_SHARE, AVERAGE]);
+    });
+
+    it("should end on the same value as the player's share", () => {
       const round = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2]);
       const scored = scoreSeries([OLEG], [round, round, round]);
 
-      expect(scored[0]?.total).toBe(scored[0]?.running.at(-ONCE));
+      expect(scored[0]?.share).toBe(scored[0]?.running.at(-ONCE));
+    });
+
+    it("should start from the first round rather than from zero", () => {
+      const round = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2], [ROMA.playerId, 3]);
+      const FULL_SHARE = 1;
+
+      expect(runningOf([round])[0]).toBe(FULL_SHARE);
     });
   });
 });

@@ -41,7 +41,7 @@ export class RepositoryStub implements Repository {
   public appendExitSpy = vi.fn();
   public dropLastExitSpy = vi.fn();
   public confirmGameSpy = vi.fn();
-  public deleteGameSpy = vi.fn();
+  public discardGameSpy = vi.fn();
   public idleCardsSpy = vi.fn();
   public gameNumberInSeriesSpy = vi.fn();
   public seriesChronologySpy = vi.fn();
@@ -142,8 +142,8 @@ export class RepositoryStub implements Repository {
     this.confirmGameSpy(gameId, finalists, actorTgId, version);
   }
 
-  public deleteGame(gameId: number): void {
-    this.deleteGameSpy(gameId);
+  public discardGame(gameId: number): void {
+    this.discardGameSpy(gameId);
   }
 
   public idleCards(idleSeconds: number): readonly GameRecord[] {

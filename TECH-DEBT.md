@@ -112,6 +112,20 @@ is cheaper than a shared module nobody else needs; three is not.
 
 ---
 
+## Counting games is spelled out twice
+
+`merge-names/render/game-tally.ts` and `scoresheet/render/session-tally.ts` both turn
+a number into `1 game` / `12 games`. The duplication is forced from two directions: a
+feature may not import another, and choosing between the singular and the plural is
+exactly the decision `copy.en.ts` is forbidden to make, so it cannot live in the copy
+table either. The scoresheet's copy also needed `1 player` / `3 players`, which is
+why its version is named after the session rather than the game.
+
+**Move it to `shared/text/` when a third feature needs to count something.** Four
+lines twice is cheaper than a shared module with two callers.
+
+---
+
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to
@@ -120,11 +134,11 @@ be awkward, with the trigger that would make the split pay for itself.
 | File | Lines | Why it is on the list | Split it when |
 |---|---|---|---|
 | `features/live-game/bot/card-service.ts` | 365 | The largest file in `src/`, and the only one doing four jobs: looking a card up, applying a tap, scheduling the debounced edit, and sweeping idle cards. It reads as a skeleton, which is why it has survived. | A fifth job arrives, or something other than the card service needs the debouncer |
-| `shared/repository/sqlite-repository.ts` | 273 | Every query in the app. It is meant to be the only file with SQL, so length is the price of that rule, not a smell. | The scoresheet's queries and the live card's queries stop overlapping — then two files behind one contract |
+| `shared/repository/sqlite-repository.ts` | 350 | Every query in the app. It is meant to be the only file with SQL, so length is the price of that rule, not a smell. | The scoresheet's queries and the live card's queries stop overlapping — then two files behind one contract |
 | `e2e/fake-telegram/fake-telegram.ts` | 371 | One `switch` over nine Bot API methods, mixing protocol shapes with the chat log. A `bot-api-methods.ts` was planned and folded in to save a file; that was probably the wrong trade. | A tenth method is needed, or the fake starts refusing more than two things |
 | `e2e/harness/scenario-chat.ts` | 266 | Module-level singletons plus a 24-member `Chat` interface that scenarios use as a language. The interface grows every time a scenario wants a new question answered. | The interface passes ~30 members — then split the driving verbs from the queries |
 | `e2e/hub/hub-server.ts` | 208 | Proxy, cache, page serving and port probing in one file. | Anything is added to the hub |
-| `src/main.ts` | 55 | Four `??` defaults inline in the diagnostics wiring, which is the only place in `src/` with branch coverage at 50%. A typed env reader would move the defaults somewhere a unit can reach. | A fifth optional key appears |
+| `src/main.ts` | 54 | Four `??` defaults inline in the diagnostics wiring, which is the only place in `src/` with branch coverage at 50%. A typed env reader would move the defaults somewhere a unit can reach. | A fifth optional key appears |
 
 ---
 
@@ -142,6 +156,16 @@ Listed so nobody "fixes" them:
 - **The same product constraint opens `README.md` and `PLAN.md`.** A visitor must
   not have to open the spec to learn why the bot is a keyboard. It is the one
   overlap `docs:check` and the `write-a-doc` skill deliberately allow.
+- **`percent-label.ts` puts the `%` outside `copy.en.ts`.** It is a numeric format, the
+  way `svg-tags.ts` rounds a coordinate, not a sentence anyone would translate — and
+  the copy rule exists so a second locale is a small change, which a percent sign is
+  not. Two review passes have now had to decide this independently, which is why it
+  is written down.
+- **`copy.sheetDate` formats a date inside the copy table**, though a decision in
+  `copy.en.ts` is normally forbidden. The month names *are* the locale's data, so
+  splitting the lookup from the names would put one format across two files, and its
+  mutants die anyway: `copy.en.spec.ts` asserts it against literals rather than
+  against itself, which is what makes the rule necessary elsewhere.
 - **`merge-callback-codec.spec.ts` imports `MOST_NAMES_AT_ONCE` from the domain**
   instead of mocking it, which every other spec would. The case it serves — that a
   full selection still fits in 64 bytes — is meaningless against a mocked cap: it

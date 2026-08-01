@@ -206,14 +206,14 @@ const openCard = async (
 
     repo.attachMessage(gameId, message.message_id);
   } catch (error) {
-    repo.deleteGame(gameId);
+    repo.discardGame(gameId);
     throw error;
   }
 };
 
 const cancelCard = async (context: CardContext, tap: Tap): Promise<string> => {
   context.edits.cancel(String(tap.card.game.id));
-  context.repo.deleteGame(tap.card.game.id);
+  context.repo.discardGame(tap.card.game.id);
   await context.sendEdit(editOf(tap.card, copy.cancelledBody, null));
 
   return copy.cancelledNotice;
@@ -272,7 +272,7 @@ const redrawLiveCards = async (context: CardContext): Promise<number> => {
   const posted = cards.filter((card) => card.game.message_id !== NO_MESSAGE);
 
   for (const card of unsent) {
-    context.repo.deleteGame(card.game.id);
+    context.repo.discardGame(card.game.id);
   }
 
   for (const card of posted) {
@@ -338,7 +338,7 @@ const sweepIdleCards = async (context: CardContext, idleSeconds: number): Promis
 
   for (const game of stale) {
     context.edits.cancel(String(game.id));
-    context.repo.deleteGame(game.id);
+    context.repo.discardGame(game.id);
     await context.sendEdit({
       chatId: game.chat_id,
       messageId: game.message_id,

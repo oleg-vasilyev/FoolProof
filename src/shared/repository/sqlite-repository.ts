@@ -29,6 +29,12 @@ const LATEST_SERIES = `SELECT id, started_at FROM game_series
    WHERE chat_id = ?
      AND series_no = (SELECT MAX(series_no) FROM game_series WHERE chat_id = ?)`;
 
+const UNREFERENCED_PLAYERS = `DELETE FROM players
+   WHERE chat_id = ?
+     AND NOT EXISTS (SELECT 1 FROM game_players WHERE player_id = players.id)
+     AND NOT EXISTS (SELECT 1 FROM game_events WHERE player_id = players.id)
+     AND NOT EXISTS (SELECT 1 FROM games WHERE starter_player_id = players.id)`;
+
 const transact = <T>(run: () => T): T => {
   db.exec("BEGIN");
   try {
@@ -260,8 +266,17 @@ export const sqliteRepository: Repository = {
     });
   },
 
-  deleteGame(gameId) {
-    db.prepare("DELETE FROM games WHERE id = ?").run(gameId);
+  discardGame(gameId) {
+    const game: Row | undefined = db.prepare("SELECT chat_id FROM games WHERE id = ?").get(gameId);
+
+    if (game === undefined) {
+      return;
+    }
+
+    transact(() => {
+      db.prepare("DELETE FROM games WHERE id = ?").run(gameId);
+      db.prepare(UNREFERENCED_PLAYERS).run(num(game.chat_id));
+    });
   },
 
   idleCards(idleSeconds) {

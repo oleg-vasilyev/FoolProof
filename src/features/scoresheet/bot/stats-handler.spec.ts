@@ -10,8 +10,17 @@ const rasterizeSpy = vi.fn();
 
 const inputFileSpy = vi.fn();
 
+const gameTallySpy = vi.fn();
+
+const playerTallySpy = vi.fn();
+
 vi.mock("#scoresheet/render/scoresheet-svg.ts", () => ({
   renderScoresheet: (chronology: unknown) => renderScoresheetSpy(chronology),
+}));
+
+vi.mock("#scoresheet/render/session-tally.ts", () => ({
+  gameTally: (games: number) => gameTallySpy(games),
+  playerTally: (players: number) => playerTallySpy(players),
 }));
 
 vi.mock("#scoresheet/bot/rasterizer.ts", () => ({
@@ -62,6 +71,8 @@ describe("onStats()", () => {
     renderScoresheetSpy.mockReturnValue(SHEET_SVG);
     rasterizeSpy.mockReturnValue(SHEET_PNG);
     repo.seriesChronologySpy.mockReturnValue(SESSION);
+    gameTallySpy.mockImplementation((games: number) => `tally(${String(games)})`);
+    playerTallySpy.mockImplementation((players: number) => `roster(${String(players)})`);
   });
 
   it("should ask the repository for this chat's session", async () => {
@@ -89,11 +100,21 @@ describe("onStats()", () => {
     expect(ctx.replyWithPhotoSpy).toHaveBeenCalledTimes(ONCE);
   });
 
-  it("should caption the photo with the session's size", async () => {
+  it("should ask the tally renderers for the session's size", async () => {
+    await onStats(context(), ctx.command("/stats"));
+
+    expect(gameTallySpy).toHaveBeenCalledWith(SESSION.games.length);
+    expect(playerTallySpy).toHaveBeenCalledWith(SESSION.players.length);
+  });
+
+  it("should caption the photo by joining the two finished tallies", async () => {
     await onStats(context(), ctx.command("/stats"));
 
     expect(ctx.lastPhoto().options.caption).toBe(
-      copy.sheetSubtitle(SESSION.games.length, SESSION.players.length)
+      copy.sheetSubtitle(
+        gameTallySpy.mock.results[0]?.value as string,
+        playerTallySpy.mock.results[0]?.value as string
+      )
     );
   });
 
@@ -108,9 +129,7 @@ describe("onStats()", () => {
 
     await onStats(context(), ctx.command("/stats"));
 
-    expect(ctx.lastPhoto().options.caption).toBe(
-      copy.sheetSubtitle(FIFTY, SESSION.players.length)
-    );
+    expect(gameTallySpy).toHaveBeenCalledWith(FIFTY);
   });
 
   it("should say nothing is recorded when the chat has no session yet", async () => {

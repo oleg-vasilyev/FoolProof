@@ -121,3 +121,35 @@ describeScenario("/merge with nothing to merge", (chat) => {
     expect(chat.captions()).toEqual([]);
   });
 });
+
+describeScenario("a cancelled typo never becomes a permanent player", (chat) => {
+  it("should offer Cancel before a starter is picked, and take a typo with it", async () => {
+    await playGame(chat, "Oleg, Anna", ["Oleg"]);
+
+    await chat.say("/game Oleg, Anna, Dimma");
+
+    expect(chat.captions()).toEqual(["Oleg", "Anna", "Dimma", "❌ Cancel"]);
+
+    await chat.tap("❌ Cancel");
+
+    expect(chat.lastAnswer()).toBe("Cancelled");
+    expect(chat.lastText()).toContain("Cancelled — nothing recorded.");
+  });
+
+  it("should leave the typo off the merge roster, and keep the players who played", async () => {
+    await chat.say("/merge");
+
+    expect(chat.captions()).toEqual(["Anna · 1", "Oleg · 1", "❌ Cancel"]);
+  });
+
+  it("should not sweep a player who already played, just because a later card with a typo named them too", async () => {
+    await playGame(chat, "Oleg, Anna, Dima", ["Oleg", "Anna"]);
+
+    await chat.say("/game Oleg, Anna, Dima, Dimma");
+    await chat.tap("❌ Cancel");
+
+    await chat.say("/merge");
+
+    expect(chat.captions()).toEqual(["Anna · 2", "Dima · 1", "Oleg · 2", "❌ Cancel"]);
+  });
+});

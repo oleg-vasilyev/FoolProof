@@ -20,13 +20,19 @@ const ROW_HEIGHT_MAX = 56;
 
 const ROW_HEIGHT_MIN = 26;
 
-export const GRID_TO_CHART = 150;
+export const GRID_TO_CHART = 190;
 
 export const CHART_HEIGHT = 620;
 
-const BOTTOM_PAD = 70;
+export const PLOT_INSET = 24;
 
-export const LEGEND_WIDTH = 300;
+export const PLOT_LEFT = GRID_LEFT;
+
+export const PLOT_RIGHT = GRID_RIGHT - PLOT_INSET;
+
+export const PLOT_WIDTH = PLOT_RIGHT - PLOT_LEFT;
+
+const BOTTOM_PAD = 240;
 
 const HALF = 2;
 
@@ -44,6 +50,8 @@ const CELL_FONT_RATIO = 0.52;
 
 const INDEX_FONT_RATIO = 0.42;
 
+const LEGEND_FONT_RATIO = 0.11;
+
 export const fontSize = {
   eyebrow: 30,
   title: 126,
@@ -53,11 +61,17 @@ export const fontSize = {
   columnName: 32,
   axis: 22,
   legend: 30,
+  legendTally: 22,
+  keyLabel: 24,
+  hint: 24,
 } as const;
 
 export const cellFontOf = (rowHeight: number): number => Math.round(rowHeight * CELL_FONT_RATIO);
 
 export const indexFontOf = (rowHeight: number): number => Math.round(rowHeight * INDEX_FONT_RATIO);
+
+export const legendFontOf = (slotWidth: number): number =>
+  Math.min(fontSize.legend, Math.round(slotWidth * LEGEND_FONT_RATIO));
 
 export interface Sheet {
   readonly startedOn: string;
@@ -67,6 +81,7 @@ export interface Sheet {
   readonly rowHeight: number;
   readonly columnWidth: number;
   readonly gridHeight: number;
+  readonly gridBottom: number;
   readonly chartTop: number;
   readonly height: number;
 }
@@ -80,7 +95,8 @@ export const layoutOf = (chronology: SeriesChronology): Sheet => {
   const rounds = shown.length;
   const rowHeight = rowHeightFor(rounds);
   const gridHeight = rounds * rowHeight;
-  const chartTop = GRID_TOP + gridHeight + GRID_TO_CHART;
+  const gridBottom = GRID_TOP + gridHeight;
+  const chartTop = gridBottom + GRID_TO_CHART;
 
   return {
     startedOn: chronology.startedOn,
@@ -90,6 +106,7 @@ export const layoutOf = (chronology: SeriesChronology): Sheet => {
     rowHeight,
     columnWidth: (GRID_RIGHT - GRID_LEFT) / players.length,
     gridHeight,
+    gridBottom,
     chartTop,
     height: chartTop + CHART_HEIGHT + BOTTOM_PAD,
   };
@@ -97,3 +114,5 @@ export const layoutOf = (chronology: SeriesChronology): Sheet => {
 
 export const columnCentre = (sheet: Sheet, column: number): number =>
   GRID_LEFT + column * sheet.columnWidth + sheet.columnWidth / HALF;
+
+export const chartBottomOf = (sheet: Sheet): number => sheet.chartTop + CHART_HEIGHT;

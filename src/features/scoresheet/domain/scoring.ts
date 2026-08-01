@@ -23,7 +23,14 @@ export interface ScoredPlayer {
   readonly displayName: string;
   readonly cells: readonly Cell[];
   readonly running: readonly number[];
-  readonly total: number;
+  readonly share: number;
+  readonly games: number;
+}
+
+interface Tally {
+  readonly shareSum: number;
+  readonly played: number;
+  readonly running: readonly number[];
 }
 
 const NOTHING = 0;
@@ -31,6 +38,14 @@ const NOTHING = 0;
 const ALONE = 1;
 
 const LAST = -1;
+
+const ONE_SEAT = 1;
+
+const ONE_ROUND = 1;
+
+const FEWEST_RIVALS = 1;
+
+export const NEUTRAL = 0.5;
 
 const lastPositionOf = (round: Round): number =>
   round.placements.reduce((furthest, exit) => Math.max(furthest, exit.position), NOTHING);
@@ -54,36 +69,46 @@ const cellFor = (round: Round, playerId: number): Cell => {
     : { kind: "drawn", position: exit.position };
 };
 
-const gainOf = (cell: Cell, tableSize: number): number => {
+const shareOf = (cell: Cell, tableSize: number): number | null => {
   switch (cell.kind) {
     case "absent":
-      return NOTHING;
+      return null;
 
     case "placed":
     case "drawn":
     case "fool":
-      return tableSize - cell.position;
+      return (tableSize - cell.position) / Math.max(FEWEST_RIVALS, tableSize - ONE_SEAT);
   }
 };
 
-const runningTotals = (gains: readonly number[]): readonly number[] =>
-  gains.reduce<readonly number[]>(
-    (totals, gain) => [...totals, (totals.at(LAST) ?? NOTHING) + gain],
-    []
-  );
+const meanOf = (shareSum: number, played: number): number =>
+  played === NOTHING ? NEUTRAL : shareSum / played;
+
+const runningShares = (shares: readonly (number | null)[]): readonly number[] =>
+  shares.reduce<Tally>(
+    (tally, share) => {
+      const shareSum = share === null ? tally.shareSum : tally.shareSum + share;
+      const played = share === null ? tally.played : tally.played + ONE_ROUND;
+
+      return { shareSum, played, running: [...tally.running, meanOf(shareSum, played)] };
+    },
+    { shareSum: NOTHING, played: NOTHING, running: [] }
+  ).running;
 
 const scorePlayer = (player: Contender, rounds: readonly Round[]): ScoredPlayer => {
   const cells = rounds.map((round) => cellFor(round, player.playerId));
-  const running = runningTotals(
-    cells.map((cell, index) => gainOf(cell, rounds[index]?.placements.length ?? NOTHING))
+  const shares = cells.map((cell, index) =>
+    shareOf(cell, rounds[index]?.placements.length ?? NOTHING)
   );
+  const running = runningShares(shares);
 
   return {
     playerId: player.playerId,
     displayName: player.displayName,
     cells,
     running,
-    total: running.at(LAST) ?? NOTHING,
+    share: running.at(LAST) ?? NEUTRAL,
+    games: shares.filter((share) => share !== null).length,
   };
 };
 

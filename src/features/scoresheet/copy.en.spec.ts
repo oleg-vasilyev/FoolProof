@@ -68,19 +68,13 @@ describe("the copy table", () => {
   });
 
   describe("sheetSubtitle()", () => {
-    it("should count games and players", () => {
-      const GAMES = 12;
-      const PLAYERS = 5;
-
-      expect(copy.sheetSubtitle(GAMES, PLAYERS)).toBe("12 games · 5 players");
+    it("should join the two finished fragments it was given", () => {
+      expect(copy.sheetSubtitle("12 games", "5 players")).toBe("12 games · 5 players");
     });
 
-    it("should keep a single game singular", () => {
-      expect(copy.sheetSubtitle(ONE, TWO)).toBe("1 game · 2 players");
-    });
-
-    it("should keep a single player singular", () => {
-      expect(copy.sheetSubtitle(TWO, ONE)).toBe("2 games · 1 player");
+    it("should not decide singular or plural itself, only join what it is handed", () => {
+      expect(copy.sheetSubtitle("1 game", "2 players")).toBe("1 game · 2 players");
+      expect(copy.sheetSubtitle("2 games", "1 player")).toBe("2 games · 1 player");
     });
   });
 

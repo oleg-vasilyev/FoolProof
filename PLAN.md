@@ -412,6 +412,17 @@ restart, since the message is already posted in the chat. Confirm sets
 written to the database" means in practice: nothing partial is ever left behind
 for statistics to trip over.
 
+That sweep has to reach the **players** too, and it did not until it was noticed on
+a real evening. `/game Anna, Oleg, Dima` inserts the `players` rows while it is
+still parsing the command — before the card exists at all, because `game_players`
+needs real ids to seat anybody. So a typo spotted on the card and cancelled left a
+permanent player behind with zero games, cluttering the `/merge` roster with names
+that never played. Discarding a game therefore deletes, in the same transaction,
+every player in that chat that no `game_players` row, no `game_events` row and no
+`games.starter_player_id` still points at. It is a sweep rather than "the players
+this command created" because abandonment, a failed `sendMessage` and the startup
+cleanup all have to undo the same thing, and none of them remembers who was new.
+
 The partial unique index makes invariant 1 the database's problem rather than the
 code's — a second live card in one chat is rejected by the engine, not by a check
 someone has to remember to write.
@@ -429,9 +440,12 @@ A rendered PNG of the current session, sent with `sendPhoto`. Two stacked parts:
 - **The chronology.** One column per player, one row per game. The cell holds the
   place that player took; black means they sat that game out, red means they were
   the fool, teal means the game was drawn. Reading down a column is one person's
-  evening; reading across a row is one game.
-- **The cumulative score.** One line per player against game number, so the shape
-  of the evening — who pulled away, who never recovered — is visible at a glance.
+  evening; reading across a row is one game. A key under the grid names all four
+  colours, because a colour a reader cannot decode is decoration.
+- **The table share.** One line per player against game number: the fraction of the
+  table they have finished ahead of, averaged over the games they have played so
+  far. The axis is a fixed 0–100% with the 50% mid-table line dotted, so a height on
+  the chart means the same thing in every picture ever rendered.
 
 A text bar chart came first and was replaced. It was accurate and unreadable: two
 tallies cannot show *when* anything happened, and the evening's story is entirely
@@ -439,10 +453,45 @@ in the sequence. The earlier tombstone against images cited a native dependency
 and a third-party chart service; only the first is still true, and it is now
 accepted deliberately. Nothing about the players leaves the machine.
 
-**A place is worth `players_in_that_game − place`.** The fool always scores zero,
-a win at a table of six is worth more than a win at a table of three, and both
-players of a draw score the same. A fixed scale was rejected: it would pay the
-same for beating two people as for beating five.
+**A game is worth `(players_in_that_game − place) ÷ (players_in_that_game − 1)`** —
+the fraction of the table you finished ahead of. First is 1, the fool is 0, both
+players of a draw score the same, and a table of three is worth exactly as much as a
+table of six. A player's number is the **mean** of those fractions over the games
+they actually played; a game they sat out is left out of the mean rather than
+counted as a zero.
+
+Cumulative points came first, and one real evening showed them to be wrong in two
+ways at once. Summing rewarded *turning up* — nineteen mediocre games beat seven
+good ones, so the leader board was measuring attendance. And scoring
+`players_in_that_game − place` paid more for a bigger table, so whoever happened to
+be sitting down when the fifth player arrived gained on everybody else. The mean of
+a normalised fraction fixes both. It costs the chart its old drama: the lines
+converge into a band instead of fanning out, which is what "these five play about
+equally well" honestly looks like.
+
+A player who has not played yet sits at 50%, and every line starts there. It is the
+truthful prior, and it stops the chart opening with five lines stacked on zero.
+
+**A line goes dashed across every game its player sat out.** A mean does not move
+while somebody is absent, so a missed game leaves a flat stretch that reads as
+"played, and held steady" — the one thing it does not mean. The line is therefore
+split into stretches: solid across the games they played, dashed across the ones
+they missed, with neighbouring stretches sharing their boundary point so the line
+never actually breaks. The legend shows the dash against the same two words the
+grid's key uses, **did not play**, and only when somebody missed something.
+
+This started as the narrower rule "dashed once a player has gone home", which needed
+the domain to carry the last round each player played. Dashing every gap turned out
+to be both more informative and *less* machinery: going home is simply a gap that
+reaches the right edge, so the extra field went away — and with it a bug where
+somebody seated on a live card, with no games finished yet, was drawn as having left
+the table.
+
+**Small samples are deliberately not corrected.** Three games all finished first
+reads as 100%, and shrinking it toward the middle was rejected: a number nobody can
+recompute from the grid directly above it is a number people argue with. The legend
+prints each player's game count under their name instead, and lets the reader
+discount it themselves.
 
 **A draw counts as neither a win nor a fool.** A shared last place means nobody
 was the fool that game, so the cell is teal rather than red.
@@ -480,9 +529,9 @@ be glanceable without a tap.
 #### Fitting a long evening
 
 The height budget is fixed at 2560, so the number of games is what has to give.
-Row height is `clamp(available ÷ games, 26, 56)` pixels: at 22 games the rows are
-full size, at 40 they are 30. Past roughly 47 games the rows would fall below the
-floor, so the sheet keeps the **most recent** 47 and says so in the corner. Being
+Row height is `clamp(available ÷ games, 26, 56)` pixels: at 18 games the rows are
+full size, at 30 they are 34. Past 39 games the rows would fall below the
+floor, so the sheet keeps the **most recent** 39 and says so in the corner. Being
 honest about the omission matters more than fitting everything.
 
 The header date is the UTC date of the session's first game. Late-evening games
@@ -530,6 +579,10 @@ bundled with Node 24 is well past both.
 5. **`actor_tg_id` is written on every event.** It gives the "who keeps the records"
    metric
 6. **A game in `FROZEN` is immutable**
+7. **A player row exists only while something still points at it.** Discarding a game
+   deletes every player in that chat left unreferenced by `game_players`,
+   `game_events` and `games.starter_player_id`, because `/game` creates them before
+   the card exists
 
 ---
 

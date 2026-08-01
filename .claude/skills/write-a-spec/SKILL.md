@@ -206,3 +206,11 @@ Ask, in this order:
 2. Does any assertion belong to another module?
 3. Would every assertion fail if the subject broke? A test that only proves the
    code ran is what the mutation score is for — see the `finish-phase` skill.
+4. **Does any assertion stand on a `filter` or a `find` that could match nothing?**
+   That is how a spec goes vacuous without ever failing. A legend spec selected its
+   rows by exact font size; the font later became a function of the slot width, the
+   filter stopped matching, and `Math.max` over the empty result returned
+   `-Infinity`, so the bound check passed for months against nothing at all. Select
+   by something the subject deliberately emits — a marker string, a spied call —
+   never by a value another change is free to alter, and assert the selection is
+   non-empty before asserting anything about it.
