@@ -162,11 +162,16 @@ trump was drawn for it.
 
 `/next_with Zhenya, Sasha` and `/next_without Oleg` take the last line-up and add
 or remove names, so the usual "somebody arrived, somebody went home" does not
-force the whole list to be typed again. Joiners are appended after the players
-already seated and the result is re-normalised — see [Seating is
-normalised](#seating-is-normalised). The bot cannot know where somebody actually
-sat, and that order is load-bearing now that `/next` reads the ring: when it
-matters, `/game` with the real order is the fix.
+force the whole list to be typed again.
+
+The two are not symmetrical, and the asymmetry is the whole design. **Removing
+somebody keeps the ring**: everyone left sits where they sat, the gap closes, and
+`/next_without` opens the card straight away. **Adding somebody destroys it** — a
+new player sits wherever there is room, and the bot has no way to guess where.
+Appending them to the end was the first attempt and it was wrong: the ring is
+load-bearing now that `/next` reads it, so a guessed seat silently deals the wrong
+person in one game later. So `/next_with` asks — see [Taking
+seats](#taking-seats).
 
 Both refuse rather than guess, because a name is how the bot identifies a person
 and a silently accepted typo becomes a second player:
@@ -184,6 +189,35 @@ them](#a-command-with-no-names-asks-for-them).
 Oleg` with Oleg already seated must not leave a new `Zhenya` behind — that is
 invariant 7 in the other direction, and the reason the check reads names rather
 than resolved ids.
+
+### Taking seats
+
+Once `/next_with` knows who is joining it shows a screen of its own: everyone at
+the new table, one per row, tapped in the order they sit. Each tap moves that name
+above the unplaced ones and marks it with its seat number. The second-to-last tap
+finishes the screen, because the final seat has nowhere else to go — a table of
+five costs four taps, not five plus a confirmation.
+
+It is deliberately not the card. The card is about one game; this is about who sits
+where, it precedes the game, and a player who cannot tell the two screens apart will
+record a game that never happened. Hence a heading of its own and 🪑 rather than the
+card's ✅.
+
+**Nothing is written down while the screen is open.** No game row exists, so `/game`
+is not blocked, there is nothing for the idle sweep to abandon, and abandoning the
+screen costs nothing. The order chosen so far lives in `callback_data`, the same way
+[the `/merge` screen](#merge-has-no-state) keeps its selection, which is what makes
+the screen immune to a restart. Player ids are written in base 62 so that a table of
+ten with six-digit ids still fits the Bot API's 64 bytes; the codec's spec asserts
+that budget rather than trusting it.
+
+Two things can have changed by the time the last seat is taken, and both are checked
+then rather than assumed: a player named on the screen may have been merged away —
+the screen refuses as out of date — and a game may have been started in the meantime,
+which refuses the same way any second card does. When the ring does settle it is
+re-normalised — see [Seating is normalised](#seating-is-normalised) — the screen is
+replaced by the ring it produced, and the card opens with the deal still to be picked
+by hand, because a new player changes who holds the lowest trump.
 
 ### Asking for a card while one is live
 

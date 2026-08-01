@@ -28,7 +28,7 @@ Dealt first: Oleg
 | `/game Oleg, Anya, Roma` | Opens a card. The list is the seating order, clockwise |
 | `/game` | Same, but asks for the names — for when you tapped the command from the menu |
 | `/next` | A new card with the same line-up; the fool's neighbour deals first |
-| `/next_with Zhenya` | The same line-up plus these players; asks for the names if sent without any |
+| `/next_with Zhenya` | The same line-up plus these players; asks for the names if sent without any, then asks where everyone sits |
 | `/next_without Oleg` | The same line-up minus these players; asks the same way |
 | `/stats` | How the current session is going, as a rendered picture |
 | `/merge` | Folds a name typed twice into the right one |

@@ -27,11 +27,40 @@ describeScenario("somebody arrives, somebody goes home", (chat) => {
     expect(chat.cardText()).toContain("Who dealt first?");
   });
 
-  it("should not be swallowed by /next", async () => {
+  it("should not be swallowed by /next, and should ask where the joiner sits", async () => {
     await chat.tap("❌ Cancel");
     await chat.say("/next_with Kim");
 
+    expect(chat.lastText()).toContain("Taking seats");
     expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "Kim", "❌ Cancel"]);
+  });
+
+  it("should number a seat as it is taken, and offer to undo it", async () => {
+    await chat.tap("Anya");
+
+    expect(chat.captions()).toEqual([
+      "🪑 1 Anya",
+      "Oleg",
+      "Roma",
+      "Kim",
+      "↩️ Back",
+      "❌ Cancel",
+    ]);
+  });
+
+  it("should put a seat back where it was", async () => {
+    await chat.tap("↩️ Back");
+
+    expect(chat.captions()).toEqual(["Anya", "Oleg", "Roma", "Kim", "❌ Cancel"]);
+  });
+
+  it("should open the card once only the last seat is left, with the deal still to pick", async () => {
+    await chat.tap("Anya");
+    await chat.tap("Kim");
+    await chat.tap("Oleg");
+
+    expect(chat.cardText()).toContain("Who dealt first?");
+    expect(chat.captions()).toEqual(["Oleg", "Roma", "Anya", "Kim", "❌ Cancel"]);
   });
 
   it("should refuse to seat somebody already at the table", async () => {
@@ -66,10 +95,21 @@ describeScenario("somebody arrives, somebody goes home", (chat) => {
     expect(chat.captions()).toEqual([]);
   });
 
-  it("should seat the joiner named in the reply", async () => {
+  it("should reach the seating screen from the reply too", async () => {
     await chat.replyToPrompt("Kim");
 
+    expect(chat.lastText()).toContain("Taking seats");
     expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "Kim", "❌ Cancel"]);
+  });
+
+  it("should start no game when the seating is abandoned", async () => {
+    await chat.tap("❌ Cancel");
+
+    expect(chat.lastText()).toContain("no game started");
+
+    await chat.say("/next_without Anya");
+
+    expect(chat.captions()).toEqual(["Oleg", "Roma", "❌ Cancel"]);
   });
 
   it("should ask who is sitting out, and take the answer from the reply", async () => {
