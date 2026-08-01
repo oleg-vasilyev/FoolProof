@@ -73,6 +73,14 @@ Read `git diff <phase-start>..HEAD` against `CLAUDE.md` — the whole diff at on
 not the individual commits, because a rule breaks across commits more often than
 inside one. The `phase-reviewer` subagent exists for exactly this pass.
 
+**When the phase is mostly a restructure, run this gate on the source before the
+specs exist.** Everything a move is judged on — does the file's name describe what
+is in it, is it a bucket, does the type name collide with one next door — is
+visible in the source alone, and every such finding invalidates specs written
+against the old shape. A phase that split one file into five wrote 88 spec cases
+first and paid a second agent to rework them; the review would have said the same
+thing an hour earlier and for nothing.
+
 Ask of every touched file:
 
 - Does it still read as a skeleton — the idea before the detail?

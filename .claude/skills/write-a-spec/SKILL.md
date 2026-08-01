@@ -206,7 +206,14 @@ Ask, in this order:
 2. Does any assertion belong to another module?
 3. Would every assertion fail if the subject broke? A test that only proves the
    code ran is what the mutation score is for — see the `finish-phase` skill.
-4. **Does any assertion stand on a `filter` or a `find` that could match nothing?**
+4. **Is it a port?** A spec moved into a new file is rewritten, not copied — the
+   old file's sins travel with it and arrive looking established. Two phases
+   running have proved it: splitting a render file silently dropped four
+   assertions that had been killing mutants, and splitting a handler file carried
+   a fake that lowercased its own input, so the case "should not create the same
+   name twice" was asserting `String.prototype.toLowerCase`. Read every ported
+   case against these questions as if it were new, because to this file it is.
+5. **Does any assertion stand on a `filter` or a `find` that could match nothing?**
    That is how a spec goes vacuous without ever failing. A legend spec selected its
    rows by exact font size; the font later became a function of the slot width, the
    filter stopped matching, and `Math.max` over the empty result returned
