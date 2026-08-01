@@ -13,18 +13,6 @@
         ]
       }
     ],
-    "PreCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/retrospective.mjs",
-            "timeout": 15,
-            "statusMessage": "Asking for a retrospective before compacting…"
-          }
-        ]
-      }
-    ],
     "Stop": [
       {
         "hooks": [

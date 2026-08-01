@@ -1,12 +1,12 @@
 ---
 name: finish-phase
-description: Run the release ritual that closes a development phase in FoolProof — the four gates (check, coverage, mutation, diff review) and the format of the phase's final commit message. Use when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
+description: Run the release ritual that closes a development phase in FoolProof — the five gates (check, coverage, mutation, diff review, retrospective) and the format of the phase's final commit message. Use when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
 ---
 
 # Finishing a phase
 
 A phase ends with a release, and a phase is done when the code is *releasable* —
-not when it works. Run all four gates before the final commit and act on what
+not when it works. Run all five gates before the final commit and act on what
 they say. None of them is advisory.
 
 ## 1. `npm run check`
@@ -82,6 +82,14 @@ Ask of every touched file:
   subject is someone else's code?
 - Does the file's name still describe what is in it?
 
+## 5. A retrospective on how the phase was carried out
+
+Gate 4 judges the diff; this one judges what producing it cost — rework, gates run
+twice, subagents briefed too thinly to be useful. Load the **`retrospective`**
+skill and answer its five questions with counts, then land each lesson as a rule
+somewhere durable. It runs before the final commit, while the transcript that is
+its evidence still exists.
+
 ## The documents the phase owes
 
 Load the **`write-a-doc`** skill before touching any of them: it routes a fact to
@@ -93,7 +101,7 @@ fails gate 1 rather than surviving to the next cleanup.
 
 ## Scaling the ritual to the change
 
-The four gates are not negotiable. What the phase *produces around them* is, and
+The five gates are not negotiable. What the phase *produces around them* is, and
 the default was written for a phase that changes a contract. A **small** phase —
 one that stays inside a single feature folder, adds no repository method, changes
 no schema and no `shared/` type — earns a shorter path:
@@ -105,7 +113,7 @@ no schema and no `shared/` type — earns a shorter path:
 | `CLAUDE.md` | untouched | edited only when a *rule* changed |
 | `TECH-DEBT.md` | untouched | an entry only if something is actually owed |
 | `e2e/` | scenarios only if it has an inline keyboard | same |
-| Gates | all four, mutation over the diff | all four, mutation over the diff |
+| Gates | all five, mutation over the diff | all five, mutation over the diff |
 
 The test rules do not bend: every file still gets a spec, because that is what
 holds the mutation score up and it is the cheapest part to write. What bends is
@@ -124,6 +132,13 @@ A phase's cost is dominated by two things, and neither of them is thinking:
   between `number` and `void` after the SQL, the stub and the integration spec were
   already written, and paid for those three files twice.
 - **Waiting on gates that did not need running.** See gate 3.
+- **Guessing a decision that was the user's.** Anything they will *look at* — a
+  picture, a layout, a wording — gets rendered and shown before the first spec is
+  written against it, and a choice between two defensible shapes gets asked rather
+  than picked. One phase spent five rounds on a chart's legend because two guesses
+  were cheaper to make than a question, and each guess cost a render, a spec pass
+  and a screenshot. A phase that starts a subagent while waiting on such an answer
+  has already lost that agent's work.
 
 **Mechanical work goes to a subagent on a cheaper model.** Once the design is
 settled, writing five spec files, adding a stub, or updating an expectation is

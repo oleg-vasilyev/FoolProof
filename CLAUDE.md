@@ -315,11 +315,11 @@ the edit instead of at the end of the turn.
 
 ### Finishing a phase
 
-A phase is done when the code is *releasable*, not when it works. Four gates run
+A phase is done when the code is *releasable*, not when it works. Five gates run
 before the final commit — `npm run check`, coverage (70% floor), mutation (breaks
-below 85%), and a review pass over the whole diff — and the numbers go in the commit
-message. The procedure is the **`finish-phase` skill**; the review pass has a
-`phase-reviewer` subagent.
+below 85%), a review pass over the whole diff, and a retrospective on how the phase
+was carried out — and the numbers go in the commit message. The procedure is the
+**`finish-phase` skill**; the review pass has a `phase-reviewer` subagent.
 
 Mutation runs over the phase's diff (`npm run test:mutation:changed`, about a
 minute); the full run happens once before a tag.
