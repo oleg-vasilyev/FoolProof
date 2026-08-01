@@ -50,6 +50,14 @@ vi.mock("#live-game/render/inline-keyboard.ts", () => ({
     renderKeyboardSpy(state, gameId, version),
 }));
 
+const toMarkupSpy = vi.fn();
+
+const MARKUP = { inline_keyboard: "converted" };
+
+vi.mock("#live-game/bot/inline-markup.ts", () => ({
+  toMarkup: (rows: unknown) => toMarkupSpy(rows),
+}));
+
 const { createCardService } = await import("#live-game/bot/card-service.ts");
 
 const THREE = ["Oleg", "Anya", "Roma"];
@@ -129,6 +137,7 @@ describe("createCardService()", () => {
     renderCardSpy.mockReturnValue(CARD_TEXT);
     renderResultSpy.mockReturnValue(RESULT_TEXT);
     renderKeyboardSpy.mockReturnValue(KEYBOARD);
+    toMarkupSpy.mockReturnValue(MARKUP);
     nameAtSpy.mockReturnValue("Oleg");
     phaseOfSpy.mockReturnValue("RECORDING");
     remainingSlotsSpy.mockReturnValue([]);
@@ -803,7 +812,8 @@ describe("createCardService()", () => {
     it("should send the keyboard as inline buttons, not as the rows it was given", async () => {
       await cards.open(CHAT_ID, seatsOf(...THREE), null);
 
-      expect(telegram.lastSend().markup).toEqual({ inline_keyboard: KEYBOARD });
+      expect(toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
+      expect(telegram.lastSend().markup).toBe(MARKUP);
     });
 
     it("should send a new card as HTML", async () => {
@@ -820,7 +830,8 @@ describe("createCardService()", () => {
         keyboard: KEYBOARD,
       });
 
-      expect(telegram.lastEdit().markup).toEqual({ inline_keyboard: KEYBOARD });
+      expect(toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
+      expect(telegram.lastEdit().markup).toBe(MARKUP);
     });
 
     it("should name the message and the cause when an edit is refused", async () => {

@@ -16,6 +16,7 @@ import {
 import type { CallbackPayload } from "#live-game/render/callback-data-codec.ts";
 import { renderCard, renderResult } from "#live-game/render/card-message.ts";
 import { renderKeyboard, type InlineKeyboardRows } from "#live-game/render/inline-keyboard.ts";
+import { toMarkup } from "#live-game/bot/inline-markup.ts";
 import { copy } from "#live-game/copy.en.ts";
 
 
@@ -71,10 +72,6 @@ type CardLookup =
   | { readonly kind: "tappable"; readonly card: CardRecord }
   | { readonly kind: "gone" }
   | { readonly kind: "outrun"; readonly card: CardRecord };
-
-const toMarkup = (rows: InlineKeyboardRows) => ({
-  inline_keyboard: rows.map((row) => row.map((button) => ({ ...button }))),
-});
 
 const toCardState = (card: CardRecord): CardState => {
   const seats = card.seats.map((seat) => ({
