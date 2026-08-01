@@ -100,7 +100,8 @@ string. `PLAN.md` says why.
 
 All copy the bot emits lives in the owning feature's `copy.en.ts`, referenced by
 key. **No string literal a user can read may appear anywhere else** — not in the
-state machine, not in a handler, not in an `answerCallbackQuery` call. Keep the
+state machine, not in a handler, not in an `answerCallbackQuery` call, and not as
+the separator a `render/` file joins two of them with. Keep the
 table flat, and put anything with a count behind a function rather than
 concatenating at the call site: that seam is what makes a second locale a small
 change, and the `.en` in the filename names it.
@@ -324,11 +325,17 @@ was carried out — and the numbers go in the commit message. The procedure is t
 Mutation runs over the phase's diff (`npm run test:mutation:changed`, about a
 minute); the full run happens once before a tag.
 
-Three habits, each of which cost a phase to learn:
+Four habits, each of which cost a phase to learn:
 
 - **Settle every signature that crosses a layer before the first `Write`** — what a
   repository method returns, what a transition carries. Re-deciding one afterwards
   costs every file that already spoke it.
+- **A new path that bypasses an old one inherits its obligations.** Before replacing
+  a call, list what the old path did *besides* the obvious thing — a cleanup, a
+  sweep, a refusal — and say for each whether the new one still does it. Noticing a
+  side effect and filing it as minor is not that check: the seating screen dropped
+  the sweep that made a mistyped name disappear, and the phase then wrote a `PLAN.md`
+  paragraph claiming it had not.
 - **Read a gate's report; never re-run a gate to see its output again.** Everything
   lands under `reports/`.
 - **Mechanical work goes to a subagent on a cheaper model.** Writing specs from a

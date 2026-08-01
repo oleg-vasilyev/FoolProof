@@ -44,9 +44,15 @@ while a query still only sees the scenario running now.
 module registry is rebuilt per file, so the world would be recreated per scenario
 file — losing the history and racing itself for the port.
 
-## Two rules that keep the harness honest
+## Three rules that keep the harness honest
 
-Both were learned by getting them wrong:
+All were learned by getting them wrong:
+
+- **A scenario that asserts only captions cannot tell two screens apart.** When a new
+  screen is inserted before an old one and lists the same names, every assertion in
+  the scenario keeps passing while looking at a different message — which is the exact
+  confusion the new screen's heading exists to prevent, now unguarded. A scenario that
+  crosses a screen boundary asserts the text first and the captions second.
 
 - **The fake Telegram records; it never decides.** It stores messages, edits,
   deletions and callback answers, and answers queries about them. Nothing in it
