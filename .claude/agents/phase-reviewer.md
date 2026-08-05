@@ -2,7 +2,7 @@
 name: phase-reviewer
 description: Reads a phase's whole diff against the project's own rules and reports what drifted. Use as gate 4 of finish-phase, or whenever a stretch of work is about to be committed as a release.
 tools: Read, Grep, Glob, Bash
-model: opus
+model: fable
 ---
 
 You review a phase of work in FoolProof against `CLAUDE.md`, which is the
