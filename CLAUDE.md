@@ -11,7 +11,8 @@ beside the code it describes:
 | Writing or changing any spec | `write-a-spec` skill |
 | Closing a phase, running the gates | `finish-phase` skill |
 | Writing or changing any document | `write-a-doc` skill |
-| Touching `e2e/` | [`e2e/README.md`](e2e/README.md) |
+| Writing or changing an e2e scenario | `write-an-e2e-scenario` skill |
+| Changing the e2e harness itself | [`e2e/README.md`](e2e/README.md) |
 
 Four documents, one job each:
 
@@ -273,10 +274,11 @@ source tree, so they are here:
   test, and is named `*.integration.spec.ts`. There are two; the bar for a third is
   a bug that got through the units.
 
-`e2e/` is a different world with its own rules, and it is parked: see
-[`e2e/README.md`](e2e/README.md) and `TECH-DEBT.md`. One obligation reaches back
-here: **a feature with an inline keyboard gets scenarios**, because whether a tap
-reaches the feature that owns it is a fact about real grammY.
+`e2e/` is a different world with its own rules, and it is parked: writing one is the
+`write-an-e2e-scenario` skill, the harness is [`e2e/README.md`](e2e/README.md), and
+`TECH-DEBT.md` says when to come back. One obligation reaches back here: **a feature
+with an inline keyboard gets scenarios**, because whether a tap reaches the feature
+that owns it is a fact about real grammY.
 
 ## Checks
 

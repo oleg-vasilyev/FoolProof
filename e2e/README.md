@@ -8,8 +8,13 @@ end.
 
 How to run it is in the root [README](../README.md#watching-it-play). What is
 deliberately unfinished about it is in [TECH-DEBT.md](../TECH-DEBT.md) — the
-harness is **parked**: it is not a release gate and nothing depends on it. This
-file is the part that must not be re-derived by whoever picks it up.
+harness is **parked**: it is not a release gate and nothing depends on it.
+
+**This file is about the harness, not about writing a scenario.** Whether one is
+owed, the verbs a scenario drives the chat with, and what it must assert are the
+`write-an-e2e-scenario` skill — a scenario gets edited far more often than the
+harness does, and the two jobs were being read as one. What is left here is what
+must not be re-derived by whoever picks the harness up.
 
 One obligation survives the parking: **a feature with an inline keyboard gets
 scenarios.** Whether a tap reaches the feature that owns it is a fact about real
@@ -27,8 +32,7 @@ grammY that no unit can reach, and it was already wrong once.
   app's, and this is not the app.
 - The runner is **Vitest**, which the project already depends on. Scenarios are
   `*.e2e.spec.ts` and read as `describeScenario(name, …)` with ordinary
-  `describe`/`it`/`expect`; the cases inside a file share one chat and run in
-  order, which is what makes a scenario a scenario rather than a pile of tests.
+  `describe`/`it`/`expect`.
 
 ## One world per worker, and it outlives the file
 
@@ -44,24 +48,9 @@ while a query still only sees the scenario running now.
 module registry is rebuilt per file, so the world would be recreated per scenario
 file — losing the history and racing itself for the port.
 
-## Four rules that keep the harness honest
+## Two rules that keep the fake honest
 
-All were learned by getting them wrong:
-
-- **A scenario ends the way an evening does.** Nothing may be left with a keyboard
-  on it: a card ends on Confirm or Cancel, a `/merge` screen the same. Eight of the
-  sixteen scenarios used to walk off mid-card, and since the chat log outlives the
-  database reset between files, the result was a watch run full of screens a player
-  could still tap against games that no longer existed. `describeScenario` now fails
-  a scenario that leaves one open, and names it — the harness cannot tidy up on the
-  scenario's behalf without deciding when a screen is finished, which is the bot's
-  business, not the fake's.
-
-- **A scenario that asserts only captions cannot tell two screens apart.** When a new
-  screen is inserted before an old one and lists the same names, every assertion in
-  the scenario keeps passing while looking at a different message — which is the exact
-  confusion the new screen's heading exists to prevent, now unguarded. A scenario that
-  crosses a screen boundary asserts the text first and the captions second.
+Both were learned by getting them wrong:
 
 - **The fake Telegram records; it never decides.** It stores messages, edits,
   deletions and callback answers, and answers queries about them. Nothing in it
@@ -74,6 +63,11 @@ All were learned by getting them wrong:
   actually gets. That immediately broke two scenarios asserting "the card was
   edited again": the honest observable is that the bot **attempted** the edit, so
   the fake counts attempts separately from applied edits.
+
+That second rule is why `describeScenario`, and not the fake, is what refuses a
+scenario ending with a keyboard still on screen: knowing when a screen is finished
+is the bot's business. The rule itself lives in the `write-an-e2e-scenario` skill,
+with the other things a scenario author has to get right.
 
 ## The hub proxies the worlds rather than linking to them
 
