@@ -21,13 +21,13 @@ vi.mock("#live-game/domain/seating-plan.ts", () => ({
 
 const decodeSeatingCallbackSpy = vi.fn();
 
-vi.mock("#live-game/render/seating/seating-callback-codec.ts", () => ({
+vi.mock("#live-game/render/seating-screen/seating-callback-codec.ts", () => ({
   decodeSeatingCallback: (data: string) => decodeSeatingCallbackSpy(data),
 }));
 
 const renderSeatingKeyboardSpy = vi.fn();
 
-vi.mock("#live-game/render/seating/seating-keyboard.ts", () => ({
+vi.mock("#live-game/render/seating-screen/seating-keyboard.ts", () => ({
   renderSeatingKeyboard: (plan: unknown) => renderSeatingKeyboardSpy(plan),
 }));
 
@@ -37,7 +37,7 @@ const renderSeatingCancelledSpy = vi.fn();
 
 const renderSeatingScreenSpy = vi.fn();
 
-vi.mock("#live-game/render/seating/seating-message.ts", () => ({
+vi.mock("#live-game/render/seating-screen/seating-message.ts", () => ({
   renderSeated: (seats: unknown) => renderSeatedSpy(seats),
   renderSeatingCancelled: () => renderSeatingCancelledSpy(),
   renderSeatingScreen: () => renderSeatingScreenSpy(),
@@ -53,7 +53,7 @@ vi.mock("#live-game/bot/card/card-service.ts", () => ({
   PICKED_BY_HAND: null,
 }));
 
-const { askSeating, onSeatingTap } = await import("#live-game/bot/opening/seating-screen.ts");
+const { askSeating, onSeatingTap } = await import("#live-game/bot/seating-screen.ts");
 
 const NEVER = 0;
 

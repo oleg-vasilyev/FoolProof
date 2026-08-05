@@ -9,7 +9,7 @@ vi.mock("#shared/text/html-escape.ts", () => ({
 }));
 
 const { renderSeated, renderSeatingCancelled, renderSeatingScreen } = await import(
-  "#live-game/render/seating/seating-message.ts"
+  "#live-game/render/seating-screen/seating-message.ts"
 );
 
 

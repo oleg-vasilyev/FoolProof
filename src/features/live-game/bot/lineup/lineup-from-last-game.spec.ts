@@ -67,7 +67,7 @@ vi.mock("#live-game/render/name-preview.ts", () => ({
 
 const askSeatingSpy = vi.fn();
 
-vi.mock("#live-game/bot/opening/seating-screen.ts", () => ({
+vi.mock("#live-game/bot/seating-screen.ts", () => ({
   askSeating: (ctx: unknown, seats: unknown) => askSeatingSpy(ctx, seats),
 }));
 
@@ -75,7 +75,7 @@ const resolveSeatsSpy = vi.fn();
 
 const toSeatsSpy = vi.fn();
 
-vi.mock("#live-game/bot/opening/seat-lookup.ts", () => ({
+vi.mock("#live-game/bot/lineup/seat-lookup.ts", () => ({
   resolveSeats: (repo: unknown, chatId: unknown, names: unknown) =>
     resolveSeatsSpy(repo, chatId, names),
   toSeats: (records: unknown) => toSeatsSpy(records),
@@ -87,7 +87,7 @@ const {
   onNext,
   onNextWith,
   onNextWithout,
-} = await import("#live-game/bot/opening/lineup-from-last-game.ts");
+} = await import("#live-game/bot/lineup/lineup-from-last-game.ts");
 
 const NEVER = 0;
 

@@ -14,7 +14,7 @@ vi.mock("#live-game/bot/card-context.ts", () => ({
 
 const openFromNamesSpy = vi.fn();
 
-vi.mock("#live-game/bot/opening/lineup-from-names.ts", () => ({
+vi.mock("#live-game/bot/lineup/lineup-from-names.ts", () => ({
   openFromNames: (...args: unknown[]) => openFromNamesSpy(...args),
 }));
 
@@ -22,12 +22,12 @@ const joinFromNamesSpy = vi.fn();
 
 const leaveFromNamesSpy = vi.fn();
 
-vi.mock("#live-game/bot/opening/lineup-from-last-game.ts", () => ({
+vi.mock("#live-game/bot/lineup/lineup-from-last-game.ts", () => ({
   joinFromNames: (...args: unknown[]) => joinFromNamesSpy(...args),
   leaveFromNames: (...args: unknown[]) => leaveFromNamesSpy(...args),
 }));
 
-const { onNamesReply } = await import("#live-game/bot/opening/names-reply.ts");
+const { onNamesReply } = await import("#live-game/bot/lineup/names-reply.ts");
 
 const NEVER = 0;
 

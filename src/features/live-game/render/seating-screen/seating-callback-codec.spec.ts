@@ -4,7 +4,7 @@ import {
   decodeSeatingCallback,
   encodeSeatingCallback,
   SEATING_TAPS,
-} from "#live-game/render/seating/seating-callback-codec.ts";
+} from "#live-game/render/seating-screen/seating-callback-codec.ts";
 
 
 const OLEG = 3;

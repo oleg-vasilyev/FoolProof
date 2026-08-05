@@ -18,8 +18,8 @@ import {
   refusedBecauseLive,
   type CardContext,
 } from "#live-game/bot/card-context.ts";
-import { resolveSeats, toSeats } from "#live-game/bot/opening/seat-lookup.ts";
-import { askSeating } from "#live-game/bot/opening/seating-screen.ts";
+import { resolveSeats, toSeats } from "#live-game/bot/lineup/seat-lookup.ts";
+import { askSeating } from "#live-game/bot/seating-screen.ts";
 
 
 type NamesProblem = Exclude<NamesResult, { ok: true }>;

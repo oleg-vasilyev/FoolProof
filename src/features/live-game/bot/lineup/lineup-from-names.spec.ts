@@ -47,11 +47,11 @@ vi.mock("#live-game/bot/card/card-service.ts", () => ({
 
 const resolveSeatsSpy = vi.fn();
 
-vi.mock("#live-game/bot/opening/seat-lookup.ts", () => ({
+vi.mock("#live-game/bot/lineup/seat-lookup.ts", () => ({
   resolveSeats: (...args: unknown[]) => resolveSeatsSpy(...args),
 }));
 
-const { onGame, openFromNames } = await import("#live-game/bot/opening/lineup-from-names.ts");
+const { onGame, openFromNames } = await import("#live-game/bot/lineup/lineup-from-names.ts");
 
 const NEVER = 0;
 

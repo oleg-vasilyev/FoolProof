@@ -135,10 +135,14 @@ for adding one is the `add-a-feature` skill.
 declares `/stats`, `/stats_chronology` and `/stats_awards`, so it gives the player
 two pictures; `live-game` declares four commands that between them open a card and
 change the table. When a layer holds files serving more than one of those things,
-each gets a subfolder named after the thing — `render/chronology/`, `bot/opening/` —
-and only what all of them use stays at the layer root. Never a bucket: `helpers/`,
-`common/` and `shared/` inside a feature are the same vagueness the file names were
-cured of. A single-command feature never subdivides.
+each gets a subfolder **named after that thing** — a picture, a screen, an entity
+the commands are about: `render/chronology/`, `render/seating-screen/`,
+`bot/lineup/`. Only what all of them use stays at the layer root. Two ways to get
+this wrong, both paid for here: a bucket (`helpers/`, `common/`, `shared/` inside a
+feature) is the vagueness the file names were cured of, and a **process** name is
+worse than it looks — `bot/opening/` reads fine to whoever just split the folder
+and tells everybody else nothing, because opening is not something the player ends
+up holding. A single-command feature never subdivides.
 
 `docs:check` fails a layer root above nine files, which is unambiguous crowding
 rather than a real limit — the fix is always a named subfolder, never a bigger
@@ -345,9 +349,6 @@ below 85%), `npm run e2e:changed`, a review pass over the whole diff, and a
 retrospective on how the phase was carried out — and the numbers go in the commit
 message. The procedure is the **`finish-phase` skill**; the review pass has a
 `phase-reviewer` subagent.
-
-Mutation runs over the phase's diff (`npm run test:mutation:changed`, about a
-minute); the full run happens once before a tag.
 
 **Say how big the phase is before starting it**, in a line, so it can be argued
 down: a phase inside one feature folder that adds no repository method and changes

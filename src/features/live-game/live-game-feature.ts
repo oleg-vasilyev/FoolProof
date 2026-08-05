@@ -5,14 +5,14 @@ import type { CardRepository } from "#shared/repository/repository-contract.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { createCardService } from "#live-game/bot/card/card-service.ts";
 import type { CardContext } from "#live-game/bot/card-context.ts";
-import { onGame } from "#live-game/bot/opening/lineup-from-names.ts";
-import { onNext, onNextWith, onNextWithout } from "#live-game/bot/opening/lineup-from-last-game.ts";
-import { onNamesReply } from "#live-game/bot/opening/names-reply.ts";
+import { onGame } from "#live-game/bot/lineup/lineup-from-names.ts";
+import { onNext, onNextWith, onNextWithout } from "#live-game/bot/lineup/lineup-from-last-game.ts";
+import { onNamesReply } from "#live-game/bot/lineup/names-reply.ts";
 import { onTap } from "#live-game/bot/card/tap-handler.ts";
-import { onSeatingTap } from "#live-game/bot/opening/seating-screen.ts";
+import { onSeatingTap } from "#live-game/bot/seating-screen.ts";
 import { createPromptRegistry } from "#live-game/bot/prompt-registry.ts";
 import { CARD_TAPS } from "#live-game/render/callback-data-codec.ts";
-import { SEATING_TAPS } from "#live-game/render/seating/seating-callback-codec.ts";
+import { SEATING_TAPS } from "#live-game/render/seating-screen/seating-callback-codec.ts";
 import { startIdleSweep } from "#live-game/bot/card/idle-sweep.ts";
 
 

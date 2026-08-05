@@ -10,7 +10,7 @@ import {
   refusedBecauseLive,
   type CardContext,
 } from "#live-game/bot/card-context.ts";
-import { resolveSeats } from "#live-game/bot/opening/seat-lookup.ts";
+import { resolveSeats } from "#live-game/bot/lineup/seat-lookup.ts";
 
 
 type LineupProblem = Exclude<ReturnType<typeof parseLineup>, { ok: true }>;

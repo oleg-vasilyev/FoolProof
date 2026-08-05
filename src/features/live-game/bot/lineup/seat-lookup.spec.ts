@@ -10,7 +10,7 @@ vi.mock("#live-game/domain/lineup-parsing.ts", () => ({
   normalizeName: (name: string) => normalizeNameSpy(name),
 }));
 
-const { resolveSeats, toSeats } = await import("#live-game/bot/opening/seat-lookup.ts");
+const { resolveSeats, toSeats } = await import("#live-game/bot/lineup/seat-lookup.ts");
 
 const NEVER = 0;
 

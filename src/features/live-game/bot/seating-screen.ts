@@ -2,13 +2,13 @@ import type { CallbackTap, Command, TextMessage } from "#shared/telegram/telegra
 import type { Seat } from "#live-game/domain/card-state.ts";
 import { rotateToLowestId } from "#live-game/domain/lineup-parsing.ts";
 import { applySeating, type SeatingPlan } from "#live-game/domain/seating-plan.ts";
-import { decodeSeatingCallback } from "#live-game/render/seating/seating-callback-codec.ts";
-import { renderSeatingKeyboard } from "#live-game/render/seating/seating-keyboard.ts";
+import { decodeSeatingCallback } from "#live-game/render/seating-screen/seating-callback-codec.ts";
+import { renderSeatingKeyboard } from "#live-game/render/seating-screen/seating-keyboard.ts";
 import {
   renderSeated,
   renderSeatingCancelled,
   renderSeatingScreen,
-} from "#live-game/render/seating/seating-message.ts";
+} from "#live-game/render/seating-screen/seating-message.ts";
 import { toMarkup } from "#live-game/bot/inline-markup.ts";
 import { PICKED_BY_HAND } from "#live-game/bot/card/card-service.ts";
 import type { CardContext } from "#live-game/bot/card-context.ts";

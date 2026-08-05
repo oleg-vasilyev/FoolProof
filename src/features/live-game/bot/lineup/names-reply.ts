@@ -1,8 +1,8 @@
 import type { TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { refusedBecauseLive, type CardContext } from "#live-game/bot/card-context.ts";
-import { openFromNames } from "#live-game/bot/opening/lineup-from-names.ts";
-import { joinFromNames, leaveFromNames } from "#live-game/bot/opening/lineup-from-last-game.ts";
+import { openFromNames } from "#live-game/bot/lineup/lineup-from-names.ts";
+import { joinFromNames, leaveFromNames } from "#live-game/bot/lineup/lineup-from-last-game.ts";
 
 
 type Answered = "lineup" | "joiners" | "leavers";

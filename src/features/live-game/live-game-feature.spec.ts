@@ -51,17 +51,17 @@ vi.mock("#live-game/bot/card/idle-sweep.ts", () => ({
   startIdleSweep: (cards: unknown, log: unknown) => startIdleSweepSpy(cards, log),
 }));
 
-vi.mock("#live-game/bot/opening/lineup-from-names.ts", () => ({
+vi.mock("#live-game/bot/lineup/lineup-from-names.ts", () => ({
   onGame: (context: unknown, ctx: unknown) => onGameSpy(context, ctx),
 }));
 
-vi.mock("#live-game/bot/opening/lineup-from-last-game.ts", () => ({
+vi.mock("#live-game/bot/lineup/lineup-from-last-game.ts", () => ({
   onNext: (context: unknown, ctx: unknown) => onNextSpy(context, ctx),
   onNextWith: (context: unknown, ctx: unknown) => onNextWithSpy(context, ctx),
   onNextWithout: (context: unknown, ctx: unknown) => onNextWithoutSpy(context, ctx),
 }));
 
-vi.mock("#live-game/bot/opening/names-reply.ts", () => ({
+vi.mock("#live-game/bot/lineup/names-reply.ts", () => ({
   onNamesReply: (context: unknown, ctx: unknown) => onNamesReplySpy(context, ctx),
 }));
 
@@ -75,13 +75,13 @@ vi.mock("#live-game/render/callback-data-codec.ts", () => ({ CARD_TAPS }));
 
 const onSeatingTapSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
 
-vi.mock("#live-game/bot/opening/seating-screen.ts", () => ({
+vi.mock("#live-game/bot/seating-screen.ts", () => ({
   onSeatingTap: (context: unknown, ctx: unknown) => onSeatingTapSpy(context, ctx),
 }));
 
 const SEATING_TAPS = /^the-seating-taps$/;
 
-vi.mock("#live-game/render/seating/seating-callback-codec.ts", () => ({ SEATING_TAPS }));
+vi.mock("#live-game/render/seating-screen/seating-callback-codec.ts", () => ({ SEATING_TAPS }));
 
 const SEATING_LISTENER = 1;
 

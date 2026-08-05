@@ -10,11 +10,11 @@ vi.mock("#live-game/domain/seating-plan.ts", () => ({
   seatNumberOf: (plan: unknown, slot: number) => seatNumberOfSpy(plan, slot),
 }));
 
-vi.mock("#live-game/render/seating/seating-callback-codec.ts", () => ({
+vi.mock("#live-game/render/seating-screen/seating-callback-codec.ts", () => ({
   encodeSeatingCallback: (payload: unknown) => encodeSeatingCallbackSpy(payload),
 }));
 
-const { renderSeatingKeyboard } = await import("#live-game/render/seating/seating-keyboard.ts");
+const { renderSeatingKeyboard } = await import("#live-game/render/seating-screen/seating-keyboard.ts");
 
 
 const OLEG = { playerId: 3, displayName: "Oleg" };
