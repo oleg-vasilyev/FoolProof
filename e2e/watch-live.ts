@@ -13,6 +13,8 @@ const CONFIG = resolve(import.meta.dirname, "vitest.e2e.config.ts");
 
 const STOPPED = 0;
 
+const PORT_TAKEN = 1;
+
 const openInBrowser = (url: string): void => {
   if (process.env.E2E_OPEN === "0") {
     return;
@@ -28,7 +30,14 @@ const openInBrowser = (url: string): void => {
 
 const hubUrl = `http://127.0.0.1:${String(HUB_PORT)}`;
 
-const hub = await startHub(HUB_PORT);
+// The port is the one thing that can be taken, and a watch run left over from last
+// time is what usually takes it. An unhandled listen error prints a stack that says
+// nothing about which run to close.
+const hub = await startHub(HUB_PORT).catch((error: unknown) => {
+  process.stdout.write(`\n  ${hubUrl} is taken: ${String(error)}\n`);
+  process.stdout.write(`  an earlier watch run is probably still holding it\n\n`);
+  process.exit(PORT_TAKEN);
+});
 
 // One tab, not one per world. A tab opened by the operating system cannot be
 // closed again by the process that opened it, so five of them outlive the run and

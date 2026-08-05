@@ -43,6 +43,12 @@ describeScenario("the bot refuses a line-up it cannot use", (chat) => {
     expect(chat.lastText()).toBe("A game is already in progress.");
     expect(chat.captions()).toEqual(["Anya", "Roma", "❌ Cancel"]);
   });
+
+  it("should leave the chat with nothing still open", async () => {
+    await chat.tap("❌ Cancel");
+
+    expect(chat.captions()).toEqual([]);
+  });
 });
 
 describeScenario("Back undoes one step and Cancel throws the card away", (chat) => {
@@ -76,6 +82,12 @@ describeScenario("Back undoes one step and Cancel throws the card away", (chat) 
     expect(chat.captions()).toContain("❌ Cancel");
     expect(chat.captions()).not.toContain("↩️ Back");
   });
+
+  it("should leave the chat with nothing still open", async () => {
+    await chat.tap("❌ Cancel");
+
+    expect(chat.captions()).toEqual([]);
+  });
 });
 
 describeScenario("/next repeats the line-up", (chat) => {
@@ -95,5 +107,11 @@ describeScenario("/next repeats the line-up", (chat) => {
   it("should have dealt to the player sitting before the fool", () => {
     expect(chat.cardText()).toContain("Dealt first: <b>Roma</b>");
     expect(chat.cardText()).not.toContain("Who dealt first?");
+  });
+
+  it("should leave the chat with nothing still open", async () => {
+    await chat.tap("❌ Cancel");
+
+    expect(chat.captions()).toEqual([]);
   });
 });

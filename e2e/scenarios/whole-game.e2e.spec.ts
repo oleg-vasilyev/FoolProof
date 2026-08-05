@@ -67,4 +67,10 @@ describeScenario("a whole game, from /game to Confirm", (chat) => {
 
     expect(chat.cardText()).toContain("Game 2");
   });
+
+  it("should leave the chat with nothing still open", async () => {
+    await chat.tap("❌ Cancel");
+
+    expect(chat.captions()).toEqual([]);
+  });
 });

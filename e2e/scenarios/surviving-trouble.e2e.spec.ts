@@ -79,4 +79,11 @@ describeScenario("a tap against a card that moved on", (chat) => {
   it("should redraw the card, in case the message was the stale one", () => {
     expect(chat.editAttemptsOf(cardId)).toBeGreaterThan(attemptsBefore);
   });
+
+  it("should leave the chat with nothing still open", async () => {
+    await chat.tap("Oleg");
+    await chat.tap("✅ Confirm");
+
+    expect(chat.captions()).toEqual([]);
+  });
 });

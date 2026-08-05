@@ -44,9 +44,18 @@ while a query still only sees the scenario running now.
 module registry is rebuilt per file, so the world would be recreated per scenario
 file — losing the history and racing itself for the port.
 
-## Three rules that keep the harness honest
+## Four rules that keep the harness honest
 
 All were learned by getting them wrong:
+
+- **A scenario ends the way an evening does.** Nothing may be left with a keyboard
+  on it: a card ends on Confirm or Cancel, a `/merge` screen the same. Eight of the
+  sixteen scenarios used to walk off mid-card, and since the chat log outlives the
+  database reset between files, the result was a watch run full of screens a player
+  could still tap against games that no longer existed. `describeScenario` now fails
+  a scenario that leaves one open, and names it — the harness cannot tidy up on the
+  scenario's behalf without deciding when a screen is finished, which is the bot's
+  business, not the fake's.
 
 - **A scenario that asserts only captions cannot tell two screens apart.** When a new
   screen is inserted before an old one and lists the same names, every assertion in

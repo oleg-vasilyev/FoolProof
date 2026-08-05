@@ -207,7 +207,13 @@ export const startHub = async (port: number): Promise<Server> => {
 
   server.once("close", () => clearInterval(watching));
 
-  await new Promise<void>((listening) => server.listen(port, "127.0.0.1", listening));
+  await new Promise<void>((listening, failed) => {
+    server.once("error", failed);
+    server.listen(port, "127.0.0.1", () => {
+      server.removeListener("error", failed);
+      listening();
+    });
+  });
 
   return server;
 };
