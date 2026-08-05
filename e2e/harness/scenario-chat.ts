@@ -65,6 +65,7 @@ export interface Chat {
   commands(): readonly string[];
   promptId(): number | null;
   photoBytes(): Buffer | undefined;
+  photosSent(): number;
 }
 
 const paceMs = (): number => Number(process.env.E2E_PACE_MS ?? String(NO_PACE));
@@ -262,5 +263,8 @@ export const createChat = (): Chat => {
         ? undefined
         : world.telegram.photoBytes(photo);
     },
+
+    photosSent: () =>
+      world.telegram.thisScenario().filter((message) => message.photo !== null).length,
   };
 };

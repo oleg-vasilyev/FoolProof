@@ -9,6 +9,10 @@ const MAGIC_LENGTH = 4;
 
 const NOTHING = 0;
 
+const ONE_PICTURE = 1;
+
+const BOTH_PICTURES = 2;
+
 const CONFIRM = "✅ Confirm";
 
 const playAnotherGame = async (chat: Chat, exits: readonly string[]): Promise<void> => {
@@ -46,5 +50,45 @@ describeScenario("/stats draws the session as a picture", (chat) => {
     expect(picture).toBeDefined();
     expect(picture?.subarray(NOTHING, MAGIC_LENGTH).toString("hex")).toBe(PNG_MAGIC);
     expect(picture?.length ?? NOTHING).toBeGreaterThan(NOTHING);
+  });
+
+  it("should keep the awards to itself while the evening is still short", async () => {
+    const before = chat.photosSent();
+
+    await chat.say("/stats");
+
+    expect(chat.photosSent()).toBe(before + ONE_PICTURE);
+  });
+
+  it("should say so when the awards are asked for too early", async () => {
+    await chat.say("/stats_awards");
+
+    expect(chat.lastText()).toContain("Too early for awards");
+  });
+
+  it("should draw both pictures once the evening is long enough", async () => {
+    await playAnotherGame(chat, ["Anya", "Roma"]);
+    await playAnotherGame(chat, ["Roma", "Anya"]);
+    const before = chat.photosSent();
+
+    await chat.say("/stats");
+
+    expect(chat.photosSent()).toBe(before + BOTH_PICTURES);
+  });
+
+  it("should send the chronology on its own when only it was asked for", async () => {
+    const before = chat.photosSent();
+
+    await chat.say("/stats_chronology");
+
+    expect(chat.photosSent()).toBe(before + ONE_PICTURE);
+  });
+
+  it("should send the awards on its own when only they were asked for", async () => {
+    const before = chat.photosSent();
+
+    await chat.say("/stats_awards");
+
+    expect(chat.photosSent()).toBe(before + ONE_PICTURE);
   });
 });
