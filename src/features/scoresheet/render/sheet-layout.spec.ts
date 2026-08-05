@@ -45,6 +45,7 @@ const startedOn = "2026-07-24";
 const gamesOf = (count: number) =>
   Array.from({ length: count }, (_unused, index) => ({
     gameId: index,
+    starterId: null,
     placements: [{ playerId: ONE, position: ONE }],
   }));
 

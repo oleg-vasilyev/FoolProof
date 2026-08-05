@@ -25,7 +25,7 @@ const NO_PLAYERS = 0;
 
 const placeholdersFor = (values: readonly number[]): string => values.map(() => "?").join(",");
 
-const LATEST_SERIES = `SELECT id, started_at FROM game_series
+const LATEST_SERIES = `SELECT id, started_at, starter_player_id FROM game_series
    WHERE chat_id = ?
      AND series_no = (SELECT MAX(series_no) FROM game_series WHERE chat_id = ?)`;
 
@@ -332,6 +332,7 @@ export const sqliteRepository: Repository = {
       .prepare(
         `SELECT g.id AS game_id,
                 date(g.started_at) AS started_on,
+                g.starter_player_id AS starter_id,
                 ge.player_id,
                 ge.position
          FROM (${LATEST_SERIES}) g

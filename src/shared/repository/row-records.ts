@@ -66,12 +66,16 @@ export const toStorageSummary = (row: Row | undefined, file: string): StorageSum
 export const groupByGame = (rows: readonly Row[]): readonly ChronologyGame[] =>
   rows.reduce<readonly ChronologyGame[]>((games, row) => {
     const gameId = num(row.game_id);
+    const starterId = nullableNum(row.starter_id);
     const placement = { playerId: num(row.player_id), position: num(row.position) };
     const open = games.at(LAST);
 
     if (open?.gameId !== gameId) {
-      return [...games, { gameId, placements: [placement] }];
+      return [...games, { gameId, starterId, placements: [placement] }];
     }
 
-    return [...games.slice(0, LAST), { gameId, placements: [...open.placements, placement] }];
+    return [
+      ...games.slice(0, LAST),
+      { gameId, starterId: open.starterId, placements: [...open.placements, placement] },
+    ];
   }, []);

@@ -55,6 +55,7 @@ export interface PlayerColumn {
 
 export interface ChronologyGame {
   gameId: number;
+  starterId: number | null;
   placements: readonly Finalist[];
 }
 

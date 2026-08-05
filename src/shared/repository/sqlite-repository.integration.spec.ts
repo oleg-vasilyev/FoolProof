@@ -784,6 +784,34 @@ describe("seriesChronology()", () => {
     expect(repo.seriesChronology(CHAT_ID)?.games).toHaveLength(TWO);
   });
 
+  it("should report who dealt each game", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    const gameId = playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
+    repo.updateCard(gameId, "RECORDING", ONCE, ids[1] ?? NONE);
+
+    expect(repo.seriesChronology(CHAT_ID)?.games[0]?.starterId).toBe(ids[1]);
+  });
+
+  it("should report no dealer for a game whose starter was never set", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
+
+    expect(repo.seriesChronology(CHAT_ID)?.games[0]?.starterId).toBeNull();
+  });
+
+  it("should keep each game's own dealer rather than the first game's", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    const first = playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
+    const second = playFullGame(ids, [ids[1] ?? NONE, ids[0] ?? NONE], [ids[2] ?? NONE]);
+    repo.updateCard(first, "RECORDING", ONCE, ids[0] ?? NONE);
+    repo.updateCard(second, "RECORDING", ONCE, ids[2] ?? NONE);
+
+    expect(repo.seriesChronology(CHAT_ID)?.games.map((game) => game.starterId)).toEqual([
+      ids[0],
+      ids[2],
+    ]);
+  });
+
   it("should keep the games in the order they were played", () => {
     const ids = seedPlayers("Oleg", "Anya", "Roma");
     const first = playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);

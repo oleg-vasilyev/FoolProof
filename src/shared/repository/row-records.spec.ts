@@ -204,16 +204,20 @@ describe("row mappers", () => {
 });
 
 describe("groupByGame()", () => {
-  const rowOf = (gameId: number, playerId: number, position: number) => ({
+  const rowOf = (gameId: number, playerId: number, position: number, starterId: unknown = null) => ({
     game_id: gameId,
     player_id: playerId,
     position,
+    starter_id: starterId,
   });
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     values.numSpy.mockImplementation((value) => Number(value));
+    values.nullableNumSpy.mockImplementation((value) =>
+      value === null || value === undefined ? null : Number(value)
+    );
   });
 
   it("should return nothing for no rows", () => {
@@ -224,12 +228,27 @@ describe("groupByGame()", () => {
     expect(groupByGame([rowOf(ONE, TWO, ONE), rowOf(ONE, THREE, TWO)])).toEqual([
       {
         gameId: ONE,
+        starterId: null,
         placements: [
           { playerId: TWO, position: ONE },
           { playerId: THREE, position: TWO },
         ],
       },
     ]);
+  });
+
+  it("should carry who dealt the game", () => {
+    expect(groupByGame([rowOf(ONE, TWO, ONE, THREE)])[0]?.starterId).toBe(THREE);
+  });
+
+  it("should report no dealer when the column is empty", () => {
+    expect(groupByGame([rowOf(ONE, TWO, ONE)])[0]?.starterId).toBeNull();
+  });
+
+  it("should take the dealer from the row that opened the game, not from a later one", () => {
+    const rows = [rowOf(ONE, TWO, ONE, THREE), rowOf(ONE, THREE, TWO, null)];
+
+    expect(groupByGame(rows)[0]?.starterId).toBe(THREE);
   });
 
   it("should open a new entry when the game changes", () => {
