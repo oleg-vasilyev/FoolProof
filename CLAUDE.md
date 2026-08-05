@@ -48,7 +48,7 @@ Anything a machine can check is a lint rule, not a paragraph — see
   idea before any detail: the exported factory is a table of contents that names
   the steps and delegates, and the steps are module-level functions taking an
   explicit context object instead of reaching into closure scope. `src/main.ts`,
-  `src/feature-installer.ts` and `features/live-game/bot/card-service.ts` are the
+  `src/feature-installer.ts` and `features/live-game/bot/card/card-service.ts` are the
   reference shape. A function that needs a comment to explain its sections is
   asking to be split.
 - **A file name has to survive being read on its own.** An editor tab shows the
@@ -228,7 +228,7 @@ keyboard out, pure. **A drawing is a string; only `bot` may turn it into pixels*
 `scoresheet/bot/rasterizer.ts`. `shared/text/html-escape.ts` and
 `scoresheet/render/svg-tags.ts` are each the only place their kind of markup is
 assembled, so a name cannot reach the output unescaped. Geometry belongs in
-`sheet-layout.ts`; nothing else computes a coordinate from scratch.
+`chronology-layout.ts` and `card-metrics.ts`; nothing else computes a coordinate.
 
 One Bot API fact that is easy to get backwards, and `PLAN.md` explains why:
 **escape user data reaching the message body, never button captions** — Telegram
