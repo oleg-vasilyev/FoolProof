@@ -147,6 +147,27 @@ const refused = (description: string): ApiResult => ({
 const sameKeyboard = (before: ButtonRows, after: ButtonRows): boolean =>
   JSON.stringify(before) === JSON.stringify(after);
 
+// Two limits the real Bot API enforces and this fake used not to, so a bot that
+// grew past either of them kept passing here and would have failed in a real chat.
+// Text is counted in characters, callback data in bytes, which is how Telegram
+// counts them.
+const LONGEST_TEXT = 4096;
+
+const LONGEST_CALLBACK_DATA = 64;
+
+const overBudget = (buttons: ButtonRows): boolean =>
+  buttons.some((row) =>
+    row.some((button) => Buffer.byteLength(button.data) > LONGEST_CALLBACK_DATA)
+  );
+
+const tooBig = (text: string, buttons: ButtonRows): ApiResult | null => {
+  if ([...text].length > LONGEST_TEXT) {
+    return refused("message is too long");
+  }
+
+  return overBudget(buttons) ? refused("BUTTON_DATA_INVALID") : null;
+};
+
 export const createFakeTelegram = (): FakeTelegram => {
   const updates: UpdateQueue = createUpdateQueue();
   const photos = new Map<number, Buffer>();
@@ -231,7 +252,15 @@ export const createFakeTelegram = (): FakeTelegram => {
       case "sendMessage": {
         effect();
 
-        const sent = post(String(payload.text), buttonRowsOf(payload.reply_markup), null);
+        const wanted = String(payload.text);
+        const keyboard = buttonRowsOf(payload.reply_markup);
+        const refusal = tooBig(wanted, keyboard);
+
+        if (refusal !== null) {
+          return refusal;
+        }
+
+        const sent = post(wanted, keyboard, null);
         const placeholder = placeholderOf(payload.reply_markup);
 
         if (placeholder !== null) {
@@ -260,6 +289,12 @@ export const createFakeTelegram = (): FakeTelegram => {
 
         if (target === undefined || target.deleted) {
           return refused("message to edit not found");
+        }
+
+        const refusal = tooBig(text, buttons);
+
+        if (refusal !== null) {
+          return refusal;
         }
 
         log = withEditAttempt(log, messageId);
