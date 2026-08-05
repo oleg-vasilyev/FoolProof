@@ -85,4 +85,66 @@ describe("the copy table", () => {
       expect(copy.sheetOmitted(DROPPED)).toContain("7");
     });
   });
+
+  describe("the awards", () => {
+    const AWARDS_IN_THE_CATALOGUE = 13;
+
+    it("should give every award in the catalogue a title", () => {
+      expect(Object.keys(copy.awardTitles)).toHaveLength(AWARDS_IN_THE_CATALOGUE);
+    });
+
+    it("should leave no award title empty", () => {
+      for (const [name, title] of Object.entries(copy.awardTitles)) {
+        expect(title, name).not.toBe("");
+      }
+    });
+
+    it("should give every award a title of its own", () => {
+      expect(new Set(Object.values(copy.awardTitles)).size).toBe(AWARDS_IN_THE_CATALOGUE);
+    });
+
+    describe("every justification carries its numbers", () => {
+      const FIFTY_ONE = 51;
+
+      const EIGHT = 8;
+
+      const reasons: readonly [string, string][] = [
+        ["king", copy.kingReason(FIFTY_ONE, "18 games")],
+        ["untouchable", copy.untouchableReason("11 games")],
+        ["teflon", copy.teflonReason(EIGHT)],
+        ["sweetRevenge", copy.sweetRevengeReason(FIFTY_ONE, EIGHT)],
+        ["ironSeat", copy.ironSeatReason("19 games")],
+        ["theTruce", copy.truceReason("1 game", "19 games")],
+        ["allOrNothing", copy.allOrNothingReason(EIGHT, "18 games")],
+        ["theInvisible", copy.invisibleReason(EIGHT, "17 games")],
+        ["theIrishGoodbye", copy.irishGoodbyeReason(EIGHT, "19 games")],
+        ["encore", copy.encoreReason(TWO)],
+        ["dealersCurse", copy.dealersCurseReason(FIFTY_ONE, TWO)],
+        ["firstBlood", copy.firstBloodReason("19 games")],
+        ["foolOfTheNight", copy.foolReason(TWO, "15 games")],
+        ["curse", copy.curseFact(EIGHT, "19 games")],
+      ];
+
+      it("should print a number in every one of them", () => {
+        for (const [name, reason] of reasons) {
+          expect(reason, name).toMatch(/\d/);
+        }
+      });
+
+      it("should interpolate the count it was handed rather than a fixed one", () => {
+        expect(copy.teflonReason(EIGHT)).toContain(String(EIGHT));
+        expect(copy.encoreReason(TWO)).toContain(String(TWO));
+      });
+
+      it("should print the finished tally it was handed rather than a bare number", () => {
+        expect(copy.kingReason(FIFTY_ONE, "18 games")).toContain("18 games");
+        expect(copy.truceReason("1 game", "19 games")).toContain("1 game");
+      });
+
+      it("should print both of the numbers an award was given two of", () => {
+        expect(copy.sweetRevengeReason(FIFTY_ONE, EIGHT)).toContain(String(FIFTY_ONE));
+        expect(copy.sweetRevengeReason(FIFTY_ONE, EIGHT)).toContain(String(EIGHT));
+      });
+    });
+  });
 });

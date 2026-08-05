@@ -14,17 +14,11 @@ import { palette } from "#scoresheet/render/palette.ts";
 import { shareChart } from "#scoresheet/render/share-chart.ts";
 import { shareLegend } from "#scoresheet/render/share-legend.ts";
 import { copy } from "#scoresheet/copy.en.ts";
-import { gameTally, playerTally } from "#scoresheet/render/session-tally.ts";
+import { EYEBROW_TRACKING, cardHeading } from "#scoresheet/render/card-heading.ts";
 import { line, rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
 
 
 const NONE = 0;
-
-const EYEBROW_BASELINE = 146;
-
-const TITLE_BASELINE = 286;
-
-const SUBTITLE_BASELINE = 227;
 
 const OMITTED_BASELINE = 286;
 
@@ -34,45 +28,16 @@ const DIVIDER_DROP = 92;
 
 const DIVIDER_WIDTH = 1;
 
-const EYEBROW_TRACKING = 3;
-
 const background = (sheet: Sheet): string =>
   rect({ x: NONE, y: NONE, width: IMAGE_WIDTH, height: sheet.height, fill: palette.sheet });
 
-const heading = (sheet: Sheet): readonly string[] => [
-  text(copy.sheetEyebrow, {
-    x: PAD,
-    y: EYEBROW_BASELINE,
-    fill: palette.inkMuted,
-    "font-family": FONT_FAMILY,
-    "font-size": fontSize.eyebrow,
-    "letter-spacing": EYEBROW_TRACKING,
-  }),
-  text(copy.sheetTitle, {
-    x: PAD,
-    y: TITLE_BASELINE,
-    fill: palette.ink,
-    "font-family": FONT_FAMILY,
-    "font-weight": "bold",
-    "font-size": fontSize.title,
-  }),
-  text(copy.sheetDate(sheet.startedOn), {
-    x: GRID_RIGHT,
-    y: EYEBROW_BASELINE,
-    fill: palette.ink,
-    "font-family": FONT_FAMILY,
-    "font-size": fontSize.date,
-    "text-anchor": "end",
-  }),
-  text(copy.sheetSubtitle(gameTally(sheet.rounds), playerTally(sheet.players.length)), {
-    x: GRID_RIGHT,
-    y: SUBTITLE_BASELINE,
-    fill: palette.inkMuted,
-    "font-family": FONT_FAMILY,
-    "font-size": fontSize.subtitle,
-    "text-anchor": "end",
-  }),
-];
+const heading = (sheet: Sheet): readonly string[] =>
+  cardHeading({
+    title: copy.sheetTitle,
+    startedOn: sheet.startedOn,
+    games: sheet.rounds,
+    players: sheet.players.length,
+  });
 
 const omittedNote = (sheet: Sheet): readonly string[] =>
   sheet.omitted === NONE

@@ -33,9 +33,7 @@ const shareLegendSpy = vi.fn();
 
 const layoutOfSpy = vi.fn();
 
-const gameTallySpy = vi.fn();
-
-const playerTallySpy = vi.fn();
+const cardHeadingSpy = vi.fn();
 
 const rectSpy = vi.fn();
 
@@ -67,17 +65,17 @@ vi.mock("#scoresheet/render/palette.ts", () => ({
   palette: { sheet: "sheet", ink: "ink", inkMuted: "muted", inkFaint: "faint", ruling: "ruling" },
 }));
 
+vi.mock("#scoresheet/render/card-heading.ts", () => ({
+  EYEBROW_TRACKING: 3,
+  cardHeading: (heading: unknown) => cardHeadingSpy(heading),
+}));
+
 vi.mock("#scoresheet/render/share-chart.ts", () => ({
   shareChart: (sheet: unknown) => shareChartSpy(sheet),
 }));
 
 vi.mock("#scoresheet/render/share-legend.ts", () => ({
   shareLegend: (sheet: unknown) => shareLegendSpy(sheet),
-}));
-
-vi.mock("#scoresheet/render/session-tally.ts", () => ({
-  gameTally: (games: number) => gameTallySpy(games),
-  playerTally: (players: number) => playerTallySpy(players),
 }));
 
 vi.mock("#scoresheet/render/svg-tags.ts", () => ({
@@ -135,8 +133,7 @@ describe("renderScoresheet()", () => {
     cellKeySpy.mockReturnValue(["<key/>"]);
     shareChartSpy.mockReturnValue(["<chart/>"]);
     shareLegendSpy.mockReturnValue(["<legend/>"]);
-    gameTallySpy.mockImplementation((games: number) => `tally(${String(games)})`);
-    playerTallySpy.mockImplementation((players: number) => `roster(${String(players)})`);
+    cardHeadingSpy.mockReturnValue(["<heading/>"]);
     rectSpy.mockImplementation(() => "<background/>");
     lineSpy.mockImplementation(() => "<divider/>");
     textSpy.mockImplementation(() => "<text/>");
@@ -159,13 +156,6 @@ describe("renderScoresheet()", () => {
       expect(cellKeySpy).toHaveBeenCalledWith(sheet);
       expect(shareChartSpy).toHaveBeenCalledWith(sheet);
       expect(shareLegendSpy).toHaveBeenCalledWith(sheet);
-    });
-
-    it("should ask the tally renderers for the session's own size, not the layout's", () => {
-      renderScoresheet(CHRONOLOGY);
-
-      expect(gameTallySpy).toHaveBeenCalledWith(ROUNDS);
-      expect(playerTallySpy).toHaveBeenCalledWith(PLAYERS);
     });
 
     it("should return whatever the document builder produced", () => {
@@ -266,23 +256,36 @@ describe("renderScoresheet()", () => {
   });
 
   describe("the heading", () => {
-    it("should print the title and its eyebrow", () => {
+    it("should ask cardHeading for this sheet's own title", () => {
       renderScoresheet(CHRONOLOGY);
 
-      expect(printed()).toContain(copy.sheetTitle);
-      expect(printed()).toContain(copy.sheetEyebrow);
+      expect(cardHeadingSpy).toHaveBeenCalledWith(expect.objectContaining({ title: copy.sheetTitle }));
     });
 
-    it("should print the session's date, formatted", () => {
+    it("should ask cardHeading for the session's own counts, not the layout's rounds label", () => {
       renderScoresheet(CHRONOLOGY);
 
-      expect(printed()).toContain(copy.sheetDate(STARTED_ON));
+      expect(cardHeadingSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ games: ROUNDS, players: PLAYERS })
+      );
     });
 
-    it("should print how big the session was, from the two finished tallies", () => {
+    it("should carry the session's date through to the heading", () => {
       renderScoresheet(CHRONOLOGY);
 
-      expect(printed()).toContain(copy.sheetSubtitle(`tally(${String(ROUNDS)})`, `roster(${String(PLAYERS)})`));
+      expect(cardHeadingSpy).toHaveBeenCalledWith(expect.objectContaining({ startedOn: STARTED_ON }));
+    });
+
+    it("should draw whatever the heading produced", () => {
+      renderScoresheet(CHRONOLOGY);
+
+      expect(body()).toContain("<heading/>");
+    });
+
+    it("should draw the heading before the grid it sits above", () => {
+      renderScoresheet(CHRONOLOGY);
+
+      expect(body().indexOf("<heading/>")).toBeLessThan(body().indexOf("<grid/>"));
     });
 
     it("should label the chart below", () => {
@@ -319,52 +322,10 @@ describe("renderScoresheet()", () => {
       );
     });
 
-    it("should set the eyebrow and the title against the left margin", () => {
-      renderScoresheet(CHRONOLOGY);
-
-      expect(attributesOfText(copy.sheetEyebrow).x).toBe(PAD);
-      expect(attributesOfText(copy.sheetTitle).x).toBe(PAD);
-    });
-
-    it("should put the title below its eyebrow", () => {
-      renderScoresheet(CHRONOLOGY);
-
-      expect(Number(attributesOfText(copy.sheetTitle).y)).toBeGreaterThan(
-        Number(attributesOfText(copy.sheetEyebrow).y)
-      );
-    });
-
-    it("should set the title in bold and larger than its eyebrow", () => {
-      renderScoresheet(CHRONOLOGY);
-
-      expect(attributesOfText(copy.sheetTitle)["font-weight"]).toBe("bold");
-      expect(Number(attributesOfText(copy.sheetTitle)["font-size"])).toBeGreaterThan(
-        Number(attributesOfText(copy.sheetEyebrow)["font-size"])
-      );
-    });
-
-    it("should right-align the subtitle under the date", () => {
-      renderScoresheet(CHRONOLOGY);
-      const subtitle = attributesOfText(copy.sheetSubtitle(`tally(${String(ROUNDS)})`, `roster(${String(PLAYERS)})`));
-
-      expect(subtitle.x).toBe(GRID_RIGHT);
-      expect(subtitle["text-anchor"]).toBe("end");
-      expect(Number(subtitle.y)).toBeGreaterThan(
-        Number(attributesOfText(copy.sheetDate(STARTED_ON)).y)
-      );
-    });
-
     it("should set the chart's label against the left margin", () => {
       renderScoresheet(CHRONOLOGY);
 
       expect(attributesOfText(copy.sheetShareLabel).x).toBe(PAD);
-    });
-
-    it("should hang the date off the right edge", () => {
-      renderScoresheet(CHRONOLOGY);
-
-      expect(attributesOfText(copy.sheetDate(STARTED_ON)).x).toBe(GRID_RIGHT);
-      expect(attributesOfText(copy.sheetDate(STARTED_ON))["text-anchor"]).toBe("end");
     });
   });
 

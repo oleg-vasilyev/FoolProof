@@ -8,6 +8,9 @@ export const palette = {
   inkMuted: "#9a9a9a",
   inkFaint: "#6a6a6a",
   ruling: "#2e2e2e",
+  plateInk: "#1a1a1a",
+  plateSoft: "#f7c9c2",
+  plateCap: "#3a0e07",
 } as const;
 
 export const PLAYER_COLOURS: readonly string[] = [
