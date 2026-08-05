@@ -107,18 +107,35 @@ const script = (base: string): string => `
       (m.edits > 0 ? '<div class="edits">edited ' + m.edits + "×</div>" : "") +
     "</div>";
 
-  const draw = (state) => {
-    if (state.banner) {
-      banner.className = state.banner.verdict;
-      banner.innerHTML = "<b>" + state.banner.scenario + "</b> <span>" +
-        (state.banner.detail ?? state.banner.step) + "</span>";
+  // A world plays several scenarios into one chat. ?scenario=N narrows the page to
+  // one of them, which is what the hub links to when a scenario is opened on its own.
+  const ONLY = new URLSearchParams(location.search).get("scenario");
 
-      const mark = { passed: "✓ ", failed: "✗ ", running: "", waiting: "" }[state.banner.verdict] ?? "";
-      document.title = mark + state.banner.scenario;
+  const headline = (state) => {
+    if (ONLY === null) return state.banner;
+    const at = Number(ONLY) - 1;
+    const named = state.scenarios[at];
+    if (!named) return state.banner;
+    return { scenario: named, step: "", verdict: state.verdicts[at] ?? "waiting", detail: null };
+  };
+
+  const draw = (state) => {
+    const head = headline(state);
+    if (head) {
+      banner.className = head.verdict;
+      banner.innerHTML = "<b>" + head.scenario + "</b> <span>" +
+        (head.detail ?? head.step) + "</span>";
+
+      const mark = { passed: "✓ ", failed: "✗ ", running: "", waiting: "" }[head.verdict] ?? "";
+      document.title = mark + head.scenario;
     }
 
+    const shown = ONLY === null
+      ? state.messages
+      : state.messages.filter((m) => String(m.scenario) === ONLY);
+
     let shownScenario = -1;
-    const feedNext = state.messages.map((m) => {
+    const feedNext = shown.map((m) => {
       const opening = m.scenario === shownScenario ? "" : divider(state.scenarios[m.scenario - 1] ?? "by hand");
       shownScenario = m.scenario;
       return opening + bubble(m);

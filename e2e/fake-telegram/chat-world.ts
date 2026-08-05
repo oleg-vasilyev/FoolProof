@@ -15,6 +15,7 @@ export interface Banner {
 export interface ChatWorld {
   readonly telegram: FakeTelegram;
   readonly banner: Banner;
+  readonly verdicts: readonly Verdict[];
   start(): void;
   reset(scenario: string): Promise<void>;
   restartBot(): Promise<void>;
@@ -33,6 +34,10 @@ export const createChatWorld = (botOptions: BotOptions): ChatWorld => {
   let bot: BotProcess | null = null;
   let banner: Banner = IDLE;
 
+  // The banner says how the scenario running now is going. This says how every
+  // scenario this world has played went, which is what the hub lists.
+  let verdicts: readonly Verdict[] = [];
+
   const stopBot = async (): Promise<void> => {
     await bot?.stop();
     bot = null;
@@ -47,6 +52,10 @@ export const createChatWorld = (botOptions: BotOptions): ChatWorld => {
       return banner;
     },
 
+    get verdicts() {
+      return verdicts;
+    },
+
     start: () => {
       bot = startBot(botOptions);
     },
@@ -57,6 +66,7 @@ export const createChatWorld = (botOptions: BotOptions): ChatWorld => {
 
       telegram.beginScenario(scenario);
       banner = { scenario, step: "starting the bot", verdict: "running", detail: null };
+      verdicts = [...verdicts, "running"];
       bot = startBot(botOptions);
     },
 
@@ -78,6 +88,7 @@ export const createChatWorld = (botOptions: BotOptions): ChatWorld => {
 
     verdict: (verdict, detail) => {
       banner = { ...banner, verdict, detail };
+      verdicts = [...verdicts.slice(0, -1), verdict];
     },
 
     // The verdict is the last thing anybody wants to read off a world, so stopping

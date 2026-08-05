@@ -246,11 +246,13 @@ npm run e2e:watch
 ```
 
 The same run with a pause after every action, and **one browser tab** —
-<http://127.0.0.1:8080> — holding every world side by side as a live frame. Each
-frame is the chat: the messages as Telegram would show them, the inline keyboard,
-the callback answers as toasts, the `/stats` picture, and a divider between
-scenarios so nothing scrolls away. A frame is outlined by how its scenario is
-going, and `open on its own ↗` gives one world a tab to itself.
+<http://127.0.0.1:8080>. Down the left is **every scenario by name**, marked as it
+passes, fails or runs; the middle holds every world side by side as a live frame.
+Picking a scenario from the list fills the page with that one chat and nothing else,
+which is the way to answer "what is this group of tests actually doing". Each frame
+is the chat: the messages as Telegram would show them, the inline keyboard, the
+callback answers as toasts, the `/stats` picture, and a divider between scenarios so
+nothing scrolls away.
 
 It is one tab rather than one per world because **a tab opened by the operating
 system cannot be closed again by the process that opened it** — five of them

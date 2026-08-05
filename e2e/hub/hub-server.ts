@@ -28,12 +28,38 @@ const WORLD_PATH = /^\/world\/([0-9]+)(\/.*)?$/;
 
 const PHOTO_PATH = /^\/photo\/([0-9]+)$/;
 
+interface Played {
+  readonly index: number;
+  readonly name: string;
+  readonly verdict: string;
+}
+
 interface WorldCard {
   readonly port: number;
   readonly url: string;
   readonly banner: unknown;
+  readonly played: readonly Played[];
   readonly live: boolean;
 }
+
+const FIRST_SCENARIO = 1;
+
+const STILL_GOING = "running";
+
+// A world plays several scenarios one after another, and the hub lists all of them
+// so a run can be read by what was tested rather than by which worker took it.
+const playedIn = (state: string | null): readonly Played[] => {
+  const world = JSON.parse(state ?? "{}") as {
+    scenarios?: readonly string[];
+    verdicts?: readonly string[];
+  };
+
+  return (world.scenarios ?? []).map((name, played) => ({
+    index: played + FIRST_SCENARIO,
+    name,
+    verdict: world.verdicts?.[played] ?? STILL_GOING,
+  }));
+};
 
 const urlOf = (port: number, path: string): string =>
   `http://127.0.0.1:${String(port)}${path}`;
@@ -124,10 +150,16 @@ const worldCards = async (cache: WorldCache): Promise<readonly WorldCard[]> =>
   Promise.all(
     cache.ports().map(async (port) => {
       const answer = await askWorld(port, "/chat/state", "GET", undefined);
-      const state = answer === null ? cache.stateOf(port) : await answer.text();
+      const state = answer === null ? (cache.stateOf(port) ?? null) : await answer.text();
       const banner = (JSON.parse(state ?? "{}") as { banner?: unknown }).banner ?? null;
 
-      return { port, url: `/world/${String(port)}/`, banner, live: answer !== null };
+      return {
+        port,
+        url: `/world/${String(port)}/`,
+        banner,
+        played: playedIn(state),
+        live: answer !== null,
+      };
     })
   );
 

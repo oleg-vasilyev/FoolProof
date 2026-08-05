@@ -77,6 +77,11 @@ All were learned by getting them wrong:
 
 ## The hub proxies the worlds rather than linking to them
 
+The hub lists a run **by scenario, not by worker**. A world plays several scenarios
+one after another, so it reports the name and verdict of each — `?scenario=N` on a
+world's URL narrows the page to one of them. Scenario, not file: `describeScenario`
+names what is being tested, and which file it sits in never reaches the world.
+
 A world lives inside a Vitest worker and dies with it, so a page pointed straight
 at its port goes blank the moment the run ends — which is exactly when you want to
 look at the `/stats` picture. So `hub/` serves every world under `/world/<port>/`,

@@ -192,6 +192,7 @@ const route = async (
       sendJson(response, {
         ...world.telegram.snapshot(),
         banner: world.banner,
+        verdicts: world.verdicts,
         pendingUpdates: world.telegram.pendingUpdates(),
         msSinceLastEffect: world.telegram.msSinceLastEffect(),
         polling: world.telegram.polling(),
