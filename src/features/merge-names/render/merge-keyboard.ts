@@ -1,8 +1,8 @@
+import { ActionKind, Role } from "#merge-names/domain/merge-states.ts";
 import {
   MIN_TO_MERGE,
   roleOf,
   type Candidate,
-  type Role,
   type Selection,
 } from "#merge-names/domain/merge-selection.ts";
 import { encodeMergeCallback } from "#merge-names/render/merge-callback-codec.ts";
@@ -20,13 +20,13 @@ const NOTHING_PICKED = 0;
 
 const markFor = (role: Role): string | null => {
   switch (role) {
-    case "keeper":
+    case Role.Keeper:
       return copy.markKeeper;
 
-    case "absorbed":
+    case Role.Absorbed:
       return copy.markAbsorbed;
 
-    case "free":
+    case Role.Free:
       return null;
   }
 };
@@ -43,14 +43,14 @@ const controlRow = (selection: Selection): readonly InlineButton[] => {
     return [
       {
         text: copy.buttonCancel,
-        callback_data: encodeMergeCallback({ selection, action: { kind: "cancel" } }),
+        callback_data: encodeMergeCallback({ selection, action: { kind: ActionKind.Cancel } }),
       },
     ];
   }
 
   const back: InlineButton = {
     text: copy.buttonBack,
-    callback_data: encodeMergeCallback({ selection, action: { kind: "back" } }),
+    callback_data: encodeMergeCallback({ selection, action: { kind: ActionKind.Back } }),
   };
 
   if (selection.length < MIN_TO_MERGE) {
@@ -61,7 +61,7 @@ const controlRow = (selection: Selection): readonly InlineButton[] => {
     back,
     {
       text: copy.buttonConfirm,
-      callback_data: encodeMergeCallback({ selection, action: { kind: "confirm" } }),
+      callback_data: encodeMergeCallback({ selection, action: { kind: ActionKind.Confirm } }),
     },
   ];
 };
@@ -75,7 +75,7 @@ export const renderMergeKeyboard = (
       text: captionFor(candidate, roleOf(selection, candidate.playerId)),
       callback_data: encodeMergeCallback({
         selection,
-        action: { kind: "pick", playerId: candidate.playerId },
+        action: { kind: ActionKind.Pick, playerId: candidate.playerId },
       }),
     },
   ]),

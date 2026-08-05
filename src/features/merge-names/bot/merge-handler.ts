@@ -1,3 +1,4 @@
+import { Outcome, Refusal, Role } from "#merge-names/domain/merge-states.ts";
 import type { RosterRepository } from "#shared/repository/repository-contract.ts";
 import type { CallbackTap, Command } from "#shared/telegram/telegram-contexts.ts";
 import {
@@ -5,7 +6,6 @@ import {
   MIN_TO_MERGE,
   roleOf,
   type Candidate,
-  type Refusal,
   type Selection,
 } from "#merge-names/domain/merge-selection.ts";
 import { decodeMergeCallback } from "#merge-names/render/merge-callback-codec.ts";
@@ -43,26 +43,26 @@ const noticeFor = (selection: Selection, touched: Candidate | null): string => {
   }
 
   switch (roleOf(selection, touched.playerId)) {
-    case "keeper":
+    case Role.Keeper:
       return copy.tapKeeper(touched.displayName);
 
-    case "absorbed":
+    case Role.Absorbed:
       return copy.tapAbsorbed(touched.displayName);
 
-    case "free":
+    case Role.Free:
       return copy.tapDropped(touched.displayName);
   }
 };
 
 const refusalFor = (because: Refusal): string => {
   switch (because) {
-    case "too_many":
+    case Refusal.TooMany:
       return copy.tapTooMany;
 
-    case "unknown_name":
+    case Refusal.UnknownName:
       return copy.screenStale;
 
-    case "nothing_yet":
+    case Refusal.NothingYet:
       return copy.tapNotAllowed;
   }
 };
@@ -147,22 +147,22 @@ export const onTap = async (context: MergeContext, ctx: CallbackTap): Promise<vo
   const transition = apply(roster, payload.selection, payload.action);
 
   switch (transition.outcome) {
-    case "updated":
+    case Outcome.Updated:
       await redraw(ctx, roster, transition.selection, transition.touched);
 
       return;
 
-    case "confirmed":
+    case Outcome.Confirmed:
       await merge(context, ctx, chatId, transition.keeper, transition.absorbed);
 
       return;
 
-    case "cancelled":
+    case Outcome.Cancelled:
       await cancel(ctx);
 
       return;
 
-    case "rejected":
+    case Outcome.Rejected:
       await ctx.answerCallbackQuery(refusalFor(transition.because));
   }
 };

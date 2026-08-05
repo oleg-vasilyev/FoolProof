@@ -1,3 +1,4 @@
+import { ActionKind } from "#merge-names/domain/merge-states.ts";
 import type { Action, Selection } from "#merge-names/domain/merge-selection.ts";
 
 
@@ -14,8 +15,6 @@ const ACTION_CODES = {
   cancel: "x",
 } as const;
 
-type ActionKind = Action["kind"];
-
 const KINDS_BY_CODE = new Map<string, ActionKind>(
   Object.entries(ACTION_CODES).map(([kind, code]) => [code, kind as ActionKind])
 );
@@ -28,7 +27,7 @@ export interface MergePayload {
 const codeOf = (action: Action): string => ACTION_CODES[action.kind];
 
 const argOf = (action: Action): string =>
-  action.kind === "pick" ? String(action.playerId) : NOTHING;
+  action.kind === ActionKind.Pick ? String(action.playerId) : NOTHING;
 
 const encodeSelection = (selection: Selection): string =>
   selection.length === 0 ? NOTHING : selection.join(BETWEEN_IDS);
@@ -37,7 +36,7 @@ const decodeSelection = (encoded: string): Selection =>
   encoded === NOTHING ? [] : encoded.split(BETWEEN_IDS).map(Number);
 
 const actionOf = (kind: ActionKind, arg: string): Action | null => {
-  if (kind !== "pick") {
+  if (kind !== ActionKind.Pick) {
     return { kind };
   }
 

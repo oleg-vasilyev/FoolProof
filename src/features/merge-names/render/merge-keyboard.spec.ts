@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Candidate, Role } from "#merge-names/domain/merge-selection.ts";
+import type { Candidate } from "#merge-names/domain/merge-selection.ts";
+import type { Role } from "#merge-names/domain/merge-states.ts";
 import { copy } from "#merge-names/copy.en.ts";
 
 

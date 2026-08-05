@@ -1,3 +1,6 @@
+import { ActionKind, Outcome, Refusal, Role } from "#merge-names/domain/merge-states.ts";
+
+
 export interface Candidate {
   readonly playerId: number;
   readonly displayName: string;
@@ -6,29 +9,25 @@ export interface Candidate {
 
 export type Selection = readonly number[];
 
-export type Role = "keeper" | "absorbed" | "free";
-
-export type Refusal = "unknown_name" | "too_many" | "nothing_yet";
-
 export type Action =
-  | { readonly kind: "pick"; readonly playerId: number }
-  | { readonly kind: "back" }
-  | { readonly kind: "confirm" }
-  | { readonly kind: "cancel" };
+  | { readonly kind: typeof ActionKind.Pick; readonly playerId: number }
+  | { readonly kind: typeof ActionKind.Back }
+  | { readonly kind: typeof ActionKind.Confirm }
+  | { readonly kind: typeof ActionKind.Cancel };
 
 export type Transition =
   | {
-      readonly outcome: "updated";
+      readonly outcome: typeof Outcome.Updated;
       readonly selection: Selection;
       readonly touched: Candidate | null;
     }
   | {
-      readonly outcome: "confirmed";
+      readonly outcome: typeof Outcome.Confirmed;
       readonly keeper: Candidate;
       readonly absorbed: readonly Candidate[];
     }
-  | { readonly outcome: "cancelled" }
-  | { readonly outcome: "rejected"; readonly because: Refusal };
+  | { readonly outcome: typeof Outcome.Cancelled }
+  | { readonly outcome: typeof Outcome.Rejected; readonly because: Refusal };
 
 export const MIN_TO_MERGE = 2;
 
@@ -51,10 +50,10 @@ export const roleOf = (selection: Selection, playerId: number): Role => {
   const place = selection.indexOf(playerId);
 
   if (place === NOT_PICKED) {
-    return "free";
+    return Role.Free;
   }
 
-  return place === FIRST ? "keeper" : "absorbed";
+  return place === FIRST ? Role.Keeper : Role.Absorbed;
 };
 
 export const gamesAfterMerge = (keeper: Candidate, absorbed: readonly Candidate[]): number =>
@@ -68,19 +67,19 @@ export const chosen = (roster: readonly Candidate[], selection: Selection): read
   });
 
 const toggled = (selection: Selection, touched: Candidate): Transition => {
-  if (roleOf(selection, touched.playerId) !== "free") {
+  if (roleOf(selection, touched.playerId) !== Role.Free) {
     return {
-      outcome: "updated",
+      outcome: Outcome.Updated,
       selection: selection.filter((playerId) => playerId !== touched.playerId),
       touched,
     };
   }
 
   if (selection.length >= MOST_NAMES_AT_ONCE) {
-    return { outcome: "rejected", because: "too_many" };
+    return { outcome: Outcome.Rejected, because: Refusal.TooMany };
   }
 
-  return { outcome: "updated", selection: [...selection, touched.playerId], touched };
+  return { outcome: Outcome.Updated, selection: [...selection, touched.playerId], touched };
 };
 
 const picked = (
@@ -91,7 +90,7 @@ const picked = (
   const touched = candidateOf(roster, playerId);
 
   return touched === undefined
-    ? { outcome: "rejected", because: "unknown_name" }
+    ? { outcome: Outcome.Rejected, because: Refusal.UnknownName }
     : toggled(selection, touched);
 };
 
@@ -100,10 +99,10 @@ const confirmed = (roster: readonly Candidate[], selection: Selection): Transiti
   const [keeper, ...absorbed] = known;
 
   if (keeper === undefined || known.length !== selection.length) {
-    return { outcome: "rejected", because: "unknown_name" };
+    return { outcome: Outcome.Rejected, because: Refusal.UnknownName };
   }
 
-  return { outcome: "confirmed", keeper, absorbed };
+  return { outcome: Outcome.Confirmed, keeper, absorbed };
 };
 
 export const apply = (
@@ -112,20 +111,20 @@ export const apply = (
   action: Action
 ): Transition => {
   switch (action.kind) {
-    case "pick":
+    case ActionKind.Pick:
       return picked(roster, selection, action.playerId);
 
-    case "back":
+    case ActionKind.Back:
       return selection.length === NOTHING_PICKED
-        ? { outcome: "rejected", because: "nothing_yet" }
-        : { outcome: "updated", selection: selection.slice(FIRST, LAST), touched: null };
+        ? { outcome: Outcome.Rejected, because: Refusal.NothingYet }
+        : { outcome: Outcome.Updated, selection: selection.slice(FIRST, LAST), touched: null };
 
-    case "confirm":
+    case ActionKind.Confirm:
       return selection.length < MIN_TO_MERGE
-        ? { outcome: "rejected", because: "nothing_yet" }
+        ? { outcome: Outcome.Rejected, because: Refusal.NothingYet }
         : confirmed(roster, selection);
 
-    case "cancel":
-      return { outcome: "cancelled" };
+    case ActionKind.Cancel:
+      return { outcome: Outcome.Cancelled };
   }
 };
