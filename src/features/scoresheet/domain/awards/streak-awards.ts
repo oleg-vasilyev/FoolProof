@@ -1,3 +1,5 @@
+import { Finish } from "#scoresheet/domain/game-outcomes.ts";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import {
   foolCount,
@@ -34,14 +36,14 @@ const longestRun = (player: PlayerAppearances, holds: (appearance: Appearance) =
 const comebacks = (player: PlayerAppearances): number =>
   player.appearances.filter(
     (appearance, at) =>
-      appearance.finish === "fool" && player.appearances[at + NEXT]?.finish === "first"
+      appearance.finish === Finish.Fool && player.appearances[at + NEXT]?.finish === Finish.First
   ).length;
 
 const cleanStreak = (player: PlayerAppearances): number =>
-  longestRun(player, (appearance) => appearance.finish !== "fool");
+  longestRun(player, (appearance) => appearance.finish !== Finish.Fool);
 
 const foolStreak = (player: PlayerAppearances): number =>
-  longestRun(player, (appearance) => appearance.finish === "fool");
+  longestRun(player, (appearance) => appearance.finish === Finish.Fool);
 
 export const teflon = (evening: SessionAppearances): Award | null => {
   const winner = bestBy(evening.players, (player) => {
@@ -52,7 +54,7 @@ export const teflon = (evening: SessionAppearances): Award | null => {
 
   return winner === null
     ? null
-    : { name: "teflon", winners: [winner.playerId], streak: cleanStreak(winner) };
+    : { name: AwardName.Teflon, winners: [winner.playerId], streak: cleanStreak(winner) };
 };
 
 export const sweetRevenge = (evening: SessionAppearances): Award | null => {
@@ -63,7 +65,7 @@ export const sweetRevenge = (evening: SessionAppearances): Award | null => {
   return winner === null
     ? null
     : {
-        name: "sweetRevenge",
+        name: AwardName.SweetRevenge,
         winners: [winner.playerId],
         fools: foolCount(winner),
         comebacks: comebacks(winner),
@@ -79,5 +81,5 @@ export const encore = (evening: SessionAppearances): Award | null => {
 
   return winner === null
     ? null
-    : { name: "encore", winners: [winner.playerId], run: foolStreak(winner) };
+    : { name: AwardName.Encore, winners: [winner.playerId], run: foolStreak(winner) };
 };

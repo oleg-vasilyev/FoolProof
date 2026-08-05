@@ -1,3 +1,4 @@
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { PlayerColumn, SeriesChronology } from "#shared/repository/repository-contract.ts";
 import type { Award, Honours, TableCurse } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { colourFor } from "#scoresheet/render/palette.ts";
@@ -195,7 +196,7 @@ const place = (
   height,
 });
 
-const isFool = (award: Award): boolean => award.name === "foolOfTheNight";
+const isFool = (award: Award): boolean => award.name === AwardName.FoolOfTheNight;
 
 export const awardsLayoutOf = (chronology: SeriesChronology, honours: Honours): AwardsSheet => {
   const density = honours.awards.length > CROWDED_ABOVE ? CROWDED : ROOMY;

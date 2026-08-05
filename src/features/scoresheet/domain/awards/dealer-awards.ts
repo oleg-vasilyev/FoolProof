@@ -1,3 +1,4 @@
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award, TableCurse } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { foolByRound, type SessionAppearances, type PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 import { bestBy } from "#scoresheet/domain/awards/pick-winner.ts";
@@ -28,7 +29,7 @@ export const dealersCurse = (evening: SessionAppearances): Award | null => {
   return winner === null
     ? null
     : {
-        name: "dealersCurse",
+        name: AwardName.DealersCurse,
         winners: [winner.playerId],
         deals: dealsOf(evening, winner),
         burns: burnsOf(evening, winner),

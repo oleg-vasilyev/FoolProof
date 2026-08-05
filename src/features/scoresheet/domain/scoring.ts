@@ -1,3 +1,6 @@
+import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
+
+
 export interface Contender {
   readonly playerId: number;
   readonly displayName: string;
@@ -13,10 +16,10 @@ export interface Round {
 }
 
 export type Cell =
-  | { readonly kind: "absent" }
-  | { readonly kind: "placed"; readonly position: number }
-  | { readonly kind: "drawn"; readonly position: number }
-  | { readonly kind: "fool"; readonly position: number };
+  | { readonly kind: typeof CellKind.Absent }
+  | { readonly kind: typeof CellKind.Placed; readonly position: number }
+  | { readonly kind: typeof CellKind.Drawn; readonly position: number }
+  | { readonly kind: typeof CellKind.Fool; readonly position: number };
 
 export interface ScoredPlayer {
   readonly playerId: number;
@@ -57,26 +60,26 @@ const cellFor = (round: Round, playerId: number): Cell => {
   const exit = round.placements.find((placement) => placement.playerId === playerId);
 
   if (exit === undefined) {
-    return { kind: "absent" };
+    return { kind: CellKind.Absent };
   }
 
   if (exit.position !== lastPositionOf(round)) {
-    return { kind: "placed", position: exit.position };
+    return { kind: CellKind.Placed, position: exit.position };
   }
 
   return sharingCount(round, exit.position) === ALONE
-    ? { kind: "fool", position: exit.position }
-    : { kind: "drawn", position: exit.position };
+    ? { kind: CellKind.Fool, position: exit.position }
+    : { kind: CellKind.Drawn, position: exit.position };
 };
 
 const shareOf = (cell: Cell, tableSize: number): number | null => {
   switch (cell.kind) {
-    case "absent":
+    case CellKind.Absent:
       return null;
 
-    case "placed":
-    case "drawn":
-    case "fool":
+    case CellKind.Placed:
+    case CellKind.Drawn:
+    case CellKind.Fool:
       return (tableSize - cell.position) / Math.max(FEWEST_RIVALS, tableSize - ONE_SEAT);
   }
 };

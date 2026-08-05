@@ -1,3 +1,5 @@
+import { Finish } from "#scoresheet/domain/game-outcomes.ts";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import {
   foolByRound,
@@ -23,7 +25,7 @@ const drawnRounds = (evening: SessionAppearances): readonly number[] => [
   ...new Set(
     evening.players.flatMap((player) =>
       player.appearances
-        .filter((appearance) => appearance.finish === "drawn")
+        .filter((appearance) => appearance.finish === Finish.Drawn)
         .map((appearance) => appearance.round)
     )
   ),
@@ -33,7 +35,7 @@ const leftEarly = (player: PlayerAppearances, evening: SessionAppearances): numb
   const last = lastRoundOf(player);
   const closing = player.appearances.at(LAST)?.finish;
 
-  return last === null || last >= evening.rounds - AFTER || closing === "fool" ? null : last;
+  return last === null || last >= evening.rounds - AFTER || closing === Finish.Fool ? null : last;
 };
 
 export const ironSeat = (evening: SessionAppearances): Award | null => {
@@ -44,17 +46,17 @@ export const ironSeat = (evening: SessionAppearances): Award | null => {
 
   return winner === null
     ? null
-    : { name: "ironSeat", winners: [winner.playerId], games: evening.rounds };
+    : { name: AwardName.IronSeat, winners: [winner.playerId], games: evening.rounds };
 };
 
 export const theTruce = (evening: SessionAppearances): Award | null => {
   const winners = evening.players
-    .filter((player) => player.appearances.some((appearance) => appearance.finish === "drawn"))
+    .filter((player) => player.appearances.some((appearance) => appearance.finish === Finish.Drawn))
     .map((player) => player.playerId);
 
   return winners.length === NONE
     ? null
-    : { name: "theTruce", winners, draws: drawnRounds(evening).length, games: evening.rounds };
+    : { name: AwardName.TheTruce, winners, draws: drawnRounds(evening).length, games: evening.rounds };
 };
 
 export const theIrishGoodbye = (evening: SessionAppearances): Award | null => {
@@ -69,7 +71,7 @@ export const theIrishGoodbye = (evening: SessionAppearances): Award | null => {
   }
 
   return {
-    name: "theIrishGoodbye",
+    name: AwardName.TheIrishGoodbye,
     winners: [winner.playerId],
     leftAfter: (leftEarly(winner, evening) ?? OPENING_ROUND) + AFTER,
     games: evening.rounds,
@@ -79,5 +81,5 @@ export const theIrishGoodbye = (evening: SessionAppearances): Award | null => {
 export const firstBlood = (evening: SessionAppearances): Award | null => {
   const opener = foolByRound(evening)[OPENING_ROUND] ?? null;
 
-  return opener === null ? null : { name: "firstBlood", winners: [opener], games: evening.rounds };
+  return opener === null ? null : { name: AwardName.FirstBlood, winners: [opener], games: evening.rounds };
 };

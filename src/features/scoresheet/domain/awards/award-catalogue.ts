@@ -1,60 +1,76 @@
 export const ENOUGH_GAMES = 5;
 
+export const AwardName = {
+  King: "king",
+  Untouchable: "untouchable",
+  Teflon: "teflon",
+  SweetRevenge: "sweetRevenge",
+  IronSeat: "ironSeat",
+  TheTruce: "theTruce",
+  AllOrNothing: "allOrNothing",
+  TheInvisible: "theInvisible",
+  TheIrishGoodbye: "theIrishGoodbye",
+  Encore: "encore",
+  DealersCurse: "dealersCurse",
+  FirstBlood: "firstBlood",
+  FoolOfTheNight: "foolOfTheNight",
+} as const;
+
+export type AwardName = (typeof AwardName)[keyof typeof AwardName];
+
 export type Award =
-  | { readonly name: "king"; readonly winners: readonly number[]; readonly percent: number; readonly games: number }
-  | { readonly name: "untouchable"; readonly winners: readonly number[]; readonly games: number }
-  | { readonly name: "teflon"; readonly winners: readonly number[]; readonly streak: number }
+  | { readonly name: typeof AwardName.King; readonly winners: readonly number[]; readonly percent: number; readonly games: number }
+  | { readonly name: typeof AwardName.Untouchable; readonly winners: readonly number[]; readonly games: number }
+  | { readonly name: typeof AwardName.Teflon; readonly winners: readonly number[]; readonly streak: number }
   | {
-      readonly name: "sweetRevenge";
+      readonly name: typeof AwardName.SweetRevenge;
       readonly winners: readonly number[];
       readonly fools: number;
       readonly comebacks: number;
     }
   | {
-      readonly name: "ironSeat";
+      readonly name: typeof AwardName.IronSeat;
       readonly winners: readonly number[];
       readonly games: number;
     }
   | {
-      readonly name: "theTruce";
+      readonly name: typeof AwardName.TheTruce;
       readonly winners: readonly number[];
       readonly draws: number;
       readonly games: number;
     }
   | {
-      readonly name: "allOrNothing";
+      readonly name: typeof AwardName.AllOrNothing;
       readonly winners: readonly number[];
       readonly edges: number;
       readonly games: number;
     }
   | {
-      readonly name: "theInvisible";
+      readonly name: typeof AwardName.TheInvisible;
       readonly winners: readonly number[];
       readonly middles: number;
       readonly games: number;
     }
   | {
-      readonly name: "theIrishGoodbye";
+      readonly name: typeof AwardName.TheIrishGoodbye;
       readonly winners: readonly number[];
       readonly leftAfter: number;
       readonly games: number;
     }
-  | { readonly name: "encore"; readonly winners: readonly number[]; readonly run: number }
+  | { readonly name: typeof AwardName.Encore; readonly winners: readonly number[]; readonly run: number }
   | {
-      readonly name: "dealersCurse";
+      readonly name: typeof AwardName.DealersCurse;
       readonly winners: readonly number[];
       readonly deals: number;
       readonly burns: number;
     }
-  | { readonly name: "firstBlood"; readonly winners: readonly number[]; readonly games: number }
+  | { readonly name: typeof AwardName.FirstBlood; readonly winners: readonly number[]; readonly games: number }
   | {
-      readonly name: "foolOfTheNight";
+      readonly name: typeof AwardName.FoolOfTheNight;
       readonly winners: readonly number[];
       readonly fools: number;
       readonly games: number;
     };
-
-export type AwardName = Award["name"];
 
 export interface TableCurse {
   readonly burns: number;

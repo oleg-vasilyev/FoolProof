@@ -1,3 +1,4 @@
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import { gameTally } from "#scoresheet/render/session-tally.ts";
@@ -10,43 +11,43 @@ export const awardWinner = (names: readonly string[]): string =>
 
 export const awardReason = (award: Award): string => {
   switch (award.name) {
-    case "king":
+    case AwardName.King:
       return copy.kingReason(award.percent, gameTally(award.games));
 
-    case "untouchable":
+    case AwardName.Untouchable:
       return copy.untouchableReason(gameTally(award.games));
 
-    case "teflon":
+    case AwardName.Teflon:
       return copy.teflonReason(award.streak);
 
-    case "sweetRevenge":
+    case AwardName.SweetRevenge:
       return copy.sweetRevengeReason(award.fools, award.comebacks);
 
-    case "ironSeat":
+    case AwardName.IronSeat:
       return copy.ironSeatReason(gameTally(award.games));
 
-    case "theTruce":
+    case AwardName.TheTruce:
       return copy.truceReason(gameTally(award.draws), gameTally(award.games));
 
-    case "allOrNothing":
+    case AwardName.AllOrNothing:
       return copy.allOrNothingReason(award.edges, gameTally(award.games));
 
-    case "theInvisible":
+    case AwardName.TheInvisible:
       return copy.invisibleReason(award.middles, gameTally(award.games));
 
-    case "theIrishGoodbye":
+    case AwardName.TheIrishGoodbye:
       return copy.irishGoodbyeReason(award.leftAfter, gameTally(award.games));
 
-    case "encore":
+    case AwardName.Encore:
       return copy.encoreReason(award.run);
 
-    case "dealersCurse":
+    case AwardName.DealersCurse:
       return copy.dealersCurseReason(award.deals, award.burns);
 
-    case "firstBlood":
+    case AwardName.FirstBlood:
       return copy.firstBloodReason(gameTally(award.games));
 
-    case "foolOfTheNight":
+    case AwardName.FoolOfTheNight:
       return copy.foolReason(award.fools, gameTally(award.games));
   }
 };

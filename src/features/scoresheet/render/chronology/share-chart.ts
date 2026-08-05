@@ -1,3 +1,4 @@
+import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import { CHART_HEIGHT, PLOT_LEFT, PLOT_RIGHT, PLOT_WIDTH, chartBottomOf, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { NEUTRAL, type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
@@ -126,7 +127,7 @@ export const segmentOf = (points: readonly Point[], colour: string, dash: string
   });
 
 export const absentIn = (player: ScoredPlayer, round: number): boolean =>
-  player.cells[round - ONE_ROUND]?.kind === "absent";
+  player.cells[round - ONE_ROUND]?.kind === CellKind.Absent;
 
 export const stretchesOf = (sheet: Sheet, player: ScoredPlayer): readonly Stretch[] => {
   const points = pointsOf(sheet, player);

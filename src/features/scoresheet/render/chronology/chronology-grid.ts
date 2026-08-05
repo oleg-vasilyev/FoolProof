@@ -1,4 +1,5 @@
-import type { Cell } from "#scoresheet/domain/scoring.ts";
+import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
+import { type Cell } from "#scoresheet/domain/scoring.ts";
 import { CELL_INSET, CELL_SHRINK, GRID_LEFT, GRID_TOP, cellFontOf, columnCentre, indexFontOf, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
@@ -19,21 +20,21 @@ const INDEX_DIGITS = 2;
 
 const fillFor = (cell: Cell): string => {
   switch (cell.kind) {
-    case "absent":
+    case CellKind.Absent:
       return palette.cellAbsent;
 
-    case "placed":
+    case CellKind.Placed:
       return palette.cellPlaced;
 
-    case "drawn":
+    case CellKind.Drawn:
       return palette.cellDrawn;
 
-    case "fool":
+    case CellKind.Fool:
       return palette.cellFool;
   }
 };
 
-const captionFor = (cell: Cell): string => (cell.kind === "absent" ? "" : String(cell.position));
+const captionFor = (cell: Cell): string => (cell.kind === CellKind.Absent ? "" : String(cell.position));
 
 const nameSizeFor = (sheet: Sheet, name: string): number =>
   Math.max(
@@ -98,6 +99,6 @@ export const chronologyGrid = (sheet: Sheet): readonly string[] =>
   Array.from({ length: sheet.rounds }, (_unused, round) => [
     rowIndex(sheet, round),
     ...sheet.players.flatMap((player, column) =>
-      cellOf(sheet, player.cells[round] ?? { kind: "absent" }, column, round)
+      cellOf(sheet, player.cells[round] ?? { kind: CellKind.Absent }, column, round)
     ),
   ]).flat();

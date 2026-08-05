@@ -1,10 +1,11 @@
+import { Finish } from "#scoresheet/domain/game-outcomes.ts";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { ENOUGH_GAMES, type Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import {
   foolCount,
   playedGames,
-  type SessionAppearances,
-  type Finish,
   type PlayerAppearances,
+  type SessionAppearances,
 } from "#scoresheet/domain/session-appearances.ts";
 import { bestBy } from "#scoresheet/domain/awards/pick-winner.ts";
 
@@ -29,17 +30,17 @@ export const untouchable = (evening: SessionAppearances): Award | null => {
 
   return winner === null
     ? null
-    : { name: "untouchable", winners: [winner.playerId], games: playedGames(winner) };
+    : { name: AwardName.Untouchable, winners: [winner.playerId], games: playedGames(winner) };
 };
 
 export const allOrNothing = (evening: SessionAppearances): Award | null => {
-  const edges: readonly Finish[] = ["first", "fool"];
+  const edges: readonly Finish[] = [Finish.First, Finish.Fool];
   const winner = bestBy(evening.players, (player) => lopsidedShare(player, edges));
 
   return winner === null
     ? null
     : {
-        name: "allOrNothing",
+        name: AwardName.AllOrNothing,
         winners: [winner.playerId],
         edges: finishing(winner, edges),
         games: playedGames(winner),
@@ -47,13 +48,13 @@ export const allOrNothing = (evening: SessionAppearances): Award | null => {
 };
 
 export const theInvisible = (evening: SessionAppearances): Award | null => {
-  const middle: readonly Finish[] = ["middle"];
+  const middle: readonly Finish[] = [Finish.Middle];
   const winner = bestBy(evening.players, (player) => lopsidedShare(player, middle));
 
   return winner === null
     ? null
     : {
-        name: "theInvisible",
+        name: AwardName.TheInvisible,
         winners: [winner.playerId],
         middles: finishing(winner, middle),
         games: playedGames(winner),

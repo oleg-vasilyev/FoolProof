@@ -1,4 +1,5 @@
-import type { Cell } from "#scoresheet/domain/scoring.ts";
+import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
+import { type Cell } from "#scoresheet/domain/scoring.ts";
 import { type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import { FONT_FAMILY, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { copy } from "#scoresheet/copy.en.ts";
@@ -30,7 +31,7 @@ const ENTRIES: Record<Cell["kind"], KeyEntry> = {
   absent: { fill: palette.cellAbsent, label: copy.sheetKeyAbsent },
 };
 
-const KIND_ORDER: readonly Cell["kind"][] = ["placed", "drawn", "fool", "absent"];
+const KIND_ORDER: readonly Cell["kind"][] = [CellKind.Placed, CellKind.Drawn, CellKind.Fool, CellKind.Absent];
 
 const baselineOf = (sheet: Sheet): number => sheet.gridBottom + KEY_DROP;
 

@@ -1,6 +1,7 @@
+import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import { PLOT_LEFT, PLOT_WIDTH, chartBottomOf, legendFontOf, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
-import type { ScoredPlayer } from "#scoresheet/domain/scoring.ts";
+import { type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import { gameTally } from "#scoresheet/render/session-tally.ts";
@@ -81,7 +82,7 @@ const legend = (sheet: Sheet): readonly string[] =>
     .flatMap(({ player, column }, rank) => entryOf(sheet, player, column, rank));
 
 const anybodySatOut = (sheet: Sheet): boolean =>
-  sheet.players.some((player) => player.cells.some((cell) => cell.kind === "absent"));
+  sheet.players.some((player) => player.cells.some((cell) => cell.kind === CellKind.Absent));
 
 const skipNote = (sheet: Sheet): readonly string[] => {
   if (!anybodySatOut(sheet)) {

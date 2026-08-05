@@ -1,3 +1,4 @@
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { ENOUGH_GAMES, type Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { foolCount, playedGames, type SessionAppearances } from "#scoresheet/domain/session-appearances.ts";
 import { bestBy } from "#scoresheet/domain/awards/pick-winner.ts";
@@ -17,7 +18,7 @@ export const kingOfTheTable = (evening: SessionAppearances): Award | null => {
   }
 
   return {
-    name: "king",
+    name: AwardName.King,
     winners: [winner.playerId],
     percent: Math.round(winner.share * PERCENT),
     games: playedGames(winner),
@@ -34,7 +35,7 @@ export const foolOfTheNight = (evening: SessionAppearances): Award | null => {
   }
 
   return {
-    name: "foolOfTheNight",
+    name: AwardName.FoolOfTheNight,
     winners: [winner.playerId],
     fools: foolCount(winner),
     games: playedGames(winner),

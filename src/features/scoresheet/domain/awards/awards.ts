@@ -1,3 +1,4 @@
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
 import type { Award, Honours } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { sessionAppearances, type SessionAppearances } from "#scoresheet/domain/session-appearances.ts";
@@ -37,7 +38,7 @@ const RULES_IN_ORDER: readonly ((evening: SessionAppearances) => Award | null)[]
 ];
 
 const repeatsTheFool = (award: Award, fool: Award | null): boolean =>
-  award.name === "firstBlood" &&
+  award.name === AwardName.FirstBlood &&
   fool !== null &&
   award.winners.some((winner) => fool.winners.includes(winner));
 
