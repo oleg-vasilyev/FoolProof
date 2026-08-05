@@ -1,3 +1,4 @@
+import { FailureKind, SettledKind } from "#shared/telegram/call-outcomes.ts";
 import { setTimeout as delay } from "node:timers/promises";
 import type { Transformer } from "grammy";
 import type { ApiResponse } from "grammy/types";
@@ -30,8 +31,12 @@ export interface RetryPlan {
 }
 
 export type Failure =
-  | { readonly kind: "unreachable" }
-  | { readonly kind: "refused"; readonly code: number; readonly retryAfterSeconds: number | null };
+  | { readonly kind: typeof FailureKind.Unreachable }
+  | {
+      readonly kind: typeof FailureKind.Refused;
+      readonly code: number;
+      readonly retryAfterSeconds: number | null;
+    };
 
 const GIVE_UP: RetryPlan = { retry: false, delayMs: NO_DELAY };
 
@@ -62,10 +67,10 @@ export const planFor = (failure: Failure, attempt: number): RetryPlan => {
   }
 
   switch (failure.kind) {
-    case "unreachable":
+    case FailureKind.Unreachable:
       return { retry: true, delayMs: backoffFor(attempt) };
 
-    case "refused":
+    case FailureKind.Refused:
       return planForRefusal(failure.code, failure.retryAfterSeconds, attempt);
   }
 };
@@ -102,9 +107,9 @@ interface RetryContext {
 type Stoppable = { readonly aborted: boolean } | undefined;
 
 type Settled<T> =
-  | { readonly kind: "response"; readonly response: ApiResponse<T> }
-  | { readonly kind: "error"; readonly error: unknown }
-  | { readonly kind: "retry"; readonly delayMs: number };
+  | { readonly kind: typeof SettledKind.Response; readonly response: ApiResponse<T> }
+  | { readonly kind: typeof SettledKind.Error; readonly error: unknown }
+  | { readonly kind: typeof SettledKind.Retry; readonly delayMs: number };
 
 const afterResponse = <T>(
   context: RetryContext,
@@ -115,12 +120,12 @@ const afterResponse = <T>(
   if (response.ok) {
     context.outage.reachable();
 
-    return { kind: "response", response };
+    return { kind: SettledKind.Response, response };
   }
 
   const plan = planFor(
     {
-      kind: "refused",
+      kind: FailureKind.Refused,
       code: response.error_code,
       retryAfterSeconds: response.parameters?.retry_after ?? null,
     },
@@ -128,12 +133,12 @@ const afterResponse = <T>(
   );
 
   if (!plan.retry) {
-    return { kind: "response", response };
+    return { kind: SettledKind.Response, response };
   }
 
   context.log.debug(`${method} was refused with ${response.error_code}, retrying in ${plan.delayMs}ms`);
 
-  return { kind: "retry", delayMs: plan.delayMs };
+  return { kind: SettledKind.Retry, delayMs: plan.delayMs };
 };
 
 const afterThrow = <T>(
@@ -144,14 +149,14 @@ const afterThrow = <T>(
   stopping: boolean
 ): Settled<T> => {
   if (stopping) {
-    return { kind: "error", error };
+    return { kind: SettledKind.Error, error };
   }
 
   context.outage.unreachable(method, String(error));
 
-  const plan = planFor({ kind: "unreachable" }, attempt);
+  const plan = planFor({ kind: FailureKind.Unreachable }, attempt);
 
-  return plan.retry ? { kind: "retry", delayMs: plan.delayMs } : { kind: "error", error };
+  return plan.retry ? { kind: SettledKind.Retry, delayMs: plan.delayMs } : { kind: SettledKind.Error, error };
 };
 
 const callWithRetries = async <T>(
@@ -167,13 +172,13 @@ const callWithRetries = async <T>(
   );
 
   switch (settled.kind) {
-    case "response":
+    case SettledKind.Response:
       return settled.response;
 
-    case "error":
+    case SettledKind.Error:
       throw settled.error;
 
-    case "retry":
+    case SettledKind.Retry:
       await delay(settled.delayMs);
 
       return callWithRetries(context, method, call, signal, attempt + NEXT_ATTEMPT);

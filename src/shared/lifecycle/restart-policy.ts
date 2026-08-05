@@ -1,3 +1,6 @@
+import { StopReason } from "#shared/lifecycle/stop-reasons.ts";
+
+
 const CLEAN_EXIT = 0;
 
 const FIRST_FAILURE = 1;
@@ -29,7 +32,7 @@ export type RestartPlan =
   | { readonly restart: true; readonly delayMs: number; readonly history: RestartHistory }
   | {
       readonly restart: false;
-      readonly reason: "stopped" | "cannot-start";
+      readonly reason: StopReason;
       readonly delayMs: number;
       readonly history: RestartHistory;
     };
@@ -48,7 +51,7 @@ export const planRestart = (
   stopping: boolean
 ): RestartPlan => {
   if (stopping || death.code === CLEAN_EXIT) {
-    return { restart: false, reason: "stopped", delayMs: NO_DELAY, history };
+    return { restart: false, reason: StopReason.Stopped, delayMs: NO_DELAY, history };
   }
 
   const ranLongEnough = death.upMs >= STABLE_AFTER_MS;
@@ -59,7 +62,7 @@ export const planRestart = (
   };
 
   if (!next.everRan && next.failures > GIVE_UP_AFTER) {
-    return { restart: false, reason: "cannot-start", delayMs: NO_DELAY, history: next };
+    return { restart: false, reason: StopReason.CannotStart, delayMs: NO_DELAY, history: next };
   }
 
   return { restart: true, delayMs: delayFor(next.failures), history: next };

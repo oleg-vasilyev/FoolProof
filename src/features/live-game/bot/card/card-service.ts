@@ -108,7 +108,7 @@ const toCardState = (card: CardRecord): CardState => {
 };
 
 const toAction = (payload: CallbackPayload): Action =>
-  payload.action === "pick"
+  payload.action === ActionKind.Pick
     ? { kind: ActionKind.Pick, slot: payload.slot ?? NO_SLOT }
     : { kind: payload.action };
 

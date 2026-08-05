@@ -1,3 +1,4 @@
+import { StopReason } from "#shared/lifecycle/stop-reasons.ts";
 import { vi } from "vitest";
 import type { RestartHistory } from "#shared/lifecycle/restart-policy.ts";
 
@@ -20,7 +21,7 @@ export class RestartPolicyStub {
   public constructor() {
     this.planRestartSpy.mockReturnValue({
       restart: false,
-      reason: "stopped",
+      reason: StopReason.Stopped,
       delayMs: NO_DELAY,
       history: this.noRuns,
     });

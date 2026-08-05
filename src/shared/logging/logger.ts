@@ -1,14 +1,11 @@
+import { Level, THRESHOLDS } from "#shared/logging/log-levels.ts";
 import { recordProblem } from "#shared/logging/log-history.ts";
 
 
-const LEVELS = { debug: 10, info: 20, warn: 30, error: 40 } as const;
-
-type Level = keyof typeof LEVELS;
-
 const LEVEL_NAME_WIDTH = 5;
 
-const configured = (process.env.LOG_LEVEL ?? "info").toLowerCase() as Level;
-const threshold = LEVELS[configured] ?? LEVELS.info;
+const configured = (process.env.LOG_LEVEL ?? Level.Info).toLowerCase() as Level;
+const threshold = THRESHOLDS[configured] ?? THRESHOLDS[Level.Info];
 
 export interface Logger {
   debug(message: string): void;
@@ -19,16 +16,16 @@ export interface Logger {
 
 export function createLogger(scope: string): Logger {
   const emit = (level: Level, message: string): void => {
-    if (level === "warn" || level === "error") {
+    if (level === Level.Warn || level === Level.Error) {
       recordProblem(level, `${scope}: ${message}`);
     }
 
-    if (LEVELS[level] < threshold) {
+    if (THRESHOLDS[level] < threshold) {
       return;
     }
 
     const line = `${new Date().toISOString()} ${level.toUpperCase().padEnd(LEVEL_NAME_WIDTH)} ${scope}: ${message}`;
-    const sink = level === "error" ? console.error : level === "warn" ? console.warn : console.log;
+    const sink = level === Level.Error ? console.error : level === Level.Warn ? console.warn : console.log;
     sink(line);
   };
 

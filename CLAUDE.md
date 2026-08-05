@@ -328,6 +328,7 @@ core equivalent defined inline there:
 | No comments in `src/` and `scripts/` | `project/no-comments` |
 | Two blank lines after the last import | `project/blank-lines-after-imports` (autofixed) |
 | A number must be named by a `const` | `project/named-numbers` |
+| A state is read from its own table, never spelled again | `project/named-states` |
 | Braces on every `if`, `const` over `let` | `curly`, `prefer-const`, `no-var` |
 | No `console.*` outside the logger (and `scripts/`) | `no-console` |
 | Imports point only downward, features stay independent | `no-restricted-imports`, one zone per feature layer |

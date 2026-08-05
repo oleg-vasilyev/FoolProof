@@ -1,3 +1,4 @@
+import { StopReason } from "#shared/lifecycle/stop-reasons.ts";
 import { spawn, type ChildProcess } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 import type { Logger } from "#shared/logging/logger.ts";
@@ -78,17 +79,17 @@ const acceptStop = (state: Supervision, log: Logger): void => {
 };
 
 const reportGivingUp = (
-  reason: "stopped" | "cannot-start",
+  reason: StopReason,
   death: Death,
   log: Logger
 ): void => {
   switch (reason) {
-    case "stopped":
+    case StopReason.Stopped:
       log.info(`the bot stopped (${describeDeath(death)})`);
 
       return;
 
-    case "cannot-start":
+    case StopReason.CannotStart:
       log.error(
         `the bot never got going (${describeDeath(death)}) — fix what the log above says and start it again`
       );

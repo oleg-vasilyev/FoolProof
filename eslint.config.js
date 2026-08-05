@@ -86,6 +86,49 @@ const project = {
         };
       },
     },
+    // A state's name is declared once, in a frozen table beside its union, and
+    // read from there. Spelling it again is what makes one file depend on how
+    // another file happens to write a word, and makes renaming it a grep.
+    // `typeof x === "string"` and a comparison against "" are not states.
+    "named-states": {
+      meta: {
+        type: "problem",
+        schema: [],
+        messages: {
+          spelled:
+            "Read this state from the table that declares it, rather than spelling it again here.",
+        },
+      },
+      create(context) {
+        const isText = (node) => node.type === "Literal" && typeof node.value === "string";
+
+        const asksTheType = (node) =>
+          node.type === "UnaryExpression" && node.operator === "typeof";
+
+        return {
+          SwitchCase(node) {
+            if (node.test && isText(node.test)) {
+              context.report({ node: node.test, messageId: "spelled" });
+            }
+          },
+          BinaryExpression(node) {
+            if (node.operator !== "===" && node.operator !== "!==") {
+              return;
+            }
+
+            if (asksTheType(node.left) || asksTheType(node.right)) {
+              return;
+            }
+
+            for (const side of [node.left, node.right]) {
+              if (isText(side) && side.value !== "") {
+                context.report({ node: side, messageId: "spelled" });
+              }
+            }
+          },
+        };
+      },
+    },
     // Exactly two blank lines after the last import, so the imports read as a
     // header rather than as the first statements.
     "blank-lines-after-imports": {
@@ -245,6 +288,7 @@ export default [
       // scripts/ dev utilities, which this block does not cover.
       "no-console": "error",
       "project/named-numbers": "error",
+      "project/named-states": "error",
     },
   },
   {
