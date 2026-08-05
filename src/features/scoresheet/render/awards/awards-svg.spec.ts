@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
 import type { Honours } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { copy } from "#scoresheet/copy.en.ts";
@@ -106,7 +107,7 @@ const HONOURS = { awards: [], curse: null } as unknown as Honours;
 
 const placedOf = (rank: number): Placed =>
   ({
-    award: { name: "untouchable", winners: [rank], games: 1 },
+    award: { name: AwardName.Untouchable, winners: [rank], games: 1 },
     names: [`P${rank}`],
     colour: "colour",
     rank,

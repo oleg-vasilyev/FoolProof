@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ActionKind } from "#live-game/domain/card-states.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
@@ -36,7 +37,7 @@ describe("onTap()", () => {
     prompts = new PromptRegistryStub();
     ctx = new ContextStub();
 
-    decodeCallbackSpy.mockReturnValue({ gameId: 1, action: "pick", slot: 0, version: 0 });
+    decodeCallbackSpy.mockReturnValue({ gameId: 1, action: ActionKind.Pick, slot: 0, version: 0 });
     cards.tapSpy.mockResolvedValue(TAP_NOTICE);
   });
 
@@ -50,7 +51,7 @@ describe("onTap()", () => {
     await onTap(context(), ctx.callbackTap("1:p:0:0"));
 
     expect(cards.tapSpy).toHaveBeenCalledWith(
-      { gameId: 1, action: "pick", slot: 0, version: 0 },
+      { gameId: 1, action: ActionKind.Pick, slot: 0, version: 0 },
       USER_ID
     );
   });

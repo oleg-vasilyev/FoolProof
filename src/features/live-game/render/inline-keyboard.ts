@@ -1,4 +1,5 @@
 import { Phase } from "#live-game/domain/card-states.ts";
+import { ActionKind } from "#live-game/domain/card-states.ts";
 import {
   cancelAvailable,
   drawAvailable,
@@ -45,12 +46,12 @@ const controlRow = (state: CardState, gameId: number, version: number): readonly
 
   const cancel: InlineButton = {
     text: copy.buttonCancel,
-    callback_data: encodeCallback({ gameId, action: "cancel", slot: null, version }),
+    callback_data: encodeCallback({ gameId, action: ActionKind.Cancel, slot: null, version }),
   };
 
   const back: InlineButton = {
     text: copy.buttonBack,
-    callback_data: encodeCallback({ gameId, action: "back", slot: null, version }),
+    callback_data: encodeCallback({ gameId, action: ActionKind.Back, slot: null, version }),
   };
 
   switch (phase) {
@@ -60,14 +61,14 @@ const controlRow = (state: CardState, gameId: number, version: number): readonly
     case Phase.Ready:
       return [
         back,
-        { text: copy.buttonConfirm, callback_data: encodeCallback({ gameId, action: "confirm", slot: null, version }) },
+        { text: copy.buttonConfirm, callback_data: encodeCallback({ gameId, action: ActionKind.Confirm, slot: null, version }) },
       ];
 
     case Phase.Recording:
       return [
         back,
         ...(drawAvailable(state)
-          ? [{ text: copy.buttonDraw, callback_data: encodeCallback({ gameId, action: "draw", slot: null, version }) }]
+          ? [{ text: copy.buttonDraw, callback_data: encodeCallback({ gameId, action: ActionKind.Draw, slot: null, version }) }]
           : []),
         ...(cancelAvailable(state) ? [cancel] : []),
       ];
@@ -85,7 +86,7 @@ export const renderKeyboard = (
   const playerRows = state.seats.map((_, slot) => [
     {
       text: captionFor(state, slot, positions, sharedFinish),
-      callback_data: encodeCallback({ gameId, action: "pick", slot, version }),
+      callback_data: encodeCallback({ gameId, action: ActionKind.Pick, slot, version }),
     },
   ]);
 

@@ -36,12 +36,17 @@ supply the functions and nothing else. The fix is never to add the table to the
 factory — that is a second copy of the vocabulary — it is `game-outcomes.ts`,
 `card-states.ts`, `log-levels.ts`: files with nothing in them to mock.
 
-**A spec narrows a union through the table too.** `award?.name === AwardName.King`,
-not `=== "king"`. `project/named-states` stops at `src/`'s non-spec files on
-purpose — a spec also compares wire values, and `call[0] === "help"` or
-`method === "sendMessage"` are the literal under test, not a state somebody spelled
-twice — so this one is a review question rather than a lint rule. The distinction
-is whether the string is the subject's own vocabulary or somebody else's protocol.
+**A fixture spells a state no more than the subject does.** `{ kind: CellKind.Fool }`
+and `award?.name === AwardName.King`, never the strings. `project/named-states`
+covers specs too, and it reads the property to tell a state from a protocol: a
+literal under `kind`, `outcome`, `phase`, `problem`, `finish`, `role`, `because`,
+`reason` or `action` is always wrong, and a comparison must name one of those or
+`.name`. What stays a literal is somebody else's wire value — `call[0] === "help"`,
+`method === "sendMessage"` — and test data like `name: "Oleg"`, which is why `name`
+is a legal *fixture* key and an illegal thing to compare against.
+
+Extending the rule to specs immediately found five sites in **production** code
+that a src-only sweep had missed, so do not assume the fixtures are the cheap half.
 
 **The corollary bites: no logic may live in a data table.** Because `copy.en.ts` is
 deliberately never mocked, a decision taken inside it is asserted against itself and

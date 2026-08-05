@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Outcome } from "#merge-names/domain/merge-states.ts";
+import { ActionKind, Outcome, Refusal } from "#merge-names/domain/merge-states.ts";
 import {
   apply,
   candidateOf,
@@ -45,7 +45,7 @@ const ROSTER: readonly Candidate[] = [
 
 const selectionAfter = (selection: Selection, taps: readonly number[]): Selection =>
   taps.reduce((carried, playerId) => {
-    const transition = apply(ROSTER, carried, { kind: "pick", playerId });
+    const transition = apply(ROSTER, carried, { kind: ActionKind.Pick, playerId });
 
     return transition.outcome === Outcome.Updated ? transition.selection : carried;
   }, selection);
@@ -103,13 +103,13 @@ describe("gamesAfterMerge()", () => {
 describe("apply()", () => {
   describe("picking a name", () => {
     it("should make the first pick the whole selection", () => {
-      const transition = apply(ROSTER, [], { kind: "pick", playerId: ANYA });
+      const transition = apply(ROSTER, [], { kind: ActionKind.Pick, playerId: ANYA });
 
-      expect(transition).toMatchObject({ outcome: "updated", selection: [ANYA] });
+      expect(transition).toMatchObject({ outcome: Outcome.Updated, selection: [ANYA] });
     });
 
     it("should say which name was touched, so the tap can be answered", () => {
-      const transition = apply(ROSTER, [], { kind: "pick", playerId: ANYA });
+      const transition = apply(ROSTER, [], { kind: ActionKind.Pick, playerId: ANYA });
 
       expect(transition).toMatchObject({ touched: { displayName: "Аня" } });
     });
@@ -127,9 +127,9 @@ describe("apply()", () => {
     });
 
     it("should refuse a name the roster does not hold", () => {
-      const transition = apply(ROSTER, [], { kind: "pick", playerId: STRANGER });
+      const transition = apply(ROSTER, [], { kind: ActionKind.Pick, playerId: STRANGER });
 
-      expect(transition).toEqual({ outcome: "rejected", because: "unknown_name" });
+      expect(transition).toEqual({ outcome: Outcome.Rejected, because: Refusal.UnknownName });
     });
 
     it("should refuse one name past what a merge can carry", () => {
@@ -137,84 +137,84 @@ describe("apply()", () => {
       const roster = full.map((playerId) => candidate(playerId, `P${String(playerId)}`, NO_GAMES));
 
       const transition = apply([...roster, candidate(STRANGER, "One too many", NO_GAMES)], full, {
-        kind: "pick",
+        kind: ActionKind.Pick,
         playerId: STRANGER,
       });
 
-      expect(transition).toEqual({ outcome: "rejected", because: "too_many" });
+      expect(transition).toEqual({ outcome: Outcome.Rejected, because: Refusal.TooMany });
     });
 
     it("should still let a full selection drop a name", () => {
       const full = Array.from({ length: MOST_NAMES_AT_ONCE }, (_, index) => index + ANYA);
       const roster = full.map((playerId) => candidate(playerId, `P${String(playerId)}`, NO_GAMES));
 
-      const transition = apply(roster, full, { kind: "pick", playerId: ANYA });
+      const transition = apply(roster, full, { kind: ActionKind.Pick, playerId: ANYA });
 
-      expect(transition).toMatchObject({ outcome: "updated" });
+      expect(transition).toMatchObject({ outcome: Outcome.Updated });
     });
   });
 
   describe("stepping back", () => {
     it("should undo the last pick only", () => {
-      const transition = apply(ROSTER, [ANYA, ANNA, ANYUTA], { kind: "back" });
+      const transition = apply(ROSTER, [ANYA, ANNA, ANYUTA], { kind: ActionKind.Back });
 
-      expect(transition).toMatchObject({ outcome: "updated", selection: [ANYA, ANNA] });
+      expect(transition).toMatchObject({ outcome: Outcome.Updated, selection: [ANYA, ANNA] });
     });
 
     it("should touch nobody, so the answer is not about a name", () => {
-      const transition = apply(ROSTER, [ANYA], { kind: "back" });
+      const transition = apply(ROSTER, [ANYA], { kind: ActionKind.Back });
 
       expect(transition).toMatchObject({ touched: null });
     });
 
     it("should refuse when there is nothing to undo", () => {
-      expect(apply(ROSTER, [], { kind: "back" })).toEqual({
-        outcome: "rejected",
-        because: "nothing_yet",
+      expect(apply(ROSTER, [], { kind: ActionKind.Back })).toEqual({
+        outcome: Outcome.Rejected,
+        because: Refusal.NothingYet,
       });
     });
   });
 
   describe("confirming", () => {
     it("should keep the first name and absorb the rest", () => {
-      const transition = apply(ROSTER, [ANYA, ANNA, ANYUTA], { kind: "confirm" });
+      const transition = apply(ROSTER, [ANYA, ANNA, ANYUTA], { kind: ActionKind.Confirm });
 
       expect(transition).toMatchObject({
-        outcome: "confirmed",
+        outcome: Outcome.Confirmed,
         keeper: { playerId: ANYA },
         absorbed: [{ playerId: ANNA }, { playerId: ANYUTA }],
       });
     });
 
     it("should refuse a single name", () => {
-      expect(apply(ROSTER, [ANYA], { kind: "confirm" })).toEqual({
-        outcome: "rejected",
-        because: "nothing_yet",
+      expect(apply(ROSTER, [ANYA], { kind: ActionKind.Confirm })).toEqual({
+        outcome: Outcome.Rejected,
+        because: Refusal.NothingYet,
       });
     });
 
     it("should refuse an empty selection", () => {
-      expect(apply(ROSTER, [], { kind: "confirm" })).toEqual({
-        outcome: "rejected",
-        because: "nothing_yet",
+      expect(apply(ROSTER, [], { kind: ActionKind.Confirm })).toEqual({
+        outcome: Outcome.Rejected,
+        because: Refusal.NothingYet,
       });
     });
 
     it("should refuse when a picked name has left the roster since", () => {
-      expect(apply(ROSTER, [ANYA, STRANGER], { kind: "confirm" })).toEqual({
-        outcome: "rejected",
-        because: "unknown_name",
+      expect(apply(ROSTER, [ANYA, STRANGER], { kind: ActionKind.Confirm })).toEqual({
+        outcome: Outcome.Rejected,
+        because: Refusal.UnknownName,
       });
     });
   });
 
   describe("cancelling", () => {
     it("should cancel whatever was picked", () => {
-      expect(apply(ROSTER, [ANYA, ANNA], { kind: "cancel" })).toEqual({ outcome: "cancelled" });
+      expect(apply(ROSTER, [ANYA, ANNA], { kind: ActionKind.Cancel })).toEqual({ outcome: Outcome.Cancelled });
     });
 
     it("should cancel an untouched screen too", () => {
-      expect(apply(ROSTER, [], { kind: "cancel" })).toEqual({ outcome: "cancelled" });
+      expect(apply(ROSTER, [], { kind: ActionKind.Cancel })).toEqual({ outcome: Outcome.Cancelled });
     });
   });
 });

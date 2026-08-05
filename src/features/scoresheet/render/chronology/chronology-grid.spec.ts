@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import type { Cell, ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import type { Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 
@@ -57,7 +58,7 @@ const NONE = 0;
 
 const ONE = 1;
 
-const PLACED: Cell = { kind: "placed", position: 2 };
+const PLACED: Cell = { kind: CellKind.Placed, position: 2 };
 
 const playerOf = (cells: readonly Cell[], index: number, name: string): ScoredPlayer => ({
   playerId: index,
@@ -206,7 +207,7 @@ describe("chronology", () => {
     });
 
     it("should print nothing in a block for a game that was sat out", () => {
-      chronologyGrid(sheetOf([[{ kind: "absent" }]]));
+      chronologyGrid(sheetOf([[{ kind: CellKind.Absent }]]));
 
       expect(printed()).toEqual(["01"]);
     });
@@ -218,19 +219,19 @@ describe("chronology", () => {
     });
 
     it("should fill an absent block with the absent colour", () => {
-      chronologyGrid(sheetOf([[{ kind: "absent" }]]));
+      chronologyGrid(sheetOf([[{ kind: CellKind.Absent }]]));
 
       expect(rectFor(NONE).fill).toBe("absent");
     });
 
     it("should fill a fool's block with the fool colour", () => {
-      chronologyGrid(sheetOf([[{ kind: "fool", position: 3 }]]));
+      chronologyGrid(sheetOf([[{ kind: CellKind.Fool, position: 3 }]]));
 
       expect(rectFor(NONE).fill).toBe("fool");
     });
 
     it("should fill a drawn block with the drawn colour", () => {
-      chronologyGrid(sheetOf([[{ kind: "drawn", position: 2 }]]));
+      chronologyGrid(sheetOf([[{ kind: CellKind.Drawn, position: 2 }]]));
 
       expect(rectFor(NONE).fill).toBe("drawn");
     });
@@ -266,7 +267,7 @@ describe("chronology", () => {
     });
 
     it("should move the digit down exactly one row per round", () => {
-      chronologyGrid(sheetOf([[PLACED, { kind: "placed", position: 3 }]]));
+      chronologyGrid(sheetOf([[PLACED, { kind: CellKind.Placed, position: 3 }]]));
 
       expect(Number(attributesOfText("3").y) - Number(attributesOfText("2").y)).toBe(ROW_HEIGHT);
     });

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ActionKind } from "#live-game/domain/card-states.ts";
 import type { CardState } from "#live-game/domain/card-state.ts";
 import type { CallbackPayload } from "#live-game/render/callback-data-codec.ts";
 
@@ -99,7 +100,7 @@ describe("renderKeyboard()", () => {
       const [firstRow] = render(stateWith({}));
 
       expect(firstRow?.[0]?.callback_data).toBe(
-        encodedAs({ gameId: GAME_ID, action: "pick", slot: OLEG, version: VERSION })
+        encodedAs({ gameId: GAME_ID, action: ActionKind.Pick, slot: OLEG, version: VERSION })
       );
     });
 
@@ -201,13 +202,13 @@ describe("renderKeyboard()", () => {
       phaseOfSpy.mockReturnValue("PICK_STARTER");
 
       expect(controlButton(stateWith({ starterSlot: null }), 0)).toBe(
-        encodedAs({ gameId: GAME_ID, action: "cancel", slot: null, version: VERSION })
+        encodedAs({ gameId: GAME_ID, action: ActionKind.Cancel, slot: null, version: VERSION })
       );
     });
 
     it("should send Back as its own action", () => {
       expect(controlButton(stateWith({}), 0)).toBe(
-        encodedAs({ gameId: GAME_ID, action: "back", slot: null, version: VERSION })
+        encodedAs({ gameId: GAME_ID, action: ActionKind.Back, slot: null, version: VERSION })
       );
     });
 
@@ -215,7 +216,7 @@ describe("renderKeyboard()", () => {
       phaseOfSpy.mockReturnValue("READY");
 
       expect(controlButton(stateWith({}), 1)).toBe(
-        encodedAs({ gameId: GAME_ID, action: "confirm", slot: null, version: VERSION })
+        encodedAs({ gameId: GAME_ID, action: ActionKind.Confirm, slot: null, version: VERSION })
       );
     });
 
@@ -223,7 +224,7 @@ describe("renderKeyboard()", () => {
       drawAvailableSpy.mockReturnValue(true);
 
       expect(controlButton(stateWith({}), 1)).toBe(
-        encodedAs({ gameId: GAME_ID, action: "draw", slot: null, version: VERSION })
+        encodedAs({ gameId: GAME_ID, action: ActionKind.Draw, slot: null, version: VERSION })
       );
     });
   });

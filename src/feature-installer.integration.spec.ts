@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { ActionKind } from "#live-game/domain/card-states.ts";
 import { Bot } from "grammy";
 import { createLiveGameFeature } from "#live-game/live-game-feature.ts";
 import { encodeCallback } from "#live-game/render/callback-data-codec.ts";
@@ -168,7 +169,7 @@ describe("the bot, driven end to end", () => {
 
       await bot.handleUpdate(
         callbackUpdate(
-          encodeCallback({ gameId: 1, action: "pick", slot: 2, version: FIRST_VERSION })
+          encodeCallback({ gameId: 1, action: ActionKind.Pick, slot: 2, version: FIRST_VERSION })
         )
       );
 
@@ -186,7 +187,7 @@ describe("the bot, driven end to end", () => {
 
       await bot.handleUpdate(
         callbackUpdate(
-          encodeCallback({ gameId: 1, action: "pick", slot: 0, version: FIRST_VERSION })
+          encodeCallback({ gameId: 1, action: ActionKind.Pick, slot: 0, version: FIRST_VERSION })
         )
       );
       await flush();

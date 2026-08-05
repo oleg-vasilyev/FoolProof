@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Finish } from "#scoresheet/domain/game-outcomes.ts";
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Appearance, SessionAppearances, PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 import type { Merit } from "#scoresheet/domain/awards/pick-winner.ts";
@@ -60,7 +61,7 @@ const sessionAppearances = (players: readonly PlayerAppearances[], rounds = NINE
   starters: [],
 });
 
-const SOMEBODY = appearing(DIMA, { round: NOTHING, finish: "first" });
+const SOMEBODY = appearing(DIMA, { round: NOTHING, finish: Finish.First });
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -116,17 +117,17 @@ describe("ironSeat()", () => {
 describe("theTruce()", () => {
   const DREW = appearing(
     DIMA,
-    { round: NOTHING, finish: "fool" },
-    { round: TWICE, finish: "drawn" }
+    { round: NOTHING, finish: Finish.Fool },
+    { round: TWICE, finish: Finish.Drawn }
   );
 
   const ALSO_DREW = appearing(
     VERONIKA,
-    { round: NOTHING, finish: "first" },
-    { round: TWICE, finish: "drawn" }
+    { round: NOTHING, finish: Finish.First },
+    { round: TWICE, finish: Finish.Drawn }
   );
 
-  const NEVER_DREW = appearing(SEVEN, { round: NOTHING, finish: "fool" });
+  const NEVER_DREW = appearing(SEVEN, { round: NOTHING, finish: Finish.Fool });
 
   it("should award nothing when the evening had no draw", () => {
     expect(theTruce(sessionAppearances([NEVER_DREW]))).toBeNull();
@@ -145,9 +146,9 @@ describe("theTruce()", () => {
   it("should count two draws played in different games", () => {
     const twice = appearing(
       DIMA,
-      { round: NOTHING, finish: "drawn" },
-      { round: ONCE, finish: "first" },
-      { round: TWICE, finish: "drawn" }
+      { round: NOTHING, finish: Finish.Drawn },
+      { round: ONCE, finish: Finish.First },
+      { round: TWICE, finish: Finish.Drawn }
     );
     const award = theTruce(sessionAppearances([twice]));
 
@@ -157,9 +158,9 @@ describe("theTruce()", () => {
   it("should count only the games that were actually drawn", () => {
     const mixed = appearing(
       DIMA,
-      { round: NOTHING, finish: "fool" },
-      { round: ONCE, finish: "first" },
-      { round: TWICE, finish: "drawn" }
+      { round: NOTHING, finish: Finish.Fool },
+      { round: ONCE, finish: Finish.First },
+      { round: TWICE, finish: Finish.Drawn }
     );
     const award = theTruce(sessionAppearances([mixed]));
 
@@ -170,16 +171,16 @@ describe("theTruce()", () => {
 describe("theIrishGoodbye()", () => {
   const SLIPPED_AWAY = appearing(
     VERONIKA,
-    { round: NOTHING, finish: "first" },
-    { round: ONCE, finish: "fool" },
-    { round: SEVEN, finish: "middle" }
+    { round: NOTHING, finish: Finish.First },
+    { round: ONCE, finish: Finish.Fool },
+    { round: SEVEN, finish: Finish.Middle }
   );
 
   const LEFT_BEATEN = appearing(
     VERONIKA,
-    { round: NOTHING, finish: "first" },
-    { round: ONCE, finish: "middle" },
-    { round: SEVEN, finish: "fool" }
+    { round: NOTHING, finish: Finish.First },
+    { round: ONCE, finish: Finish.Middle },
+    { round: SEVEN, finish: Finish.Fool }
   );
 
   const NEVER_SAT_DOWN = appearing(DIMA);

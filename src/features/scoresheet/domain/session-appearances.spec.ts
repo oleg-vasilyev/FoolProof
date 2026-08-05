@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CellKind, Finish } from "#scoresheet/domain/game-outcomes.ts";
 import type { Cell, ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import type { PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 
@@ -92,31 +93,31 @@ describe("sessionAppearances()", () => {
     };
 
     it("should leave out the games the player sat out", () => {
-      expect(appearancesFor({ kind: "absent" }, { kind: "fool", position: TWICE })).toHaveLength(
+      expect(appearancesFor({ kind: CellKind.Absent }, { kind: CellKind.Fool, position: TWICE })).toHaveLength(
         ONCE
       );
     });
 
     it("should number a round by its place in the session, not by the appearance", () => {
-      const appearances = appearancesFor({ kind: "absent" }, { kind: "placed", position: ONCE });
+      const appearances = appearancesFor({ kind: CellKind.Absent }, { kind: CellKind.Placed, position: ONCE });
 
       expect(appearances[NOTHING]?.round).toBe(ONCE);
     });
 
     it("should call going out first a first", () => {
-      expect(appearancesFor({ kind: "placed", position: ONCE })[NOTHING]?.finish).toBe("first");
+      expect(appearancesFor({ kind: CellKind.Placed, position: ONCE })[NOTHING]?.finish).toBe("first");
     });
 
     it("should call any other place a middle", () => {
-      expect(appearancesFor({ kind: "placed", position: TWICE })[NOTHING]?.finish).toBe("middle");
+      expect(appearancesFor({ kind: CellKind.Placed, position: TWICE })[NOTHING]?.finish).toBe("middle");
     });
 
     it("should call a shared last place a draw rather than a fool", () => {
-      expect(appearancesFor({ kind: "drawn", position: TWICE })[NOTHING]?.finish).toBe("drawn");
+      expect(appearancesFor({ kind: CellKind.Drawn, position: TWICE })[NOTHING]?.finish).toBe("drawn");
     });
 
     it("should call being left alone at the back a fool", () => {
-      expect(appearancesFor({ kind: "fool", position: TWICE })[NOTHING]?.finish).toBe("fool");
+      expect(appearancesFor({ kind: CellKind.Fool, position: TWICE })[NOTHING]?.finish).toBe("fool");
     });
   });
 });
@@ -124,8 +125,8 @@ describe("sessionAppearances()", () => {
 describe("playedGames()", () => {
   it("should count the games the player actually sat", () => {
     const player = eveningWith(
-      { round: NOTHING, finish: "first" },
-      { round: TWICE, finish: "fool" }
+      { round: NOTHING, finish: Finish.First },
+      { round: TWICE, finish: Finish.Fool }
     );
 
     expect(playedGames(player)).toBe(TWICE);
@@ -135,24 +136,24 @@ describe("playedGames()", () => {
 describe("foolCount()", () => {
   it("should count only the games left the fool", () => {
     const player = eveningWith(
-      { round: NOTHING, finish: "fool" },
-      { round: ONCE, finish: "drawn" },
-      { round: TWICE, finish: "fool" }
+      { round: NOTHING, finish: Finish.Fool },
+      { round: ONCE, finish: Finish.Drawn },
+      { round: TWICE, finish: Finish.Fool }
     );
 
     expect(foolCount(player)).toBe(TWICE);
   });
 
   it("should not count a draw as a fool", () => {
-    expect(foolCount(eveningWith({ round: NOTHING, finish: "drawn" }))).toBe(NOTHING);
+    expect(foolCount(eveningWith({ round: NOTHING, finish: Finish.Drawn }))).toBe(NOTHING);
   });
 });
 
 describe("lastRoundOf()", () => {
   it("should report the round of the player's final appearance", () => {
     const player = eveningWith(
-      { round: NOTHING, finish: "first" },
-      { round: TWICE, finish: "middle" }
+      { round: NOTHING, finish: Finish.First },
+      { round: TWICE, finish: Finish.Middle }
     );
 
     expect(lastRoundOf(player)).toBe(TWICE);
@@ -165,11 +166,11 @@ describe("lastRoundOf()", () => {
 
 describe("finishIn()", () => {
   it("should report how the player finished that round", () => {
-    expect(finishIn(eveningWith({ round: TWICE, finish: "fool" }), TWICE)).toBe("fool");
+    expect(finishIn(eveningWith({ round: TWICE, finish: Finish.Fool }), TWICE)).toBe("fool");
   });
 
   it("should report nothing for a round the player sat out", () => {
-    expect(finishIn(eveningWith({ round: TWICE, finish: "fool" }), ONCE)).toBeNull();
+    expect(finishIn(eveningWith({ round: TWICE, finish: Finish.Fool }), ONCE)).toBeNull();
   });
 });
 
@@ -181,14 +182,14 @@ describe("foolByRound()", () => {
   });
 
   it("should name the fool of every round", () => {
-    const oleg = { playerId: OLEG, share: NOTHING, appearances: [{ round: NOTHING, finish: "fool" as const }] };
-    const anya = { playerId: ANYA, share: NOTHING, appearances: [{ round: ONCE, finish: "fool" as const }] };
+    const oleg = { playerId: OLEG, share: NOTHING, appearances: [{ round: NOTHING, finish: Finish.Fool }] };
+    const anya = { playerId: ANYA, share: NOTHING, appearances: [{ round: ONCE, finish: Finish.Fool }] };
 
     expect(foolByRound(eveningFor([oleg, anya], TWICE))).toEqual([OLEG, ANYA]);
   });
 
   it("should leave a drawn round without a fool", () => {
-    const oleg = { playerId: OLEG, share: NOTHING, appearances: [{ round: NOTHING, finish: "drawn" as const }] };
+    const oleg = { playerId: OLEG, share: NOTHING, appearances: [{ round: NOTHING, finish: Finish.Drawn }] };
 
     expect(foolByRound(eveningFor([oleg], ONCE))).toEqual([null]);
   });

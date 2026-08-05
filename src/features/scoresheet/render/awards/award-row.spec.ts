@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Density, Placed } from "#scoresheet/render/awards/awards-layout.ts";
 
@@ -75,7 +76,7 @@ vi.mock("#scoresheet/render/svg-tags.ts", () => ({
 
 const { awardRow } = await import("#scoresheet/render/awards/award-row.ts");
 
-const AWARD = { name: "untouchable", winners: [1], games: 6 } as unknown as Award;
+const AWARD = { name: AwardName.Untouchable, winners: [1], games: 6 } as unknown as Award;
 
 const TITLE_MARK = "TITLE_MARK";
 

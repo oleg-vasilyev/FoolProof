@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import type { Cell } from "#scoresheet/domain/scoring.ts";
 import type { Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 
@@ -75,9 +76,9 @@ const NONE = 0;
 
 const ONE = 1;
 
-const PLACED_CELL: Cell = { kind: "placed", position: ONE };
+const PLACED_CELL: Cell = { kind: CellKind.Placed, position: ONE };
 
-const ABSENT_CELL: Cell = { kind: "absent" };
+const ABSENT_CELL: Cell = { kind: CellKind.Absent };
 
 interface PlayerFixture {
   readonly running: readonly number[];

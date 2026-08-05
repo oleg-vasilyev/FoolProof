@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { StopReason } from "#shared/lifecycle/stop-reasons.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
 import { RestartPolicyStub } from "#shared/lifecycle/restart-policy.stub.ts";
 import { SpawnStub } from "#shared/lifecycle/child-process.stub.ts";
@@ -54,7 +55,7 @@ describe("superviseChild()", () => {
   const restartsOnce = (history = ONE_FAILURE) => {
     policy.planRestartSpy
       .mockReturnValueOnce({ restart: true, delayMs: RESTART_DELAY_MS, history })
-      .mockReturnValue({ restart: false, reason: "stopped", delayMs: NO_DELAY, history });
+      .mockReturnValue({ restart: false, reason: StopReason.Stopped, delayMs: NO_DELAY, history });
   };
 
   beforeEach(() => {
@@ -66,7 +67,7 @@ describe("superviseChild()", () => {
 
     policy.planRestartSpy.mockReturnValue({
       restart: false,
-      reason: "stopped",
+      reason: StopReason.Stopped,
       delayMs: NO_DELAY,
       history: policy.noRuns,
     });
@@ -264,7 +265,7 @@ describe("superviseChild()", () => {
     it("should report a bot that never got going as a failure, not a stop", async () => {
       policy.planRestartSpy.mockReturnValue({
         restart: false,
-        reason: "cannot-start",
+        reason: StopReason.CannotStart,
         delayMs: NO_DELAY,
         history: ONE_FAILURE,
       });
@@ -279,7 +280,7 @@ describe("superviseChild()", () => {
     it("should say what the failed start looked like, so there is something to fix", async () => {
       policy.planRestartSpy.mockReturnValue({
         restart: false,
-        reason: "cannot-start",
+        reason: StopReason.CannotStart,
         delayMs: NO_DELAY,
         history: ONE_FAILURE,
       });
@@ -294,7 +295,7 @@ describe("superviseChild()", () => {
     it("should not start it again once it has given up", async () => {
       policy.planRestartSpy.mockReturnValue({
         restart: false,
-        reason: "cannot-start",
+        reason: StopReason.CannotStart,
         delayMs: NO_DELAY,
         history: ONE_FAILURE,
       });

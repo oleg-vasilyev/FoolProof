@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ActionKind } from "#live-game/domain/card-states.ts";
 import {
   decodeCallback,
   encodeCallback,
@@ -44,19 +45,19 @@ describe("toBase62() / fromBase62()", () => {
 
 describe("encodeCallback()", () => {
   it("should lay out the four fields separated by colons", () => {
-    const encoded = encodeCallback({ gameId: 1, action: "pick", slot: 3, version: 5 });
+    const encoded = encodeCallback({ gameId: 1, action: ActionKind.Pick, slot: 3, version: 5 });
 
     expect(encoded).toBe("1:p:3:5");
   });
 
   it("should mark a missing slot rather than omitting the field", () => {
-    const encoded = encodeCallback({ gameId: 1, action: "confirm", slot: null, version: 2 });
+    const encoded = encodeCallback({ gameId: 1, action: ActionKind.Confirm, slot: null, version: 2 });
 
     expect(encoded).toBe("1:k:-:2");
   });
 
   it("should never carry a player name", () => {
-    const encoded = encodeCallback({ gameId: 7, action: "pick", slot: 0, version: 1 });
+    const encoded = encodeCallback({ gameId: 7, action: ActionKind.Pick, slot: 0, version: 1 });
 
     expect(encoded).not.toMatch(/[a-zA-Zа-яА-Я]{2,}/);
   });
@@ -64,7 +65,7 @@ describe("encodeCallback()", () => {
   it("should stay inside Telegram's 64 byte limit at absurd sizes", () => {
     const encoded = encodeCallback({
       gameId: HUGE_GAME_ID,
-      action: "pick",
+      action: ActionKind.Pick,
       slot: 99,
       version: HUGE_VERSION,
     });
@@ -78,7 +79,7 @@ describe("decodeCallback()", () => {
     decodeCallback(encodeCallback(payload));
 
   it("should round-trip a pick", () => {
-    const payload: CallbackPayload = { gameId: 42, action: "pick", slot: 2, version: 9 };
+    const payload: CallbackPayload = { gameId: 42, action: ActionKind.Pick, slot: 2, version: 9 };
 
     expect(roundTrip(payload)).toEqual(payload);
   });
@@ -96,7 +97,7 @@ describe("decodeCallback()", () => {
   it("should round-trip a large game id through base62", () => {
     const payload: CallbackPayload = {
       gameId: HUGE_GAME_ID,
-      action: "back",
+      action: ActionKind.Back,
       slot: null,
       version: 3,
     };

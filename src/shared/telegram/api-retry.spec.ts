@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { FailureKind } from "#shared/telegram/call-outcomes.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
 
 
@@ -77,23 +78,23 @@ const callThrough = (log: LoggerStub, prev: PrevCall, signal?: { aborted: boolea
 describe("planFor()", () => {
   describe("an unreachable server", () => {
     it("should retry the first failure", () => {
-      expect(planFor({ kind: "unreachable" }, FIRST_ATTEMPT).retry).toBe(true);
+      expect(planFor({ kind: FailureKind.Unreachable }, FIRST_ATTEMPT).retry).toBe(true);
     });
 
     it("should wait before the second attempt rather than hammering", () => {
-      expect(planFor({ kind: "unreachable" }, FIRST_ATTEMPT).delayMs).toBe(FIRST_DELAY_MS);
+      expect(planFor({ kind: FailureKind.Unreachable }, FIRST_ATTEMPT).delayMs).toBe(FIRST_DELAY_MS);
     });
 
     it("should back off further with every attempt", () => {
       const waits = [SECOND_ATTEMPT, THIRD_ATTEMPT].map(
-        (attempt) => planFor({ kind: "unreachable" }, attempt).delayMs
+        (attempt) => planFor({ kind: FailureKind.Unreachable }, attempt).delayMs
       );
 
       expect(waits).toEqual([SECOND_DELAY_MS, THIRD_DELAY_MS]);
     });
 
     it("should stop once the attempts are spent, so a tap cannot hang forever", () => {
-      expect(planFor({ kind: "unreachable" }, LAST_ATTEMPT)).toEqual({
+      expect(planFor({ kind: FailureKind.Unreachable }, LAST_ATTEMPT)).toEqual({
         retry: false,
         delayMs: NO_DELAY,
       });
@@ -103,27 +104,27 @@ describe("planFor()", () => {
   describe("a refusal from Telegram", () => {
     it("should retry a server error, which is never our fault", () => {
       expect(
-        planFor({ kind: "refused", code: SERVER_ERROR, retryAfterSeconds: null }, FIRST_ATTEMPT)
+        planFor({ kind: FailureKind.Refused, code: SERVER_ERROR, retryAfterSeconds: null }, FIRST_ATTEMPT)
           .retry
       ).toBe(true);
     });
 
     it("should retry anything above the server error code too", () => {
       expect(
-        planFor({ kind: "refused", code: BAD_GATEWAY, retryAfterSeconds: null }, FIRST_ATTEMPT).retry
+        planFor({ kind: FailureKind.Refused, code: BAD_GATEWAY, retryAfterSeconds: null }, FIRST_ATTEMPT).retry
       ).toBe(true);
     });
 
     it("should retry a flood limit", () => {
       expect(
-        planFor({ kind: "refused", code: FLOOD_LIMIT, retryAfterSeconds: null }, FIRST_ATTEMPT).retry
+        planFor({ kind: FailureKind.Refused, code: FLOOD_LIMIT, retryAfterSeconds: null }, FIRST_ATTEMPT).retry
       ).toBe(true);
     });
 
     it("should wait exactly as long as Telegram asked", () => {
       expect(
         planFor(
-          { kind: "refused", code: FLOOD_LIMIT, retryAfterSeconds: SHORT_WAIT_SECONDS },
+          { kind: FailureKind.Refused, code: FLOOD_LIMIT, retryAfterSeconds: SHORT_WAIT_SECONDS },
           FIRST_ATTEMPT
         ).delayMs
       ).toBe(SHORT_WAIT_MS);
@@ -132,7 +133,7 @@ describe("planFor()", () => {
     it("should still wait when Telegram asks for exactly as long as it may", () => {
       expect(
         planFor(
-          { kind: "refused", code: FLOOD_LIMIT, retryAfterSeconds: LONGEST_WAIT_SECONDS },
+          { kind: FailureKind.Refused, code: FLOOD_LIMIT, retryAfterSeconds: LONGEST_WAIT_SECONDS },
           FIRST_ATTEMPT
         ).retry
       ).toBe(true);
@@ -141,7 +142,7 @@ describe("planFor()", () => {
     it("should give up when Telegram asks for longer than a tap can wait", () => {
       expect(
         planFor(
-          { kind: "refused", code: FLOOD_LIMIT, retryAfterSeconds: LONG_WAIT_SECONDS },
+          { kind: FailureKind.Refused, code: FLOOD_LIMIT, retryAfterSeconds: LONG_WAIT_SECONDS },
           FIRST_ATTEMPT
         ).retry
       ).toBe(false);
@@ -149,7 +150,7 @@ describe("planFor()", () => {
 
     it("should never retry a bad request, which would fail identically", () => {
       expect(
-        planFor({ kind: "refused", code: BAD_REQUEST, retryAfterSeconds: null }, FIRST_ATTEMPT).retry
+        planFor({ kind: FailureKind.Refused, code: BAD_REQUEST, retryAfterSeconds: null }, FIRST_ATTEMPT).retry
       ).toBe(false);
     });
   });

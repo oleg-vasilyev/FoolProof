@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ActionKind, Role } from "#merge-names/domain/merge-states.ts";
 import type { Candidate } from "#merge-names/domain/merge-selection.ts";
-import type { Role } from "#merge-names/domain/merge-states.ts";
 import { copy } from "#merge-names/copy.en.ts";
 
 
@@ -105,7 +105,7 @@ describe("renderMergeKeyboard()", () => {
 
       expect(encodeMergeCallbackSpy).toHaveBeenCalledWith({
         selection: [ANYA_ID],
-        action: { kind: "pick", playerId: ANNA_ID },
+        action: { kind: ActionKind.Pick, playerId: ANNA_ID },
       });
     });
 
@@ -145,7 +145,7 @@ describe("renderMergeKeyboard()", () => {
 
       expect(encodeMergeCallbackSpy).toHaveBeenCalledWith({
         selection: [],
-        action: { kind: "cancel" },
+        action: { kind: ActionKind.Cancel },
       });
     });
 
@@ -154,7 +154,7 @@ describe("renderMergeKeyboard()", () => {
 
       expect(encodeMergeCallbackSpy).toHaveBeenCalledWith({
         selection: [ANYA_ID],
-        action: { kind: "back" },
+        action: { kind: ActionKind.Back },
       });
     });
 
@@ -163,7 +163,7 @@ describe("renderMergeKeyboard()", () => {
 
       expect(encodeMergeCallbackSpy).toHaveBeenCalledWith({
         selection: [ANYA_ID, ANNA_ID],
-        action: { kind: "confirm" },
+        action: { kind: ActionKind.Confirm },
       });
     });
   });

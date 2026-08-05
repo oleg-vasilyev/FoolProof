@@ -100,15 +100,49 @@ const project = {
         },
       },
       create(context) {
+        // The fields a discriminated union is dispatched on here. `name` is
+        // deliberately absent: `name: "game"` is a command and `name: "Oleg"` is a
+        // player, so only a *comparison* against `.name` is unambiguously a state.
+        const DISCRIMINANTS = new Set([
+          "kind",
+          "outcome",
+          "phase",
+          "problem",
+          "finish",
+          "role",
+          "because",
+          "reason",
+          "action",
+        ]);
+
         const isText = (node) => node.type === "Literal" && typeof node.value === "string";
 
         const asksTheType = (node) =>
           node.type === "UnaryExpression" && node.operator === "typeof";
 
+        // A spec also compares wire values — `call[0] === "help"`, `method ===
+        // "sendMessage"` — which are the literal under test rather than a state
+        // spelled twice, so there the comparison has to name a discriminant.
+        const readsAState = (node) =>
+          node.type === "MemberExpression" &&
+          node.property.type === "Identifier" &&
+          (DISCRIMINANTS.has(node.property.name) || node.property.name === "name");
+
+        const isSpec = context.filename.endsWith(".spec.ts");
+
         return {
           SwitchCase(node) {
             if (node.test && isText(node.test)) {
               context.report({ node: node.test, messageId: "spelled" });
+            }
+          },
+          Property(node) {
+            if (node.computed || node.key.type !== "Identifier") {
+              return;
+            }
+
+            if (DISCRIMINANTS.has(node.key.name) && isText(node.value)) {
+              context.report({ node: node.value, messageId: "spelled" });
             }
           },
           BinaryExpression(node) {
@@ -117,6 +151,10 @@ const project = {
             }
 
             if (asksTheType(node.left) || asksTheType(node.right)) {
+              return;
+            }
+
+            if (isSpec && !readsAState(node.left) && !readsAState(node.right)) {
               return;
             }
 
@@ -288,6 +326,13 @@ export default [
       // scripts/ dev utilities, which this block does not cover.
       "no-console": "error",
       "project/named-numbers": "error",
+    },
+  },
+  {
+    // States are named everywhere, specs included: a fixture that spells a state
+    // is the same magic knowledge as a case clause that does.
+    files: ["src/**/*.ts"],
+    rules: {
       "project/named-states": "error",
     },
   },

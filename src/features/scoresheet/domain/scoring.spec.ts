@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import { NEUTRAL, scoreSeries, type Round } from "#scoresheet/domain/scoring.ts";
 
 
@@ -67,26 +68,26 @@ describe("scoreSeries()", () => {
 
   describe("what each cell says", () => {
     it("should mark a player who did not sit down as absent", () => {
-      expect(cellsOf([roundOf([ANYA.playerId, 1])])).toEqual([{ kind: "absent" }]);
+      expect(cellsOf([roundOf([ANYA.playerId, 1])])).toEqual([{ kind: CellKind.Absent }]);
     });
 
     it("should mark a position that is not last as placed", () => {
       const round = roundOf([OLEG.playerId, 1], [ANYA.playerId, 2], [ROMA.playerId, 3]);
 
-      expect(cellsOf([round])).toEqual([{ kind: "placed", position: 1 }]);
+      expect(cellsOf([round])).toEqual([{ kind: CellKind.Placed, position: 1 }]);
     });
 
     it("should mark the player alone in last place as the fool", () => {
       const round = roundOf([ANYA.playerId, 1], [ROMA.playerId, 2], [OLEG.playerId, 3]);
       const LAST_OF_THREE = 3;
 
-      expect(cellsOf([round])).toEqual([{ kind: "fool", position: LAST_OF_THREE }]);
+      expect(cellsOf([round])).toEqual([{ kind: CellKind.Fool, position: LAST_OF_THREE }]);
     });
 
     it("should mark a shared last place as a draw rather than a fool", () => {
       const round = roundOf([ROMA.playerId, 1], [OLEG.playerId, 2], [ANYA.playerId, 2]);
 
-      expect(cellsOf([round])).toEqual([{ kind: "drawn", position: 2 }]);
+      expect(cellsOf([round])).toEqual([{ kind: CellKind.Drawn, position: 2 }]);
     });
 
     it("should call a two-player draw a draw for both", () => {

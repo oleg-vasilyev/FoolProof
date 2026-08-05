@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ActionKind, Outcome } from "#merge-names/domain/merge-states.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import type { Candidate, Transition } from "#merge-names/domain/merge-selection.ts";
 import { copy } from "#merge-names/copy.en.ts";
@@ -82,7 +83,7 @@ const ANNA = candidate(ANNA_ID, "Анна");
 const ROSTER = [ANYA, ANNA];
 
 const confirmedBy = (keeper: Candidate, absorbed: readonly Candidate[]): Transition => ({
-  outcome: "confirmed",
+  outcome: Outcome.Confirmed,
   keeper,
   absorbed,
 });
@@ -100,8 +101,8 @@ describe("merge-handler", () => {
     ctx = new ContextStub();
 
     repo.rosterInChatSpy.mockReturnValue(ROSTER);
-    decodeMergeCallbackSpy.mockReturnValue({ selection: SELECTION, action: { kind: "back" } });
-    applySpy.mockReturnValue({ outcome: "updated", selection: SELECTION, touched: null });
+    decodeMergeCallbackSpy.mockReturnValue({ selection: SELECTION, action: { kind: ActionKind.Back } });
+    applySpy.mockReturnValue({ outcome: Outcome.Updated, selection: SELECTION, touched: null });
     roleOfSpy.mockReturnValue("absorbed");
     renderMergeScreenSpy.mockReturnValue(SCREEN);
     renderMergeKeyboardSpy.mockReturnValue(KEYBOARD);
@@ -207,13 +208,13 @@ describe("merge-handler", () => {
       it("should hand the decoded tap to the domain", async () => {
         decodeMergeCallbackSpy.mockReturnValue({
           selection: SELECTION,
-          action: { kind: "pick", playerId: ANNA_ID },
+          action: { kind: ActionKind.Pick, playerId: ANNA_ID },
         });
 
         await onTap(context(), ctx.callbackTap(TAP_DATA));
 
         expect(applySpy).toHaveBeenCalledWith(ROSTER, SELECTION, {
-          kind: "pick",
+          kind: ActionKind.Pick,
           playerId: ANNA_ID,
         });
       });
@@ -240,7 +241,7 @@ describe("merge-handler", () => {
       });
 
       it("should answer the keeper by name", async () => {
-        applySpy.mockReturnValue({ outcome: "updated", selection: [ANYA_ID], touched: ANYA });
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, selection: [ANYA_ID], touched: ANYA });
         roleOfSpy.mockReturnValue("keeper");
 
         await onTap(context(), ctx.callbackTap(TAP_DATA));
@@ -249,7 +250,7 @@ describe("merge-handler", () => {
       });
 
       it("should answer an absorbed name by name", async () => {
-        applySpy.mockReturnValue({ outcome: "updated", selection: SELECTION, touched: ANNA });
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, selection: SELECTION, touched: ANNA });
         roleOfSpy.mockReturnValue("absorbed");
 
         await onTap(context(), ctx.callbackTap(TAP_DATA));
@@ -258,7 +259,7 @@ describe("merge-handler", () => {
       });
 
       it("should say so when a name was let go", async () => {
-        applySpy.mockReturnValue({ outcome: "updated", selection: [], touched: ANNA });
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, selection: [], touched: ANNA });
         roleOfSpy.mockReturnValue("free");
 
         await onTap(context(), ctx.callbackTap(TAP_DATA));
@@ -267,7 +268,7 @@ describe("merge-handler", () => {
       });
 
       it("should read the role out of the selection the tap produced", async () => {
-        applySpy.mockReturnValue({ outcome: "updated", selection: [ANNA_ID], touched: ANNA });
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, selection: [ANNA_ID], touched: ANNA });
 
         await onTap(context(), ctx.callbackTap(TAP_DATA));
 
@@ -360,7 +361,7 @@ describe("merge-handler", () => {
 
     describe("cancelling", () => {
       beforeEach(() => {
-        applySpy.mockReturnValue({ outcome: "cancelled" });
+        applySpy.mockReturnValue({ outcome: Outcome.Cancelled });
       });
 
       it("should say nothing was merged and drop the buttons", async () => {
@@ -391,7 +392,7 @@ describe("merge-handler", () => {
 
     describe("a tap the domain refused", () => {
       const refused = (because: string) => {
-        applySpy.mockReturnValue({ outcome: "rejected", because });
+        applySpy.mockReturnValue({ outcome: Outcome.Rejected, because });
       };
 
       it("should say when one name too many was picked", async () => {

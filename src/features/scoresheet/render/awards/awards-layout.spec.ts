@@ -50,10 +50,10 @@ const chronologyOf = (playerCount: number): SeriesChronology => ({
   games: [],
 });
 
-const untouchableOf = (winner: number): Award => ({ name: "untouchable", winners: [winner], games: GAMES });
+const untouchableOf = (winner: number): Award => ({ name: AwardName.Untouchable, winners: [winner], games: GAMES });
 
 const foolOf = (winner: number): Award => ({
-  name: "foolOfTheNight",
+  name: AwardName.FoolOfTheNight,
   winners: [winner],
   fools: GAMES,
   games: GAMES,
@@ -227,7 +227,7 @@ describe("awardsLayoutOf()", () => {
 
   describe("resolving names", () => {
     it("should resolve every winner id to a display name, in the award's own order", () => {
-      const truce: Award = { name: "theTruce", winners: [2, 0], draws: 1, games: 1 };
+      const truce: Award = { name: AwardName.TheTruce, winners: [2, 0], draws: 1, games: 1 };
       const honours = honoursOf([truce]);
 
       const sheet = awardsLayoutOf(chronologyOf(3), honours);

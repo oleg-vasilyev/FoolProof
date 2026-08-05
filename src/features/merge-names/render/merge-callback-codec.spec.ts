@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ActionKind } from "#merge-names/domain/merge-states.ts";
 import { MOST_NAMES_AT_ONCE } from "#merge-names/domain/merge-selection.ts";
 import {
   decodeMergeCallback,
@@ -24,7 +25,7 @@ const WIDEST_ID = 9_999_999;
 describe("encodeMergeCallback()", () => {
   it("should carry the selection in tap order", () => {
     expect(
-      encodeMergeCallback({ selection: [ANYA, ANNA], action: { kind: "pick", playerId: OLEG } })
+      encodeMergeCallback({ selection: [ANYA, ANNA], action: { kind: ActionKind.Pick, playerId: OLEG } })
     ).toBe("m:12.7:p:3");
   });
 
@@ -32,17 +33,17 @@ describe("encodeMergeCallback()", () => {
     expect(
       encodeMergeCallback({
         selection: [ANYA, TWO_DIGIT_ID],
-        action: { kind: "pick", playerId: TWO_DIGIT_ID },
+        action: { kind: ActionKind.Pick, playerId: TWO_DIGIT_ID },
       })
     ).toBe("m:12.34:p:34");
   });
 
   it("should write an empty selection as nothing", () => {
-    expect(encodeMergeCallback({ selection: [], action: { kind: "cancel" } })).toBe("m:-:x:-");
+    expect(encodeMergeCallback({ selection: [], action: { kind: ActionKind.Cancel } })).toBe("m:-:x:-");
   });
 
   it("should give an action with no name an empty argument", () => {
-    expect(encodeMergeCallback({ selection: [ANYA], action: { kind: "back" } })).toBe("m:12:b:-");
+    expect(encodeMergeCallback({ selection: [ANYA], action: { kind: ActionKind.Back } })).toBe("m:12:b:-");
   });
 
   it("should stay inside the Bot API's budget for as many names as a merge allows", () => {
@@ -50,7 +51,7 @@ describe("encodeMergeCallback()", () => {
 
     const data = encodeMergeCallback({
       selection,
-      action: { kind: "pick", playerId: WIDEST_ID },
+      action: { kind: ActionKind.Pick, playerId: WIDEST_ID },
     });
 
     expect(Buffer.byteLength(data)).toBeLessThanOrEqual(CALLBACK_DATA_LIMIT);
@@ -59,7 +60,7 @@ describe("encodeMergeCallback()", () => {
 
 describe("decodeMergeCallback()", () => {
   it("should read back what it wrote", () => {
-    const payload = { selection: [ANYA, ANNA], action: { kind: "pick", playerId: OLEG } } as const;
+    const payload = { selection: [ANYA, ANNA], action: { kind: ActionKind.Pick, playerId: OLEG } } as const;
 
     expect(decodeMergeCallback(encodeMergeCallback(payload))).toEqual(payload);
   });
@@ -67,7 +68,7 @@ describe("decodeMergeCallback()", () => {
   it("should read an empty selection back as no names", () => {
     expect(decodeMergeCallback("m:-:k:-")).toEqual({
       selection: [],
-      action: { kind: "confirm" },
+      action: { kind: ActionKind.Confirm },
     });
   });
 
@@ -98,14 +99,14 @@ describe("decodeMergeCallback()", () => {
   it("should read every digit of a multi-digit id back", () => {
     expect(decodeMergeCallback("m:12.34:p:56")).toEqual({
       selection: [ANYA, TWO_DIGIT_ID],
-      action: { kind: "pick", playerId: MULTI_DIGIT_ARG },
+      action: { kind: ActionKind.Pick, playerId: MULTI_DIGIT_ARG },
     });
   });
 });
 
 describe("MERGE_TAPS", () => {
   it("should match what the codec writes", () => {
-    const data = encodeMergeCallback({ selection: [ANYA], action: { kind: "confirm" } });
+    const data = encodeMergeCallback({ selection: [ANYA], action: { kind: ActionKind.Confirm } });
 
     expect(MERGE_TAPS.test(data)).toBe(true);
   });
