@@ -36,6 +36,13 @@ supply the functions and nothing else. The fix is never to add the table to the
 factory — that is a second copy of the vocabulary — it is `game-outcomes.ts`,
 `card-states.ts`, `log-levels.ts`: files with nothing in them to mock.
 
+**A spec narrows a union through the table too.** `award?.name === AwardName.King`,
+not `=== "king"`. `project/named-states` stops at `src/`'s non-spec files on
+purpose — a spec also compares wire values, and `call[0] === "help"` or
+`method === "sendMessage"` are the literal under test, not a state somebody spelled
+twice — so this one is a review question rather than a lint rule. The distinction
+is whether the string is the subject's own vocabulary or somebody else's protocol.
+
 **The corollary bites: no logic may live in a data table.** Because `copy.en.ts` is
 deliberately never mocked, a decision taken inside it is asserted against itself and
 is therefore **unkillable** — a spec comparing `report` to `copy.problemTally(…)`

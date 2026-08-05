@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Appearance, SessionAppearances, PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 import type { Merit } from "#scoresheet/domain/awards/pick-winner.ts";
 
@@ -86,7 +87,7 @@ describe("ironSeat()", () => {
     soleBySpy.mockReturnValue(SOMEBODY);
     const award = ironSeat(sessionAppearances([SOMEBODY], NINETEEN));
 
-    expect(award?.name === "ironSeat" ? [award.winners, award.games] : []).toEqual([
+    expect(award?.name === AwardName.IronSeat ? [award.winners, award.games] : []).toEqual([
       [DIMA],
       NINETEEN,
     ]);
@@ -138,7 +139,7 @@ describe("theTruce()", () => {
   it("should count one draw when two players shared the same last place", () => {
     const award = theTruce(sessionAppearances([DREW, ALSO_DREW]));
 
-    expect(award?.name === "theTruce" ? [award.draws, award.games] : []).toEqual([ONCE, NINETEEN]);
+    expect(award?.name === AwardName.TheTruce ? [award.draws, award.games] : []).toEqual([ONCE, NINETEEN]);
   });
 
   it("should count two draws played in different games", () => {
@@ -150,7 +151,7 @@ describe("theTruce()", () => {
     );
     const award = theTruce(sessionAppearances([twice]));
 
-    expect(award?.name === "theTruce" ? award.draws : NOTHING).toBe(TWICE);
+    expect(award?.name === AwardName.TheTruce ? award.draws : NOTHING).toBe(TWICE);
   });
 
   it("should count only the games that were actually drawn", () => {
@@ -162,7 +163,7 @@ describe("theTruce()", () => {
     );
     const award = theTruce(sessionAppearances([mixed]));
 
-    expect(award?.name === "theTruce" ? award.draws : NOTHING).toBe(ONCE);
+    expect(award?.name === AwardName.TheTruce ? award.draws : NOTHING).toBe(ONCE);
   });
 });
 
@@ -194,7 +195,7 @@ describe("theIrishGoodbye()", () => {
     lastRoundOfSpy.mockReturnValue(SEVEN);
     const award = theIrishGoodbye(sessionAppearances([SLIPPED_AWAY]));
 
-    expect(award?.name === "theIrishGoodbye" ? [award.leftAfter, award.games] : []).toEqual([
+    expect(award?.name === AwardName.TheIrishGoodbye ? [award.leftAfter, award.games] : []).toEqual([
       EIGHT,
       NINETEEN,
     ]);
@@ -242,7 +243,7 @@ describe("firstBlood()", () => {
     foolByRoundSpy.mockReturnValue([VERONIKA, DIMA]);
     const award = firstBlood(sessionAppearances([SOMEBODY]));
 
-    expect(award?.name === "firstBlood" ? [award.winners, award.games] : []).toEqual([
+    expect(award?.name === AwardName.FirstBlood ? [award.winners, award.games] : []).toEqual([
       [VERONIKA],
       NINETEEN,
     ]);

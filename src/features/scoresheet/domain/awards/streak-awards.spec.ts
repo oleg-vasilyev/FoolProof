@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Appearance, SessionAppearances, PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 import type { Merit } from "#scoresheet/domain/awards/pick-winner.ts";
 
@@ -74,7 +75,7 @@ describe("teflon()", () => {
     bestBySpy.mockReturnValue(SEVEN_CLEAN);
     const award = teflon(sessionAppearances(SEVEN_CLEAN));
 
-    expect(award?.name === "teflon" ? award.streak : NOTHING).toBe(SEVEN);
+    expect(award?.name === AwardName.Teflon ? award.streak : NOTHING).toBe(SEVEN);
   });
 
   it("should name the player who kept clean", () => {
@@ -126,7 +127,7 @@ describe("sweetRevenge()", () => {
     foolCountSpy.mockReturnValue(TWICE);
     const award = sweetRevenge(sessionAppearances(AVENGER));
 
-    expect(award?.name === "sweetRevenge" ? [award.fools, award.comebacks] : []).toEqual([
+    expect(award?.name === AwardName.SweetRevenge ? [award.fools, award.comebacks] : []).toEqual([
       TWICE,
       TWICE,
     ]);
@@ -187,7 +188,7 @@ describe("encore()", () => {
     bestBySpy.mockReturnValue(REPEATER);
     const award = encore(sessionAppearances(REPEATER));
 
-    expect(award?.name === "encore" ? award.run : NOTHING).toBe(TWICE);
+    expect(award?.name === AwardName.Encore ? award.run : NOTHING).toBe(TWICE);
   });
 
   it("should name the player who repeated", () => {

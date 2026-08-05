@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { ENOUGH_GAMES } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Appearance, SessionAppearances, PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 import type { Merit } from "#scoresheet/domain/awards/pick-winner.ts";
@@ -96,7 +97,7 @@ describe("untouchable()", () => {
     bestBySpy.mockReturnValue(LOPSIDED);
     const award = untouchable(sessionAppearances(LOPSIDED));
 
-    expect(award?.name === "untouchable" ? award.games : NOTHING).toBe(TEN);
+    expect(award?.name === AwardName.Untouchable ? award.games : NOTHING).toBe(TEN);
   });
 
   it("should name the player who survived", () => {
@@ -144,7 +145,7 @@ describe("allOrNothing()", () => {
     bestBySpy.mockReturnValue(LOPSIDED);
     const award = allOrNothing(sessionAppearances(LOPSIDED));
 
-    expect(award?.name === "allOrNothing" ? [award.edges, award.games] : []).toEqual([
+    expect(award?.name === AwardName.AllOrNothing ? [award.edges, award.games] : []).toEqual([
       AT_THE_EDGES,
       TEN,
     ]);
@@ -202,7 +203,7 @@ describe("theInvisible()", () => {
     bestBySpy.mockReturnValue(MIDDLING);
     const award = theInvisible(sessionAppearances(MIDDLING));
 
-    expect(award?.name === "theInvisible" ? [award.middles, award.games] : []).toEqual([
+    expect(award?.name === AwardName.TheInvisible ? [award.middles, award.games] : []).toEqual([
       IN_THE_MIDDLE,
       TEN,
     ]);

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { SessionAppearances, PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 import type { Merit } from "#scoresheet/domain/awards/pick-winner.ts";
 
@@ -60,7 +61,7 @@ describe("dealersCurse()", () => {
     bestBySpy.mockReturnValue(player);
     const award = dealersCurse(DEALT_FIVE);
 
-    expect(award?.name === "dealersCurse" ? [award.deals, award.burns] : []).toEqual([FIVE, TWICE]);
+    expect(award?.name === AwardName.DealersCurse ? [award.deals, award.burns] : []).toEqual([FIVE, TWICE]);
   });
 
   describe("who is eligible", () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Outcome } from "#merge-names/domain/merge-states.ts";
 import {
   apply,
   candidateOf,
@@ -46,7 +47,7 @@ const selectionAfter = (selection: Selection, taps: readonly number[]): Selectio
   taps.reduce((carried, playerId) => {
     const transition = apply(ROSTER, carried, { kind: "pick", playerId });
 
-    return transition.outcome === "updated" ? transition.selection : carried;
+    return transition.outcome === Outcome.Updated ? transition.selection : carried;
   }, selection);
 
 describe("candidateOf()", () => {

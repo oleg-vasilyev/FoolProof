@@ -39,7 +39,7 @@ const updatedState = (state: CardState, ...slots: readonly number[]): CardState 
   slots.reduce((current, slot) => {
     const transition = apply(current, { kind: ActionKind.Pick, slot });
 
-    return transition.outcome === "updated" ? transition.state : current;
+    return transition.outcome === Outcome.Updated ? transition.state : current;
   }, state);
 
 describe("phaseOf()", () => {
@@ -335,7 +335,7 @@ describe("apply()", () => {
 
       const walked = [1, 2, 3].reduce((current) => {
         const transition = apply(current, { kind: ActionKind.Back });
-        const next = transition.outcome === "updated" ? transition.state : current;
+        const next = transition.outcome === Outcome.Updated ? transition.state : current;
         steps.push(next);
 
         return next;

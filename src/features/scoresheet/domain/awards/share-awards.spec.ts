@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { ENOUGH_GAMES } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { SessionAppearances, PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 import type { Merit } from "#scoresheet/domain/awards/pick-winner.ts";
@@ -72,14 +73,14 @@ describe("kingOfTheTable()", () => {
     bestBySpy.mockReturnValue(winner);
     const award = kingOfTheTable(EVENING);
 
-    expect(award?.name === "king" ? award.percent : NOTHING).toBe(KING_PERCENT);
+    expect(award?.name === AwardName.King ? award.percent : NOTHING).toBe(KING_PERCENT);
   });
 
   it("should report the games behind that share", () => {
     bestBySpy.mockReturnValue(winner);
     const award = kingOfTheTable(EVENING);
 
-    expect(award?.name === "king" ? award.games : NOTHING).toBe(EIGHTEEN);
+    expect(award?.name === AwardName.King ? award.games : NOTHING).toBe(EIGHTEEN);
   });
 
   describe("who is eligible", () => {
@@ -122,7 +123,7 @@ describe("foolOfTheNight()", () => {
     foolCountSpy.mockReturnValue(TWICE);
     const award = foolOfTheNight(EVENING);
 
-    expect(award?.name === "foolOfTheNight" ? [award.fools, award.games] : []).toEqual([
+    expect(award?.name === AwardName.FoolOfTheNight ? [award.fools, award.games] : []).toEqual([
       TWICE,
       EIGHTEEN,
     ]);

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { PlayerColumn, SeriesChronology } from "#shared/repository/repository-contract.ts";
 import type { Award, Honours, TableCurse } from "#scoresheet/domain/awards/award-catalogue.ts";
 
@@ -142,7 +143,7 @@ describe("awardsLayoutOf()", () => {
 
       const sheet = awardsLayoutOf(chronologyOf(2), honours);
 
-      expect(sheet.rows.some((placed) => placed.award.name === "foolOfTheNight")).toBe(false);
+      expect(sheet.rows.some((placed) => placed.award.name === AwardName.FoolOfTheNight)).toBe(false);
     });
   });
 
