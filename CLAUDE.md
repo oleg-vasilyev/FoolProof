@@ -274,11 +274,12 @@ source tree, so they are here:
   test, and is named `*.integration.spec.ts`. There are two; the bar for a third is
   a bug that got through the units.
 
-`e2e/` is a different world with its own rules, and it is parked: writing one is the
-`write-an-e2e-scenario` skill, the harness is [`e2e/README.md`](e2e/README.md), and
-`TECH-DEBT.md` says when to come back. One obligation reaches back here: **a feature
-with an inline keyboard gets scenarios**, because whether a tap reaches the feature
-that owns it is a fact about real grammY.
+`e2e/` is a different world with its own rules: writing one is the
+`write-an-e2e-scenario` skill and the harness is [`e2e/README.md`](e2e/README.md).
+It is **a gate now, not a parked experiment** — `npm run e2e:changed` plays the
+scenarios the diff can reach. One obligation reaches back here: **a feature with an
+inline keyboard gets scenarios**, because whether a tap reaches the feature that
+owns it is a fact about real grammY.
 
 ## Checks
 
@@ -318,11 +319,12 @@ the edit instead of at the end of the turn.
 
 ### Finishing a phase
 
-A phase is done when the code is *releasable*, not when it works. Five gates run
+A phase is done when the code is *releasable*, not when it works. Six gates run
 before the final commit — `npm run check`, coverage (70% floor), mutation (breaks
-below 85%), a review pass over the whole diff, and a retrospective on how the phase
-was carried out — and the numbers go in the commit message. The procedure is the
-**`finish-phase` skill**; the review pass has a `phase-reviewer` subagent.
+below 85%), `npm run e2e:changed`, a review pass over the whole diff, and a
+retrospective on how the phase was carried out — and the numbers go in the commit
+message. The procedure is the **`finish-phase` skill**; the review pass has a
+`phase-reviewer` subagent.
 
 Mutation runs over the phase's diff (`npm run test:mutation:changed`, about a
 minute); the full run happens once before a tag.

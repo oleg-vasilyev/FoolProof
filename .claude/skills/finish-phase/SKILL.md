@@ -1,12 +1,12 @@
 ---
 name: finish-phase
-description: Run the release ritual that closes a development phase in FoolProof — the five gates (check, coverage, mutation, diff review, retrospective) and the format of the phase's final commit message. Use when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
+description: Run the release ritual that closes a development phase in FoolProof — the six gates (check, coverage, mutation, e2e, diff review, retrospective) and the format of the phase's final commit message. Use when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
 ---
 
 # Finishing a phase
 
 A phase ends with a release, and a phase is done when the code is *releasable* —
-not when it works. Run all five gates before the final commit and act on what
+not when it works. Run all six gates before the final commit and act on what
 they say. None of them is advisory.
 
 ## 1. `npm run check`
@@ -67,7 +67,22 @@ them:
   changes nothing observable. Recognising this is cheaper than writing the test that
   cannot exist.
 
-## 4. A review pass over the phase's whole diff
+## 4. `npm run e2e:changed`
+
+Plays the scenarios the diff can reach: a change under `src/features/<X>/` plays
+what `scripts/e2e-changed.ts` lists for `<X>`, a change under `shared/`, `main.ts`
+or the harness plays everything, and a changed scenario file plays itself. It errs
+towards playing too much — an unknown feature folder means the map is out of date,
+so everything runs rather than nothing.
+
+This is a real gate rather than a smoke test, and it is cheap because it is
+selective: a phase inside one feature usually plays two or three files in about
+fifteen seconds. Before a tag, run `npm run e2e` in full.
+
+`npm run e2e:test` covers the harness's own pure parts and takes under a second; it
+is not part of `npm run check` because it belongs to `e2e/`, not to the app.
+
+## 5. A review pass over the phase's whole diff
 
 Read `git diff <phase-start>..HEAD` against `CLAUDE.md` — the whole diff at once,
 not the individual commits, because a rule breaks across commits more often than
@@ -90,7 +105,7 @@ Ask of every touched file:
   subject is someone else's code?
 - Does the file's name still describe what is in it?
 
-## 5. A retrospective on how the phase was carried out
+## 6. A retrospective on how the phase was carried out
 
 Gate 4 judges the diff; this one judges what producing it cost — rework, gates run
 twice, subagents briefed too thinly to be useful. Load the **`retrospective`**
@@ -109,7 +124,7 @@ fails gate 1 rather than surviving to the next cleanup.
 
 ## Scaling the ritual to the change
 
-The five gates are not negotiable. What the phase *produces around them* is, and
+The six gates are not negotiable. What the phase *produces around them* is, and
 the default was written for a phase that changes a contract. A **small** phase —
 one that stays inside a single feature folder, adds no repository method, changes
 no schema and no `shared/` type — earns a shorter path:
@@ -121,7 +136,7 @@ no schema and no `shared/` type — earns a shorter path:
 | `CLAUDE.md` | untouched | edited only when a *rule* changed |
 | `TECH-DEBT.md` | untouched | an entry only if something is actually owed |
 | `e2e/` | scenarios only if it has an inline keyboard | same |
-| Gates | all five, mutation over the diff | all five, mutation over the diff |
+| Gates | all six, mutation and e2e over the diff | all six, mutation and e2e over the diff |
 
 The test rules do not bend: every file still gets a spec, because that is what
 holds the mutation score up and it is the cheapest part to write. What bends is

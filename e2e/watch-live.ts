@@ -49,7 +49,7 @@ process.stdout.write(`\n  every scenario, live, in one tab: ${hubUrl}\n\n`);
 
 const run = spawn(process.execPath, [VITEST, "run", "--config", CONFIG], {
   stdio: "inherit",
-  env: { ...process.env, E2E_PACE_MS: PACE_MS },
+  env: { ...process.env, E2E_PACE_MS: PACE_MS, E2E_HUB_PORT: String(HUB_PORT) },
 });
 
 run.once("exit", () => {

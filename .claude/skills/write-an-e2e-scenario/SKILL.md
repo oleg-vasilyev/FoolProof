@@ -13,8 +13,9 @@ not when writing a scenario.
 
 ## First: is one owed?
 
-Usually not. The harness is **parked** — not a release gate, nothing depends on it
-— so a scenario is a cost with no automatic return. Two things earn one:
+Usually not. A scenario is the slowest test this project has, and `npm run
+e2e:changed` will play it on every phase that touches its feature — so it is a
+standing cost, not a one-off. Two things earn one:
 
 - **A feature with an inline keyboard.** Whether a tap reaches the feature that owns
   it is a fact about real grammY that no unit can reach, and it was wrong once

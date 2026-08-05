@@ -6,9 +6,11 @@ the whole thing. So this folder plays whole scenarios against a **real
 `src/main.ts` process** on a real SQLite file, with a fake Telegram on the other
 end.
 
-How to run it is in the root [README](../README.md#watching-it-play). What is
-deliberately unfinished about it is in [TECH-DEBT.md](../TECH-DEBT.md) — the
-harness is **parked**: it is not a release gate and nothing depends on it.
+How to run it is in the root [README](../README.md#watching-it-play). It used to be
+parked — not a gate, nothing depending on it — because seven honest problems stood
+between it and being trusted. Six are closed and the seventh is in
+[TECH-DEBT.md](../TECH-DEBT.md): a graceful shutdown cannot be played on Windows.
+So it is **a gate now**, and `npm run e2e:changed` plays only what a diff can reach.
 
 **This file is about the harness, not about writing a scenario.** Whether one is
 owed, the verbs a scenario drives the chat with, and what it must assert are the

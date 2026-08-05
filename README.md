@@ -219,6 +219,7 @@ environment value is ever printed.
 | `npm run e2e` | Whole scenarios against the real bot and a fake Telegram |
 | `npm run e2e:watch` | The same run, slowed down, in one browser tab |
 | `npm run e2e:play` | A chat in the browser to try things by hand |
+| `npm run e2e:test` | Units for the harness's own pure parts |
 | `npm run e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
 | `npm run docs:check` | Links, anchors, the source tree and the script table above |
 
@@ -271,9 +272,10 @@ One chat, nobody driving it, pointed at the dev database. Type in the box and ta
 the buttons — it is the same fake Telegram, so the bot cannot tell the difference.
 Add `--db=data/somewhere.db` to keep an experiment out of the dev database.
 
-The harness is deliberately walled off from the app and is **parked** — not a
-release gate, nothing depends on it. [`e2e/README.md`](e2e/README.md) has its rules,
-`TECH-DEBT.md` says what is wrong with it and when to come back.
+The harness is deliberately walled off from the app, and it is **a release gate**:
+`npm run e2e:changed` plays the scenarios a diff can reach.
+[`e2e/README.md`](e2e/README.md) has its rules, `TECH-DEBT.md` has the one thing
+still wrong with it.
 
 ## Layout
 

@@ -1,0 +1,26 @@
+{
+  // These two files are the only browser code in the repository. They used to live
+  // inside template literals, where TypeScript saw 250 lines of program as a string
+  // — which is how a page that fetched the wrong path looked dead for two rounds of
+  // "fixed it". They are plain .js because there is no build step and the browser is
+  // handed the file as written; `checkJs` is what makes the compiler read them.
+  //
+  // `strict` is off on purpose. The value here is catching a misspelled identifier,
+  // a property that does not exist on an Element, or a call with the wrong number of
+  // arguments — not annotating every DOM lookup that can return null, which would
+  // cost more than the bugs it would find in a viewing tool.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": true,
+    "checkJs": true,
+    "strict": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": ["*.js"]
+}

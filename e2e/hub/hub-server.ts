@@ -2,6 +2,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { chatPage } from "../fake-telegram/chat-page.ts";
 import { hubPage } from "./hub-page.ts";
 import { createWorldCache, type WorldCache } from "./world-cache.ts";
+import { worldPorts } from "../world-ports.ts";
 
 
 const OK = 200;
@@ -9,10 +10,6 @@ const OK = 200;
 const NOT_FOUND = 404;
 
 const GONE = 410;
-
-const FIRST_WORLD_PORT = 8090;
-
-const MOST_WORLDS = 9;
 
 const PROBE_TIMEOUT_MS = 3000;
 
@@ -27,6 +24,8 @@ const PNG_TYPE = "image/png";
 const WORLD_PATH = /^\/world\/([0-9]+)(\/.*)?$/;
 
 const PHOTO_PATH = /^\/photo\/([0-9]+)$/;
+
+const ANNOUNCE_PATH = /^\/announce\/([0-9]+)$/;
 
 interface Played {
   readonly index: number;
@@ -117,10 +116,8 @@ const watchWorlds = (cache: WorldCache): NodeJS.Timeout => {
   };
 
   const sweep = async (): Promise<void> => {
-    const ports = Array.from({ length: MOST_WORLDS }, (_, index) => FIRST_WORLD_PORT + index);
-
     await Promise.all(
-      ports.map(async (port) => {
+      worldPorts().map(async (port) => {
         const answer = await askWorld(port, "/chat/state", "GET", undefined);
 
         if (answer === null) {
@@ -211,6 +208,17 @@ const route = async (
 
   if (world !== null) {
     return serveWorld(cache, Number(world[1]), world[2] ?? "/", request, response);
+  }
+
+  // A world hands over its last state as it goes, rather than staying alive long
+  // enough to be swept one more time.
+  const announced = ANNOUNCE_PATH.exec(path);
+
+  if (announced !== null) {
+    cache.rememberState(Number(announced[1]), (await readBody(request)).toString("utf8"));
+    send(response, OK, JSON_TYPE, "{}");
+
+    return;
   }
 
   switch (path) {

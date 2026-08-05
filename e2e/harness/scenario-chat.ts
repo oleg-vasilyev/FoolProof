@@ -4,13 +4,12 @@ import { createChatWorld } from "../fake-telegram/chat-world.ts";
 import type { Banner, Verdict } from "../fake-telegram/chat-world.ts";
 import type { ChatMessage } from "../fake-telegram/chat-log.ts";
 import type { Person, PublishedCommand, Prompt } from "../fake-telegram/fake-telegram.ts";
+import { databaseForWorker, portForWorker } from "../world-ports.ts";
+import { claimWorld } from "./world-claim.ts";
+import { announceTo } from "./hub-announce.ts";
+import { QUIET_MS } from "./settling.ts";
 
 
-const FIRST_WORLD_PORT = 8090;
-
-const LONE_WORKER = "1";
-
-const QUIET_MS = 600;
 
 const POLL_MS = 25;
 
@@ -22,10 +21,6 @@ const NOTHING = 0;
 
 const NO_PACE = 0;
 
-// The hub keeps the last state it managed to read, so the final verdict has to be
-// readable for one of its rounds before the world goes away with its worker.
-const HANDOVER_MS = 700;
-
 const OPERATOR_TG_ID = "777";
 
 const LOG_LEVEL = "warn";
@@ -36,6 +31,7 @@ interface WorldState {
   readonly commands: readonly PublishedCommand[];
   readonly prompt: Prompt | null;
   readonly banner: Banner;
+  readonly verdicts: readonly Verdict[];
   readonly pendingUpdates: number;
   readonly msSinceLastEffect: number;
   readonly polling: boolean;
@@ -71,12 +67,6 @@ export interface Chat {
   photoBytes(): Buffer | undefined;
 }
 
-const workerPort = (): number =>
-  FIRST_WORLD_PORT + Number(process.env.VITEST_WORKER_ID ?? LONE_WORKER);
-
-const workerDatabase = (): string =>
-  `data/foolproof.e2e-${process.env.VITEST_WORKER_ID ?? LONE_WORKER}.db`;
-
 const paceMs = (): number => Number(process.env.E2E_PACE_MS ?? String(NO_PACE));
 
 const sleep = (ms: number): Promise<void> => new Promise((done) => setTimeout(done, ms));
@@ -84,16 +74,25 @@ const sleep = (ms: number): Promise<void> => new Promise((done) => setTimeout(do
 const captionsOf = (card: ChatMessage | undefined): readonly string[] =>
   (card?.buttons ?? []).flatMap((row) => row.map((button) => button.text));
 
-const port = workerPort();
+const worker = process.env.VITEST_WORKER_ID;
+
+const port = portForWorker(worker);
 
 const origin = `http://127.0.0.1:${String(port)}`;
 
 // One world per worker, not one per file: the chat then reads as one long
 // conversation the way Telegram does, and the port is never reopened — which is
 // what used to make a run flake when two files landed on the same worker.
+//
+// That depends on `isolate: false`, which rebuilds nothing between files. With
+// isolation this module is evaluated again per file, and the symptom is not a
+// failure — it is a chat that quietly loses its history and a port that races
+// itself. So the second evaluation says so.
+claimWorld(port);
+
 const world = createChatWorld({
   apiRoot: origin,
-  dbPath: workerDatabase(),
+  dbPath: databaseForWorker(worker),
   logLevel: LOG_LEVEL,
   operatorTgId: OPERATOR_TG_ID,
   echo: false,
@@ -105,6 +104,7 @@ export const createChat = (): Chat => {
   const refresh = (): WorldState => ({
     ...world.telegram.snapshot(),
     banner: world.banner,
+    verdicts: world.verdicts,
     pendingUpdates: world.telegram.pendingUpdates(),
     msSinceLastEffect: world.telegram.msSinceLastEffect(),
     polling: world.telegram.polling(),
@@ -167,7 +167,7 @@ export const createChat = (): Chat => {
     },
 
     close: async () => {
-      await sleep(HANDOVER_MS);
+      await announceTo(port, refresh());
       await world.stop();
     },
 
