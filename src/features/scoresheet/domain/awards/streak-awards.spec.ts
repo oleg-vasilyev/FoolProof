@@ -77,6 +77,12 @@ describe("teflon()", () => {
     expect(award?.name === "teflon" ? award.streak : NOTHING).toBe(SEVEN);
   });
 
+  it("should name the player who kept clean", () => {
+    bestBySpy.mockReturnValue(SEVEN_CLEAN);
+
+    expect(teflon(sessionAppearances(SEVEN_CLEAN))?.winners).toEqual([DIMA]);
+  });
+
   describe("who is eligible", () => {
     it("should rank a player by their longest run without being the fool", () => {
       teflon(sessionAppearances(SEVEN_CLEAN));
@@ -126,6 +132,19 @@ describe("sweetRevenge()", () => {
     ]);
   });
 
+  it("should name the player who came back", () => {
+    bestBySpy.mockReturnValue(AVENGER);
+
+    expect(sweetRevenge(sessionAppearances(AVENGER))?.winners).toEqual([DIMA]);
+  });
+
+  it("should not count a middling game as a comeback", () => {
+    sweetRevenge(sessionAppearances(SULKER));
+
+    expect(meritGiven()(SULKER)).toBeNull();
+    expect(meritGiven()(AVENGER)).toBe(TWICE);
+  });
+
   describe("who is eligible", () => {
     it("should count only a fool followed by going out first next time", () => {
       sweetRevenge(sessionAppearances(AVENGER));
@@ -169,6 +188,12 @@ describe("encore()", () => {
     const award = encore(sessionAppearances(REPEATER));
 
     expect(award?.name === "encore" ? award.run : NOTHING).toBe(TWICE);
+  });
+
+  it("should name the player who repeated", () => {
+    bestBySpy.mockReturnValue(REPEATER);
+
+    expect(encore(sessionAppearances(REPEATER))?.winners).toEqual([DIMA]);
   });
 
   describe("who is eligible", () => {

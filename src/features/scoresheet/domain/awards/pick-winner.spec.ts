@@ -79,6 +79,12 @@ describe("bestBy()", () => {
     expect(playedGamesSpy).toHaveBeenCalledTimes(TWICE);
   });
 
+  it("should let more games win even when the other id sorts first", () => {
+    playedGamesSpy.mockReturnValueOnce(FEW).mockReturnValueOnce(MANY);
+
+    expect(bestBy([LOW, HIGH], () => ONCE)).toBe(LOW);
+  });
+
   it("should break a tie on games by the lower player id", () => {
     expect(bestBy([HIGH, LOW], () => ONCE)).toBe(LOW);
   });
