@@ -87,6 +87,15 @@ failed poll while the chat was still empty pinned the notice in place, and every
 later poll agreed nothing had changed. Anything that writes to the feed writes to
 `feedShown` too.
 
+A fourth was not in this code at all. The hub answers **`410 Gone`** for a world
+its sweep has not reached yet, a browser opens its tab within a second of the hub
+starting, and **`410` is heuristically cacheable** — so Chrome kept that answer and
+never asked again, for as long as the tab stayed open. `curl` has no cache, which
+is why it could not be reproduced from a terminal. Both ends now refuse the cache:
+every hub response carries `cache-control: no-store`, and every poll passes
+`{ cache: "no-store" }`, which is also what rescues a browser whose cache was
+poisoned before the header existed.
+
 The chat page renders the bot's message text as **raw HTML**, which is what
 Telegram does with `parse_mode: "HTML"`. That is deliberate: a name the bot failed
 to escape shows up as markup on the page instead of hiding in a string comparison.

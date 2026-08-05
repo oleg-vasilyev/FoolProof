@@ -178,9 +178,12 @@ const script = (base: string): string => `
     }
   };
 
+  // Never off the browser's cache: the hub answers 410 for a world it has not swept
+  // yet, a 410 is cacheable, and a tab that asked one moment too early then stopped
+  // asking for as long as it stayed open.
   const POLL_MS = 350;
   const tick = () =>
-    fetch(BASE + "chat/state")
+    fetch(BASE + "chat/state", { cache: "no-store" })
       .then((r) => (r.ok ? r.json().then(draw) : nothingHere("this world has not started yet")))
       .catch(() => nothingHere("the run has stopped — this page is a leftover"));
   setInterval(tick, POLL_MS);

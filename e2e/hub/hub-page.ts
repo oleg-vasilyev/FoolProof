@@ -72,7 +72,7 @@ const script = `
 
   const POLL_MS = 500;
   const tick = () =>
-    fetch("/worlds")
+    fetch("/worlds", { cache: "no-store" })
       .then((r) => r.json())
       .then((worlds) => { answering(true); paint(worlds); })
       .catch(() => answering(false));

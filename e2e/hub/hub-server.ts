@@ -38,6 +38,23 @@ interface WorldCard {
 const urlOf = (port: number, path: string): string =>
   `http://127.0.0.1:${String(port)}${path}`;
 
+// Every answer here is a live reading, and one of them is `410 Gone` for a world
+// the sweep has not reached yet. A 410 is heuristically cacheable, so a browser
+// that asked one moment too early kept its copy and stopped asking — which looked
+// exactly like a world that never started, for as long as the tab stayed open.
+const send = (
+  response: ServerResponse,
+  status: number,
+  type: string | null,
+  body?: string | Buffer
+): void => {
+  response.writeHead(status, {
+    "cache-control": "no-store",
+    ...(type === null ? {} : { "content-type": type }),
+  });
+  response.end(body);
+};
+
 const askWorld = async (
   port: number,
   path: string,
@@ -122,10 +139,9 @@ const serveWorld = async (
   response: ServerResponse
 ): Promise<void> => {
   if (path === "/") {
-    response.writeHead(cache.stateOf(port) === undefined ? NOT_FOUND : OK, {
-      "content-type": HTML_TYPE,
-    });
-    response.end(chatPage(`/world/${String(port)}/`));
+    const status = cache.stateOf(port) === undefined ? NOT_FOUND : OK;
+
+    send(response, status, HTML_TYPE, chatPage(`/world/${String(port)}/`));
 
     return;
   }
@@ -133,12 +149,10 @@ const serveWorld = async (
   const body = await readBody(request);
   const answer = await askWorld(port, path, request.method ?? "GET", body);
   const photo = PHOTO_PATH.exec(path)?.[1];
+  const type = photo === undefined ? JSON_TYPE : PNG_TYPE;
 
   if (answer !== null) {
-    const bytes = Buffer.from(await answer.arrayBuffer());
-
-    response.writeHead(OK, { "content-type": photo === undefined ? JSON_TYPE : PNG_TYPE });
-    response.end(bytes);
+    send(response, OK, type, Buffer.from(await answer.arrayBuffer()));
 
     return;
   }
@@ -147,14 +161,12 @@ const serveWorld = async (
     photo === undefined ? cache.stateOf(port) : cache.photoOf(port, Number(photo));
 
   if (remembered === undefined) {
-    response.writeHead(GONE);
-    response.end();
+    send(response, GONE, null);
 
     return;
   }
 
-  response.writeHead(OK, { "content-type": photo === undefined ? JSON_TYPE : PNG_TYPE });
-  response.end(remembered);
+  send(response, OK, type, remembered);
 };
 
 const route = async (
@@ -171,21 +183,17 @@ const route = async (
 
   switch (path) {
     case "/":
-      response.writeHead(OK, { "content-type": HTML_TYPE });
-      response.end(hubPage());
+      send(response, OK, HTML_TYPE, hubPage());
 
       return;
 
-    case "/worlds": {
-      response.writeHead(OK, { "content-type": JSON_TYPE });
-      response.end(JSON.stringify(await worldCards(cache)));
+    case "/worlds":
+      send(response, OK, JSON_TYPE, JSON.stringify(await worldCards(cache)));
 
       return;
-    }
 
     default:
-      response.writeHead(NOT_FOUND);
-      response.end();
+      send(response, NOT_FOUND, null);
   }
 };
 
@@ -194,10 +202,7 @@ export const startHub = async (port: number): Promise<Server> => {
   const watching = watchWorlds(cache);
 
   const server = createServer((request, response) => {
-    void route(cache, request, response).catch(() => {
-      response.writeHead(NOT_FOUND);
-      response.end();
-    });
+    void route(cache, request, response).catch(() => send(response, NOT_FOUND, null));
   });
 
   server.once("close", () => clearInterval(watching));
