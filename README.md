@@ -217,7 +217,7 @@ environment value is ever printed.
 | `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run e2e` | Whole scenarios against the real bot and a fake Telegram |
-| `npm run e2e:watch` | The same run, slowed down, in the browser |
+| `npm run e2e:watch` | The same run, slowed down, in one browser tab |
 | `npm run e2e:play` | A chat in the browser to try things by hand |
 | `npm run e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
 | `npm run docs:check` | Links, anchors, the source tree and the script table above |
@@ -245,17 +245,21 @@ they run at the same time — one per worker.
 npm run e2e:watch
 ```
 
-The same run with a pause after every action, and **a browser tab per world** as
-each one starts — the tab is titled after the scenario running in it, with a `✓` or
-a `✗` once it is done. Each tab is the chat: the messages as Telegram would show
-them, the inline keyboard, the callback answers as toasts, the `/stats` picture, and
-a divider between scenarios so nothing scrolls away.
-<http://127.0.0.1:8080> shows all of them together if you want one page.
+The same run with a pause after every action, and **one browser tab** —
+<http://127.0.0.1:8080> — holding every world side by side as a live frame. Each
+frame is the chat: the messages as Telegram would show them, the inline keyboard,
+the callback answers as toasts, the `/stats` picture, and a divider between
+scenarios so nothing scrolls away. A frame is outlined by how its scenario is
+going, and `open on its own ↗` gives one world a tab to itself.
 
-**The chats stay up after the run ends.** The hub keeps the last state of every
-world and the pictures it drew, so the tabs are still there to read when the
-scenarios have finished and their bots are gone. Ctrl+C in the terminal lets them
-go.
+It is one tab rather than one per world because **a tab opened by the operating
+system cannot be closed again by the process that opened it** — five of them
+outlived every run and had to be dismissed by hand.
+
+**The chats stay readable after the run ends.** The hub keeps the last state of
+every world and the pictures it drew, so the page still has everything when the
+scenarios have finished and their bots are gone; it says so in the header rather
+than looking broken. Ctrl+C in the terminal ends it.
 
 ```bash
 npm run e2e:play

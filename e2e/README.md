@@ -80,6 +80,13 @@ trailing slash — a relative `chat/state` under `/world/8090` resolves to
 `/world/chat/state`, which matches no route, and that looked exactly like a dead
 world for two rounds of "fixed it".
 
+A third round of the same illusion came from the page's own redraw. It skips the
+feed when the markup it computed matches what it last drew, and the "nothing here"
+notice wrote into the feed **without** recording what it had written — so one
+failed poll while the chat was still empty pinned the notice in place, and every
+later poll agreed nothing had changed. Anything that writes to the feed writes to
+`feedShown` too.
+
 The chat page renders the bot's message text as **raw HTML**, which is what
 Telegram does with `parse_mode: "HTML"`. That is deliberate: a name the bot failed
 to escape shows up as markup on the page instead of hiding in a string comparison.

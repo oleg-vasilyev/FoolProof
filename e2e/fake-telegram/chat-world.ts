@@ -80,9 +80,9 @@ export const createChatWorld = (botOptions: BotOptions): ChatWorld => {
       banner = { ...banner, verdict, detail };
     },
 
-    stop: async () => {
-      await stopBot();
-      banner = IDLE;
-    },
+    // The verdict is the last thing anybody wants to read off a world, so stopping
+    // keeps it. Resetting to IDLE here lost the result of whichever scenario the
+    // hub happened to sweep between one file's stop and the next file's reset.
+    stop: stopBot,
   };
 };

@@ -57,6 +57,11 @@ const styles = `
   #banner span { color: #8fc7ff; margin-left: 8px; }
   #banner.failed { background: #2a1416; }
   #banner.failed span { color: #ff9b9b; }
+  @media (max-width: 760px) {
+    body { grid-template-columns: 1fr; }
+    aside { display: none; }
+    .msg { max-width: 100%; }
+  }
 `;
 
 const script = (base: string): string => `
@@ -160,17 +165,24 @@ const script = (base: string): string => `
   document.getElementById("send").addEventListener("click", send);
   box.addEventListener("keydown", (event) => { if (event.key === "Enter") send(); });
 
+  // Whatever this writes into the feed has to be written into feedShown too. It
+  // used to leave feedShown at "", so one failed poll while the chat was still
+  // empty pinned the notice there: the next good poll computed the same "" and
+  // decided nothing had changed.
   const nothingHere = (why) => {
     banner.className = "waiting";
     banner.innerHTML = "<b>" + why + "</b>";
-    if (feed.innerHTML === "") feed.innerHTML = '<div class="divider"><span>' + why + "</span></div>";
+    if (feedShown === "") {
+      feedShown = '<div class="divider"><span>' + why + "</span></div>";
+      feed.innerHTML = feedShown;
+    }
   };
 
   const POLL_MS = 350;
   const tick = () =>
     fetch(BASE + "chat/state")
-      .then((r) => (r.ok ? r.json().then(draw) : nothingHere("no world is running on this port")))
-      .catch(() => nothingHere("the fake Telegram is not answering"));
+      .then((r) => (r.ok ? r.json().then(draw) : nothingHere("this world has not started yet")))
+      .catch(() => nothingHere("the run has stopped — this page is a leftover"));
   setInterval(tick, POLL_MS);
   tick();
 `;

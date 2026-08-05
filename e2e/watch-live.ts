@@ -7,8 +7,6 @@ const PACE_MS = "600";
 
 const HUB_PORT = 8080;
 
-const LOOK_FOR_WORLDS_MS = 700;
-
 const VITEST = resolve(import.meta.dirname, "..", "node_modules", "vitest", "vitest.mjs");
 
 const CONFIG = resolve(import.meta.dirname, "vitest.e2e.config.ts");
@@ -32,37 +30,13 @@ const hubUrl = `http://127.0.0.1:${String(HUB_PORT)}`;
 
 const hub = await startHub(HUB_PORT);
 
-const opened = new Set<number>();
+// One tab, not one per world. A tab opened by the operating system cannot be
+// closed again by the process that opened it, so five of them outlive the run and
+// have to be dismissed by hand; the hub already shows every world as a live frame,
+// and it can say for itself when the run is over.
+openInBrowser(hubUrl);
 
-interface WorldCard {
-  readonly port: number;
-  readonly url: string;
-  readonly banner: { readonly verdict: string } | null;
-}
-
-// A world starts listening before its bot is up and before a scenario has named
-// itself, so a tab opened at that moment shows an empty chat and looks broken.
-// Wait until something is actually running in it.
-const openEachNewWorld = async (): Promise<void> => {
-  try {
-    const answer = await fetch(`${hubUrl}/worlds`);
-    const worlds = (await answer.json()) as readonly WorldCard[];
-
-    for (const world of worlds) {
-      if (!opened.has(world.port) && world.banner?.verdict === "running") {
-        opened.add(world.port);
-        openInBrowser(`${hubUrl}${world.url}`);
-      }
-    }
-  } catch {
-    return;
-  }
-};
-
-const looking = setInterval(() => void openEachNewWorld(), LOOK_FOR_WORLDS_MS);
-
-process.stdout.write(`\n  a tab per scenario opens as each one starts\n`);
-process.stdout.write(`  all of them together: ${hubUrl}\n\n`);
+process.stdout.write(`\n  every scenario, live, in one tab: ${hubUrl}\n\n`);
 
 const run = spawn(process.execPath, [VITEST, "run", "--config", CONFIG], {
   stdio: "inherit",
@@ -70,12 +44,14 @@ const run = spawn(process.execPath, [VITEST, "run", "--config", CONFIG], {
 });
 
 run.once("exit", () => {
-  clearInterval(looking);
-  process.stdout.write(`\n  the chats stay open — Ctrl+C here to let them go\n\n`);
+  process.stdout.write(`\n  the chats stay readable — Ctrl+C here to let them go\n\n`);
 });
 
+// The open tab holds a keep-alive socket, and `close` waits for every connection
+// to go idle — so without this, Ctrl+C hangs for as long as the browser is looking.
 const stop = (): void => {
-  clearInterval(looking);
+  run.kill();
+  hub.closeAllConnections();
   hub.close(() => process.exit(STOPPED));
 };
 

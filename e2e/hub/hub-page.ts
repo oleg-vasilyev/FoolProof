@@ -24,6 +24,8 @@ const styles = `
   .finished .top b::after { content: " · finished"; color: #6d7f8f; font-weight: 400; }
   iframe { flex: 1; border: 0; background: #0e1621; }
   #none { padding: 40px; color: #6d7f8f; }
+  #state { color: #d7a24c; margin-left: 10px; }
+  body.stopped #grid { opacity: .55; }
 `;
 
 const script = `
@@ -61,8 +63,19 @@ const script = `
     }
   };
 
+  const state = document.getElementById("state");
+
+  const answering = (yes) => {
+    document.body.className = yes ? "" : "stopped";
+    state.textContent = yes ? "" : "the run has stopped — closing this tab loses nothing";
+  };
+
   const POLL_MS = 500;
-  const tick = () => fetch("/worlds").then((r) => r.json()).then(paint).catch(() => undefined);
+  const tick = () =>
+    fetch("/worlds")
+      .then((r) => r.json())
+      .then((worlds) => { answering(true); paint(worlds); })
+      .catch(() => answering(false));
   setInterval(tick, POLL_MS);
   tick();
 `;
@@ -78,6 +91,7 @@ export const hubPage = (): string => `<!doctype html>
 <header>
   <b>FoolProof e2e</b>
   <span>one chat per worker · the real bot on each · nothing reaches a real Telegram</span>
+  <span id="state"></span>
 </header>
 <div id="grid"></div>
 <div id="none">No world is running yet. Scenarios appear here as workers pick them up, and stay after the run ends.</div>
