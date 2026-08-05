@@ -7,12 +7,18 @@ const requireFontsSpy = vi.fn();
 
 const onStatsSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
 
+const onChronologySpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
+
+const onAwardsSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
+
 vi.mock("#scoresheet/bot/rasterizer.ts", () => ({
   requireFonts: () => requireFontsSpy(),
 }));
 
 vi.mock("#scoresheet/bot/stats-handler.ts", () => ({
   onStats: (context: unknown, ctx: unknown) => onStatsSpy(context, ctx),
+  onChronology: (context: unknown, ctx: unknown) => onChronologySpy(context, ctx),
+  onAwards: (context: unknown, ctx: unknown) => onAwardsSpy(context, ctx),
 }));
 
 const { createScoresheetFeature } = await import("#scoresheet/scoresheet-feature.ts");
@@ -58,23 +64,52 @@ describe("createScoresheetFeature()", () => {
     });
   });
 
-  describe("the command it declares", () => {
-    it("should offer stats and nothing else", () => {
-      expect(build().commands.map((route) => route.command)).toEqual(["stats"]);
+  describe("the commands it declares", () => {
+    const routeFor = (command: string) =>
+      build().commands.find((route) => route.command === command);
+
+    it("should offer the pair and each picture on its own, and nothing else", () => {
+      expect(build().commands.map((route) => route.command)).toEqual([
+        "stats",
+        "stats_chronology",
+        "stats_awards",
+      ]);
     });
 
-    it("should take its menu description from its own copy", () => {
-      expect(build().commands[0]?.menuDescription).toBe(copy.commandStats);
+    it("should take every menu description from its own copy", () => {
+      expect(build().commands.map((route) => route.menuDescription)).toEqual([
+        copy.commandStats,
+        copy.commandChronology,
+        copy.commandAwards,
+      ]);
     });
 
-    it("should take its help line from its own copy", () => {
-      expect(build().commands[0]?.help).toBe(copy.helpStats);
+    it("should take every help line from its own copy", () => {
+      expect(build().commands.map((route) => route.help)).toEqual([
+        copy.helpStats,
+        copy.helpChronology,
+        copy.helpAwards,
+      ]);
     });
 
-    it("should route stats to its own handler", async () => {
-      await build().commands[0]?.run("the-context" as never);
+    it("should route stats to the handler that sends both pictures", async () => {
+      await routeFor("stats")?.run("the-context" as never);
 
       expect(onStatsSpy).toHaveBeenCalledWith({ repo }, "the-context");
+    });
+
+    it("should route the chronology to its own handler", async () => {
+      await routeFor("stats_chronology")?.run("the-context" as never);
+
+      expect(onChronologySpy).toHaveBeenCalledWith({ repo }, "the-context");
+      expect(onStatsSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should route the awards to its own handler", async () => {
+      await routeFor("stats_awards")?.run("the-context" as never);
+
+      expect(onAwardsSpy).toHaveBeenCalledWith({ repo }, "the-context");
+      expect(onChronologySpy).toHaveBeenCalledTimes(NEVER);
     });
   });
 
