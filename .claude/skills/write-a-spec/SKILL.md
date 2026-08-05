@@ -26,6 +26,16 @@ Three consequences, the first absolute:
    behaviour; mocking it would compare a constant against itself. Everything with
    a body gets mocked.
 
+**A mocked module cannot hand back a data table.** So a table everything reads —
+a state's names, a threshold — must live in a module with **no behaviour**, or the
+first spec that mocks its neighbour deletes it. This has been paid for twice in one
+phase: a stub could not import `FailureKind` from the module a spec mocks, because
+the hoisted `vi.mock` had not initialised it yet; and moving `Finish` into
+`session-appearances.ts` turned 68 award specs red at once, since their factories
+supply the functions and nothing else. The fix is never to add the table to the
+factory — that is a second copy of the vocabulary — it is `game-outcomes.ts`,
+`card-states.ts`, `log-levels.ts`: files with nothing in them to mock.
+
 **The corollary bites: no logic may live in a data table.** Because `copy.en.ts` is
 deliberately never mocked, a decision taken inside it is asserted against itself and
 is therefore **unkillable** — a spec comparing `report` to `copy.problemTally(…)`

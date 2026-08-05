@@ -103,6 +103,15 @@ against the old shape. A phase that split one file into five wrote 88 spec cases
 first and paid a second agent to rework them; the review would have said the same
 thing an hour earlier and for nothing.
 
+**Run any rule the phase itself introduced against the phase's own diff, first.**
+A new rule is at its least believed by the person who just wrote it, because they
+are still holding the reasoning that made it obvious. A phase that added "a folder
+is named after what the player gets" then named two folders after processes
+(`bot/opening/`, `render/seating/`) and shipped them in the same commit as the
+rule; a threshold proposed in the same phase misfired on the first folder outside
+the two it was written for, which one command against the tree would have shown.
+Apply it, then test it, then commit it — in that order.
+
 **The brief names paths, never purposes.** Say which files to read; do not say what
 each one is for. A reviewer handed "`evening.ts` — turns the chronology into a
 reading of the evening" judges the name against that sentence and passes it; the
@@ -229,6 +238,15 @@ something disjoint. So the policy is not "delegate the mechanical work", it is:
   nothing. One phase lost about twenty minutes of wall clock this way and still had
   to finish five of the twelve files by hand, including a spec the agent had stopped
   in the middle of rewriting.
+- **Freeze the paths an agent was given.** Renaming or moving the files it is
+  writing into is the same mistake as delegating an unsettled subject, one level
+  up: a phase moved `render/*` into subfolders while an agent was writing specs
+  against those very paths, and the agent spent its last turn on stale mocks. If a
+  restructure is coming, do it before the brief or after the agent lands.
+- **Check whether it landed before redoing its work.** A background agent that was
+  interrupted may finish after you looked. One was reported here as having written
+  nothing, which was true at that moment and false ten minutes later; its seven
+  spec files were nearly rewritten by hand.
 - **Never delegate against a subject that is not settled.** Delegation multiplies
   the cost of rework: a placement decision you would fix in five minutes yourself
   cost a whole second agent here, and cost a stopped agent in the phase before.
