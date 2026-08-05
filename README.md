@@ -30,7 +30,9 @@ Dealt first: Oleg
 | `/next` | A new card with the same line-up; the fool's neighbour deals first |
 | `/next_with Zhenya` | The same line-up plus these players; asks for the names if sent without any, then asks where everyone sits |
 | `/next_without Oleg` | The same line-up minus these players; asks the same way |
-| `/stats` | How the current session is going, as a rendered picture |
+| `/stats` | How the current session is going: the chronology, then the awards |
+| `/stats_chronology` | The chronology picture on its own |
+| `/stats_awards` | The awards picture on its own; needs five games |
 | `/merge` | Folds a name typed twice into the right one |
 | `/help` | What the commands do and how the card works |
 

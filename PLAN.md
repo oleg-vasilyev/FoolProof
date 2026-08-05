@@ -565,7 +565,9 @@ ends up in position zero**. Without this, neighbour analytics falls apart.
 
 ### `/stats`
 
-A rendered PNG of the current session, sent with `sendPhoto`. Two stacked parts:
+Two rendered PNGs of the current session, each sent with its own `sendPhoto` — the
+chronology below, then [the awards card](#the-awards-card). The chronology has two
+stacked parts:
 
 - **The chronology.** One column per player, one row per game. The cell holds the
   place that player took; black means they sat that game out, red means they were
@@ -667,6 +669,82 @@ honest about the omission matters more than fitting everything.
 The header date is the UTC date of the session's first game. Late-evening games
 can therefore be stamped with the following day. A configured timezone is the fix
 on the day it bothers anyone; inventing one would be worse.
+
+### The awards card
+
+A second picture of the same session, sent after the chronology as its own photo
+rather than as an album — an album collapses into a grid of thumbnails, and each
+card is meant to be read at full width. `/stats_chronology` and `/stats_awards`
+send one of the two on their own.
+
+Awards need **five games** in the session. Below that `/stats` sends the chronology
+and says nothing about awards, because a card that fires two of thirteen rules reads
+as a bug rather than as a thin evening; `/stats_awards` answers in text instead.
+
+The card is read top to bottom from glory to disgrace, and **FOOL OF THE NIGHT is
+always last**, on a red plate. Under it, when it happened at all, one line about the
+whole table: how often the dealer was left the fool in their own deal.
+
+| Award | Earned by | Threshold |
+|---|---|---|
+| KING OF THE TABLE | the best table share | ≥ 5 games |
+| UNTOUCHABLE | never the fool all evening | ≥ 5 games |
+| TEFLON | the longest run without being the fool | run ≥ 5 |
+| SWEET REVENGE | leaving first in the game after being the fool | ≥ 2 of them |
+| IRON SEAT | the only player who sat through every game | evening ≥ 10 |
+| THE TRUCE | everybody who was in a drawn game | a draw happened |
+| ALL OR NOTHING | most games finished at an edge — first out or fool | ≥ 60%, ≥ 5 games |
+| THE INVISIBLE | most games finished in the middle | ≥ 60%, ≥ 5 games |
+| THE IRISH GOODBYE | leaving before the end, and not as the fool | left early |
+| DEALER'S CURSE | dealing and being left the fool in that same game | ≥ 2 times |
+| ENCORE | the fool in two games running | ≥ 2 running |
+| FIRST BLOOD | the fool of the very first game | never the same person as FOOL |
+| FOOL OF THE NIGHT | the worst fool rate | ≥ 5 games |
+
+That order is also the order they are printed in, and the **cap is nine**: past
+that the tail of the catalogue is dropped, which is why the shame awards are
+listed last. On the evening of 31 July 2026 — nineteen games, five players — nine
+fire and every player takes at least one.
+
+Nine is not a taste decision. The card is drawn at the same 1620 width as the
+chronology and is bound by the same [2560 limit](#what-telegram-does-to-the-image),
+so the row metrics are derived from that budget rather than from how the rows look
+on their own: nine awards at the dense scale come to 2514, and a tenth would not
+fit. Fewer than six awards switch to a roomier scale, because a short card has the
+height to spare and a sparse one drawn dense reads as unfinished.
+
+Three rules about how a winner is chosen, each of which changed who won on that
+evening:
+
+- **A rate award is ranked on the rate, not on the count.** Two players with twelve
+  middling games are not equal if one played seventeen and the other nineteen.
+  Ranking on the count made the same player win three awards while another won none.
+- **Every rate award also demands five games**, including the two the catalogue
+  states only as percentages. Three games out of three is not 100%, it is three
+  games, and `/stats` already refuses to shrink small samples elsewhere.
+- **Ties break on games played, then on the lower `player_id`** — stable, and it
+  matches the rotation the seating is normalised by.
+
+**A reason line never contains a player's name.** SVG does not wrap text, so every
+justification is one line; a 32-character name inside a sentence is the one thing
+that could push it past the edge. The name has its own line, where it is the only
+thing that can overflow. Each justification carries a number, because "played well"
+is an opinion and "61% across 18 games" is not.
+
+Three families of award were considered and are impossible on this data, rather than
+merely unbuilt:
+
+- **Anything about how long a game took.** `started_at → confirmed_at` measures the
+  life of the card, not of the game — evenings are sometimes logged afterwards, a
+  game at a time, in seconds. Fastest and longest game are unavailable.
+- **Anything about the time of day**, for the same reason.
+- **Who tapped the buttons most.** `game_events.actor_tg_id` is recorded, but there
+  is no mapping from a Telegram id to a name at the table, so the award could name
+  an account and not a player.
+
+**CURTAIN CALL** — the fool of the evening's last game — is not in the catalogue at
+all: the bot has no signal that an evening has ended, so mid-session it would crown
+whoever lost most recently and then quietly change its mind.
 
 ### A session is computed, not a table
 

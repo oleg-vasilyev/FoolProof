@@ -88,6 +88,13 @@ Read `git diff <phase-start>..HEAD` against `CLAUDE.md` — the whole diff at on
 not the individual commits, because a rule breaks across commits more often than
 inside one. The `phase-reviewer` subagent exists for exactly this pass.
 
+**Stop editing before you launch it.** The reviewer reads files, not a snapshot, so
+a tree that moves under it produces findings against code that no longer exists and
+a report that has to be re-checked line by line before it can be trusted. One phase
+ran the reviewer while its own mutation fixes were still landing; the report opened
+by saying so, and every finding then needed confirming twice. Land the fixes, get
+`npm run check` green, *then* review.
+
 **When the phase is mostly a restructure, run this gate on the source before the
 specs exist.** Everything a move is judged on — does the file's name describe what
 is in it, is it a bucket, does the type name collide with one next door — is
@@ -197,6 +204,12 @@ something disjoint. So the policy is not "delegate the mechanical work", it is:
 - **Delegate transcription only when your context is the scarce resource** — after
   a compaction, or with one clearly coming. With room to spare it is cheaper to
   type the specs than to brief someone to type them.
+- **A background agent that has stalled twice has produced what it is going to
+  produce.** Take what landed on disk, finish the rest yourself, and repair whatever
+  it left half-edited — resuming a third time costs another watchdog timeout for
+  nothing. One phase lost about twenty minutes of wall clock this way and still had
+  to finish five of the twelve files by hand, including a spec the agent had stopped
+  in the middle of rewriting.
 - **Never delegate against a subject that is not settled.** Delegation multiplies
   the cost of rework: a placement decision you would fix in five minutes yourself
   cost a whole second agent here, and cost a stopped agent in the phase before.
