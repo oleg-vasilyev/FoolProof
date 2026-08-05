@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
+import { copy as russian } from "#live-game/copy.ru.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
 import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
 import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
@@ -8,8 +10,11 @@ import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
 
 const refusedBecauseLiveSpy = vi.fn();
 
+const copyForSpy = vi.fn();
+
 vi.mock("#live-game/bot/card-context.ts", () => ({
   refusedBecauseLive: (...args: unknown[]) => refusedBecauseLiveSpy(...args),
+  copyFor: (context: unknown, chatId: number) => copyForSpy(context, chatId),
 }));
 
 const openFromNamesSpy = vi.fn();
@@ -33,16 +38,20 @@ const NEVER = 0;
 
 describe("onNamesReply()", () => {
   let repo: RepositoryStub;
+  let locales: LocaleReaderStub;
   let cards: CardServiceStub;
   let prompts: PromptRegistryStub;
   let ctx: ContextStub;
 
-  const context = () => ({ repo, cards: cards.service, prompts: prompts.registry });
+  const context = () => ({ repo, cards: cards.service, prompts: prompts.registry, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
 
+    copyForSpy.mockReturnValue(copy);
+
     repo = new RepositoryStub();
+    locales = new LocaleReaderStub();
     cards = new CardServiceStub();
     prompts = new PromptRegistryStub();
     ctx = new ContextStub();
@@ -62,6 +71,35 @@ describe("onNamesReply()", () => {
     expect(openFromNamesSpy).toHaveBeenCalledWith(built, message, "Oleg, Anya, Roma");
     expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
     expect(leaveFromNamesSpy).toHaveBeenCalledTimes(NEVER);
+  });
+
+  it("should ignore a reply to a message of its own that carries no text", async () => {
+    const message = ctx.textMessage("Oleg, Anya", { text: undefined, fromBot: true });
+
+    await onNamesReply(context(), message);
+
+    expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
+    expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
+    expect(leaveFromNamesSpy).toHaveBeenCalledTimes(NEVER);
+  });
+
+  it("should recognise a prompt it asked in the other language", async () => {
+    const built = context();
+    const message = ctx.textMessage("Олег, Аня", { text: russian.lineupPrompt, fromBot: true });
+
+    await onNamesReply(built, message);
+
+    expect(openFromNamesSpy).toHaveBeenCalledWith(built, message, "Олег, Аня");
+  });
+
+  it("should tell that language's joiners prompt from its line-up one", async () => {
+    const built = context();
+    const message = ctx.textMessage("Дима", { text: russian.joinersPrompt, fromBot: true });
+
+    await onNamesReply(built, message);
+
+    expect(joinFromNamesSpy).toHaveBeenCalledWith(built, message);
+    expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should route a reply to the joiners prompt to joinFromNames", async () => {

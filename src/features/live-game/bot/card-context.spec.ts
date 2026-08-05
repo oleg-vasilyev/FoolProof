@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { cardRecordOf } from "#shared/repository/database-records.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { CHAT_ID, COMMAND_MESSAGE_ID, ContextStub, SENT_MESSAGE_ID } from "#live-game/bot/grammy-context.stub.ts";
@@ -19,6 +20,7 @@ const contextOf = (repo: RepositoryStub, prompts: PromptRegistryStub) => ({
   repo,
   cards: new CardServiceStub().service,
   prompts: prompts.registry,
+  localeIn: new LocaleReaderStub().read,
 });
 
 const QUESTION = "Who is playing?";
@@ -53,7 +55,7 @@ describe("refusedBecauseLive()", () => {
   it("should return false and reply nothing when no card is live", async () => {
     repo.liveCardInChatSpy.mockReturnValue(null);
 
-    const refused = await refusedBecauseLive(context(), ctx.command("/game"));
+    const refused = await refusedBecauseLive(copy, context(), ctx.command("/game"));
 
     expect(refused).toBe(false);
     expect(ctx.replySpy).toHaveBeenCalledTimes(NEVER);
@@ -62,7 +64,7 @@ describe("refusedBecauseLive()", () => {
   it("should return true and reply with the running-game notice when a card is live", async () => {
     repo.liveCardInChatSpy.mockReturnValue(cardRecordOf(THREE));
 
-    const refused = await refusedBecauseLive(context(), ctx.command("/game"));
+    const refused = await refusedBecauseLive(copy, context(), ctx.command("/game"));
 
     expect(refused).toBe(true);
     expect(ctx.lastReply().text).toBe(copy.gameAlreadyRunning);
@@ -72,7 +74,7 @@ describe("refusedBecauseLive()", () => {
     const live = cardRecordOf(THREE);
     repo.liveCardInChatSpy.mockReturnValue(live);
 
-    await refusedBecauseLive(context(), ctx.command("/game"));
+    await refusedBecauseLive(copy, context(), ctx.command("/game"));
 
     expect(ctx.lastReply().options.reply_parameters).toEqual({
       message_id: live.game.message_id,

@@ -207,6 +207,15 @@ A phase's cost is dominated by two things, and neither of them is thinking:
   and a screenshot. A phase that starts a subagent while waiting on such an answer
   has already lost that agent's work.
 
+- **Rewriting the same shape in fifty files by hand.** A signature that gains a
+  parameter changes every call site and every mock factory; do it with a **script
+  written to a file** and run with `node`, never a heredoc — two heredocs died on
+  shell quoting before the first one landed. The script must anchor on syntax, not
+  on a name: replacing `awardRow(` blindly also rewrote `describe("awardRow()")`
+  into `describe("awardRow(copy, )")` and turned one assertion into
+  `toHaveBeenCalledWith(copy, copy, …)`. Anchor on the call as it appears —
+  `expect(fooSpy).toHaveBeenCalledWith(` — and let the failures name the rest.
+
 **Mechanical work goes to a subagent on a cheaper model.** Once the design is
 settled, writing five spec files, adding a stub, or updating an expectation is
 transcription, not judgement. Delegate it as one batch with `model: "sonnet"`, and

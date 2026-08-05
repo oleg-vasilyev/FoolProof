@@ -20,7 +20,7 @@ vi.mock("#merge-names/domain/merge-selection.ts", () => ({
 }));
 
 vi.mock("#merge-names/render/game-tally.ts", () => ({
-  gameTally: (games: unknown) => gameTallySpy(games),
+  gameTally: (table: unknown, games: unknown) => gameTallySpy(table, games),
 }));
 
 const { joinedNames, renderCancelled, renderMerged, renderMergeScreen } = await import(
@@ -55,17 +55,17 @@ describe("merge-message", () => {
     gameTallySpy.mockReturnValue(TALLY);
   });
 
-  describe("renderMergeScreen()", () => {
+  describe("renderMergeScreen(copy, )", () => {
     it("should open with the header", () => {
-      expect(renderMergeScreen(ROSTER, SELECTION)).toContain(copy.header);
+      expect(renderMergeScreen(copy, ROSTER, SELECTION)).toContain(copy.header);
     });
 
     it("should ask for the keeper while nothing is picked", () => {
-      expect(renderMergeScreen(ROSTER, SELECTION)).toContain(copy.askKeeper);
+      expect(renderMergeScreen(copy, ROSTER, SELECTION)).toContain(copy.askKeeper);
     });
 
     it("should read the selection through the domain, not the roster order", () => {
-      renderMergeScreen(ROSTER, SELECTION);
+      renderMergeScreen(copy, ROSTER, SELECTION);
 
       expect(chosenSpy).toHaveBeenCalledWith(ROSTER, SELECTION);
     });
@@ -73,26 +73,26 @@ describe("merge-message", () => {
     it("should say the keeper is settled once one name is picked", () => {
       chosenSpy.mockReturnValue([ANYA]);
 
-      expect(renderMergeScreen(ROSTER, SELECTION)).toContain(copy.keeperChosen(ESCAPED));
+      expect(renderMergeScreen(copy, ROSTER, SELECTION)).toContain(copy.keeperChosen(ESCAPED));
     });
 
     it("should read as a sentence once there is something to fold in", () => {
       chosenSpy.mockReturnValue([ANYA, ANNA]);
 
-      expect(renderMergeScreen(ROSTER, SELECTION)).toContain(copy.plan(ESCAPED, ESCAPED));
+      expect(renderMergeScreen(copy, ROSTER, SELECTION)).toContain(copy.plan(ESCAPED, ESCAPED));
     });
 
     it("should list every absorbed name", () => {
       chosenSpy.mockReturnValue([ANYA, ANNA, ANYUTA]);
       escaper.escapeHtmlSpy.mockImplementation((value) => `<${value}>`);
 
-      expect(renderMergeScreen(ROSTER, SELECTION)).toContain("<Анна>, <Анюта>");
+      expect(renderMergeScreen(copy, ROSTER, SELECTION)).toContain("<Анна>, <Анюта>");
     });
 
     it("should put the sentence and the promise on lines of their own", () => {
       chosenSpy.mockReturnValue([ANYA, ANNA]);
 
-      expect(renderMergeScreen(ROSTER, SELECTION).split("\n")).toEqual([
+      expect(renderMergeScreen(copy, ROSTER, SELECTION).split("\n")).toEqual([
         copy.header,
         copy.plan(ESCAPED, ESCAPED),
         copy.willHave(ESCAPED, TALLY),
@@ -102,13 +102,13 @@ describe("merge-message", () => {
     it("should promise the keeper's total after the merge", () => {
       chosenSpy.mockReturnValue([ANYA, ANNA]);
 
-      expect(renderMergeScreen(ROSTER, SELECTION)).toContain(copy.willHave(ESCAPED, TALLY));
+      expect(renderMergeScreen(copy, ROSTER, SELECTION)).toContain(copy.willHave(ESCAPED, TALLY));
     });
 
     it("should count that total from the picked names, not the whole roster", () => {
       chosenSpy.mockReturnValue([ANYA, ANNA]);
 
-      renderMergeScreen(ROSTER, SELECTION);
+      renderMergeScreen(copy, ROSTER, SELECTION);
 
       expect(gamesAfterMergeSpy).toHaveBeenCalledWith(ANYA, [ANNA]);
     });
@@ -116,35 +116,35 @@ describe("merge-message", () => {
     it("should put that total into words rather than a bare number", () => {
       chosenSpy.mockReturnValue([ANYA, ANNA]);
 
-      renderMergeScreen(ROSTER, SELECTION);
+      renderMergeScreen(copy, ROSTER, SELECTION);
 
-      expect(gameTallySpy).toHaveBeenCalledWith(GAMES_AFTER);
+      expect(gameTallySpy).toHaveBeenCalledWith(copy, GAMES_AFTER);
     });
 
     it("should take every name through the escaper", () => {
       chosenSpy.mockReturnValue([ANYA, ANNA]);
 
-      renderMergeScreen(ROSTER, SELECTION);
+      renderMergeScreen(copy, ROSTER, SELECTION);
 
       expect(escaper.escapeHtmlSpy).toHaveBeenCalledWith("Анна");
     });
   });
 
-  describe("renderMerged()", () => {
+  describe("renderMerged(copy, )", () => {
     it("should keep the sentence that was confirmed", () => {
-      expect(renderMerged(ANYA, [ANNA])).toContain(copy.plan(ESCAPED, ESCAPED));
+      expect(renderMerged(copy, ANYA, [ANNA])).toContain(copy.plan(ESCAPED, ESCAPED));
     });
 
     it("should report the total as done rather than promised", () => {
-      expect(renderMerged(ANYA, [ANNA])).toContain(copy.nowHas(ESCAPED, TALLY));
+      expect(renderMerged(copy, ANYA, [ANNA])).toContain(copy.nowHas(ESCAPED, TALLY));
     });
 
     it("should not ask for anything more", () => {
-      expect(renderMerged(ANYA, [ANNA])).not.toContain(copy.askKeeper);
+      expect(renderMerged(copy, ANYA, [ANNA])).not.toContain(copy.askKeeper);
     });
 
     it("should keep its three lines apart", () => {
-      expect(renderMerged(ANYA, [ANNA]).split("\n")).toEqual([
+      expect(renderMerged(copy, ANYA, [ANNA]).split("\n")).toEqual([
         copy.header,
         copy.plan(ESCAPED, ESCAPED),
         copy.nowHas(ESCAPED, TALLY),
@@ -152,13 +152,13 @@ describe("merge-message", () => {
     });
   });
 
-  describe("renderCancelled()", () => {
+  describe("renderCancelled(copy)", () => {
     it("should say nothing was merged", () => {
-      expect(renderCancelled()).toContain(copy.cancelledBody);
+      expect(renderCancelled(copy)).toContain(copy.cancelledBody);
     });
 
     it("should keep the header, so the message still says what it was", () => {
-      expect(renderCancelled()).toContain(copy.header);
+      expect(renderCancelled(copy)).toContain(copy.header);
     });
   });
 

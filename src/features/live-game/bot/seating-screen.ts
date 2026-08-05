@@ -12,17 +12,18 @@ import {
 } from "#live-game/render/seating-screen/seating-message.ts";
 import { toMarkup } from "#live-game/bot/inline-markup.ts";
 import { PICKED_BY_HAND } from "#live-game/bot/card/card-service.ts";
-import type { CardContext } from "#live-game/bot/card-context.ts";
-import { copy } from "#live-game/copy.en.ts";
+import { DEFAULT_LOCALE } from "#shared/locale/locales.ts";
+import { copyIn, type Copy } from "#live-game/copy.ts";
+import { copyFor, type CardContext } from "#live-game/bot/card-context.ts";
 
 
 const NOTHING_PLACED = 0;
 
 const AS_HTML = { parse_mode: "HTML" } as const;
 
-const screenOptions = (plan: SeatingPlan) => ({
+const screenOptions = (copy: Copy, plan: SeatingPlan) => ({
   ...AS_HTML,
-  reply_markup: toMarkup(renderSeatingKeyboard(plan)),
+  reply_markup: toMarkup(renderSeatingKeyboard(copy, plan)),
 });
 
 const planOf = (
@@ -44,12 +45,18 @@ const planOf = (
   return roster.length === order.length ? { roster, placed } : null;
 };
 
-const redraw = async (ctx: CallbackTap, plan: SeatingPlan, notice: string): Promise<void> => {
-  await ctx.editMessageText(renderSeatingScreen(), screenOptions(plan));
+const redraw = async (
+  copy: Copy,
+  ctx: CallbackTap,
+  plan: SeatingPlan,
+  notice: string
+): Promise<void> => {
+  await ctx.editMessageText(renderSeatingScreen(copy), screenOptions(copy, plan));
   await ctx.answerCallbackQuery(notice);
 };
 
 const openSeatedCard = async (
+  copy: Copy,
   context: CardContext,
   ctx: CallbackTap,
   chatId: number,
@@ -61,33 +68,36 @@ const openSeatedCard = async (
     return;
   }
 
-  await ctx.editMessageText(renderSeated(seats), AS_HTML);
+  await ctx.editMessageText(renderSeated(copy, seats), AS_HTML);
   await ctx.answerCallbackQuery(copy.seatedNotice);
-  await context.cards.open(chatId, rotateToLowestId(seats), PICKED_BY_HAND);
+  await context.cards.open(copy, chatId, rotateToLowestId(seats), PICKED_BY_HAND);
 };
 
 const cancelSeating = async (
+  copy: Copy,
   context: CardContext,
   ctx: CallbackTap,
   chatId: number
 ): Promise<void> => {
   context.repo.forgetUnplayedPlayers(chatId);
-  await ctx.editMessageText(renderSeatingCancelled(), AS_HTML);
+  await ctx.editMessageText(renderSeatingCancelled(copy), AS_HTML);
   await ctx.answerCallbackQuery(copy.cancelledNotice);
 };
 
 export const askSeating = async (
+  copy: Copy,
   ctx: Command | TextMessage,
   seats: readonly Seat[]
 ): Promise<void> => {
   const plan: SeatingPlan = { roster: seats, placed: NOTHING_PLACED };
 
-  await ctx.reply(renderSeatingScreen(), screenOptions(plan));
+  await ctx.reply(renderSeatingScreen(copy), screenOptions(copy, plan));
 };
 
 export const onSeatingTap = async (context: CardContext, ctx: CallbackTap): Promise<void> => {
   const payload = decodeSeatingCallback(ctx.callbackQuery.data);
   const chatId = ctx.chat?.id;
+  const copy = chatId === undefined ? copyIn(DEFAULT_LOCALE) : copyFor(context, chatId);
 
   if (payload === null || chatId === undefined) {
     await ctx.answerCallbackQuery(copy.seatingStale);
@@ -107,6 +117,7 @@ export const onSeatingTap = async (context: CardContext, ctx: CallbackTap): Prom
   switch (transition.outcome) {
     case Outcome.Updated:
       await redraw(
+        copy,
         ctx,
         transition.plan,
         copy.tapSeated(transition.seated.displayName, transition.seat)
@@ -115,17 +126,17 @@ export const onSeatingTap = async (context: CardContext, ctx: CallbackTap): Prom
       return;
 
     case Outcome.SteppedBack:
-      await redraw(ctx, transition.plan, copy.tapBack);
+      await redraw(copy, ctx, transition.plan, copy.tapBack);
 
       return;
 
     case Outcome.Seated:
-      await openSeatedCard(context, ctx, chatId, transition.seats);
+      await openSeatedCard(copy, context, ctx, chatId, transition.seats);
 
       return;
 
     case Outcome.Cancelled:
-      await cancelSeating(context, ctx, chatId);
+      await cancelSeating(copy, context, ctx, chatId);
 
       return;
 

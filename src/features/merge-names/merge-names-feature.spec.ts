@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { ListenersStub } from "#shared/telegram/feature-contract.stub.ts";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { Locale } from "#shared/locale/locales.ts";
 import { copy } from "#merge-names/copy.en.ts";
+import { copy as russian } from "#merge-names/copy.ru.ts";
 
 
 const ONCE = 1;
@@ -24,14 +27,16 @@ const { createMergeNamesFeature } = await import("#merge-names/merge-names-featu
 describe("createMergeNamesFeature()", () => {
   let repo: RepositoryStub;
   let listeners: ListenersStub;
+  let locales: LocaleReaderStub;
 
-  const build = () => createMergeNamesFeature({ repo });
+  const build = () => createMergeNamesFeature({ repo, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     repo = new RepositoryStub();
     listeners = new ListenersStub();
+    locales = new LocaleReaderStub();
   });
 
   describe("what it offers", () => {
@@ -42,8 +47,15 @@ describe("createMergeNamesFeature()", () => {
     it("should describe itself for the menu and for help", () => {
       const route = build().commands[0];
 
-      expect(route?.menuDescription).toBe(copy.commandMerge);
-      expect(route?.help).toBe(copy.helpMerge);
+      expect(route?.menuDescription(Locale.En)).toBe(copy.commandMerge);
+      expect(route?.help(Locale.En)).toBe(copy.helpMerge);
+    });
+
+    it("should describe itself in whichever language it is asked for", () => {
+      const route = build().commands[0];
+
+      expect(route?.menuDescription(Locale.Ru)).toBe(russian.commandMerge);
+      expect(route?.help(Locale.Ru)).toBe(russian.helpMerge);
     });
 
     it("should stay in the published menu, since a typo is found by the people playing", () => {

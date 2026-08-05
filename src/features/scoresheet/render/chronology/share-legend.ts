@@ -3,7 +3,7 @@ import { PLOT_LEFT, PLOT_WIDTH, chartBottomOf, legendFontOf, type Sheet } from "
 import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
-import { copy } from "#scoresheet/copy.en.ts";
+import type { Copy } from "#scoresheet/copy.ts";
 import { gameTally } from "#scoresheet/render/session-tally.ts";
 import { line, text } from "#scoresheet/render/svg-tags.ts";
 import { percentLabel } from "#scoresheet/render/chronology/percent-label.ts";
@@ -38,6 +38,7 @@ const tallyFontOf = (blockSize: number): number =>
   Math.min(fontSize.legendTally, Math.round(blockSize * TALLY_FONT_RATIO));
 
 const entryOf = (
+  copy: Copy,
   sheet: Sheet,
   player: ScoredPlayer,
   column: number,
@@ -65,7 +66,7 @@ const entryOf = (
       "font-weight": "bold",
       "font-size": size,
     }),
-    text(gameTally(player.games), {
+    text(gameTally(copy, player.games), {
       x: left,
       y: chartBottomOf(sheet) + LEGEND_TALLY_DROP,
       fill: palette.inkFaint,
@@ -75,16 +76,16 @@ const entryOf = (
   ];
 };
 
-const legend = (sheet: Sheet): readonly string[] =>
+const legend = (copy: Copy, sheet: Sheet): readonly string[] =>
   sheet.players
     .map((player, column) => ({ player, column }))
     .sort((a, b) => b.player.share - a.player.share)
-    .flatMap(({ player, column }, rank) => entryOf(sheet, player, column, rank));
+    .flatMap(({ player, column }, rank) => entryOf(copy, sheet, player, column, rank));
 
 const anybodySatOut = (sheet: Sheet): boolean =>
   sheet.players.some((player) => player.cells.some((cell) => cell.kind === CellKind.Absent));
 
-const skipNote = (sheet: Sheet): readonly string[] => {
+const skipNote = (copy: Copy, sheet: Sheet): readonly string[] => {
   if (!anybodySatOut(sheet)) {
     return [];
   }
@@ -111,4 +112,7 @@ const skipNote = (sheet: Sheet): readonly string[] => {
   ];
 };
 
-export const shareLegend = (sheet: Sheet): readonly string[] => [...legend(sheet), ...skipNote(sheet)];
+export const shareLegend = (copy: Copy, sheet: Sheet): readonly string[] => [
+  ...legend(copy, sheet),
+  ...skipNote(copy, sheet),
+];

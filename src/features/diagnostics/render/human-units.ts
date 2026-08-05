@@ -10,35 +10,38 @@ const BYTES_PER_KB = 1024;
 
 const NONE = 0;
 
-const ONE = 1;
-
 const ONE_DECIMAL = 1;
 
-export const counted = (count: number, one: string, many: string): string =>
-  `${count} ${count === ONE ? one : many}`;
+export interface UnitLabels {
+  readonly days: string;
+  readonly hours: string;
+  readonly minutes: string;
+  readonly kilobytes: string;
+  readonly megabytes: string;
+}
 
-export const humanDuration = (ms: number): string => {
+export const humanDuration = (ms: number, units: UnitLabels): string => {
   const minutes = Math.floor(ms / MS_PER_SECOND / SECONDS_PER_MINUTE);
   const hours = Math.floor(minutes / MINUTES_PER_HOUR);
   const days = Math.floor(hours / HOURS_PER_DAY);
 
   if (days > NONE) {
-    return `${days}d ${hours % HOURS_PER_DAY}h`;
+    return `${days}${units.days} ${hours % HOURS_PER_DAY}${units.hours}`;
   }
 
   if (hours > NONE) {
-    return `${hours}h ${minutes % MINUTES_PER_HOUR}m`;
+    return `${hours}${units.hours} ${minutes % MINUTES_PER_HOUR}${units.minutes}`;
   }
 
-  return `${minutes}m`;
+  return `${minutes}${units.minutes}`;
 };
 
-export const humanSize = (bytes: number): string => {
+export const humanSize = (bytes: number, units: UnitLabels): string => {
   const kb = bytes / BYTES_PER_KB;
 
   if (kb < BYTES_PER_KB) {
-    return `${Math.round(kb)} KB`;
+    return `${Math.round(kb)} ${units.kilobytes}`;
   }
 
-  return `${(kb / BYTES_PER_KB).toFixed(ONE_DECIMAL)} MB`;
+  return `${(kb / BYTES_PER_KB).toFixed(ONE_DECIMAL)} ${units.megabytes}`;
 };

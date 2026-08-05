@@ -1,5 +1,5 @@
 import { db, dbFile, SERIES_GAP_SECONDS } from "#shared/repository/sqlite-connection.ts";
-import { num, numberOr, text } from "#shared/repository/column-values.ts";
+import { nullableText, num, numberOr, text } from "#shared/repository/column-values.ts";
 import {
   groupByGame,
   toExit,
@@ -325,6 +325,19 @@ export const sqliteRepository: Repository = {
       .get(chatId, chatId, chatId, SERIES_GAP_SECONDS);
 
     return numberOr(row?.game_no, FIRST_GAME);
+  },
+
+  chatLocale(chatId) {
+    const row = db.prepare("SELECT locale FROM chat_locales WHERE chat_id = ?").get(chatId);
+
+    return nullableText(row?.locale);
+  },
+
+  rememberChatLocale(chatId, locale) {
+    db.prepare(
+      `INSERT INTO chat_locales (chat_id, locale) VALUES (?, ?)
+       ON CONFLICT(chat_id) DO UPDATE SET locale = excluded.locale, chosen_at = datetime('now')`
+    ).run(chatId, locale);
   },
 
   seriesChronology(chatId) {

@@ -1,0 +1,86 @@
+import { Locale } from "#shared/locale/locales.ts";
+import type { Copy } from "#live-game/copy.en.ts";
+
+
+export const copy: Copy = {
+  locale: Locale.Ru,
+
+  lineupMissing: "Кто играет? Например: /game Олег, Аня, Рома",
+  lineupPrompt: "Кто играет? Пришли имена в порядке посадки.",
+  lineupPlaceholder: "Олег, Аня, Рома",
+  lineupTooFew: "Для партии нужны хотя бы двое.",
+  lineupTooMany: (most: number) => `За столом помещается не больше ${most}.`,
+  nameTooLong: (longest: number, names: readonly string[]) =>
+    `Слишком длинно для кнопки: ${names.join(", ")}. Длина имени — до ${longest} символов.`,
+  lineupDuplicates: (names: readonly string[]) =>
+    `Эти имена повторяются: ${names.join(", ")}. Дай каждому своё.`,
+  gameAlreadyRunning: "Партия уже идёт.",
+  noLineupToRepeat: "Здесь ещё не было составов. Начни с /game и имён.",
+  joinersPrompt: "Кто присоединяется? Пришли имена.",
+  joinersPlaceholder: "Женя, Саша",
+  joinersMissing: "Кто присоединяется? Например: /next_with Женя, Саша",
+  leaversPrompt: "Кто выходит? Пришли имена.",
+  leaversPlaceholder: "Олег",
+  leaversMissing: "Кто выходит? Например: /next_without Олег",
+  alreadyAtTable: (names: readonly string[]) =>
+    `Уже за столом: ${names.join(", ")}. Называй только тех, кто присоединяется.`,
+  notAtTable: (names: readonly string[]) =>
+    `Не за столом: ${names.join(", ")}. Называй только тех, кто играл.`,
+
+  seatingHeader: "<b>Рассаживаемся</b>",
+  seatingAsk: "Нажимай на всех по очереди — в том порядке, как сидят за столом.",
+  seatedBody: (ring: string) => `Посадка: ${ring}`,
+  betweenSeats: " → ",
+  seatingCancelledBody: "Отменено — партия не начата.",
+  seatingStale: "Эта посадка устарела — начни заново",
+
+  commandGame: "Открыть партию — /game Олег, Аня, Рома",
+  commandNext: "Ещё партия, тот же состав",
+  commandNextWith: "Ещё партия, плюс игроки — /next_with Женя",
+  commandNextWithout: "Ещё партия, минус игроки — /next_without Олег",
+
+  helpGame: "/game Олег, Аня, Рома — открыть партию; порядок имён — это порядок посадки за столом",
+  helpNext:
+    "/next — ещё партия тем же составом; на дурака ходят первым, поэтому раздаёт сосед",
+  helpNextWith:
+    "/next_with Женя, Саша — тот же состав плюс эти; дальше жмёшь всех по порядку посадки, а раздающего выбираешь сам",
+  helpNextWithout: "/next_without Олег — тот же состав минус эти; раздающего выбираешь сам",
+  helpCard: [
+    "Нажми имя, чтобы отметить, кто раздал первым, а дальше жми игроков в порядке выхода.",
+    "Последний оставшийся — дурак, его отметят за тебя. «Ничья» появляется, когда осталось",
+    "двое. «Назад» отменяет по шагу, и ничего не записано, пока не нажмёшь «Подтвердить».",
+  ],
+
+  header: (gameNumber: number) => `<b>Партия ${gameNumber}</b>`,
+  askStarter: "Кто раздал первым?",
+  dealtFirst: (name: string) => `Раздаёт первым: <b>${name}</b>`,
+
+  resultPlace: (position: number, name: string) => `${position} · ${name}`,
+  resultFool: (position: number, name: string) => `${position} · <b>${name}</b> — дурак`,
+  resultDraw: (position: number, name: string) => `${position} · <b>${name}</b> — ничья`,
+
+  markExit: "✅",
+  markFool: "💀",
+  markDraw: "🤝",
+  markSeat: "🪑",
+
+  buttonDraw: "🤝 Ничья",
+  buttonConfirm: "✅ Подтвердить",
+  buttonBack: "↩️ Назад",
+  buttonCancel: "❌ Отмена",
+
+  tapSeated: (name: string, seat: number) => `${name} — место ${seat}`,
+  tapRecorded: (name: string, position: number) => `${name} — ${position}`,
+  tapStarter: (name: string) => `${name} раздаёт первым`,
+  tapDraw: "Ничья",
+  tapBack: "Шаг назад",
+  tapNotAllowed: "Сейчас так нельзя",
+  cardStale: "Карточка обновилась — посмотри ещё раз",
+  cardGone: "Эта партия уже закончена",
+
+  seatedNotice: "Расселись",
+  confirmedNotice: "Записано",
+  cancelledNotice: "Отменено",
+  cancelledBody: "Отменено — ничего не записано.",
+  abandonedBody: "Заброшено после трёх часов тишины — ничего не записано.",
+};

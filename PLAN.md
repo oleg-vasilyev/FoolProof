@@ -55,13 +55,37 @@ chats; this is one.
 
 ## Language
 
-Everything the bot says is **English** — this is built as an international product
-from the start. All user-facing strings live in a single module so that adding a
-locale never means grepping the codebase. Choosing a locale per chat is out of
-scope for the first version; the seam that makes it possible is not.
+The bot speaks **English or Russian, and a chat picks which**. `/language` opens a
+screen of one button per language, marked with the one in use; a tap stores the
+choice and the chat is spoken to in it from then on — messages, buttons, `/help`,
+and the words on both `/stats` pictures.
+
+**A chat that has never chosen is spoken to in English**, which is what every chat
+got before this existed. The choice is a row in `chat_locales`, so it survives a
+restart, and nothing is inferred from the Telegram language of whoever happened to
+type first: the language belongs to the table, not to a player.
+
+The command **names** stay Latin in both languages — `/game`, `/next_without` — because
+Telegram allows nothing else. Their *descriptions* are republished for that chat
+with `setMyCommands` scoped to it the moment the language changes, so the `/` menu
+matches what the bot says. A chat that never chose keeps the global English menu.
+
+Two consequences worth stating, because both are easy to get wrong:
+
+- **A count picks its word from the language, not from English.** Russian needs three
+  forms (`1 партия`, `2 партии`, `5 партий`) where English needs two, so a copy table
+  holds the forms and the rule lives outside it. Getting this wrong is invisible in
+  English.
+- **A reply-keyboard prompt is matched against every language's text.** `/game` with
+  no names asks a question and reads the answer by matching the quoted prompt; a chat
+  that switched language between the question and the answer would otherwise lose the
+  reply.
 
 Player names are user data, not copy: they may be in any script and are stored and
-displayed exactly as typed.
+displayed exactly as typed. Adding a third language means an entry in the language
+table, one more `copy.<code>.ts` per feature, a case in each feature's `copy.ts`, and
+a plural rule if the language needs one — the compiler names every one of those, and
+nothing else changes.
 
 ---
 
@@ -520,6 +544,12 @@ CREATE TABLE game_events (
   actor_tg_id INTEGER NOT NULL
 );
 CREATE INDEX idx_game_events_game ON game_events(game_id);
+
+CREATE TABLE chat_locales (
+  chat_id   INTEGER PRIMARY KEY,
+  locale    TEXT NOT NULL,
+  chosen_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 ```
 
 Three SQLite specifics that are easy to get wrong:

@@ -41,8 +41,8 @@ export const featureOf = (
     commands: [
       {
         command: name,
-        menuDescription: `does ${name}`,
-        help: `/${name} — does it`,
+        menuDescription: (locale) => `does ${name} in ${locale}`,
+        help: (locale) => `/${name} — does it in ${locale}`,
         hidden: over.hidden,
         run: vi.fn(async () => undefined),
       },

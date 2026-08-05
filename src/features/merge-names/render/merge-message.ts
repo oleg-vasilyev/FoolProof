@@ -6,7 +6,7 @@ import {
   type Selection,
 } from "#merge-names/domain/merge-selection.ts";
 import { gameTally } from "#merge-names/render/game-tally.ts";
-import { copy } from "#merge-names/copy.en.ts";
+import type { Copy } from "#merge-names/copy.ts";
 
 
 const BETWEEN_NAMES = ", ";
@@ -20,10 +20,10 @@ const safeNameOf = (candidate: Candidate): string => escapeHtml(candidate.displa
 export const joinedNames = (candidates: readonly Candidate[]): string =>
   candidates.map((candidate) => candidate.displayName).join(BETWEEN_NAMES);
 
-const planLine = (keeper: Candidate, absorbed: readonly Candidate[]): string =>
+const planLine = (copy: Copy, keeper: Candidate, absorbed: readonly Candidate[]): string =>
   copy.plan(absorbed.map(safeNameOf).join(BETWEEN_NAMES), safeNameOf(keeper));
 
-const bodyFor = (picked: readonly Candidate[]): readonly string[] => {
+const bodyFor = (copy: Copy, picked: readonly Candidate[]): readonly string[] => {
   const [keeper, ...absorbed] = picked;
 
   if (keeper === undefined) {
@@ -35,19 +35,27 @@ const bodyFor = (picked: readonly Candidate[]): readonly string[] => {
   }
 
   return [
-    planLine(keeper, absorbed),
-    copy.willHave(safeNameOf(keeper), gameTally(gamesAfterMerge(keeper, absorbed))),
+    planLine(copy, keeper, absorbed),
+    copy.willHave(safeNameOf(keeper), gameTally(copy, gamesAfterMerge(keeper, absorbed))),
   ];
 };
 
-export const renderMergeScreen = (roster: readonly Candidate[], selection: Selection): string =>
-  [copy.header, ...bodyFor(chosen(roster, selection))].join(BETWEEN_LINES);
+export const renderMergeScreen = (
+  copy: Copy,
+  roster: readonly Candidate[],
+  selection: Selection
+): string => [copy.header, ...bodyFor(copy, chosen(roster, selection))].join(BETWEEN_LINES);
 
-export const renderMerged = (keeper: Candidate, absorbed: readonly Candidate[]): string =>
+export const renderMerged = (
+  copy: Copy,
+  keeper: Candidate,
+  absorbed: readonly Candidate[]
+): string =>
   [
     copy.header,
-    planLine(keeper, absorbed),
-    copy.nowHas(safeNameOf(keeper), gameTally(gamesAfterMerge(keeper, absorbed))),
+    planLine(copy, keeper, absorbed),
+    copy.nowHas(safeNameOf(keeper), gameTally(copy, gamesAfterMerge(keeper, absorbed))),
   ].join(BETWEEN_LINES);
 
-export const renderCancelled = (): string => [copy.header, copy.cancelledBody].join(BETWEEN_LINES);
+export const renderCancelled = (copy: Copy): string =>
+  [copy.header, copy.cancelledBody].join(BETWEEN_LINES);

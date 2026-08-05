@@ -1,6 +1,7 @@
 import type { Feature } from "#shared/telegram/feature-contract.ts";
 import type { ScoresheetRepository } from "#shared/repository/repository-contract.ts";
-import { copy } from "#scoresheet/copy.en.ts";
+import type { LocaleReader } from "#shared/locale/chat-locale.ts";
+import { copyIn } from "#scoresheet/copy.ts";
 import {
   onAwards,
   onChronology,
@@ -12,31 +13,32 @@ import { requireFonts } from "#scoresheet/bot/rasterizer.ts";
 
 export interface ScoresheetDeps {
   readonly repo: ScoresheetRepository;
+  readonly localeIn: LocaleReader;
 }
 
 export const createScoresheetFeature = (deps: ScoresheetDeps): Feature => {
   requireFonts();
 
-  const context: ScoresheetContext = { repo: deps.repo };
+  const context: ScoresheetContext = { repo: deps.repo, localeIn: deps.localeIn };
 
   return {
     commands: [
       {
         command: "stats",
-        menuDescription: copy.commandStats,
-        help: copy.helpStats,
+        menuDescription: (locale) => copyIn(locale).commandStats,
+        help: (locale) => copyIn(locale).helpStats,
         run: (ctx) => onStats(context, ctx),
       },
       {
         command: "stats_chronology",
-        menuDescription: copy.commandChronology,
-        help: copy.helpChronology,
+        menuDescription: (locale) => copyIn(locale).commandChronology,
+        help: (locale) => copyIn(locale).helpChronology,
         run: (ctx) => onChronology(context, ctx),
       },
       {
         command: "stats_awards",
-        menuDescription: copy.commandAwards,
-        help: copy.helpAwards,
+        menuDescription: (locale) => copyIn(locale).commandAwards,
+        help: (locale) => copyIn(locale).helpAwards,
         run: (ctx) => onAwards(context, ctx),
       },
     ],

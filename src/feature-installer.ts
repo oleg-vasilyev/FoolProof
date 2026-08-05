@@ -1,25 +1,35 @@
 import type { Api, Bot } from "grammy";
 import type { Feature, Listeners } from "#shared/telegram/feature-contract.ts";
 import type { Logger } from "#shared/logging/logger.ts";
-import { copy } from "#app/copy.en.ts";
+import type { LocaleReader } from "#shared/locale/chat-locale.ts";
+import { DEFAULT_LOCALE, type Locale } from "#shared/locale/locales.ts";
+import { copyIn } from "#app/copy.ts";
 
 
 const HELP = "help";
+
+export interface ChatMenu {
+  readonly chatId: number;
+  readonly locale: Locale;
+}
 
 const routesOf = (features: readonly Feature[]) => features.flatMap((feature) => feature.commands);
 
 const listedRoutesOf = (features: readonly Feature[]) =>
   routesOf(features).filter((route) => route.hidden !== true);
 
-const helpBody = (features: readonly Feature[]): string =>
-  [
+const helpBody = (features: readonly Feature[], locale: Locale): string => {
+  const copy = copyIn(locale);
+
+  return [
     copy.helpLead,
     "",
-    ...listedRoutesOf(features).map((route) => route.help),
+    ...listedRoutesOf(features).map((route) => route.help(locale)),
     copy.helpSelf,
     "",
-    ...features.flatMap((feature) => feature.notes ?? []),
+    ...features.flatMap((feature) => feature.notes?.(locale) ?? []),
   ].join("\n");
+};
 
 const listenersOn = (bot: Bot): Listeners => ({
   onText: (run) => {
@@ -30,19 +40,25 @@ const listenersOn = (bot: Bot): Listeners => ({
   },
 });
 
+const menuIn = (features: readonly Feature[], locale: Locale) => [
+  ...listedRoutesOf(features).map((route) => ({
+    command: route.command,
+    description: route.menuDescription(locale),
+  })),
+  { command: HELP, description: copyIn(locale).commandHelp },
+];
+
 export const publishCommandMenu = async (
   api: Api,
   features: readonly Feature[],
-  log: Logger
+  log: Logger,
+  chat: ChatMenu | null = null
 ): Promise<void> => {
   try {
-    await api.setMyCommands([
-      ...listedRoutesOf(features).map((route) => ({
-        command: route.command,
-        description: route.menuDescription,
-      })),
-      { command: HELP, description: copy.commandHelp },
-    ]);
+    await api.setMyCommands(
+      menuIn(features, chat === null ? DEFAULT_LOCALE : chat.locale),
+      chat === null ? undefined : { scope: { type: "chat", chat_id: chat.chatId } }
+    );
   } catch (error) {
     log.warn(`could not publish the command menu: ${String(error)}`);
   }
@@ -64,15 +80,15 @@ export const resumeFeatures = async (
 export const installFeatures = (
   bot: Bot,
   features: readonly Feature[],
-  log: Logger
+  log: Logger,
+  localeIn: LocaleReader
 ): readonly (() => Promise<void>)[] => {
   for (const route of routesOf(features)) {
     bot.command(route.command, (ctx) => route.run(ctx));
   }
 
-  const help = helpBody(features);
   bot.command(HELP, async (ctx) => {
-    await ctx.reply(help);
+    await ctx.reply(helpBody(features, localeIn(ctx.chat.id)));
   });
 
   for (const feature of features) {
@@ -80,11 +96,15 @@ export const installFeatures = (
   }
 
   bot.on("callback_query:data", async (ctx) => {
-    await ctx.answerCallbackQuery(copy.tapUnclaimed);
+    const chatId = ctx.chat?.id;
+
+    await ctx.answerCallbackQuery(
+      copyIn(chatId === undefined ? DEFAULT_LOCALE : localeIn(chatId)).tapUnclaimed
+    );
   });
 
   bot.catch((error) => {
-    log.error(copy.updateFailed(error.ctx.update.update_id, String(error.error)));
+    log.error(copyIn(DEFAULT_LOCALE).updateFailed(error.ctx.update.update_id, String(error.error)));
   });
 
   return features.flatMap((feature) => (feature.stop === undefined ? [] : [feature.stop]));

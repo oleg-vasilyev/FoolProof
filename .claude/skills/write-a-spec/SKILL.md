@@ -48,6 +48,14 @@ is a legal *fixture* key and an illegal thing to compare against.
 Extending the rule to specs immediately found five sites in **production** code
 that a src-only sweep had missed, so do not assume the fixtures are the cheap half.
 
+**A fixture that enumerates a union enumerates it from the table** —
+`Object.values(AwardName)`, never a hand-typed list. The lint cannot help here: a
+string inside an array literal is neither a comparison nor a discriminant key, which
+is how thirteen hand-written award names survived both a full spec audit and the rule
+written to stop exactly that. Reading the list from the table also turns the case
+into a real one — it now fails when the catalogue gains a member the copy table has
+no title for.
+
 **The corollary bites: no logic may live in a data table.** Because `copy.en.ts` is
 deliberately never mocked, a decision taken inside it is asserted against itself and
 is therefore **unkillable** — a spec comparing `report` to `copy.problemTally(…)`
@@ -243,3 +251,11 @@ Ask, in this order:
    by something the subject deliberately emits — a marker string, a spied call —
    never by a value another change is free to alter, and assert the selection is
    non-empty before asserting anything about it.
+
+   **A loop counted off the subject is the same trap.** A spec that called every
+   copy function with one marker per parameter took the count from
+   `value.length` — the function under test. Stryker's `() => undefined` mutant has
+   no parameters, so the loop ran zero times and the case passed against nothing;
+   forty mutants survived a test written to kill exactly them. Count off something
+   the mutation cannot move (here the English table, which is the shape master), and
+   assert the output is neither `""` nor `"undefined"` before looking inside it.

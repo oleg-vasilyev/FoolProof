@@ -27,13 +27,13 @@ describe("seating-message", () => {
 
   describe("renderSeatingScreen()", () => {
     it("should head the screen and ask for the order", () => {
-      expect(renderSeatingScreen()).toBe(`${copy.seatingHeader}\n${copy.seatingAsk}`);
+      expect(renderSeatingScreen(copy)).toBe(`${copy.seatingHeader}\n${copy.seatingAsk}`);
     });
   });
 
   describe("renderSeated()", () => {
     it("should show the ring in the order it was tapped, not in any other", () => {
-      expect(renderSeated([OLEG, ANYA])).toBe(
+      expect(renderSeated(copy, [OLEG, ANYA])).toBe(
         `${copy.seatingHeader}\n${copy.seatedBody(
           `${escaped(OLEG.displayName)}${copy.betweenSeats}${escaped(ANYA.displayName)}`
         )}`
@@ -41,7 +41,7 @@ describe("seating-message", () => {
     });
 
     it("should route every name through the escaper, since a name is user data", () => {
-      renderSeated([OLEG, ANYA]);
+      renderSeated(copy, [OLEG, ANYA]);
 
       expect(escapeHtmlSpy).toHaveBeenCalledWith(OLEG.displayName);
       expect(escapeHtmlSpy).toHaveBeenCalledWith(ANYA.displayName);
@@ -50,7 +50,7 @@ describe("seating-message", () => {
 
   describe("renderSeatingCancelled()", () => {
     it("should say that no game was started", () => {
-      expect(renderSeatingCancelled()).toBe(
+      expect(renderSeatingCancelled(copy)).toBe(
         `${copy.seatingHeader}\n${copy.seatingCancelledBody}`
       );
     });

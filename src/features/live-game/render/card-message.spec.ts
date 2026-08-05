@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { copy } from "#live-game/copy.en.ts";
 import { HtmlEscapeStub } from "#shared/text/html-escape.stub.ts";
 import type { CardState } from "#live-game/domain/card-state.ts";
 
@@ -53,13 +54,13 @@ describe("renderCard()", () => {
   });
 
   it("should ask for the starter before one is picked", () => {
-    const rendered = renderCard(stateWith({ starterSlot: null }), GAME_NUMBER);
+    const rendered = renderCard(copy, stateWith({ starterSlot: null }), GAME_NUMBER);
 
     expect(linesOf(rendered)).toEqual(["<b>Game 3</b>", "Who dealt first?"]);
   });
 
   it("should name nobody before a starter is picked", () => {
-    renderCard(stateWith({ starterSlot: null }), GAME_NUMBER);
+    renderCard(copy, stateWith({ starterSlot: null }), GAME_NUMBER);
 
     expect(nameAtSpy).not.toHaveBeenCalled();
   });
@@ -67,7 +68,7 @@ describe("renderCard()", () => {
   it("should name the starter once one is picked", () => {
     nameAtSpy.mockReturnValue("Oleg");
 
-    const rendered = renderCard(stateWith({ starterSlot: OLEG }), GAME_NUMBER);
+    const rendered = renderCard(copy, stateWith({ starterSlot: OLEG }), GAME_NUMBER);
 
     expect(linesOf(rendered)).toEqual(["<b>Game 3</b>", "Dealt first: <b>Oleg</b>"]);
   });
@@ -75,7 +76,7 @@ describe("renderCard()", () => {
   it("should read the name out of the starter's own slot", () => {
     const state = stateWith({ starterSlot: 2 });
 
-    renderCard(state, GAME_NUMBER);
+    renderCard(copy, state, GAME_NUMBER);
 
     expect(nameAtSpy).toHaveBeenCalledWith(state, 2);
   });
@@ -84,11 +85,11 @@ describe("renderCard()", () => {
     const early = stateWith({ starterSlot: OLEG, exits: [] });
     const later = stateWith({ starterSlot: OLEG, exits: TWO_EXITS });
 
-    expect(renderCard(later, GAME_NUMBER)).toBe(renderCard(early, GAME_NUMBER));
+    expect(renderCard(copy, later, GAME_NUMBER)).toBe(renderCard(copy, early, GAME_NUMBER));
   });
 
   it("should never list the standings", () => {
-    renderCard(stateWith({ exits: TWO_EXITS }), GAME_NUMBER);
+    renderCard(copy, stateWith({ exits: TWO_EXITS }), GAME_NUMBER);
 
     expect(finalPlacementsSpy).not.toHaveBeenCalled();
   });
@@ -96,7 +97,7 @@ describe("renderCard()", () => {
   it("should escape the starter's name, since it is user data", () => {
     nameAtSpy.mockReturnValue("Аня & Оля");
 
-    renderCard(stateWith({}), GAME_NUMBER);
+    renderCard(copy, stateWith({}), GAME_NUMBER);
 
     expect(html.escapeHtmlSpy).toHaveBeenCalledWith("Аня & Оля");
   });
@@ -104,11 +105,11 @@ describe("renderCard()", () => {
   it("should print what the escaper returned, not the raw name", () => {
     html.escapeHtmlSpy.mockReturnValue("ESCAPED");
 
-    expect(renderCard(stateWith({}), GAME_NUMBER)).toContain("ESCAPED");
+    expect(renderCard(copy, stateWith({}), GAME_NUMBER)).toContain("ESCAPED");
   });
 
   it("should carry the game number it was given", () => {
-    const rendered = renderCard(stateWith({ starterSlot: null }), 12);
+    const rendered = renderCard(copy, stateWith({ starterSlot: null }), 12);
 
     expect(rendered).toContain("Game 12");
   });
@@ -126,7 +127,7 @@ describe("renderResult()", () => {
   it("should separate the heading from the standings with a blank line", () => {
     finalPlacementsSpy.mockReturnValue([{ slot: OLEG, position: 1 }]);
 
-    const lines = linesOf(renderResult(stateWith({ exits: [] }), GAME_NUMBER));
+    const lines = linesOf(renderResult(copy, stateWith({ exits: [] }), GAME_NUMBER));
 
     expect(lines[2]).toBe("");
   });
@@ -138,7 +139,7 @@ describe("renderResult()", () => {
       { slot: 2, position: 3 },
     ]);
 
-    const lines = linesOf(renderResult(stateWith({ exits: TWO_EXITS }), GAME_NUMBER));
+    const lines = linesOf(renderResult(copy, stateWith({ exits: TWO_EXITS }), GAME_NUMBER));
 
     expect(lines.slice(3)).toEqual(["1 · player0", "2 · player1", "3 · <b>player2</b> — fool"]);
   });
@@ -146,7 +147,7 @@ describe("renderResult()", () => {
   it("should keep the middle places unbolded", () => {
     finalPlacementsSpy.mockReturnValue([{ slot: 0, position: 1 }]);
 
-    const rendered = renderResult(stateWith({ exits: TWO_EXITS }), GAME_NUMBER);
+    const rendered = renderResult(copy, stateWith({ exits: TWO_EXITS }), GAME_NUMBER);
 
     expect(rendered).toContain("1 · player0");
   });
@@ -155,7 +156,7 @@ describe("renderResult()", () => {
     finalPlacementsSpy.mockReturnValue([{ slot: ANYA, position: 2 }]);
     remainingSlotsSpy.mockReturnValue([ANYA]);
 
-    const rendered = renderResult(stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
+    const rendered = renderResult(copy, stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
 
     expect(rendered).toContain("2 · <b>player1</b> — fool");
   });
@@ -164,7 +165,7 @@ describe("renderResult()", () => {
     finalPlacementsSpy.mockReturnValue([{ slot: ANYA, position: 2 }]);
     remainingSlotsSpy.mockReturnValue([ANYA, 2]);
 
-    const rendered = renderResult(stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
+    const rendered = renderResult(copy, stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
 
     expect(rendered).toContain("2 · <b>player1</b> — draw");
   });
@@ -173,7 +174,7 @@ describe("renderResult()", () => {
     finalPlacementsSpy.mockReturnValue([{ slot: ANYA, position: 2 }]);
     remainingSlotsSpy.mockReturnValue([ANYA, 2]);
 
-    const rendered = renderResult(stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
+    const rendered = renderResult(copy, stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
 
     expect(rendered).not.toContain("fool");
   });
@@ -182,7 +183,7 @@ describe("renderResult()", () => {
     finalPlacementsSpy.mockReturnValue([{ slot: ANYA, position: 2 }]);
     nameAtSpy.mockReturnValue("<b>x</b>");
 
-    renderResult(stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
+    renderResult(copy, stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
 
     expect(html.escapeHtmlSpy).toHaveBeenCalledTimes(TWICE);
   });
@@ -192,7 +193,7 @@ describe("renderResult()", () => {
     nameAtSpy.mockReturnValue("<i>x</i>");
     html.escapeHtmlSpy.mockReturnValue("&lt;i&gt;x&lt;/i&gt;");
 
-    const rendered = renderResult(stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
+    const rendered = renderResult(copy, stateWith({ exits: ONE_EXIT }), GAME_NUMBER);
 
     expect(rendered).not.toContain("<i>x</i>");
   });
@@ -201,7 +202,7 @@ describe("renderResult()", () => {
     finalPlacementsSpy.mockReturnValue([]);
     const state = stateWith({ exits: ONE_EXIT });
 
-    renderResult(state, GAME_NUMBER);
+    renderResult(copy, state, GAME_NUMBER);
 
     expect(remainingSlotsSpy).toHaveBeenCalledWith(state);
   });

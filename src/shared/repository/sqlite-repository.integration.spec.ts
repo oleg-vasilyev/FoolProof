@@ -64,6 +64,7 @@ beforeEach(() => {
   db.exec("DELETE FROM game_players");
   db.exec("DELETE FROM games");
   db.exec("DELETE FROM players");
+  db.exec("DELETE FROM chat_locales");
 });
 
 afterAll(() => {
@@ -891,5 +892,30 @@ describe("seriesChronology()", () => {
     playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
 
     expect(repo.seriesChronology(OTHER_CHAT_ID)).toBeNull();
+  });
+});
+
+describe("the language a chat chose", () => {
+  it("should have none until the chat chooses", () => {
+    expect(repo.chatLocale(CHAT_ID)).toBeNull();
+  });
+
+  it("should read back what was remembered", () => {
+    repo.rememberChatLocale(CHAT_ID, "ru");
+
+    expect(repo.chatLocale(CHAT_ID)).toBe("ru");
+  });
+
+  it("should replace an earlier choice rather than fail on the second one", () => {
+    repo.rememberChatLocale(CHAT_ID, "ru");
+    repo.rememberChatLocale(CHAT_ID, "en");
+
+    expect(repo.chatLocale(CHAT_ID)).toBe("en");
+  });
+
+  it("should keep each chat's choice to itself", () => {
+    repo.rememberChatLocale(CHAT_ID, "ru");
+
+    expect(repo.chatLocale(OTHER_CHAT_ID)).toBeNull();
   });
 });

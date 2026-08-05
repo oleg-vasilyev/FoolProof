@@ -34,6 +34,7 @@ Dealt first: Oleg
 | `/stats_chronology` | The chronology picture on its own |
 | `/stats_awards` | The awards picture on its own; needs five games |
 | `/merge` | Folds a name typed twice into the right one |
+| `/language` | Picks the language this chat is played in — English or Russian |
 | `/help` | What the commands do and how the card works |
 
 This table is the one place the commands are listed; `PLAN.md` says what each one
@@ -294,7 +295,8 @@ src/
     merge-names/        the /merge screen
     scoresheet/         the picture /stats sends back
     diagnostics/        the /status report about the bot itself
-  shared/               config, lifecycle, logging, repository,
+    language/           the /language screen that picks the chat's language
+  shared/               config, lifecycle, locale, logging, repository,
                         telegram, text, timing — a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
 scripts/                dev utilities that are not part of the bot

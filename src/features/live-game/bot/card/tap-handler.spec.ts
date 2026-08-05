@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { ActionKind } from "#live-game/domain/card-states.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
@@ -23,16 +24,18 @@ const TAP_NOTICE = "Oleg — 1";
 
 describe("onTap()", () => {
   let repo: RepositoryStub;
+  let locales: LocaleReaderStub;
   let cards: CardServiceStub;
   let prompts: PromptRegistryStub;
   let ctx: ContextStub;
 
-  const context = () => ({ repo, cards: cards.service, prompts: prompts.registry });
+  const context = () => ({ repo, cards: cards.service, prompts: prompts.registry, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     repo = new RepositoryStub();
+    locales = new LocaleReaderStub();
     cards = new CardServiceStub();
     prompts = new PromptRegistryStub();
     ctx = new ContextStub();
@@ -50,7 +53,7 @@ describe("onTap()", () => {
   it("should attribute the tap to whoever pressed it", async () => {
     await onTap(context(), ctx.callbackTap("1:p:0:0"));
 
-    expect(cards.tapSpy).toHaveBeenCalledWith(
+    expect(cards.tapSpy).toHaveBeenCalledWith(copy, 
       { gameId: 1, action: ActionKind.Pick, slot: 0, version: 0 },
       USER_ID
     );

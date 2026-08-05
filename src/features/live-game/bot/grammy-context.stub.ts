@@ -13,7 +13,7 @@ export const COMMAND_MESSAGE_ID = 10;
 export const SENT_MESSAGE_ID = 500;
 
 interface QuotedMessage {
-  readonly text: string;
+  readonly text: string | undefined;
   readonly fromBot: boolean;
   readonly senderless?: boolean;
 }

@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
 import { ListenersStub } from "#shared/telegram/feature-contract.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { Locale } from "#shared/locale/locales.ts";
 import { copy } from "#live-game/copy.en.ts";
+import { copy as russian } from "#live-game/copy.ru.ts";
 
 
 const CARD_SERVICE = { marker: "the-card-service" };
@@ -98,14 +101,17 @@ const API = { marker: "the-api" };
 describe("createLiveGameFeature()", () => {
   let repo: RepositoryStub;
   let log: LoggerStub;
+  let locales: LocaleReaderStub;
 
-  const build = () => createLiveGameFeature({ repo, api: API as never, log });
+  const build = () =>
+    createLiveGameFeature({ repo, api: API as never, log, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     repo = new RepositoryStub();
     log = new LoggerStub();
+    locales = new LocaleReaderStub();
     stopSweepSpy.mockImplementation(() => undefined);
     shutdownSpy.mockImplementation(async () => undefined);
   });
@@ -114,7 +120,12 @@ describe("createLiveGameFeature()", () => {
     it("should give the card service the repository, the api and the log", () => {
       build();
 
-      expect(createCardServiceSpy).toHaveBeenCalledWith({ repo, api: API, log });
+      expect(createCardServiceSpy).toHaveBeenCalledWith({
+        repo,
+        api: API,
+        log,
+        localeIn: locales.read,
+      });
     });
 
     it("should give the prompt registry the api and the log", () => {
@@ -147,7 +158,7 @@ describe("createLiveGameFeature()", () => {
     });
 
     it("should take its menu descriptions from its own copy", () => {
-      expect(build().commands.map((route) => route.menuDescription)).toEqual([
+      expect(build().commands.map((route) => route.menuDescription(Locale.En))).toEqual([
         copy.commandGame,
         copy.commandNext,
         copy.commandNextWith,
@@ -156,7 +167,7 @@ describe("createLiveGameFeature()", () => {
     });
 
     it("should take its help lines from its own copy", () => {
-      expect(build().commands.map((route) => route.help)).toEqual([
+      expect(build().commands.map((route) => route.help(Locale.En))).toEqual([
         copy.helpGame,
         copy.helpNext,
         copy.helpNextWith,
@@ -164,8 +175,21 @@ describe("createLiveGameFeature()", () => {
       ]);
     });
 
+    it("should describe every command in whichever language it is asked for", () => {
+      expect(build().commands.map((route) => route.menuDescription(Locale.Ru))).toEqual([
+        russian.commandGame,
+        russian.commandNext,
+        russian.commandNextWith,
+        russian.commandNextWithout,
+      ]);
+    });
+
     it("should contribute its notes to the help text", () => {
-      expect(build().notes).toEqual(copy.helpCard);
+      expect(build().notes?.(Locale.En)).toEqual(copy.helpCard);
+    });
+
+    it("should contribute those notes in the language it was asked for", () => {
+      expect(build().notes?.(Locale.Ru)).toEqual(russian.helpCard);
     });
 
     it("should route game to its own handler", async () => {

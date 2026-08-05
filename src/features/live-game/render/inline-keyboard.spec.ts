@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { copy } from "#live-game/copy.en.ts";
 import { ActionKind } from "#live-game/domain/card-states.ts";
 import type { CardState } from "#live-game/domain/card-state.ts";
 import type { CallbackPayload } from "#live-game/render/callback-data-codec.ts";
@@ -60,7 +61,7 @@ const stateWith = (over: Partial<CardState>): CardState =>
 const encodedAs = (payload: CallbackPayload): string =>
   `cb(${payload.gameId},${payload.action},${String(payload.slot)},${payload.version})`;
 
-const render = (state: CardState) => renderKeyboard(state, GAME_ID, VERSION);
+const render = (state: CardState) => renderKeyboard(copy, state, GAME_ID, VERSION);
 
 const captionsOf = (state: CardState): readonly string[] =>
   render(state)

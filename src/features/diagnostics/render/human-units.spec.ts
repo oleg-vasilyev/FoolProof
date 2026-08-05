@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { counted, humanDuration, humanSize } from "#diagnostics/render/human-units.ts";
+import { humanDuration, humanSize, type UnitLabels } from "#diagnostics/render/human-units.ts";
 
 
 const SECOND_MS = 1000;
@@ -24,80 +24,70 @@ const TWELVE = 12;
 
 const FORTY = 40;
 
+const UNITS: UnitLabels = {
+  days: "<days>",
+  hours: "<hours>",
+  minutes: "<minutes>",
+  kilobytes: "<kb>",
+  megabytes: "<mb>",
+};
+
 describe("humanDuration()", () => {
   it("should give minutes for a fresh start, which is the case that matters", () => {
-    expect(humanDuration(THREE * MINUTE_MS)).toBe("3m");
+    expect(humanDuration(THREE * MINUTE_MS, UNITS)).toBe("3<minutes>");
   });
 
   it("should round down rather than invent a minute", () => {
-    expect(humanDuration(MINUTE_MS - SECOND_MS)).toBe("0m");
+    expect(humanDuration(MINUTE_MS - SECOND_MS, UNITS)).toBe("0<minutes>");
   });
 
   it("should give hours and minutes once it has run an hour", () => {
-    expect(humanDuration(THREE * HOUR_MS + TWELVE * MINUTE_MS)).toBe("3h 12m");
+    expect(humanDuration(THREE * HOUR_MS + TWELVE * MINUTE_MS, UNITS)).toBe("3<hours> 12<minutes>");
   });
 
   it("should not repeat the hours inside the minutes", () => {
-    expect(humanDuration(HOUR_MS)).toBe("1h 0m");
+    expect(humanDuration(HOUR_MS, UNITS)).toBe("1<hours> 0<minutes>");
   });
 
   it("should give days and hours for a long-running bot", () => {
-    expect(humanDuration(DAY_MS + THREE * HOUR_MS)).toBe("1d 3h");
+    expect(humanDuration(DAY_MS + THREE * HOUR_MS, UNITS)).toBe("1<days> 3<hours>");
   });
 
   it("should not repeat the days inside the hours", () => {
-    expect(humanDuration(DAY_MS)).toBe("1d 0h");
+    expect(humanDuration(DAY_MS, UNITS)).toBe("1<days> 0<hours>");
   });
 
   it("should say zero minutes for a bot that has only just started", () => {
-    expect(humanDuration(NOTHING)).toBe("0m");
-  });
-});
-
-describe("counted()", () => {
-  const ONE_THING = 1;
-
-  const TWO_THINGS = 2;
-
-  it("should use the singular for one", () => {
-    expect(counted(ONE_THING, "warning", "warnings")).toBe("1 warning");
-  });
-
-  it("should use the plural for more than one", () => {
-    expect(counted(TWO_THINGS, "warning", "warnings")).toBe("2 warnings");
-  });
-
-  it("should use the plural for none, as English does", () => {
-    expect(counted(NOTHING, "warning", "warnings")).toBe("0 warnings");
+    expect(humanDuration(NOTHING, UNITS)).toBe("0<minutes>");
   });
 });
 
 describe("humanSize()", () => {
   it("should give kilobytes for a database of an evening's games", () => {
-    expect(humanSize(FORTY * KB)).toBe("40 KB");
+    expect(humanSize(FORTY * KB, UNITS)).toBe("40 <kb>");
   });
 
   it("should round to whole kilobytes, since the digits carry no meaning", () => {
-    expect(humanSize(FORTY * KB + KB / THREE)).toBe("40 KB");
+    expect(humanSize(FORTY * KB + KB / THREE, UNITS)).toBe("40 <kb>");
   });
 
   it("should give megabytes once it passes a thousand kilobytes", () => {
-    expect(humanSize(THREE * MB)).toBe("3.0 MB");
+    expect(humanSize(THREE * MB, UNITS)).toBe("3.0 <mb>");
   });
 
   it("should switch to megabytes exactly at the boundary, not a kilobyte later", () => {
-    expect(humanSize(MB)).toBe("1.0 MB");
+    expect(humanSize(MB, UNITS)).toBe("1.0 <mb>");
   });
 
   it("should still be kilobytes one byte below it", () => {
-    expect(humanSize(MB - ONE_BYTE)).toBe("1024 KB");
+    expect(humanSize(MB - ONE_BYTE, UNITS)).toBe("1024 <kb>");
   });
 
   it("should keep one decimal in megabytes, so growth is visible", () => {
-    expect(humanSize(MB + MB / TWELVE)).toBe("1.1 MB");
+    expect(humanSize(MB + MB / TWELVE, UNITS)).toBe("1.1 <mb>");
   });
 
   it("should call an empty file zero, not something clever", () => {
-    expect(humanSize(NOTHING)).toBe("0 KB");
+    expect(humanSize(NOTHING, UNITS)).toBe("0 <kb>");
   });
 });

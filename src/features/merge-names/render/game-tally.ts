@@ -1,7 +1,6 @@
-import { copy } from "#merge-names/copy.en.ts";
+import { counted } from "#shared/locale/plural-rules.ts";
+import type { Copy } from "#merge-names/copy.ts";
 
 
-const ONE = 1;
-
-export const gameTally = (games: number): string =>
-  `${games} ${games === ONE ? copy.gameOne : copy.gameMany}`;
+export const gameTally = (copy: Copy, games: number): string =>
+  counted(copy.locale, games, copy.gameForms);

@@ -52,15 +52,15 @@ vi.mock("#scoresheet/render/awards/awards-layout.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/card-heading.ts", () => ({
-  cardHeading: (heading: unknown) => cardHeadingSpy(heading),
+  cardHeading: (table: unknown, heading: unknown) => cardHeadingSpy(table, heading),
 }));
 
 vi.mock("#scoresheet/render/awards/award-row.ts", () => ({
-  awardRow: (placed: unknown, density: unknown) => awardRowSpy(placed, density),
+  awardRow: (table: unknown, placed: unknown, density: unknown) => awardRowSpy(table, placed, density),
 }));
 
 vi.mock("#scoresheet/render/awards/fool-plate.ts", () => ({
-  foolPlate: (placed: unknown, density: unknown) => foolPlateSpy(placed, density),
+  foolPlate: (table: unknown, placed: unknown, density: unknown) => foolPlateSpy(table, placed, density),
 }));
 
 vi.mock("#scoresheet/render/card-metrics.ts", () => ({
@@ -75,7 +75,7 @@ vi.mock("#scoresheet/render/palette.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/session-tally.ts", () => ({
-  gameTally: (games: number) => gameTallySpy(games),
+  gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
 }));
 
 vi.mock("#scoresheet/render/svg-tags.ts", () => ({
@@ -136,9 +136,9 @@ describe("renderAwards()", () => {
 
     awardsLayoutOfSpy.mockReturnValue(sheetOf());
     cardHeadingSpy.mockReturnValue(["<heading/>"]);
-    awardRowSpy.mockImplementation((placed: Placed) => [`row-${String(placed.rank)}`]);
+    awardRowSpy.mockImplementation((_table: unknown, placed: Placed) => [`row-${String(placed.rank)}`]);
     foolPlateSpy.mockReturnValue(["<fool-plate/>"]);
-    gameTallySpy.mockImplementation((games: number) => `tally(${String(games)})`);
+    gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
     rectSpy.mockImplementation(() => "<background/>");
     lineSpy.mockImplementation(() => "<line/>");
     textSpy.mockImplementation(() => "<text/>");
@@ -146,14 +146,14 @@ describe("renderAwards()", () => {
   });
 
   it("should lay the sheet out exactly once, from the chronology and honours it was given", () => {
-    renderAwards(CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS);
 
     expect(awardsLayoutOfSpy).toHaveBeenCalledTimes(ONCE);
     expect(awardsLayoutOfSpy).toHaveBeenCalledWith(CHRONOLOGY, HONOURS);
   });
 
   it("should paint a background sized to the sheet, not the chronology", () => {
-    renderAwards(CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS);
 
     expect(rectSpy).toHaveBeenCalledWith(
       expect.objectContaining({ width: IMAGE_WIDTH, height: SHEET_HEIGHT, fill: "sheet" })
@@ -161,22 +161,22 @@ describe("renderAwards()", () => {
   });
 
   it("should draw the heading with the awards title, not the chronology sheet's title", () => {
-    renderAwards(CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS);
 
-    expect(cardHeadingSpy).toHaveBeenCalledWith(
+    expect(cardHeadingSpy).toHaveBeenCalledWith(copy, 
       expect.objectContaining({ title: copy.awardsTitle, startedOn: STARTED_ON, games: GAMES, players: PLAYERS })
     );
   });
 
   it("should draw one row per sheet.rows, in the order they came", () => {
-    renderAwards(CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS);
 
     expect(awardRowSpy).toHaveBeenCalledTimes(2);
     expect(body().indexOf("row-0")).toBeLessThan(body().indexOf("row-1"));
   });
 
   it("should draw the fool plate after every row", () => {
-    renderAwards(CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS);
 
     expect(body().indexOf("row-1")).toBeLessThan(body().indexOf("<fool-plate/>"));
   });
@@ -184,7 +184,7 @@ describe("renderAwards()", () => {
   it("should draw no plate at all when the sheet has no fool", () => {
     awardsLayoutOfSpy.mockReturnValue(sheetOf({ fool: null }));
 
-    renderAwards(CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS);
 
     expect(foolPlateSpy).toHaveBeenCalledTimes(NEVER);
     expect(body()).not.toContain("<fool-plate/>");
@@ -193,7 +193,7 @@ describe("renderAwards()", () => {
   it("should print no curse note when the sheet has no curse", () => {
     awardsLayoutOfSpy.mockReturnValue(sheetOf({ curse: null }));
 
-    renderAwards(CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS);
 
     expect(textSpy).not.toHaveBeenCalledWith(copy.awardsCurseLabel, expect.anything());
   });
@@ -202,7 +202,7 @@ describe("renderAwards()", () => {
     const CURSE = { burns: 2, games: 8 };
     awardsLayoutOfSpy.mockReturnValue(sheetOf({ curse: { fact: CURSE, top: CURSE_TOP } }));
 
-    renderAwards(CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS);
 
     expect(textSpy).toHaveBeenCalledWith(copy.awardsCurseLabel, expect.anything());
     expect(textSpy).toHaveBeenCalledWith(
@@ -219,11 +219,11 @@ describe("renderAwards()", () => {
       awardsLayoutOfSpy.mockReturnValue(
         sheetOf({ curse: { fact: { burns: 2, games: 8 }, top: CURSE_TOP } })
       );
-      renderAwards(CHRONOLOGY, HONOURS);
+      renderAwards(copy, CHRONOLOGY, HONOURS);
     };
 
     it("should rule off the heading across the card's own width", () => {
-      renderAwards(CHRONOLOGY, HONOURS);
+      renderAwards(copy, CHRONOLOGY, HONOURS);
 
       expect(lineSpy).toHaveBeenCalledWith(
         expect.objectContaining({ x1: PAD, x2: GRID_RIGHT, y1: ROWS_TOP, y2: ROWS_TOP })
@@ -265,7 +265,7 @@ describe("renderAwards()", () => {
     it("should add nothing at all for a card with neither a fool nor a curse", () => {
       awardsLayoutOfSpy.mockReturnValue(sheetOf({ fool: null, curse: null, rows: [] }));
 
-      renderAwards(CHRONOLOGY, HONOURS);
+      renderAwards(copy, CHRONOLOGY, HONOURS);
 
       expect(body()).toEqual(["<background/>", "<heading/>", "<line/>"]);
     });

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { Locale } from "#shared/locale/locales.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import { CHAT_ID, ContextStub } from "#scoresheet/bot/grammy-context.stub.ts";
 
@@ -18,12 +20,20 @@ const renderAwardsSpy = vi.fn();
 
 const honoursForSpy = vi.fn();
 
+const copyInSpy = vi.fn();
+
 vi.mock("#scoresheet/render/chronology/chronology-svg.ts", () => ({
-  renderScoresheet: (chronology: unknown) => renderScoresheetSpy(chronology),
+  renderScoresheet: (table: unknown, chronology: unknown) =>
+    renderScoresheetSpy(table, chronology),
+}));
+
+vi.mock("#scoresheet/copy.ts", () => ({
+  copyIn: (locale: unknown) => copyInSpy(locale),
 }));
 
 vi.mock("#scoresheet/render/awards/awards-svg.ts", () => ({
-  renderAwards: (chronology: unknown, honours: unknown) => renderAwardsSpy(chronology, honours),
+  renderAwards: (table: unknown, chronology: unknown, honours: unknown) =>
+    renderAwardsSpy(table, chronology, honours),
 }));
 
 const EVENING_MINIMUM = 5;
@@ -34,8 +44,8 @@ vi.mock("#scoresheet/domain/awards/awards.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/session-tally.ts", () => ({
-  gameTally: (games: number) => gameTallySpy(games),
-  playerTally: (players: number) => playerTallySpy(players),
+  gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
+  playerTally: (table: unknown, players: number) => playerTallySpy(table, players),
 }));
 
 vi.mock("#scoresheet/bot/rasterizer.ts", () => ({
@@ -82,11 +92,15 @@ const SESSION = {
 describe("onStats()", () => {
   let repo: RepositoryStub;
   let ctx: ContextStub;
+  let locales: LocaleReaderStub;
 
-  const context = () => ({ repo });
+  const context = () => ({ repo, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    locales = new LocaleReaderStub(Locale.Ru);
+    copyInSpy.mockReturnValue(copy);
 
     repo = new RepositoryStub();
     ctx = new ContextStub();
@@ -96,8 +110,8 @@ describe("onStats()", () => {
     rasterizeSpy.mockReturnValue(SHEET_PNG);
     honoursForSpy.mockReturnValue(null);
     repo.seriesChronologySpy.mockReturnValue(SESSION);
-    gameTallySpy.mockImplementation((games: number) => `tally(${String(games)})`);
-    playerTallySpy.mockImplementation((players: number) => `roster(${String(players)})`);
+    gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
+    playerTallySpy.mockImplementation((_table: unknown, players: number) => `roster(${String(players)})`);
   });
 
   it("should ask the repository for this chat's session", async () => {
@@ -109,7 +123,7 @@ describe("onStats()", () => {
   it("should draw the sheet from exactly what the repository returned", async () => {
     await onStats(context(), ctx.command("/stats"));
 
-    expect(renderScoresheetSpy).toHaveBeenCalledWith(SESSION);
+    expect(renderScoresheetSpy).toHaveBeenCalledWith(copy, SESSION);
   });
 
   it("should rasterize the drawing it was given", async () => {
@@ -128,8 +142,8 @@ describe("onStats()", () => {
   it("should ask the tally renderers for the session's size", async () => {
     await onStats(context(), ctx.command("/stats"));
 
-    expect(gameTallySpy).toHaveBeenCalledWith(SESSION.games.length);
-    expect(playerTallySpy).toHaveBeenCalledWith(SESSION.players.length);
+    expect(gameTallySpy).toHaveBeenCalledWith(copy, SESSION.games.length);
+    expect(playerTallySpy).toHaveBeenCalledWith(copy, SESSION.players.length);
   });
 
   it("should caption the photo by joining the two finished tallies", async () => {
@@ -154,7 +168,7 @@ describe("onStats()", () => {
 
     await onStats(context(), ctx.command("/stats"));
 
-    expect(gameTallySpy).toHaveBeenCalledWith(FIFTY);
+    expect(gameTallySpy).toHaveBeenCalledWith(copy, FIFTY);
   });
 
   it("should say nothing is recorded when the chat has no session yet", async () => {
@@ -207,7 +221,7 @@ describe("onStats()", () => {
 
       await onStats(context(), ctx.command("/stats"));
 
-      expect(renderAwardsSpy).toHaveBeenCalledWith(SESSION, HONOURS);
+      expect(renderAwardsSpy).toHaveBeenCalledWith(copy, SESSION, HONOURS);
     });
 
     it("should leave the awards photo without a caption, since the picture names itself", async () => {
@@ -236,11 +250,15 @@ describe("onStats()", () => {
 describe("onChronology()", () => {
   let repo: RepositoryStub;
   let ctx: ContextStub;
+  let locales: LocaleReaderStub;
 
-  const context = () => ({ repo });
+  const context = () => ({ repo, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    locales = new LocaleReaderStub(Locale.Ru);
+    copyInSpy.mockReturnValue(copy);
 
     repo = new RepositoryStub();
     ctx = new ContextStub();
@@ -249,8 +267,8 @@ describe("onChronology()", () => {
     rasterizeSpy.mockReturnValue(SHEET_PNG);
     honoursForSpy.mockReturnValue(HONOURS);
     repo.seriesChronologySpy.mockReturnValue(SESSION);
-    gameTallySpy.mockImplementation((games: number) => `tally(${String(games)})`);
-    playerTallySpy.mockImplementation((players: number) => `roster(${String(players)})`);
+    gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
+    playerTallySpy.mockImplementation((_table: unknown, players: number) => `roster(${String(players)})`);
   });
 
   it("should send one photo and never reach for the awards", async () => {
@@ -263,7 +281,7 @@ describe("onChronology()", () => {
   it("should draw the chronology of the session it was given", async () => {
     await onChronology(context(), ctx.command("/stats_chronology"));
 
-    expect(renderScoresheetSpy).toHaveBeenCalledWith(SESSION);
+    expect(renderScoresheetSpy).toHaveBeenCalledWith(copy, SESSION);
   });
 
   it("should say nothing is recorded when the chat has no session yet", async () => {
@@ -279,11 +297,15 @@ describe("onChronology()", () => {
 describe("onAwards()", () => {
   let repo: RepositoryStub;
   let ctx: ContextStub;
+  let locales: LocaleReaderStub;
 
-  const context = () => ({ repo });
+  const context = () => ({ repo, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    locales = new LocaleReaderStub(Locale.Ru);
+    copyInSpy.mockReturnValue(copy);
 
     repo = new RepositoryStub();
     ctx = new ContextStub();
@@ -309,7 +331,7 @@ describe("onAwards()", () => {
 
   it("should explain itself when the evening is too short for awards", async () => {
     honoursForSpy.mockReturnValue(null);
-    gameTallySpy.mockImplementation((games: number) => `tally(${String(games)})`);
+    gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
 
     await onAwards(context(), ctx.command("/stats_awards"));
 
@@ -322,7 +344,7 @@ describe("onAwards()", () => {
 
     await onAwards(context(), ctx.command("/stats_awards"));
 
-    expect(gameTallySpy).toHaveBeenCalledWith(EVENING_MINIMUM);
+    expect(gameTallySpy).toHaveBeenCalledWith(copy, EVENING_MINIMUM);
   });
 
   it("should say nothing is recorded when the chat has no session yet", async () => {

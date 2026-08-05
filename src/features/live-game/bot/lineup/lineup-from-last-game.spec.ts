@@ -1,5 +1,6 @@
 import { Problem } from "#live-game/domain/refusals.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { playerIdOf, seatRecordsOf } from "#shared/repository/database-records.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
@@ -9,6 +10,8 @@ import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
 
 
 const parseNamesSpy = vi.fn();
+
+const copyForSpy = vi.fn();
 
 const rotateToLowestIdSpy = vi.fn();
 
@@ -48,6 +51,7 @@ vi.mock("#live-game/bot/card-context.ts", () => ({
     askForNamesSpy(context, ctx, question, placeholder),
   commandText: (ctx: unknown) => commandTextSpy(ctx),
   refusedBecauseLive: (context: unknown, ctx: unknown) => refusedBecauseLiveSpy(context, ctx),
+  copyFor: (context: unknown, chatId: number) => copyForSpy(context, chatId),
 }));
 
 vi.mock("#live-game/bot/card/card-service.ts", () => ({
@@ -69,7 +73,7 @@ vi.mock("#live-game/render/name-preview.ts", () => ({
 const askSeatingSpy = vi.fn();
 
 vi.mock("#live-game/bot/seating-screen.ts", () => ({
-  askSeating: (ctx: unknown, seats: unknown) => askSeatingSpy(ctx, seats),
+  askSeating: (table: unknown, ctx: unknown, seats: unknown) => askSeatingSpy(table, ctx, seats),
 }));
 
 const resolveSeatsSpy = vi.fn();
@@ -124,18 +128,22 @@ const DISTINCT_SEATS = [{ playerId: DISTINCT_PLAYER_ID, displayName: "Zzz" }];
 
 describe("a line-up taken from the last game", () => {
   let repo: RepositoryStub;
+  let locales: LocaleReaderStub;
   let cards: CardServiceStub;
   let prompts: PromptRegistryStub;
   let ctx: ContextStub;
 
-  const context = () => ({ repo, cards: cards.service, prompts: prompts.registry });
+  const context = () => ({ repo, cards: cards.service, prompts: prompts.registry, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
 
+    copyForSpy.mockReturnValue(copy);
+
     commandTextSpy.mockReturnValue(COMMAND_TEXT);
 
     repo = new RepositoryStub();
+    locales = new LocaleReaderStub();
     cards = new CardServiceStub();
     prompts = new PromptRegistryStub();
     ctx = new ContextStub();
@@ -199,7 +207,7 @@ describe("a line-up taken from the last game", () => {
 
       await onNext(context(), ctx.command("/next"));
 
-      expect(cards.openSpy).toHaveBeenCalledWith(CHAT_ID, MAPPED_SEATS, DISTINCTIVE_STARTER_SLOT);
+      expect(cards.openSpy).toHaveBeenCalledWith(copy, CHAT_ID, MAPPED_SEATS, DISTINCTIVE_STARTER_SLOT);
     });
   });
 
@@ -325,7 +333,7 @@ describe("a line-up taken from the last game", () => {
       await onNextWith(context(), ctx.command("/next_with Dima"));
 
       expect(tableWithSpy).toHaveBeenCalledWith(MAPPED_SEATS, JOINER_SEATS);
-      expect(askSeatingSpy).toHaveBeenCalledWith(expect.anything(), SEATED_TOGETHER);
+      expect(askSeatingSpy).toHaveBeenCalledWith(copy, expect.anything(), SEATED_TOGETHER);
     });
 
     it("should refuse a table the joiners would overfill", async () => {
@@ -345,7 +353,7 @@ describe("a line-up taken from the last game", () => {
 
       await onNextWith(context(), command);
 
-      expect(askSeatingSpy).toHaveBeenCalledWith(command, expect.anything());
+      expect(askSeatingSpy).toHaveBeenCalledWith(copy, command, expect.anything());
       expect(cards.openSpy).toHaveBeenCalledTimes(NEVER);
     });
   });
@@ -466,7 +474,7 @@ describe("a line-up taken from the last game", () => {
 
       await onNextWithout(context(), ctx.command("/next_without Anya"));
 
-      expect(cards.openSpy).toHaveBeenCalledWith(CHAT_ID, ROTATED, null);
+      expect(cards.openSpy).toHaveBeenCalledWith(copy, CHAT_ID, ROTATED, null);
     });
 
     it("should never create a player", async () => {
@@ -519,7 +527,7 @@ describe("a line-up taken from the last game", () => {
 
       await joinFromNames(context(), ctx.textMessage("Dima"));
 
-      expect(askSeatingSpy).toHaveBeenCalledWith(expect.anything(), SEATED_TOGETHER);
+      expect(askSeatingSpy).toHaveBeenCalledWith(copy, expect.anything(), SEATED_TOGETHER);
     });
 
     it("should never drop an unanswered prompt", async () => {
@@ -563,7 +571,7 @@ describe("a line-up taken from the last game", () => {
 
       await leaveFromNames(context(), ctx.textMessage("Anya"));
 
-      expect(cards.openSpy).toHaveBeenCalledWith(CHAT_ID, ROTATED, null);
+      expect(cards.openSpy).toHaveBeenCalledWith(copy, CHAT_ID, ROTATED, null);
     });
 
     it("should never drop an unanswered prompt", async () => {

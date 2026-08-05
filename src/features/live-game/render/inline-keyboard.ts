@@ -11,7 +11,7 @@ import {
   type CardState,
 } from "#live-game/domain/card-state.ts";
 import { encodeCallback } from "#live-game/render/callback-data-codec.ts";
-import { copy } from "#live-game/copy.en.ts";
+import type { Copy } from "#live-game/copy.ts";
 
 
 export interface InlineButton {
@@ -22,6 +22,7 @@ export interface InlineButton {
 export type InlineKeyboardRows = readonly (readonly InlineButton[])[];
 
 const captionFor = (
+  copy: Copy,
   state: CardState,
   slot: number,
   positions: ReadonlyMap<number, number>,
@@ -41,7 +42,12 @@ const captionFor = (
   return `${sharedFinish ? copy.markDraw : copy.markFool} ${name}`;
 };
 
-const controlRow = (state: CardState, gameId: number, version: number): readonly InlineButton[] => {
+const controlRow = (
+  copy: Copy,
+  state: CardState,
+  gameId: number,
+  version: number
+): readonly InlineButton[] => {
   const phase = phaseOf(state);
 
   const cancel: InlineButton = {
@@ -76,6 +82,7 @@ const controlRow = (state: CardState, gameId: number, version: number): readonly
 };
 
 export const renderKeyboard = (
+  copy: Copy,
   state: CardState,
   gameId: number,
   version: number
@@ -85,10 +92,10 @@ export const renderKeyboard = (
 
   const playerRows = state.seats.map((_, slot) => [
     {
-      text: captionFor(state, slot, positions, sharedFinish),
+      text: captionFor(copy, state, slot, positions, sharedFinish),
       callback_data: encodeCallback({ gameId, action: ActionKind.Pick, slot, version }),
     },
   ]);
 
-  return [...playerRows, controlRow(state, gameId, version)];
+  return [...playerRows, controlRow(copy, state, gameId, version)];
 };

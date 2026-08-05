@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { PluralRulesStub } from "#shared/locale/plural-rules.stub.ts";
 import { copy } from "#diagnostics/copy.en.ts";
+import { copy as russian } from "#diagnostics/copy.ru.ts";
 
 
 const DURATION = "3h 12m";
@@ -12,13 +14,14 @@ const humanDurationSpy = vi.fn();
 
 const humanSizeSpy = vi.fn();
 
-const countedSpy = vi.fn();
+const plural = new PluralRulesStub();
 
 vi.mock("#diagnostics/render/human-units.ts", () => ({
-  humanDuration: (ms: number) => humanDurationSpy(ms),
-  humanSize: (bytes: number) => humanSizeSpy(bytes),
-  counted: (count: number, one: string, many: string) => countedSpy(count, one, many),
+  humanDuration: (ms: number, units: unknown) => humanDurationSpy(ms, units),
+  humanSize: (bytes: number, units: unknown) => humanSizeSpy(bytes, units),
 }));
+
+vi.mock("#shared/locale/plural-rules.ts", () => plural.module);
 
 const { renderHealthReport } = await import("#diagnostics/render/health-report.ts");
 
@@ -71,7 +74,7 @@ const snapshotOf = (over: Record<string, unknown> = {}) => ({
 });
 
 const report = (over: Record<string, unknown> = {}) =>
-  renderHealthReport(snapshotOf(over) as Parameters<typeof renderHealthReport>[0]);
+  renderHealthReport(copy, snapshotOf(over) as Parameters<typeof renderHealthReport>[1]);
 
 describe("renderHealthReport()", () => {
   beforeEach(() => {
@@ -79,7 +82,7 @@ describe("renderHealthReport()", () => {
 
     humanDurationSpy.mockReturnValue(DURATION);
     humanSizeSpy.mockReturnValue(SIZE);
-    countedSpy.mockReturnValue(COUNTED);
+    plural.countedSpy.mockReturnValue(COUNTED);
   });
 
   describe("the database", () => {
@@ -105,10 +108,10 @@ describe("renderHealthReport()", () => {
       expect(report()).toContain(SIZE);
     });
 
-    it("should hand the size to the formatter in bytes", () => {
+    it("should hand the size to the formatter in bytes, with the labels to spell it in", () => {
       report();
 
-      expect(humanSizeSpy).toHaveBeenCalledWith(SIZE_BYTES);
+      expect(humanSizeSpy).toHaveBeenCalledWith(SIZE_BYTES, copy.units);
     });
 
     it("should count what is recorded, so an empty database is obvious", () => {
@@ -118,13 +121,13 @@ describe("renderHealthReport()", () => {
     it("should have the players counted with their own noun", () => {
       report();
 
-      expect(countedSpy).toHaveBeenCalledWith(PLAYERS, "player", "players");
+      expect(plural.countedSpy).toHaveBeenCalledWith(copy.locale, PLAYERS, copy.playerForms);
     });
 
     it("should have the games counted with theirs", () => {
       report();
 
-      expect(countedSpy).toHaveBeenCalledWith(GAMES, "game", "games");
+      expect(plural.countedSpy).toHaveBeenCalledWith(copy.locale, GAMES, copy.gameForms);
     });
 
     it("should say when the last game was", () => {
@@ -143,10 +146,10 @@ describe("renderHealthReport()", () => {
       expect(report()).toContain(copy.uptime(DURATION));
     });
 
-    it("should hand the uptime to the formatter in milliseconds", () => {
+    it("should hand the uptime to the formatter in milliseconds, with the labels to spell it in", () => {
       report();
 
-      expect(humanDurationSpy).toHaveBeenCalledWith(UPTIME_MS);
+      expect(humanDurationSpy).toHaveBeenCalledWith(UPTIME_MS, copy.units);
     });
 
     it("should say it is the first start when nothing died before it", () => {
@@ -200,13 +203,13 @@ describe("renderHealthReport()", () => {
     it("should have the warnings counted with their own noun", () => {
       report({ warnings: WARNINGS, errors: ERRORS });
 
-      expect(countedSpy).toHaveBeenCalledWith(WARNINGS, "warning", "warnings");
+      expect(plural.countedSpy).toHaveBeenCalledWith(copy.locale, WARNINGS, copy.warningForms);
     });
 
     it("should have the errors counted with theirs, not with the warnings'", () => {
       report({ warnings: WARNINGS, errors: ERRORS });
 
-      expect(countedSpy).toHaveBeenCalledWith(ERRORS, "error", "errors");
+      expect(plural.countedSpy).toHaveBeenCalledWith(copy.locale, ERRORS, copy.errorForms);
     });
 
     it("should not print an empty list of problems", () => {
@@ -240,6 +243,21 @@ describe("renderHealthReport()", () => {
 
   it("should lead with a title, since this arrives in a chat of card messages", () => {
     expect(report().startsWith(copy.reportTitle)).toBe(true);
+  });
+
+  it("should speak in the copy it was handed, not in the one it imported", () => {
+    const russianReport = renderHealthReport(
+      russian,
+      snapshotOf() as Parameters<typeof renderHealthReport>[1]
+    );
+
+    expect(russianReport.startsWith(russian.reportTitle)).toBe(true);
+  });
+
+  it("should count in the language of the copy it was handed", () => {
+    renderHealthReport(russian, snapshotOf() as Parameters<typeof renderHealthReport>[1]);
+
+    expect(plural.countedSpy).toHaveBeenCalledWith(russian.locale, PLAYERS, russian.playerForms);
   });
 
   it("should lay the whole message out in a fixed shape", () => {

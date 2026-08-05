@@ -167,6 +167,39 @@ const project = {
         };
       },
     },
+    // Every import belongs in the header. Imports are hoisted, so one that
+    // lands lower down still runs — a scripted edit that appended one to the
+    // end of a file compiled and passed every test, and the blank-line rule
+    // below could not see it because there was no statement after it to
+    // measure against.
+    "imports-first": {
+      meta: {
+        type: "problem",
+        schema: [],
+        messages: {
+          late: "An import belongs in the header, above the first statement.",
+        },
+      },
+      create(context) {
+        return {
+          Program(program) {
+            const firstStatement = program.body.findIndex(
+              (statement) => statement.type !== "ImportDeclaration"
+            );
+
+            if (firstStatement < 0) {
+              return;
+            }
+
+            for (const statement of program.body.slice(firstStatement)) {
+              if (statement.type === "ImportDeclaration") {
+                context.report({ node: statement, messageId: "late" });
+              }
+            }
+          },
+        };
+      },
+    },
     // Exactly two blank lines after the last import, so the imports read as a
     // header rather than as the first statements.
     "blank-lines-after-imports": {
@@ -248,7 +281,7 @@ const forbid = (bans, message) => {
 
 const FRAMEWORK = ["grammy", "grammy/*", "@resvg/*", "node:*"];
 
-const FEATURES = ["live-game", "merge-names", "scoresheet", "diagnostics"];
+const FEATURES = ["live-game", "merge-names", "scoresheet", "diagnostics", "language"];
 
 // Imports are written as Node subpath aliases (`#live-game/bot/x.ts`), so that is
 // the shape the bans have to name. The relative globs stay listed as well, so a
@@ -315,6 +348,7 @@ export default [
       "prefer-const": "error",
       "no-var": "error",
       "project/no-comments": "error",
+      "project/imports-first": "error",
       "project/blank-lines-after-imports": "error",
     },
   },

@@ -2,7 +2,7 @@ import { vi } from "vitest";
 import type { Command } from "#shared/telegram/telegram-contexts.ts";
 
 
-const CHAT_ID = -100777;
+export const CHAT_ID = -100777;
 
 const COMMAND_MESSAGE_ID = 500;
 

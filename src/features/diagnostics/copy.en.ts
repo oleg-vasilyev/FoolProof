@@ -1,4 +1,9 @@
+import { Locale } from "#shared/locale/locales.ts";
+
+
 export const copy = {
+  locale: Locale.En as Locale,
+
   commandStatus: "How the bot itself is doing",
 
   helpStatus: "/status — which database, how long it has been up, what went wrong",
@@ -28,4 +33,13 @@ export const copy = {
   noProblems: "Since this start: nothing went wrong",
 
   recentProblems: "Latest:",
-} as const;
+
+  playerForms: { one: "player", few: "players", many: "players" },
+  gameForms: { one: "game", few: "games", many: "games" },
+  warningForms: { one: "warning", few: "warnings", many: "warnings" },
+  errorForms: { one: "error", few: "errors", many: "errors" },
+
+  units: { days: "d", hours: "h", minutes: "m", kilobytes: "KB", megabytes: "MB" },
+};
+
+export type Copy = typeof copy;

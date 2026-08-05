@@ -18,7 +18,8 @@ import type { CallbackPayload } from "#live-game/render/callback-data-codec.ts";
 import { renderCard, renderResult } from "#live-game/render/card-message.ts";
 import { renderKeyboard, type InlineKeyboardRows } from "#live-game/render/inline-keyboard.ts";
 import { toMarkup } from "#live-game/bot/inline-markup.ts";
-import { copy } from "#live-game/copy.en.ts";
+import type { LocaleReader } from "#shared/locale/chat-locale.ts";
+import { copyIn, type Copy } from "#live-game/copy.ts";
 
 
 const EDIT_DEBOUNCE_MS = 350;
@@ -35,13 +36,14 @@ export interface CardServiceDeps {
   readonly repo: CardRepository;
   readonly api: Api;
   readonly log: Logger;
+  readonly localeIn: LocaleReader;
 }
 
 export const PICKED_BY_HAND = null;
 
 export interface CardService {
-  open(chatId: number, seats: readonly Seat[], starterSlot: number | null): Promise<void>;
-  tap(payload: CallbackPayload, actorTgId: number): Promise<string>;
+  open(copy: Copy, chatId: number, seats: readonly Seat[], starterSlot: number | null): Promise<void>;
+  tap(copy: Copy, payload: CallbackPayload, actorTgId: number): Promise<string>;
   redrawLive(): Promise<number>;
   sweepIdle(idleSeconds: number): Promise<number>;
   shutdown(): Promise<void>;
@@ -59,9 +61,11 @@ interface EditingContext {
   readonly api: Api;
   readonly edits: Debouncer<EditRequest>;
   readonly sendEdit: (request: EditRequest) => Promise<void>;
+  readonly localeIn: LocaleReader;
 }
 
 interface Tap {
+  readonly copy: Copy;
   readonly card: CardRecord;
   readonly before: CardState;
   readonly actorTgId: number;
@@ -126,7 +130,10 @@ const findTappableCard = (repo: CardRepository, payload: CallbackPayload): CardL
   return { kind: TapTarget.Tappable, card };
 };
 
-const noticeFor = (before: CardState, after: CardState): string => {
+const spokenIn = (context: EditingContext, chatId: number): Copy =>
+  copyIn(context.localeIn(chatId));
+
+const noticeFor = (copy: Copy, before: CardState, after: CardState): string => {
   if (before.starterSlot === null && after.starterSlot !== null) {
     return copy.tapStarter(nameAt(after, after.starterSlot));
   }
@@ -163,11 +170,12 @@ const editOf = (card: CardRecord, text: string, keyboard: InlineKeyboardRows | n
 
 const redrawOf = (context: EditingContext, card: CardRecord): EditRequest => {
   const state = toCardState(card);
+  const copy = spokenIn(context, card.game.chat_id);
 
   return editOf(
     card,
-    renderCard(state, context.repo.gameNumberInSeries(card.game.chat_id)),
-    renderKeyboard(state, card.game.id, card.game.state_version)
+    renderCard(copy, state, context.repo.gameNumberInSeries(card.game.chat_id)),
+    renderKeyboard(copy, state, card.game.id, card.game.state_version)
   );
 };
 
@@ -193,6 +201,7 @@ const createEditSender =
 
 const openCard = async (
   context: EditingContext,
+  copy: Copy,
   chatId: number,
   seats: readonly Seat[],
   starterSlot: number | null
@@ -210,10 +219,14 @@ const openCard = async (
   }
 
   try {
-    const message = await api.sendMessage(chatId, renderCard(state, repo.gameNumberInSeries(chatId)), {
-      parse_mode: "HTML",
-      reply_markup: toMarkup(renderKeyboard(state, gameId, FIRST_VERSION)),
-    });
+    const message = await api.sendMessage(
+      chatId,
+      renderCard(copy, state, repo.gameNumberInSeries(chatId)),
+      {
+        parse_mode: "HTML",
+        reply_markup: toMarkup(renderKeyboard(copy, state, gameId, FIRST_VERSION)),
+      }
+    );
 
     repo.attachMessage(gameId, message.message_id);
   } catch (error) {
@@ -225,17 +238,17 @@ const openCard = async (
 const cancelCard = async (context: EditingContext, tap: Tap): Promise<string> => {
   context.edits.cancel(String(tap.card.game.id));
   context.repo.discardGame(tap.card.game.id);
-  await context.sendEdit(editOf(tap.card, copy.cancelledBody, null));
+  await context.sendEdit(editOf(tap.card, tap.copy.cancelledBody, null));
 
-  return copy.cancelledNotice;
+  return tap.copy.cancelledNotice;
 };
 
 const confirmCard = async (context: EditingContext, tap: Tap): Promise<string> => {
   context.repo.confirmGame(tap.card.game.id, finalistsOf(tap.before), tap.actorTgId, tap.version);
   context.edits.cancel(String(tap.card.game.id));
-  await context.sendEdit(editOf(tap.card, renderResult(tap.before, tap.gameNumber), null));
+  await context.sendEdit(editOf(tap.card, renderResult(tap.copy, tap.before, tap.gameNumber), null));
 
-  return copy.confirmedNotice;
+  return tap.copy.confirmedNotice;
 };
 
 const persist = (context: EditingContext, tap: Tap, after: CardState): void => {
@@ -263,15 +276,15 @@ const advanceCard = (context: EditingContext, tap: Tap, after: CardState): strin
     String(tap.card.game.id),
     editOf(
       tap.card,
-      renderCard(after, tap.gameNumber),
-      renderKeyboard(after, tap.card.game.id, tap.version)
+      renderCard(tap.copy, after, tap.gameNumber),
+      renderKeyboard(tap.copy, after, tap.card.game.id, tap.version)
     )
   );
 
-  return noticeFor(tap.before, after);
+  return noticeFor(tap.copy, tap.before, after);
 };
 
-const repairOutrunCard = (context: EditingContext, card: CardRecord): string => {
+const repairOutrunCard = (context: EditingContext, copy: Copy, card: CardRecord): string => {
   context.edits.schedule(String(card.game.id), redrawOf(context, card));
 
   return copy.cardStale;
@@ -295,6 +308,7 @@ const redrawLiveCards = async (context: EditingContext): Promise<number> => {
 
 const tapKnownCard = async (
   context: EditingContext,
+  copy: Copy,
   card: CardRecord,
   payload: CallbackPayload,
   actorTgId: number
@@ -303,6 +317,7 @@ const tapKnownCard = async (
   const transition = apply(before, toAction(payload));
 
   const tap: Tap = {
+    copy,
     card,
     before,
     actorTgId,
@@ -327,6 +342,7 @@ const tapKnownCard = async (
 
 const tapCard = async (
   context: EditingContext,
+  copy: Copy,
   payload: CallbackPayload,
   actorTgId: number
 ): Promise<string> => {
@@ -337,10 +353,10 @@ const tapCard = async (
       return copy.cardGone;
 
     case TapTarget.Outrun:
-      return repairOutrunCard(context, lookup.card);
+      return repairOutrunCard(context, copy, lookup.card);
 
     case TapTarget.Tappable:
-      return tapKnownCard(context, lookup.card, payload, actorTgId);
+      return tapKnownCard(context, copy, lookup.card, payload, actorTgId);
   }
 };
 
@@ -353,7 +369,7 @@ const sweepIdleCards = async (context: EditingContext, idleSeconds: number): Pro
     await context.sendEdit({
       chatId: game.chat_id,
       messageId: game.message_id,
-      text: copy.abandonedBody,
+      text: spokenIn(context, game.chat_id).abandonedBody,
       keyboard: null,
     });
   }
@@ -364,11 +380,17 @@ const sweepIdleCards = async (context: EditingContext, idleSeconds: number): Pro
 export function createCardService(deps: CardServiceDeps): CardService {
   const sendEdit = createEditSender(deps.api, deps.log);
   const edits = createDebouncer<EditRequest>(EDIT_DEBOUNCE_MS, sendEdit);
-  const context: EditingContext = { repo: deps.repo, api: deps.api, edits, sendEdit };
+  const context: EditingContext = {
+    repo: deps.repo,
+    api: deps.api,
+    edits,
+    sendEdit,
+    localeIn: deps.localeIn,
+  };
 
   return {
-    open: (chatId, seats, starterSlot) => openCard(context, chatId, seats, starterSlot),
-    tap: (payload, actorTgId) => tapCard(context, payload, actorTgId),
+    open: (copy, chatId, seats, starterSlot) => openCard(context, copy, chatId, seats, starterSlot),
+    tap: (copy, payload, actorTgId) => tapCard(context, copy, payload, actorTgId),
     redrawLive: () => redrawLiveCards(context),
     sweepIdle: (idleSeconds) => sweepIdleCards(context, idleSeconds),
     shutdown: () => edits.flushAll(),

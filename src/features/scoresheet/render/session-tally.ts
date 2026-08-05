@@ -1,10 +1,9 @@
-import { copy } from "#scoresheet/copy.en.ts";
+import { counted } from "#shared/locale/plural-rules.ts";
+import type { Copy } from "#scoresheet/copy.ts";
 
 
-const ALONE = 1;
+export const gameTally = (copy: Copy, games: number): string =>
+  counted(copy.locale, games, copy.sheetGameForms);
 
-export const gameTally = (games: number): string =>
-  `${String(games)} ${games === ALONE ? copy.sheetGameSingular : copy.sheetGamePlural}`;
-
-export const playerTally = (players: number): string =>
-  `${String(players)} ${players === ALONE ? copy.sheetPlayerSingular : copy.sheetPlayerPlural}`;
+export const playerTally = (copy: Copy, players: number): string =>
+  counted(copy.locale, players, copy.sheetPlayerForms);

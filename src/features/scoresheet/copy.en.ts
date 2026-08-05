@@ -1,19 +1,9 @@
-const MONTHS: readonly string[] = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+import { Locale } from "#shared/locale/locales.ts";
+
 
 export const copy = {
+  locale: Locale.En as Locale,
+
   commandStats: "How tonight is going",
   commandChronology: "The chronology on its own",
   commandAwards: "Tonight's awards",
@@ -76,10 +66,8 @@ export const copy = {
   sheetShareLabel: "TABLE SHARE",
   sheetShareHint: "50% is mid-table · 100% is winning every game",
 
-  sheetGameSingular: "game",
-  sheetGamePlural: "games",
-  sheetPlayerSingular: "player",
-  sheetPlayerPlural: "players",
+  sheetGameForms: { one: "game", few: "games", many: "games" },
+  sheetPlayerForms: { one: "player", few: "players", many: "players" },
 
   sheetKeyPlaced: "went out",
   sheetKeyDrawn: "drew for last",
@@ -88,12 +76,9 @@ export const copy = {
 
   sheetSubtitle: (games: string, players: string) => `${games} · ${players}`,
   sheetOmitted: (games: number) => `earliest ${games} not shown`,
-  sheetDate: (isoDate: string) => {
-    const [year, month, day] = isoDate.split("-");
-    const name = month === undefined ? undefined : MONTHS[Number(month) - 1];
 
-    return name === undefined || day === undefined || year === undefined
-      ? isoDate
-      : `${Number(day)} ${name} ${year}`;
-  },
-} as const;
+  months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  sheetDate: (day: string, month: string, year: string) => `${day} ${month} ${year}`,
+};
+
+export type Copy = typeof copy;

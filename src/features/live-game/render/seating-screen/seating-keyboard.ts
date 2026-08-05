@@ -2,18 +2,22 @@ import { ActionKind } from "#live-game/domain/card-states.ts";
 import { seatNumberOf, type SeatingPlan } from "#live-game/domain/seating-plan.ts";
 import { encodeSeatingCallback } from "#live-game/render/seating-screen/seating-callback-codec.ts";
 import type { InlineButton, InlineKeyboardRows } from "#live-game/render/inline-keyboard.ts";
-import { copy } from "#live-game/copy.en.ts";
+import type { Copy } from "#live-game/copy.ts";
 
 
 const NONE_PLACED = 0;
 
-const captionFor = (plan: SeatingPlan, slot: number, name: string): string => {
+const captionFor = (copy: Copy, plan: SeatingPlan, slot: number, name: string): string => {
   const seat = seatNumberOf(plan, slot);
 
   return seat === null ? name : `${copy.markSeat} ${seat} ${name}`;
 };
 
-const controlRow = (plan: SeatingPlan, order: readonly number[]): readonly InlineButton[] => {
+const controlRow = (
+  copy: Copy,
+  plan: SeatingPlan,
+  order: readonly number[]
+): readonly InlineButton[] => {
   const cancel: InlineButton = {
     text: copy.buttonCancel,
     callback_data: encodeSeatingCallback({ order, placed: plan.placed, action: { kind: ActionKind.Cancel } }),
@@ -32,12 +36,12 @@ const controlRow = (plan: SeatingPlan, order: readonly number[]): readonly Inlin
   ];
 };
 
-export const renderSeatingKeyboard = (plan: SeatingPlan): InlineKeyboardRows => {
+export const renderSeatingKeyboard = (copy: Copy, plan: SeatingPlan): InlineKeyboardRows => {
   const order = plan.roster.map((seat) => seat.playerId);
 
   const seatRows = plan.roster.map((seat, slot) => [
     {
-      text: captionFor(plan, slot, seat.displayName),
+      text: captionFor(copy, plan, slot, seat.displayName),
       callback_data: encodeSeatingCallback({
         order,
         placed: plan.placed,
@@ -46,5 +50,5 @@ export const renderSeatingKeyboard = (plan: SeatingPlan): InlineKeyboardRows => 
     },
   ]);
 
-  return [...seatRows, controlRow(plan, order)];
+  return [...seatRows, controlRow(copy, plan, order)];
 };

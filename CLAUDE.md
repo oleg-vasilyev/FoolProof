@@ -99,25 +99,28 @@ Node actually runs the code. `erasableSyntaxOnly` and `verbatimModuleSyntax` kee
 the source type-strippable (no enums, no namespaces, `import type` for types), and
 `allowImportingTsExtensions` matches the explicit `.ts` import paths.
 
-## Everything a user can read lives in `copy.en.ts`
+## Everything a user can read lives in a copy table
 
-Everything is English — code, identifiers, commits, docs and every user-facing
-string. `PLAN.md` says why.
+Code, identifiers, commits and docs are English. What the bot *says* is whichever
+language the chat picked, so every feature carries `copy.en.ts`, `copy.ru.ts` and a
+`copy.ts` whose `copyIn(locale)` switches between them. `copy.en.ts` declares the
+shape (`export type Copy = typeof copy`) and every other table is annotated with it,
+so a key missing from one language is a compile error.
 
-All copy the bot emits lives in the owning feature's `copy.en.ts`, referenced by
-key. **No string literal a user can read may appear anywhere else** — not in the
-state machine, not in a handler, not in an `answerCallbackQuery` call, and not as
-the separator a `render/` file joins two of them with. Keep the
-table flat, and put anything with a count behind a function rather than
-concatenating at the call site: that seam is what makes a second locale a small
-change, and the `.en` in the filename names it.
+**No string literal a user can read may appear anywhere else** — not in the state
+machine, not in a handler, not in an `answerCallbackQuery` call, and not as the
+separator a `render/` file joins two of them with. Keep the table flat.
+
+**Copy is a parameter, never an import.** A `render/` or `bot/` function that speaks
+takes `copy: Copy` first; only an entry point and its handlers resolve one, from the
+chat's language. A module-level `import { copy }` pins the bot to one language.
 
 **A copy function interpolates; it never decides.** Choosing between `1 game` and
-`2 games` is a `render/` job (`merge-names/render/game-tally.ts`) and the copy
-function takes the finished fragment. The reason is mechanical: specs leave the copy
-table real on purpose, so a decision made inside it is compared against itself and
-no test can catch it breaking — the `write-a-spec` skill has the five mutants that
-proved it.
+`2 партии` is a `render/` job — the table holds `{ one, few, many }` and
+`shared/locale/plural-rules.ts` picks by the table's own `locale`. The reason is
+mechanical: specs leave copy tables real on purpose, so a decision made inside one is
+compared against itself and no test can catch it breaking — the `write-a-spec` skill
+has the five mutants that proved it.
 
 Player names are user data, not copy. Matching normalises via Unicode NFC and lower
 case, plus `ё` → `е`, and the parser must not assume latin
@@ -146,9 +149,8 @@ up holding. A single-command feature never subdivides.
 
 `docs:check` fails a layer root above nine files, which is unambiguous crowding
 rather than a real limit — the fix is always a named subfolder, never a bigger
-number. It is a late alarm on purpose: a count of seven fired on a folder that
-turned out to need no split, so the question is the rule and the count only makes
-somebody ask it.
+number. It is a late alarm on purpose: seven fired on a folder needing no split, so
+the question is the rule and the count only makes somebody ask it.
 
 **A feature folder is named after what the player gets**, not after an internal
 noun. `diagnostics/` is the exception that proves the rule — its reader is whoever
@@ -164,9 +166,11 @@ src/
     merge-names/        the /merge screen that makes two names one player
     scoresheet/         the /stats picture
     diagnostics/        the /status report about the bot itself
+    language/           the /language screen a chat picks its language on
   shared/
     config/             reading .env, and where the project root is
     lifecycle/          draining the stops, restarting after a crash
+    locale/             the language table, the plural rules, the chat's choice
     logging/            the scoped logger
     repository/         the connection, the contract, the SQL
     telegram/           context types, the feature contract, api retries,
@@ -278,20 +282,15 @@ non-zero, and neither tries to carry on — the state is unknown by definition.
 
 ## Tests
 
-The `write-a-spec` skill has everything about writing one. Four facts shape the
+The `write-a-spec` skill has everything about writing one. Three facts shape the
 source tree, so they are here:
 
 - Specs sit next to the code as `*.spec.ts`, and **so do the stubs**. A stub for
   something we did not write (grammY's `Api`, a `Context`) sits next to its only
   consumer instead.
 - **Everything mockable has a stub, and specs use it instead of a hand-written
-  fake** — everything in `shared/`, and every feature entry point. A stub exposes a
-  `module` field typed `typeof import("…")`, so `vi.mock("#…", () => stub.module)`
-  is the whole call site. This is not tidiness: a `vi.mock` factory is **untyped**,
-  so an inline fake drifts from the real module in silence.
-- **A fake never contains logic.** If it needs an `if`, a lookup or a loop to
-  satisfy its caller, it has become a second implementation and the test passes
-  because the fake works.
+  fake** — everything in `shared/`, and every feature entry point. The skill has
+  the two silent failures that made it a rule.
 - **A spec tests one file, and everything that file imports is mocked.** Third-party
   code is never exercised in a unit — the one rule with no exceptions. An
   integration spec is written only when the seam between systems is itself under
@@ -320,12 +319,13 @@ testing appears next to the source.
 ### What enforces what
 
 A rule that can be checked mechanically is a lint rule, not a paragraph — prose is
-for judgement. `eslint.config.js` holds the checkable ones, including three with no
+for judgement. `eslint.config.js` holds the checkable ones, including four with no
 core equivalent defined inline there:
 
 | Rule | Enforced by |
 |---|---|
 | No comments in `src/` and `scripts/` | `project/no-comments` |
+| An import belongs in the header, not further down | `project/imports-first` |
 | Two blank lines after the last import | `project/blank-lines-after-imports` (autofixed) |
 | A number must be named by a `const` | `project/named-numbers` |
 | A state is read from its own table, specs included | `project/named-states` |

@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
-import { CommandContextStub } from "#diagnostics/bot/grammy-context.stub.ts";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { Locale } from "#shared/locale/locales.ts";
+import { CHAT_ID, CommandContextStub } from "#diagnostics/bot/grammy-context.stub.ts";
 
 
 const ONCE = 1;
@@ -13,10 +15,18 @@ const SOMEONE_ELSE = 999;
 
 const SNAPSHOT = { marker: "the-snapshot" };
 
+const COPY = { marker: "the-copy" };
+
 const renderHealthReportSpy = vi.fn();
 
+const copyInSpy = vi.fn();
+
 vi.mock("#diagnostics/render/health-report.ts", () => ({
-  renderHealthReport: (snapshot: unknown) => renderHealthReportSpy(snapshot),
+  renderHealthReport: (copy: unknown, snapshot: unknown) => renderHealthReportSpy(copy, snapshot),
+}));
+
+vi.mock("#diagnostics/copy.ts", () => ({
+  copyIn: (locale: unknown) => copyInSpy(locale),
 }));
 
 const { onStatus } = await import("#diagnostics/bot/status-handler.ts");
@@ -25,12 +35,14 @@ const { onStatus } = await import("#diagnostics/bot/status-handler.ts");
 describe("onStatus()", () => {
   let log: LoggerStub;
   let ctx: CommandContextStub;
+  let locales: LocaleReaderStub;
   let takeSnapshot: ReturnType<typeof vi.fn>;
 
   const contextWith = (operatorTgId: string | null) => ({
     takeSnapshot: takeSnapshot as unknown as () => never,
     operatorTgId,
     log,
+    localeIn: locales.read,
   });
 
   beforeEach(() => {
@@ -38,8 +50,10 @@ describe("onStatus()", () => {
 
     log = new LoggerStub();
     ctx = new CommandContextStub(Number(OPERATOR_TG_ID));
+    locales = new LocaleReaderStub(Locale.Ru);
     takeSnapshot = vi.fn(() => SNAPSHOT);
     renderHealthReportSpy.mockReturnValue(REPORT);
+    copyInSpy.mockReturnValue(COPY);
   });
 
   it("should answer with the rendered report", async () => {
@@ -51,7 +65,19 @@ describe("onStatus()", () => {
   it("should render the snapshot it was handed", async () => {
     await onStatus(contextWith(OPERATOR_TG_ID), ctx.context);
 
-    expect(renderHealthReportSpy).toHaveBeenCalledWith(SNAPSHOT);
+    expect(renderHealthReportSpy).toHaveBeenCalledWith(COPY, SNAPSHOT);
+  });
+
+  it("should ask which language this chat chose", async () => {
+    await onStatus(contextWith(OPERATOR_TG_ID), ctx.context);
+
+    expect(locales.readSpy).toHaveBeenCalledWith(CHAT_ID);
+  });
+
+  it("should render in the copy of that language", async () => {
+    await onStatus(contextWith(OPERATOR_TG_ID), ctx.context);
+
+    expect(copyInSpy).toHaveBeenCalledWith(Locale.Ru);
   });
 
   it("should take a fresh snapshot per call, not one from build time", async () => {

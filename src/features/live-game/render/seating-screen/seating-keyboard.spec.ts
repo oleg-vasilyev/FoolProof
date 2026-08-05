@@ -50,7 +50,7 @@ const A_CONTROL_ROW = 1;
 
 const DATA = "encoded";
 
-const rowsOf = (placed: number) => renderSeatingKeyboard({ roster: ROSTER, placed });
+const rowsOf = (placed: number) => renderSeatingKeyboard(copy, { roster: ROSTER, placed });
 
 const seatRows = (placed: number) => rowsOf(placed).slice(FIRST_ROW, LAST_ROW);
 

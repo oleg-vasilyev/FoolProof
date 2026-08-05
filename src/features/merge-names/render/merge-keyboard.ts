@@ -6,7 +6,7 @@ import {
   type Selection,
 } from "#merge-names/domain/merge-selection.ts";
 import { encodeMergeCallback } from "#merge-names/render/merge-callback-codec.ts";
-import { copy } from "#merge-names/copy.en.ts";
+import type { Copy } from "#merge-names/copy.ts";
 
 
 export interface InlineButton {
@@ -18,7 +18,7 @@ export type InlineKeyboardRows = readonly (readonly InlineButton[])[];
 
 const NOTHING_PICKED = 0;
 
-const markFor = (role: Role): string | null => {
+const markFor = (copy: Copy, role: Role): string | null => {
   switch (role) {
     case Role.Keeper:
       return copy.markKeeper;
@@ -31,14 +31,14 @@ const markFor = (role: Role): string | null => {
   }
 };
 
-const captionFor = (candidate: Candidate, role: Role): string => {
+const captionFor = (copy: Copy, candidate: Candidate, role: Role): string => {
   const caption = copy.candidate(candidate.displayName, candidate.games);
-  const mark = markFor(role);
+  const mark = markFor(copy, role);
 
   return mark === null ? caption : `${mark} ${caption}`;
 };
 
-const controlRow = (selection: Selection): readonly InlineButton[] => {
+const controlRow = (copy: Copy, selection: Selection): readonly InlineButton[] => {
   if (selection.length === NOTHING_PICKED) {
     return [
       {
@@ -67,17 +67,18 @@ const controlRow = (selection: Selection): readonly InlineButton[] => {
 };
 
 export const renderMergeKeyboard = (
+  copy: Copy,
   roster: readonly Candidate[],
   selection: Selection
 ): InlineKeyboardRows => [
   ...roster.map((candidate) => [
     {
-      text: captionFor(candidate, roleOf(selection, candidate.playerId)),
+      text: captionFor(copy, candidate, roleOf(selection, candidate.playerId)),
       callback_data: encodeMergeCallback({
         selection,
         action: { kind: ActionKind.Pick, playerId: candidate.playerId },
       }),
     },
   ]),
-  controlRow(selection),
+  controlRow(copy, selection),
 ];

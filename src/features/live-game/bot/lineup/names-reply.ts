@@ -1,6 +1,7 @@
 import type { TextMessage } from "#shared/telegram/telegram-contexts.ts";
-import { copy } from "#live-game/copy.en.ts";
-import { refusedBecauseLive, type CardContext } from "#live-game/bot/card-context.ts";
+import { LOCALES } from "#shared/locale/locales.ts";
+import { copyIn } from "#live-game/copy.ts";
+import { copyFor, refusedBecauseLive, type CardContext } from "#live-game/bot/card-context.ts";
 import { openFromNames } from "#live-game/bot/lineup/lineup-from-names.ts";
 import { joinFromNames, leaveFromNames } from "#live-game/bot/lineup/lineup-from-last-game.ts";
 
@@ -13,15 +14,17 @@ const Answered = {
 
 type Answered = (typeof Answered)[keyof typeof Answered];
 
-const PROMPT_OF: Record<Answered, string> = {
-  lineup: copy.lineupPrompt,
-  joiners: copy.joinersPrompt,
-  leavers: copy.leaversPrompt,
+const promptsIn = (locale: (typeof LOCALES)[number]): readonly (readonly [string, Answered])[] => {
+  const copy = copyIn(locale);
+
+  return [
+    [copy.lineupPrompt, Answered.Lineup],
+    [copy.joinersPrompt, Answered.Joiners],
+    [copy.leaversPrompt, Answered.Leavers],
+  ];
 };
 
-const ANSWERED_BY = new Map<string, Answered>(
-  Object.entries(PROMPT_OF).map(([answered, question]) => [question, answered as Answered])
-);
+const ANSWERED_BY = new Map<string, Answered>(LOCALES.flatMap(promptsIn));
 
 const askedIn = (text: string | undefined): Answered | null =>
   ANSWERED_BY.get(text ?? "") ?? null;
@@ -39,7 +42,7 @@ export const onNamesReply = async (context: CardContext, ctx: TextMessage): Prom
 
   context.prompts.forget(ctx.chat.id);
 
-  if (await refusedBecauseLive(context, ctx)) {
+  if (await refusedBecauseLive(copyFor(context, ctx.chat.id), context, ctx)) {
     return;
   }
 

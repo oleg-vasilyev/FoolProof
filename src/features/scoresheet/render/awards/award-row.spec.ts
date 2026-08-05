@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { copy } from "#scoresheet/copy.en.ts";
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Density, Placed } from "#scoresheet/render/awards/awards-layout.ts";
@@ -39,9 +40,9 @@ const ROW_TITLE_TRACKING = 2.2;
 const WINNER_TRACKING = 0.8;
 
 vi.mock("#scoresheet/render/awards/award-lines.ts", () => ({
-  awardTitle: (award: unknown) => awardTitleSpy(award),
-  awardWinner: (names: unknown) => awardWinnerSpy(names),
-  awardReason: (award: unknown) => awardReasonSpy(award),
+  awardTitle: (table: unknown, award: unknown) => awardTitleSpy(table, award),
+  awardWinner: (table: unknown, names: unknown) => awardWinnerSpy(table, names),
+  awardReason: (table: unknown, award: unknown) => awardReasonSpy(table, award),
 }));
 
 vi.mock("#scoresheet/render/awards/awards-layout.ts", () => ({
@@ -142,7 +143,7 @@ describe("awardRow()", () => {
   });
 
   it("should draw the tick in the row's own colour, spanning its full height", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(rectSpy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -156,15 +157,15 @@ describe("awardRow()", () => {
   });
 
   it("should ask award-lines for the title, the winner and the reason of this award", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
-    expect(awardTitleSpy).toHaveBeenCalledWith(PLACED.award);
-    expect(awardWinnerSpy).toHaveBeenCalledWith(PLACED.names);
-    expect(awardReasonSpy).toHaveBeenCalledWith(PLACED.award);
+    expect(awardTitleSpy).toHaveBeenCalledWith(copy, PLACED.award);
+    expect(awardWinnerSpy).toHaveBeenCalledWith(copy, PLACED.names);
+    expect(awardReasonSpy).toHaveBeenCalledWith(copy, PLACED.award);
   });
 
   it("should print exactly what award-lines gave it, not a re-derived string", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(textSpy).toHaveBeenCalledWith(TITLE_MARK, expect.anything());
     expect(textSpy).toHaveBeenCalledWith(WINNER_MARK, expect.anything());
@@ -172,20 +173,20 @@ describe("awardRow()", () => {
   });
 
   it("should number the row with the label rank-label gave it", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(rankLabelSpy).toHaveBeenCalledWith(RANK);
     expect(textSpy).toHaveBeenCalledWith(RANK_MARK, expect.anything());
   });
 
   it("should fill the winner text in the row's own colour", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(attributesOf(WINNER_MARK).fill).toBe(COLOUR);
   });
 
   it("should set the rank in its own gutter and the three lines in the text column", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(attributesOf(RANK_MARK).x).toBe(RANK_LEFT);
     expect(attributesOf(TITLE_MARK).x).toBe(TEXT_LEFT);
@@ -194,31 +195,31 @@ describe("awardRow()", () => {
   });
 
   it("should set the title against the row's top plus its own padding", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(baselineOfSpy).toHaveBeenCalledWith(CONTENT_TOP, DENSITY.titleFont);
   });
 
   it("should drop the winner by the title's line and the gap under it", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(baselineOfSpy).toHaveBeenCalledWith(WINNER_TOP, DENSITY.winnerFont);
   });
 
   it("should drop the reason by the winner's line and the gap under it", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(baselineOfSpy).toHaveBeenCalledWith(REASON_TOP, DENSITY.reasonFont);
   });
 
   it("should lift the rank to sit level with the title it numbers", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(attributesOf(RANK_MARK).y).toBe(CONTENT_TOP + DENSITY.rankLift);
   });
 
   it("should set the title and the winner in bold, and the reason not", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(attributesOf(TITLE_MARK)["font-weight"]).toBe("bold");
     expect(attributesOf(WINNER_MARK)["font-weight"]).toBe("bold");
@@ -226,7 +227,7 @@ describe("awardRow()", () => {
   });
 
   it("should size each line from the density it was given", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(attributesOf(TITLE_MARK)["font-size"]).toBe(DENSITY.titleFont);
     expect(attributesOf(WINNER_MARK)["font-size"]).toBe(DENSITY.winnerFont);
@@ -235,14 +236,14 @@ describe("awardRow()", () => {
   });
 
   it("should track the title wider than the winner, as the card's own scale says", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(attributesOf(TITLE_MARK)["letter-spacing"]).toBe(ROW_TITLE_TRACKING);
     expect(attributesOf(WINNER_MARK)["letter-spacing"]).toBe(WINNER_TRACKING);
   });
 
   it("should close the row with a rule at its own bottom edge", () => {
-    awardRow(PLACED, DENSITY);
+    awardRow(copy, PLACED, DENSITY);
 
     expect(lineSpy).toHaveBeenCalledWith(
       expect.objectContaining({

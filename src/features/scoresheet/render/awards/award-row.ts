@@ -1,4 +1,5 @@
 import { awardReason, awardTitle, awardWinner } from "#scoresheet/render/awards/award-lines.ts";
+import type { Copy } from "#scoresheet/copy.ts";
 import {
   RANK_FONT,
   RANK_LEFT,
@@ -18,7 +19,7 @@ import { line, rect, text } from "#scoresheet/render/svg-tags.ts";
 
 const RULE_WIDTH = 1;
 
-export const awardRow = (placed: Placed, density: Density): readonly string[] => {
+export const awardRow = (copy: Copy, placed: Placed, density: Density): readonly string[] => {
   const contentTop = placed.top + density.rowPad;
   const winnerTop = contentTop + density.titleLine + density.titleGap;
   const reasonTop = winnerTop + density.winnerLine + density.winnerGap;
@@ -38,7 +39,7 @@ export const awardRow = (placed: Placed, density: Density): readonly string[] =>
       "font-family": FONT_FAMILY,
       "font-size": RANK_FONT,
     }),
-    text(awardTitle(placed.award), {
+    text(awardTitle(copy, placed.award), {
       x: TEXT_LEFT,
       y: baselineOf(contentTop, density.titleFont),
       fill: palette.ink,
@@ -47,7 +48,7 @@ export const awardRow = (placed: Placed, density: Density): readonly string[] =>
       "font-size": density.titleFont,
       "letter-spacing": ROW_TITLE_TRACKING,
     }),
-    text(awardWinner(placed.names), {
+    text(awardWinner(copy, placed.names), {
       x: TEXT_LEFT,
       y: baselineOf(winnerTop, density.winnerFont),
       fill: placed.colour,
@@ -56,7 +57,7 @@ export const awardRow = (placed: Placed, density: Density): readonly string[] =>
       "font-size": density.winnerFont,
       "letter-spacing": WINNER_TRACKING,
     }),
-    text(awardReason(placed.award), {
+    text(awardReason(copy, placed.award), {
       x: TEXT_LEFT,
       y: baselineOf(reasonTop, density.reasonFont),
       fill: palette.inkMuted,

@@ -93,6 +93,23 @@ be awkward, with the trigger that would make the split pay for itself.
 
 ---
 
+## A chat that picked a language keeps a menu of its own
+
+Choosing a language republishes that chat's `/` menu through `setMyCommands` scoped
+to it. Telegram then serves that chat its own copy for good: the global menu
+published at every start no longer reaches it. Add a command and a chat that once
+tapped `/language` keeps the old list until somebody opens the screen again.
+
+The honest fix is to republish every scoped menu on start, which means keeping the
+list of chats that have one — `chat_locales` already is that list. It was left out
+because the menu is a convenience, the commands themselves keep working, and the
+first new command after this is the trigger anyway.
+
+**Pick it up when a command is added or renamed**, since that is the moment the
+stale menu starts lying.
+
+---
+
 ## Not debt, deliberately
 
 Listed so nobody "fixes" them:
@@ -112,11 +129,6 @@ Listed so nobody "fixes" them:
   the copy rule exists so a second locale is a small change, which a percent sign is
   not. Two review passes have now had to decide this independently, which is why it
   is written down.
-- **`copy.sheetDate` formats a date inside the copy table**, though a decision in
-  `copy.en.ts` is normally forbidden. The month names *are* the locale's data, so
-  splitting the lookup from the names would put one format across two files, and its
-  mutants die anyway: `copy.en.spec.ts` asserts it against literals rather than
-  against itself, which is what makes the rule necessary elsewhere.
 - **`merge-callback-codec.spec.ts` imports `MOST_NAMES_AT_ONCE` from the domain**
   instead of mocking it, which every other spec would. The case it serves — that a
   full selection still fits in 64 bytes — is meaningless against a mocked cap: it

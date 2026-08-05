@@ -1,4 +1,9 @@
+import { Locale } from "#shared/locale/locales.ts";
+
+
 export const copy = {
+  locale: Locale.En as Locale,
+
   lineupMissing: "Who is playing? For example: /game Oleg, Anya, Roma",
   lineupPrompt: "Who is playing? Send the names in seating order.",
   lineupPlaceholder: "Oleg, Anya, Roma",
@@ -78,4 +83,6 @@ export const copy = {
   cancelledNotice: "Cancelled",
   cancelledBody: "Cancelled — nothing recorded.",
   abandonedBody: "Abandoned after three quiet hours — nothing recorded.",
-} as const;
+};
+
+export type Copy = typeof copy;

@@ -1,5 +1,6 @@
 import { Problem } from "#live-game/domain/refusals.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
@@ -8,6 +9,8 @@ import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
 
 
 const parseLineupSpy = vi.fn();
+
+const copyForSpy = vi.fn();
 
 const rotateToLowestIdSpy = vi.fn();
 
@@ -40,6 +43,7 @@ vi.mock("#live-game/bot/card-context.ts", () => ({
   askForNames: (...args: unknown[]) => askForNamesSpy(...args),
   commandText: (ctx: unknown) => commandTextSpy(ctx),
   refusedBecauseLive: (...args: unknown[]) => refusedBecauseLiveSpy(...args),
+  copyFor: (context: unknown, chatId: number) => copyForSpy(context, chatId),
 }));
 
 vi.mock("#live-game/bot/card/card-service.ts", () => ({
@@ -66,16 +70,20 @@ const SHORTENED = ["short enough to send"];
 
 describe("openFromNames()", () => {
   let repo: RepositoryStub;
+  let locales: LocaleReaderStub;
   let cards: CardServiceStub;
   let prompts: PromptRegistryStub;
   let ctx: ContextStub;
 
-  const context = () => ({ repo, cards: cards.service, prompts: prompts.registry });
+  const context = () => ({ repo, cards: cards.service, prompts: prompts.registry, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
 
+    copyForSpy.mockReturnValue(copy);
+
     repo = new RepositoryStub();
+    locales = new LocaleReaderStub();
     cards = new CardServiceStub();
     prompts = new PromptRegistryStub();
     ctx = new ContextStub();
@@ -146,22 +154,26 @@ describe("openFromNames()", () => {
     await openFromNames(context(), ctx.command("/game Oleg, Anya, Roma"), "Oleg, Anya, Roma");
 
     expect(rotateToLowestIdSpy).toHaveBeenCalledWith(RESOLVED_SEATS);
-    expect(cards.openSpy).toHaveBeenCalledWith(CHAT_ID, ROTATED_SEATS, null);
+    expect(cards.openSpy).toHaveBeenCalledWith(copy, CHAT_ID, ROTATED_SEATS, null);
   });
 });
 
 describe("onGame()", () => {
   let repo: RepositoryStub;
+  let locales: LocaleReaderStub;
   let cards: CardServiceStub;
   let prompts: PromptRegistryStub;
   let ctx: ContextStub;
 
-  const context = () => ({ repo, cards: cards.service, prompts: prompts.registry });
+  const context = () => ({ repo, cards: cards.service, prompts: prompts.registry, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
 
+    copyForSpy.mockReturnValue(copy);
+
     repo = new RepositoryStub();
+    locales = new LocaleReaderStub();
     cards = new CardServiceStub();
     prompts = new PromptRegistryStub();
     ctx = new ContextStub();
@@ -183,7 +195,7 @@ describe("onGame()", () => {
   it("should open a card with the rotated seats and null as the third argument", async () => {
     await onGame(context(), ctx.command("/game Oleg, Anya, Roma"));
 
-    expect(cards.openSpy).toHaveBeenCalledWith(CHAT_ID, ROTATED_SEATS, null);
+    expect(cards.openSpy).toHaveBeenCalledWith(copy, CHAT_ID, ROTATED_SEATS, null);
   });
 
   it("should parse exactly the text commandText gave back for the context it received", async () => {
@@ -203,7 +215,7 @@ describe("onGame()", () => {
 
     await onGame(built, command);
 
-    expect(refusedBecauseLiveSpy).toHaveBeenCalledWith(built, command);
+    expect(refusedBecauseLiveSpy).toHaveBeenCalledWith(copy, built, command);
     expect(cards.openSpy).toHaveBeenCalledTimes(NEVER);
   });
 

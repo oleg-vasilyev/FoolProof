@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { Locale } from "#shared/locale/locales.ts";
 import { copy } from "#diagnostics/copy.en.ts";
+import { copy as russian } from "#diagnostics/copy.ru.ts";
 import { CommandContextStub } from "#diagnostics/bot/grammy-context.stub.ts";
 
 
@@ -35,10 +38,12 @@ const { createDiagnosticsFeature } = await import("#diagnostics/diagnostics-feat
 describe("createDiagnosticsFeature()", () => {
   let repo: RepositoryStub;
   let log: LoggerStub;
+  let locales: LocaleReaderStub;
 
   const build = () =>
     createDiagnosticsFeature({
       repo,
+      localeIn: locales.read,
       log,
       logLevel: LOG_LEVEL,
       startAttempt: START_ATTEMPT,
@@ -53,6 +58,7 @@ describe("createDiagnosticsFeature()", () => {
 
     repo = new RepositoryStub();
     log = new LoggerStub();
+    locales = new LocaleReaderStub();
   });
 
   describe("what it offers", () => {
@@ -69,11 +75,19 @@ describe("createDiagnosticsFeature()", () => {
     });
 
     it("should describe itself from the copy table", () => {
-      expect(statusRoute()?.menuDescription).toBe(copy.commandStatus);
+      expect(statusRoute()?.menuDescription(Locale.En)).toBe(copy.commandStatus);
     });
 
     it("should take its help line from the same table", () => {
-      expect(statusRoute()?.help).toBe(copy.helpStatus);
+      expect(statusRoute()?.help(Locale.En)).toBe(copy.helpStatus);
+    });
+
+    it("should describe itself in whichever language it is asked for", () => {
+      expect(statusRoute()?.menuDescription(Locale.Ru)).toBe(russian.commandStatus);
+    });
+
+    it("should offer its help line in that language too", () => {
+      expect(statusRoute()?.help(Locale.Ru)).toBe(russian.helpStatus);
     });
 
     it("should listen to nothing, since it only answers a command", () => {
@@ -106,6 +120,14 @@ describe("createDiagnosticsFeature()", () => {
       await statusRoute()?.run(new CommandContextStub(Number(OPERATOR_TG_ID)).context);
 
       expect(onStatusSpy.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ log }));
+    });
+
+    it("should give the handler a way to ask which language the chat chose", async () => {
+      await statusRoute()?.run(new CommandContextStub(Number(OPERATOR_TG_ID)).context);
+
+      expect(onStatusSpy.mock.calls[0]?.[0]).toEqual(
+        expect.objectContaining({ localeIn: locales.read })
+      );
     });
 
     it("should not gather anything until the command is used", () => {

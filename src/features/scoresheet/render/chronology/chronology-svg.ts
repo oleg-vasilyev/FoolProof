@@ -12,7 +12,7 @@ import {
 import { palette } from "#scoresheet/render/palette.ts";
 import { shareChart } from "#scoresheet/render/chronology/share-chart.ts";
 import { shareLegend } from "#scoresheet/render/chronology/share-legend.ts";
-import { copy } from "#scoresheet/copy.en.ts";
+import type { Copy } from "#scoresheet/copy.ts";
 import { EYEBROW_TRACKING, cardHeading } from "#scoresheet/render/card-heading.ts";
 import { line, rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
 
@@ -30,15 +30,15 @@ const DIVIDER_WIDTH = 1;
 const background = (sheet: Sheet): string =>
   rect({ x: NONE, y: NONE, width: IMAGE_WIDTH, height: sheet.height, fill: palette.sheet });
 
-const heading = (sheet: Sheet): readonly string[] =>
-  cardHeading({
+const heading = (copy: Copy, sheet: Sheet): readonly string[] =>
+  cardHeading(copy, {
     title: copy.sheetTitle,
     startedOn: sheet.startedOn,
     games: sheet.rounds,
     players: sheet.players.length,
   });
 
-const omittedNote = (sheet: Sheet): readonly string[] =>
+const omittedNote = (copy: Copy, sheet: Sheet): readonly string[] =>
   sheet.omitted === NONE
     ? []
     : [
@@ -62,7 +62,7 @@ const sectionDivider = (sheet: Sheet): string =>
     "stroke-width": DIVIDER_WIDTH,
   });
 
-const sectionHeading = (sheet: Sheet): readonly string[] => [
+const sectionHeading = (copy: Copy, sheet: Sheet): readonly string[] => [
   text(copy.sheetShareLabel, {
     x: PAD,
     y: sheet.chartTop - LABEL_LIFT,
@@ -81,19 +81,19 @@ const sectionHeading = (sheet: Sheet): readonly string[] => [
   }),
 ];
 
-export const renderScoresheet = (chronology: SeriesChronology): string => {
+export const renderScoresheet = (copy: Copy, chronology: SeriesChronology): string => {
   const sheet = layoutOf(chronology);
 
   return svgOf(IMAGE_WIDTH, sheet.height, [
     background(sheet),
-    ...heading(sheet),
-    ...omittedNote(sheet),
+    ...heading(copy, sheet),
+    ...omittedNote(copy, sheet),
     ...columnNames(sheet),
     ...chronologyGrid(sheet),
-    ...cellKey(sheet),
+    ...cellKey(copy, sheet),
     sectionDivider(sheet),
-    ...sectionHeading(sheet),
+    ...sectionHeading(copy, sheet),
     ...shareChart(sheet),
-    ...shareLegend(sheet),
+    ...shareLegend(copy, sheet),
   ]);
 };

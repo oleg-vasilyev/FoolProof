@@ -47,6 +47,8 @@ export class RepositoryStub implements Repository {
   public gameNumberInSeriesSpy = vi.fn();
   public seriesChronologySpy = vi.fn();
   public storageSummarySpy = vi.fn();
+  public chatLocaleSpy = vi.fn();
+  public rememberChatLocaleSpy = vi.fn();
 
   public constructor() {
     this.playersInChatSpy.mockReturnValue([]);
@@ -66,6 +68,7 @@ export class RepositoryStub implements Repository {
     this.gameNumberInSeriesSpy.mockReturnValue(FIRST_GAME_NUMBER);
     this.seriesChronologySpy.mockReturnValue(null);
     this.storageSummarySpy.mockReturnValue(EMPTY_STORAGE);
+    this.chatLocaleSpy.mockReturnValue(null);
   }
 
   public playersInChat(chatId: number): readonly PlayerRecord[] {
@@ -165,5 +168,13 @@ export class RepositoryStub implements Repository {
 
   public seriesChronology(chatId: number): SeriesChronology | null {
     return this.seriesChronologySpy(chatId);
+  }
+
+  public chatLocale(chatId: number): string | null {
+    return this.chatLocaleSpy(chatId);
+  }
+
+  public rememberChatLocale(chatId: number, locale: string): void {
+    this.rememberChatLocaleSpy(chatId, locale);
   }
 }

@@ -1,3 +1,6 @@
+import { ActionKind, Outcome, Phase } from "#live-game/domain/card-states.ts";
+
+
 export interface Seat {
   readonly playerId: number;
   readonly displayName: string;
@@ -137,5 +140,5 @@ export const apply = (state: CardState, action: Action): Transition => {
     case ActionKind.Pick:
       return picked(state, phase, action.slot);
   }
-};import { ActionKind, Outcome, Phase } from "#live-game/domain/card-states.ts";
+};
 

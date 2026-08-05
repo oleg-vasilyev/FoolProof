@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { ActionKind } from "#live-game/domain/card-states.ts";
 import { Bot } from "grammy";
 import { createLiveGameFeature } from "#live-game/live-game-feature.ts";
@@ -33,6 +34,7 @@ describe("the bot, driven end to end", () => {
   let repo: RepositoryStub;
   let log: LoggerStub;
   let bot: Bot;
+  let locales: LocaleReaderStub;
   let stops: readonly (() => Promise<void>)[];
   let calls: ApiCall[];
   let lateCommandSpy: Mock<(ctx: Command) => Promise<void>>;
@@ -52,6 +54,7 @@ describe("the bot, driven end to end", () => {
   beforeEach(() => {
     repo = new RepositoryStub();
     log = new LoggerStub();
+    locales = new LocaleReaderStub();
     calls = [];
     lateCommandSpy = vi.fn(async (_ctx: Command) => undefined);
 
@@ -61,8 +64,8 @@ describe("the bot, driven end to end", () => {
       commands: [
         {
           command: "stats",
-          menuDescription: "installed after the one that listens",
-          help: "/stats — installed last",
+          menuDescription: () => "installed after the one that listens",
+          help: () => "/stats — installed last",
           run: lateCommandSpy,
         },
       ],
@@ -70,8 +73,9 @@ describe("the bot, driven end to end", () => {
 
     stops = installFeatures(
       bot,
-      [createLiveGameFeature({ repo, api: bot.api, log }), lateFeature],
-      log
+      [createLiveGameFeature({ repo, api: bot.api, log, localeIn: locales.read }), lateFeature],
+      log,
+      locales.read
     );
 
     bot.api.config.use((_prev, method, payload) => {

@@ -113,8 +113,14 @@ export interface DiagnosticsRepository {
   storageSummary(): StorageSummary;
 }
 
+export interface LocaleRepository {
+  chatLocale(chatId: number): string | null;
+  rememberChatLocale(chatId: number, locale: string): void;
+}
+
 export interface Repository
   extends CardRepository,
     RosterRepository,
     ScoresheetRepository,
-    DiagnosticsRepository {}
+    DiagnosticsRepository,
+    LocaleRepository {}

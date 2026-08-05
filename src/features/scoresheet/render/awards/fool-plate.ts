@@ -14,6 +14,7 @@ import {
   type Placed,
 } from "#scoresheet/render/awards/awards-layout.ts";
 import { rankLabel } from "#scoresheet/render/awards/rank-label.ts";
+import type { Copy } from "#scoresheet/copy.ts";
 import { FONT_FAMILY, GRID_RIGHT, PAD } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
 import { path, rect, text } from "#scoresheet/render/svg-tags.ts";
@@ -32,7 +33,7 @@ const jesterCap = (top: number): string =>
     transform: `translate(${String(PLATE_TEXT_LEFT)} ${String(top)}) scale(${String(CAP_WIDTH / CAP_DRAWN_AT)})`,
   });
 
-export const foolPlate = (placed: Placed, density: Density): readonly string[] => {
+export const foolPlate = (copy: Copy, placed: Placed, density: Density): readonly string[] => {
   const box = plateBoxOf(density);
   const headTop = placed.top + box.headTop;
 
@@ -54,7 +55,7 @@ export const foolPlate = (placed: Placed, density: Density): readonly string[] =
       "text-anchor": "middle",
     }),
     jesterCap(headTop + (density.plateFont - CAP_HEIGHT) / HALF),
-    text(awardTitle(placed.award), {
+    text(awardTitle(copy, placed.award), {
       x: PLATE_TITLE_LEFT,
       y: baselineOf(headTop, density.plateFont),
       fill: palette.plateInk,
@@ -63,7 +64,7 @@ export const foolPlate = (placed: Placed, density: Density): readonly string[] =
       "font-size": density.plateFont,
       "letter-spacing": PLATE_TITLE_TRACKING,
     }),
-    text(awardWinner(placed.names), {
+    text(awardWinner(copy, placed.names), {
       x: PLATE_TEXT_LEFT,
       y: baselineOf(placed.top + box.winnerTop, density.plateWinnerFont),
       fill: palette.ink,
@@ -72,7 +73,7 @@ export const foolPlate = (placed: Placed, density: Density): readonly string[] =
       "font-size": density.plateWinnerFont,
       "letter-spacing": WINNER_TRACKING,
     }),
-    text(awardReason(placed.award), {
+    text(awardReason(copy, placed.award), {
       x: PLATE_TEXT_LEFT,
       y: baselineOf(placed.top + box.reasonTop, density.reasonFont),
       fill: palette.ink,

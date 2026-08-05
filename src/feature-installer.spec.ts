@@ -3,7 +3,11 @@ import { installFeatures, publishCommandMenu, resumeFeatures } from "#app/featur
 import type { Feature } from "#shared/telegram/feature-contract.ts";
 import { featureOf } from "#shared/telegram/feature-contract.stub.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { DEFAULT_LOCALE, Locale } from "#shared/locale/locales.ts";
 import { copy } from "#app/copy.en.ts";
+import { copy as russian } from "#app/copy.ru.ts";
+import { copyIn } from "#app/copy.ts";
 
 
 const ONCE = 1;
@@ -11,6 +15,8 @@ const ONCE = 1;
 const NEVER = 0;
 
 const UPDATE_ID = 4242;
+
+const CHAT_ID = -100777;
 
 class BotMock {
   public registrations: string[] = [];
@@ -64,24 +70,31 @@ const listensToText = (name: string): Feature =>
 
 describe("installFeatures()", () => {
   let bot: BotMock;
+  let locales: LocaleReaderStub;
 
   const replySpy = vi.fn();
 
   const install = (features: readonly Feature[]) =>
-    installFeatures(bot as never, features, logStub);
+    installFeatures(bot as never, features, logStub, locales.read);
 
-  const helpText = async (features: readonly Feature[]): Promise<string> => {
+  const helpIn = async (features: readonly Feature[], chatId = CHAT_ID): Promise<string> => {
     install(features);
     const registered = bot.commandSpy.mock.calls.find((call) => call[0] === "help")?.[1];
-    await (registered as (ctx: unknown) => Promise<void>)({ reply: replySpy });
+    await (registered as (ctx: unknown) => Promise<void>)({
+      reply: replySpy,
+      chat: { id: chatId },
+    });
 
     return String(replySpy.mock.calls[0]?.[0]);
   };
+
+  const helpText = (features: readonly Feature[]): Promise<string> => helpIn(features);
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     bot = new BotMock();
+    locales = new LocaleReaderStub();
     replySpy.mockResolvedValue(undefined);
   });
 
@@ -183,9 +196,41 @@ describe("installFeatures()", () => {
     it("should be answered rather than left spinning", async () => {
       install([listensToTaps("game")]);
 
-      await unclaimedListener()({ answerCallbackQuery: answerSpy });
+      await unclaimedListener()({
+        chat: { id: CHAT_ID },
+        answerCallbackQuery: answerSpy,
+      });
 
       expect(answerSpy).toHaveBeenCalledWith(copy.tapUnclaimed);
+    });
+
+    it("should be answered in the language of the chat it came from", async () => {
+      locales.readSpy.mockReturnValue(Locale.Ru);
+      install([listensToTaps("game")]);
+
+      await unclaimedListener()({
+        chat: { id: CHAT_ID },
+        answerCallbackQuery: answerSpy,
+      });
+
+      expect(answerSpy).toHaveBeenCalledWith(russian.tapUnclaimed);
+    });
+
+    it("should fall back to the default language when there is no chat behind it", async () => {
+      locales.readSpy.mockReturnValue(Locale.Ru);
+      install([listensToTaps("game")]);
+
+      await unclaimedListener()({ chat: undefined, answerCallbackQuery: answerSpy });
+
+      expect(answerSpy).toHaveBeenCalledWith(copyIn(DEFAULT_LOCALE).tapUnclaimed);
+    });
+
+    it("should not ask which language a chat it cannot name speaks", async () => {
+      install([listensToTaps("game")]);
+
+      await unclaimedListener()({ chat: undefined, answerCallbackQuery: answerSpy });
+
+      expect(locales.readSpy).not.toHaveBeenCalled();
     });
 
     it("should be answered only after every feature had its chance", () => {
@@ -205,18 +250,44 @@ describe("installFeatures()", () => {
     it("should list the help line of every command", async () => {
       const text = await helpText([featureOf({ name: "game" }), featureOf({ name: "stats" })]);
 
-      expect(text).toContain("/game — does it");
-      expect(text).toContain("/stats — does it");
+      expect(text).toContain(`/game — does it in ${DEFAULT_LOCALE}`);
+      expect(text).toContain(`/stats — does it in ${DEFAULT_LOCALE}`);
     });
 
     it("should mention itself", async () => {
       expect(await helpText([featureOf({ name: "game" })])).toContain(copy.helpSelf);
     });
 
-    it("should append a feature's notes after the command list", async () => {
-      const text = await helpText([featureOf({ name: "game", notes: ["a note"] })]);
+    it("should ask which language the chat asking for help speaks", async () => {
+      await helpText([featureOf({ name: "game" })]);
 
-      expect(text.indexOf("a note")).toBeGreaterThan(text.indexOf("/game — does it"));
+      expect(locales.readSpy).toHaveBeenCalledWith(CHAT_ID);
+    });
+
+    it("should write the help in that language", async () => {
+      locales.readSpy.mockReturnValue(Locale.Ru);
+
+      expect(await helpText([featureOf({ name: "game" })])).toContain(russian.helpLead);
+    });
+
+    it("should take the command lines in that language too", async () => {
+      locales.readSpy.mockReturnValue(Locale.Ru);
+
+      expect(await helpText([featureOf({ name: "game" })])).toContain(
+        `/game — does it in ${Locale.Ru}`
+      );
+    });
+
+    it("should append a feature's notes after the command list", async () => {
+      const text = await helpText([featureOf({ name: "game", notes: () => ["a note"] })]);
+
+      expect(text.indexOf("a note")).toBeGreaterThan(text.indexOf(`/game — does it in ${DEFAULT_LOCALE}`));
+    });
+
+    it("should add nothing for a feature that has no notes", async () => {
+      const text = await helpText([featureOf({ name: "game" })]);
+
+      expect(text.split("\n").at(-1)).toBe("");
     });
 
     it("should say nothing about a feature that is not installed", async () => {
@@ -230,12 +301,12 @@ describe("installFeatures()", () => {
     });
 
     it("should lay the whole message out in a fixed shape", async () => {
-      const text = await helpText([featureOf({ name: "game", notes: ["a note"] })]);
+      const text = await helpText([featureOf({ name: "game", notes: () => ["a note"] })]);
 
       expect(text.split("\n")).toEqual([
         copy.helpLead,
         "",
-        "/game — does it",
+        `/game — does it in ${DEFAULT_LOCALE}`,
         copy.helpSelf,
         "",
         "a note",
@@ -255,8 +326,8 @@ describe("installFeatures()", () => {
       commands: [
         {
           command: "status",
-          menuDescription: "how the bot is doing",
-          help: "/status — how the bot is doing",
+          menuDescription: () => "how the bot is doing",
+          help: () => "/status — how the bot is doing",
           hidden: true,
           run: vi.fn(async () => undefined),
         },
@@ -395,11 +466,31 @@ describe("publishCommandMenu()", () => {
       log
     );
 
-    expect(bot.setMyCommandsSpy).toHaveBeenCalledWith([
-      { command: "game", description: "does game" },
-      { command: "stats", description: "does stats" },
-      { command: "help", description: copy.commandHelp },
-    ]);
+    expect(bot.setMyCommandsSpy).toHaveBeenCalledWith(
+      [
+        { command: "game", description: `does game in ${DEFAULT_LOCALE}` },
+        { command: "stats", description: `does stats in ${DEFAULT_LOCALE}` },
+        { command: "help", description: copy.commandHelp },
+      ],
+      undefined
+    );
+  });
+
+  it("should publish a chat's own menu in the language that chat chose", async () => {
+    const CHAT_ID = -100777;
+
+    await publishCommandMenu(bot.api as never, [featureOf({ name: "game" })], log, {
+      chatId: CHAT_ID,
+      locale: Locale.Ru,
+    });
+
+    expect(bot.setMyCommandsSpy).toHaveBeenCalledWith(
+      [
+        { command: "game", description: `does game in ${Locale.Ru}` },
+        { command: "help", description: russian.commandHelp },
+      ],
+      { scope: { type: "chat", chat_id: CHAT_ID } }
+    );
   });
 
   it("should leave an uninstalled feature out of the menu", async () => {

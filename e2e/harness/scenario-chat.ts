@@ -63,6 +63,7 @@ export interface Chat {
   lastText(): string;
   lastAnswer(): string;
   commands(): readonly string[];
+  menuDescriptions(): readonly string[];
   promptId(): number | null;
   photoBytes(): Buffer | undefined;
   photosSent(): number;
@@ -250,6 +251,8 @@ export const createChat = (): Chat => {
     lastAnswer: () => refresh().answers.at(-1) ?? "",
 
     commands: () => refresh().commands.map((command) => command.command),
+
+    menuDescriptions: () => refresh().commands.map((command) => command.description),
 
     promptId: () => refresh().prompt?.messageId ?? null,
 

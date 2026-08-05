@@ -2,7 +2,7 @@ import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import { type Cell } from "#scoresheet/domain/scoring.ts";
 import { type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import { FONT_FAMILY, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
-import { copy } from "#scoresheet/copy.en.ts";
+import type { Copy } from "#scoresheet/copy.ts";
 import { palette } from "#scoresheet/render/palette.ts";
 import { rect, text } from "#scoresheet/render/svg-tags.ts";
 
@@ -24,12 +24,12 @@ const SWATCH_LIFT = 20;
 
 const LABEL_GAP = 16;
 
-const ENTRIES: Record<Cell["kind"], KeyEntry> = {
+const entriesIn = (copy: Copy): Record<Cell["kind"], KeyEntry> => ({
   placed: { fill: palette.cellPlaced, label: copy.sheetKeyPlaced },
   drawn: { fill: palette.cellDrawn, label: copy.sheetKeyDrawn },
   fool: { fill: palette.cellFool, label: copy.sheetKeyFool },
   absent: { fill: palette.cellAbsent, label: copy.sheetKeyAbsent },
-};
+});
 
 const KIND_ORDER: readonly Cell["kind"][] = [CellKind.Placed, CellKind.Drawn, CellKind.Fool, CellKind.Absent];
 
@@ -58,5 +58,8 @@ const entryOf = (sheet: Sheet, entry: KeyEntry, slot: number): readonly string[]
   ];
 };
 
-export const cellKey = (sheet: Sheet): readonly string[] =>
-  KIND_ORDER.flatMap((kind, slot) => entryOf(sheet, ENTRIES[kind], slot));
+export const cellKey = (copy: Copy, sheet: Sheet): readonly string[] => {
+  const entries = entriesIn(copy);
+
+  return KIND_ORDER.flatMap((kind, slot) => entryOf(sheet, entries[kind], slot));
+};

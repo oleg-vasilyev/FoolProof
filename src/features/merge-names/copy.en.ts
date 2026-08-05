@@ -1,4 +1,9 @@
+import { Locale } from "#shared/locale/locales.ts";
+
+
 export const copy = {
+  locale: Locale.En as Locale,
+
   commandMerge: "Fix one player written under two names",
   helpMerge:
     "/merge — one player written under two names; tap the name to keep first, then the ones to fold into it",
@@ -10,8 +15,7 @@ export const copy = {
   willHave: (keeper: string, games: string) => `${keeper} will have ${games}.`,
   nowHas: (keeper: string, games: string) => `${keeper} now has ${games}.`,
 
-  gameOne: "game",
-  gameMany: "games",
+  gameForms: { one: "game", few: "games", many: "games" },
 
   nothingToMerge: "Only one name here so far — nothing to merge.",
   gameRunning: "A game is running. Confirm it first, then /merge.",
@@ -39,4 +43,6 @@ export const copy = {
 
   mergedNotice: "Merged",
   cancelledNotice: "Cancelled",
-} as const;
+};
+
+export type Copy = typeof copy;

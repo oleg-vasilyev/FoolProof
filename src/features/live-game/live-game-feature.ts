@@ -2,7 +2,8 @@ import type { Api } from "grammy";
 import type { Feature, Listeners } from "#shared/telegram/feature-contract.ts";
 import type { Logger } from "#shared/logging/logger.ts";
 import type { CardRepository } from "#shared/repository/repository-contract.ts";
-import { copy } from "#live-game/copy.en.ts";
+import type { LocaleReader } from "#shared/locale/chat-locale.ts";
+import { copyIn } from "#live-game/copy.ts";
 import { createCardService } from "#live-game/bot/card/card-service.ts";
 import type { CardContext } from "#live-game/bot/card-context.ts";
 import { onGame } from "#live-game/bot/lineup/lineup-from-names.ts";
@@ -22,16 +23,18 @@ export interface LiveGameDeps {
   readonly repo: CardRepository;
   readonly api: Api;
   readonly log: Logger;
+  readonly localeIn: LocaleReader;
 }
 
 export const createLiveGameFeature = (deps: LiveGameDeps): Feature => {
-  const { repo, api, log } = deps;
-  const cards = createCardService({ repo, api, log });
+  const { repo, api, log, localeIn } = deps;
+  const cards = createCardService({ repo, api, log, localeIn });
 
   const context: CardContext = {
     repo,
     cards,
     prompts: createPromptRegistry(api, log),
+    localeIn,
   };
 
   const stopSweep = startIdleSweep(cards, log);
@@ -40,31 +43,31 @@ export const createLiveGameFeature = (deps: LiveGameDeps): Feature => {
     commands: [
       {
         command: "game",
-        menuDescription: copy.commandGame,
-        help: copy.helpGame,
+        menuDescription: (locale) => copyIn(locale).commandGame,
+        help: (locale) => copyIn(locale).helpGame,
         run: (ctx) => onGame(context, ctx),
       },
       {
         command: "next",
-        menuDescription: copy.commandNext,
-        help: copy.helpNext,
+        menuDescription: (locale) => copyIn(locale).commandNext,
+        help: (locale) => copyIn(locale).helpNext,
         run: (ctx) => onNext(context, ctx),
       },
       {
         command: "next_with",
-        menuDescription: copy.commandNextWith,
-        help: copy.helpNextWith,
+        menuDescription: (locale) => copyIn(locale).commandNextWith,
+        help: (locale) => copyIn(locale).helpNextWith,
         run: (ctx) => onNextWith(context, ctx),
       },
       {
         command: "next_without",
-        menuDescription: copy.commandNextWithout,
-        help: copy.helpNextWithout,
+        menuDescription: (locale) => copyIn(locale).commandNextWithout,
+        help: (locale) => copyIn(locale).helpNextWithout,
         run: (ctx) => onNextWithout(context, ctx),
       },
     ],
 
-    notes: copy.helpCard,
+    notes: (locale) => copyIn(locale).helpCard,
 
     listen: (listeners: Listeners) => {
       listeners.onText((ctx) => onNamesReply(context, ctx));

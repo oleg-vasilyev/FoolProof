@@ -58,6 +58,12 @@ CREATE TABLE IF NOT EXISTS game_events (
   actor_tg_id INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_game_events_game ON game_events(game_id);
+
+CREATE TABLE IF NOT EXISTS chat_locales (
+  chat_id INTEGER PRIMARY KEY,
+  locale  TEXT NOT NULL,
+  chosen_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `);
 
 db.exec(`

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { copy } from "#scoresheet/copy.en.ts";
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Density, Placed } from "#scoresheet/render/awards/awards-layout.ts";
@@ -49,9 +50,9 @@ const PLATE_TITLE_TRACKING = 2.8;
 const WINNER_TRACKING = 0.8;
 
 vi.mock("#scoresheet/render/awards/award-lines.ts", () => ({
-  awardTitle: (award: unknown) => awardTitleSpy(award),
-  awardWinner: (names: unknown) => awardWinnerSpy(names),
-  awardReason: (award: unknown) => awardReasonSpy(award),
+  awardTitle: (table: unknown, award: unknown) => awardTitleSpy(table, award),
+  awardWinner: (table: unknown, names: unknown) => awardWinnerSpy(table, names),
+  awardReason: (table: unknown, award: unknown) => awardReasonSpy(table, award),
 }));
 
 vi.mock("#scoresheet/render/awards/awards-layout.ts", () => ({
@@ -165,7 +166,7 @@ describe("foolPlate()", () => {
   });
 
   it("should fill a rect spanning the whole plate", () => {
-    foolPlate(PLACED, DENSITY);
+    foolPlate(copy, PLACED, DENSITY);
 
     expect(rectSpy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -179,7 +180,7 @@ describe("foolPlate()", () => {
   });
 
   it("should draw the jester cap through path(), scaled to CAP_WIDTH", () => {
-    foolPlate(PLACED, DENSITY);
+    foolPlate(copy, PLACED, DENSITY);
 
     const expectedScale = CAP_WIDTH / CAP_DRAWN_AT_REAL;
 
@@ -192,38 +193,38 @@ describe("foolPlate()", () => {
   });
 
   it("should print the title in the plate's dark ink", () => {
-    foolPlate(PLACED, DENSITY);
+    foolPlate(copy, PLACED, DENSITY);
 
     expect(attributesOf(TITLE_MARK).fill).toBe("ink-dark");
   });
 
   it("should print the winner in the plate's light ink, not the row's own colour", () => {
-    foolPlate(PLACED, DENSITY);
+    foolPlate(copy, PLACED, DENSITY);
 
     expect(attributesOf(WINNER_MARK).fill).toBe("ink-light");
     expect(attributesOf(WINNER_MARK).fill).not.toBe(COLOUR);
   });
 
   it("should print the reason in the plate's light ink", () => {
-    foolPlate(PLACED, DENSITY);
+    foolPlate(copy, PLACED, DENSITY);
 
     expect(attributesOf(REASON_MARK).fill).toBe("ink-light");
   });
 
   it("should centre the rank", () => {
-    foolPlate(PLACED, DENSITY);
+    foolPlate(copy, PLACED, DENSITY);
 
     expect(attributesOf(RANK_MARK)["text-anchor"]).toBe("middle");
   });
 
   it("should ask award-row for the rank label of this placement's own rank", () => {
-    foolPlate(PLACED, DENSITY);
+    foolPlate(copy, PLACED, DENSITY);
 
     expect(rankLabelSpy).toHaveBeenCalledWith(RANK);
   });
 
   it("should ask awards-layout for the plate box of this density", () => {
-    foolPlate(PLACED, DENSITY);
+    foolPlate(copy, PLACED, DENSITY);
 
     expect(plateBoxOfSpy).toHaveBeenCalledWith(DENSITY);
   });
@@ -236,77 +237,77 @@ describe("foolPlate()", () => {
       (/translate\((-?[\d.]+) (-?[\d.]+)\)/.exec(capTransform())?.slice(1) ?? []).map(Number);
 
     it("should set the title against the plate box's own head", () => {
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(baselineOfSpy).toHaveBeenCalledWith(TOP + BOX.headTop, DENSITY.plateFont);
     });
 
     it("should set the winner against the plate box's own winner line", () => {
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(baselineOfSpy).toHaveBeenCalledWith(TOP + BOX.winnerTop, DENSITY.plateWinnerFont);
     });
 
     it("should set the reason against the plate box's own reason line", () => {
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(baselineOfSpy).toHaveBeenCalledWith(TOP + BOX.reasonTop, DENSITY.reasonFont);
     });
 
     it("should centre the rank across its own gutter", () => {
       const HALF = 2;
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(attributesOf(RANK_MARK).x).toBe(PAD + RANK_WIDTH / HALF);
     });
 
     it("should drop the rank to the title it numbers", () => {
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(attributesOf(RANK_MARK).y).toBe(TOP + DENSITY.plateRankLift);
     });
 
     it("should start the cap at the plate's own text edge", () => {
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(capOrigin()[0]).toBe(PLATE_TEXT_LEFT);
     });
 
     it("should centre the cap against the title beside it", () => {
       const HALF = 2;
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(capOrigin()[1]).toBe(TOP + BOX.headTop + (DENSITY.plateFont - CAP_HEIGHT) / HALF);
     });
 
     it("should set the title clear of the cap, at the plate's own title edge", () => {
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(attributesOf(TITLE_MARK).x).toBe(PLATE_TITLE_LEFT);
     });
 
     it("should hang the winner and the reason off the same left edge as the cap", () => {
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(attributesOf(WINNER_MARK).x).toBe(PLATE_TEXT_LEFT);
       expect(attributesOf(REASON_MARK).x).toBe(PLATE_TEXT_LEFT);
     });
 
     it("should track the plate's title wider than its winner", () => {
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(attributesOf(TITLE_MARK)["letter-spacing"]).toBe(PLATE_TITLE_TRACKING);
       expect(attributesOf(WINNER_MARK)["letter-spacing"]).toBe(WINNER_TRACKING);
     });
 
     it("should give the cap an outline to draw", () => {
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(String((pathSpy.mock.calls[0]?.[0] as Record<string, unknown>).d)).toMatch(/^M\S/);
     });
 
     it("should set the title and the winner in bold, and the reason not", () => {
-      foolPlate(PLACED, DENSITY);
+      foolPlate(copy, PLACED, DENSITY);
 
       expect(attributesOf(TITLE_MARK)["font-weight"]).toBe("bold");
       expect(attributesOf(WINNER_MARK)["font-weight"]).toBe("bold");

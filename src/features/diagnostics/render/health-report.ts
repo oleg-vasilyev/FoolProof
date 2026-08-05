@@ -1,7 +1,8 @@
 import type { Problem } from "#shared/logging/log-history.ts";
 import type { StorageSummary } from "#shared/repository/repository-contract.ts";
-import { counted, humanDuration, humanSize } from "#diagnostics/render/human-units.ts";
-import { copy } from "#diagnostics/copy.en.ts";
+import { counted } from "#shared/locale/plural-rules.ts";
+import { humanDuration, humanSize } from "#diagnostics/render/human-units.ts";
+import type { Copy } from "#diagnostics/copy.ts";
 
 
 const NONE = 0;
@@ -25,20 +26,20 @@ export interface HealthSnapshot {
 
 const fileNameOf = (path: string): string => path.replace(/^.*[\\/]/, "");
 
-const startLine = (snapshot: HealthSnapshot): string =>
+const startLine = (copy: Copy, snapshot: HealthSnapshot): string =>
   snapshot.previousExit === null || snapshot.startAttempt <= FIRST_START
     ? copy.firstStart
     : copy.restarted(snapshot.startAttempt, snapshot.previousExit);
 
-const tallyLine = (snapshot: HealthSnapshot): string =>
+const tallyLine = (copy: Copy, snapshot: HealthSnapshot): string =>
   snapshot.warnings === NONE && snapshot.errors === NONE
     ? copy.noProblems
     : copy.problemTally(
-        counted(snapshot.warnings, "warning", "warnings"),
-        counted(snapshot.errors, "error", "errors")
+        counted(copy.locale, snapshot.warnings, copy.warningForms),
+        counted(copy.locale, snapshot.errors, copy.errorForms)
       );
 
-const problemLines = (problems: readonly Problem[]): readonly string[] =>
+const problemLines = (copy: Copy, problems: readonly Problem[]): readonly string[] =>
   problems.length === NONE
     ? []
     : [
@@ -50,23 +51,26 @@ const problemLines = (problems: readonly Problem[]): readonly string[] =>
         ),
       ];
 
-export const renderHealthReport = (snapshot: HealthSnapshot): string =>
+export const renderHealthReport = (copy: Copy, snapshot: HealthSnapshot): string =>
   [
     copy.reportTitle,
     "",
-    copy.database(fileNameOf(snapshot.storage.file), humanSize(snapshot.storage.sizeBytes)),
+    copy.database(
+      fileNameOf(snapshot.storage.file),
+      humanSize(snapshot.storage.sizeBytes, copy.units)
+    ),
     copy.contents(
-      counted(snapshot.storage.players, "player", "players"),
-      counted(snapshot.storage.games, "game", "games"),
+      counted(copy.locale, snapshot.storage.players, copy.playerForms),
+      counted(copy.locale, snapshot.storage.games, copy.gameForms),
       snapshot.storage.liveCards
     ),
     snapshot.storage.lastGameAt === null
       ? copy.noGamesYet
       : copy.lastGame(snapshot.storage.lastGameAt),
     "",
-    copy.uptime(humanDuration(snapshot.uptimeMs)),
-    startLine(snapshot),
+    copy.uptime(humanDuration(snapshot.uptimeMs, copy.units)),
+    startLine(copy, snapshot),
     copy.logLevel(snapshot.logLevel),
-    tallyLine(snapshot),
-    ...problemLines(snapshot.problems),
+    tallyLine(copy, snapshot),
+    ...problemLines(copy, snapshot.problems),
   ].join("\n");

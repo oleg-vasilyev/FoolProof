@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ActionKind, Outcome } from "#merge-names/domain/merge-states.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { Locale } from "#shared/locale/locales.ts";
+import { Role } from "#merge-names/domain/merge-states.ts";
 import type { Candidate, Transition } from "#merge-names/domain/merge-selection.ts";
 import { copy } from "#merge-names/copy.en.ts";
 import { CHAT_ID, ContextStub } from "#merge-names/bot/grammy-context.stub.ts";
@@ -24,6 +27,8 @@ const renderCancelledSpy = vi.fn();
 
 const joinedNamesSpy = vi.fn();
 
+const copyInSpy = vi.fn();
+
 vi.mock("#merge-names/domain/merge-selection.ts", () => ({
   MIN_TO_MERGE,
   apply: (roster: unknown, selection: unknown, action: unknown) =>
@@ -36,15 +41,20 @@ vi.mock("#merge-names/render/merge-callback-codec.ts", () => ({
 }));
 
 vi.mock("#merge-names/render/merge-keyboard.ts", () => ({
-  renderMergeKeyboard: (roster: unknown, selection: unknown) =>
-    renderMergeKeyboardSpy(roster, selection),
+  renderMergeKeyboard: (table: unknown, roster: unknown, selection: unknown) =>
+    renderMergeKeyboardSpy(table, roster, selection),
+}));
+
+vi.mock("#merge-names/copy.ts", () => ({
+  copyIn: (locale: unknown) => copyInSpy(locale),
 }));
 
 vi.mock("#merge-names/render/merge-message.ts", () => ({
-  renderMergeScreen: (roster: unknown, selection: unknown) =>
-    renderMergeScreenSpy(roster, selection),
-  renderMerged: (keeper: unknown, absorbed: unknown) => renderMergedSpy(keeper, absorbed),
-  renderCancelled: () => renderCancelledSpy(),
+  renderMergeScreen: (table: unknown, roster: unknown, selection: unknown) =>
+    renderMergeScreenSpy(table, roster, selection),
+  renderMerged: (table: unknown, keeper: unknown, absorbed: unknown) =>
+    renderMergedSpy(table, keeper, absorbed),
+  renderCancelled: (table: unknown) => renderCancelledSpy(table),
   joinedNames: (candidates: unknown) => joinedNamesSpy(candidates),
 }));
 
@@ -91,19 +101,22 @@ const confirmedBy = (keeper: Candidate, absorbed: readonly Candidate[]): Transit
 describe("merge-handler", () => {
   let repo: RepositoryStub;
   let ctx: ContextStub;
+  let locales: LocaleReaderStub;
 
-  const context = () => ({ repo });
+  const context = () => ({ repo, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     repo = new RepositoryStub();
     ctx = new ContextStub();
+    locales = new LocaleReaderStub(Locale.Ru);
 
     repo.rosterInChatSpy.mockReturnValue(ROSTER);
     decodeMergeCallbackSpy.mockReturnValue({ selection: SELECTION, action: { kind: ActionKind.Back } });
     applySpy.mockReturnValue({ outcome: Outcome.Updated, selection: SELECTION, touched: null });
-    roleOfSpy.mockReturnValue("absorbed");
+    roleOfSpy.mockReturnValue(Role.Absorbed);
+    copyInSpy.mockReturnValue(copy);
     renderMergeScreenSpy.mockReturnValue(SCREEN);
     renderMergeKeyboardSpy.mockReturnValue(KEYBOARD);
     renderMergedSpy.mockReturnValue(RESULT);
@@ -122,7 +135,7 @@ describe("merge-handler", () => {
     it("should open with nothing picked", async () => {
       await onMerge(context(), ctx.command());
 
-      expect(renderMergeScreenSpy).toHaveBeenCalledWith(ROSTER, []);
+      expect(renderMergeScreenSpy).toHaveBeenCalledWith(copy, ROSTER, []);
     });
 
     it("should hang the keyboard on that message", async () => {
@@ -202,7 +215,7 @@ describe("merge-handler", () => {
         await onTap(context(), ctx.callbackTap(TAP_DATA));
 
         expect(repo.rosterInChatSpy).toHaveBeenCalledWith(CHAT_ID);
-        expect(renderMergeScreenSpy).toHaveBeenCalledWith(ROSTER, SELECTION);
+        expect(renderMergeScreenSpy).toHaveBeenCalledWith(copy, ROSTER, SELECTION);
       });
 
       it("should hand the decoded tap to the domain", async () => {
@@ -242,7 +255,7 @@ describe("merge-handler", () => {
 
       it("should answer the keeper by name", async () => {
         applySpy.mockReturnValue({ outcome: Outcome.Updated, selection: [ANYA_ID], touched: ANYA });
-        roleOfSpy.mockReturnValue("keeper");
+        roleOfSpy.mockReturnValue(Role.Keeper);
 
         await onTap(context(), ctx.callbackTap(TAP_DATA));
 
@@ -251,7 +264,7 @@ describe("merge-handler", () => {
 
       it("should answer an absorbed name by name", async () => {
         applySpy.mockReturnValue({ outcome: Outcome.Updated, selection: SELECTION, touched: ANNA });
-        roleOfSpy.mockReturnValue("absorbed");
+        roleOfSpy.mockReturnValue(Role.Absorbed);
 
         await onTap(context(), ctx.callbackTap(TAP_DATA));
 
@@ -260,7 +273,7 @@ describe("merge-handler", () => {
 
       it("should say so when a name was let go", async () => {
         applySpy.mockReturnValue({ outcome: Outcome.Updated, selection: [], touched: ANNA });
-        roleOfSpy.mockReturnValue("free");
+        roleOfSpy.mockReturnValue(Role.Free);
 
         await onTap(context(), ctx.callbackTap(TAP_DATA));
 

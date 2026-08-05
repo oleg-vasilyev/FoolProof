@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { Locale } from "#shared/locale/locales.ts";
 import { copy } from "#scoresheet/copy.en.ts";
+import { copy as russian } from "#scoresheet/copy.ru.ts";
 
 
 const requireFontsSpy = vi.fn();
@@ -29,13 +32,15 @@ const NEVER = 0;
 
 describe("createScoresheetFeature()", () => {
   let repo: RepositoryStub;
+  let locales: LocaleReaderStub;
 
-  const build = () => createScoresheetFeature({ repo });
+  const build = () => createScoresheetFeature({ repo, localeIn: locales.read });
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     repo = new RepositoryStub();
+    locales = new LocaleReaderStub();
     requireFontsSpy.mockImplementation(() => undefined);
   });
 
@@ -77,7 +82,7 @@ describe("createScoresheetFeature()", () => {
     });
 
     it("should take every menu description from its own copy", () => {
-      expect(build().commands.map((route) => route.menuDescription)).toEqual([
+      expect(build().commands.map((route) => route.menuDescription(Locale.En))).toEqual([
         copy.commandStats,
         copy.commandChronology,
         copy.commandAwards,
@@ -85,30 +90,46 @@ describe("createScoresheetFeature()", () => {
     });
 
     it("should take every help line from its own copy", () => {
-      expect(build().commands.map((route) => route.help)).toEqual([
+      expect(build().commands.map((route) => route.help(Locale.En))).toEqual([
         copy.helpStats,
         copy.helpChronology,
         copy.helpAwards,
       ]);
     });
 
+    it("should describe every command in whichever language it is asked for", () => {
+      expect(build().commands.map((route) => route.menuDescription(Locale.Ru))).toEqual([
+        russian.commandStats,
+        russian.commandChronology,
+        russian.commandAwards,
+      ]);
+    });
+
+    it("should offer every help line in that language too", () => {
+      expect(build().commands.map((route) => route.help(Locale.Ru))).toEqual([
+        russian.helpStats,
+        russian.helpChronology,
+        russian.helpAwards,
+      ]);
+    });
+
     it("should route stats to the handler that sends both pictures", async () => {
       await routeFor("stats")?.run("the-context" as never);
 
-      expect(onStatsSpy).toHaveBeenCalledWith({ repo }, "the-context");
+      expect(onStatsSpy).toHaveBeenCalledWith({ repo, localeIn: locales.read }, "the-context");
     });
 
     it("should route the chronology to its own handler", async () => {
       await routeFor("stats_chronology")?.run("the-context" as never);
 
-      expect(onChronologySpy).toHaveBeenCalledWith({ repo }, "the-context");
+      expect(onChronologySpy).toHaveBeenCalledWith({ repo, localeIn: locales.read }, "the-context");
       expect(onStatsSpy).toHaveBeenCalledTimes(NEVER);
     });
 
     it("should route the awards to its own handler", async () => {
       await routeFor("stats_awards")?.run("the-context" as never);
 
-      expect(onAwardsSpy).toHaveBeenCalledWith({ repo }, "the-context");
+      expect(onAwardsSpy).toHaveBeenCalledWith({ repo, localeIn: locales.read }, "the-context");
       expect(onChronologySpy).toHaveBeenCalledTimes(NEVER);
     });
   });

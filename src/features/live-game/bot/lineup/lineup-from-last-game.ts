@@ -11,11 +11,12 @@ import {
 } from "#live-game/domain/table-change.ts";
 import { LONGEST_NAME, MOST_PLAYERS } from "#live-game/domain/card-state.ts";
 import { namePreviews } from "#live-game/render/name-preview.ts";
-import { copy } from "#live-game/copy.en.ts";
+import type { Copy } from "#live-game/copy.ts";
 import { PICKED_BY_HAND } from "#live-game/bot/card/card-service.ts";
 import {
   askForNames,
   commandText,
+  copyFor,
   refusedBecauseLive,
   type CardContext,
 } from "#live-game/bot/card-context.ts";
@@ -35,19 +36,19 @@ const NO_SEATS = 0;
 
 const NOBODY = 0;
 
-const JOINERS: Question = {
+const joinersAsked = (copy: Copy): Question => ({
   asked: copy.joinersPrompt,
   placeholder: copy.joinersPlaceholder,
   missing: copy.joinersMissing,
-};
+});
 
-const LEAVERS: Question = {
+const leaversAsked = (copy: Copy): Question => ({
   asked: copy.leaversPrompt,
   placeholder: copy.leaversPlaceholder,
   missing: copy.leaversMissing,
-};
+});
 
-const namesProblemText = (problem: NamesProblem, missing: string): string => {
+const namesProblemText = (copy: Copy, problem: NamesProblem, missing: string): string => {
   switch (problem.problem) {
     case Problem.Empty:
       return missing;
@@ -60,7 +61,7 @@ const namesProblemText = (problem: NamesProblem, missing: string): string => {
   }
 };
 
-const tableProblemText = (change: Exclude<TableChange, { ok: true }>): string => {
+const tableProblemText = (copy: Copy, change: Exclude<TableChange, { ok: true }>): string => {
   switch (change.problem) {
     case Problem.UnknownNames:
       return copy.notAtTable(change.names);
@@ -74,6 +75,7 @@ const tableProblemText = (change: Exclude<TableChange, { ok: true }>): string =>
 };
 
 const lastGameOr = async (
+  copy: Copy,
   context: CardContext,
   ctx: Command | TextMessage
 ): Promise<LastGame | null> => {
@@ -87,17 +89,22 @@ const lastGameOr = async (
   return last;
 };
 
-const beginNext = async (context: CardContext, ctx: Command): Promise<LastGame | null> => {
+const beginNext = async (
+  copy: Copy,
+  context: CardContext,
+  ctx: Command
+): Promise<LastGame | null> => {
   await context.prompts.dropUnanswered(ctx.chat.id);
 
-  if (await refusedBecauseLive(context, ctx)) {
+  if (await refusedBecauseLive(copy, context, ctx)) {
     return null;
   }
 
-  return lastGameOr(context, ctx);
+  return lastGameOr(copy, context, ctx);
 };
 
 const askedOrRefused = async (
+  copy: Copy,
   context: CardContext,
   ctx: Command,
   problem: NamesProblem,
@@ -109,10 +116,11 @@ const askedOrRefused = async (
     return;
   }
 
-  await ctx.reply(namesProblemText(problem, question.missing));
+  await ctx.reply(namesProblemText(copy, problem, question.missing));
 };
 
 const seatJoiners = async (
+  copy: Copy,
   context: CardContext,
   ctx: Command | TextMessage,
   last: LastGame,
@@ -131,15 +139,16 @@ const seatJoiners = async (
   const change = tableWith(seated, joining);
 
   if (!change.ok) {
-    await ctx.reply(tableProblemText(change));
+    await ctx.reply(tableProblemText(copy, change));
 
     return;
   }
 
-  await askSeating(ctx, change.seats);
+  await askSeating(copy, ctx, change.seats);
 };
 
 const seatWithout = async (
+  copy: Copy,
   context: CardContext,
   ctx: Command | TextMessage,
   last: LastGame,
@@ -148,12 +157,12 @@ const seatWithout = async (
   const change = tableWithout(toSeats(last.seats), names);
 
   if (!change.ok) {
-    await ctx.reply(tableProblemText(change));
+    await ctx.reply(tableProblemText(copy, change));
 
     return;
   }
 
-  await context.cards.open(ctx.chat.id, rotateToLowestId(change.seats), PICKED_BY_HAND);
+  await context.cards.open(copy, ctx.chat.id, rotateToLowestId(change.seats), PICKED_BY_HAND);
 };
 
 interface Answer {
@@ -162,18 +171,19 @@ interface Answer {
 }
 
 const answeredNames = async (
+  copy: Copy,
   context: CardContext,
   ctx: TextMessage,
   question: Question
 ): Promise<Answer | null> => {
-  const last = await lastGameOr(context, ctx);
+  const last = await lastGameOr(copy, context, ctx);
   if (last === null) {
     return null;
   }
 
   const parsed = parseNames(ctx.message.text);
   if (!parsed.ok) {
-    await ctx.reply(namesProblemText(parsed, question.missing));
+    await ctx.reply(namesProblemText(copy, parsed, question.missing));
 
     return null;
   }
@@ -182,62 +192,72 @@ const answeredNames = async (
 };
 
 export const onNext = async (context: CardContext, ctx: Command): Promise<void> => {
-  const last = await beginNext(context, ctx);
+  const copy = copyFor(context, ctx.chat.id);
+  const last = await beginNext(copy, context, ctx);
+
   if (last === null) {
     return;
   }
 
   const seats = toSeats(last.seats);
 
-  await context.cards.open(ctx.chat.id, seats, starterAfterLoss(seats, last.loserIds));
+  await context.cards.open(copy, ctx.chat.id, seats, starterAfterLoss(seats, last.loserIds));
 };
 
 export const onNextWith = async (context: CardContext, ctx: Command): Promise<void> => {
-  const last = await beginNext(context, ctx);
+  const copy = copyFor(context, ctx.chat.id);
+  const last = await beginNext(copy, context, ctx);
+
   if (last === null) {
     return;
   }
 
   const parsed = parseNames(commandText(ctx));
   if (!parsed.ok) {
-    await askedOrRefused(context, ctx, parsed, JOINERS);
+    await askedOrRefused(copy, context, ctx, parsed, joinersAsked(copy));
 
     return;
   }
 
-  await seatJoiners(context, ctx, last, parsed.names);
+  await seatJoiners(copy, context, ctx, last, parsed.names);
 };
 
 export const onNextWithout = async (context: CardContext, ctx: Command): Promise<void> => {
-  const last = await beginNext(context, ctx);
+  const copy = copyFor(context, ctx.chat.id);
+  const last = await beginNext(copy, context, ctx);
+
   if (last === null) {
     return;
   }
 
   const parsed = parseNames(commandText(ctx));
   if (!parsed.ok) {
-    await askedOrRefused(context, ctx, parsed, LEAVERS);
+    await askedOrRefused(copy, context, ctx, parsed, leaversAsked(copy));
 
     return;
   }
 
-  await seatWithout(context, ctx, last, parsed.names);
+  await seatWithout(copy, context, ctx, last, parsed.names);
 };
 
 export const joinFromNames = async (context: CardContext, ctx: TextMessage): Promise<void> => {
-  const answer = await answeredNames(context, ctx, JOINERS);
+  const copy = copyFor(context, ctx.chat.id);
+  const answer = await answeredNames(copy, context, ctx, joinersAsked(copy));
+
   if (answer === null) {
     return;
   }
 
-  await seatJoiners(context, ctx, answer.last, answer.names);
+  await seatJoiners(copy, context, ctx, answer.last, answer.names);
 };
 
 export const leaveFromNames = async (context: CardContext, ctx: TextMessage): Promise<void> => {
-  const answer = await answeredNames(context, ctx, LEAVERS);
+  const copy = copyFor(context, ctx.chat.id);
+  const answer = await answeredNames(copy, context, ctx, leaversAsked(copy));
+
   if (answer === null) {
     return;
   }
 
-  await seatWithout(context, ctx, answer.last, answer.names);
+  await seatWithout(copy, context, ctx, answer.last, answer.names);
 };

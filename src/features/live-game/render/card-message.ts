@@ -1,16 +1,16 @@
 import { finalPlacements, nameAt, remainingSlots, type CardState } from "#live-game/domain/card-state.ts";
 import { escapeHtml } from "#shared/text/html-escape.ts";
-import { copy } from "#live-game/copy.en.ts";
+import type { Copy } from "#live-game/copy.ts";
 
 
 const nameOf = (state: CardState, slot: number): string => escapeHtml(nameAt(state, slot));
 
-const heading = (state: CardState, gameNumber: number): readonly string[] => [
+const heading = (copy: Copy, state: CardState, gameNumber: number): readonly string[] => [
   copy.header(gameNumber),
   copy.dealtFirst(nameOf(state, state.starterSlot ?? 0)),
 ];
 
-const placeLines = (state: CardState): readonly string[] => {
+const placeLines = (copy: Copy, state: CardState): readonly string[] => {
   const lastPosition = state.exits.length + 1;
   const shared = remainingSlots(state).length > 1;
 
@@ -25,13 +25,13 @@ const placeLines = (state: CardState): readonly string[] => {
   });
 };
 
-export const renderCard = (state: CardState, gameNumber: number): string => {
+export const renderCard = (copy: Copy, state: CardState, gameNumber: number): string => {
   if (state.starterSlot === null) {
     return [copy.header(gameNumber), copy.askStarter].join("\n");
   }
 
-  return heading(state, gameNumber).join("\n");
+  return heading(copy, state, gameNumber).join("\n");
 };
 
-export const renderResult = (state: CardState, gameNumber: number): string =>
-  [...heading(state, gameNumber), "", ...placeLines(state)].join("\n");
+export const renderResult = (copy: Copy, state: CardState, gameNumber: number): string =>
+  [...heading(copy, state, gameNumber), "", ...placeLines(copy, state)].join("\n");

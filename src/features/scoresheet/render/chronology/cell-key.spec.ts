@@ -80,7 +80,7 @@ describe("cellKey()", () => {
   });
 
   it("should draw four entries", () => {
-    cellKey(sheetOf());
+    cellKey(copy, sheetOf());
 
     const ENTRIES = 4;
 
@@ -89,7 +89,7 @@ describe("cellKey()", () => {
   });
 
   it("should explain each cell colour in order", () => {
-    cellKey(sheetOf());
+    cellKey(copy, sheetOf());
 
     expect(printed()).toEqual([
       copy.sheetKeyPlaced,
@@ -100,7 +100,7 @@ describe("cellKey()", () => {
   });
 
   it("should give each swatch the colour of the cell it explains", () => {
-    cellKey(sheetOf());
+    cellKey(copy, sheetOf());
 
     expect(rectFor(NONE).fill).toBe("placed");
     expect(rectFor(1).fill).toBe("drawn");
@@ -109,7 +109,7 @@ describe("cellKey()", () => {
   });
 
   it("should advance each slot to the right of the one before it", () => {
-    cellKey(sheetOf());
+    cellKey(copy, sheetOf());
     const first = Number(rectFor(0).x);
     const second = Number(rectFor(1).x);
     const third = Number(rectFor(2).x);
@@ -119,38 +119,38 @@ describe("cellKey()", () => {
   });
 
   it("should space slots a whole slot width apart, not by some other step", () => {
-    cellKey(sheetOf());
+    cellKey(copy, sheetOf());
     const SECOND_SLOT = 1;
 
     expect(rectFor(SECOND_SLOT).x).toBe(PAD + SECOND_SLOT * SLOT_WIDTH);
   });
 
   it("should start the first slot at the page margin", () => {
-    cellKey(sheetOf());
+    cellKey(copy, sheetOf());
 
     expect(rectFor(NONE).x).toBe(PAD);
   });
 
   it("should derive the baseline from the grid's own bottom edge, not a recomputed one", () => {
-    cellKey(sheetOf());
+    cellKey(copy, sheetOf());
 
     expect(Number(attributesOfText(copy.sheetKeyPlaced).y)).toBe(BASELINE);
   });
 
   it("should sit the swatch exactly SWATCH_LIFT above the baseline", () => {
-    cellKey(sheetOf());
+    cellKey(copy, sheetOf());
 
     expect(rectFor(NONE).y).toBe(BASELINE - SWATCH_LIFT);
   });
 
   it("should start the label SWATCH_SIZE plus LABEL_GAP to the right of its swatch", () => {
-    cellKey(sheetOf());
+    cellKey(copy, sheetOf());
 
     expect(attributesOfText(copy.sheetKeyPlaced).x).toBe(PAD + SWATCH_SIZE + LABEL_GAP);
   });
 
   it("should stroke every swatch so a black fill still shows against the sheet", () => {
-    cellKey(sheetOf());
+    cellKey(copy, sheetOf());
 
     expect(rectFor(NONE).stroke).toBe("ruling");
     expect(rectFor(3).stroke).toBe("ruling");
@@ -158,7 +158,7 @@ describe("cellKey()", () => {
   });
 
   it("should put the label to the right of its swatch", () => {
-    cellKey(sheetOf());
+    cellKey(copy, sheetOf());
 
     expect(Number(attributesOfText(copy.sheetKeyPlaced).x)).toBeGreaterThan(
       Number(rectFor(NONE).x)

@@ -1,6 +1,7 @@
 import { FONT_FAMILY, GRID_RIGHT, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
-import { copy } from "#scoresheet/copy.en.ts";
+import type { Copy } from "#scoresheet/copy.ts";
+import { sessionDate } from "#scoresheet/render/session-date.ts";
 import { gameTally, playerTally } from "#scoresheet/render/session-tally.ts";
 import { text } from "#scoresheet/render/svg-tags.ts";
 
@@ -20,7 +21,7 @@ export interface Heading {
   readonly players: number;
 }
 
-export const cardHeading = (heading: Heading): readonly string[] => [
+export const cardHeading = (copy: Copy, heading: Heading): readonly string[] => [
   text(copy.sheetEyebrow, {
     x: PAD,
     y: EYEBROW_BASELINE,
@@ -37,7 +38,7 @@ export const cardHeading = (heading: Heading): readonly string[] => [
     "font-weight": "bold",
     "font-size": fontSize.title,
   }),
-  text(copy.sheetDate(heading.startedOn), {
+  text(sessionDate(copy, heading.startedOn), {
     x: GRID_RIGHT,
     y: EYEBROW_BASELINE,
     fill: palette.ink,
@@ -45,7 +46,7 @@ export const cardHeading = (heading: Heading): readonly string[] => [
     "font-size": fontSize.date,
     "text-anchor": "end",
   }),
-  text(copy.sheetSubtitle(gameTally(heading.games), playerTally(heading.players)), {
+  text(copy.sheetSubtitle(gameTally(copy, heading.games), playerTally(copy, heading.players)), {
     x: GRID_RIGHT,
     y: SUBTITLE_BASELINE,
     fill: palette.inkMuted,

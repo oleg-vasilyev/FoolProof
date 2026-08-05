@@ -51,17 +51,17 @@ const everyRole = (role: Role): void => {
 };
 
 const captions = (selection: readonly number[]): readonly string[] =>
-  renderMergeKeyboard(ROSTER, selection)
+  renderMergeKeyboard(copy, ROSTER, selection)
     .flat()
     .map((button) => button.text);
 
 const controlRow = (selection: readonly number[]) => {
-  const rows = renderMergeKeyboard(ROSTER, selection);
+  const rows = renderMergeKeyboard(copy, ROSTER, selection);
 
   return rows[rows.length - ONE_ROW] ?? [];
 };
 
-describe("renderMergeKeyboard()", () => {
+describe("renderMergeKeyboard(copy, )", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -71,7 +71,7 @@ describe("renderMergeKeyboard()", () => {
 
   describe("the names", () => {
     it("should give every player a row of their own", () => {
-      expect(renderMergeKeyboard(ROSTER, [])).toHaveLength(ROSTER.length + ONE_ROW);
+      expect(renderMergeKeyboard(copy, ROSTER, [])).toHaveLength(ROSTER.length + ONE_ROW);
     });
 
     it("should put the name and its games on the button", () => {
@@ -79,7 +79,7 @@ describe("renderMergeKeyboard()", () => {
     });
 
     it("should ask the domain what part each name is playing", () => {
-      renderMergeKeyboard(ROSTER, [ANYA_ID]);
+      renderMergeKeyboard(copy, ROSTER, [ANYA_ID]);
 
       expect(roleOfSpy).toHaveBeenCalledWith([ANYA_ID], ANNA_ID);
     });
@@ -101,7 +101,7 @@ describe("renderMergeKeyboard()", () => {
     });
 
     it("should carry the tapped name in the button's data", () => {
-      renderMergeKeyboard(ROSTER, [ANYA_ID]);
+      renderMergeKeyboard(copy, ROSTER, [ANYA_ID]);
 
       expect(encodeMergeCallbackSpy).toHaveBeenCalledWith({
         selection: [ANYA_ID],
@@ -112,7 +112,7 @@ describe("renderMergeKeyboard()", () => {
     it("should leave a name unescaped, because Telegram shows a caption as typed", () => {
       const named = [candidate(ANYA_ID, "A & B", ONE_GAME)];
 
-      expect(renderMergeKeyboard(named, [])[0]?.[0]?.text).toContain("A & B");
+      expect(renderMergeKeyboard(copy, named, [])[0]?.[0]?.text).toContain("A & B");
     });
   });
 
@@ -141,7 +141,7 @@ describe("renderMergeKeyboard()", () => {
     });
 
     it("should send cancel to the codec as an action with no name", () => {
-      renderMergeKeyboard(ROSTER, []);
+      renderMergeKeyboard(copy, ROSTER, []);
 
       expect(encodeMergeCallbackSpy).toHaveBeenCalledWith({
         selection: [],
@@ -150,7 +150,7 @@ describe("renderMergeKeyboard()", () => {
     });
 
     it("should send back to the codec with the selection it would undo", () => {
-      renderMergeKeyboard(ROSTER, [ANYA_ID]);
+      renderMergeKeyboard(copy, ROSTER, [ANYA_ID]);
 
       expect(encodeMergeCallbackSpy).toHaveBeenCalledWith({
         selection: [ANYA_ID],
@@ -159,7 +159,7 @@ describe("renderMergeKeyboard()", () => {
     });
 
     it("should send confirm to the codec with the whole selection", () => {
-      renderMergeKeyboard(ROSTER, [ANYA_ID, ANNA_ID]);
+      renderMergeKeyboard(copy, ROSTER, [ANYA_ID, ANNA_ID]);
 
       expect(encodeMergeCallbackSpy).toHaveBeenCalledWith({
         selection: [ANYA_ID, ANNA_ID],

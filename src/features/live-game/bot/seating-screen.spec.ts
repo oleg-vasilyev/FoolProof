@@ -1,5 +1,6 @@
 import { ActionKind, Outcome } from "#live-game/domain/card-states.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { cardRecordOf } from "#shared/repository/database-records.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
@@ -29,7 +30,7 @@ vi.mock("#live-game/render/seating-screen/seating-callback-codec.ts", () => ({
 const renderSeatingKeyboardSpy = vi.fn();
 
 vi.mock("#live-game/render/seating-screen/seating-keyboard.ts", () => ({
-  renderSeatingKeyboard: (plan: unknown) => renderSeatingKeyboardSpy(plan),
+  renderSeatingKeyboard: (table: unknown, plan: unknown) => renderSeatingKeyboardSpy(table, plan),
 }));
 
 const renderSeatedSpy = vi.fn();
@@ -39,9 +40,9 @@ const renderSeatingCancelledSpy = vi.fn();
 const renderSeatingScreenSpy = vi.fn();
 
 vi.mock("#live-game/render/seating-screen/seating-message.ts", () => ({
-  renderSeated: (seats: unknown) => renderSeatedSpy(seats),
-  renderSeatingCancelled: () => renderSeatingCancelledSpy(),
-  renderSeatingScreen: () => renderSeatingScreenSpy(),
+  renderSeated: (table: unknown, seats: unknown) => renderSeatedSpy(table, seats),
+  renderSeatingCancelled: (table: unknown) => renderSeatingCancelledSpy(table),
+  renderSeatingScreen: (table: unknown) => renderSeatingScreenSpy(table),
 }));
 
 const toMarkupSpy = vi.fn();
@@ -99,18 +100,20 @@ const MARKUP = { inline_keyboard: "converted" };
 const DATA = "s:3.7.f:0:p:7";
 
 let repo: RepositoryStub;
+let locales: LocaleReaderStub;
 
 let cards: CardServiceStub;
 
 let ctx: ContextStub;
 
-const context = () => ({ repo, cards: cards.service, prompts: new PromptRegistryStub().registry });
+const context = () => ({ repo, cards: cards.service, prompts: new PromptRegistryStub().registry, localeIn: locales.read });
 
 describe("seating-screen", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
     repo = new RepositoryStub();
+    locales = new LocaleReaderStub();
     cards = new CardServiceStub();
     ctx = new ContextStub();
 
@@ -133,21 +136,21 @@ describe("seating-screen", () => {
 
   describe("askSeating()", () => {
     it("should post the screen with nobody seated yet", async () => {
-      await askSeating(ctx.command("/next_with Kim"), SEATS);
+      await askSeating(copy, ctx.command("/next_with Kim"), SEATS);
 
-      expect(renderSeatingKeyboardSpy).toHaveBeenCalledWith({ roster: SEATS, placed: NONE_PLACED });
+      expect(renderSeatingKeyboardSpy).toHaveBeenCalledWith(copy, { roster: SEATS, placed: NONE_PLACED });
       expect(ctx.lastReply().text).toBe(SCREEN);
     });
 
     it("should send the keyboard as markup, parsed as HTML", async () => {
-      await askSeating(ctx.command("/next_with Kim"), SEATS);
+      await askSeating(copy, ctx.command("/next_with Kim"), SEATS);
 
       expect(toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
       expect(ctx.lastReply().options).toEqual({ parse_mode: "HTML", reply_markup: MARKUP });
     });
 
     it("should answer a reply the same way it answers a command", async () => {
-      await askSeating(ctx.textMessage("Kim"), SEATS);
+      await askSeating(copy, ctx.textMessage("Kim"), SEATS);
 
       expect(ctx.lastReply().text).toBe(SCREEN);
     });
@@ -197,7 +200,7 @@ describe("seating-screen", () => {
       await onSeatingTap(context(), ctx.callbackTap(DATA));
 
       expect(ctx.lastEdit().text).toBe(SCREEN);
-      expect(renderSeatingKeyboardSpy).toHaveBeenCalledWith(NEXT_PLAN);
+      expect(renderSeatingKeyboardSpy).toHaveBeenCalledWith(copy, NEXT_PLAN);
       expect(ctx.answerCallbackQuerySpy).toHaveBeenCalledWith(
         copy.tapSeated(ANYA.display_name, DISTINCTIVE_SEAT)
       );
@@ -218,7 +221,7 @@ describe("seating-screen", () => {
       await onSeatingTap(context(), ctx.callbackTap(DATA));
 
       expect(rotateToLowestIdSpy).toHaveBeenCalledWith(SEATS);
-      expect(cards.openSpy).toHaveBeenCalledWith(CHAT_ID, ROTATED, null);
+      expect(cards.openSpy).toHaveBeenCalledWith(copy, CHAT_ID, ROTATED, null);
     });
 
     it("should leave the settled ring in the chat before the card arrives", async () => {
@@ -226,7 +229,7 @@ describe("seating-screen", () => {
 
       await onSeatingTap(context(), ctx.callbackTap(DATA));
 
-      expect(renderSeatedSpy).toHaveBeenCalledWith(SEATS);
+      expect(renderSeatedSpy).toHaveBeenCalledWith(copy, SEATS);
       expect(ctx.lastEdit().text).toBe(SEATED_TEXT);
       expect(ctx.answerCallbackQuerySpy).toHaveBeenCalledWith(copy.seatedNotice);
     });

@@ -14,7 +14,7 @@ import {
 import { foolPlate } from "#scoresheet/render/awards/fool-plate.ts";
 import { FONT_FAMILY, GRID_RIGHT, IMAGE_WIDTH, PAD } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
-import { copy } from "#scoresheet/copy.en.ts";
+import type { Copy } from "#scoresheet/copy.ts";
 import { gameTally } from "#scoresheet/render/session-tally.ts";
 import { line, rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
 
@@ -36,7 +36,7 @@ const headingRule = (): string =>
     "stroke-width": RULE_WIDTH,
   });
 
-const curseNote = (curse: TableCurse, top: number): readonly string[] => [
+const curseNote = (copy: Copy, curse: TableCurse, top: number): readonly string[] => [
   line({
     x1: PAD,
     y1: top,
@@ -54,7 +54,7 @@ const curseNote = (curse: TableCurse, top: number): readonly string[] => [
     "font-size": CURSE_LABEL_FONT,
     "letter-spacing": CURSE_TRACKING,
   }),
-  text(copy.curseFact(curse.burns, gameTally(curse.games)), {
+  text(copy.curseFact(curse.burns, gameTally(copy, curse.games)), {
     x: GRID_RIGHT,
     y: top + CURSE_BASELINE_DROP,
     fill: palette.inkMuted,
@@ -64,23 +64,27 @@ const curseNote = (curse: TableCurse, top: number): readonly string[] => [
   }),
 ];
 
-const curseSection = (sheet: AwardsSheet): readonly string[] =>
-  sheet.curse === null ? [] : curseNote(sheet.curse.fact, sheet.curse.top);
+const curseSection = (copy: Copy, sheet: AwardsSheet): readonly string[] =>
+  sheet.curse === null ? [] : curseNote(copy, sheet.curse.fact, sheet.curse.top);
 
-export const renderAwards = (chronology: SeriesChronology, honours: Honours): string => {
+export const renderAwards = (
+  copy: Copy,
+  chronology: SeriesChronology,
+  honours: Honours
+): string => {
   const sheet = awardsLayoutOf(chronology, honours);
 
   return svgOf(IMAGE_WIDTH, sheet.height, [
     background(sheet),
-    ...cardHeading({
+    ...cardHeading(copy, {
       title: copy.awardsTitle,
       startedOn: sheet.startedOn,
       games: sheet.games,
       players: sheet.players,
     }),
     headingRule(),
-    ...sheet.rows.flatMap((placed) => awardRow(placed, sheet.density)),
-    ...(sheet.fool === null ? [] : foolPlate(sheet.fool, sheet.density)),
-    ...curseSection(sheet),
+    ...sheet.rows.flatMap((placed) => awardRow(copy, placed, sheet.density)),
+    ...(sheet.fool === null ? [] : foolPlate(copy, sheet.fool, sheet.density)),
+    ...curseSection(copy, sheet),
   ]);
 };

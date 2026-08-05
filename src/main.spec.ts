@@ -10,6 +10,9 @@ import { LiveGameFeatureStub } from "#live-game/live-game-feature.stub.ts";
 import { MergeNamesFeatureStub } from "#merge-names/merge-names-feature.stub.ts";
 import { ScoresheetFeatureStub } from "#scoresheet/scoresheet-feature.stub.ts";
 import { DiagnosticsFeatureStub } from "#diagnostics/diagnostics-feature.stub.ts";
+import { LanguageFeatureStub } from "#language/language-feature.stub.ts";
+import { ChatLocaleStub } from "#shared/locale/chat-locale.stub.ts";
+import { Locale } from "#shared/locale/locales.ts";
 
 
 const ONCE = 1;
@@ -74,14 +77,26 @@ const scoresheet = new ScoresheetFeatureStub();
 
 const diagnostics = new DiagnosticsFeatureStub();
 
-const installFeaturesSpy = vi.fn((_bot: unknown, _features: unknown, _log: unknown) => {
+const language = new LanguageFeatureStub();
+
+const chatLocale = new ChatLocaleStub();
+
+const INSTALLED = [
+  liveGame.feature,
+  mergeNames.feature,
+  scoresheet.feature,
+  diagnostics.feature,
+  language.feature,
+];
+
+const installFeaturesSpy = vi.fn((_bot: unknown, _features: unknown, _log: unknown, _localeIn: unknown) => {
   order.push("install");
 
   return [liveGame.stopSpy];
 });
 
 const publishCommandMenuSpy = vi.fn(
-  async (_api: unknown, _features: unknown, _log: unknown): Promise<void> => {
+  async (_api: unknown, _features: unknown, _log: unknown, _chat: unknown): Promise<void> => {
     order.push("menu");
   }
 );
@@ -107,10 +122,10 @@ vi.mock("grammy", () => ({
 vi.mock("#shared/logging/logger.ts", () => logging.module);
 
 vi.mock("#app/feature-installer.ts", () => ({
-  installFeatures: (bot: unknown, features: unknown, log: unknown) =>
-    installFeaturesSpy(bot, features, log),
-  publishCommandMenu: (api: unknown, features: unknown, log: unknown) =>
-    publishCommandMenuSpy(api, features, log),
+  installFeatures: (bot: unknown, features: unknown, log: unknown, localeIn: unknown) =>
+    installFeaturesSpy(bot, features, log, localeIn),
+  publishCommandMenu: (api: unknown, features: unknown, log: unknown, chat: unknown) =>
+    publishCommandMenuSpy(api, features, log, chat),
   resumeFeatures: (features: unknown, log: unknown) => resumeFeaturesSpy(features, log),
 }));
 
@@ -127,6 +142,10 @@ vi.mock("#merge-names/merge-names-feature.ts", () => mergeNames.module);
 vi.mock("#scoresheet/scoresheet-feature.ts", () => scoresheet.module);
 
 vi.mock("#diagnostics/diagnostics-feature.ts", () => diagnostics.module);
+
+vi.mock("#language/language-feature.ts", () => language.module);
+
+vi.mock("#shared/locale/chat-locale.ts", () => chatLocale.module);
 
 vi.mock("#shared/lifecycle/shutdown.ts", () => shutdown.module);
 
@@ -184,12 +203,7 @@ describe("main.ts", () => {
   });
 
   it("should install every feature", () => {
-    expect(installFeaturesSpy.mock.calls[0]?.[1]).toEqual([
-      liveGame.feature,
-      mergeNames.feature,
-      scoresheet.feature,
-      diagnostics.feature,
-    ]);
+    expect(installFeaturesSpy.mock.calls[0]?.[1]).toEqual(INSTALLED);
   });
 
   it("should hand diagnostics the real repository, so /status reads the live database", () => {
@@ -223,9 +237,30 @@ describe("main.ts", () => {
   it("should publish a menu built from the installed features", () => {
     expect(publishCommandMenuSpy).toHaveBeenCalledWith(
       botApi,
-      [liveGame.feature, mergeNames.feature, scoresheet.feature, diagnostics.feature],
-      logging.logger
+      INSTALLED,
+      logging.logger,
+      undefined
     );
+  });
+
+  it("should give the language screen a way to republish the menu for one chat", async () => {
+    const CHAT_ID = -100777;
+
+    await language.depsGiven()?.publishMenu(CHAT_ID, Locale.Ru);
+
+    expect(publishCommandMenuSpy).toHaveBeenCalledWith(botApi, INSTALLED, logging.logger, {
+      chatId: CHAT_ID,
+      locale: Locale.Ru,
+    });
+  });
+
+  it("should build the locale reader from the repository the features share", () => {
+    expect(chatLocale.createLocaleReaderSpy).toHaveBeenCalledWith(repository.stub);
+  });
+
+  it("should hand every feature the same locale reader", () => {
+    expect(language.depsGiven()?.localeIn).toBe(chatLocale.reader.read);
+    expect(diagnostics.depsGiven()?.localeIn).toBe(chatLocale.reader.read);
   });
 
   it("should teach the api to retry, so one lost packet does not lose a tap", () => {
@@ -247,10 +282,7 @@ describe("main.ts", () => {
   });
 
   it("should let the features pick up what the last run left behind", () => {
-    expect(resumeFeaturesSpy).toHaveBeenCalledWith(
-      [liveGame.feature, mergeNames.feature, scoresheet.feature, diagnostics.feature],
-      logging.logger
-    );
+    expect(resumeFeaturesSpy).toHaveBeenCalledWith(INSTALLED, logging.logger);
   });
 
   it("should resume before accepting updates, so a stale card is fixed first", () => {

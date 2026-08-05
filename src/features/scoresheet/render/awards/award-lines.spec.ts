@@ -6,7 +6,7 @@ import { copy } from "#scoresheet/copy.en.ts";
 const gameTallySpy = vi.fn();
 
 vi.mock("#scoresheet/render/session-tally.ts", () => ({
-  gameTally: (games: number) => gameTallySpy(games),
+  gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
 }));
 
 const { awardReason, awardTitle, awardWinner } = await import(
@@ -21,42 +21,28 @@ describe("award-lines", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    gameTallySpy.mockImplementation((games: number) => tallyOf(games));
+    gameTallySpy.mockImplementation((_table: unknown, games: number) => tallyOf(games));
   });
 
   describe("awardTitle()", () => {
-    const NAMES: readonly AwardName[] = [
-      "king",
-      "untouchable",
-      "teflon",
-      "sweetRevenge",
-      "ironSeat",
-      "theTruce",
-      "allOrNothing",
-      "theInvisible",
-      "theIrishGoodbye",
-      "encore",
-      "dealersCurse",
-      "firstBlood",
-      "foolOfTheNight",
-    ];
+    const NAMES: readonly AwardName[] = Object.values(AwardName);
 
     it.each(NAMES)("should look up %s in the copy table", (name) => {
       const award = { name, winners: [WINNER] } as unknown as Award;
 
-      expect(awardTitle(award)).toBe(copy.awardTitles[name]);
+      expect(awardTitle(copy, award)).toBe(copy.awardTitles[name]);
     });
   });
 
   describe("awardWinner()", () => {
     it("should print a single name untouched", () => {
-      expect(awardWinner(["Oleg"])).toBe("Oleg");
+      expect(awardWinner(copy, ["Oleg"])).toBe("Oleg");
     });
 
     it("should join several names with the copy's own separator", () => {
       const names = ["Oleg", "Anya", "Roma"];
 
-      expect(awardWinner(names)).toBe(names.join(copy.betweenWinners));
+      expect(awardWinner(copy, names)).toBe(names.join(copy.betweenWinners));
     });
   });
 
@@ -66,18 +52,18 @@ describe("award-lines", () => {
       const GAMES = 9;
       const award: Award = { name: AwardName.King, winners: [WINNER], percent: PERCENT, games: GAMES };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(String(PERCENT));
       expect(reason).toContain(tallyOf(GAMES));
-      expect(gameTallySpy).toHaveBeenCalledWith(GAMES);
+      expect(gameTallySpy).toHaveBeenCalledWith(copy, GAMES);
     });
 
     it("should give the untouchable a tally of the games, not the raw count", () => {
       const GAMES = 6;
       const award: Award = { name: AwardName.Untouchable, winners: [WINNER], games: GAMES };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(tallyOf(GAMES));
       expect(reason).not.toContain(`${String(GAMES)} games`);
@@ -87,7 +73,7 @@ describe("award-lines", () => {
       const STREAK = 7;
       const award: Award = { name: AwardName.Teflon, winners: [WINNER], streak: STREAK };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(String(STREAK));
       expect(gameTallySpy).not.toHaveBeenCalled();
@@ -103,7 +89,7 @@ describe("award-lines", () => {
         comebacks: COMEBACKS,
       };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(String(FOOLS));
       expect(reason).toContain(String(COMEBACKS));
@@ -114,10 +100,10 @@ describe("award-lines", () => {
       const GAMES = 11;
       const award: Award = { name: AwardName.IronSeat, winners: [WINNER], games: GAMES };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(tallyOf(GAMES));
-      expect(gameTallySpy).toHaveBeenCalledWith(GAMES);
+      expect(gameTallySpy).toHaveBeenCalledWith(copy, GAMES);
     });
 
     it("should give the truce a tally of both the draws and the games", () => {
@@ -125,12 +111,12 @@ describe("award-lines", () => {
       const GAMES = 8;
       const award: Award = { name: AwardName.TheTruce, winners: [WINNER], draws: DRAWS, games: GAMES };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(tallyOf(DRAWS));
       expect(reason).toContain(tallyOf(GAMES));
-      expect(gameTallySpy).toHaveBeenCalledWith(DRAWS);
-      expect(gameTallySpy).toHaveBeenCalledWith(GAMES);
+      expect(gameTallySpy).toHaveBeenCalledWith(copy, DRAWS);
+      expect(gameTallySpy).toHaveBeenCalledWith(copy, GAMES);
     });
 
     it("should give all or nothing the raw edges and a tally of the games", () => {
@@ -138,7 +124,7 @@ describe("award-lines", () => {
       const GAMES = 10;
       const award: Award = { name: AwardName.AllOrNothing, winners: [WINNER], edges: EDGES, games: GAMES };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(String(EDGES));
       expect(reason).toContain(tallyOf(GAMES));
@@ -154,7 +140,7 @@ describe("award-lines", () => {
         games: GAMES,
       };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(String(MIDDLES));
       expect(reason).toContain(tallyOf(GAMES));
@@ -170,7 +156,7 @@ describe("award-lines", () => {
         games: GAMES,
       };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(String(LEFT_AFTER));
       expect(reason).toContain(tallyOf(GAMES));
@@ -180,7 +166,7 @@ describe("award-lines", () => {
       const RUN = 4;
       const award: Award = { name: AwardName.Encore, winners: [WINNER], run: RUN };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(String(RUN));
       expect(gameTallySpy).not.toHaveBeenCalled();
@@ -191,7 +177,7 @@ describe("award-lines", () => {
       const BURNS = 2;
       const award: Award = { name: AwardName.DealersCurse, winners: [WINNER], deals: DEALS, burns: BURNS };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(String(DEALS));
       expect(reason).toContain(String(BURNS));
@@ -202,10 +188,10 @@ describe("award-lines", () => {
       const GAMES = 5;
       const award: Award = { name: AwardName.FirstBlood, winners: [WINNER], games: GAMES };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(tallyOf(GAMES));
-      expect(gameTallySpy).toHaveBeenCalledWith(GAMES);
+      expect(gameTallySpy).toHaveBeenCalledWith(copy, GAMES);
     });
 
     it("should give fool of the night the raw fool count and a tally of the games", () => {
@@ -218,7 +204,7 @@ describe("award-lines", () => {
         games: GAMES,
       };
 
-      const reason = awardReason(award);
+      const reason = awardReason(copy, award);
 
       expect(reason).toContain(String(FOOLS));
       expect(reason).toContain(tallyOf(GAMES));
