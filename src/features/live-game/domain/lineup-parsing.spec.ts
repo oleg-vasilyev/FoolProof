@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { LONGEST_NAME, MOST_PLAYERS } from "#live-game/domain/card-state.ts";
 import {
   normalizeName,
   parseLineup,
@@ -9,6 +10,18 @@ import {
 
 
 const THREE_NAMES = ["Oleg", "Anya", "Roma"];
+
+const OVER_THE_CAP = LONGEST_NAME + 1;
+
+const OVERLONG = "L".repeat(OVER_THE_CAP);
+
+const EMOJI_AT_THE_CAP = "🂡".repeat(LONGEST_NAME);
+
+const OVER_THE_TABLE = MOST_PLAYERS + 1;
+
+const A_FULL_TABLE = Array.from({ length: MOST_PLAYERS }, (_, at) => `P${String(at)}`);
+
+const ONE_TOO_MANY = Array.from({ length: OVER_THE_TABLE }, (_, at) => `P${String(at)}`);
 
 describe("stripCommand()", () => {
   it("should drop a bare command", () => {
@@ -68,6 +81,52 @@ describe("parseNames()", () => {
       names: ["Oleg"],
     });
   });
+
+  it("should refuse a name too long for a button, carrying only the ones at fault", () => {
+    expect(parseNames(`/next_with Anya, ${OVERLONG}`)).toEqual({
+      ok: false,
+      problem: "too_long",
+      names: [OVERLONG],
+    });
+  });
+
+  it("should count a name in characters, not in the bytes an emoji costs", () => {
+    expect(parseNames(`/next_with ${EMOJI_AT_THE_CAP}`)).toEqual({
+      ok: true,
+      names: [EMOJI_AT_THE_CAP],
+    });
+  });
+
+  it("should refuse a long name before blaming it for repeating", () => {
+    expect(parseNames(`/next_with ${OVERLONG}, ${OVERLONG}`)).toMatchObject({
+      problem: "too_long",
+    });
+  });
+});
+
+describe("parseNames(), on characters nobody can see", () => {
+  it("should drop a name made only of a zero-width space", () => {
+    expect(parseNames("/next_with Anya, ​, Kim")).toEqual({
+      ok: true,
+      names: ["Anya", "Kim"],
+    });
+  });
+
+  it("should report a line-up of nothing but invisibles as empty", () => {
+    expect(parseNames("/next_with ​﻿")).toEqual({ ok: false, problem: "empty" });
+  });
+
+  it("should take the invisibles out of a name rather than store them", () => {
+    expect(parseNames("/next_with A​nya")).toEqual({ ok: true, names: ["Anya"] });
+  });
+
+  it("should see two names that differ only by an invisible as one repeat", () => {
+    expect(parseNames("/next_with Anya, An﻿ya")).toEqual({
+      ok: false,
+      problem: "duplicates",
+      names: ["Anya"],
+    });
+  });
 });
 
 describe("parseLineup()", () => {
@@ -101,6 +160,26 @@ describe("parseLineup()", () => {
 
   it("should report an empty lineup", () => {
     expect(parseLineup("/game")).toEqual({ ok: false, problem: "empty" });
+  });
+
+  it("should seat a table right up to the cap", () => {
+    expect(parseLineup(`/game ${A_FULL_TABLE.join(", ")}`)).toEqual({
+      ok: true,
+      names: A_FULL_TABLE,
+    });
+  });
+
+  it("should refuse one player past the cap", () => {
+    expect(parseLineup(`/game ${ONE_TOO_MANY.join(", ")}`)).toEqual({
+      ok: false,
+      problem: "too_many",
+    });
+  });
+
+  it("should refuse a name for its length before counting the table", () => {
+    expect(parseLineup(`/game ${OVERLONG}, ${ONE_TOO_MANY.join(", ")}`)).toMatchObject({
+      problem: "too_long",
+    });
   });
 
   it("should report whitespace-only input as empty", () => {

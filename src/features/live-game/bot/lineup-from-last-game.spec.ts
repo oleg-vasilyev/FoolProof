@@ -24,10 +24,13 @@ vi.mock("#live-game/domain/starter-rule.ts", () => ({
 
 const alreadySeatedSpy = vi.fn();
 
+const tableWithSpy = vi.fn();
+
 const tableWithoutSpy = vi.fn();
 
 vi.mock("#live-game/domain/table-change.ts", () => ({
   alreadySeated: (seats: unknown, names: unknown) => alreadySeatedSpy(seats, names),
+  tableWith: (seats: unknown, joining: unknown) => tableWithSpy(seats, joining),
   tableWithout: (seats: unknown, names: unknown) => tableWithoutSpy(seats, names),
 }));
 
@@ -48,6 +51,18 @@ vi.mock("#live-game/bot/card-context.ts", () => ({
 
 vi.mock("#live-game/bot/card-service.ts", () => ({
   PICKED_BY_HAND: null,
+}));
+
+const MOST_PLAYERS = 7;
+
+const LONGEST_NAME = 5;
+
+vi.mock("#live-game/domain/card-state.ts", () => ({ MOST_PLAYERS, LONGEST_NAME }));
+
+const namePreviewsSpy = vi.fn();
+
+vi.mock("#live-game/render/name-preview.ts", () => ({
+  namePreviews: (names: unknown) => namePreviewsSpy(names),
 }));
 
 const askSeatingSpy = vi.fn();
@@ -98,6 +113,10 @@ const NEW_PLAYER_ID = 1;
 
 const JOINER_SEATS = [{ playerId: NEW_PLAYER_ID, displayName: "Dima" }];
 
+const SEATED_TOGETHER = [{ playerId: 41, displayName: "the whole new table" }];
+
+const SHORTENED = ["short enough to send"];
+
 const DISTINCT_PLAYER_ID = 99;
 
 const DISTINCT_SEATS = [{ playerId: DISTINCT_PLAYER_ID, displayName: "Zzz" }];
@@ -129,6 +148,8 @@ describe("a line-up taken from the last game", () => {
     parseNamesSpy.mockReturnValue({ ok: true, names: [] });
     starterAfterLossSpy.mockReturnValue(null);
     alreadySeatedSpy.mockReturnValue([]);
+    namePreviewsSpy.mockReturnValue(SHORTENED);
+    tableWithSpy.mockReturnValue({ ok: true, seats: SEATED_TOGETHER });
     tableWithoutSpy.mockReturnValue({ ok: true, seats: MAPPED_SEATS });
   });
 
@@ -302,10 +323,18 @@ describe("a line-up taken from the last game", () => {
 
       await onNextWith(context(), ctx.command("/next_with Dima"));
 
-      expect(askSeatingSpy).toHaveBeenCalledWith(expect.anything(), [
-        ...MAPPED_SEATS,
-        ...JOINER_SEATS,
-      ]);
+      expect(tableWithSpy).toHaveBeenCalledWith(MAPPED_SEATS, JOINER_SEATS);
+      expect(askSeatingSpy).toHaveBeenCalledWith(expect.anything(), SEATED_TOGETHER);
+    });
+
+    it("should refuse a table the joiners would overfill", async () => {
+      parseNamesSpy.mockReturnValue({ ok: true, names: ["Dima"] });
+      tableWithSpy.mockReturnValue({ ok: false, problem: "too_many" });
+
+      await onNextWith(context(), ctx.command("/next_with Dima"));
+
+      expect(ctx.lastReply().text).toBe(copy.lineupTooMany(MOST_PLAYERS));
+      expect(askSeatingSpy).toHaveBeenCalledTimes(NEVER);
     });
 
     it("should ask where everyone sits rather than open a card, since a joiner sits anywhere", async () => {
@@ -474,15 +503,22 @@ describe("a line-up taken from the last game", () => {
       expect(ctx.lastReply().text).toBe(copy.lineupDuplicates(["Dima"]));
     });
 
+    it("should shorten an overlong joiner rather than send it back whole", async () => {
+      const whole = ["D".repeat(300)];
+      parseNamesSpy.mockReturnValue({ ok: false, problem: "too_long", names: whole });
+
+      await joinFromNames(context(), ctx.textMessage(whole[0] ?? ""));
+
+      expect(namePreviewsSpy).toHaveBeenCalledWith(whole);
+      expect(ctx.lastReply().text).toBe(copy.nameTooLong(LONGEST_NAME, SHORTENED));
+    });
+
     it("should reach the same seating question a good command would", async () => {
       parseNamesSpy.mockReturnValue({ ok: true, names: ["Dima"] });
 
       await joinFromNames(context(), ctx.textMessage("Dima"));
 
-      expect(askSeatingSpy).toHaveBeenCalledWith(expect.anything(), [
-        ...MAPPED_SEATS,
-        ...JOINER_SEATS,
-      ]);
+      expect(askSeatingSpy).toHaveBeenCalledWith(expect.anything(), SEATED_TOGETHER);
     });
 
     it("should never drop an unanswered prompt", async () => {

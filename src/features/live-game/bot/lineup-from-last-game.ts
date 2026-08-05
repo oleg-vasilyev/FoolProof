@@ -2,7 +2,14 @@ import type { LastGame } from "#shared/repository/repository-contract.ts";
 import type { Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import { parseNames, rotateToLowestId, type NamesResult } from "#live-game/domain/lineup-parsing.ts";
 import { starterAfterLoss } from "#live-game/domain/starter-rule.ts";
-import { alreadySeated, tableWithout, type TableChange } from "#live-game/domain/table-change.ts";
+import {
+  alreadySeated,
+  tableWith,
+  tableWithout,
+  type TableChange,
+} from "#live-game/domain/table-change.ts";
+import { LONGEST_NAME, MOST_PLAYERS } from "#live-game/domain/card-state.ts";
+import { namePreviews } from "#live-game/render/name-preview.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { PICKED_BY_HAND } from "#live-game/bot/card-service.ts";
 import {
@@ -39,6 +46,19 @@ const LEAVERS: Question = {
   missing: copy.leaversMissing,
 };
 
+const namesProblemText = (problem: NamesProblem, missing: string): string => {
+  switch (problem.problem) {
+    case "empty":
+      return missing;
+
+    case "too_long":
+      return copy.nameTooLong(LONGEST_NAME, namePreviews(problem.names));
+
+    case "duplicates":
+      return copy.lineupDuplicates(problem.names);
+  }
+};
+
 const tableProblemText = (change: Exclude<TableChange, { ok: true }>): string => {
   switch (change.problem) {
     case "unknown_names":
@@ -46,6 +66,9 @@ const tableProblemText = (change: Exclude<TableChange, { ok: true }>): string =>
 
     case "too_few":
       return copy.lineupTooFew;
+
+    case "too_many":
+      return copy.lineupTooMany(MOST_PLAYERS);
   }
 };
 
@@ -79,15 +102,13 @@ const askedOrRefused = async (
   problem: NamesProblem,
   question: Question
 ): Promise<void> => {
-  switch (problem.problem) {
-    case "empty":
-      await askForNames(context, ctx, question.asked, question.placeholder);
+  if (problem.problem === "empty") {
+    await askForNames(context, ctx, question.asked, question.placeholder);
 
-      return;
-
-    case "duplicates":
-      await ctx.reply(copy.lineupDuplicates(problem.names));
+    return;
   }
+
+  await ctx.reply(namesProblemText(problem, question.missing));
 };
 
 const seatJoiners = async (
@@ -106,8 +127,15 @@ const seatJoiners = async (
   }
 
   const joining = resolveSeats(context.repo, ctx.chat.id, names);
+  const change = tableWith(seated, joining);
 
-  await askSeating(ctx, [...seated, ...joining]);
+  if (!change.ok) {
+    await ctx.reply(tableProblemText(change));
+
+    return;
+  }
+
+  await askSeating(ctx, change.seats);
 };
 
 const seatWithout = async (
@@ -125,16 +153,6 @@ const seatWithout = async (
   }
 
   await context.cards.open(ctx.chat.id, rotateToLowestId(change.seats), PICKED_BY_HAND);
-};
-
-const namesProblemText = (problem: NamesProblem, missing: string): string => {
-  switch (problem.problem) {
-    case "empty":
-      return missing;
-
-    case "duplicates":
-      return copy.lineupDuplicates(problem.names);
-  }
 };
 
 interface Answer {

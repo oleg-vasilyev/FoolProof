@@ -1,5 +1,7 @@
 import type { Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import { parseLineup, rotateToLowestId } from "#live-game/domain/lineup-parsing.ts";
+import { LONGEST_NAME, MOST_PLAYERS } from "#live-game/domain/card-state.ts";
+import { namePreviews } from "#live-game/render/name-preview.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { PICKED_BY_HAND } from "#live-game/bot/card-service.ts";
 import {
@@ -20,6 +22,12 @@ const lineupProblemText = (result: LineupProblem): string => {
 
     case "too_few":
       return copy.lineupTooFew;
+
+    case "too_many":
+      return copy.lineupTooMany(MOST_PLAYERS);
+
+    case "too_long":
+      return copy.nameTooLong(LONGEST_NAME, namePreviews(result.names));
 
     case "duplicates":
       return copy.lineupDuplicates(result.names);

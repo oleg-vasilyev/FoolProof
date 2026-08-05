@@ -138,6 +138,30 @@ Cyrillic input. Normalisation catches a different case, not a different spelling
 `Анна` and `Аня` are two players until somebody merges them — see
 [Merging two names into one](#merging-two-names-into-one).
 
+### What a name and a table may not be
+
+Three limits, each of which the bot had none of until somebody tried:
+
+- **A table seats at most ten.** Not a rule of the game — the game is played with
+  far fewer — but the number the rest of the design can carry: the seating screen
+  puts the whole roster in `callback_data`, and ten six-digit player ids in base 62
+  reach 49 of the 64 bytes the Bot API allows. Above thirteen it would not fit at
+  all, so the cap is where the margin is comfortable rather than where the format
+  gives out. `/game`, `/next_with` and everything that opens a card refuse past it.
+- **A name is at most 32 characters**, counted in characters so an emoji costs one.
+  Longer than that is unreadable on a button, and a 4000-character name pasted into
+  `/game` would have made the *refusal* too long for Telegram to deliver — which is
+  why the refusal names the culprit shortened, never whole.
+- **A name has to be visible.** Characters in Unicode's format and control classes
+  are stripped before anything else happens, so a name made only of a zero-width
+  space is no name at all and is dropped like an empty one. Two consequences worth
+  stating: what is stored is what is visible, and `Roma` cannot be smuggled in twice
+  by hiding a joiner in the middle of one of them.
+
+None of this is validation for its own sake. Each one is a refusal the bot can
+explain, in place of a table nobody can read, a message Telegram will not send, or a
+player nobody can see.
+
 ### Who deals first, and who decides
 
 At a new table nobody can know: the deal goes to whoever drew the lowest trump,

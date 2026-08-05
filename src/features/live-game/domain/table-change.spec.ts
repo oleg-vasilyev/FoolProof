@@ -6,19 +6,24 @@ const NORMALIZED_PREFIX = "normalized:";
 
 const MOCKED_MIN_PLAYERS = 3;
 
+const MOCKED_MOST_PLAYERS = 4;
+
 const FOLDED_KEY = "folded";
 
 const normalizeNameSpy = vi.fn();
 
 vi.mock("#live-game/domain/card-state.ts", () => ({
   MIN_PLAYERS: MOCKED_MIN_PLAYERS,
+  MOST_PLAYERS: MOCKED_MOST_PLAYERS,
 }));
 
 vi.mock("#live-game/domain/lineup-parsing.ts", () => ({
   normalizeName: (name: string) => normalizeNameSpy(name),
 }));
 
-const { alreadySeated, tableWithout } = await import("#live-game/domain/table-change.ts");
+const { alreadySeated, tableWith, tableWithout } = await import(
+  "#live-game/domain/table-change.ts"
+);
 
 const OLEG = 0;
 
@@ -31,6 +36,42 @@ const DIMA = 3;
 beforeEach(() => {
   vi.clearAllMocks();
   normalizeNameSpy.mockImplementation((name: string) => `${NORMALIZED_PREFIX}${name}`);
+});
+
+describe("tableWith()", () => {
+  it("should seat the joiners after the players already there", () => {
+    const seated = seatsOf("Oleg", "Anya");
+    const joining = seatsOf("Kim");
+
+    expect(tableWith(seated, joining)).toEqual({ ok: true, seats: [...seated, ...joining] });
+  });
+
+  it("should fill the table right up to the cap", () => {
+    const seated = seatsOf("Oleg", "Anya", "Roma");
+
+    expect(tableWith(seated, seatsOf("Kim"))).toMatchObject({ ok: true });
+  });
+
+  it("should refuse one joiner past the cap", () => {
+    const seated = seatsOf("Oleg", "Anya", "Roma", "Dima");
+
+    expect(tableWith(seated, seatsOf("Kim"))).toEqual({ ok: false, problem: "too_many" });
+  });
+
+  it("should refuse a table that several joiners together overfill", () => {
+    const seated = seatsOf("Oleg", "Anya");
+
+    expect(tableWith(seated, seatsOf("Kim", "Zhenya", "Sasha"))).toEqual({
+      ok: false,
+      problem: "too_many",
+    });
+  });
+
+  it("should not consult the name normaliser, since nobody is being matched", () => {
+    tableWith(seatsOf("Oleg"), seatsOf("Kim"));
+
+    expect(normalizeNameSpy).not.toHaveBeenCalled();
+  });
 });
 
 describe("alreadySeated()", () => {

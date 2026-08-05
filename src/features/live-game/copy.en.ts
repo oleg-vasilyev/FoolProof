@@ -3,6 +3,9 @@ export const copy = {
   lineupPrompt: "Who is playing? Send the names in seating order.",
   lineupPlaceholder: "Oleg, Anya, Roma",
   lineupTooFew: "A game needs at least two players.",
+  lineupTooMany: (most: number) => `A table seats at most ${most} players.`,
+  nameTooLong: (longest: number, names: readonly string[]) =>
+    `Too long for a button: ${names.join(", ")}. Keep a name under ${longest} characters.`,
   lineupDuplicates: (names: readonly string[]) =>
     `These names appear twice: ${names.join(", ")}. Give everyone a name of their own.`,
   gameAlreadyRunning: "A game is already in progress.",

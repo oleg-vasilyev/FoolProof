@@ -34,6 +34,10 @@ const PLAYERS_SHARING_A_DRAW = 2;
 
 export const MIN_PLAYERS = 2;
 
+export const MOST_PLAYERS = 10;
+
+export const LONGEST_NAME = 32;
+
 export const seatAt = (state: CardState, slot: number): Seat | undefined => state.seats[slot];
 
 export const nameAt = (state: CardState, slot: number): string => seatAt(state, slot)?.displayName ?? "";

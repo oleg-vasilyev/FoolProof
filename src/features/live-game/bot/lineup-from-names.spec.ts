@@ -15,6 +15,18 @@ vi.mock("#live-game/domain/lineup-parsing.ts", () => ({
   rotateToLowestId: (seats: unknown) => rotateToLowestIdSpy(seats),
 }));
 
+const MOST_PLAYERS = 7;
+
+const LONGEST_NAME = 5;
+
+vi.mock("#live-game/domain/card-state.ts", () => ({ MOST_PLAYERS, LONGEST_NAME }));
+
+const namePreviewsSpy = vi.fn();
+
+vi.mock("#live-game/render/name-preview.ts", () => ({
+  namePreviews: (names: unknown) => namePreviewsSpy(names),
+}));
+
 const askForNamesSpy = vi.fn();
 
 const commandTextSpy = vi.fn();
@@ -48,6 +60,8 @@ const THREE = ["Oleg", "Anya", "Roma"];
 const RESOLVED_SEATS = [{ playerId: 9, displayName: "Resolved" }];
 
 const ROTATED_SEATS = [{ playerId: 4, displayName: "Anya" }];
+
+const SHORTENED = ["short enough to send"];
 
 describe("openFromNames()", () => {
   let repo: RepositoryStub;
@@ -95,6 +109,27 @@ describe("openFromNames()", () => {
     await openFromNames(context(), ctx.command("/game Oleg, Oleg"), "Oleg, Oleg");
 
     expect(ctx.lastReply().text).toBe(copy.lineupDuplicates(["Oleg"]));
+    expect(cards.openSpy).toHaveBeenCalledTimes(NEVER);
+  });
+
+  it("should report a table nobody could sit at, naming the cap the domain set", async () => {
+    parseLineupSpy.mockReturnValue({ ok: false, problem: "too_many" });
+
+    await openFromNames(context(), ctx.command("/game"), "");
+
+    expect(ctx.lastReply().text).toBe(copy.lineupTooMany(MOST_PLAYERS));
+    expect(cards.openSpy).toHaveBeenCalledTimes(NEVER);
+  });
+
+  it("should shorten an overlong name rather than send it back whole", async () => {
+    const whole = ["N".repeat(300)];
+    parseLineupSpy.mockReturnValue({ ok: false, problem: "too_long", names: whole });
+    namePreviewsSpy.mockReturnValue(SHORTENED);
+
+    await openFromNames(context(), ctx.command("/game"), "");
+
+    expect(namePreviewsSpy).toHaveBeenCalledWith(whole);
+    expect(ctx.lastReply().text).toBe(copy.nameTooLong(LONGEST_NAME, SHORTENED));
     expect(cards.openSpy).toHaveBeenCalledTimes(NEVER);
   });
 

@@ -239,6 +239,12 @@ describe("apply()", () => {
       expect(apply(state, { kind: "pick", slot: OUT_OF_RANGE_SLOT }).outcome).toBe("rejected");
     });
 
+    it("should reject the slot one past the last seat, which has no player in it", () => {
+      const state = cardStateOf(THREE, { starterSlot: OLEG });
+
+      expect(apply(state, { kind: "pick", slot: THREE.length }).outcome).toBe("rejected");
+    });
+
     it("should reject a negative slot", () => {
       const negativeSlot = -1;
       const state = cardStateOf(THREE, { starterSlot: OLEG });
