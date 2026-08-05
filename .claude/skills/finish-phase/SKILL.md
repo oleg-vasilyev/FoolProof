@@ -103,6 +103,13 @@ against the old shape. A phase that split one file into five wrote 88 spec cases
 first and paid a second agent to rework them; the review would have said the same
 thing an hour earlier and for nothing.
 
+**The brief names paths, never purposes.** Say which files to read; do not say what
+each one is for. A reviewer handed "`evening.ts` — turns the chronology into a
+reading of the evening" judges the name against that sentence and passes it; the
+same reviewer given only the path opens the file cold and says the name predicts
+nothing. That is exactly how a file called `evening.ts` shipped through a review
+whose checklist already contained the naming question.
+
 Ask of every touched file:
 
 - Does it still read as a skeleton — the idea before the detail?
@@ -110,7 +117,13 @@ Ask of every touched file:
 - Is there a user-facing string outside the owning feature's `copy.en.ts`?
 - Does every stub sit beside its subject, or beside its only consumer when the
   subject is someone else's code?
-- Does the file's name still describe what is in it?
+- Shown only the basename, could you guess the exports? A name that states the
+  file's topic rather than its contents passes every other test and fails this one.
+- Does any state's name — a phase, an outcome, a kind — appear as a bare string
+  literal outside the module that declares it?
+
+And of the feature as a whole: it declares one command per thing it gives the
+player, so can a reader tell from the file names which files serve which?
 
 ## 6. A retrospective on how the phase was carried out
 
@@ -162,6 +175,12 @@ A phase's cost is dominated by two things, and neither of them is thinking:
   between `number` and `void` after the SQL, the stub and the integration spec were
   already written, and paid for those three files twice.
 - **Waiting on gates that did not need running.** See gate 3.
+- **A new path that bypasses an old one inherits its obligations.** Before replacing
+  a call, list what the old path did *besides* the obvious thing — a cleanup, a
+  sweep, a refusal — and say for each whether the new one still does it. Noticing a
+  side effect and filing it as minor is not that check: the seating screen dropped
+  the sweep that made a mistyped name disappear, and the phase then wrote a `PLAN.md`
+  paragraph claiming it had not.
 - **Deciding where a rule lives after writing it.** Settling the signatures is not
   the whole design note: also ask, for every rule the phase adds, whether it is
   pure — and if one of them already earned a `domain/` module, its siblings almost

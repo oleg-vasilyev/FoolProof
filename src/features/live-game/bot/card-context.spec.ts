@@ -3,7 +3,7 @@ import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { cardRecordOf } from "#shared/repository/database-records.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { CHAT_ID, COMMAND_MESSAGE_ID, ContextStub, SENT_MESSAGE_ID } from "#live-game/bot/grammy-context.stub.ts";
-import { CardServiceStub } from "#live-game/bot/card-service.stub.ts";
+import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
 import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
 
 

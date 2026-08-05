@@ -25,7 +25,7 @@ vi.mock("#scoresheet/render/session-tally.ts", () => ({
 
 const fontSize = { eyebrow: 30, title: 126, date: 52, subtitle: 42 };
 
-vi.mock("#scoresheet/render/sheet-layout.ts", () => ({
+vi.mock("#scoresheet/render/card-metrics.ts", () => ({
   FONT_FAMILY,
   GRID_RIGHT,
   PAD,

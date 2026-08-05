@@ -40,7 +40,7 @@ vi.mock("node:path", () => ({
 
 vi.mock("#shared/config/env.ts", () => env.module);
 
-vi.mock("#scoresheet/render/sheet-layout.ts", () => ({
+vi.mock("#scoresheet/render/card-metrics.ts", () => ({
   FONT_FAMILY,
 }));
 

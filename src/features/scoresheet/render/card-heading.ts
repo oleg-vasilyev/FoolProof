@@ -1,4 +1,4 @@
-import { FONT_FAMILY, GRID_RIGHT, PAD, fontSize } from "#scoresheet/render/sheet-layout.ts";
+import { FONT_FAMILY, GRID_RIGHT, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import { gameTally, playerTally } from "#scoresheet/render/session-tally.ts";

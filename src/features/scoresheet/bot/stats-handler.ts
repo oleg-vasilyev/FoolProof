@@ -4,10 +4,10 @@ import type {
   SeriesChronology,
 } from "#shared/repository/repository-contract.ts";
 import type { Command } from "#shared/telegram/telegram-contexts.ts";
-import type { Honours } from "#scoresheet/domain/award-catalogue.ts";
-import { EVENING_MINIMUM, honoursFor } from "#scoresheet/domain/awards.ts";
-import { renderScoresheet } from "#scoresheet/render/scoresheet-svg.ts";
-import { renderAwards } from "#scoresheet/render/awards-svg.ts";
+import type { Honours } from "#scoresheet/domain/awards/award-catalogue.ts";
+import { EVENING_MINIMUM, honoursFor } from "#scoresheet/domain/awards/awards.ts";
+import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
+import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import { gameTally, playerTally } from "#scoresheet/render/session-tally.ts";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";

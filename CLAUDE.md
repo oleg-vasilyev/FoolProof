@@ -57,6 +57,11 @@ Anything a machine can check is a lint rule, not a paragraph — see
   price of that — `repository/repository-contract.ts` reads worse in a path and
   better in a tab, and the tab wins. `index.ts` promises a re-export, so logic
   never goes in one.
+- **A name says what is inside, not what the file is about.** `evening.ts` was
+  specific and still told a reader nothing; it became `session-appearances.ts`,
+  which predicts the `Appearance` type and the per-player helpers actually in it.
+  The test is cold: shown only the basename, guess the exports. A topic passes the
+  first rule and fails this one, so both have to be asked.
 - **The same thing is called the same thing in every feature.** User copy is
   `copy.en.ts`, the entry point is `<feature>-feature.ts`, a stub for third-party
   code is named after that code (`grammy-api.stub.ts`). Two files named
@@ -125,6 +130,21 @@ the rest compiling and passing, and adding a feature must not require editing
 another one. Deleting one was tested by deleting it: the only failures were in
 `main.spec.ts`, which is the one spec *supposed* to know the roster. The procedure
 for adding one is the `add-a-feature` skill.
+
+**The commands a feature declares are the list of its sub-features.** `scoresheet`
+declares `/stats`, `/stats_chronology` and `/stats_awards`, so it gives the player
+two pictures; `live-game` declares four commands that between them open a card and
+change the table. When a layer holds files serving more than one of those things,
+each gets a subfolder named after the thing — `render/chronology/`, `bot/opening/` —
+and only what all of them use stays at the layer root. Never a bucket: `helpers/`,
+`common/` and `shared/` inside a feature are the same vagueness the file names were
+cured of. A single-command feature never subdivides.
+
+`docs:check` fails a layer root above nine files, which is unambiguous crowding
+rather than a real limit — the fix is always a named subfolder, never a bigger
+number. It is a late alarm on purpose: a count of seven fired on a folder that
+turned out to need no split, so the question is the rule and the count only makes
+somebody ask it.
 
 **A feature folder is named after what the player gets**, not after an internal
 noun. `diagnostics/` is the exception that proves the rule — its reader is whoever
@@ -328,23 +348,6 @@ message. The procedure is the **`finish-phase` skill**; the review pass has a
 
 Mutation runs over the phase's diff (`npm run test:mutation:changed`, about a
 minute); the full run happens once before a tag.
-
-Four habits, each of which cost a phase to learn:
-
-- **Settle every signature that crosses a layer before the first `Write`** — what a
-  repository method returns, what a transition carries. Re-deciding one afterwards
-  costs every file that already spoke it.
-- **A new path that bypasses an old one inherits its obligations.** Before replacing
-  a call, list what the old path did *besides* the obvious thing — a cleanup, a
-  sweep, a refusal — and say for each whether the new one still does it. Noticing a
-  side effect and filing it as minor is not that check: the seating screen dropped
-  the sweep that made a mistyped name disappear, and the phase then wrote a `PLAN.md`
-  paragraph claiming it had not.
-- **Read a gate's report; never re-run a gate to see its output again.** Everything
-  lands under `reports/`.
-- **Mechanical work goes to a subagent on a cheaper model.** Writing specs from a
-  settled design is transcription; a cross-feature hazard is not. The brief must be
-  complete, because the agent starts cold.
 
 **Say how big the phase is before starting it**, in a line, so it can be argued
 down: a phase inside one feature folder that adds no repository method and changes

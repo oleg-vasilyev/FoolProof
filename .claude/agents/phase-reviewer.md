@@ -30,7 +30,13 @@ run `npm run check` and trust it. Spend the pass on what no rule can check:
     the table is worse than a vague name, because it actively misleads;
   - the name describes a subset. `*-commands.ts` holding three functions that are
     not commands, or a `*-context.ts` that quietly writes database rows, sends the
-    reader looking in the wrong tab.
+    reader looking in the wrong tab;
+  - the name states a topic rather than contents. `evening.ts` was specific,
+    unambiguous and told a reader nothing about the `Appearance` type inside it.
+    This one is the hardest to catch, because such a name looks fine the moment
+    somebody tells you what the file is for — **so distrust any description of a
+    file you were handed in the brief, and open the file cold instead.** That is
+    how `evening.ts` passed a review whose checklist already asked this question.
 
   A name that needs the folder path to make sense has already failed — the tab
   shows the basename. **If you propose a replacement, test your own suggestion the

@@ -22,6 +22,10 @@ const NOTHING = 0;
 
 const FIRST_GROUP = 1;
 
+const ONE_COMMAND = 1;
+
+const ROOMY_ENOUGH = 9;
+
 const read = (file: string): string => readFileSync(file, "utf8");
 
 const headingsOf = (text: string): readonly string[] =>
@@ -109,10 +113,42 @@ const overBudget = (): readonly string[] => {
   ];
 };
 
+const sourceFilesIn = (folder: string): readonly string[] =>
+  readdirSync(folder, { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name)
+    .filter((name) => name.endsWith(".ts"))
+    .filter((name) => !name.endsWith(".spec.ts") && !name.endsWith(".stub.ts"));
+
+const commandsDeclaredBy = (feature: string): number =>
+  readdirSync(join(FEATURE_FOLDERS, feature))
+    .filter((name) => name.endsWith("-feature.ts"))
+    .flatMap((name) => read(join(FEATURE_FOLDERS, feature, name)).match(/command: "/g) ?? []).length;
+
+const crowdedLayers = (): readonly string[] =>
+  readdirSync(FEATURE_FOLDERS, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .filter((entry) => commandsDeclaredBy(entry.name) > ONE_COMMAND)
+    .flatMap((feature) =>
+      readdirSync(join(FEATURE_FOLDERS, feature.name), { withFileTypes: true })
+        .filter((layer) => layer.isDirectory())
+        .flatMap((layer) => {
+          const folder = join(FEATURE_FOLDERS, feature.name, layer.name);
+          const files = sourceFilesIn(folder).length;
+
+          return files <= ROOMY_ENOUGH
+            ? []
+            : [
+                `${folder}: ${String(files)} files at one level in a feature that gives the player more than one thing — name the sub-features as folders rather than raising the number`,
+              ];
+        })
+    );
+
 const complaints = [
   ...brokenLinks(),
   ...featuresMissingFromTheTree(),
   ...scriptsOutOfStep(),
+  ...crowdedLayers(),
   ...overBudget(),
 ];
 

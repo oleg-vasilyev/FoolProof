@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 
 export const QUIET_MS = 600;
 
-const CARD_SERVICE = ["src", "features", "live-game", "bot", "card-service.ts"];
+const CARD_SERVICE = ["src", "features", "live-game", "bot", "card", "card-service.ts"];
 
 const DEBOUNCE = /EDIT_DEBOUNCE_MS\s*=\s*(\d+)/;
 

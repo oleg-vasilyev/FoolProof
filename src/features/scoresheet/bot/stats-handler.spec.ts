@@ -18,17 +18,17 @@ const renderAwardsSpy = vi.fn();
 
 const honoursForSpy = vi.fn();
 
-vi.mock("#scoresheet/render/scoresheet-svg.ts", () => ({
+vi.mock("#scoresheet/render/chronology/chronology-svg.ts", () => ({
   renderScoresheet: (chronology: unknown) => renderScoresheetSpy(chronology),
 }));
 
-vi.mock("#scoresheet/render/awards-svg.ts", () => ({
+vi.mock("#scoresheet/render/awards/awards-svg.ts", () => ({
   renderAwards: (chronology: unknown, honours: unknown) => renderAwardsSpy(chronology, honours),
 }));
 
 const EVENING_MINIMUM = 5;
 
-vi.mock("#scoresheet/domain/awards.ts", () => ({
+vi.mock("#scoresheet/domain/awards/awards.ts", () => ({
   EVENING_MINIMUM,
   honoursFor: (chronology: unknown) => honoursForSpy(chronology),
 }));

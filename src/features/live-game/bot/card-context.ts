@@ -1,7 +1,7 @@
 import type { CardRepository } from "#shared/repository/repository-contract.ts";
 import type { Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import { copy } from "#live-game/copy.en.ts";
-import type { CardService } from "#live-game/bot/card-service.ts";
+import type { CardService } from "#live-game/bot/card/card-service.ts";
 import type { PromptRegistry } from "#live-game/bot/prompt-registry.ts";
 
 

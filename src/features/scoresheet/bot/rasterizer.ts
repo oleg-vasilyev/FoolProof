@@ -2,7 +2,7 @@ import { Resvg } from "@resvg/resvg-js";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { rootDir } from "#shared/config/env.ts";
-import { FONT_FAMILY } from "#scoresheet/render/sheet-layout.ts";
+import { FONT_FAMILY } from "#scoresheet/render/card-metrics.ts";
 
 
 const FONT_FILES: readonly string[] = ["NotoSans-Regular.ttf", "NotoSans-Bold.ttf"].map((file) =>
