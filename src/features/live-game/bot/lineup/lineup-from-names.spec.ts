@@ -1,3 +1,4 @@
+import { Problem } from "#live-game/domain/refusals.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
@@ -86,7 +87,7 @@ describe("openFromNames()", () => {
   });
 
   it("should report a line-up with nobody in it", async () => {
-    parseLineupSpy.mockReturnValue({ ok: false, problem: "empty" });
+    parseLineupSpy.mockReturnValue({ ok: false, problem: Problem.Empty });
 
     await openFromNames(context(), ctx.command("/game"), "");
 
@@ -95,7 +96,7 @@ describe("openFromNames()", () => {
   });
 
   it("should report a line-up that is too short", async () => {
-    parseLineupSpy.mockReturnValue({ ok: false, problem: "too_few" });
+    parseLineupSpy.mockReturnValue({ ok: false, problem: Problem.TooFew });
 
     await openFromNames(context(), ctx.command("/game Oleg"), "Oleg");
 
@@ -104,7 +105,7 @@ describe("openFromNames()", () => {
   });
 
   it("should name the duplicates a line-up was refused for", async () => {
-    parseLineupSpy.mockReturnValue({ ok: false, problem: "duplicates", names: ["Oleg"] });
+    parseLineupSpy.mockReturnValue({ ok: false, problem: Problem.Duplicates, names: ["Oleg"] });
 
     await openFromNames(context(), ctx.command("/game Oleg, Oleg"), "Oleg, Oleg");
 
@@ -113,7 +114,7 @@ describe("openFromNames()", () => {
   });
 
   it("should report a table nobody could sit at, naming the cap the domain set", async () => {
-    parseLineupSpy.mockReturnValue({ ok: false, problem: "too_many" });
+    parseLineupSpy.mockReturnValue({ ok: false, problem: Problem.TooMany });
 
     await openFromNames(context(), ctx.command("/game"), "");
 
@@ -123,7 +124,7 @@ describe("openFromNames()", () => {
 
   it("should shorten an overlong name rather than send it back whole", async () => {
     const whole = ["N".repeat(300)];
-    parseLineupSpy.mockReturnValue({ ok: false, problem: "too_long", names: whole });
+    parseLineupSpy.mockReturnValue({ ok: false, problem: Problem.TooLong, names: whole });
     namePreviewsSpy.mockReturnValue(SHORTENED);
 
     await openFromNames(context(), ctx.command("/game"), "");
@@ -207,7 +208,7 @@ describe("onGame()", () => {
   });
 
   it("should report a line-up with nobody in it", async () => {
-    parseLineupSpy.mockReturnValue({ ok: false, problem: "too_few" });
+    parseLineupSpy.mockReturnValue({ ok: false, problem: Problem.TooFew });
 
     await onGame(context(), ctx.command("/game Oleg"));
 
@@ -215,7 +216,7 @@ describe("onGame()", () => {
   });
 
   it("should name the duplicates a line-up was refused for", async () => {
-    parseLineupSpy.mockReturnValue({ ok: false, problem: "duplicates", names: ["Oleg"] });
+    parseLineupSpy.mockReturnValue({ ok: false, problem: Problem.Duplicates, names: ["Oleg"] });
 
     await onGame(context(), ctx.command("/game Oleg, Oleg"));
 
@@ -224,7 +225,7 @@ describe("onGame()", () => {
 
   describe("with no names", () => {
     beforeEach(() => {
-      parseLineupSpy.mockReturnValue({ ok: false, problem: "empty" });
+      parseLineupSpy.mockReturnValue({ ok: false, problem: Problem.Empty });
     });
 
     it("should ask for the names instead of failing", async () => {

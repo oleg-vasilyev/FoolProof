@@ -1,3 +1,4 @@
+import { Problem } from "#live-game/domain/refusals.ts";
 import { describe, expect, it } from "vitest";
 import { LONGEST_NAME, MOST_PLAYERS } from "#live-game/domain/card-state.ts";
 import {
@@ -71,13 +72,13 @@ describe("parseNames()", () => {
   });
 
   it("should report an empty argument as empty", () => {
-    expect(parseNames("/next_with")).toEqual({ ok: false, problem: "empty" });
+    expect(parseNames("/next_with")).toEqual({ ok: false, problem: Problem.Empty });
   });
 
   it("should report repeated names as duplicates carrying the repeated names", () => {
     expect(parseNames("/next_with Oleg, Anya, Oleg")).toEqual({
       ok: false,
-      problem: "duplicates",
+      problem: Problem.Duplicates,
       names: ["Oleg"],
     });
   });
@@ -85,7 +86,7 @@ describe("parseNames()", () => {
   it("should refuse a name too long for a button, carrying only the ones at fault", () => {
     expect(parseNames(`/next_with Anya, ${OVERLONG}`)).toEqual({
       ok: false,
-      problem: "too_long",
+      problem: Problem.TooLong,
       names: [OVERLONG],
     });
   });
@@ -99,7 +100,7 @@ describe("parseNames()", () => {
 
   it("should refuse a long name before blaming it for repeating", () => {
     expect(parseNames(`/next_with ${OVERLONG}, ${OVERLONG}`)).toMatchObject({
-      problem: "too_long",
+      problem: Problem.TooLong,
     });
   });
 });
@@ -113,7 +114,7 @@ describe("parseNames(), on characters nobody can see", () => {
   });
 
   it("should report a line-up of nothing but invisibles as empty", () => {
-    expect(parseNames("/next_with ​﻿")).toEqual({ ok: false, problem: "empty" });
+    expect(parseNames("/next_with ​﻿")).toEqual({ ok: false, problem: Problem.Empty });
   });
 
   it("should take the invisibles out of a name rather than store them", () => {
@@ -123,7 +124,7 @@ describe("parseNames(), on characters nobody can see", () => {
   it("should see two names that differ only by an invisible as one repeat", () => {
     expect(parseNames("/next_with Anya, An﻿ya")).toEqual({
       ok: false,
-      problem: "duplicates",
+      problem: Problem.Duplicates,
       names: ["Anya"],
     });
   });
@@ -159,7 +160,7 @@ describe("parseLineup()", () => {
   });
 
   it("should report an empty lineup", () => {
-    expect(parseLineup("/game")).toEqual({ ok: false, problem: "empty" });
+    expect(parseLineup("/game")).toEqual({ ok: false, problem: Problem.Empty });
   });
 
   it("should seat a table right up to the cap", () => {
@@ -172,38 +173,38 @@ describe("parseLineup()", () => {
   it("should refuse one player past the cap", () => {
     expect(parseLineup(`/game ${ONE_TOO_MANY.join(", ")}`)).toEqual({
       ok: false,
-      problem: "too_many",
+      problem: Problem.TooMany,
     });
   });
 
   it("should refuse a name for its length before counting the table", () => {
     expect(parseLineup(`/game ${OVERLONG}, ${ONE_TOO_MANY.join(", ")}`)).toMatchObject({
-      problem: "too_long",
+      problem: Problem.TooLong,
     });
   });
 
   it("should report whitespace-only input as empty", () => {
-    expect(parseLineup("/game    ")).toEqual({ ok: false, problem: "empty" });
+    expect(parseLineup("/game    ")).toEqual({ ok: false, problem: Problem.Empty });
   });
 
   it("should reject a single player", () => {
-    expect(parseLineup("/game Oleg")).toEqual({ ok: false, problem: "too_few" });
+    expect(parseLineup("/game Oleg")).toEqual({ ok: false, problem: Problem.TooFew });
   });
 
   it("should reject duplicates", () => {
     expect(parseLineup("/game Oleg, Anya, Oleg")).toEqual({
       ok: false,
-      problem: "duplicates",
+      problem: Problem.Duplicates,
       names: ["Oleg"],
     });
   });
 
   it("should catch duplicates that differ only by case", () => {
-    expect(parseLineup("/game Oleg, ОЛЕГ, олег")).toMatchObject({ problem: "duplicates" });
+    expect(parseLineup("/game Oleg, ОЛЕГ, олег")).toMatchObject({ problem: Problem.Duplicates });
   });
 
   it("should catch duplicates that differ only by yo", () => {
-    expect(parseLineup("/game Пётр, Анна, Петр")).toMatchObject({ problem: "duplicates" });
+    expect(parseLineup("/game Пётр, Анна, Петр")).toMatchObject({ problem: Problem.Duplicates });
   });
 
   it("should keep names exactly as typed when they are accepted", () => {

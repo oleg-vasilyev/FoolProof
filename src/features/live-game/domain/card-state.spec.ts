@@ -1,3 +1,4 @@
+import { ActionKind, Outcome } from "#live-game/domain/card-states.ts";
 import { describe, expect, it } from "vitest";
 import { playerIdOf } from "#shared/repository/database-records.stub.ts";
 import { cardStateOf } from "#live-game/domain/card-state.stub.ts";
@@ -36,7 +37,7 @@ const OUT_OF_RANGE_SLOT = 99;
 
 const updatedState = (state: CardState, ...slots: readonly number[]): CardState =>
   slots.reduce((current, slot) => {
-    const transition = apply(current, { kind: "pick", slot });
+    const transition = apply(current, { kind: ActionKind.Pick, slot });
 
     return transition.outcome === "updated" ? transition.state : current;
   }, state);
@@ -197,20 +198,20 @@ describe("starterPlayerId()", () => {
 describe("apply()", () => {
   describe("pick", () => {
     it("should set the starter in PICK_STARTER", () => {
-      const transition = apply(cardStateOf(THREE), { kind: "pick", slot: ANYA });
+      const transition = apply(cardStateOf(THREE), { kind: ActionKind.Pick, slot: ANYA });
 
       expect(transition).toEqual({
-        outcome: "updated",
+        outcome: Outcome.Updated,
         state: expect.objectContaining({ starterSlot: ANYA }),
       });
     });
 
     it("should record an exit in RECORDING", () => {
       const state = cardStateOf(THREE, { starterSlot: OLEG });
-      const transition = apply(state, { kind: "pick", slot: ROMA });
+      const transition = apply(state, { kind: ActionKind.Pick, slot: ROMA });
 
       expect(transition).toEqual({
-        outcome: "updated",
+        outcome: Outcome.Updated,
         state: expect.objectContaining({ exits: [ROMA] }),
       });
     });
@@ -218,45 +219,45 @@ describe("apply()", () => {
     it("should let the starter go out first", () => {
       const state = cardStateOf(THREE, { starterSlot: OLEG });
 
-      expect(apply(state, { kind: "pick", slot: OLEG }).outcome).toBe("updated");
+      expect(apply(state, { kind: ActionKind.Pick, slot: OLEG }).outcome).toBe("updated");
     });
 
     it("should reject a player who already went out", () => {
       const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [ROMA] });
 
-      expect(apply(state, { kind: "pick", slot: ROMA }).outcome).toBe("rejected");
+      expect(apply(state, { kind: ActionKind.Pick, slot: ROMA }).outcome).toBe("rejected");
     });
 
     it("should reject a tap once the card is READY", () => {
       const state = cardStateOf(THREE, { starterSlot: OLEG, exits: [OLEG, ANYA] });
 
-      expect(apply(state, { kind: "pick", slot: ROMA }).outcome).toBe("rejected");
+      expect(apply(state, { kind: ActionKind.Pick, slot: ROMA }).outcome).toBe("rejected");
     });
 
     it("should reject a slot past the table", () => {
       const state = cardStateOf(THREE, { starterSlot: OLEG });
 
-      expect(apply(state, { kind: "pick", slot: OUT_OF_RANGE_SLOT }).outcome).toBe("rejected");
+      expect(apply(state, { kind: ActionKind.Pick, slot: OUT_OF_RANGE_SLOT }).outcome).toBe("rejected");
     });
 
     it("should reject the slot one past the last seat, which has no player in it", () => {
       const state = cardStateOf(THREE, { starterSlot: OLEG });
 
-      expect(apply(state, { kind: "pick", slot: THREE.length }).outcome).toBe("rejected");
+      expect(apply(state, { kind: ActionKind.Pick, slot: THREE.length }).outcome).toBe("rejected");
     });
 
     it("should reject a negative slot", () => {
       const negativeSlot = -1;
       const state = cardStateOf(THREE, { starterSlot: OLEG });
 
-      expect(apply(state, { kind: "pick", slot: negativeSlot }).outcome).toBe("rejected");
+      expect(apply(state, { kind: ActionKind.Pick, slot: negativeSlot }).outcome).toBe("rejected");
     });
 
     it("should reject a fractional slot", () => {
       const fractionalSlot = 1.5;
       const state = cardStateOf(THREE, { starterSlot: OLEG });
 
-      expect(apply(state, { kind: "pick", slot: fractionalSlot }).outcome).toBe("rejected");
+      expect(apply(state, { kind: ActionKind.Pick, slot: fractionalSlot }).outcome).toBe("rejected");
     });
 
     it("should reach READY when only one player is left", () => {
@@ -270,10 +271,10 @@ describe("apply()", () => {
   describe("draw", () => {
     it("should accept a draw when two remain", () => {
       const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [OLEG, ANYA, ROMA] });
-      const transition = apply(state, { kind: "draw" });
+      const transition = apply(state, { kind: ActionKind.Draw });
 
       expect(transition).toEqual({
-        outcome: "updated",
+        outcome: Outcome.Updated,
         state: expect.objectContaining({ drawAccepted: true }),
       });
     });
@@ -281,17 +282,17 @@ describe("apply()", () => {
     it("should reject a draw while three remain", () => {
       const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [OLEG, ANYA] });
 
-      expect(apply(state, { kind: "draw" }).outcome).toBe("rejected");
+      expect(apply(state, { kind: ActionKind.Draw }).outcome).toBe("rejected");
     });
 
     it("should reject a draw in PICK_STARTER", () => {
-      expect(apply(cardStateOf(TWO), { kind: "draw" }).outcome).toBe("rejected");
+      expect(apply(cardStateOf(TWO), { kind: ActionKind.Draw }).outcome).toBe("rejected");
     });
   });
 
   describe("back", () => {
     it("should be rejected in PICK_STARTER", () => {
-      expect(apply(cardStateOf(THREE), { kind: "back" }).outcome).toBe("rejected");
+      expect(apply(cardStateOf(THREE), { kind: ActionKind.Back }).outcome).toBe("rejected");
     });
 
     it("should roll back an accepted draw before touching exits", () => {
@@ -300,30 +301,30 @@ describe("apply()", () => {
         exits: [OLEG, ANYA, ROMA],
         drawAccepted: true,
       });
-      const transition = apply(state, { kind: "back" });
+      const transition = apply(state, { kind: ActionKind.Back });
 
       expect(transition).toEqual({
-        outcome: "updated",
+        outcome: Outcome.Updated,
         state: expect.objectContaining({ drawAccepted: false, exits: [OLEG, ANYA, ROMA] }),
       });
     });
 
     it("should drop the last exit", () => {
       const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [OLEG, ANYA] });
-      const transition = apply(state, { kind: "back" });
+      const transition = apply(state, { kind: ActionKind.Back });
 
       expect(transition).toEqual({
-        outcome: "updated",
+        outcome: Outcome.Updated,
         state: expect.objectContaining({ exits: [OLEG] }),
       });
     });
 
     it("should clear the starter when there are no exits left", () => {
       const state = cardStateOf(THREE, { starterSlot: OLEG });
-      const transition = apply(state, { kind: "back" });
+      const transition = apply(state, { kind: ActionKind.Back });
 
       expect(transition).toEqual({
-        outcome: "updated",
+        outcome: Outcome.Updated,
         state: expect.objectContaining({ starterSlot: null }),
       });
     });
@@ -333,7 +334,7 @@ describe("apply()", () => {
       const steps = [finished];
 
       const walked = [1, 2, 3].reduce((current) => {
-        const transition = apply(current, { kind: "back" });
+        const transition = apply(current, { kind: ActionKind.Back });
         const next = transition.outcome === "updated" ? transition.state : current;
         steps.push(next);
 
@@ -348,41 +349,41 @@ describe("apply()", () => {
     it("should confirm a READY card", () => {
       const state = cardStateOf(THREE, { starterSlot: OLEG, exits: [OLEG, ANYA] });
 
-      expect(apply(state, { kind: "confirm" }).outcome).toBe("confirmed");
+      expect(apply(state, { kind: ActionKind.Confirm }).outcome).toBe("confirmed");
     });
 
     it("should reject a confirm while still recording", () => {
       const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [OLEG] });
 
-      expect(apply(state, { kind: "confirm" }).outcome).toBe("rejected");
+      expect(apply(state, { kind: ActionKind.Confirm }).outcome).toBe("rejected");
     });
 
     it("should reject a confirm in PICK_STARTER", () => {
-      expect(apply(cardStateOf(THREE), { kind: "confirm" }).outcome).toBe("rejected");
+      expect(apply(cardStateOf(THREE), { kind: ActionKind.Confirm }).outcome).toBe("rejected");
     });
   });
 
   describe("cancel", () => {
     it("should cancel when no starter has been picked yet", () => {
-      expect(apply(cardStateOf(THREE), { kind: "cancel" }).outcome).toBe("cancelled");
+      expect(apply(cardStateOf(THREE), { kind: ActionKind.Cancel }).outcome).toBe("cancelled");
     });
 
     it("should cancel once a starter is picked but no exits are recorded", () => {
       const state = cardStateOf(THREE, { starterSlot: OLEG });
 
-      expect(apply(state, { kind: "cancel" }).outcome).toBe("cancelled");
+      expect(apply(state, { kind: ActionKind.Cancel }).outcome).toBe("cancelled");
     });
 
     it("should reject a cancel once an exit is recorded", () => {
       const state = cardStateOf(THREE, { starterSlot: OLEG, exits: [ROMA] });
 
-      expect(apply(state, { kind: "cancel" }).outcome).toBe("rejected");
+      expect(apply(state, { kind: ActionKind.Cancel }).outcome).toBe("rejected");
     });
 
     it("should reject a cancel once a draw is accepted", () => {
       const state = cardStateOf(TWO, { starterSlot: OLEG, drawAccepted: true });
 
-      expect(apply(state, { kind: "cancel" }).outcome).toBe("rejected");
+      expect(apply(state, { kind: ActionKind.Cancel }).outcome).toBe("rejected");
     });
   });
 
@@ -390,9 +391,9 @@ describe("apply()", () => {
     const state = cardStateOf(FIVE, { starterSlot: OLEG, exits: [ANYA] });
     const snapshot = structuredClone(state);
 
-    apply(state, { kind: "pick", slot: ROMA });
-    apply(state, { kind: "back" });
-    apply(state, { kind: "draw" });
+    apply(state, { kind: ActionKind.Pick, slot: ROMA });
+    apply(state, { kind: ActionKind.Back });
+    apply(state, { kind: ActionKind.Draw });
 
     expect(state).toEqual(snapshot);
   });

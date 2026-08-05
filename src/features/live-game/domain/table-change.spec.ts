@@ -1,3 +1,4 @@
+import { Problem } from "#live-game/domain/refusals.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { seatsOf } from "#live-game/domain/card-state.stub.ts";
 
@@ -55,7 +56,7 @@ describe("tableWith()", () => {
   it("should refuse one joiner past the cap", () => {
     const seated = seatsOf("Oleg", "Anya", "Roma", "Dima");
 
-    expect(tableWith(seated, seatsOf("Kim"))).toEqual({ ok: false, problem: "too_many" });
+    expect(tableWith(seated, seatsOf("Kim"))).toEqual({ ok: false, problem: Problem.TooMany });
   });
 
   it("should refuse a table that several joiners together overfill", () => {
@@ -63,7 +64,7 @@ describe("tableWith()", () => {
 
     expect(tableWith(seated, seatsOf("Kim", "Zhenya", "Sasha"))).toEqual({
       ok: false,
-      problem: "too_many",
+      problem: Problem.TooMany,
     });
   });
 
@@ -132,7 +133,7 @@ describe("tableWithout()", () => {
 
     const result = tableWithout(seats, ["Oleg", "Anya", "Dima"]);
 
-    expect(result).toEqual({ ok: false, problem: "unknown_names", names: ["Dima"] });
+    expect(result).toEqual({ ok: false, problem: Problem.UnknownNames, names: ["Dima"] });
   });
 
   it("should report too_few when removing enough players leaves fewer than MIN_PLAYERS", () => {
@@ -140,7 +141,7 @@ describe("tableWithout()", () => {
 
     const result = tableWithout(seats, ["Oleg"]);
 
-    expect(result).toEqual({ ok: false, problem: "too_few" });
+    expect(result).toEqual({ ok: false, problem: Problem.TooFew });
   });
 
   it("should allow leaving exactly MIN_PLAYERS seated", () => {

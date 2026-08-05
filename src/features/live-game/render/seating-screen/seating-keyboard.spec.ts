@@ -1,3 +1,4 @@
+import { ActionKind } from "#live-game/domain/card-states.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { copy } from "#live-game/copy.en.ts";
 
@@ -92,7 +93,7 @@ describe("renderSeatingKeyboard()", () => {
     expect(encodeSeatingCallbackSpy).toHaveBeenCalledWith({
       order: ORDER,
       placed: ONE_PLACED,
-      action: { kind: "pick", playerId: ANYA.playerId },
+      action: { kind: ActionKind.Pick, playerId: ANYA.playerId },
     });
   });
 
@@ -102,7 +103,7 @@ describe("renderSeatingKeyboard()", () => {
     expect(encodeSeatingCallbackSpy.mock.calls[SECOND_ROW]?.[FIRST_BUTTON]).toEqual({
       order: ORDER,
       placed: NONE_PLACED,
-      action: { kind: "pick", playerId: ROSTER[SECOND_SLOT]?.playerId },
+      action: { kind: ActionKind.Pick, playerId: ROSTER[SECOND_SLOT]?.playerId },
     });
   });
 
@@ -127,7 +128,7 @@ describe("renderSeatingKeyboard()", () => {
     expect(encodeSeatingCallbackSpy).toHaveBeenCalledWith({
       order: ORDER,
       placed: ONE_PLACED,
-      action: { kind: "back" },
+      action: { kind: ActionKind.Back },
     });
   });
 
@@ -137,7 +138,7 @@ describe("renderSeatingKeyboard()", () => {
     expect(encodeSeatingCallbackSpy).toHaveBeenCalledWith({
       order: ORDER,
       placed: NONE_PLACED,
-      action: { kind: "cancel" },
+      action: { kind: ActionKind.Cancel },
     });
   });
 

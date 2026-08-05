@@ -1,3 +1,4 @@
+import { Phase } from "#live-game/domain/card-states.ts";
 import {
   cancelAvailable,
   drawAvailable,
@@ -53,16 +54,16 @@ const controlRow = (state: CardState, gameId: number, version: number): readonly
   };
 
   switch (phase) {
-    case "PICK_STARTER":
+    case Phase.PickStarter:
       return [cancel];
 
-    case "READY":
+    case Phase.Ready:
       return [
         back,
         { text: copy.buttonConfirm, callback_data: encodeCallback({ gameId, action: "confirm", slot: null, version }) },
       ];
 
-    case "RECORDING":
+    case Phase.Recording:
       return [
         back,
         ...(drawAvailable(state)

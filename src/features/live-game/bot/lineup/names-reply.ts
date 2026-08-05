@@ -5,7 +5,13 @@ import { openFromNames } from "#live-game/bot/lineup/lineup-from-names.ts";
 import { joinFromNames, leaveFromNames } from "#live-game/bot/lineup/lineup-from-last-game.ts";
 
 
-type Answered = "lineup" | "joiners" | "leavers";
+const Answered = {
+  Lineup: "lineup",
+  Joiners: "joiners",
+  Leavers: "leavers",
+} as const;
+
+type Answered = (typeof Answered)[keyof typeof Answered];
 
 const PROMPT_OF: Record<Answered, string> = {
   lineup: copy.lineupPrompt,
@@ -38,17 +44,17 @@ export const onNamesReply = async (context: CardContext, ctx: TextMessage): Prom
   }
 
   switch (answered) {
-    case "lineup":
+    case Answered.Lineup:
       await openFromNames(context, ctx, ctx.message.text);
 
       return;
 
-    case "joiners":
+    case Answered.Joiners:
       await joinFromNames(context, ctx);
 
       return;
 
-    case "leavers":
+    case Answered.Leavers:
       await leaveFromNames(context, ctx);
   }
 };

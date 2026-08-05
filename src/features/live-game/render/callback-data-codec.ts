@@ -1,3 +1,6 @@
+import { ActionKind } from "#live-game/domain/card-states.ts";
+
+
 const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 const BASE = 62;
@@ -6,7 +9,7 @@ export const CARD_TAPS = /^([0-9A-Za-z]+):([a-z]):(-|[0-9]+):([0-9]+)$/;
 
 const NO_SLOT = "-";
 
-export type CallbackAction = "pick" | "draw" | "back" | "confirm" | "cancel";
+export type CallbackAction = ActionKind;
 
 const ACTION_CODES: Record<CallbackAction, string> = {
   pick: "p",

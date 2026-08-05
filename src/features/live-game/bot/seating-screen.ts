@@ -1,3 +1,4 @@
+import { Outcome } from "#live-game/domain/card-states.ts";
 import type { CallbackTap, Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import type { Seat } from "#live-game/domain/card-state.ts";
 import { rotateToLowestId } from "#live-game/domain/lineup-parsing.ts";
@@ -104,7 +105,7 @@ export const onSeatingTap = async (context: CardContext, ctx: CallbackTap): Prom
   const transition = applySeating(plan, payload.action);
 
   switch (transition.outcome) {
-    case "updated":
+    case Outcome.Updated:
       await redraw(
         ctx,
         transition.plan,
@@ -113,22 +114,22 @@ export const onSeatingTap = async (context: CardContext, ctx: CallbackTap): Prom
 
       return;
 
-    case "stepped_back":
+    case Outcome.SteppedBack:
       await redraw(ctx, transition.plan, copy.tapBack);
 
       return;
 
-    case "seated":
+    case Outcome.Seated:
       await openSeatedCard(context, ctx, chatId, transition.seats);
 
       return;
 
-    case "cancelled":
+    case Outcome.Cancelled:
       await cancelSeating(context, ctx, chatId);
 
       return;
 
-    case "rejected":
+    case Outcome.Rejected:
       await ctx.answerCallbackQuery(copy.tapNotAllowed);
   }
 };

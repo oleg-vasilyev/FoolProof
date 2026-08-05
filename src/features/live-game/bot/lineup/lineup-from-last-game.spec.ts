@@ -1,3 +1,4 @@
+import { Problem } from "#live-game/domain/refusals.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { playerIdOf, seatRecordsOf } from "#shared/repository/database-records.stub.ts";
@@ -236,7 +237,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should ask who is joining when no names were given", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: "empty" });
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Empty });
 
       const cmd = ctx.command("/next_with");
 
@@ -251,7 +252,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should not open a card when no names were given", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: "empty" });
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Empty });
 
       await onNextWith(context(), ctx.command("/next_with"));
 
@@ -259,7 +260,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should name a repeated joiner the parser rejected", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: "duplicates", names: ["Dima"] });
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Duplicates, names: ["Dima"] });
 
       await onNextWith(context(), ctx.command("/next_with Dima, Dima"));
 
@@ -267,7 +268,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should ask nothing when a joiner is repeated", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: "duplicates", names: ["Dima"] });
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Duplicates, names: ["Dima"] });
 
       await onNextWith(context(), ctx.command("/next_with Dima, Dima"));
 
@@ -329,7 +330,7 @@ describe("a line-up taken from the last game", () => {
 
     it("should refuse a table the joiners would overfill", async () => {
       parseNamesSpy.mockReturnValue({ ok: true, names: ["Dima"] });
-      tableWithSpy.mockReturnValue({ ok: false, problem: "too_many" });
+      tableWithSpy.mockReturnValue({ ok: false, problem: Problem.TooMany });
 
       await onNextWith(context(), ctx.command("/next_with Dima"));
 
@@ -383,7 +384,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should ask who is sitting out when no names were given", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: "empty" });
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Empty });
 
       const cmd = ctx.command("/next_without");
 
@@ -398,7 +399,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should open nothing when no names were given", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: "empty" });
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Empty });
 
       await onNextWithout(context(), ctx.command("/next_without"));
 
@@ -416,7 +417,7 @@ describe("a line-up taken from the last game", () => {
 
     it("should name a leaver who was never at the table", async () => {
       parseNamesSpy.mockReturnValue({ ok: true, names: ["Dima"] });
-      tableWithoutSpy.mockReturnValue({ ok: false, problem: "unknown_names", names: ["Dima"] });
+      tableWithoutSpy.mockReturnValue({ ok: false, problem: Problem.UnknownNames, names: ["Dima"] });
 
       await onNextWithout(context(), ctx.command("/next_without Dima"));
 
@@ -425,7 +426,7 @@ describe("a line-up taken from the last game", () => {
 
     it("should not open a card for a leaver who was never at the table", async () => {
       parseNamesSpy.mockReturnValue({ ok: true, names: ["Dima"] });
-      tableWithoutSpy.mockReturnValue({ ok: false, problem: "unknown_names", names: ["Dima"] });
+      tableWithoutSpy.mockReturnValue({ ok: false, problem: Problem.UnknownNames, names: ["Dima"] });
 
       await onNextWithout(context(), ctx.command("/next_without Dima"));
 
@@ -434,7 +435,7 @@ describe("a line-up taken from the last game", () => {
 
     it("should refuse when too few players would remain", async () => {
       parseNamesSpy.mockReturnValue({ ok: true, names: ["Oleg", "Anya"] });
-      tableWithoutSpy.mockReturnValue({ ok: false, problem: "too_few" });
+      tableWithoutSpy.mockReturnValue({ ok: false, problem: Problem.TooFew });
 
       await onNextWithout(context(), ctx.command("/next_without Oleg, Anya"));
 
@@ -443,7 +444,7 @@ describe("a line-up taken from the last game", () => {
 
     it("should not open a card when too few players would remain", async () => {
       parseNamesSpy.mockReturnValue({ ok: true, names: ["Oleg", "Anya"] });
-      tableWithoutSpy.mockReturnValue({ ok: false, problem: "too_few" });
+      tableWithoutSpy.mockReturnValue({ ok: false, problem: Problem.TooFew });
 
       await onNextWithout(context(), ctx.command("/next_without Oleg, Anya"));
 
@@ -487,7 +488,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should refuse to ask again when the reply names nobody", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: "empty" });
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Empty });
 
       await joinFromNames(context(), ctx.textMessage(""));
 
@@ -496,7 +497,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should name a repeated joiner the parser rejected", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: "duplicates", names: ["Dima"] });
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Duplicates, names: ["Dima"] });
 
       await joinFromNames(context(), ctx.textMessage("Dima, Dima"));
 
@@ -505,7 +506,7 @@ describe("a line-up taken from the last game", () => {
 
     it("should shorten an overlong joiner rather than send it back whole", async () => {
       const whole = ["D".repeat(300)];
-      parseNamesSpy.mockReturnValue({ ok: false, problem: "too_long", names: whole });
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.TooLong, names: whole });
 
       await joinFromNames(context(), ctx.textMessage(whole[0] ?? ""));
 
@@ -540,7 +541,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should refuse to ask again when the reply names nobody", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: "empty" });
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Empty });
 
       await leaveFromNames(context(), ctx.textMessage(""));
 
@@ -549,7 +550,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should name a repeated leaver the parser rejected", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: "duplicates", names: ["Anya"] });
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Duplicates, names: ["Anya"] });
 
       await leaveFromNames(context(), ctx.textMessage("Anya, Anya"));
 

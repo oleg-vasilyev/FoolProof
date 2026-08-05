@@ -1,3 +1,4 @@
+import { ActionKind, Outcome } from "#live-game/domain/card-states.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { cardRecordOf } from "#shared/repository/database-records.stub.ts";
@@ -125,9 +126,9 @@ describe("seating-screen", () => {
     decodeSeatingCallbackSpy.mockReturnValue({
       order: ORDER,
       placed: NONE_PLACED,
-      action: { kind: "pick", playerId: ANYA.id },
+      action: { kind: ActionKind.Pick, playerId: ANYA.id },
     });
-    applySeatingSpy.mockReturnValue({ outcome: "rejected" });
+    applySeatingSpy.mockReturnValue({ outcome: Outcome.Rejected });
   });
 
   describe("askSeating()", () => {
@@ -182,12 +183,12 @@ describe("seating-screen", () => {
       await onSeatingTap(context(), ctx.callbackTap(DATA));
 
       expect(decodeSeatingCallbackSpy).toHaveBeenCalledWith(DATA);
-      expect(applySeatingSpy).toHaveBeenCalledWith(PLAN, { kind: "pick", playerId: ANYA.id });
+      expect(applySeatingSpy).toHaveBeenCalledWith(PLAN, { kind: ActionKind.Pick, playerId: ANYA.id });
     });
 
     it("should redraw the screen and name the seat just taken", async () => {
       applySeatingSpy.mockReturnValue({
-        outcome: "updated",
+        outcome: Outcome.Updated,
         plan: NEXT_PLAN,
         seated: SEATS[1],
         seat: DISTINCTIVE_SEAT,
@@ -203,7 +204,7 @@ describe("seating-screen", () => {
     });
 
     it("should redraw the screen after a step back", async () => {
-      applySeatingSpy.mockReturnValue({ outcome: "stepped_back", plan: NEXT_PLAN });
+      applySeatingSpy.mockReturnValue({ outcome: Outcome.SteppedBack, plan: NEXT_PLAN });
 
       await onSeatingTap(context(), ctx.callbackTap(DATA));
 
@@ -212,7 +213,7 @@ describe("seating-screen", () => {
     });
 
     it("should open the card once the ring is settled, with the deal picked by hand", async () => {
-      applySeatingSpy.mockReturnValue({ outcome: "seated", seats: SEATS });
+      applySeatingSpy.mockReturnValue({ outcome: Outcome.Seated, seats: SEATS });
 
       await onSeatingTap(context(), ctx.callbackTap(DATA));
 
@@ -221,7 +222,7 @@ describe("seating-screen", () => {
     });
 
     it("should leave the settled ring in the chat before the card arrives", async () => {
-      applySeatingSpy.mockReturnValue({ outcome: "seated", seats: SEATS });
+      applySeatingSpy.mockReturnValue({ outcome: Outcome.Seated, seats: SEATS });
 
       await onSeatingTap(context(), ctx.callbackTap(DATA));
 
@@ -231,7 +232,7 @@ describe("seating-screen", () => {
     });
 
     it("should refuse to open a second card when a game started while the screen waited", async () => {
-      applySeatingSpy.mockReturnValue({ outcome: "seated", seats: SEATS });
+      applySeatingSpy.mockReturnValue({ outcome: Outcome.Seated, seats: SEATS });
       repo.liveCardInChatSpy.mockReturnValue(cardRecordOf([OLEG.display_name, ANYA.display_name]));
 
       await onSeatingTap(context(), ctx.callbackTap(DATA));
@@ -244,7 +245,7 @@ describe("seating-screen", () => {
     });
 
     it("should close the screen when it is cancelled, without opening a card", async () => {
-      applySeatingSpy.mockReturnValue({ outcome: "cancelled" });
+      applySeatingSpy.mockReturnValue({ outcome: Outcome.Cancelled });
 
       await onSeatingTap(context(), ctx.callbackTap(DATA));
 
@@ -254,7 +255,7 @@ describe("seating-screen", () => {
     });
 
     it("should take a mistyped joiner away with the cancelled screen", async () => {
-      applySeatingSpy.mockReturnValue({ outcome: "cancelled" });
+      applySeatingSpy.mockReturnValue({ outcome: Outcome.Cancelled });
 
       await onSeatingTap(context(), ctx.callbackTap(DATA));
 
@@ -262,7 +263,7 @@ describe("seating-screen", () => {
     });
 
     it("should keep a joiner the seating did not cancel", async () => {
-      applySeatingSpy.mockReturnValue({ outcome: "seated", seats: SEATS });
+      applySeatingSpy.mockReturnValue({ outcome: Outcome.Seated, seats: SEATS });
 
       await onSeatingTap(context(), ctx.callbackTap(DATA));
 
@@ -277,7 +278,7 @@ describe("seating-screen", () => {
     });
 
     it("should answer every tap exactly once, so the client stops spinning", async () => {
-      applySeatingSpy.mockReturnValue({ outcome: "cancelled" });
+      applySeatingSpy.mockReturnValue({ outcome: Outcome.Cancelled });
 
       await onSeatingTap(context(), ctx.callbackTap(DATA));
 

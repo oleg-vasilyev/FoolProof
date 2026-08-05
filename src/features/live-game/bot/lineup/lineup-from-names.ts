@@ -1,3 +1,4 @@
+import { Problem } from "#live-game/domain/refusals.ts";
 import type { Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import { parseLineup, rotateToLowestId } from "#live-game/domain/lineup-parsing.ts";
 import { LONGEST_NAME, MOST_PLAYERS } from "#live-game/domain/card-state.ts";
@@ -17,19 +18,19 @@ type LineupProblem = Exclude<ReturnType<typeof parseLineup>, { ok: true }>;
 
 const lineupProblemText = (result: LineupProblem): string => {
   switch (result.problem) {
-    case "empty":
+    case Problem.Empty:
       return copy.lineupMissing;
 
-    case "too_few":
+    case Problem.TooFew:
       return copy.lineupTooFew;
 
-    case "too_many":
+    case Problem.TooMany:
       return copy.lineupTooMany(MOST_PLAYERS);
 
-    case "too_long":
+    case Problem.TooLong:
       return copy.nameTooLong(LONGEST_NAME, namePreviews(result.names));
 
-    case "duplicates":
+    case Problem.Duplicates:
       return copy.lineupDuplicates(result.names);
   }
 };
@@ -64,7 +65,7 @@ export const onGame = async (context: CardContext, ctx: Command): Promise<void> 
   const rawText = commandText(ctx);
   const parsed = parseLineup(rawText);
 
-  if (!parsed.ok && parsed.problem === "empty") {
+  if (!parsed.ok && parsed.problem === Problem.Empty) {
     await askForNames(context, ctx, copy.lineupPrompt, copy.lineupPlaceholder);
 
     return;

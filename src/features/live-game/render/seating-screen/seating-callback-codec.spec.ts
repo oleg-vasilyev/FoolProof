@@ -1,3 +1,4 @@
+import { ActionKind } from "#live-game/domain/card-states.ts";
 import { describe, expect, it } from "vitest";
 import { CARD_TAPS, toBase62 } from "#live-game/render/callback-data-codec.ts";
 import {
@@ -37,14 +38,14 @@ describe("encodeSeatingCallback()", () => {
       encodeSeatingCallback({
         order: [ANYA, KIM, OLEG, ROMA],
         placed: TWO_PLACED,
-        action: { kind: "pick", playerId: OLEG },
+        action: { kind: ActionKind.Pick, playerId: OLEG },
       })
     ).toBe("s:7.f.3.C:2:p:3");
   });
 
   it("should give an action with nobody to seat an empty argument", () => {
     expect(
-      encodeSeatingCallback({ order: [OLEG, ANYA], placed: NONE_PLACED, action: { kind: "back" } })
+      encodeSeatingCallback({ order: [OLEG, ANYA], placed: NONE_PLACED, action: { kind: ActionKind.Back } })
     ).toBe("s:3.7:0:b:-");
   });
 
@@ -53,7 +54,7 @@ describe("encodeSeatingCallback()", () => {
       encodeSeatingCallback({
         order: [WIDEST_ID],
         placed: NONE_PLACED,
-        action: { kind: "cancel" },
+        action: { kind: ActionKind.Cancel },
       })
     ).toBe(`s:${toBase62(WIDEST_ID)}:0:x:-`);
   });
@@ -64,7 +65,7 @@ describe("encodeSeatingCallback()", () => {
     const data = encodeSeatingCallback({
       order,
       placed: BIGGEST_TABLE,
-      action: { kind: "pick", playerId: WIDEST_ID },
+      action: { kind: ActionKind.Pick, playerId: WIDEST_ID },
     });
 
     expect(Buffer.byteLength(data)).toBeLessThanOrEqual(CALLBACK_DATA_LIMIT);
@@ -76,7 +77,7 @@ describe("decodeSeatingCallback()", () => {
     const payload = {
       order: [ANYA, KIM, OLEG, ROMA],
       placed: TWO_PLACED,
-      action: { kind: "pick", playerId: OLEG },
+      action: { kind: ActionKind.Pick, playerId: OLEG },
     } as const;
 
     expect(decodeSeatingCallback(encodeSeatingCallback(payload))).toEqual(payload);
@@ -86,7 +87,7 @@ describe("decodeSeatingCallback()", () => {
     expect(decodeSeatingCallback("s:7.f.3.C:2:b:-")).toEqual({
       order: [ANYA, KIM, OLEG, ROMA],
       placed: TWO_PLACED,
-      action: { kind: "back" },
+      action: { kind: ActionKind.Back },
     });
   });
 
@@ -94,7 +95,7 @@ describe("decodeSeatingCallback()", () => {
     expect(decodeSeatingCallback("s:1A.7.2B:0:b:-")).toEqual({
       order: [SHORTENED_ID, ANYA, ANOTHER_SHORTENED_ID],
       placed: NONE_PLACED,
-      action: { kind: "back" },
+      action: { kind: ActionKind.Back },
     });
   });
 
@@ -102,7 +103,7 @@ describe("decodeSeatingCallback()", () => {
     expect(decodeSeatingCallback("s:3.7:0:p:1A")).toEqual({
       order: [OLEG, ANYA],
       placed: NONE_PLACED,
-      action: { kind: "pick", playerId: SHORTENED_ID },
+      action: { kind: ActionKind.Pick, playerId: SHORTENED_ID },
     });
   });
 
@@ -110,7 +111,7 @@ describe("decodeSeatingCallback()", () => {
     expect(decodeSeatingCallback("s:3.7:12:b:-")).toEqual({
       order: [OLEG, ANYA],
       placed: TWELVE_PLACED,
-      action: { kind: "back" },
+      action: { kind: ActionKind.Back },
     });
   });
 
@@ -144,7 +145,7 @@ describe("SEATING_TAPS", () => {
     const data = encodeSeatingCallback({
       order: [OLEG, ANYA],
       placed: NONE_PLACED,
-      action: { kind: "cancel" },
+      action: { kind: ActionKind.Cancel },
     });
 
     expect(SEATING_TAPS.test(data)).toBe(true);
@@ -158,7 +159,7 @@ describe("SEATING_TAPS", () => {
     const data = encodeSeatingCallback({
       order: [OLEG, ANYA],
       placed: NONE_PLACED,
-      action: { kind: "pick", playerId: OLEG },
+      action: { kind: ActionKind.Pick, playerId: OLEG },
     });
 
     expect(CARD_TAPS.test(data)).toBe(false);

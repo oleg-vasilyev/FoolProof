@@ -1,3 +1,4 @@
+import { ActionKind, Outcome } from "#live-game/domain/card-states.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cardRecordOf, playerIdOf } from "#shared/repository/database-records.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
@@ -314,7 +315,7 @@ describe("createCardService()", () => {
 
     beforeEach(() => {
       repo.cardByIdSpy.mockReturnValue(liveCard());
-      applySpy.mockReturnValue({ outcome: "updated", state: stateAfter() });
+      applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter() });
     });
 
     describe("when the card cannot be tapped", () => {
@@ -370,13 +371,13 @@ describe("createCardService()", () => {
       });
 
       it("should refuse a tap the reducer rejected", async () => {
-        applySpy.mockReturnValue({ outcome: "rejected" });
+        applySpy.mockReturnValue({ outcome: Outcome.Rejected });
 
         expect(await cards.tap(payload("pick", OLEG), ACTOR_ID)).toBe(copy.tapNotAllowed);
       });
 
       it("should change nothing when the reducer rejected the tap", async () => {
-        applySpy.mockReturnValue({ outcome: "rejected" });
+        applySpy.mockReturnValue({ outcome: Outcome.Rejected });
 
         await cards.tap(payload("pick", OLEG), ACTOR_ID);
 
@@ -388,13 +389,13 @@ describe("createCardService()", () => {
       it("should carry the slot for a pick", async () => {
         await cards.tap(payload("pick", ROMA), ACTOR_ID);
 
-        expect(applySpy).toHaveBeenCalledWith(expect.anything(), { kind: "pick", slot: ROMA });
+        expect(applySpy).toHaveBeenCalledWith(expect.anything(), { kind: ActionKind.Pick, slot: ROMA });
       });
 
       it("should send a pick without a slot somewhere no seat can be", async () => {
         await cards.tap(payload("pick", null), ACTOR_ID);
 
-        expect(applySpy.mock.calls[0]?.[1]).toEqual({ kind: "pick", slot: -1 });
+        expect(applySpy.mock.calls[0]?.[1]).toEqual({ kind: ActionKind.Pick, slot: -1 });
       });
 
       it.each(["draw", "back", "confirm", "cancel"])(
@@ -439,7 +440,7 @@ describe("createCardService()", () => {
 
     describe("cancelled", () => {
       beforeEach(() => {
-        applySpy.mockReturnValue({ outcome: "cancelled" });
+        applySpy.mockReturnValue({ outcome: Outcome.Cancelled });
       });
 
       it("should delete the row, since a cancelled game is never stored", async () => {
@@ -468,7 +469,7 @@ describe("createCardService()", () => {
 
     describe("confirmed", () => {
       beforeEach(() => {
-        applySpy.mockReturnValue({ outcome: "confirmed" });
+        applySpy.mockReturnValue({ outcome: Outcome.Confirmed });
         remainingSlotsSpy.mockReturnValue([ROMA]);
       });
 
@@ -524,7 +525,7 @@ describe("createCardService()", () => {
 
     describe("updated", () => {
       it("should record a new exit against the player who left", async () => {
-        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [ROMA] }) });
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ exits: [ROMA] }) });
 
         await cards.tap(payload("pick", ROMA), ACTOR_ID);
 
@@ -537,7 +538,7 @@ describe("createCardService()", () => {
       });
 
       it("should not record an exit whose slot has no seat", async () => {
-        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [ROMA] }) });
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ exits: [ROMA] }) });
         seatAtSpy.mockReturnValue(undefined);
 
         await cards.tap(payload("pick", ROMA), ACTOR_ID);
@@ -547,7 +548,7 @@ describe("createCardService()", () => {
 
       it("should drop the last exit when the reducer took one back", async () => {
         repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE, { id: GAME_ID }, [ROMA]));
-        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [] }) });
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ exits: [] }) });
 
         await cards.tap(payload("back", null), ACTOR_ID);
 
@@ -595,14 +596,14 @@ describe("createCardService()", () => {
     describe("what the tapper is told", () => {
       it("should name the starter when one was just picked", async () => {
         repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE, { id: GAME_ID }));
-        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ starterSlot: OLEG }) });
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ starterSlot: OLEG }) });
         nameAtSpy.mockReturnValue("Oleg");
 
         expect(await cards.tap(payload("pick", OLEG), ACTOR_ID)).toBe(copy.tapStarter("Oleg"));
       });
 
       it("should name the player and their place when an exit was recorded", async () => {
-        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [ROMA] }) });
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ exits: [ROMA] }) });
         nameAtSpy.mockReturnValue("Roma");
 
         expect(await cards.tap(payload("pick", ROMA), ACTOR_ID)).toBe(
@@ -611,7 +612,7 @@ describe("createCardService()", () => {
       });
 
       it("should announce a draw when the reducer accepted one", async () => {
-        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ drawAccepted: true }) });
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ drawAccepted: true }) });
 
         expect(await cards.tap(payload("draw", null), ACTOR_ID)).toBe(copy.tapDraw);
       });
@@ -620,7 +621,7 @@ describe("createCardService()", () => {
         repo.cardByIdSpy.mockReturnValue(
           cardRecordOf(THREE, { id: GAME_ID, starter_player_id: playerIdOf(OLEG) }, [ROMA])
         );
-        applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [] }) });
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ exits: [] }) });
 
         expect(await cards.tap(payload("back", null), ACTOR_ID)).toBe(copy.tapBack);
       });
@@ -776,7 +777,7 @@ describe("createCardService()", () => {
     const stateHandedToReducer = () => applySpy.mock.calls[0]?.[0];
 
     beforeEach(() => {
-      applySpy.mockReturnValue({ outcome: "rejected" });
+      applySpy.mockReturnValue({ outcome: Outcome.Rejected });
     });
 
     it("should leave the starter unset when no player dealt yet", async () => {
@@ -854,7 +855,7 @@ describe("createCardService()", () => {
       repo.cardByIdSpy.mockReturnValue(
         cardRecordOf(THREE, { id: GAME_ID, starter_player_id: playerIdOf(OLEG) }, [ANYA])
       );
-      applySpy.mockReturnValue({ outcome: "updated", state: stateAfter({ exits: [ANYA, ROMA] }) });
+      applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ exits: [ANYA, ROMA] }) });
 
       await cards.tap(payload("pick", ROMA), ACTOR_ID);
 
@@ -864,7 +865,7 @@ describe("createCardService()", () => {
     it("should not claim a starter was picked when there still is none", async () => {
       repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE, { id: GAME_ID, starter_player_id: null }));
       applySpy.mockReturnValue({
-        outcome: "updated",
+        outcome: Outcome.Updated,
         state: stateAfter({ starterSlot: null, exits: [] }),
       });
 

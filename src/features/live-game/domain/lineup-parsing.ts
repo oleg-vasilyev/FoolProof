@@ -1,3 +1,4 @@
+import { Problem } from "#live-game/domain/refusals.ts";
 import { LONGEST_NAME, MIN_PLAYERS, MOST_PLAYERS } from "#live-game/domain/card-state.ts";
 
 
@@ -11,14 +12,14 @@ const NOTHING = 0;
 
 export type NamesResult =
   | { readonly ok: true; readonly names: readonly string[] }
-  | { readonly ok: false; readonly problem: "empty" }
-  | { readonly ok: false; readonly problem: "duplicates"; readonly names: readonly string[] }
-  | { readonly ok: false; readonly problem: "too_long"; readonly names: readonly string[] };
+  | { readonly ok: false; readonly problem: typeof Problem.Empty }
+  | { readonly ok: false; readonly problem: typeof Problem.Duplicates; readonly names: readonly string[] }
+  | { readonly ok: false; readonly problem: typeof Problem.TooLong; readonly names: readonly string[] };
 
 export type LineupResult =
   | NamesResult
-  | { readonly ok: false; readonly problem: "too_few" }
-  | { readonly ok: false; readonly problem: "too_many" };
+  | { readonly ok: false; readonly problem: typeof Problem.TooFew }
+  | { readonly ok: false; readonly problem: typeof Problem.TooMany };
 
 export const stripCommand = (text: string): string => text.replace(COMMAND_PREFIX, "");
 
@@ -49,17 +50,17 @@ export const parseNames = (rawText: string): NamesResult => {
     .filter((name) => name.length > NOTHING);
 
   if (names.length === NOTHING) {
-    return { ok: false, problem: "empty" };
+    return { ok: false, problem: Problem.Empty };
   }
 
   const tooLong = overLong(names);
   if (tooLong.length > NOTHING) {
-    return { ok: false, problem: "too_long", names: tooLong };
+    return { ok: false, problem: Problem.TooLong, names: tooLong };
   }
 
   const repeated = duplicatesIn(names);
   if (repeated.length > NOTHING) {
-    return { ok: false, problem: "duplicates", names: repeated };
+    return { ok: false, problem: Problem.Duplicates, names: repeated };
   }
 
   return { ok: true, names };
@@ -73,10 +74,10 @@ export const parseLineup = (rawText: string): LineupResult => {
   }
 
   if (parsed.names.length < MIN_PLAYERS) {
-    return { ok: false, problem: "too_few" };
+    return { ok: false, problem: Problem.TooFew };
   }
 
-  return parsed.names.length > MOST_PLAYERS ? { ok: false, problem: "too_many" } : parsed;
+  return parsed.names.length > MOST_PLAYERS ? { ok: false, problem: Problem.TooMany } : parsed;
 };
 
 export const rotateToLowestId = <T extends { readonly playerId: number }>(

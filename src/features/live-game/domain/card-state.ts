@@ -10,20 +10,18 @@ export interface CardState {
   readonly drawAccepted: boolean;
 }
 
-export type Phase = "PICK_STARTER" | "RECORDING" | "READY";
-
 export type Action =
-  | { readonly kind: "pick"; readonly slot: number }
-  | { readonly kind: "draw" }
-  | { readonly kind: "back" }
-  | { readonly kind: "confirm" }
-  | { readonly kind: "cancel" };
+  | { readonly kind: typeof ActionKind.Pick; readonly slot: number }
+  | { readonly kind: typeof ActionKind.Draw }
+  | { readonly kind: typeof ActionKind.Back }
+  | { readonly kind: typeof ActionKind.Confirm }
+  | { readonly kind: typeof ActionKind.Cancel };
 
 export type Transition =
-  | { readonly outcome: "updated"; readonly state: CardState }
-  | { readonly outcome: "confirmed"; readonly state: CardState }
-  | { readonly outcome: "cancelled" }
-  | { readonly outcome: "rejected" };
+  | { readonly outcome: typeof Outcome.Updated; readonly state: CardState }
+  | { readonly outcome: typeof Outcome.Confirmed; readonly state: CardState }
+  | { readonly outcome: typeof Outcome.Cancelled }
+  | { readonly outcome: typeof Outcome.Rejected };
 
 export interface Placement {
   readonly slot: number;
@@ -62,7 +60,7 @@ export const phaseOf = (state: CardState): Phase => {
 };
 
 export const drawAvailable = (state: CardState): boolean =>
-  phaseOf(state) === "RECORDING" && remainingSlots(state).length === PLAYERS_SHARING_A_DRAW;
+  phaseOf(state) === Phase.Recording && remainingSlots(state).length === PLAYERS_SHARING_A_DRAW;
 
 export const recordedPlacements = (state: CardState): readonly Placement[] =>
   state.exits.map((slot, index) => ({ slot, position: index + 1 }));
@@ -99,20 +97,20 @@ const steppedBack = (state: CardState): CardState => {
 
 const picked = (state: CardState, phase: Phase, slot: number): Transition => {
   if (!isSlot(state, slot)) {
-    return { outcome: "rejected" };
+    return { outcome: Outcome.Rejected };
   }
 
   switch (phase) {
-    case "PICK_STARTER":
-      return { outcome: "updated", state: { ...state, starterSlot: slot } };
+    case Phase.PickStarter:
+      return { outcome: Outcome.Updated, state: { ...state, starterSlot: slot } };
 
-    case "RECORDING":
+    case Phase.Recording:
       return state.exits.includes(slot)
-        ? { outcome: "rejected" }
-        : { outcome: "updated", state: { ...state, exits: [...state.exits, slot] } };
+        ? { outcome: Outcome.Rejected }
+        : { outcome: Outcome.Updated, state: { ...state, exits: [...state.exits, slot] } };
 
-    case "READY":
-      return { outcome: "rejected" };
+    case Phase.Ready:
+      return { outcome: Outcome.Rejected };
   }
 };
 
@@ -120,23 +118,24 @@ export const apply = (state: CardState, action: Action): Transition => {
   const phase = phaseOf(state);
 
   switch (action.kind) {
-    case "cancel":
-      return cancelAvailable(state) ? { outcome: "cancelled" } : { outcome: "rejected" };
+    case ActionKind.Cancel:
+      return cancelAvailable(state) ? { outcome: Outcome.Cancelled } : { outcome: Outcome.Rejected };
 
-    case "confirm":
-      return phase === "READY" ? { outcome: "confirmed", state } : { outcome: "rejected" };
+    case ActionKind.Confirm:
+      return phase === Phase.Ready ? { outcome: Outcome.Confirmed, state } : { outcome: Outcome.Rejected };
 
-    case "back":
-      return phase === "PICK_STARTER"
-        ? { outcome: "rejected" }
-        : { outcome: "updated", state: steppedBack(state) };
+    case ActionKind.Back:
+      return phase === Phase.PickStarter
+        ? { outcome: Outcome.Rejected }
+        : { outcome: Outcome.Updated, state: steppedBack(state) };
 
-    case "draw":
+    case ActionKind.Draw:
       return drawAvailable(state)
-        ? { outcome: "updated", state: { ...state, drawAccepted: true } }
-        : { outcome: "rejected" };
+        ? { outcome: Outcome.Updated, state: { ...state, drawAccepted: true } }
+        : { outcome: Outcome.Rejected };
 
-    case "pick":
+    case ActionKind.Pick:
       return picked(state, phase, action.slot);
   }
-};
+};import { ActionKind, Outcome, Phase } from "#live-game/domain/card-states.ts";
+

@@ -1,3 +1,4 @@
+import { Problem } from "#live-game/domain/refusals.ts";
 import type { LastGame } from "#shared/repository/repository-contract.ts";
 import type { Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import { parseNames, rotateToLowestId, type NamesResult } from "#live-game/domain/lineup-parsing.ts";
@@ -48,26 +49,26 @@ const LEAVERS: Question = {
 
 const namesProblemText = (problem: NamesProblem, missing: string): string => {
   switch (problem.problem) {
-    case "empty":
+    case Problem.Empty:
       return missing;
 
-    case "too_long":
+    case Problem.TooLong:
       return copy.nameTooLong(LONGEST_NAME, namePreviews(problem.names));
 
-    case "duplicates":
+    case Problem.Duplicates:
       return copy.lineupDuplicates(problem.names);
   }
 };
 
 const tableProblemText = (change: Exclude<TableChange, { ok: true }>): string => {
   switch (change.problem) {
-    case "unknown_names":
+    case Problem.UnknownNames:
       return copy.notAtTable(change.names);
 
-    case "too_few":
+    case Problem.TooFew:
       return copy.lineupTooFew;
 
-    case "too_many":
+    case Problem.TooMany:
       return copy.lineupTooMany(MOST_PLAYERS);
   }
 };
@@ -102,7 +103,7 @@ const askedOrRefused = async (
   problem: NamesProblem,
   question: Question
 ): Promise<void> => {
-  if (problem.problem === "empty") {
+  if (problem.problem === Problem.Empty) {
     await askForNames(context, ctx, question.asked, question.placeholder);
 
     return;

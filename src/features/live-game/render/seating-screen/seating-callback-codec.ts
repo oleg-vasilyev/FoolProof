@@ -1,3 +1,4 @@
+import { ActionKind } from "#live-game/domain/card-states.ts";
 import { fromBase62, toBase62 } from "#live-game/render/callback-data-codec.ts";
 import type { SeatingAction } from "#live-game/domain/seating-plan.ts";
 
@@ -14,10 +15,10 @@ const ACTION_CODES = {
   cancel: "x",
 } as const;
 
-type ActionKind = SeatingAction["kind"];
+type SeatingActionKind = SeatingAction["kind"];
 
-const KINDS_BY_CODE = new Map<string, ActionKind>(
-  Object.entries(ACTION_CODES).map(([kind, code]) => [code, kind as ActionKind])
+const KINDS_BY_CODE = new Map<string, SeatingActionKind>(
+  Object.entries(ACTION_CODES).map(([kind, code]) => [code, kind as SeatingActionKind])
 );
 
 export interface SeatingPayload {
@@ -27,10 +28,10 @@ export interface SeatingPayload {
 }
 
 const argOf = (action: SeatingAction): string =>
-  action.kind === "pick" ? toBase62(action.playerId) : NOTHING;
+  action.kind === ActionKind.Pick ? toBase62(action.playerId) : NOTHING;
 
-const actionOf = (kind: ActionKind, arg: string): SeatingAction | null => {
-  if (kind !== "pick") {
+const actionOf = (kind: SeatingActionKind, arg: string): SeatingAction | null => {
+  if (kind !== ActionKind.Pick) {
     return { kind };
   }
 

@@ -1,3 +1,4 @@
+import { ActionKind, Outcome } from "#live-game/domain/card-states.ts";
 import type { Seat } from "#live-game/domain/card-state.ts";
 
 
@@ -7,21 +8,21 @@ export interface SeatingPlan {
 }
 
 export type SeatingAction =
-  | { readonly kind: "pick"; readonly playerId: number }
-  | { readonly kind: "back" }
-  | { readonly kind: "cancel" };
+  | { readonly kind: typeof ActionKind.Pick; readonly playerId: number }
+  | { readonly kind: typeof ActionKind.Back }
+  | { readonly kind: typeof ActionKind.Cancel };
 
 export type SeatingTransition =
   | {
-      readonly outcome: "updated";
+      readonly outcome: typeof Outcome.Updated;
       readonly plan: SeatingPlan;
       readonly seated: Seat;
       readonly seat: number;
     }
-  | { readonly outcome: "stepped_back"; readonly plan: SeatingPlan }
-  | { readonly outcome: "seated"; readonly seats: readonly Seat[] }
-  | { readonly outcome: "cancelled" }
-  | { readonly outcome: "rejected" };
+  | { readonly outcome: typeof Outcome.SteppedBack; readonly plan: SeatingPlan }
+  | { readonly outcome: typeof Outcome.Seated; readonly seats: readonly Seat[] }
+  | { readonly outcome: typeof Outcome.Cancelled }
+  | { readonly outcome: typeof Outcome.Rejected };
 
 const NONE_PLACED = 0;
 
@@ -40,7 +41,7 @@ const seatedNext = (plan: SeatingPlan, playerId: number): SeatingTransition => {
   const picked = unplaced[among];
 
   if (picked === undefined) {
-    return { outcome: "rejected" };
+    return { outcome: Outcome.Rejected };
   }
 
   const roster = [
@@ -51,9 +52,9 @@ const seatedNext = (plan: SeatingPlan, playerId: number): SeatingTransition => {
   const placed = plan.placed + ONE_SEAT;
 
   return placed >= roster.length - LAST_IS_FORCED
-    ? { outcome: "seated", seats: roster }
+    ? { outcome: Outcome.Seated, seats: roster }
     : {
-        outcome: "updated",
+        outcome: Outcome.Updated,
         plan: { roster, placed },
         seated: picked,
         seat: seatNumber(plan.placed),
@@ -62,18 +63,18 @@ const seatedNext = (plan: SeatingPlan, playerId: number): SeatingTransition => {
 
 const steppedBack = (plan: SeatingPlan): SeatingTransition =>
   plan.placed === NONE_PLACED
-    ? { outcome: "rejected" }
-    : { outcome: "stepped_back", plan: { ...plan, placed: plan.placed - ONE_SEAT } };
+    ? { outcome: Outcome.Rejected }
+    : { outcome: Outcome.SteppedBack, plan: { ...plan, placed: plan.placed - ONE_SEAT } };
 
 export const applySeating = (plan: SeatingPlan, action: SeatingAction): SeatingTransition => {
   switch (action.kind) {
-    case "cancel":
-      return { outcome: "cancelled" };
+    case ActionKind.Cancel:
+      return { outcome: Outcome.Cancelled };
 
-    case "back":
+    case ActionKind.Back:
       return steppedBack(plan);
 
-    case "pick":
+    case ActionKind.Pick:
       return seatedNext(plan, action.playerId);
   }
 };

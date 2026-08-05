@@ -1,3 +1,4 @@
+import { ActionKind, Outcome, Phase } from "#live-game/domain/card-states.ts";
 import type { Api } from "grammy";
 import { createDebouncer, type Debouncer } from "#shared/timing/debounce.ts";
 import type { Logger } from "#shared/logging/logger.ts";
@@ -68,10 +69,16 @@ interface Tap {
   readonly gameNumber: number;
 }
 
+const TapTarget = {
+  Tappable: "tappable",
+  Gone: "gone",
+  Outrun: "outrun",
+} as const;
+
 type CardLookup =
-  | { readonly kind: "tappable"; readonly card: CardRecord }
-  | { readonly kind: "gone" }
-  | { readonly kind: "outrun"; readonly card: CardRecord };
+  | { readonly kind: typeof TapTarget.Tappable; readonly card: CardRecord }
+  | { readonly kind: typeof TapTarget.Gone }
+  | { readonly kind: typeof TapTarget.Outrun; readonly card: CardRecord };
 
 const toCardState = (card: CardRecord): CardState => {
   const seats = card.seats.map((seat) => ({
@@ -96,27 +103,27 @@ const toCardState = (card: CardRecord): CardState => {
     seats,
     starterSlot,
     exits,
-    drawAccepted: card.game.state === "READY" && seats.length - exits.length > 1,
+    drawAccepted: card.game.state === Phase.Ready && seats.length - exits.length > 1,
   };
 };
 
 const toAction = (payload: CallbackPayload): Action =>
   payload.action === "pick"
-    ? { kind: "pick", slot: payload.slot ?? NO_SLOT }
+    ? { kind: ActionKind.Pick, slot: payload.slot ?? NO_SLOT }
     : { kind: payload.action };
 
 const findTappableCard = (repo: CardRepository, payload: CallbackPayload): CardLookup => {
   const card = repo.cardById(payload.gameId);
 
   if (card === null || card.game.confirmed_at !== null) {
-    return { kind: "gone" };
+    return { kind: TapTarget.Gone };
   }
 
   if (card.game.state_version !== payload.version) {
-    return { kind: "outrun", card };
+    return { kind: TapTarget.Outrun, card };
   }
 
-  return { kind: "tappable", card };
+  return { kind: TapTarget.Tappable, card };
 };
 
 const noticeFor = (before: CardState, after: CardState): string => {
@@ -304,16 +311,16 @@ const tapKnownCard = async (
   };
 
   switch (transition.outcome) {
-    case "rejected":
+    case Outcome.Rejected:
       return copy.tapNotAllowed;
 
-    case "cancelled":
+    case Outcome.Cancelled:
       return cancelCard(context, tap);
 
-    case "confirmed":
+    case Outcome.Confirmed:
       return confirmCard(context, tap);
 
-    case "updated":
+    case Outcome.Updated:
       return advanceCard(context, tap, transition.state);
   }
 };
@@ -326,13 +333,13 @@ const tapCard = async (
   const lookup = findTappableCard(context.repo, payload);
 
   switch (lookup.kind) {
-    case "gone":
+    case TapTarget.Gone:
       return copy.cardGone;
 
-    case "outrun":
+    case TapTarget.Outrun:
       return repairOutrunCard(context, lookup.card);
 
-    case "tappable":
+    case TapTarget.Tappable:
       return tapKnownCard(context, lookup.card, payload, actorTgId);
   }
 };
