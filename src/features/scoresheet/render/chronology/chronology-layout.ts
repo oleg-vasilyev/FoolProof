@@ -43,12 +43,38 @@ const INDEX_FONT_RATIO = 0.42;
 
 const LEGEND_FONT_RATIO = 0.11;
 
+const NAME_ADVANCE = 0.58;
+
+const NAME_MIN_SIZE = 14;
+
+const ELLIPSIS = "…";
+
 export const cellFontOf = (rowHeight: number): number => Math.round(rowHeight * CELL_FONT_RATIO);
 
 export const indexFontOf = (rowHeight: number): number => Math.round(rowHeight * INDEX_FONT_RATIO);
 
 export const legendFontOf = (slotWidth: number): number =>
   Math.min(fontSize.legend, Math.round(slotWidth * LEGEND_FONT_RATIO));
+
+export interface FittedName {
+  readonly text: string;
+  readonly size: number;
+}
+
+export const nameToFit = (name: string, width: number, largest: number): FittedName => {
+  const wanted = width / (name.length * NAME_ADVANCE);
+
+  if (wanted >= NAME_MIN_SIZE) {
+    return { text: name, size: Math.min(largest, wanted) };
+  }
+
+  const fits = Math.floor(width / (NAME_MIN_SIZE * NAME_ADVANCE));
+
+  return {
+    text: `${name.slice(0, Math.max(fits - ELLIPSIS.length, 0))}${ELLIPSIS}`,
+    size: NAME_MIN_SIZE,
+  };
+};
 
 export interface Sheet {
   readonly startedOn: string;

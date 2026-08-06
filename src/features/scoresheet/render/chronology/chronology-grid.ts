@@ -1,6 +1,6 @@
 import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import { type Cell } from "#scoresheet/domain/scoring.ts";
-import { CELL_INSET, CELL_SHRINK, GRID_LEFT, GRID_TOP, cellFontOf, columnCentre, indexFontOf, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
+import { CELL_INSET, CELL_SHRINK, GRID_LEFT, GRID_TOP, cellFontOf, columnCentre, indexFontOf, nameToFit, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
 import { rect, text } from "#scoresheet/render/svg-tags.ts";
@@ -8,9 +8,7 @@ import { rect, text } from "#scoresheet/render/svg-tags.ts";
 
 const NAME_LIFT = 30;
 
-const NAME_ADVANCE = 0.58;
-
-const NAME_MIN_SIZE = 14;
+const NAME_GUTTER = 20;
 
 const BASELINE_RATIO = 0.68;
 
@@ -36,24 +34,20 @@ const fillFor = (cell: Cell): string => {
 
 const captionFor = (cell: Cell): string => (cell.kind === CellKind.Absent ? "" : String(cell.position));
 
-const nameSizeFor = (sheet: Sheet, name: string): number =>
-  Math.max(
-    NAME_MIN_SIZE,
-    Math.min(fontSize.columnName, sheet.columnWidth / (name.length * NAME_ADVANCE))
-  );
-
 export const columnNames = (sheet: Sheet): readonly string[] =>
-  sheet.players.map((player, column) =>
-    text(player.displayName, {
+  sheet.players.map((player, column) => {
+    const fitted = nameToFit(player.displayName, sheet.columnWidth - NAME_GUTTER, fontSize.columnName);
+
+    return text(fitted.text, {
       x: columnCentre(sheet, column),
       y: GRID_TOP - NAME_LIFT,
       fill: colourFor(column),
       "font-family": FONT_FAMILY,
       "font-weight": "bold",
-      "font-size": nameSizeFor(sheet, player.displayName),
+      "font-size": fitted.size,
       "text-anchor": "middle",
-    })
-  );
+    });
+  });
 
 const rowIndex = (sheet: Sheet, round: number): string =>
   text(String(round + 1).padStart(INDEX_DIGITS, "0"), {

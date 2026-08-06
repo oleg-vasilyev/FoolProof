@@ -129,6 +129,9 @@ Listed so nobody "fixes" them:
   the copy rule exists so a second locale is a small change, which a percent sign is
   not. Two review passes have now had to decide this independently, which is why it
   is written down.
+- **`chronology-layout.ts` puts the truncation `…` outside the copy table**, for the
+  same reason as the `%`: it marks that a name was cut to fit its column, and no
+  language spells that differently.
 - **`merge-callback-codec.spec.ts` imports `MOST_NAMES_AT_ONCE` from the domain**
   instead of mocking it, which every other spec would. The case it serves — that a
   full selection still fits in 64 bytes — is meaningless against a mocked cap: it

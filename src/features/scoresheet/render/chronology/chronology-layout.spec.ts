@@ -36,6 +36,7 @@ const {
   indexFontOf,
   layoutOf,
   legendFontOf,
+  nameToFit,
 } = await import("#scoresheet/render/chronology/chronology-layout.ts");
 
 const TELEGRAM_LONG_SIDE_LIMIT = 2560;
@@ -346,5 +347,74 @@ describe("legendFontOf()", () => {
     const DESIGN_SIZE = 30;
 
     expect(legendFontOf(WIDE_SLOT)).toBe(DESIGN_SIZE);
+  });
+});
+
+describe("nameToFit()", () => {
+  const DESIGN_SIZE = 32;
+
+  const COLUMN = 200;
+
+  const ADVANCE = 0.58;
+
+  const MINIMUM = 14;
+
+  const widthOf = (fitted: { text: string; size: number }): number =>
+    fitted.text.length * fitted.size * ADVANCE;
+
+  it("should leave a short name alone", () => {
+    expect(nameToFit("Al", COLUMN, DESIGN_SIZE).text).toBe("Al");
+  });
+
+  it("should not blow a short name up past the design size", () => {
+    expect(nameToFit("Al", COLUMN, DESIGN_SIZE).size).toBe(DESIGN_SIZE);
+  });
+
+  it("should shrink a name that would not fit rather than let it overflow", () => {
+    const long = "Konstantinovna";
+
+    expect(nameToFit(long, COLUMN, DESIGN_SIZE).size).toBeLessThan(DESIGN_SIZE);
+  });
+
+  it("should size that name so it spans the width it was given", () => {
+    const long = "Konstantinovna";
+
+    expect(widthOf(nameToFit(long, COLUMN, DESIGN_SIZE))).toBeCloseTo(COLUMN);
+  });
+
+  it("should keep an absurd name legible rather than shrinking it to nothing", () => {
+    const absurd = "x".repeat(200);
+
+    expect(nameToFit(absurd, COLUMN, DESIGN_SIZE).size).toBe(MINIMUM);
+  });
+
+  it("should cut an absurd name short rather than run it past the width", () => {
+    const absurd = "x".repeat(200);
+
+    expect(widthOf(nameToFit(absurd, COLUMN, DESIGN_SIZE))).toBeLessThanOrEqual(COLUMN);
+  });
+
+  it("should mark a cut name with an ellipsis, so nobody reads it as the whole name", () => {
+    const absurd = "x".repeat(200);
+
+    expect(nameToFit(absurd, COLUMN, DESIGN_SIZE).text.endsWith("…")).toBe(true);
+  });
+
+  it("should never cut a name that fits", () => {
+    expect(nameToFit("Konstantinovna", COLUMN, DESIGN_SIZE).text).toBe("Konstantinovna");
+  });
+
+  it("should fit the longest name a player may have into the narrowest legend slot", () => {
+    const LONGEST_NAME = 32;
+
+    const NARROWEST_SLOT = 120;
+
+    const fitted = nameToFit("x".repeat(LONGEST_NAME), NARROWEST_SLOT, DESIGN_SIZE);
+
+    expect(widthOf(fitted)).toBeLessThanOrEqual(NARROWEST_SLOT);
+  });
+
+  it("should cope with a name of no length at all", () => {
+    expect(nameToFit("", COLUMN, DESIGN_SIZE)).toEqual({ text: "", size: DESIGN_SIZE });
   });
 });

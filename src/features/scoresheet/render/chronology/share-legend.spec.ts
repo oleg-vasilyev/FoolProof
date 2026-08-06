@@ -45,6 +45,8 @@ const gameTallySpy = vi.fn();
 
 const legendFontOfSpy = vi.fn();
 
+const nameToFitSpy = vi.fn();
+
 vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
   FONT_FAMILY: "Test Sans",
   PLOT_LEFT,
@@ -52,6 +54,7 @@ vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
   chartBottomOf: (sheet: { chartTop: number }) => sheet.chartTop + CHART_HEIGHT,
   fontSize: { legend: LEGEND_FONT, legendTally: TALLY_FONT },
   legendFontOf: (slotWidth: number) => legendFontOfSpy(slotWidth),
+  nameToFit: (name: string, width: number, largest: number) => nameToFitSpy(name, width, largest),
 }));
 
 vi.mock("#scoresheet/render/palette.ts", () => ({
@@ -121,6 +124,11 @@ const attributesOfText = (value: string): Record<string, unknown> =>
 describe("shareLegend()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    nameToFitSpy.mockImplementation((name: string, _width: number, largest: number) => ({
+      text: name,
+      size: largest,
+    }));
 
     lineSpy.mockImplementation(() => "<line/>");
     textSpy.mockImplementation(() => "<text/>");

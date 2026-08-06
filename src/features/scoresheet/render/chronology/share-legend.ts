@@ -1,5 +1,5 @@
 import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
-import { PLOT_LEFT, PLOT_WIDTH, chartBottomOf, legendFontOf, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
+import { PLOT_LEFT, PLOT_WIDTH, chartBottomOf, legendFontOf, nameToFit, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
@@ -29,6 +29,8 @@ const SAMPLE_LIFT = 7;
 
 const LEGEND_SLOT_MAX = 284;
 
+const LEGEND_GUTTER = 24;
+
 const TALLY_FONT_RATIO = fontSize.legendTally / fontSize.legend;
 
 const slotWidthOf = (sheet: Sheet): number =>
@@ -48,6 +50,7 @@ const entryOf = (
   const left = PLOT_LEFT + rank * slotWidth;
   const baseline = chartBottomOf(sheet) + LEGEND_DROP;
   const size = legendFontOf(slotWidth);
+  const fitted = nameToFit(player.displayName, slotWidth - LEGEND_GUTTER, size);
 
   return [
     text(percentLabel(player.share), {
@@ -58,13 +61,13 @@ const entryOf = (
       "font-weight": "bold",
       "font-size": size,
     }),
-    text(player.displayName, {
+    text(fitted.text, {
       x: left,
       y: chartBottomOf(sheet) + LEGEND_NAME_DROP,
       fill: colourFor(column),
       "font-family": FONT_FAMILY,
       "font-weight": "bold",
-      "font-size": size,
+      "font-size": fitted.size,
     }),
     text(gameTally(copy, player.games), {
       x: left,

@@ -22,6 +22,14 @@ const textSpy = vi.fn();
 
 const colourForSpy = vi.fn();
 
+const nameToFitSpy = vi.fn();
+
+const FITTED_TEXT = "the-fitted-name";
+
+const FITTED_SIZE = 19;
+
+const NAME_GUTTER = 20;
+
 vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
   CELL_INSET: 2,
   CELL_SHRINK: 4,
@@ -32,6 +40,7 @@ vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
   columnCentre: (_sheet: unknown, column: number) =>
     GRID_LEFT + column * COLUMN_WIDTH + COLUMN_WIDTH / 2,
   fontSize: { columnName: 32 },
+  nameToFit: (name: string, width: number, largest: number) => nameToFitSpy(name, width, largest),
   indexFontOf: () => INDEX_FONT,
 }));
 
@@ -95,6 +104,8 @@ describe("chronology", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    nameToFitSpy.mockImplementation((name: string) => ({ text: name, size: FITTED_SIZE }));
+
     rectSpy.mockImplementation(() => "<rect/>");
     textSpy.mockImplementation(() => "<text/>");
     colourForSpy.mockImplementation((column: number) => `colour-${String(column)}`);
@@ -125,30 +136,25 @@ describe("chronology", () => {
       expect(attributesOfText("P1").x).toBe(GRID_LEFT + COLUMN_WIDTH + COLUMN_WIDTH / 2);
     });
 
-    it("should shrink a name that would not fit its column", () => {
-      const long = "Alexandrina-Konstantinovna";
-      columnNames(sheetOf([[]], [long]));
-
-      expect(Number(attributesOfText(long)["font-size"])).toBeLessThan(
-        Number(attributesOfText("P0")["font-size"] ?? Number.MAX_SAFE_INTEGER)
-      );
-    });
-
-    it("should not blow a short name up past the design size", () => {
+    it("should ask for each name to be fitted to its own column", () => {
       const DESIGN_SIZE = 32;
-      columnNames(sheetOf([[]], ["Al"]));
+      columnNames(sheetOf([[]], ["Konstantinovna"]));
 
-      expect(Number(attributesOfText("Al")["font-size"])).toBe(DESIGN_SIZE);
+      expect(nameToFitSpy).toHaveBeenCalledWith("Konstantinovna", COLUMN_WIDTH - NAME_GUTTER, DESIGN_SIZE);
     });
 
-    it("should size a long name so it spans the column rather than overflowing it", () => {
-      const fifteen = "Konstantinovna";
-      const ADVANCE = 0.58;
-      columnNames(sheetOf([[]], [fifteen]));
+    it("should print whatever came back fitted, not the name it was given", () => {
+      nameToFitSpy.mockReturnValue({ text: FITTED_TEXT, size: FITTED_SIZE });
+      columnNames(sheetOf([[]], ["Konstantinovna"]));
 
-      expect(Number(attributesOfText(fifteen)["font-size"])).toBeCloseTo(
-        COLUMN_WIDTH / (fifteen.length * ADVANCE)
-      );
+      expect(printed()).toEqual([FITTED_TEXT]);
+    });
+
+    it("should set it at the size that came back with it", () => {
+      nameToFitSpy.mockReturnValue({ text: FITTED_TEXT, size: FITTED_SIZE });
+      columnNames(sheetOf([[]], ["Konstantinovna"]));
+
+      expect(Number(attributesOfText(FITTED_TEXT)["font-size"])).toBe(FITTED_SIZE);
     });
 
     it("should centre the heading over its column", () => {
@@ -163,13 +169,6 @@ describe("chronology", () => {
       expect(attributesOfText("P0")["font-weight"]).toBe("bold");
     });
 
-    it("should keep a very long name legible rather than shrinking to nothing", () => {
-      const MINIMUM = 14;
-      const absurd = "x".repeat(200);
-      columnNames(sheetOf([[]], [absurd]));
-
-      expect(Number(attributesOfText(absurd)["font-size"])).toBe(MINIMUM);
-    });
   });
 
   describe("chronologyGrid()", () => {
