@@ -40,20 +40,20 @@ export const copy = {
 
   helpGame: "/game Oleg, Anya, Roma — open a game; the list is the seating order around the table",
   helpNext:
-    "/next — another game with the same line-up; the fool is attacked first, so their neighbour deals",
+    "/next — another game with the same line-up; the fool is attacked first, so their neighbour goes first",
   helpNextWith:
-    "/next_with Zhenya, Sasha — the same line-up plus these; you then tap everyone in seating order, and the deal is picked by hand",
+    "/next_with Zhenya, Sasha — the same line-up plus these; you then tap everyone in seating order, and who goes first is picked by hand",
   helpNextWithout:
-    "/next_without Oleg — the same line-up minus these; deal is picked by hand",
+    "/next_without Oleg — the same line-up minus these; who goes first is picked by hand",
   helpCard: [
-    "Tap a name to record who dealt first, then tap players in the order they go out.",
+    "Tap a name to record who went first, then tap players in the order they go out.",
     "The last one left is the fool and gets marked for you. Draw appears once two players",
     "are left. Back undoes one step at a time, and nothing is recorded until you tap Confirm.",
   ],
 
   header: (gameNumber: number) => `<b>Game ${gameNumber}</b>`,
-  askStarter: "Who dealt first?",
-  dealtFirst: (name: string) => `Dealt first: <b>${name}</b>`,
+  askStarter: "Who went first?",
+  wentFirst: (name: string) => `Went first: <b>${name}</b>`,
 
   resultPlace: (position: number, name: string) => `${position} · ${name}`,
   resultFool: (position: number, name: string) => `${position} · <b>${name}</b> — fool`,
@@ -71,7 +71,7 @@ export const copy = {
 
   tapSeated: (name: string, seat: number) => `${name} — seat ${seat}`,
   tapRecorded: (name: string, position: number) => `${name} — ${position}`,
-  tapStarter: (name: string) => `${name} dealt first`,
+  tapStarter: (name: string) => `${name} went first`,
   tapDraw: "Draw",
   tapBack: "Undone",
   tapNotAllowed: "Not available right now",

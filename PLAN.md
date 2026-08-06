@@ -18,7 +18,7 @@ belongs in a commit.
 ## Purpose
 
 The bot lives in a group chat of friends. It records games of Podkidnoy Durak:
-who dealt first, in what order players went out, who was left the fool. It reports
+who went first, in what order players went out, who was left the fool. It reports
 statistics for the session and for arbitrary periods.
 
 The key constraint: input happens on a Friday evening, on a phone, one-handed,
@@ -186,15 +186,15 @@ None of this is validation for its own sake. Each one is a refusal the bot can
 explain, in place of a table nobody can read, a message Telegram will not send, or a
 player nobody can see.
 
-### Who deals first, and who decides
+### Who goes first, and who decides
 
-At a new table nobody can know: the deal goes to whoever drew the lowest trump,
-which happens in the room. So `/game` asks, and phase 1 exists.
+At a new table nobody can know: the first move goes to whoever drew the lowest
+trump, which happens in the room. So `/game` asks, and phase 1 exists.
 
 At a table that has just played, the house rule decides it and the bot can apply
 it. The fool is attacked first, so the player seated **immediately before them**
-deals the next game — one seat back in the ring, wrapping past the start.
-A `/next` card therefore opens already in `RECORDING`, with the deal shown.
+opens the next game — one seat back in the ring, wrapping past the start.
+A `/next` card therefore opens already in `RECORDING`, with that player shown.
 
 It asks anyway whenever it cannot name one loser. A game closed with Draw leaves
 two players sharing last place, and a game confirmed with nothing recorded leaves
@@ -383,7 +383,7 @@ what the keyboard cannot: which game this is and who dealt.
 
 ```
 <b>Game 3</b>
-Dealt first: <b>Oleg</b>
+Went first: <b>Oleg</b>
 ```
 
 **And it stops changing once the starter is picked.** A progress line and a
@@ -397,7 +397,7 @@ keyboard disappears and the text becomes the only record left in the chat:
 
 ```
 <b>Game 3</b>
-Dealt first: <b>Oleg</b>
+Went first: <b>Oleg</b>
 
 1 · Oleg
 2 · Roma

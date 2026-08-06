@@ -209,7 +209,7 @@ describe("merging one name into another", () => {
     expect(repo.cardById(gameId)?.exits.map((exit) => exit.player_id)).toContain(keeper);
   });
 
-  it("should hand over who dealt first", () => {
+  it("should hand over who went first", () => {
     const { keeper, typo, gameId } = seedTypo();
 
     repo.mergePlayers(keeper, [typo]);

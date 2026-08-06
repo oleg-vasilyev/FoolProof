@@ -78,7 +78,7 @@ describeScenario("Back undoes one step and Cancel throws the card away", (chat) 
   it("should undo who dealt on a second Back", async () => {
     await chat.tap("↩️ Back");
 
-    expect(chat.cardText()).toContain("Who dealt first?");
+    expect(chat.cardText()).toContain("Who went first?");
     expect(chat.captions()).toContain("❌ Cancel");
     expect(chat.captions()).not.toContain("↩️ Back");
   });
@@ -105,8 +105,8 @@ describeScenario("/next repeats the line-up", (chat) => {
   });
 
   it("should have dealt to the player sitting before the fool", () => {
-    expect(chat.cardText()).toContain("Dealt first: <b>Roma</b>");
-    expect(chat.cardText()).not.toContain("Who dealt first?");
+    expect(chat.cardText()).toContain("Went first: <b>Roma</b>");
+    expect(chat.cardText()).not.toContain("Who went first?");
   });
 
   it("should leave the chat with nothing still open", async () => {

@@ -26,7 +26,7 @@ describeScenario("a restart mid-game loses nothing", (chat) => {
 
   it("should have kept everything that was confirmed", () => {
     expect(chat.captions()).toContain("✅ 1 Anya");
-    expect(chat.cardText()).toContain("Dealt first: <b>Oleg</b>");
+    expect(chat.cardText()).toContain("Went first: <b>Oleg</b>");
   });
 
   it("should still take taps afterwards", async () => {

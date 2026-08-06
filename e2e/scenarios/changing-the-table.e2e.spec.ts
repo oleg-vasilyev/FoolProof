@@ -24,7 +24,7 @@ describeScenario("somebody arrives, somebody goes home", (chat) => {
   });
 
   it("should ask who dealt, because the table changed", () => {
-    expect(chat.cardText()).toContain("Who dealt first?");
+    expect(chat.cardText()).toContain("Who went first?");
   });
 
   it("should not be swallowed by /next, and should ask where the joiner sits", async () => {
@@ -54,12 +54,12 @@ describeScenario("somebody arrives, somebody goes home", (chat) => {
     expect(chat.captions()).toEqual(["Anya", "Oleg", "Roma", "Kim", "❌ Cancel"]);
   });
 
-  it("should open the card once only the last seat is left, with the deal still to pick", async () => {
+  it("should open the card once only the last seat is left, with the first move still to pick", async () => {
     await chat.tap("Anya");
     await chat.tap("Kim");
     await chat.tap("Oleg");
 
-    expect(chat.cardText()).toContain("Who dealt first?");
+    expect(chat.cardText()).toContain("Who went first?");
     expect(chat.captions()).toEqual(["Oleg", "Roma", "Anya", "Kim", "❌ Cancel"]);
   });
 

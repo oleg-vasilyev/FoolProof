@@ -49,8 +49,8 @@ describeScenario("a name the bot was never meant to be given", (chat) => {
   it("should escape markup reaching the message body rather than obey it", async () => {
     await chat.tap("<b");
 
-    expect(chat.cardText()).toContain("Dealt first: <b>&lt;b</b>");
-    expect(chat.cardText()).not.toContain("Dealt first: <b><b</b>");
+    expect(chat.cardText()).toContain("Went first: <b>&lt;b</b>");
+    expect(chat.cardText()).not.toContain("Went first: <b><b</b>");
   });
 
   it("should refuse a name too long for a button, without echoing the whole thing", async () => {

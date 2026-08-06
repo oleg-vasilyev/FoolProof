@@ -53,7 +53,7 @@ export const copy: Copy = {
 
   header: (gameNumber: number) => `<b>Партия ${gameNumber}</b>`,
   askStarter: "Кто ходил первым?",
-  dealtFirst: (name: string) => `Ходит первым: <b>${name}</b>`,
+  wentFirst: (name: string) => `Ходит первым: <b>${name}</b>`,
 
   resultPlace: (position: number, name: string) => `${position} · ${name}`,
   resultFool: (position: number, name: string) => `${position} · <b>${name}</b> — дурак`,

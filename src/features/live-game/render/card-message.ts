@@ -7,7 +7,7 @@ const nameOf = (state: CardState, slot: number): string => escapeHtml(nameAt(sta
 
 const heading = (copy: Copy, state: CardState, gameNumber: number): readonly string[] => [
   copy.header(gameNumber),
-  copy.dealtFirst(nameOf(state, state.starterSlot ?? 0)),
+  copy.wentFirst(nameOf(state, state.starterSlot ?? 0)),
 ];
 
 const placeLines = (copy: Copy, state: CardState): readonly string[] => {

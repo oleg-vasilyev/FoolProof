@@ -1,7 +1,7 @@
 # FoolProof
 
 A Telegram bot that keeps the score for a group of friends playing Podkidnoy
-Durak. It records who dealt first, the order players went out, and who was left
+Durak. It records who went first, the order players went out, and who was left
 the fool, then reports how the evening went.
 
 Input happens on a Friday night, on a phone, one-handed, between games. So the
@@ -10,7 +10,7 @@ order people finish, and tap Confirm. There is nothing to type after the line-up
 
 ```
 Game 3
-Dealt first: Oleg
+Went first: Oleg
 
 ┌──────────────┬──────────────┐
 │  ✅ 1 Oleg   │  ✅ 2 Roma   │
@@ -27,7 +27,7 @@ Dealt first: Oleg
 |---|---|
 | `/game Oleg, Anya, Roma` | Opens a card. The list is the seating order, clockwise |
 | `/game` | Same, but asks for the names — for when you tapped the command from the menu |
-| `/next` | A new card with the same line-up; the fool's neighbour deals first |
+| `/next` | A new card with the same line-up; the fool's neighbour goes first |
 | `/next_with Zhenya` | The same line-up plus these players; asks for the names if sent without any, then asks where everyone sits |
 | `/next_without Oleg` | The same line-up minus these players; asks the same way |
 | `/stats` | How the current session is going: the chronology, then the awards |

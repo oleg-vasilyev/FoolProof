@@ -59,7 +59,7 @@ describeScenario("/help and the / menu agree", (chat) => {
     expect(chat.lastText()).toContain("/game Oleg, Anya, Roma");
     expect(chat.lastText()).toContain("/next");
     expect(chat.lastText()).toContain("/stats");
-    expect(chat.lastText()).toContain("Tap a name to record who dealt first");
+    expect(chat.lastText()).toContain("Tap a name to record who went first");
   });
 
   it("should never mention the hidden command", () => {

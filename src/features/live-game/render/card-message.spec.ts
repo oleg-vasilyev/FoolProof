@@ -56,7 +56,7 @@ describe("renderCard()", () => {
   it("should ask for the starter before one is picked", () => {
     const rendered = renderCard(copy, stateWith({ starterSlot: null }), GAME_NUMBER);
 
-    expect(linesOf(rendered)).toEqual(["<b>Game 3</b>", "Who dealt first?"]);
+    expect(linesOf(rendered)).toEqual(["<b>Game 3</b>", "Who went first?"]);
   });
 
   it("should name nobody before a starter is picked", () => {
@@ -70,7 +70,7 @@ describe("renderCard()", () => {
 
     const rendered = renderCard(copy, stateWith({ starterSlot: OLEG }), GAME_NUMBER);
 
-    expect(linesOf(rendered)).toEqual(["<b>Game 3</b>", "Dealt first: <b>Oleg</b>"]);
+    expect(linesOf(rendered)).toEqual(["<b>Game 3</b>", "Went first: <b>Oleg</b>"]);
   });
 
   it("should read the name out of the starter's own slot", () => {

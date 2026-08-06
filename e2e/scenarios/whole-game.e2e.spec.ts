@@ -7,16 +7,16 @@ describeScenario("a whole game, from /game to Confirm", (chat) => {
     await chat.say("/game Oleg, Anya, Roma");
 
     expect(chat.cardText()).toContain("Game 1");
-    expect(chat.cardText()).toContain("Who dealt first?");
+    expect(chat.cardText()).toContain("Who went first?");
     expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "❌ Cancel"]);
   });
 
   it("should record who dealt and stop asking", async () => {
     await chat.tap("Oleg");
 
-    expect(chat.lastAnswer()).toBe("Oleg dealt first");
-    expect(chat.cardText()).toContain("Dealt first: <b>Oleg</b>");
-    expect(chat.cardText()).not.toContain("Who dealt first?");
+    expect(chat.lastAnswer()).toBe("Oleg went first");
+    expect(chat.cardText()).toContain("Went first: <b>Oleg</b>");
+    expect(chat.cardText()).not.toContain("Who went first?");
   });
 
   it("should add Back while keeping the card throwable", () => {
@@ -59,7 +59,7 @@ describeScenario("a whole game, from /game to Confirm", (chat) => {
     expect(chat.lastText()).toContain("1 · Anya");
     expect(chat.lastText()).toContain("2 · Roma");
     expect(chat.lastText()).toContain("3 · <b>Oleg</b> — fool");
-    expect(chat.lastText()).toContain("Dealt first: <b>Oleg</b>");
+    expect(chat.lastText()).toContain("Went first: <b>Oleg</b>");
   });
 
   it("should number the next game after it", async () => {
