@@ -12,6 +12,7 @@ beside the code it describes:
 | Closing a phase, running the gates | `finish-phase` skill |
 | Writing or changing any document | `write-a-doc` skill |
 | Writing or changing an e2e scenario | `write-an-e2e-scenario` skill |
+| Changing anything the `/stats` picture draws | `sync-the-mockups` skill |
 | Changing the e2e harness itself | [`e2e/README.md`](e2e/README.md) |
 
 Four documents, one job each:
@@ -34,7 +35,8 @@ behaviour and this file wins on style.
 That rule has needed enforcing twice, so it is now enforced: `npm run docs:check`
 (part of `npm run check`) resolves every cross-document link and anchor, checks this
 tree against the real folders, checks `README.md`'s script table against
-`package.json`, and holds **this file to a line budget**. The budget is what makes
+`package.json`, compares `PLAN.md`'s schema and `docs/mockups/` against what the
+code actually produces, and holds **this file to a line budget**. The budget is what makes
 appending cost something — when a new rule pushes it over, move an old paragraph
 into the skill it belongs to instead of raising the number. The `write-a-doc` skill
 routes a fact to its file.
@@ -131,8 +133,11 @@ case, plus `ё` → `е`, and the parser must not assume latin
 **A feature is a folder you can delete.** Removing `features/scoresheet/` must leave
 the rest compiling and passing, and adding a feature must not require editing
 another one. Deleting one was tested by deleting it: the only failures were in
-`main.spec.ts`, which is the one spec *supposed* to know the roster. The procedure
-for adding one is the `add-a-feature` skill.
+`main.spec.ts`, which is the one spec *supposed* to know the roster — and now also
+in `scripts/`, where the mockup tools draw the scoresheet's own posters and
+`docs:check` compares them. That second exception is deliberate and bounded: no lint
+zone fences `scripts/`, so it is kept honest here rather than by a rule. The
+procedure for adding one is the `add-a-feature` skill.
 
 **The commands a feature declares are the list of its sub-features.** `scoresheet`
 declares `/stats`, `/stats_chronology` and `/stats_awards`, so it gives the player
@@ -145,12 +150,8 @@ this wrong, both paid for here: a bucket (`helpers/`, `common/`, `shared/` insid
 feature) is the vagueness the file names were cured of, and a **process** name is
 worse than it looks — `bot/opening/` reads fine to whoever just split the folder
 and tells everybody else nothing, because opening is not something the player ends
-up holding. A single-command feature never subdivides.
-
-`docs:check` fails a layer root above nine files, which is unambiguous crowding
-rather than a real limit — the fix is always a named subfolder, never a bigger
-number. It is a late alarm on purpose: seven fired on a folder needing no split, so
-the question is the rule and the count only makes somebody ask it.
+up holding. A single-command feature never subdivides; `docs:check` fails a layer
+root above nine files, and the `add-a-feature` skill says why that number.
 
 **A feature folder is named after what the player gets**, not after an internal
 noun. `diagnostics/` is the exception that proves the rule — its reader is whoever
@@ -311,10 +312,6 @@ comment keys (`"// ...": "..."`) in `package.json`** — the script name has to 
 what it does — and **keep it short**, because it is the first thing a new reader
 sees. Anything occasional goes behind one `scripts/tools.ts` that lists itself when
 run with no argument.
-
-**Everything a check writes goes under `reports/`** — coverage, mutation, and
-Stryker's sandbox via `tempDirName`. One gitignored directory, and nothing about
-testing appears next to the source.
 
 ### What enforces what
 

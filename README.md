@@ -65,6 +65,30 @@ Merging names
 There is no undo, which is what the Confirm button is for. Two merges are refused
 with the reason, and [PLAN.md](PLAN.md#merging-two-names-into-one) says why.
 
+### The pictures it sends back
+
+`/stats` answers with two PNGs: the chronology of the evening, then the awards.
+Both are below at the size a phone gets them, and both were drawn by the bot's own
+renderer over a sample evening rather than by hand — `node scripts/tools.ts mockups`
+redraws them whenever the drawing code changes.
+
+| The chronology — a row per game, a column per player | The awards — at most nine, and the fool last |
+|---|---|
+| [![The chronology poster](docs/mockups/chronology.png)](docs/mockups/chronology.png) | [![The awards poster](docs/mockups/awards.png)](docs/mockups/awards.png) |
+
+The grid prints the finishing position in every cell and uses four fills and no
+more: went out, drew for last, left the fool, did not play. Under it, each player's
+running share of the table — 50% is mid-table, 100% is winning every game. The
+awards need five games before there are any.
+
+Every colour, size and rule behind the two is specified in the [poster design
+system](https://claude.ai/design/p/dfdd20cb-3609-4baa-935d-eb20b8257c2c?file=Durak+Stats+Poster+System.dc.html),
+which lives in Claude Design rather than here and opens only for somebody with
+access to that project. It is not decoration: the two mockups on it are the same
+SVG committed under `docs/mockups/`, and `npm run check` fails when either stops
+matching what the renderer draws. The `sync-the-mockups` skill is the procedure
+that keeps the three in step.
+
 ## Running it
 
 Node 24 or newer. There is no build step — Node runs the TypeScript directly.
@@ -299,6 +323,7 @@ src/
   shared/               config, lifecycle, locale, logging, repository,
                         telegram, text, timing — a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
+docs/mockups/           the two posters this file shows, drawn by scripts/tools.ts
 scripts/                dev utilities that are not part of the bot
 e2e/                    the fake Telegram and the scenarios played against it
 ```

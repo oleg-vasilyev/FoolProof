@@ -41,8 +41,12 @@ Run gate 4's review pass **before** this gate when the diff is small: review
 findings edit code, and this is the costliest gate to repeat. An edit made after
 the run re-checks with `--mutate <file>` alone, never a full re-run.
 
-Two rules about *running* it, both learned by burning most of a phase's budget on
-them:
+**Everything a check writes goes under `reports/`** — coverage, mutation, and
+Stryker's sandbox via `tempDirName`. One gitignored directory, and nothing about
+testing appears next to the source. A new check that wants somewhere to write has
+that answer already; `.gitignore` says the same thing in one line.
+
+Rules about *running* it, learned by burning most of a phase's budget on them:
 
 - **Never re-run a gate to re-read its output.** Every run writes
   `reports/mutation/mutation.json` and `reports/mutation/index.html`, and a

@@ -34,6 +34,13 @@ nothing. Skip a layer that has nothing in it rather than leaving it empty —
 feature's composition root, the same job `src/main.ts` does one level up, so
 opening the folder shows what the feature *is* before how it works.
 
+**`docs:check` fails a layer root above nine files**, which is unambiguous crowding
+rather than a real limit — the fix is always a named subfolder, never a bigger
+number. It is a late alarm on purpose: seven fired on a folder that needed no split,
+so the question is the rule and the count only makes somebody ask it. `CLAUDE.md`
+has the rule the subfolder has to satisfy: name it after a thing the player ends up
+holding, never after a process.
+
 ## 2. What the feature declares
 
 A feature does **not** get the `Bot`. It returns a `Feature`

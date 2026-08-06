@@ -52,9 +52,10 @@ Two consequences worth spelling out, because both have been got wrong:
 3. **Write it once, in the home the table names.** If you find yourself explaining
    the same thing in a second file "briefly", stop: that is the duplication being
    born. A link is shorter and cannot drift.
-4. **Run `npm run docs:check`.** It resolves every cross-document link and anchor,
-   checks the source tree in `README.md` against the real folders, checks the script
-   table against `package.json`, and holds `CLAUDE.md` to its line budget.
+4. **Run `npm run docs:check`.** It is the gate that catches most of what this file
+   asks for, and it grows — the schema and the poster mockups joined it after this
+   list was first written. What it checks is enumerated once, in `CLAUDE.md`; do not
+   re-list it here. Read the complaint rather than guessing which check fired.
 
 ## The budget is the point
 
