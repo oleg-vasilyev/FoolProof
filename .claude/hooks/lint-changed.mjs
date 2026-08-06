@@ -20,8 +20,14 @@ const changedFile = () => {
   }
 };
 
+// The folders `npm run lint` covers. A file the hook skips is one whose
+// violation waits until the end of the turn instead of surfacing at the edit.
+const LINTED_FOLDERS = ["src", "scripts"];
+
 const file = changedFile();
-const inSource = file.endsWith(".ts") && !relative(resolve("src"), file).startsWith("..");
+const inSource =
+  file.endsWith(".ts") &&
+  LINTED_FOLDERS.some((folder) => !relative(resolve(folder), file).startsWith(".."));
 
 if (!inSource) {
   process.exit(NO_FILE);
