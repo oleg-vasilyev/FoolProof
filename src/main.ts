@@ -4,7 +4,12 @@ import { createMergeNamesFeature } from "#merge-names/merge-names-feature.ts";
 import { createScoresheetFeature } from "#scoresheet/scoresheet-feature.ts";
 import { createDiagnosticsFeature } from "#diagnostics/diagnostics-feature.ts";
 import { createLanguageFeature } from "#language/language-feature.ts";
-import { installFeatures, publishCommandMenu, resumeFeatures } from "#app/feature-installer.ts";
+import {
+  installFeatures,
+  publishCommandMenu,
+  republishChatMenus,
+  resumeFeatures,
+} from "#app/feature-installer.ts";
 import { loadEnv, requireEnv } from "#shared/config/env.ts";
 import { installCrashExit } from "#shared/lifecycle/crash-exit.ts";
 import { createShutdown } from "#shared/lifecycle/shutdown.ts";
@@ -58,6 +63,7 @@ process.once("SIGINT", () => void shutdown());
 process.once("SIGTERM", () => void shutdown());
 
 await publishCommandMenu(bot.api, features, log);
+await republishChatMenus(bot.api, features, log, repository.rememberedChatLocales());
 await resumeFeatures(features, log);
 
 log.info("listening for updates by long polling");

@@ -918,4 +918,25 @@ describe("the language a chat chose", () => {
 
     expect(repo.chatLocale(OTHER_CHAT_ID)).toBeNull();
   });
+
+  it("should list nothing before any chat chose", () => {
+    expect(repo.rememberedChatLocales()).toEqual([]);
+  });
+
+  it("should list every chat's remembered choice", () => {
+    repo.rememberChatLocale(CHAT_ID, "ru");
+    repo.rememberChatLocale(OTHER_CHAT_ID, "en");
+
+    expect(repo.rememberedChatLocales()).toEqual([
+      { chatId: OTHER_CHAT_ID, locale: "en" },
+      { chatId: CHAT_ID, locale: "ru" },
+    ]);
+  });
+
+  it("should list one row per chat however often it re-chose", () => {
+    repo.rememberChatLocale(CHAT_ID, "ru");
+    repo.rememberChatLocale(CHAT_ID, "en");
+
+    expect(repo.rememberedChatLocales()).toEqual([{ chatId: CHAT_ID, locale: "en" }]);
+  });
 });

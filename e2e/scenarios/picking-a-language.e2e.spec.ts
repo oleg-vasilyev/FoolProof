@@ -103,6 +103,10 @@ describeScenario("picking the language a chat is played in", (chat) => {
     expect(chat.captions()).toEqual(["English", "✅ Русский"]);
   });
 
+  it("should republish that chat's menu on the restart, before anybody opens the screen", () => {
+    expect(chat.menuDescriptions()).toContain("Открыть партию — /game Олег, Аня, Рома");
+  });
+
   it("should leave the screen closed on English again", async () => {
     await chat.tap("English");
 

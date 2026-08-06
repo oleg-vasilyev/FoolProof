@@ -5,6 +5,7 @@ import {
   requireText,
 } from "#shared/repository/column-values.ts";
 import type {
+  ChatLocaleChoice,
   ChronologyGame,
   ExitRecord,
   GameRecord,
@@ -57,6 +58,11 @@ export const toPlayerTally = (row: Row): PlayerTally => ({
 export const toPlayerColumn = (row: Row): PlayerColumn => ({
   playerId: requireNum(row.player_id),
   displayName: requireText(row.display_name),
+});
+
+export const toChatLocaleChoice = (row: Row): ChatLocaleChoice => ({
+  chatId: requireNum(row.chat_id),
+  locale: requireText(row.locale),
 });
 
 export const toStorageSummary = (row: Row | undefined, file: string): StorageSummary => ({

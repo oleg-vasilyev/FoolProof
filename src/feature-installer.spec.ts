@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { installFeatures, publishCommandMenu, resumeFeatures } from "#app/feature-installer.ts";
+import {
+  installFeatures,
+  publishCommandMenu,
+  republishChatMenus,
+  resumeFeatures,
+} from "#app/feature-installer.ts";
 import type { Feature } from "#shared/telegram/feature-contract.ts";
 import { featureOf } from "#shared/telegram/feature-contract.stub.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
@@ -515,5 +520,73 @@ describe("publishCommandMenu()", () => {
     await publishCommandMenu(bot.api as never, [featureOf({ name: "game" })], log);
 
     expect(log.warnSpy.mock.calls[0]?.[0]).toContain(cause);
+  });
+});
+
+describe("republishChatMenus()", () => {
+  let bot: BotMock;
+  let log: LoggerStub;
+
+  const RU_CHAT = -100111;
+
+  const EN_CHAT = -100222;
+
+  const TWICE = 2;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    bot = new BotMock();
+    log = new LoggerStub();
+    bot.setMyCommandsSpy.mockResolvedValue(true);
+  });
+
+  it("should publish a chosen chat's menu scoped to it, in its own language", async () => {
+    await republishChatMenus(bot.api as never, [featureOf({ name: "game" })], log, [
+      { chatId: RU_CHAT, locale: "ru" },
+    ]);
+
+    expect(bot.setMyCommandsSpy).toHaveBeenCalledWith(
+      [
+        { command: "game", description: `does game in ${Locale.Ru}` },
+        { command: "help", description: russian.commandHelp },
+      ],
+      { scope: { type: "chat", chat_id: RU_CHAT } }
+    );
+  });
+
+  it("should publish every chat on the list", async () => {
+    await republishChatMenus(bot.api as never, [featureOf({ name: "game" })], log, [
+      { chatId: RU_CHAT, locale: "ru" },
+      { chatId: EN_CHAT, locale: "en" },
+    ]);
+
+    expect(bot.setMyCommandsSpy).toHaveBeenCalledTimes(TWICE);
+  });
+
+  it("should skip a stored locale the bot no longer speaks", async () => {
+    await republishChatMenus(bot.api as never, [featureOf({ name: "game" })], log, [
+      { chatId: RU_CHAT, locale: "de" },
+    ]);
+
+    expect(bot.setMyCommandsSpy).toHaveBeenCalledTimes(NEVER);
+  });
+
+  it("should keep publishing after one chat refuses, since the rest still deserve theirs", async () => {
+    bot.setMyCommandsSpy.mockRejectedValueOnce(new Error("chat not found"));
+
+    await republishChatMenus(bot.api as never, [featureOf({ name: "game" })], log, [
+      { chatId: RU_CHAT, locale: "ru" },
+      { chatId: EN_CHAT, locale: "en" },
+    ]);
+
+    expect(bot.setMyCommandsSpy).toHaveBeenCalledTimes(TWICE);
+    expect(log.warnSpy).toHaveBeenCalledTimes(ONCE);
+  });
+
+  it("should publish nothing when no chat ever chose", async () => {
+    await republishChatMenus(bot.api as never, [featureOf({ name: "game" })], log, []);
+
+    expect(bot.setMyCommandsSpy).toHaveBeenCalledTimes(NEVER);
   });
 });

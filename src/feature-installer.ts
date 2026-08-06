@@ -1,7 +1,8 @@
 import type { Api, Bot } from "grammy";
 import type { Feature, Listeners } from "#shared/telegram/feature-contract.ts";
 import type { Logger } from "#shared/logging/logger.ts";
-import type { LocaleReader } from "#shared/locale/chat-locale.ts";
+import type { ChatLocaleChoice } from "#shared/repository/repository-contract.ts";
+import { localeFrom, type LocaleReader } from "#shared/locale/chat-locale.ts";
 import { DEFAULT_LOCALE, type Locale } from "#shared/locale/locales.ts";
 import { copyIn } from "#app/copy.ts";
 
@@ -61,6 +62,21 @@ export const publishCommandMenu = async (
     );
   } catch (error) {
     log.warn(`could not publish the command menu: ${String(error)}`);
+  }
+};
+
+export const republishChatMenus = async (
+  api: Api,
+  features: readonly Feature[],
+  log: Logger,
+  choices: readonly ChatLocaleChoice[]
+): Promise<void> => {
+  for (const choice of choices) {
+    const locale = localeFrom(choice.locale);
+
+    if (locale !== null) {
+      await publishCommandMenu(api, features, log, { chatId: choice.chatId, locale });
+    }
   }
 };
 

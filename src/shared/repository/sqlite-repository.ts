@@ -7,6 +7,7 @@ import {
 } from "#shared/repository/column-values.ts";
 import {
   groupByGame,
+  toChatLocaleChoice,
   toExit,
   toGame,
   toPlayer,
@@ -343,6 +344,13 @@ export const sqliteRepository: Repository = {
       `INSERT INTO chat_locales (chat_id, locale) VALUES (?, ?)
        ON CONFLICT(chat_id) DO UPDATE SET locale = excluded.locale, chosen_at = datetime('now')`
     ).run(chatId, locale);
+  },
+
+  rememberedChatLocales() {
+    return db
+      .prepare("SELECT chat_id, locale FROM chat_locales ORDER BY chat_id")
+      .all()
+      .map(toChatLocaleChoice);
   },
 
   seriesChronology(chatId) {

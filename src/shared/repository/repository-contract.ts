@@ -113,9 +113,15 @@ export interface DiagnosticsRepository {
   storageSummary(): StorageSummary;
 }
 
+export interface ChatLocaleChoice {
+  chatId: number;
+  locale: string;
+}
+
 export interface LocaleRepository {
   chatLocale(chatId: number): string | null;
   rememberChatLocale(chatId: number, locale: string): void;
+  rememberedChatLocales(): readonly ChatLocaleChoice[];
 }
 
 export interface Repository

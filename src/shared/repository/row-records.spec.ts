@@ -8,6 +8,7 @@ vi.mock("#shared/repository/column-values.ts", () => values.module);
 
 const {
   groupByGame,
+  toChatLocaleChoice,
   toExit,
   toGame,
   toPlayer,
@@ -170,6 +171,24 @@ describe("row mappers", () => {
         playerId: AS_NUMBER,
         displayName: AS_TEXT,
       });
+    });
+  });
+
+  describe("toChatLocaleChoice()", () => {
+    const row = { chat_id: ONE, locale: "ru" };
+
+    it("should rename the columns to the camel case the contract promises", () => {
+      expect(toChatLocaleChoice(row)).toEqual({
+        chatId: AS_NUMBER,
+        locale: AS_TEXT,
+      });
+    });
+
+    it("should read the chat as a number and the locale as text", () => {
+      toChatLocaleChoice(row);
+
+      expect(values.requireNumSpy).toHaveBeenCalledWith(ONE);
+      expect(values.requireTextSpy).toHaveBeenCalledWith("ru");
     });
   });
 

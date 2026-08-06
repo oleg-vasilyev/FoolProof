@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import type {
   CardRecord,
+  ChatLocaleChoice,
   Finalist,
   GameRecord,
   LastGame,
@@ -49,6 +50,7 @@ export class RepositoryStub implements Repository {
   public storageSummarySpy = vi.fn();
   public chatLocaleSpy = vi.fn();
   public rememberChatLocaleSpy = vi.fn();
+  public rememberedChatLocalesSpy = vi.fn();
 
   public constructor() {
     this.playersInChatSpy.mockReturnValue([]);
@@ -69,6 +71,7 @@ export class RepositoryStub implements Repository {
     this.seriesChronologySpy.mockReturnValue(null);
     this.storageSummarySpy.mockReturnValue(EMPTY_STORAGE);
     this.chatLocaleSpy.mockReturnValue(null);
+    this.rememberedChatLocalesSpy.mockReturnValue([]);
   }
 
   public playersInChat(chatId: number): readonly PlayerRecord[] {
@@ -176,5 +179,9 @@ export class RepositoryStub implements Repository {
 
   public rememberChatLocale(chatId: number, locale: string): void {
     this.rememberChatLocaleSpy(chatId, locale);
+  }
+
+  public rememberedChatLocales(): readonly ChatLocaleChoice[] {
+    return this.rememberedChatLocalesSpy();
   }
 }

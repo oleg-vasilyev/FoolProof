@@ -69,6 +69,10 @@ The command **names** stay Latin in both languages — `/game`, `/next_without` 
 Telegram allows nothing else. Their *descriptions* are republished for that chat
 with `setMyCommands` scoped to it the moment the language changes, so the `/` menu
 matches what the bot says. A chat that never chose keeps the global English menu.
+Telegram keeps serving a scoped menu until it is explicitly replaced, so **every
+start republishes the scoped menu of every chat in `chat_locales`** after the global
+one — without that, a chat that once chose would keep an outdated command list after
+an update until somebody happened to open `/language` again.
 
 Two consequences worth stating, because both are easy to get wrong:
 

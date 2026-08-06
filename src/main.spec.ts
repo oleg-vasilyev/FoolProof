@@ -33,6 +33,10 @@ const PREVIOUS_EXIT = "exit code 1";
 
 const OPERATOR_TG_ID = "777";
 
+const CHOSEN_CHAT_ID = -100888;
+
+const CHAT_MENUS = [{ chatId: CHOSEN_CHAT_ID, locale: "ru" }];
+
 const env = new EnvStub({
   BOT_TOKEN: TOKEN_FROM_ENV,
   LOG_LEVEL: LOG_LEVEL_FROM_ENV,
@@ -101,6 +105,12 @@ const publishCommandMenuSpy = vi.fn(
   }
 );
 
+const republishChatMenusSpy = vi.fn(
+  async (_api: unknown, _features: unknown, _log: unknown, _choices: unknown): Promise<void> => {
+    order.push("chat-menus");
+  }
+);
+
 const resumeFeaturesSpy = vi.fn(async (_features: unknown, _log: unknown): Promise<void> => {
   order.push("resume");
 });
@@ -126,6 +136,8 @@ vi.mock("#app/feature-installer.ts", () => ({
     installFeaturesSpy(bot, features, log, localeIn),
   publishCommandMenu: (api: unknown, features: unknown, log: unknown, chat: unknown) =>
     publishCommandMenuSpy(api, features, log, chat),
+  republishChatMenus: (api: unknown, features: unknown, log: unknown, choices: unknown) =>
+    republishChatMenusSpy(api, features, log, choices),
   resumeFeatures: (features: unknown, log: unknown) => resumeFeaturesSpy(features, log),
 }));
 
@@ -157,6 +169,7 @@ describe("main.ts", () => {
   beforeAll(async () => {
     env.requireEnvSpy.mockReturnValue(TOKEN_FROM_ENV);
     clientOptions.botClientOptionsSpy.mockReturnValue(CLIENT_OPTIONS);
+    repository.stub.rememberedChatLocalesSpy.mockReturnValue(CHAT_MENUS);
     vi.spyOn(process, "once").mockImplementation(((event: string, handler: () => void) => {
       signalHandlers.set(event, handler);
 
@@ -241,6 +254,23 @@ describe("main.ts", () => {
       logging.logger,
       undefined
     );
+  });
+
+  it("should republish the menu of every chat that chose a language", () => {
+    expect(republishChatMenusSpy).toHaveBeenCalledWith(
+      botApi,
+      INSTALLED,
+      logging.logger,
+      CHAT_MENUS
+    );
+  });
+
+  it("should republish the chat menus after the global menu", () => {
+    expect(order.indexOf("menu")).toBeLessThan(order.indexOf("chat-menus"));
+  });
+
+  it("should republish the chat menus before accepting updates", () => {
+    expect(order.indexOf("chat-menus")).toBeLessThan(order.indexOf("start"));
   });
 
   it("should give the language screen a way to republish the menu for one chat", async () => {

@@ -93,23 +93,6 @@ be awkward, with the trigger that would make the split pay for itself.
 
 ---
 
-## A chat that picked a language keeps a menu of its own
-
-Choosing a language republishes that chat's `/` menu through `setMyCommands` scoped
-to it. Telegram then serves that chat its own copy for good: the global menu
-published at every start no longer reaches it. Add a command and a chat that once
-tapped `/language` keeps the old list until somebody opens the screen again.
-
-The honest fix is to republish every scoped menu on start, which means keeping the
-list of chats that have one — `chat_locales` already is that list. It was left out
-because the menu is a convenience, the commands themselves keep working, and the
-first new command after this is the trigger anyway.
-
-**Pick it up when a command is added or renamed**, since that is the moment the
-stale menu starts lying.
-
----
-
 ## Not debt, deliberately
 
 Listed so nobody "fixes" them:
