@@ -37,6 +37,10 @@ the test above, or an optional chain hiding a value that was never set.
 Strengthening a spec is the `write-a-spec` skill's job — load it rather than
 reaching for the nearest assertion that turns the mutant red.
 
+Run gate 4's review pass **before** this gate when the diff is small: review
+findings edit code, and this is the costliest gate to repeat. An edit made after
+the run re-checks with `--mutate <file>` alone, never a full re-run.
+
 Two rules about *running* it, both learned by burning most of a phase's budget on
 them:
 

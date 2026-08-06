@@ -65,6 +65,13 @@ mutants until it moved to `render/human-units.ts`, where it is a unit with its o
 cases and the copy function takes the finished fragment. A count still belongs behind
 a copy function — the *choice of word* belongs in `render/`.
 
+**An existing spec file's habits are not precedent.** `feature-installer.spec.ts`
+had always run `copyIn` real, and a new `describe` added there copied that instead
+of the rule — it exercised the real `localeFrom` and re-proved a fact
+`chat-locale.spec.ts` already pins, which the phase review then caught. When a
+subject gains an import, the new cases start from this rule, not from whatever the
+file around them got away with.
+
 ## Mocking is usually the more direct test
 
 It is not a weaker substitute for the real thing. It is often the only way to
