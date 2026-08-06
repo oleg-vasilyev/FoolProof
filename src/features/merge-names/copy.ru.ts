@@ -29,7 +29,7 @@ export const copy: Copy = {
   markKeeper: "⭐",
   markAbsorbed: "➕",
 
-  buttonConfirm: "✅ Подтвердить",
+  buttonConfirm: "✅ Слить",
   buttonBack: "↩️ Назад",
   buttonCancel: "❌ Отмена",
 

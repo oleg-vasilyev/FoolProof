@@ -39,14 +39,14 @@ describeScenario("picking the language a chat is played in", (chat) => {
     await chat.say("/game Олег, Аня, Рома");
 
     expect(chat.cardText()).toContain("Партия 1");
-    expect(chat.cardText()).toContain("Кто раздал первым?");
+    expect(chat.cardText()).toContain("Кто ходил первым?");
     expect(chat.captions()).toContain("❌ Отмена");
   });
 
   it("should name the seat in Russian when a name is tapped", async () => {
     await chat.tap("Олег");
 
-    expect(chat.lastAnswer()).toBe("Олег раздаёт первым");
+    expect(chat.lastAnswer()).toBe("Олег ходит первым");
   });
 
   it("should say so in Russian when the card is cancelled", async () => {

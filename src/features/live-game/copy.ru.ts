@@ -41,19 +41,19 @@ export const copy: Copy = {
 
   helpGame: "/game Олег, Аня, Рома — открыть партию; порядок имён — это порядок посадки за столом",
   helpNext:
-    "/next — ещё партия тем же составом; на дурака ходят первым, поэтому раздаёт сосед",
+    "/next — ещё партия тем же составом; первым ходит сосед дурака, потому что ходят на дурака",
   helpNextWith:
     "/next_with Женя, Саша — тот же состав плюс эти; дальше жмёшь всех по порядку посадки, а раздающего выбираешь сам",
   helpNextWithout: "/next_without Олег — тот же состав минус эти; раздающего выбираешь сам",
   helpCard: [
-    "Нажми имя, чтобы отметить, кто раздал первым, а дальше жми игроков в порядке выхода.",
+    "Нажми имя, чтобы отметить, кто ходил первым, а дальше жми игроков в порядке выхода.",
     "Последний оставшийся — дурак, его отметят за тебя. «Ничья» появляется, когда осталось",
-    "двое. «Назад» отменяет по шагу, и ничего не записано, пока не нажмёшь «Подтвердить».",
+    "двое. «Назад» отменяет по шагу, и ничего не записано, пока не нажмёшь «Записать».",
   ],
 
   header: (gameNumber: number) => `<b>Партия ${gameNumber}</b>`,
-  askStarter: "Кто раздал первым?",
-  dealtFirst: (name: string) => `Раздаёт первым: <b>${name}</b>`,
+  askStarter: "Кто ходил первым?",
+  dealtFirst: (name: string) => `Ходит первым: <b>${name}</b>`,
 
   resultPlace: (position: number, name: string) => `${position} · ${name}`,
   resultFool: (position: number, name: string) => `${position} · <b>${name}</b> — дурак`,
@@ -65,13 +65,13 @@ export const copy: Copy = {
   markSeat: "🪑",
 
   buttonDraw: "🤝 Ничья",
-  buttonConfirm: "✅ Подтвердить",
+  buttonConfirm: "✅ Записать",
   buttonBack: "↩️ Назад",
   buttonCancel: "❌ Отмена",
 
   tapSeated: (name: string, seat: number) => `${name} — место ${seat}`,
   tapRecorded: (name: string, position: number) => `${name} — ${position}`,
-  tapStarter: (name: string) => `${name} раздаёт первым`,
+  tapStarter: (name: string) => `${name} ходит первым`,
   tapDraw: "Ничья",
   tapBack: "Шаг назад",
   tapNotAllowed: "Сейчас так нельзя",
