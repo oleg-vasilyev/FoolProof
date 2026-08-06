@@ -129,6 +129,12 @@ describe("requireFonts()", () => {
     expect(() => requireFonts()).toThrow(/NotoSans-Bold\.ttf/);
   });
 
+  it("should list every missing face apart, not run their names together", () => {
+    existsSyncSpy.mockReturnValue(false);
+
+    expect(() => requireFonts()).toThrow(/NotoSans-Regular\.ttf, .*NotoSans-Bold\.ttf/);
+  });
+
   it("should not complain about a face that is present", () => {
     existsSyncSpy.mockImplementation((file: string) => !file.includes("Bold"));
 
