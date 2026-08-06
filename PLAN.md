@@ -516,7 +516,7 @@ CREATE INDEX idx_players_chat ON players(chat_id);
 CREATE TABLE games (
   id                INTEGER PRIMARY KEY AUTOINCREMENT,
   chat_id           INTEGER NOT NULL,
-  message_id        INTEGER NOT NULL,
+  message_id        INTEGER NOT NULL DEFAULT 0,
   state             TEXT NOT NULL,
   state_version     INTEGER NOT NULL DEFAULT 0,
   starter_player_id INTEGER REFERENCES players(id),

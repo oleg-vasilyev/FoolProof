@@ -84,12 +84,12 @@ be awkward, with the trigger that would make the split pay for itself.
 
 | File | Lines | Why it is on the list | Split it when |
 |---|---|---|---|
-| `features/live-game/bot/card-service.ts` | 370 | The largest file in `src/`, and the only one doing four jobs: looking a card up, applying a tap, scheduling the debounced edit, and sweeping idle cards. It reads as a skeleton, which is why it has survived. | A fifth job arrives, or something other than the card service needs the debouncer |
-| `shared/repository/sqlite-repository.ts` | 365 | Every query in the app. It is meant to be the only file with SQL, so length is the price of that rule, not a smell. | The scoresheet's queries and the live card's queries stop overlapping — then two files behind one contract |
-| `e2e/fake-telegram/fake-telegram.ts` | 371 | One `switch` over nine Bot API methods, mixing protocol shapes with the chat log. A `bot-api-methods.ts` was planned and folded in to save a file; that was probably the wrong trade. | A tenth method is needed, or the fake starts refusing more than two things |
-| `e2e/harness/scenario-chat.ts` | 266 | Module-level singletons plus a 24-member `Chat` interface that scenarios use as a language. The interface grows every time a scenario wants a new question answered. | The interface passes ~30 members — then split the driving verbs from the queries |
-| `e2e/hub/hub-server.ts` | 208 | Proxy, cache, page serving and port probing in one file. | Anything is added to the hub |
-| `src/main.ts` | 54 | Four `??` defaults inline in the diagnostics wiring, which is the only place in `src/` with branch coverage at 50%. A typed env reader would move the defaults somewhere a unit can reach. | A fifth optional key appears |
+| `features/live-game/bot/card/card-service.ts` | 398 | The largest file in `src/`, and the only one doing four jobs: looking a card up, applying a tap, scheduling the debounced edit, and sweeping idle cards. It reads as a skeleton, which is why it has survived. | A fifth job arrives, or something other than the card service needs the debouncer |
+| `shared/repository/sqlite-repository.ts` | 383 | Every query in the app. It is meant to be the only file with SQL, so length is the price of that rule, not a smell. | The scoresheet's queries and the live card's queries stop overlapping — then two files behind one contract |
+| `e2e/fake-telegram/fake-telegram.ts` | 406 | One `switch` over nine Bot API methods, mixing protocol shapes with the chat log. A `bot-api-methods.ts` was planned and folded in to save a file; that was probably the wrong trade. | A tenth method is needed, or the fake starts refusing more than two things |
+| `e2e/harness/scenario-chat.ts` | 273 | Module-level singletons plus a 25-member `Chat` interface that scenarios use as a language. The interface grows every time a scenario wants a new question answered. | The interface passes ~30 members — then split the driving verbs from the queries |
+| `e2e/hub/hub-server.ts` | 259 | Proxy, cache, page serving and port probing in one file. | Anything is added to the hub |
+| `src/main.ts` | 64 | Four `??` defaults inline in the diagnostics wiring, which is the only place in `src/` with branch coverage at 50%. A typed env reader would move the defaults somewhere a unit can reach. | A fifth optional key appears |
 
 ---
 
@@ -107,6 +107,37 @@ first new command after this is the trigger anyway.
 
 **Pick it up when a command is added or renamed**, since that is the moment the
 stale menu starts lying.
+
+---
+
+## `num()` and `text()` make a broken query look like data
+
+`column-values.ts` coerces anything unexpected to `0` or `""`. A column aliased
+wrong in an edited query, or a NULL arriving in a column that "cannot" hold one,
+comes back as a plausible value instead of an error, so the mistake surfaces as a
+wrong figure in a picture rather than as a stack trace at the query. The
+integration spec keeps today's queries honest; the next query written gets no such
+guard at runtime. The shape of the fix is a throwing `requireNum` / `requireText`
+for columns declared NOT NULL, with `numberOr` kept only where a fallback means
+something.
+
+**Pick it up the first time a wrong figure is traced back to a silent `0`** —
+until then the integration suite is the guard that exists.
+
+---
+
+## Two dev scripts hand git-derived filenames to a shell
+
+`scripts/mutate-changed.ts` and `scripts/e2e-changed.ts` join names from
+`git diff` and `git ls-files --others` into `spawnSync(..., { shell: true })`, so
+a filename carrying a backtick or a `;` would execute the day somebody runs the
+script over a hostile checkout. The reach is short — a developer's own working
+tree, no path from a chat — which is why it is debt and not a fix. `shell: true`
+exists because `npx` is a `.cmd` on Windows; the exit is resolving
+`node_modules/.bin` directly, the way `.claude/hooks/lint-changed.mjs` already
+does.
+
+**Drop the shell the next time either script is edited.**
 
 ---
 
@@ -138,3 +169,13 @@ Listed so nobody "fixes" them:
   would assert the spec's own number. The real coupling is that the codec's byte
   budget bounds the domain's cap, and this is the one place both are visible. It
   already earned its keep by failing at eight names.
+- **No tap is gated by who tapped it.** An inline button acts for whoever presses
+  it — Telegram's model, and the right one for a single table of friends, where
+  every action is reversible or one tap to redo. The one authorization in the
+  product is `/status` answering only `OPERATOR_TG_ID`.
+- **`logger.ts` and `sqlite-connection.ts` read the environment at module scope.**
+  A logger is created wherever code runs and the connection opens at import, so
+  neither can be handed values the way feature code is — which is what "read in
+  one place, pass values down" actually polices. The visible cost is that
+  `LOG_LEVEL` has two readers: the logger's threshold, and the copy `main.ts`
+  hands the diagnostics for `/status` to report.
