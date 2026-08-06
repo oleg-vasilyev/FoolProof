@@ -572,6 +572,14 @@ describe("republishChatMenus()", () => {
     expect(bot.setMyCommandsSpy).toHaveBeenCalledTimes(NEVER);
   });
 
+  it("should skip it quietly, not by tripping over the unknown locale", async () => {
+    await republishChatMenus(bot.api as never, [featureOf({ name: "game" })], log, [
+      { chatId: RU_CHAT, locale: "de" },
+    ]);
+
+    expect(log.warnSpy).toHaveBeenCalledTimes(NEVER);
+  });
+
   it("should keep publishing after one chat refuses, since the rest still deserve theirs", async () => {
     bot.setMyCommandsSpy.mockRejectedValueOnce(new Error("chat not found"));
 
