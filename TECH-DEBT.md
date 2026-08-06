@@ -60,23 +60,6 @@ lines twice is cheaper than a shared module with two callers.
 
 ---
 
-## `card-context.ts` is mocked by hand in three places
-
-`lineup-from-names.spec.ts`, `lineup-from-last-game.spec.ts` and `names-reply.spec.ts` each write their
-own `vi.mock` factory for it rather than using a stub. That is inside the letter of
-the rule — `CLAUDE.md` requires stubs for `shared/` modules and feature entry points,
-and this is neither — but a `vi.mock` factory is **untyped**, which is the exact
-failure the stub rule exists to stop: add a parameter to `askForNames` and all three
-fakes keep compiling and keep passing.
-
-It is not written yet because the file just shed `toSeats` and `resolveSeats` to
-`seat-lookup.ts`, and three small fakes are cheaper than a stub with three callers.
-
-**Write `card-context.stub.ts` when a fourth consumer appears**, or the first time
-one of the three fakes is caught disagreeing with the real signature.
-
----
-
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to

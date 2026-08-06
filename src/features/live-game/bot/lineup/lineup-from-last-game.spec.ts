@@ -7,11 +7,10 @@ import { copy } from "#live-game/copy.en.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
 import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
 import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
+import { CardContextStub } from "#live-game/bot/card-context.stub.ts";
 
 
 const parseNamesSpy = vi.fn();
-
-const copyForSpy = vi.fn();
 
 const rotateToLowestIdSpy = vi.fn();
 
@@ -38,21 +37,11 @@ vi.mock("#live-game/domain/table-change.ts", () => ({
   tableWithout: (seats: unknown, names: unknown) => tableWithoutSpy(seats, names),
 }));
 
-const askForNamesSpy = vi.fn();
-
-const commandTextSpy = vi.fn();
-
 const COMMAND_TEXT = "the text the command carried";
 
-const refusedBecauseLiveSpy = vi.fn();
+const cardContext = new CardContextStub();
 
-vi.mock("#live-game/bot/card-context.ts", () => ({
-  askForNames: (context: unknown, ctx: unknown, question: unknown, placeholder: unknown) =>
-    askForNamesSpy(context, ctx, question, placeholder),
-  commandText: (ctx: unknown) => commandTextSpy(ctx),
-  refusedBecauseLive: (context: unknown, ctx: unknown) => refusedBecauseLiveSpy(context, ctx),
-  copyFor: (context: unknown, chatId: number) => copyForSpy(context, chatId),
-}));
+vi.mock("#live-game/bot/card-context.ts", () => cardContext.module);
 
 vi.mock("#live-game/bot/card/card-service.ts", () => ({
   PICKED_BY_HAND: null,
@@ -138,9 +127,9 @@ describe("a line-up taken from the last game", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    copyForSpy.mockReturnValue(copy);
+    cardContext.copyForSpy.mockReturnValue(copy);
 
-    commandTextSpy.mockReturnValue(COMMAND_TEXT);
+    cardContext.commandTextSpy.mockReturnValue(COMMAND_TEXT);
 
     repo = new RepositoryStub();
     locales = new LocaleReaderStub();
@@ -149,8 +138,8 @@ describe("a line-up taken from the last game", () => {
     ctx = new ContextStub();
 
     repo.lastGameSpy.mockReturnValue({ seats: RAW_SEATS, loserIds: NO_LOSERS });
-    refusedBecauseLiveSpy.mockResolvedValue(false);
-    askForNamesSpy.mockResolvedValue(undefined);
+    cardContext.refusedBecauseLiveSpy.mockResolvedValue(false);
+    cardContext.askForNamesSpy.mockResolvedValue(undefined);
     toSeatsSpy.mockReturnValue(MAPPED_SEATS);
     resolveSeatsSpy.mockReturnValue(JOINER_SEATS);
     rotateToLowestIdSpy.mockReturnValue(ROTATED);
@@ -170,7 +159,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should refuse while a card is live", async () => {
-      refusedBecauseLiveSpy.mockResolvedValue(true);
+      cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
 
       await onNext(context(), ctx.command("/next"));
 
@@ -219,7 +208,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should refuse while a card is live", async () => {
-      refusedBecauseLiveSpy.mockResolvedValue(true);
+      cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
 
       await onNextWith(context(), ctx.command("/next_with Dima"));
 
@@ -240,7 +229,7 @@ describe("a line-up taken from the last game", () => {
 
       await onNextWith(built, command);
 
-      expect(commandTextSpy).toHaveBeenCalledWith(command);
+      expect(cardContext.commandTextSpy).toHaveBeenCalledWith(command);
       expect(parseNamesSpy).toHaveBeenCalledWith(COMMAND_TEXT);
     });
 
@@ -251,7 +240,7 @@ describe("a line-up taken from the last game", () => {
 
       await onNextWith(context(), cmd);
 
-      expect(askForNamesSpy).toHaveBeenCalledWith(
+      expect(cardContext.askForNamesSpy).toHaveBeenCalledWith(
         context(),
         cmd,
         copy.joinersPrompt,
@@ -280,7 +269,7 @@ describe("a line-up taken from the last game", () => {
 
       await onNextWith(context(), ctx.command("/next_with Dima, Dima"));
 
-      expect(askForNamesSpy).toHaveBeenCalledTimes(NEVER);
+      expect(cardContext.askForNamesSpy).toHaveBeenCalledTimes(NEVER);
       expect(cards.openSpy).toHaveBeenCalledTimes(NEVER);
     });
 
@@ -366,7 +355,7 @@ describe("a line-up taken from the last game", () => {
     });
 
     it("should refuse while a card is live", async () => {
-      refusedBecauseLiveSpy.mockResolvedValue(true);
+      cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
 
       await onNextWithout(context(), ctx.command("/next_without Anya"));
 
@@ -387,7 +376,7 @@ describe("a line-up taken from the last game", () => {
 
       await onNextWithout(built, command);
 
-      expect(commandTextSpy).toHaveBeenCalledWith(command);
+      expect(cardContext.commandTextSpy).toHaveBeenCalledWith(command);
       expect(parseNamesSpy).toHaveBeenCalledWith(COMMAND_TEXT);
     });
 
@@ -398,7 +387,7 @@ describe("a line-up taken from the last game", () => {
 
       await onNextWithout(context(), cmd);
 
-      expect(askForNamesSpy).toHaveBeenCalledWith(
+      expect(cardContext.askForNamesSpy).toHaveBeenCalledWith(
         context(),
         cmd,
         copy.leaversPrompt,
@@ -501,7 +490,7 @@ describe("a line-up taken from the last game", () => {
       await joinFromNames(context(), ctx.textMessage(""));
 
       expect(ctx.lastReply().text).toBe(copy.joinersMissing);
-      expect(askForNamesSpy).toHaveBeenCalledTimes(NEVER);
+      expect(cardContext.askForNamesSpy).toHaveBeenCalledTimes(NEVER);
     });
 
     it("should name a repeated joiner the parser rejected", async () => {
@@ -554,7 +543,7 @@ describe("a line-up taken from the last game", () => {
       await leaveFromNames(context(), ctx.textMessage(""));
 
       expect(ctx.lastReply().text).toBe(copy.leaversMissing);
-      expect(askForNamesSpy).toHaveBeenCalledTimes(NEVER);
+      expect(cardContext.askForNamesSpy).toHaveBeenCalledTimes(NEVER);
     });
 
     it("should name a repeated leaver the parser rejected", async () => {

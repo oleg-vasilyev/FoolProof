@@ -6,11 +6,10 @@ import { copy } from "#live-game/copy.en.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
 import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
 import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
+import { CardContextStub } from "#live-game/bot/card-context.stub.ts";
 
 
 const parseLineupSpy = vi.fn();
-
-const copyForSpy = vi.fn();
 
 const rotateToLowestIdSpy = vi.fn();
 
@@ -31,20 +30,11 @@ vi.mock("#live-game/render/name-preview.ts", () => ({
   namePreviews: (names: unknown) => namePreviewsSpy(names),
 }));
 
-const askForNamesSpy = vi.fn();
-
-const commandTextSpy = vi.fn();
-
 const COMMAND_TEXT = "the text the command carried";
 
-const refusedBecauseLiveSpy = vi.fn();
+const cardContext = new CardContextStub();
 
-vi.mock("#live-game/bot/card-context.ts", () => ({
-  askForNames: (...args: unknown[]) => askForNamesSpy(...args),
-  commandText: (ctx: unknown) => commandTextSpy(ctx),
-  refusedBecauseLive: (...args: unknown[]) => refusedBecauseLiveSpy(...args),
-  copyFor: (context: unknown, chatId: number) => copyForSpy(context, chatId),
-}));
+vi.mock("#live-game/bot/card-context.ts", () => cardContext.module);
 
 vi.mock("#live-game/bot/card/card-service.ts", () => ({
   PICKED_BY_HAND: null,
@@ -80,7 +70,7 @@ describe("openFromNames()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    copyForSpy.mockReturnValue(copy);
+    cardContext.copyForSpy.mockReturnValue(copy);
 
     repo = new RepositoryStub();
     locales = new LocaleReaderStub();
@@ -88,7 +78,7 @@ describe("openFromNames()", () => {
     prompts = new PromptRegistryStub();
     ctx = new ContextStub();
 
-    commandTextSpy.mockReturnValue(COMMAND_TEXT);
+    cardContext.commandTextSpy.mockReturnValue(COMMAND_TEXT);
     parseLineupSpy.mockReturnValue({ ok: true, names: THREE });
     resolveSeatsSpy.mockReturnValue(RESOLVED_SEATS);
     rotateToLowestIdSpy.mockReturnValue(ROTATED_SEATS);
@@ -170,7 +160,7 @@ describe("onGame()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    copyForSpy.mockReturnValue(copy);
+    cardContext.copyForSpy.mockReturnValue(copy);
 
     repo = new RepositoryStub();
     locales = new LocaleReaderStub();
@@ -178,12 +168,12 @@ describe("onGame()", () => {
     prompts = new PromptRegistryStub();
     ctx = new ContextStub();
 
-    commandTextSpy.mockReturnValue(COMMAND_TEXT);
+    cardContext.commandTextSpy.mockReturnValue(COMMAND_TEXT);
     parseLineupSpy.mockReturnValue({ ok: true, names: THREE });
     resolveSeatsSpy.mockReturnValue(RESOLVED_SEATS);
     rotateToLowestIdSpy.mockReturnValue(ROTATED_SEATS);
-    refusedBecauseLiveSpy.mockResolvedValue(false);
-    askForNamesSpy.mockResolvedValue(undefined);
+    cardContext.refusedBecauseLiveSpy.mockResolvedValue(false);
+    cardContext.askForNamesSpy.mockResolvedValue(undefined);
   });
 
   it("should clear a prompt nobody answered before doing anything else", async () => {
@@ -204,18 +194,18 @@ describe("onGame()", () => {
 
     await onGame(built, command);
 
-    expect(commandTextSpy).toHaveBeenCalledWith(command);
+    expect(cardContext.commandTextSpy).toHaveBeenCalledWith(command);
     expect(parseLineupSpy).toHaveBeenCalledWith(COMMAND_TEXT);
   });
 
   it("should refuse while a card is live", async () => {
-    refusedBecauseLiveSpy.mockResolvedValue(true);
+    cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
     const built = context();
     const command = ctx.command("/game Oleg, Anya");
 
     await onGame(built, command);
 
-    expect(refusedBecauseLiveSpy).toHaveBeenCalledWith(copy, built, command);
+    expect(cardContext.refusedBecauseLiveSpy).toHaveBeenCalledWith(copy, built, command);
     expect(cards.openSpy).toHaveBeenCalledTimes(NEVER);
   });
 
@@ -246,7 +236,7 @@ describe("onGame()", () => {
 
       await onGame(built, command);
 
-      expect(askForNamesSpy).toHaveBeenCalledWith(
+      expect(cardContext.askForNamesSpy).toHaveBeenCalledWith(
         built,
         command,
         copy.lineupPrompt,

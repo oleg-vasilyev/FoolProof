@@ -6,16 +6,12 @@ import { copy as russian } from "#live-game/copy.ru.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
 import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
 import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
+import { CardContextStub } from "#live-game/bot/card-context.stub.ts";
 
 
-const refusedBecauseLiveSpy = vi.fn();
+const cardContext = new CardContextStub();
 
-const copyForSpy = vi.fn();
-
-vi.mock("#live-game/bot/card-context.ts", () => ({
-  refusedBecauseLive: (...args: unknown[]) => refusedBecauseLiveSpy(...args),
-  copyFor: (context: unknown, chatId: number) => copyForSpy(context, chatId),
-}));
+vi.mock("#live-game/bot/card-context.ts", () => cardContext.module);
 
 const openFromNamesSpy = vi.fn();
 
@@ -48,7 +44,7 @@ describe("onNamesReply()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    copyForSpy.mockReturnValue(copy);
+    cardContext.copyForSpy.mockReturnValue(copy);
 
     repo = new RepositoryStub();
     locales = new LocaleReaderStub();
@@ -56,7 +52,7 @@ describe("onNamesReply()", () => {
     prompts = new PromptRegistryStub();
     ctx = new ContextStub();
 
-    refusedBecauseLiveSpy.mockResolvedValue(false);
+    cardContext.refusedBecauseLiveSpy.mockResolvedValue(false);
     openFromNamesSpy.mockResolvedValue(undefined);
     joinFromNamesSpy.mockResolvedValue(undefined);
     leaveFromNamesSpy.mockResolvedValue(undefined);
@@ -198,36 +194,36 @@ describe("onNamesReply()", () => {
   });
 
   it("should refuse when a card went live while the line-up prompt stood", async () => {
-    refusedBecauseLiveSpy.mockResolvedValue(true);
+    cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
     const message = ctx.textMessage("Oleg, Anya, Roma", { text: copy.lineupPrompt, fromBot: true });
 
     await onNamesReply(context(), message);
 
-    expect(refusedBecauseLiveSpy).toHaveBeenCalled();
+    expect(cardContext.refusedBecauseLiveSpy).toHaveBeenCalled();
     expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
     expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
     expect(leaveFromNamesSpy).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should refuse when a card went live while the joiners prompt stood", async () => {
-    refusedBecauseLiveSpy.mockResolvedValue(true);
+    cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
     const message = ctx.textMessage("Dima", { text: copy.joinersPrompt, fromBot: true });
 
     await onNamesReply(context(), message);
 
-    expect(refusedBecauseLiveSpy).toHaveBeenCalled();
+    expect(cardContext.refusedBecauseLiveSpy).toHaveBeenCalled();
     expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
     expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
     expect(leaveFromNamesSpy).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should refuse when a card went live while the leavers prompt stood", async () => {
-    refusedBecauseLiveSpy.mockResolvedValue(true);
+    cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
     const message = ctx.textMessage("Anya", { text: copy.leaversPrompt, fromBot: true });
 
     await onNamesReply(context(), message);
 
-    expect(refusedBecauseLiveSpy).toHaveBeenCalled();
+    expect(cardContext.refusedBecauseLiveSpy).toHaveBeenCalled();
     expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
     expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
     expect(leaveFromNamesSpy).toHaveBeenCalledTimes(NEVER);
