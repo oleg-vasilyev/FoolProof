@@ -1,4 +1,9 @@
-import { nullableNum, nullableText, num, text } from "#shared/repository/column-values.ts";
+import {
+  nullableNum,
+  nullableText,
+  requireNum,
+  requireText,
+} from "#shared/repository/column-values.ts";
 import type {
   ChronologyGame,
   ExitRecord,
@@ -16,58 +21,58 @@ export type Row = Record<string, unknown>;
 const LAST = -1;
 
 export const toPlayer = (row: Row): PlayerRecord => ({
-  id: num(row.id),
-  chat_id: num(row.chat_id),
-  display_name: text(row.display_name),
+  id: requireNum(row.id),
+  chat_id: requireNum(row.chat_id),
+  display_name: requireText(row.display_name),
 });
 
 export const toGame = (row: Row): GameRecord => ({
-  id: num(row.id),
-  chat_id: num(row.chat_id),
-  message_id: num(row.message_id),
-  state: text(row.state),
-  state_version: num(row.state_version),
+  id: requireNum(row.id),
+  chat_id: requireNum(row.chat_id),
+  message_id: requireNum(row.message_id),
+  state: requireText(row.state),
+  state_version: requireNum(row.state_version),
   starter_player_id: nullableNum(row.starter_player_id),
-  started_at: text(row.started_at),
+  started_at: requireText(row.started_at),
   confirmed_at: nullableText(row.confirmed_at),
 });
 
 export const toSeat = (row: Row): SeatRecord => ({
-  player_id: num(row.player_id),
-  seat_index: num(row.seat_index),
-  display_name: text(row.display_name),
+  player_id: requireNum(row.player_id),
+  seat_index: requireNum(row.seat_index),
+  display_name: requireText(row.display_name),
 });
 
 export const toExit = (row: Row): ExitRecord => ({
-  player_id: num(row.player_id),
-  position: num(row.position),
+  player_id: requireNum(row.player_id),
+  position: requireNum(row.position),
 });
 
 export const toPlayerTally = (row: Row): PlayerTally => ({
-  playerId: num(row.player_id),
-  displayName: text(row.display_name),
-  games: num(row.games),
+  playerId: requireNum(row.player_id),
+  displayName: requireText(row.display_name),
+  games: requireNum(row.games),
 });
 
 export const toPlayerColumn = (row: Row): PlayerColumn => ({
-  playerId: num(row.player_id),
-  displayName: text(row.display_name),
+  playerId: requireNum(row.player_id),
+  displayName: requireText(row.display_name),
 });
 
 export const toStorageSummary = (row: Row | undefined, file: string): StorageSummary => ({
   file,
-  sizeBytes: num(row?.size_bytes),
-  players: num(row?.players),
-  games: num(row?.games),
-  liveCards: num(row?.live_cards),
+  sizeBytes: requireNum(row?.size_bytes),
+  players: requireNum(row?.players),
+  games: requireNum(row?.games),
+  liveCards: requireNum(row?.live_cards),
   lastGameAt: nullableText(row?.last_game_at),
 });
 
 export const groupByGame = (rows: readonly Row[]): readonly ChronologyGame[] =>
   rows.reduce<readonly ChronologyGame[]>((games, row) => {
-    const gameId = num(row.game_id);
+    const gameId = requireNum(row.game_id);
     const starterId = nullableNum(row.starter_id);
-    const placement = { playerId: num(row.player_id), position: num(row.position) };
+    const placement = { playerId: requireNum(row.player_id), position: requireNum(row.position) };
     const open = games.at(LAST);
 
     if (open?.gameId !== gameId) {

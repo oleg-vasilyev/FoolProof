@@ -1,5 +1,10 @@
 import { db, dbFile, SERIES_GAP_SECONDS } from "#shared/repository/sqlite-connection.ts";
-import { nullableText, num, numberOr, text } from "#shared/repository/column-values.ts";
+import {
+  nullableText,
+  numberOr,
+  requireNum,
+  requireText,
+} from "#shared/repository/column-values.ts";
 import {
   groupByGame,
   toExit,
@@ -80,7 +85,7 @@ const losersOf = (gameId: number): readonly number[] => {
     )
     .all(gameId, gameId);
 
-  return rows.map((row) => num(row.player_id));
+  return rows.map((row) => requireNum(row.player_id));
 };
 
 const cardOf = (row: Row): CardRecord => {
@@ -105,7 +110,7 @@ export const sqliteRepository: Repository = {
       .prepare("INSERT INTO players (chat_id, display_name) VALUES (?, ?)")
       .run(chatId, displayName);
 
-    return { id: num(result.lastInsertRowid), chat_id: chatId, display_name: displayName };
+    return { id: requireNum(result.lastInsertRowid), chat_id: chatId, display_name: displayName };
   },
 
   forgetUnplayedPlayers(chatId) {
@@ -216,7 +221,7 @@ export const sqliteRepository: Repository = {
       return null;
     }
 
-    const gameId = num(row.id);
+    const gameId = requireNum(row.id);
 
     return { seats: seatsOf(gameId), loserIds: losersOf(gameId) };
   },
@@ -227,7 +232,7 @@ export const sqliteRepository: Repository = {
         .prepare("INSERT INTO games (chat_id, state) VALUES (?, 'PICK_STARTER')")
         .run(chatId);
 
-      const gameId = num(inserted.lastInsertRowid);
+      const gameId = requireNum(inserted.lastInsertRowid);
       const seat = db.prepare(
         "INSERT INTO game_players (game_id, player_id, seat_index) VALUES (?, ?, ?)"
       );
@@ -294,7 +299,7 @@ export const sqliteRepository: Repository = {
 
     transact(() => {
       db.prepare("DELETE FROM games WHERE id = ?").run(gameId);
-      db.prepare(UNREFERENCED_PLAYERS).run(num(game.chat_id));
+      db.prepare(UNREFERENCED_PLAYERS).run(requireNum(game.chat_id));
     });
   },
 
@@ -378,6 +383,6 @@ export const sqliteRepository: Repository = {
       .all(chatId, chatId)
       .map(toPlayerColumn);
 
-    return { startedOn: text(startedOn), players, games: groupByGame(played) };
+    return { startedOn: requireText(startedOn), players, games: groupByGame(played) };
   },
 };

@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   nullableNum,
   nullableText,
-  num,
   numberOr,
-  text,
+  requireNum,
+  requireText,
 } from "#shared/repository/column-values.ts";
 
 
@@ -48,25 +48,35 @@ describe("numberOr()", () => {
   });
 });
 
-describe("num()", () => {
+describe("requireNum()", () => {
   it("should pass a number straight through", () => {
-    expect(num(COUNT)).toBe(COUNT);
+    expect(requireNum(COUNT)).toBe(COUNT);
   });
 
-  it("should narrow a bigint", () => {
-    expect(num(BigInt(COUNT))).toBe(COUNT);
+  it("should keep zero, which is a real value for a message sentinel", () => {
+    expect(requireNum(ZERO)).toBe(ZERO);
   });
 
-  it("should read a missing column as zero", () => {
-    expect(num(undefined)).toBe(ZERO);
+  it("should narrow a bigint, since SQLite returns rowids as one", () => {
+    expect(requireNum(BigInt(COUNT))).toBe(COUNT);
   });
 
-  it("should read a null column as zero", () => {
-    expect(num(null)).toBe(ZERO);
+  it("should return a number, not a bigint, so arithmetic downstream works", () => {
+    expect(typeof requireNum(BigInt(COUNT))).toBe("number");
   });
 
-  it("should read a string as zero rather than parsing it", () => {
-    expect(num("42")).toBe(ZERO);
+  it("should refuse a missing column instead of inventing a zero", () => {
+    expect(() => requireNum(undefined)).toThrow(
+      "expected a number in a NOT NULL column, found undefined"
+    );
+  });
+
+  it("should refuse a NULL column and say it was null", () => {
+    expect(() => requireNum(null)).toThrow("expected a number in a NOT NULL column, found null");
+  });
+
+  it("should refuse a numeric string rather than parsing it", () => {
+    expect(() => requireNum("42")).toThrow("expected a number in a NOT NULL column, found string");
   });
 });
 
@@ -91,30 +101,32 @@ describe("nullableNum()", () => {
     expect(nullableNum(undefined)).toBeNull();
   });
 
-  it("should fall back to zero for a present value of the wrong type", () => {
-    expect(nullableNum("42")).toBe(ZERO);
+  it("should refuse a present value of the wrong type", () => {
+    expect(() => nullableNum("42")).toThrow("expected a number in a NOT NULL column, found string");
   });
 });
 
-describe("text()", () => {
+describe("requireText()", () => {
   it("should pass a string straight through", () => {
-    expect(text("Oleg")).toBe("Oleg");
+    expect(requireText("Oleg")).toBe("Oleg");
   });
 
   it("should keep an empty string", () => {
-    expect(text("")).toBe("");
+    expect(requireText("")).toBe("");
   });
 
-  it("should read a missing column as an empty string", () => {
-    expect(text(undefined)).toBe("");
+  it("should refuse a missing column instead of inventing an empty string", () => {
+    expect(() => requireText(undefined)).toThrow(
+      "expected text in a NOT NULL column, found undefined"
+    );
   });
 
-  it("should read a NULL column as an empty string", () => {
-    expect(text(null)).toBe("");
+  it("should refuse a NULL column and say it was null", () => {
+    expect(() => requireText(null)).toThrow("expected text in a NOT NULL column, found null");
   });
 
-  it("should read a number as an empty string rather than stringifying it", () => {
-    expect(text(COUNT)).toBe("");
+  it("should refuse a number rather than stringifying it", () => {
+    expect(() => requireText(COUNT)).toThrow("expected text in a NOT NULL column, found number");
   });
 });
 
@@ -135,7 +147,7 @@ describe("nullableText()", () => {
     expect(nullableText(undefined)).toBeNull();
   });
 
-  it("should report a number as null rather than stringifying it", () => {
-    expect(nullableText(COUNT)).toBeNull();
+  it("should refuse a number rather than stringifying it", () => {
+    expect(() => nullableText(COUNT)).toThrow("expected text in a NOT NULL column, found number");
   });
 });

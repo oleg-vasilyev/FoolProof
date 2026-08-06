@@ -7,25 +7,25 @@ const ZERO = 0;
 
 export class ColumnValuesStub {
   public numberOrSpy = vi.fn<ColumnValuesModule["numberOr"]>();
-  public numSpy = vi.fn<ColumnValuesModule["num"]>();
+  public requireNumSpy = vi.fn<ColumnValuesModule["requireNum"]>();
   public nullableNumSpy = vi.fn<ColumnValuesModule["nullableNum"]>();
-  public textSpy = vi.fn<ColumnValuesModule["text"]>();
+  public requireTextSpy = vi.fn<ColumnValuesModule["requireText"]>();
   public nullableTextSpy = vi.fn<ColumnValuesModule["nullableText"]>();
 
   public readonly module: ColumnValuesModule;
 
   public constructor() {
     this.numberOrSpy.mockReturnValue(ZERO);
-    this.numSpy.mockReturnValue(ZERO);
+    this.requireNumSpy.mockReturnValue(ZERO);
     this.nullableNumSpy.mockReturnValue(null);
-    this.textSpy.mockReturnValue("");
+    this.requireTextSpy.mockReturnValue("");
     this.nullableTextSpy.mockReturnValue(null);
 
     this.module = {
       numberOr: (value, fallback) => this.numberOrSpy(value, fallback),
-      num: (value) => this.numSpy(value),
+      requireNum: (value) => this.requireNumSpy(value),
       nullableNum: (value) => this.nullableNumSpy(value),
-      text: (value) => this.textSpy(value),
+      requireText: (value) => this.requireTextSpy(value),
       nullableText: (value) => this.nullableTextSpy(value),
     };
   }

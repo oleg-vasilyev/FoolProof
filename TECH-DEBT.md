@@ -110,22 +110,6 @@ stale menu starts lying.
 
 ---
 
-## `num()` and `text()` make a broken query look like data
-
-`column-values.ts` coerces anything unexpected to `0` or `""`. A column aliased
-wrong in an edited query, or a NULL arriving in a column that "cannot" hold one,
-comes back as a plausible value instead of an error, so the mistake surfaces as a
-wrong figure in a picture rather than as a stack trace at the query. The
-integration spec keeps today's queries honest; the next query written gets no such
-guard at runtime. The shape of the fix is a throwing `requireNum` / `requireText`
-for columns declared NOT NULL, with `numberOr` kept only where a fallback means
-something.
-
-**Pick it up the first time a wrong figure is traced back to a silent `0`** —
-until then the integration suite is the guard that exists.
-
----
-
 ## Two dev scripts hand git-derived filenames to a shell
 
 `scripts/mutate-changed.ts` and `scripts/e2e-changed.ts` join names from

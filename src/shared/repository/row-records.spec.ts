@@ -39,9 +39,9 @@ describe("row mappers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    values.numSpy.mockReturnValue(AS_NUMBER);
+    values.requireNumSpy.mockReturnValue(AS_NUMBER);
     values.nullableNumSpy.mockReturnValue(AS_NULLABLE_NUMBER);
-    values.textSpy.mockReturnValue(AS_TEXT);
+    values.requireTextSpy.mockReturnValue(AS_TEXT);
     values.nullableTextSpy.mockReturnValue(AS_NULLABLE_TEXT);
   });
 
@@ -57,13 +57,13 @@ describe("row mappers", () => {
     it("should feed the numeric coercion the id and the chat, in that order", () => {
       toPlayer({ id: ONE, chat_id: TWO, display_name: "Oleg" });
 
-      expect(values.numSpy.mock.calls).toEqual([[ONE], [TWO]]);
+      expect(values.requireNumSpy.mock.calls).toEqual([[ONE], [TWO]]);
     });
 
     it("should feed the text coercion the name", () => {
       toPlayer({ id: ONE, chat_id: TWO, display_name: "Oleg" });
 
-      expect(values.textSpy).toHaveBeenCalledWith("Oleg");
+      expect(values.requireTextSpy).toHaveBeenCalledWith("Oleg");
     });
 
     it("should ignore columns the record does not promise", () => {
@@ -104,7 +104,7 @@ describe("row mappers", () => {
       toGame(row);
 
       expect(values.nullableNumSpy).toHaveBeenCalledWith(STARTER_ID);
-      expect(values.numSpy).not.toHaveBeenCalledWith(STARTER_ID);
+      expect(values.requireNumSpy).not.toHaveBeenCalledWith(STARTER_ID);
     });
 
     it("should read confirmed_at as nullable, since a live card has none", () => {
@@ -116,7 +116,7 @@ describe("row mappers", () => {
     it("should read started_at as plain text, since a game always has one", () => {
       toGame(row);
 
-      expect(values.textSpy).toHaveBeenCalledWith("2026-07-24 20:00:00");
+      expect(values.requireTextSpy).toHaveBeenCalledWith("2026-07-24 20:00:00");
       expect(values.nullableTextSpy).not.toHaveBeenCalledWith("2026-07-24 20:00:00");
     });
   });
@@ -133,7 +133,7 @@ describe("row mappers", () => {
     it("should feed the numeric coercion the player and the seat, in that order", () => {
       toSeat({ player_id: ONE, seat_index: TWO, display_name: "Anya" });
 
-      expect(values.numSpy.mock.calls).toEqual([[ONE], [TWO]]);
+      expect(values.requireNumSpy.mock.calls).toEqual([[ONE], [TWO]]);
     });
   });
 
@@ -160,7 +160,7 @@ describe("row mappers", () => {
     it("should count games as a number, not as text", () => {
       toPlayerTally(row);
 
-      expect(values.numSpy).toHaveBeenCalledWith(THREE);
+      expect(values.requireNumSpy).toHaveBeenCalledWith(THREE);
     });
   });
 
@@ -191,10 +191,10 @@ describe("row mappers", () => {
       expect(toStorageSummary(row, DB_FILE).file).toBe(DB_FILE);
     });
 
-    it("should treat a missing row as a database with nothing in it", () => {
+    it("should hand a missing row's columns to the coercion, which is what refuses them", () => {
       toStorageSummary(undefined, DB_FILE);
 
-      expect(values.numSpy).toHaveBeenCalledWith(undefined);
+      expect(values.requireNumSpy).toHaveBeenCalledWith(undefined);
     });
 
     it("should still name the file when there is no row", () => {
@@ -214,7 +214,7 @@ describe("groupByGame()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    values.numSpy.mockImplementation((value) => Number(value));
+    values.requireNumSpy.mockImplementation((value) => Number(value));
     values.nullableNumSpy.mockImplementation((value) =>
       value === null || value === undefined ? null : Number(value)
     );
@@ -278,6 +278,6 @@ describe("groupByGame()", () => {
   it("should take every column through the numeric coercion", () => {
     groupByGame([rowOf(ONE, TWO, THREE)]);
 
-    expect(values.numSpy.mock.calls).toEqual([[ONE], [TWO], [THREE]]);
+    expect(values.requireNumSpy.mock.calls).toEqual([[ONE], [TWO], [THREE]]);
   });
 });

@@ -1,6 +1,6 @@
-const ZERO = 0;
+const kindOf = (value: unknown): string => (value === null ? "null" : typeof value);
 
-export const numberOr = (value: unknown, fallback: number): number => {
+const asNumber = (value: unknown): number | null => {
   if (typeof value === "number") {
     return value;
   }
@@ -9,15 +9,31 @@ export const numberOr = (value: unknown, fallback: number): number => {
     return Number(value);
   }
 
-  return fallback;
+  return null;
 };
 
-export const num = (value: unknown): number => numberOr(value, ZERO);
+export const numberOr = (value: unknown, fallback: number): number => asNumber(value) ?? fallback;
+
+export const requireNum = (value: unknown): number => {
+  const found = asNumber(value);
+
+  if (found === null) {
+    throw new Error(`expected a number in a NOT NULL column, found ${kindOf(value)}`);
+  }
+
+  return found;
+};
 
 export const nullableNum = (value: unknown): number | null =>
-  value === null || value === undefined ? null : num(value);
+  value === null || value === undefined ? null : requireNum(value);
 
-export const text = (value: unknown): string => (typeof value === "string" ? value : "");
+export const requireText = (value: unknown): string => {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  throw new Error(`expected text in a NOT NULL column, found ${kindOf(value)}`);
+};
 
 export const nullableText = (value: unknown): string | null =>
-  typeof value === "string" ? value : null;
+  value === null || value === undefined ? null : requireText(value);
