@@ -366,7 +366,8 @@ export default [
   },
   {
     // scripts/ shares the style rules but not the app rules below: a dev utility
-    // may print to the console, and it imports no feature.
+    // may print to the console, and it may import a feature — the mockup tools draw
+    // the scoresheet's own posters, which is why no feature zone fences scripts/.
     files: ["src/**/*.ts", "scripts/**/*.ts"],
     languageOptions: {
       parser: tsParser,

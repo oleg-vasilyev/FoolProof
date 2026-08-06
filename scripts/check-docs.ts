@@ -1,5 +1,6 @@
 import { readdirSync, existsSync, readFileSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
+import { MOCKUP_DIR, posters } from "./mockups.ts";
 
 
 const DOCUMENTS = [
@@ -198,12 +199,29 @@ const schemaOutOfStep = (): readonly string[] => {
   });
 };
 
+const mockupsOutOfStep = (): readonly string[] =>
+  Object.entries(posters()).flatMap(([name, svg]) => {
+    const committed = `${MOCKUP_DIR}/${name}.svg`;
+
+    if (!existsSync(committed)) {
+      return [`${committed}: never drawn — run "node scripts/tools.ts mockups"`];
+    }
+
+    return read(committed) === svg
+      ? []
+      : [
+          `${committed}: the renderer draws something else now — the ` +
+            `"sync-the-mockups" skill redraws this and the Claude Design page it belongs to`,
+        ];
+  });
+
 const complaints = [
   ...brokenLinks(),
   ...featuresMissingFromTheTree(),
   ...scriptsOutOfStep(),
   ...crowdedLayers(),
   ...schemaOutOfStep(),
+  ...mockupsOutOfStep(),
   ...overBudget(),
 ];
 
