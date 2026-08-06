@@ -211,7 +211,7 @@ environment value is ever printed.
 | `npm run start:prod` | The bot on the production database, under the supervisor |
 | `npm test` | Vitest, once — units and integration together |
 | `npm run test:unit` | Only the unit specs, where everything outside the file is mocked |
-| `npm run test:integration` | Only `*.integration.spec.ts` — the real grammY bot and a real SQLite file |
+| `npm run test:integration` | Only `*.integration.spec.ts` — the seams where third-party code runs for real |
 | `npm run test:watch` | Vitest left running while you edit |
 | `npm run test:coverage` | Vitest with coverage; fails below 70% on any metric |
 | `npm run test:mutation:changed` | Stryker over the files that differ from `origin/main`, about a minute |

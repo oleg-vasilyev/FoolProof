@@ -207,16 +207,26 @@ export class CardServiceStub {
 
 ## Integration specs
 
-**An integration spec is an exception with a reason**: several parts once went
-wrong *together*, and no single unit could have caught it. Write one when the
-seam between systems is itself the thing under test — never because mocking was
-inconvenient.
+**An integration spec covers a seam the unit rule puts out of reach.** Not "several
+parts that mock badly" — two specific shapes, and if a candidate is neither, it is a
+unit that has not been written properly:
+
+1. **A contract with code we did not write.** "Never exercise third-party code in a
+   unit" is absolute, so every belief about grammY, `node:sqlite`, resvg and
+   `node:child_process` is otherwise asserted by *our own fake*. The rule creates
+   this work; it does not excuse us from it.
+2. **A chain of our own modules whose every joint is mocked.** Types catch the shape
+   of what crosses a joint and say nothing about the meaning of a number — which
+   `position`, which `round`, counted from what. The longer the chain of pure
+   modules, the less any pairwise unit knows.
+
+What does not earn one: mocking was inconvenient, or a scenario already plays it.
 
 Name it `*.integration.spec.ts`, so nobody mistakes it for the default, and put
 it beside the code like every other spec. `npm run test:unit` and
 `npm run test:integration` run them separately; `npm test` runs both.
 
-Two exist, and the bar for a third is a bug that got through the units:
+Six exist. Three cover the contracts:
 
 - **`src/feature-installer.integration.spec.ts`** drives a real grammY `Bot`
   through `bot.handleUpdate()`, intercepting the network at
@@ -229,6 +239,54 @@ Two exist, and the bar for a third is a bug that got through the units:
   would assert nothing. Set `process.env.DB_PATH` before importing, because
   `sqlite-connection.ts` opens the connection at module load — and close the connection before
   deleting the file, or Windows refuses and the temp files pile up.
+- **`shared/telegram/api-retry.integration.spec.ts`** installs the real transformer
+  over a fake wire on a real `Bot`. Order matters and reads backwards: the **last**
+  transformer installed is the outermost, so the wire goes on first. It pins the
+  asymmetry no unit can check — a network fault **throws**, a refusal **resolves**
+  as `{ ok: false }`, and a refusal that survives the retries reaches the call site
+  as a thrown `GrammyError`.
+
+Two cover the seams the harness cannot reach, because a scenario cannot make the
+outside world misbehave:
+
+- **`shared/lifecycle/child-supervisor.integration.spec.ts`** supervises a real
+  child: a `.cjs` fixture written to a temp dir that exits non-zero on its first
+  attempt. It pins what only a real `spawn` can — the exit code coming back, and
+  `BOT_START_ATTEMPT` and `BOT_PREVIOUS_EXIT` reaching the next child, which is
+  what `/status` reports. Nothing else supervises a real process: `e2e/` spawns
+  `main.ts` directly, so the restart path production runs on has no other cover.
+- **`scoresheet/bot/rasterizer.integration.spec.ts`** rasterizes real render output
+  with the shipped fonts. A missing font makes resvg draw a **blank page rather
+  than fail**, so the assertion is that the raster differs from the same SVG with
+  its `<text>` stripped — and separately for a Cyrillic word, since half of what
+  this bot writes is Russian.
+
+One covers a chain:
+
+- **`scoresheet/scoresheet-chain.integration.spec.ts`** plays an evening into a real
+  database and reads the percentages back out of the **SVG string** — before
+  rasterizing, while the numbers are still text. Every joint from `seriesChronology`
+  to the legend is mocked in the units, and a PNG is opaque to e2e, so this is the
+  only place the arithmetic of an evening is checked end to end.
+
+Four things this tier gets wrong, all paid for:
+
+- **An integration spec is still bound by the layering.** The chain spec first
+  arranged its evening with `db.prepare("UPDATE games SET starter_player_id …")` —
+  a second copy of the schema inside a feature folder, writing by a path production
+  never takes. Arrange through the contract (`repo.updateCard(…)`, and a phase
+  crosses it as a plain string), and isolate cases with a **different `chatId`**
+  rather than a `DELETE`. No lint zone catches this: a feature zone bans other
+  features, not SQL.
+- **Select by something the subject deliberately emits.** `"50%"` is a legend entry
+  *and* an axis label on the share chart, so an `indexOf` picked the wrong one. The
+  fix was to take the percent immediately followed by a player's name.
+- **Prove it fails.** Point the font paths at files that do not exist and watch the
+  ink assertions go red — the PNG-magic assertion stays green, which is exactly why
+  "it is a PNG" was never enough.
+- **Real time is the price.** A retry backoff and a restart delay are real waits.
+  Keep the number of waiting cases countable, and reach for the branch that gives up
+  without sleeping when one will do.
 
 One trap worth keeping: `bot.catch` only participates in `bot.start()`.
 `handleUpdate` rethrows, so an error handler is exercised through

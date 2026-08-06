@@ -292,10 +292,10 @@ source tree, so they are here:
   fake** — everything in `shared/`, and every feature entry point. The skill has
   the two silent failures that made it a rule.
 - **A spec tests one file, and everything that file imports is mocked.** Third-party
-  code is never exercised in a unit — the one rule with no exceptions. An
-  integration spec is written only when the seam between systems is itself under
-  test, and is named `*.integration.spec.ts`. There are two; the bar for a third is
-  a bug that got through the units.
+  code is never exercised in a unit — the one rule with no exceptions, and it is
+  what leaves work for the specs named `*.integration.spec.ts`: a contract with
+  somebody else's code, or a chain of our own whose every joint is mocked away.
+  The skill lists the ones that exist and what earns another.
 
 `e2e/` is a different world with its own rules: writing one is the
 `write-an-e2e-scenario` skill and the harness is [`e2e/README.md`](e2e/README.md).

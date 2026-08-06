@@ -55,7 +55,7 @@ method for free; without this step they fail to compile.
 
 ## 4. `src/shared/repository/sqlite-repository.integration.spec.ts`
 
-One of the project's two integration specs, and it runs against a **real**
+One of the project's integration specs, and it runs against a **real**
 temporary SQLite file — its whole job is the SQL, and a mocked database would
 assert nothing.
 

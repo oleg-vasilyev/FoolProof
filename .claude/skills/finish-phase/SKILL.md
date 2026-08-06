@@ -61,6 +61,12 @@ them:
   notices, so a refactor after the mutation run is a refactor before another one.
   That is the second round the rule above forbids, and it is the one case where
   taking it is right.
+- **`--reporters` replaces the configured set, it does not add to it.** Passing
+  `--reporters clear-text` drops the `json` one, so `reports/mutation/mutation.json`
+  still holds the *previous* run's survivors — and the rule above sends you straight
+  to that stale file. This has already produced a confident reading of seven
+  survivors from a run that mutated three files and found two. Override the
+  reporters or read the report, never both.
 - **Read the survivor's own line before believing it is a gap.** Two adjacent
   ternaries in one reducer differ by one word, and a line number quoted from memory
   cost a whole extra run here: the rule everyone was worried about was already
@@ -98,6 +104,11 @@ a report that has to be re-checked line by line before it can be trusted. One ph
 ran the reviewer while its own mutation fixes were still landing; the report opened
 by saying so, and every finding then needed confirming twice. Land the fixes, get
 `npm run check` green, *then* review.
+
+**Spend the waiting on read-only work** — a control run, a report, the
+retrospective's counting. This rule has now been broken twice, and neither time by a
+decision: both times it was one small fix that seemed free because the agent was
+out. If the diff is worth reviewing, it is worth holding still for five minutes.
 
 **When the phase is mostly a restructure, run this gate on the source before the
 specs exist.** Everything a move is judged on — does the file's name describe what

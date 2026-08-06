@@ -74,6 +74,20 @@ first time the fake is caught disagreeing with a real signature.
 
 ---
 
+## Two `main.spec.ts` cases fail inside Stryker and nowhere else
+
+`should register a handler for SIGTERM` and `should run the same shutdown on SIGTERM`
+pass under `npm test` and are reported failed in every Stryker run, on any `--mutate`
+target — including files that have nothing to do with signals. Stryker carries on
+because both cover zero mutants, so the score is honest and the gate is not lying;
+what is lost is two cases' worth of killing power over `main.ts`, and a pair of red
+lines in every mutation run that a reader learns to skip past. The cause is in how
+the runner's environment handles a process-level `SIGTERM` listener, not in the
+assertions.
+
+**Chase it when a mutant in `main.ts`'s signal wiring survives**, or when the noise
+first makes somebody miss a real failure in that output.
+
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to
