@@ -130,6 +130,32 @@ const project = {
 
         const isSpec = context.filename.endsWith(".spec.ts");
 
+        const FUNCTIONS = new Set([
+          "ArrowFunctionExpression",
+          "FunctionDeclaration",
+          "FunctionExpression",
+        ]);
+
+        const enclosingReturnType = (node) => {
+          for (let current = node.parent; current; current = current.parent) {
+            if (FUNCTIONS.has(current.type)) {
+              return current.returnType?.typeAnnotation;
+            }
+          }
+
+          return undefined;
+        };
+
+        // `: string` may hold any text; `: Phase` may hold only what the Phase
+        // table says. Anything else — a union, a promise, a literal type — is
+        // left alone rather than guessed at.
+        const namesAType = (annotation) => annotation?.type === "TSTypeReference";
+
+        const branchesOf = (expression) =>
+          expression.type === "ConditionalExpression"
+            ? [expression.consequent, expression.alternate]
+            : [expression];
+
         return {
           SwitchCase(node) {
             if (node.test && isText(node.test)) {
@@ -143,6 +169,19 @@ const project = {
 
             if (DISCRIMINANTS.has(node.key.name) && isText(node.value)) {
               context.report({ node: node.value, messageId: "spelled" });
+            }
+          },
+          // A function that promises a named type and hands back a bare string
+          // is spelling the state a third way: not in a case, not in a
+          // comparison, so neither check above sees it. `phaseOf` returned
+          // "READY" for a whole phase after the table was introduced.
+          ReturnStatement(node) {
+            if (node.argument !== null && namesAType(enclosingReturnType(node))) {
+              for (const returned of branchesOf(node.argument)) {
+                if (isText(returned)) {
+                  context.report({ node: returned, messageId: "spelled" });
+                }
+              }
             }
           },
           BinaryExpression(node) {

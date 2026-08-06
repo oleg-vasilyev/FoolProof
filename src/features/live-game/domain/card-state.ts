@@ -56,10 +56,10 @@ export const isReady = (state: CardState): boolean => {
 
 export const phaseOf = (state: CardState): Phase => {
   if (state.starterSlot === null) {
-    return "PICK_STARTER";
+    return Phase.PickStarter;
   }
 
-  return isReady(state) ? "READY" : "RECORDING";
+  return isReady(state) ? Phase.Ready : Phase.Recording;
 };
 
 export const drawAvailable = (state: CardState): boolean =>
