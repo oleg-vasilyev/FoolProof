@@ -112,6 +112,14 @@ rule; a threshold proposed in the same phase misfired on the first folder outsid
 the two it was written for, which one command against the tree would have shown.
 Apply it, then test it, then commit it — in that order.
 
+**Then ask what shape of the same mistake the rule cannot see, and grep the whole
+tree for that shape once.** A lint rule catches the syntax somebody thought of.
+`project/named-states` knew a case clause, a discriminant property and a
+comparison; it did not know a `return`, so `phaseOf` kept handing back
+`"PICK_STARTER"` for two releases after the table existed, in a file the rule ran
+over cleanly every time. The grep is one command and it is the only thing that
+looks at the code the rule was written to protect rather than at the diff.
+
 **The brief names paths, never purposes.** Say which files to read; do not say what
 each one is for. A reviewer handed "`evening.ts` — turns the chronology into a
 reading of the evening" judges the name against that sentence and passes it; the
