@@ -241,11 +241,11 @@ describe("groupByGame()", () => {
     expect(groupByGame([rowOf(ONE, TWO, ONE, THREE)])[0]?.starterId).toBe(THREE);
   });
 
-  it("should report no dealer when the column is empty", () => {
+  it("should report nobody opening when the column is empty", () => {
     expect(groupByGame([rowOf(ONE, TWO, ONE)])[0]?.starterId).toBeNull();
   });
 
-  it("should take the dealer from the row that opened the game, not from a later one", () => {
+  it("should take the opener from the row that opened the game, not from a later one", () => {
     const rows = [rowOf(ONE, TWO, ONE, THREE), rowOf(ONE, THREE, TWO, null)];
 
     expect(groupByGame(rows)[0]?.starterId).toBe(THREE);

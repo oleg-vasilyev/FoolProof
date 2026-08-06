@@ -16,7 +16,7 @@ vi.mock("#scoresheet/domain/session-appearances.ts", () => ({
   foolByRound: (evening: unknown) => foolByRoundSpy(evening),
 }));
 
-const { dealersCurse, tableCurse } = await import("#scoresheet/domain/awards/dealer-awards.ts");
+const { openersCurse, tableCurse } = await import("#scoresheet/domain/awards/opener-awards.ts");
 
 const NOTHING = 0;
 
@@ -49,39 +49,39 @@ beforeEach(() => {
   foolByRoundSpy.mockReturnValue([]);
 });
 
-describe("dealersCurse()", () => {
+describe("openersCurse()", () => {
   const DEALT_FIVE = sessionAppearances([ROMANI, ROMANI, ROMANI, ROMANI, ROMANI, OLEG]);
 
   it("should award nothing when the ranking found nobody", () => {
-    expect(dealersCurse(DEALT_FIVE)).toBeNull();
+    expect(openersCurse(DEALT_FIVE)).toBeNull();
   });
 
   it("should report the deals as well as the deals that burned the dealer", () => {
     foolByRoundSpy.mockReturnValue([ROMANI, ROMANI, OLEG, OLEG, OLEG, ROMANI]);
     bestBySpy.mockReturnValue(player);
-    const award = dealersCurse(DEALT_FIVE);
+    const award = openersCurse(DEALT_FIVE);
 
-    expect(award?.name === AwardName.DealersCurse ? [award.deals, award.burns] : []).toEqual([FIVE, TWICE]);
+    expect(award?.name === AwardName.OpenersCurse ? [award.opens, award.burns] : []).toEqual([FIVE, TWICE]);
   });
 
   describe("who is eligible", () => {
     it("should count only the games a player both dealt and lost", () => {
       foolByRoundSpy.mockReturnValue([ROMANI, ROMANI, OLEG, OLEG, OLEG, ROMANI]);
-      dealersCurse(DEALT_FIVE);
+      openersCurse(DEALT_FIVE);
 
       expect(meritGiven()(player)).toBe(TWICE);
     });
 
     it("should refuse a dealer who was burned only once", () => {
       foolByRoundSpy.mockReturnValue([ROMANI, OLEG, OLEG, OLEG, OLEG, OLEG]);
-      dealersCurse(DEALT_FIVE);
+      openersCurse(DEALT_FIVE);
 
       expect(meritGiven()(player)).toBeNull();
     });
 
     it("should not count a game somebody else dealt and this player lost", () => {
       foolByRoundSpy.mockReturnValue([OLEG, OLEG, OLEG, OLEG, OLEG, ROMANI]);
-      dealersCurse(sessionAppearances([OLEG, OLEG, OLEG, OLEG, OLEG, OLEG]));
+      openersCurse(sessionAppearances([OLEG, OLEG, OLEG, OLEG, OLEG, OLEG]));
 
       expect(meritGiven()(player)).toBeNull();
     });

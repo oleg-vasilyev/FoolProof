@@ -11,7 +11,7 @@ import {
   theIrishGoodbye,
   theTruce,
 } from "#scoresheet/domain/awards/attendance-awards.ts";
-import { dealersCurse, tableCurse } from "#scoresheet/domain/awards/dealer-awards.ts";
+import { openersCurse, tableCurse } from "#scoresheet/domain/awards/opener-awards.ts";
 
 
 export const EVENING_MINIMUM = 5;
@@ -32,7 +32,7 @@ const RULES_IN_ORDER: readonly ((evening: SessionAppearances) => Award | null)[]
   allOrNothing,
   theInvisible,
   theIrishGoodbye,
-  dealersCurse,
+  openersCurse,
   encore,
   firstBlood,
 ];

@@ -11,7 +11,7 @@ export const AwardName = {
   TheInvisible: "theInvisible",
   TheIrishGoodbye: "theIrishGoodbye",
   Encore: "encore",
-  DealersCurse: "dealersCurse",
+  OpenersCurse: "openersCurse",
   FirstBlood: "firstBlood",
   FoolOfTheNight: "foolOfTheNight",
 } as const;
@@ -59,9 +59,9 @@ export type Award =
     }
   | { readonly name: typeof AwardName.Encore; readonly winners: readonly number[]; readonly run: number }
   | {
-      readonly name: typeof AwardName.DealersCurse;
+      readonly name: typeof AwardName.OpenersCurse;
       readonly winners: readonly number[];
-      readonly deals: number;
+      readonly opens: number;
       readonly burns: number;
     }
   | { readonly name: typeof AwardName.FirstBlood; readonly winners: readonly number[]; readonly games: number }

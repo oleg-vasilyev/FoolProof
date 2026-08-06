@@ -18,7 +18,7 @@ const ruleSpies = {
   allOrNothing: vi.fn(),
   theInvisible: vi.fn(),
   theIrishGoodbye: vi.fn(),
-  dealersCurse: vi.fn(),
+  openersCurse: vi.fn(),
   encore: vi.fn(),
   firstBlood: vi.fn(),
   foolOfTheNight: vi.fn(),
@@ -50,8 +50,8 @@ vi.mock("#scoresheet/domain/awards/attendance-awards.ts", () => ({
   firstBlood: (evening: unknown) => ruleSpies.firstBlood(evening),
 }));
 
-vi.mock("#scoresheet/domain/awards/dealer-awards.ts", () => ({
-  dealersCurse: (evening: unknown) => ruleSpies.dealersCurse(evening),
+vi.mock("#scoresheet/domain/awards/opener-awards.ts", () => ({
+  openersCurse: (evening: unknown) => ruleSpies.openersCurse(evening),
   tableCurse: (evening: unknown) => tableCurseSpy(evening),
 }));
 
@@ -137,11 +137,11 @@ describe("honoursFor()", () => {
   });
 
   it("should print the awards from glory to disgrace", () => {
-    ruleSpies.dealersCurse.mockReturnValue(awardOf("dealersCurse"));
+    ruleSpies.openersCurse.mockReturnValue(awardOf("openersCurse"));
     ruleSpies.king.mockReturnValue(awardOf("king"));
     ruleSpies.ironSeat.mockReturnValue(awardOf("ironSeat"));
 
-    expect(namesOf()).toEqual(["king", "ironSeat", "dealersCurse"]);
+    expect(namesOf()).toEqual(["king", "ironSeat", "openersCurse"]);
   });
 
   it("should keep the fool of the night last, however early it was judged", () => {

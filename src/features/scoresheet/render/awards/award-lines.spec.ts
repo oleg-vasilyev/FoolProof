@@ -172,14 +172,14 @@ describe("award-lines", () => {
       expect(gameTallySpy).not.toHaveBeenCalled();
     });
 
-    it("should give the dealer's curse the raw deals and burns, with no tally involved", () => {
-      const DEALS = 6;
+    it("should give the opener's curse the raw opens and burns, with no tally involved", () => {
+      const OPENS = 6;
       const BURNS = 2;
-      const award: Award = { name: AwardName.DealersCurse, winners: [WINNER], deals: DEALS, burns: BURNS };
+      const award: Award = { name: AwardName.OpenersCurse, winners: [WINNER], opens: OPENS, burns: BURNS };
 
       const reason = awardReason(copy, award);
 
-      expect(reason).toContain(String(DEALS));
+      expect(reason).toContain(String(OPENS));
       expect(reason).toContain(String(BURNS));
       expect(gameTallySpy).not.toHaveBeenCalled();
     });

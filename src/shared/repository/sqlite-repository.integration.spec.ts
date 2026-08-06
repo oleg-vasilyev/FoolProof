@@ -793,14 +793,14 @@ describe("seriesChronology()", () => {
     expect(repo.seriesChronology(CHAT_ID)?.games[0]?.starterId).toBe(ids[1]);
   });
 
-  it("should report no dealer for a game whose starter was never set", () => {
+  it("should report nobody opening a game whose starter was never set", () => {
     const ids = seedPlayers("Oleg", "Anya", "Roma");
     playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
 
     expect(repo.seriesChronology(CHAT_ID)?.games[0]?.starterId).toBeNull();
   });
 
-  it("should keep each game's own dealer rather than the first game's", () => {
+  it("should keep each game's own opener rather than the first game's", () => {
     const ids = seedPlayers("Oleg", "Anya", "Roma");
     const first = playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
     const second = playFullGame(ids, [ids[1] ?? NONE, ids[0] ?? NONE], [ids[2] ?? NONE]);

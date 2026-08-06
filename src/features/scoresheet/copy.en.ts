@@ -31,7 +31,7 @@ export const copy = {
     theInvisible: "THE INVISIBLE",
     theIrishGoodbye: "THE IRISH GOODBYE",
     encore: "ENCORE",
-    dealersCurse: "DEALER'S CURSE",
+    openersCurse: "OPENER'S CURSE",
     firstBlood: "FIRST BLOOD",
     foolOfTheNight: "FOOL OF THE NIGHT",
   },
@@ -53,13 +53,13 @@ export const copy = {
     `Left after game ${leftAfter} of ${games} and was never the fool again.`,
   encoreReason: (run: number) =>
     `${run} games running as the fool. An encore nobody asked for.`,
-  dealersCurseReason: (deals: number, burns: number) =>
-    `Dealt ${deals} times and left the fool in ${burns} of those deals.`,
+  openersCurseReason: (opens: number, burns: number) =>
+    `Opened ${opens} games and was left the fool in ${burns} of them.`,
   firstBloodReason: (games: string) => `Fool of game 1 of ${games}. The evening opened badly.`,
   foolReason: (fools: number, games: string) =>
     `Left the fool in ${fools} of ${games}. Nobody managed worse.`,
   curseFact: (burns: number, games: string) =>
-    `in ${burns} of ${games} the dealer was left the fool.`,
+    `in ${burns} of ${games} whoever opened was left the fool.`,
 
   sheetEyebrow: "SESSION LOG",
   sheetTitle: "CHRONOLOGY",

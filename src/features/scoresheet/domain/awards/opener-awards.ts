@@ -8,7 +8,7 @@ const BURNED_ENOUGH = 2;
 
 const NONE = 0;
 
-const dealsOf = (evening: SessionAppearances, player: PlayerAppearances): number =>
+const opensOf = (evening: SessionAppearances, player: PlayerAppearances): number =>
   evening.starters.filter((starter) => starter === player.playerId).length;
 
 const burnsOf = (evening: SessionAppearances, player: PlayerAppearances): number => {
@@ -19,7 +19,7 @@ const burnsOf = (evening: SessionAppearances, player: PlayerAppearances): number
   ).length;
 };
 
-export const dealersCurse = (evening: SessionAppearances): Award | null => {
+export const openersCurse = (evening: SessionAppearances): Award | null => {
   const winner = bestBy(evening.players, (player) => {
     const burns = burnsOf(evening, player);
 
@@ -29,9 +29,9 @@ export const dealersCurse = (evening: SessionAppearances): Award | null => {
   return winner === null
     ? null
     : {
-        name: AwardName.DealersCurse,
+        name: AwardName.OpenersCurse,
         winners: [winner.playerId],
-        deals: dealsOf(evening, winner),
+        opens: opensOf(evening, winner),
         burns: burnsOf(evening, winner),
       };
 };

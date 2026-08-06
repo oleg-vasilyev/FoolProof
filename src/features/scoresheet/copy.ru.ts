@@ -32,7 +32,7 @@ export const copy: Copy = {
     theInvisible: "НЕВИДИМКА",
     theIrishGoodbye: "АНГЛИЙСКИЙ УХОД",
     encore: "НА БИС",
-    dealersCurse: "ПРОКЛЯТИЕ РАЗДАЧИ",
+    openersCurse: "ПРОКЛЯТИЕ ПЕРВОГО ХОДА",
     firstBlood: "ПЕРВАЯ КРОВЬ",
     foolOfTheNight: "ДУРАК ВЕЧЕРА",
   },
@@ -53,13 +53,13 @@ export const copy: Copy = {
   irishGoodbyeReason: (leftAfter: number, games: string) =>
     `Ушёл на партии ${leftAfter} из ${games} — и дураком больше ни разу.`,
   encoreReason: (run: number) => `${run} подряд — дураком. На бис никто не просил.`,
-  dealersCurseReason: (deals: number, burns: number) =>
-    `Раздач — ${deals}, и дураком в ${burns} из них.`,
+  openersCurseReason: (opens: number, burns: number) =>
+    `Первых ходов — ${opens}, и дураком в ${burns} из них.`,
   firstBloodReason: (games: string) => `Дурак первой партии из ${games}. Вечер начался плохо.`,
   foolReason: (fools: number, games: string) =>
     `Дураком в ${fools} из ${games}. Хуже не сыграл никто.`,
   curseFact: (burns: number, games: string) =>
-    `в ${burns} из ${games} дураком оставался раздающий.`,
+    `в ${burns} из ${games} дураком оставался ходивший первым.`,
 
   sheetEyebrow: "ЖУРНАЛ ВЕЧЕРА",
   sheetTitle: "ХРОНОЛОГИЯ",

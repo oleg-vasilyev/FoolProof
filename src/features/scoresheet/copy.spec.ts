@@ -31,7 +31,7 @@ const reasonsOf = (copy: Copy): readonly (readonly [string, string])[] => {
     ["theInvisible", copy.invisibleReason(EIGHT, "17 games")],
     ["theIrishGoodbye", copy.irishGoodbyeReason(EIGHT, "19 games")],
     ["encore", copy.encoreReason(TWO)],
-    ["dealersCurse", copy.dealersCurseReason(FIFTY_ONE, TWO)],
+    ["openersCurse", copy.openersCurseReason(FIFTY_ONE, TWO)],
     ["firstBlood", copy.firstBloodReason("19 games")],
     ["foolOfTheNight", copy.foolReason(TWO, "15 games")],
     ["curse", copy.curseFact(EIGHT, "19 games")],

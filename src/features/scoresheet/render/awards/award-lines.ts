@@ -41,8 +41,8 @@ export const awardReason = (copy: Copy, award: Award): string => {
     case AwardName.Encore:
       return copy.encoreReason(award.run);
 
-    case AwardName.DealersCurse:
-      return copy.dealersCurseReason(award.deals, award.burns);
+    case AwardName.OpenersCurse:
+      return copy.openersCurseReason(award.opens, award.burns);
 
     case AwardName.FirstBlood:
       return copy.firstBloodReason(gameTally(copy, award.games));

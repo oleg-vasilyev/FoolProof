@@ -713,7 +713,7 @@ as a bug rather than as a thin evening; `/stats_awards` answers in text instead.
 
 The card is read top to bottom from glory to disgrace, and **FOOL OF THE NIGHT is
 always last**, on a red plate. Under it, when it happened at all, one line about the
-whole table: how often the dealer was left the fool in their own deal.
+whole table: how often whoever opened a game was left the fool in it.
 
 | Award | Earned by | Threshold |
 |---|---|---|
@@ -726,7 +726,7 @@ whole table: how often the dealer was left the fool in their own deal.
 | ALL OR NOTHING | most games finished at an edge — first out or fool | ≥ 60%, ≥ 5 games |
 | THE INVISIBLE | most games finished in the middle | ≥ 60%, ≥ 5 games |
 | THE IRISH GOODBYE | leaving before the end, and not as the fool | left early |
-| DEALER'S CURSE | dealing and being left the fool in that same game | ≥ 2 times |
+| OPENER'S CURSE | opening a game and being left the fool in that same game | ≥ 2 times |
 | ENCORE | the fool in two games running | ≥ 2 running |
 | FIRST BLOOD | the fool of the very first game | never the same person as FOOL |
 | FOOL OF THE NIGHT | the worst fool rate | ≥ 5 games |
