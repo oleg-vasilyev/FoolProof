@@ -67,16 +67,16 @@ describe("requireNum()", () => {
 
   it("should refuse a missing column instead of inventing a zero", () => {
     expect(() => requireNum(undefined)).toThrow(
-      "expected a number in a NOT NULL column, found undefined"
+      "expected a number from the database, found undefined"
     );
   });
 
-  it("should refuse a NULL column and say it was null", () => {
-    expect(() => requireNum(null)).toThrow("expected a number in a NOT NULL column, found null");
+  it("should refuse a NULL column and say it was null, without claiming a constraint", () => {
+    expect(() => requireNum(null)).toThrow("expected a number from the database, found null");
   });
 
   it("should refuse a numeric string rather than parsing it", () => {
-    expect(() => requireNum("42")).toThrow("expected a number in a NOT NULL column, found string");
+    expect(() => requireNum("42")).toThrow("expected a number from the database, found string");
   });
 });
 
@@ -102,7 +102,7 @@ describe("nullableNum()", () => {
   });
 
   it("should refuse a present value of the wrong type", () => {
-    expect(() => nullableNum("42")).toThrow("expected a number in a NOT NULL column, found string");
+    expect(() => nullableNum("42")).toThrow("expected a number from the database, found string");
   });
 });
 
@@ -117,16 +117,16 @@ describe("requireText()", () => {
 
   it("should refuse a missing column instead of inventing an empty string", () => {
     expect(() => requireText(undefined)).toThrow(
-      "expected text in a NOT NULL column, found undefined"
+      "expected text from the database, found undefined"
     );
   });
 
   it("should refuse a NULL column and say it was null", () => {
-    expect(() => requireText(null)).toThrow("expected text in a NOT NULL column, found null");
+    expect(() => requireText(null)).toThrow("expected text from the database, found null");
   });
 
   it("should refuse a number rather than stringifying it", () => {
-    expect(() => requireText(COUNT)).toThrow("expected text in a NOT NULL column, found number");
+    expect(() => requireText(COUNT)).toThrow("expected text from the database, found number");
   });
 });
 
@@ -148,6 +148,6 @@ describe("nullableText()", () => {
   });
 
   it("should refuse a number rather than stringifying it", () => {
-    expect(() => nullableText(COUNT)).toThrow("expected text in a NOT NULL column, found number");
+    expect(() => nullableText(COUNT)).toThrow("expected text from the database, found number");
   });
 });

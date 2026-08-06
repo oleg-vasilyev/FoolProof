@@ -1,18 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  installFeatures,
-  publishCommandMenu,
-  republishChatMenus,
-  resumeFeatures,
-} from "#app/feature-installer.ts";
 import type { Feature } from "#shared/telegram/feature-contract.ts";
 import { featureOf } from "#shared/telegram/feature-contract.stub.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
-import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { ChatLocaleStub, LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { DEFAULT_LOCALE, Locale } from "#shared/locale/locales.ts";
 import { copy } from "#app/copy.en.ts";
 import { copy as russian } from "#app/copy.ru.ts";
 import { copyIn } from "#app/copy.ts";
+
+
+const chatLocale = new ChatLocaleStub();
+
+vi.mock("#shared/locale/chat-locale.ts", () => chatLocale.module);
+
+const { installFeatures, publishCommandMenu, republishChatMenus, resumeFeatures } = await import(
+  "#app/feature-installer.ts"
+);
 
 
 const ONCE = 1;
@@ -539,9 +542,20 @@ describe("republishChatMenus()", () => {
     bot = new BotMock();
     log = new LoggerStub();
     bot.setMyCommandsSpy.mockResolvedValue(true);
+    chatLocale.localeFromSpy.mockReturnValue(Locale.En);
   });
 
-  it("should publish a chosen chat's menu scoped to it, in its own language", async () => {
+  it("should hand the stored locale to the resolver rather than compare it itself", async () => {
+    await republishChatMenus(bot.api as never, [featureOf({ name: "game" })], log, [
+      { chatId: RU_CHAT, locale: "ru" },
+    ]);
+
+    expect(chatLocale.localeFromSpy).toHaveBeenCalledWith("ru");
+  });
+
+  it("should publish a chosen chat's menu scoped to it, in the language the resolver found", async () => {
+    chatLocale.localeFromSpy.mockReturnValue(Locale.Ru);
+
     await republishChatMenus(bot.api as never, [featureOf({ name: "game" })], log, [
       { chatId: RU_CHAT, locale: "ru" },
     ]);
@@ -564,7 +578,9 @@ describe("republishChatMenus()", () => {
     expect(bot.setMyCommandsSpy).toHaveBeenCalledTimes(TWICE);
   });
 
-  it("should skip a stored locale the bot no longer speaks", async () => {
+  it("should skip a chat whose stored locale the resolver refuses", async () => {
+    chatLocale.localeFromSpy.mockReturnValue(null);
+
     await republishChatMenus(bot.api as never, [featureOf({ name: "game" })], log, [
       { chatId: RU_CHAT, locale: "de" },
     ]);
@@ -573,6 +589,8 @@ describe("republishChatMenus()", () => {
   });
 
   it("should skip it quietly, not by tripping over the unknown locale", async () => {
+    chatLocale.localeFromSpy.mockReturnValue(null);
+
     await republishChatMenus(bot.api as never, [featureOf({ name: "game" })], log, [
       { chatId: RU_CHAT, locale: "de" },
     ]);

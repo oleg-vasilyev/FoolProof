@@ -72,7 +72,9 @@ matches what the bot says. A chat that never chose keeps the global English menu
 Telegram keeps serving a scoped menu until it is explicitly replaced, so **every
 start republishes the scoped menu of every chat in `chat_locales`** after the global
 one — without that, a chat that once chose would keep an outdated command list after
-an update until somebody happened to open `/language` again.
+an update until somebody happened to open `/language` again. A stored locale the
+bot no longer speaks is skipped quietly on that pass: unreachable while `/language`
+only stores known languages, but decided rather than accidental.
 
 Two consequences worth stating, because both are easy to get wrong:
 

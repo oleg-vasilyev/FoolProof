@@ -131,14 +131,13 @@ vi.mock("grammy", () => ({
 
 vi.mock("#shared/logging/logger.ts", () => logging.module);
 
-vi.mock("#app/feature-installer.ts", () => ({
-  installFeatures: (bot: unknown, features: unknown, log: unknown, localeIn: unknown) =>
+vi.mock("#app/feature-installer.ts", (): typeof import("#app/feature-installer.ts") => ({
+  installFeatures: (bot, features, log, localeIn) =>
     installFeaturesSpy(bot, features, log, localeIn),
-  publishCommandMenu: (api: unknown, features: unknown, log: unknown, chat: unknown) =>
-    publishCommandMenuSpy(api, features, log, chat),
-  republishChatMenus: (api: unknown, features: unknown, log: unknown, choices: unknown) =>
+  publishCommandMenu: (api, features, log, chat) => publishCommandMenuSpy(api, features, log, chat),
+  republishChatMenus: (api, features, log, choices) =>
     republishChatMenusSpy(api, features, log, choices),
-  resumeFeatures: (features: unknown, log: unknown) => resumeFeaturesSpy(features, log),
+  resumeFeatures: (features, log) => resumeFeaturesSpy(features, log),
 }));
 
 vi.mock("#shared/lifecycle/crash-exit.ts", () => crashExit.module);

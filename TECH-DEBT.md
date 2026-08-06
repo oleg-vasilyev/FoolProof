@@ -60,6 +60,20 @@ lines twice is cheaper than a shared module with two callers.
 
 ---
 
+## `feature-installer.ts` is faked by hand in `main.spec.ts`
+
+The `vi.mock` factory there is the one hand-rolled fake left after
+`card-context.stub.ts`, and it has the same weakness that entry named: an added
+parameter on `installFeatures` or `republishChatMenus` keeps the fake compiling and
+passing. The factory's return is annotated with the module's own type, which
+catches a renamed or missing member — the cheap half of the protection. One
+mocking consumer does not pay for a stub file.
+
+**Write `feature-installer.stub.ts` when a second spec mocks the module**, or the
+first time the fake is caught disagreeing with a real signature.
+
+---
+
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to

@@ -18,7 +18,7 @@ export const requireNum = (value: unknown): number => {
   const found = asNumber(value);
 
   if (found === null) {
-    throw new Error(`expected a number in a NOT NULL column, found ${kindOf(value)}`);
+    throw new Error(`expected a number from the database, found ${kindOf(value)}`);
   }
 
   return found;
@@ -32,7 +32,7 @@ export const requireText = (value: unknown): string => {
     return value;
   }
 
-  throw new Error(`expected text in a NOT NULL column, found ${kindOf(value)}`);
+  throw new Error(`expected text from the database, found ${kindOf(value)}`);
 };
 
 export const nullableText = (value: unknown): string | null =>
