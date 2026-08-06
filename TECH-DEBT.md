@@ -110,21 +110,6 @@ stale menu starts lying.
 
 ---
 
-## Two dev scripts hand git-derived filenames to a shell
-
-`scripts/mutate-changed.ts` and `scripts/e2e-changed.ts` join names from
-`git diff` and `git ls-files --others` into `spawnSync(..., { shell: true })`, so
-a filename carrying a backtick or a `;` would execute the day somebody runs the
-script over a hostile checkout. The reach is short — a developer's own working
-tree, no path from a chat — which is why it is debt and not a fix. `shell: true`
-exists because `npx` is a `.cmd` on Windows; the exit is resolving
-`node_modules/.bin` directly, the way `.claude/hooks/lint-changed.mjs` already
-does.
-
-**Drop the shell the next time either script is edited.**
-
----
-
 ## Not debt, deliberately
 
 Listed so nobody "fixes" them:

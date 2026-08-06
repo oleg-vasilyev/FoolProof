@@ -3,6 +3,8 @@ import { execFileSync, spawnSync } from "node:child_process";
 
 const BASELINE = process.env.MUTATE_AGAINST ?? "origin/main";
 
+const STRYKER = "node_modules/@stryker-mutator/core/bin/stryker.js";
+
 const NOTHING = 0;
 
 const MUTABLE = /^src\/.*\.ts$/;
@@ -38,9 +40,8 @@ const run = (): number => {
     console.log(`  ${file}`);
   }
 
-  const stryker = spawnSync("npx", ["stryker", "run", "--mutate", files.join(",")], {
+  const stryker = spawnSync(process.execPath, [STRYKER, "run", "--mutate", files.join(",")], {
     stdio: "inherit",
-    shell: true,
   });
 
   return stryker.status ?? NOTHING;

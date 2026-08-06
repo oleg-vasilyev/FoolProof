@@ -3,6 +3,8 @@ import { execFileSync, spawnSync } from "node:child_process";
 
 const BASELINE = process.env.E2E_AGAINST ?? "origin/main";
 
+const VITEST = "node_modules/vitest/vitest.mjs";
+
 const NOTHING = 0;
 
 const FEATURE = /^src\/features\/([^/]+)\//;
@@ -24,8 +26,9 @@ const SCENARIOS_OF: Record<string, readonly string[]> = {
     "edge/a-table-too-big",
   ],
   "merge-names": ["merging-two-names"],
-  scoresheet: ["the-stats-picture"],
+  scoresheet: ["the-stats-picture", "the-pictures-in-russian"],
   diagnostics: ["the-status-report"],
+  language: ["picking-a-language", "the-pictures-in-russian"],
 };
 
 const gitLines = (...args: readonly string[]): readonly string[] =>
@@ -80,9 +83,9 @@ const play = (files: readonly string[] | null): number => {
   }
 
   const run = spawnSync(
-    "npx",
-    ["vitest", "run", "--config", "e2e/vitest.e2e.config.ts", ...(files ?? [])],
-    { stdio: "inherit", shell: true }
+    process.execPath,
+    [VITEST, "run", "--config", "e2e/vitest.e2e.config.ts", ...(files ?? [])],
+    { stdio: "inherit" }
   );
 
   return run.status ?? NOTHING;
