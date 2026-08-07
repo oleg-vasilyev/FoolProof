@@ -27,7 +27,7 @@ const ONE_COMMAND = 1;
 
 const ROOMY_ENOUGH = 9;
 
-const read = (file: string): string => readFileSync(file, "utf8");
+const read = (file: string): string => readFileSync(file, "utf8").replaceAll("\r\n", "\n");
 
 const headingsOf = (text: string): readonly string[] =>
   (text.match(/^#+ .+$/gm) ?? []).map((heading) => heading.replace(/^#+ /, ""));
