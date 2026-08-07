@@ -33,6 +33,8 @@ const LEGEND_FONT = 30;
 
 const TALLY_FONT = 22;
 
+const LABEL_FONT = 24;
+
 const lineSpy = vi.fn();
 
 const textSpy = vi.fn();
@@ -52,13 +54,13 @@ vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
   PLOT_LEFT,
   PLOT_WIDTH,
   chartBottomOf: (sheet: { chartTop: number }) => sheet.chartTop + CHART_HEIGHT,
-  fontSize: { legend: LEGEND_FONT, legendTally: TALLY_FONT },
+  fontSize: { legend: LEGEND_FONT, legendLabel: LABEL_FONT, legendTally: TALLY_FONT },
   legendFontOf: (slotWidth: number) => legendFontOfSpy(slotWidth),
   nameToFit: (name: string, width: number, largest: number) => nameToFitSpy(name, width, largest),
 }));
 
 vi.mock("#scoresheet/render/palette.ts", () => ({
-  palette: { ink: "ink", inkFaint: "faint" },
+  palette: { ink: "ink", inkFigure: "figure", inkMuted: "muted" },
   colourFor: (column: number) => colourForSpy(column),
 }));
 
@@ -172,11 +174,54 @@ describe("shareLegend()", () => {
     });
 
     it("should set the percentage's own baseline LEGEND_DROP below the plot's own bottom edge", () => {
-      const LEGEND_DROP = 96;
+      const LEGEND_DROP = 180;
       const SHARE = 0.1;
       shareLegend(copy, sheetOf([{ running: [SHARE], share: SHARE }], ["Oleg"]));
 
       expect(Number(attributesOfText("pct(0.1)").y)).toBe(CHART_TOP + CHART_HEIGHT + LEGEND_DROP);
+    });
+
+    it("should head the legend, because the grid is in seating order and this is not", () => {
+      shareLegend(copy, sheetOf([{ running: [0.1] }], ["Oleg"]));
+      const label = attributesOfText(copy.sheetLegendLabel);
+
+      expect(printed()).toContain(copy.sheetLegendLabel);
+      expect(label.x).toBe(PLOT_LEFT);
+      expect(label["font-size"]).toBe(LABEL_FONT);
+    });
+
+    it("should put that heading above the entries it heads", () => {
+      shareLegend(copy, sheetOf([{ running: [0.1] }], ["Oleg"]));
+
+      expect(Number(attributesOfText(copy.sheetLegendLabel).y)).toBeLessThan(
+        Number(attributesOfText("Oleg").y)
+      );
+    });
+
+    it("should rule each entry in its own player's colour", () => {
+      shareLegend(copy, sheetOf([{ running: [0.9] }, { running: [0.1] }], ["Oleg", "Anya"]));
+      const rules = lineSpy.mock.calls.map((call) => call[0] as Record<string, unknown>);
+
+      expect(rules.map((rule) => rule.stroke)).toEqual(["colour-0", "colour-1"]);
+    });
+
+    it("should start each rule over its own entry and keep it above the percentage", () => {
+      const SHARE = 0.1;
+      shareLegend(copy, sheetOf([{ running: [SHARE], share: SHARE }], ["Oleg"]));
+      const rule = lineSpy.mock.calls[NONE]?.[NONE] as Record<string, number>;
+
+      expect(rule.x1).toBe(Number(attributesOfText("pct(0.1)").x));
+      expect(rule.y1).toBeGreaterThan(CHART_TOP + CHART_HEIGHT);
+      expect(rule.y2).toBe(rule.y1);
+      expect(rule.y1).toBeLessThan(Number(attributesOfText("pct(0.1)").y));
+      expect(Number(rule.x2) - Number(rule.x1)).toBe(SAMPLE_WIDTH);
+    });
+
+    it("should fit each name inside its own slot, with the gutter taken off", () => {
+      shareLegend(copy, sheetOf([{ running: [0.9] }, { running: [0.1] }], ["Oleg", "Anya"]));
+      const width = Number(nameToFitSpy.mock.calls[NONE]?.[ONE]);
+
+      expect(width).toBeLessThan(LEGEND_SLOT_MAX);
     });
 
     it("should cap the slot at a fixed maximum when there is room to spare", () => {
@@ -252,11 +297,11 @@ describe("shareLegend()", () => {
       expect(attributesOfText("Oleg").x).toBe(attributesOfText("tally(4)").x);
     });
 
-    it("should print the tally faintly", () => {
+    it("should print the tally in the ink kept for the numbers around the picture", () => {
       const GAMES = 4;
       shareLegend(copy, sheetOf([{ running: [0.5], games: GAMES }], ["Oleg"]));
 
-      expect(attributesOfText("tally(4)").fill).toBe("faint");
+      expect(attributesOfText("tally(4)").fill).toBe("figure");
     });
 
     it("should size the block's type from the slot width it was given", () => {
@@ -302,7 +347,8 @@ describe("shareLegend()", () => {
     });
 
     it("should add nothing to the drawing beyond the legend entries when nobody sat out", () => {
-      const TEXTS_PER_PLAYER = 3;
+      const THE_HEADING = 1;
+      const PARTS_PER_PLAYER = 4;
       const TWO_PLAYERS = 2;
 
       const result = shareLegend(copy, 
@@ -315,7 +361,7 @@ describe("shareLegend()", () => {
         )
       );
 
-      expect(result).toHaveLength(TEXTS_PER_PLAYER * TWO_PLAYERS);
+      expect(result).toHaveLength(THE_HEADING + PARTS_PER_PLAYER * TWO_PLAYERS);
     });
 
     it("should appear when anybody sat out any round, not only a departure at the end", () => {
@@ -344,16 +390,25 @@ describe("shareLegend()", () => {
       expect(sample).toBeDefined();
     });
 
-    it("should start the sample at the plot's left edge and run SAMPLE_WIDTH", () => {
-      shareLegend(copy, 
+    it("should run the sample SAMPLE_WIDTH, the same length as a legend rule", () => {
+      shareLegend(copy,
         sheetOf([{ running: [ONE, HALF], cells: [PLACED_CELL, ABSENT_CELL] }], ["Oleg"])
       );
       const sample = lineSpy.mock.calls
         .map((call) => call[0] as Record<string, unknown>)
         .find((attributes) => (attributes["stroke-dasharray"] as string | undefined) !== undefined);
 
-      expect(sample?.x1).toBe(PLOT_LEFT);
       expect(Number(sample?.x2) - Number(sample?.x1)).toBe(SAMPLE_WIDTH);
+    });
+
+    it("should park the note at the far end of the heading's own line", () => {
+      shareLegend(copy,
+        sheetOf([{ running: [ONE, HALF], cells: [PLACED_CELL, ABSENT_CELL] }], ["Oleg"])
+      );
+      const note = Number(attributesOfText(copy.sheetKeyAbsent).x);
+
+      expect(note).toBeGreaterThan(Number(attributesOfText(copy.sheetLegendLabel).x));
+      expect(note).toBeLessThan(PLOT_LEFT + PLOT_WIDTH);
     });
 
     it("should lift the sample SAMPLE_LIFT above its label's baseline", () => {
@@ -369,14 +424,13 @@ describe("shareLegend()", () => {
       expect(Number(sample?.y2)).toBe(labelY - SAMPLE_LIFT);
     });
 
-    it("should hang the note NOTE_DROP below the plot's own bottom edge", () => {
-      const NOTE_DROP = 208;
-      shareLegend(copy, 
+    it("should share the heading's baseline rather than claim a row of its own", () => {
+      shareLegend(copy,
         sheetOf([{ running: [ONE, HALF], cells: [PLACED_CELL, ABSENT_CELL] }], ["Oleg"])
       );
 
-      expect(Number(attributesOfText(copy.sheetKeyAbsent).y)).toBe(
-        CHART_TOP + CHART_HEIGHT + NOTE_DROP
+      expect(attributesOfText(copy.sheetKeyAbsent).y).toBe(
+        attributesOfText(copy.sheetLegendLabel).y
       );
     });
 
@@ -392,7 +446,7 @@ describe("shareLegend()", () => {
       expect(labelX).toBe(Number(sample?.x2) + SAMPLE_GAP);
     });
 
-    it("should sit below the last row of the legend", () => {
+    it("should sit above the first row of the legend, where the heading is", () => {
       shareLegend(copy, 
         sheetOf(
           [
@@ -406,8 +460,8 @@ describe("shareLegend()", () => {
         .filter((call) => String(call[0]).startsWith("tally("))
         .map((call) => Number((call[1] as Record<string, unknown>).y));
 
-      expect(Number(attributesOfText(copy.sheetKeyAbsent).y)).toBeGreaterThan(
-        Math.max(...tallyRows)
+      expect(Number(attributesOfText(copy.sheetKeyAbsent).y)).toBeLessThan(
+        Math.min(...tallyRows)
       );
     });
   });

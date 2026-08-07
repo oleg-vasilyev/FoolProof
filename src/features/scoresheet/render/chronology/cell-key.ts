@@ -1,65 +1,77 @@
 import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import { type Cell } from "#scoresheet/domain/scoring.ts";
-import { type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
-import { FONT_FAMILY, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { GRID_LEFT, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
+import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { type CellBox, baselineIn, cellFace } from "#scoresheet/render/chronology/cell-face.ts";
 import type { Copy } from "#scoresheet/copy.ts";
 import { palette } from "#scoresheet/render/palette.ts";
-import { rect, text } from "#scoresheet/render/svg-tags.ts";
+import { text } from "#scoresheet/render/svg-tags.ts";
 
 
-interface KeyEntry {
-  readonly fill: string;
-  readonly label: string;
-}
+const KEY_DROP = 38;
 
-const SWATCH_SIZE = 26;
+const SLOT_WIDTH = 380;
 
-const SWATCH_STROKE = 1;
+const MINI_WIDTH = 64;
 
-const SLOT_WIDTH = 330;
+const MINI_HEIGHT = 38;
 
-const KEY_DROP = 44;
+const LABEL_GAP = 18;
 
-const SWATCH_LIFT = 20;
+const PLACE_ABOVE_FOOL = 1;
 
-const LABEL_GAP = 16;
+type KeyKind = typeof CellKind.Drawn | typeof CellKind.Fool | typeof CellKind.Absent;
 
-const entriesIn = (copy: Copy): Record<Cell["kind"], KeyEntry> => ({
-  placed: { fill: palette.cellPlaced, label: copy.sheetKeyPlaced },
-  drawn: { fill: palette.cellDrawn, label: copy.sheetKeyDrawn },
-  fool: { fill: palette.cellFool, label: copy.sheetKeyFool },
-  absent: { fill: palette.cellAbsent, label: copy.sheetKeyAbsent },
+const KEY_KINDS: readonly KeyKind[] = [CellKind.Drawn, CellKind.Fool, CellKind.Absent];
+
+const labelFor = (copy: Copy, kind: KeyKind): string => {
+  switch (kind) {
+    case CellKind.Drawn:
+      return copy.sheetKeyDrawn;
+
+    case CellKind.Fool:
+      return copy.sheetKeyFool;
+
+    case CellKind.Absent:
+      return copy.sheetKeyAbsent;
+  }
+};
+
+const sampleFor = (kind: KeyKind, players: number): Cell => {
+  switch (kind) {
+    case CellKind.Drawn:
+      return { kind: CellKind.Drawn, position: players - PLACE_ABOVE_FOOL };
+
+    case CellKind.Fool:
+      return { kind: CellKind.Fool, position: players };
+
+    case CellKind.Absent:
+      return { kind: CellKind.Absent };
+  }
+};
+
+const boxIn = (sheet: Sheet, slot: number): CellBox => ({
+  x: GRID_LEFT + slot * SLOT_WIDTH,
+  y: sheet.gridBottom + KEY_DROP,
+  width: MINI_WIDTH,
+  height: MINI_HEIGHT,
+  fontSize: fontSize.keyCell,
 });
 
-const KIND_ORDER: readonly Cell["kind"][] = [CellKind.Placed, CellKind.Drawn, CellKind.Fool, CellKind.Absent];
-
-const baselineOf = (sheet: Sheet): number => sheet.gridBottom + KEY_DROP;
-
-const entryOf = (sheet: Sheet, entry: KeyEntry, slot: number): readonly string[] => {
-  const left = PAD + slot * SLOT_WIDTH;
+const entryOf = (copy: Copy, sheet: Sheet, kind: KeyKind, slot: number): readonly string[] => {
+  const box = boxIn(sheet, slot);
 
   return [
-    rect({
-      x: left,
-      y: baselineOf(sheet) - SWATCH_LIFT,
-      width: SWATCH_SIZE,
-      height: SWATCH_SIZE,
-      fill: entry.fill,
-      stroke: palette.ruling,
-      "stroke-width": SWATCH_STROKE,
-    }),
-    text(entry.label, {
-      x: left + SWATCH_SIZE + LABEL_GAP,
-      y: baselineOf(sheet),
-      fill: palette.inkMuted,
+    ...cellFace(box, sampleFor(kind, sheet.players.length)),
+    text(labelFor(copy, kind), {
+      x: box.x + MINI_WIDTH + LABEL_GAP,
+      y: baselineIn(box),
+      fill: palette.inkKey,
       "font-family": FONT_FAMILY,
       "font-size": fontSize.keyLabel,
     }),
   ];
 };
 
-export const cellKey = (copy: Copy, sheet: Sheet): readonly string[] => {
-  const entries = entriesIn(copy);
-
-  return KIND_ORDER.flatMap((kind, slot) => entryOf(sheet, entries[kind], slot));
-};
+export const cellKey = (copy: Copy, sheet: Sheet): readonly string[] =>
+  KEY_KINDS.flatMap((kind, slot) => entryOf(copy, sheet, kind, slot));

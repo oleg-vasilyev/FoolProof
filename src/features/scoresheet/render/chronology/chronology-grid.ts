@@ -2,37 +2,20 @@ import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import { type Cell } from "#scoresheet/domain/scoring.ts";
 import { CELL_INSET, CELL_SHRINK, GRID_LEFT, GRID_TOP, cellFontOf, columnCentre, indexFontOf, nameToFit, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { type CellBox, baselineIn, cellFace } from "#scoresheet/render/chronology/cell-face.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
-import { rect, text } from "#scoresheet/render/svg-tags.ts";
+import { text } from "#scoresheet/render/svg-tags.ts";
 
+
+const FIRST_COLUMN = 0;
 
 const NAME_LIFT = 30;
 
 const NAME_GUTTER = 20;
 
-const BASELINE_RATIO = 0.68;
-
 const INDEX_GAP = 16;
 
 const INDEX_DIGITS = 2;
-
-const fillFor = (cell: Cell): string => {
-  switch (cell.kind) {
-    case CellKind.Absent:
-      return palette.cellAbsent;
-
-    case CellKind.Placed:
-      return palette.cellPlaced;
-
-    case CellKind.Drawn:
-      return palette.cellDrawn;
-
-    case CellKind.Fool:
-      return palette.cellFool;
-  }
-};
-
-const captionFor = (cell: Cell): string => (cell.kind === CellKind.Absent ? "" : String(cell.position));
 
 export const columnNames = (sheet: Sheet): readonly string[] =>
   sheet.players.map((player, column) => {
@@ -49,45 +32,26 @@ export const columnNames = (sheet: Sheet): readonly string[] =>
     });
   });
 
+const boxIn = (sheet: Sheet, column: number, round: number): CellBox => ({
+  x: GRID_LEFT + column * sheet.columnWidth + CELL_INSET,
+  y: GRID_TOP + round * sheet.rowHeight + CELL_INSET,
+  width: sheet.columnWidth - CELL_SHRINK,
+  height: sheet.rowHeight - CELL_SHRINK,
+  fontSize: cellFontOf(sheet.rowHeight),
+});
+
 const rowIndex = (sheet: Sheet, round: number): string =>
   text(String(round + 1).padStart(INDEX_DIGITS, "0"), {
     x: GRID_LEFT - INDEX_GAP,
-    y: GRID_TOP + round * sheet.rowHeight + sheet.rowHeight * BASELINE_RATIO,
-    fill: palette.inkFaint,
+    y: baselineIn(boxIn(sheet, FIRST_COLUMN, round)),
+    fill: palette.inkFigure,
     "font-family": FONT_FAMILY,
     "font-size": indexFontOf(sheet.rowHeight),
     "text-anchor": "end",
   });
 
-const cellOf = (sheet: Sheet, cell: Cell, column: number, round: number): readonly string[] => {
-  const left = GRID_LEFT + column * sheet.columnWidth;
-  const top = GRID_TOP + round * sheet.rowHeight;
-  const caption = captionFor(cell);
-
-  const block = rect({
-    x: left + CELL_INSET,
-    y: top + CELL_INSET,
-    width: sheet.columnWidth - CELL_SHRINK,
-    height: sheet.rowHeight - CELL_SHRINK,
-    fill: fillFor(cell),
-  });
-
-  if (caption === "") {
-    return [block];
-  }
-
-  return [
-    block,
-    text(caption, {
-      x: columnCentre(sheet, column),
-      y: top + sheet.rowHeight * BASELINE_RATIO,
-      fill: palette.ink,
-      "font-family": FONT_FAMILY,
-      "font-size": cellFontOf(sheet.rowHeight),
-      "text-anchor": "middle",
-    }),
-  ];
-};
+const cellOf = (sheet: Sheet, cell: Cell, column: number, round: number): readonly string[] =>
+  cellFace(boxIn(sheet, column, round), cell);
 
 export const chronologyGrid = (sheet: Sheet): readonly string[] =>
   Array.from({ length: sheet.rounds }, (_unused, round) => [

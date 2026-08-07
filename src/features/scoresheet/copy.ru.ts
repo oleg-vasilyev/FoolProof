@@ -63,13 +63,15 @@ export const copy: Copy = {
 
   sheetEyebrow: "ЖУРНАЛ ВЕЧЕРА",
   sheetTitle: "ХРОНОЛОГИЯ",
+  sheetGridLabel: "ПАРТИЯ ЗА ПАРТИЕЙ",
+  sheetGridHint: "колонки — в порядке рассадки · в клетке занятое место",
   sheetShareLabel: "ДОЛЯ СТОЛА",
   sheetShareHint: "50% — середина стола · 100% — победа в каждой партии",
+  sheetLegendLabel: "ПО ДОЛЕ СТОЛА",
 
   sheetGameForms: { one: "партия", few: "партии", many: "партий" },
   sheetPlayerForms: { one: "игрок", few: "игрока", many: "игроков" },
 
-  sheetKeyPlaced: "выход",
   sheetKeyDrawn: "ничья",
   sheetKeyFool: "дурак",
   sheetKeyAbsent: "пропуск",

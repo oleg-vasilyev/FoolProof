@@ -9,13 +9,17 @@ import { line, text } from "#scoresheet/render/svg-tags.ts";
 import { percentLabel } from "#scoresheet/render/chronology/percent-label.ts";
 
 
-const LEGEND_DROP = 96;
+const LEGEND_LABEL_DROP = 96;
 
-const LEGEND_NAME_DROP = 132;
+const LEGEND_RULE_DROP = 132;
 
-const LEGEND_TALLY_DROP = 162;
+const LEGEND_DROP = 180;
 
-const NOTE_DROP = 208;
+const LEGEND_NAME_DROP = 222;
+
+const LEGEND_TALLY_DROP = 256;
+
+const LABEL_TRACKING = 2;
 
 const LINE_WIDTH = 3;
 
@@ -26,6 +30,8 @@ const SAMPLE_WIDTH = 46;
 const SAMPLE_GAP = 14;
 
 const SAMPLE_LIFT = 7;
+
+const NOTE_ROOM = 230;
 
 const LEGEND_SLOT_MAX = 284;
 
@@ -38,6 +44,16 @@ const slotWidthOf = (sheet: Sheet): number =>
 
 const tallyFontOf = (blockSize: number): number =>
   Math.min(fontSize.legendTally, Math.round(blockSize * TALLY_FONT_RATIO));
+
+const legendLabel = (copy: Copy, sheet: Sheet): string =>
+  text(copy.sheetLegendLabel, {
+    x: PLOT_LEFT,
+    y: chartBottomOf(sheet) + LEGEND_LABEL_DROP,
+    fill: palette.inkMuted,
+    "font-family": FONT_FAMILY,
+    "font-size": fontSize.legendLabel,
+    "letter-spacing": LABEL_TRACKING,
+  });
 
 const entryOf = (
   copy: Copy,
@@ -53,6 +69,14 @@ const entryOf = (
   const fitted = nameToFit(player.displayName, slotWidth - LEGEND_GUTTER, size);
 
   return [
+    line({
+      x1: left,
+      y1: chartBottomOf(sheet) + LEGEND_RULE_DROP,
+      x2: left + SAMPLE_WIDTH,
+      y2: chartBottomOf(sheet) + LEGEND_RULE_DROP,
+      stroke: colourFor(column),
+      "stroke-width": LINE_WIDTH,
+    }),
     text(percentLabel(player.share), {
       x: left,
       y: baseline,
@@ -72,7 +96,7 @@ const entryOf = (
     text(gameTally(copy, player.games), {
       x: left,
       y: chartBottomOf(sheet) + LEGEND_TALLY_DROP,
-      fill: palette.inkFaint,
+      fill: palette.inkFigure,
       "font-family": FONT_FAMILY,
       "font-size": tallyFontOf(size),
     }),
@@ -93,22 +117,23 @@ const skipNote = (copy: Copy, sheet: Sheet): readonly string[] => {
     return [];
   }
 
-  const baseline = chartBottomOf(sheet) + NOTE_DROP;
+  const baseline = chartBottomOf(sheet) + LEGEND_LABEL_DROP;
+  const left = PLOT_LEFT + PLOT_WIDTH - NOTE_ROOM;
 
   return [
     line({
-      x1: PLOT_LEFT,
+      x1: left,
       y1: baseline - SAMPLE_LIFT,
-      x2: PLOT_LEFT + SAMPLE_WIDTH,
+      x2: left + SAMPLE_WIDTH,
       y2: baseline - SAMPLE_LIFT,
-      stroke: palette.inkFaint,
+      stroke: palette.inkFigure,
       "stroke-width": LINE_WIDTH,
       "stroke-dasharray": SKIP_DASH,
     }),
     text(copy.sheetKeyAbsent, {
-      x: PLOT_LEFT + SAMPLE_WIDTH + SAMPLE_GAP,
+      x: left + SAMPLE_WIDTH + SAMPLE_GAP,
       y: baseline,
-      fill: palette.inkFaint,
+      fill: palette.inkFigure,
       "font-family": FONT_FAMILY,
       "font-size": fontSize.legendTally,
     }),
@@ -116,6 +141,7 @@ const skipNote = (copy: Copy, sheet: Sheet): readonly string[] => {
 };
 
 export const shareLegend = (copy: Copy, sheet: Sheet): readonly string[] => [
+  legendLabel(copy, sheet),
   ...legend(copy, sheet),
   ...skipNote(copy, sheet),
 ];

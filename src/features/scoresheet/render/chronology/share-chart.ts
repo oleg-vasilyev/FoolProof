@@ -3,7 +3,7 @@ import { CHART_HEIGHT, PLOT_LEFT, PLOT_RIGHT, PLOT_WIDTH, chartBottomOf, type Sh
 import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { NEUTRAL, type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
-import { line, path, polyline, text } from "#scoresheet/render/svg-tags.ts";
+import { circle, line, path, polyline, text } from "#scoresheet/render/svg-tags.ts";
 import { percentLabel } from "#scoresheet/render/chronology/percent-label.ts";
 
 
@@ -44,7 +44,13 @@ const AXIS_GAP = 18;
 
 const AXIS_LIFT = 7;
 
-const AXIS_DROP = 34;
+const AXIS_DROP = 44;
+
+const TICK_LENGTH = 12;
+
+const END_DOT_RADIUS = 7;
+
+const LAST_SHARE = -1;
 
 const LINE_WIDTH = 3;
 
@@ -77,7 +83,7 @@ export const shareRules = (sheet: Sheet): readonly string[] =>
       text(percentLabel(tick), {
         x: PLOT_LEFT - AXIS_GAP,
         y: yOf(sheet, tick) + AXIS_LIFT,
-        fill: palette.inkFaint,
+        fill: palette.inkFigure,
         "font-family": FONT_FAMILY,
         "font-size": fontSize.axis,
         "text-anchor": "end",
@@ -101,17 +107,35 @@ export const roundLabels = (sheet: Sheet): readonly string[] => {
 
   return Array.from({ length: sheet.rounds }, (_unused, round) => round + FIRST_ROUND)
     .filter((round) => round % every === NONE)
-    .map((round) =>
+    .flatMap((round) => [
+      line({
+        x1: xOf(sheet, round),
+        y1: chartBottomOf(sheet),
+        x2: xOf(sheet, round),
+        y2: chartBottomOf(sheet) + TICK_LENGTH,
+        stroke: palette.inkFaint,
+        "stroke-width": RULE_WIDTH,
+      }),
       text(String(round), {
         x: xOf(sheet, round),
         y: chartBottomOf(sheet) + AXIS_DROP,
-        fill: palette.inkFaint,
+        fill: palette.inkFigure,
         "font-family": FONT_FAMILY,
         "font-size": fontSize.axis,
         "text-anchor": "middle",
-      })
-    );
+      }),
+    ]);
 };
+
+export const endDots = (sheet: Sheet): readonly string[] =>
+  sheet.players.map((player, column) =>
+    circle({
+      cx: xOf(sheet, player.running.length),
+      cy: yOf(sheet, player.running.at(LAST_SHARE) ?? NEUTRAL),
+      r: END_DOT_RADIUS,
+      fill: colourFor(column),
+    })
+  );
 
 export const pointsOf = (sheet: Sheet, player: ScoredPlayer): readonly Point[] =>
   [NEUTRAL, ...player.running].map((share, point) => [xOf(sheet, point), yOf(sheet, share)]);
@@ -156,4 +180,5 @@ export const shareChart = (sheet: Sheet): readonly string[] => [
   midline(sheet),
   ...roundLabels(sheet),
   ...shareLines(sheet),
+  ...endDots(sheet),
 ];

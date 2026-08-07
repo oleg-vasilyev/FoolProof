@@ -6,7 +6,7 @@ const html = new HtmlEscapeStub();
 
 vi.mock("#shared/text/html-escape.ts", () => html.module);
 
-const { line, path, polyline, rect, svgOf, text } = await import("#scoresheet/render/svg-tags.ts");
+const { circle, line, path, polyline, rect, svgOf, text } = await import("#scoresheet/render/svg-tags.ts");
 
 const ESCAPED = "escaped";
 
@@ -36,6 +36,14 @@ describe("svg primitives", () => {
   describe("path()", () => {
     it("should emit a self-closing path", () => {
       expect(path({ d: "M0 0", fill: "none" })).toBe(`<path d="M0 0" fill="none"/>`);
+    });
+  });
+
+  describe("circle()", () => {
+    it("should emit a self-closing circle", () => {
+      expect(circle({ cx: 10, cy: 20, r: 7, fill: "#e8c547" })).toBe(
+        `<circle cx="10" cy="20" r="7" fill="#e8c547"/>`
+      );
     });
   });
 

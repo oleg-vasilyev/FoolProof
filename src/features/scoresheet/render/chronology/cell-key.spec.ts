@@ -1,33 +1,37 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import { copy } from "#scoresheet/copy.en.ts";
+import type { Cell, ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import type { Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 
 
-const PAD = 60;
+const GRID_LEFT = 146;
 
-const rectSpy = vi.fn();
+const KEY_CELL_FONT = 24;
+
+const KEY_LABEL_FONT = 26;
+
+const cellFaceSpy = vi.fn();
+
+const baselineSpy = vi.fn();
 
 const textSpy = vi.fn();
 
-vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
+vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({ GRID_LEFT }));
+
+vi.mock("#scoresheet/render/card-metrics.ts", () => ({
   FONT_FAMILY: "Test Sans",
-  PAD,
-  fontSize: { keyLabel: 24 },
+  fontSize: { keyCell: KEY_CELL_FONT, keyLabel: KEY_LABEL_FONT },
 }));
 
-vi.mock("#scoresheet/render/palette.ts", () => ({
-  palette: {
-    cellPlaced: "placed",
-    cellDrawn: "drawn",
-    cellFool: "fool",
-    cellAbsent: "absent",
-    ruling: "ruling",
-    inkMuted: "muted",
-  },
+vi.mock("#scoresheet/render/chronology/cell-face.ts", () => ({
+  cellFace: (box: unknown, cell: unknown) => cellFaceSpy(box, cell),
+  baselineIn: (box: unknown) => baselineSpy(box),
 }));
+
+vi.mock("#scoresheet/render/palette.ts", () => ({ palette: { inkKey: "key ink" } }));
 
 vi.mock("#scoresheet/render/svg-tags.ts", () => ({
-  rect: (attributes: Record<string, unknown>) => rectSpy(attributes),
   text: (value: string, attributes: Record<string, unknown>) => textSpy(value, attributes),
 }));
 
@@ -37,22 +41,22 @@ const NONE = 0;
 
 const GRID_BOTTOM = 810;
 
-const SLOT_WIDTH = 330;
+const BASELINE = 999;
 
-const KEY_DROP = 44;
+const AT_THE_TABLE = 5;
 
-const SWATCH_LIFT = 20;
+const ENTRIES = 3;
 
-const SWATCH_SIZE = 26;
+const PLACE_ABOVE_FOOL = 1;
 
-const LABEL_GAP = 16;
+const FIRST_SLOT = 0;
 
-const BASELINE = GRID_BOTTOM + KEY_DROP;
+const SECOND_SLOT = 1;
 
 const sheetOf = (): Sheet =>
   ({
     startedOn: "2026-07-24",
-    players: [],
+    players: Array.from({ length: AT_THE_TABLE }, () => ({}) as ScoredPlayer),
     rounds: NONE,
     omitted: NONE,
     rowHeight: NONE,
@@ -63,8 +67,10 @@ const sheetOf = (): Sheet =>
     height: NONE,
   }) satisfies Sheet;
 
-const rectFor = (call: number): Record<string, unknown> =>
-  (rectSpy.mock.calls[call]?.[0] ?? {}) as Record<string, unknown>;
+const boxFor = (slot: number): Record<string, number> =>
+  (cellFaceSpy.mock.calls[slot]?.[0] ?? {}) as Record<string, number>;
+
+const cellFor = (slot: number): Cell => cellFaceSpy.mock.calls[slot]?.[1] as Cell;
 
 const printed = (): readonly string[] => textSpy.mock.calls.map((call) => String(call[0]));
 
@@ -75,93 +81,95 @@ describe("cellKey()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    rectSpy.mockImplementation(() => "<rect/>");
+    cellFaceSpy.mockImplementation(() => ["<rect/>"]);
+    baselineSpy.mockReturnValue(BASELINE);
     textSpy.mockImplementation(() => "<text/>");
   });
 
-  it("should draw four entries", () => {
+  it("should explain the three cells that are not the default one", () => {
     cellKey(copy, sheetOf());
 
-    const ENTRIES = 4;
-
-    expect(rectSpy).toHaveBeenCalledTimes(ENTRIES);
-    expect(textSpy).toHaveBeenCalledTimes(ENTRIES);
+    expect(printed()).toEqual([copy.sheetKeyDrawn, copy.sheetKeyFool, copy.sheetKeyAbsent]);
   });
 
-  it("should explain each cell colour in order", () => {
+  it("should show a real cell for each entry rather than a colour swatch", () => {
     cellKey(copy, sheetOf());
 
-    expect(printed()).toEqual([
-      copy.sheetKeyPlaced,
-      copy.sheetKeyDrawn,
-      copy.sheetKeyFool,
-      copy.sheetKeyAbsent,
+    expect(cellFaceSpy).toHaveBeenCalledTimes(ENTRIES);
+    expect([cellFor(0).kind, cellFor(1).kind, cellFor(2).kind]).toEqual([
+      CellKind.Drawn,
+      CellKind.Fool,
+      CellKind.Absent,
     ]);
   });
 
-  it("should give each swatch the colour of the cell it explains", () => {
+  it("should number the fool sample last at the table it is drawn for", () => {
     cellKey(copy, sheetOf());
 
-    expect(rectFor(NONE).fill).toBe("placed");
-    expect(rectFor(1).fill).toBe("drawn");
-    expect(rectFor(2).fill).toBe("fool");
-    expect(rectFor(3).fill).toBe("absent");
+    expect(cellFor(1)).toEqual({ kind: CellKind.Fool, position: AT_THE_TABLE });
   });
 
-  it("should advance each slot to the right of the one before it", () => {
+  it("should number the drawn sample one place above the fool", () => {
     cellKey(copy, sheetOf());
-    const first = Number(rectFor(0).x);
-    const second = Number(rectFor(1).x);
-    const third = Number(rectFor(2).x);
 
-    expect(second).toBeGreaterThan(first);
-    expect(third).toBeGreaterThan(second);
+    expect(cellFor(0)).toEqual({
+      kind: CellKind.Drawn,
+      position: AT_THE_TABLE - PLACE_ABOVE_FOOL,
+    });
+  });
+
+  it("should leave the absent sample without a place, because nobody took one", () => {
+    cellKey(copy, sheetOf());
+
+    expect(cellFor(2)).toEqual({ kind: CellKind.Absent });
+  });
+
+  it("should start the first slot at the grid's own left edge", () => {
+    cellKey(copy, sheetOf());
+
+    expect(boxFor(FIRST_SLOT).x).toBe(GRID_LEFT);
   });
 
   it("should space slots a whole slot width apart, not by some other step", () => {
     cellKey(copy, sheetOf());
-    const SECOND_SLOT = 1;
 
-    expect(rectFor(SECOND_SLOT).x).toBe(PAD + SECOND_SLOT * SLOT_WIDTH);
+    const step = Number(boxFor(SECOND_SLOT).x) - Number(boxFor(FIRST_SLOT).x);
+
+    expect(boxFor(2).x).toBe(GRID_LEFT + step + step);
   });
 
-  it("should start the first slot at the page margin", () => {
+  it("should hang the key below the grid's own bottom edge", () => {
     cellKey(copy, sheetOf());
 
-    expect(rectFor(NONE).x).toBe(PAD);
+    expect(boxFor(FIRST_SLOT).y).toBeGreaterThan(GRID_BOTTOM);
   });
 
-  it("should derive the baseline from the grid's own bottom edge, not a recomputed one", () => {
+  it("should set every miniature in the key's own cell size", () => {
     cellKey(copy, sheetOf());
 
-    expect(Number(attributesOfText(copy.sheetKeyPlaced).y)).toBe(BASELINE);
+    expect(boxFor(FIRST_SLOT).fontSize).toBe(KEY_CELL_FONT);
   });
 
-  it("should sit the swatch exactly SWATCH_LIFT above the baseline", () => {
+  it("should put each label to the right of its own miniature", () => {
     cellKey(copy, sheetOf());
 
-    expect(rectFor(NONE).y).toBe(BASELINE - SWATCH_LIFT);
+    const label = Number(attributesOfText(copy.sheetKeyFool).x);
+
+    expect(label).toBeGreaterThan(Number(boxFor(SECOND_SLOT).x) + Number(boxFor(SECOND_SLOT).width));
+    expect(label).toBeLessThan(Number(boxFor(2).x));
   });
 
-  it("should start the label SWATCH_SIZE plus LABEL_GAP to the right of its swatch", () => {
+  it("should sit the label on the miniature's own baseline rather than recompute one", () => {
     cellKey(copy, sheetOf());
 
-    expect(attributesOfText(copy.sheetKeyPlaced).x).toBe(PAD + SWATCH_SIZE + LABEL_GAP);
+    expect(baselineSpy).toHaveBeenCalledWith(boxFor(FIRST_SLOT));
+    expect(attributesOfText(copy.sheetKeyDrawn).y).toBe(BASELINE);
   });
 
-  it("should stroke every swatch so a black fill still shows against the sheet", () => {
+  it("should draw the labels in the key's own ink and size", () => {
     cellKey(copy, sheetOf());
 
-    expect(rectFor(NONE).stroke).toBe("ruling");
-    expect(rectFor(3).stroke).toBe("ruling");
-    expect(Number(rectFor(NONE)["stroke-width"])).toBeGreaterThan(NONE);
-  });
-
-  it("should put the label to the right of its swatch", () => {
-    cellKey(copy, sheetOf());
-
-    expect(Number(attributesOfText(copy.sheetKeyPlaced).x)).toBeGreaterThan(
-      Number(rectFor(NONE).x)
-    );
+    expect(attributesOfText(copy.sheetKeyAbsent).fill).toBe("key ink");
+    expect(attributesOfText(copy.sheetKeyAbsent)["font-size"]).toBe(KEY_LABEL_FONT);
   });
 });

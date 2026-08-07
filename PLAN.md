@@ -606,10 +606,14 @@ chronology below, then [the awards card](#the-awards-card). The chronology has t
 stacked parts:
 
 - **The chronology.** One column per player, one row per game. The cell holds the
-  place that player took; black means they sat that game out, red means they were
-  the fool, teal means the game was drawn. Reading down a column is one person's
-  evening; reading across a row is one game. A key under the grid names all four
-  colours, because a colour a reader cannot decode is decoration.
+  place that player took: a plain cell for an ordinary finish, red for the fool,
+  slate for a game drawn for last, and an empty outlined cell holding a dash for a
+  player who was not at the table. Reading down a column is one person's evening;
+  reading across a row is one game. **No state rides on hue alone** — the two that
+  are easy to confuse carry a dashed outline as well, and the fool's digit is set
+  bold. A key under the grid shows the three states as miniatures of the cells
+  themselves; the ordinary finish needs no entry, because every cell already prints
+  its own place.
 - **The table share.** One line per player against game number: the fraction of the
   table they have finished ahead of, averaged over the games they have played so
   far. The axis is a fixed 0–100% with the 50% mid-table line dotted, so a height on
@@ -662,7 +666,7 @@ prints each player's game count under their name instead, and lets the reader
 discount it themselves.
 
 **A draw counts as neither a win nor a fool.** A shared last place means nobody
-was the fool that game, so the cell is teal rather than red.
+was the fool that game, so the cell is slate rather than red.
 
 #### What Telegram does to the image
 
@@ -697,10 +701,15 @@ be glanceable without a tap.
 #### Fitting a long evening
 
 The height budget is fixed at 2560, so the number of games is what has to give.
-Row height is `clamp(available ÷ games, 26, 56)` pixels: at 18 games the rows are
-full size, at 30 they are 34. Past 39 games the rows would fall below the
-floor, so the sheet keeps the **most recent** 39 and says so in the corner. Being
+Row height is `clamp(available ÷ games, 26, 56)` pixels: at 15 games the rows are
+full size, at 30 they are 29. Past 34 games the rows would fall below the
+floor, so the sheet keeps the **most recent** 34 and says so in the corner. Being
 honest about the omission matters more than fitting everything.
+
+That ceiling is derived, not chosen, so a change above the grid moves it: the
+labelled section headings and the taller cell key cost five rows when they were
+added. The number is worth spending on the picture — an evening reaching it has
+never happened — but it is a real trade, not a free one.
 
 The header date is the UTC date of the session's first game. Late-evening games
 can therefore be stamped with the following day. A configured timezone is the fix

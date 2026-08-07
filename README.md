@@ -76,10 +76,10 @@ redraws them whenever the drawing code changes.
 |---|---|
 | [![The chronology poster](docs/mockups/chronology.png)](docs/mockups/chronology.png) | [![The awards poster](docs/mockups/awards.png)](docs/mockups/awards.png) |
 
-The grid prints the finishing position in every cell and uses four fills and no
-more: went out, drew for last, left the fool, did not play. Under it, each player's
-running share of the table — 50% is mid-table, 100% is winning every game. The
-awards need five games before there are any.
+The grid prints the finishing position in every cell, and marks only what an
+ordinary finish is not: drew for last, left the fool, did not play. Under it, each
+player's running share of the table — 50% is mid-table, 100% is winning every game.
+The awards need five games before there are any.
 
 Every colour, size and rule behind the two is specified in the [poster design
 system](https://claude.ai/design/p/dfdd20cb-3609-4baa-935d-eb20b8257c2c?file=Durak+Stats+Poster+System.dc.html),

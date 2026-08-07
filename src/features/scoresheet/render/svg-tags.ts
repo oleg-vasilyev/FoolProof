@@ -23,6 +23,8 @@ export const line = (attributes: Attributes): string => `<line ${attributesOf(at
 
 export const path = (attributes: Attributes): string => `<path ${attributesOf(attributes)}/>`;
 
+export const circle = (attributes: Attributes): string => `<circle ${attributesOf(attributes)}/>`;
+
 export const text = (value: string, attributes: Attributes): string =>
   `<text ${attributesOf(attributes)}>${escapeHtml(value)}</text>`;
 

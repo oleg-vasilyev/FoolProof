@@ -30,6 +30,8 @@ const AXIS_LIFT = 7;
 
 const lineSpy = vi.fn();
 
+const circleSpy = vi.fn();
+
 const pathSpy = vi.fn();
 
 const polylineSpy = vi.fn();
@@ -55,7 +57,7 @@ vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/palette.ts", () => ({
-  palette: { ink: "ink", inkFaint: "faint", ruling: "ruling" },
+  palette: { ink: "ink", inkFaint: "faint", inkFigure: "figure", ruling: "ruling" },
   colourFor: (column: number) => colourForSpy(column),
 }));
 
@@ -64,6 +66,7 @@ vi.mock("#scoresheet/render/chronology/percent-label.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/svg-tags.ts", () => ({
+  circle: (attributes: Record<string, unknown>) => circleSpy(attributes),
   line: (attributes: Record<string, unknown>) => lineSpy(attributes),
   path: (attributes: Record<string, unknown>) => pathSpy(attributes),
   polyline: (points: readonly (readonly [number, number])[]) => polylineSpy(points),
@@ -127,10 +130,20 @@ const linesFor = (stroke: string): readonly Record<string, unknown>[] =>
 const attributesOfText = (value: string): Record<string, unknown> =>
   (textSpy.mock.calls.find((call) => call[0] === value)?.[1] ?? {}) as Record<string, unknown>;
 
+const midlineOf = (): Record<string, unknown> =>
+  linesFor("faint").find((attributes) => attributes.y1 === attributes.y2) ?? {};
+
+const ticks = (): readonly Record<string, unknown>[] =>
+  linesFor("faint").filter((attributes) => attributes.x1 === attributes.x2);
+
+const dots = (): readonly Record<string, unknown>[] =>
+  circleSpy.mock.calls.map((call) => call[0] as Record<string, unknown>);
+
 describe("shareChart()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    circleSpy.mockImplementation(() => "<circle/>");
     lineSpy.mockImplementation(() => "<line/>");
     pathSpy.mockImplementation(() => "<path/>");
     polylineSpy.mockImplementation(() => "M0 0");
@@ -191,14 +204,14 @@ describe("shareChart()", () => {
 
     it("should put the emphasised midline exactly halfway up the plot", () => {
       shareChart(sheetOf([{ running: [ONE] }]));
-      const midline = linesFor("faint")[0];
+      const midline = midlineOf();
 
       expect(Number(midline?.y1)).toBe(CHART_TOP + CHART_HEIGHT / 2);
     });
 
     it("should dash the midline, unlike an ordinary rule", () => {
       shareChart(sheetOf([{ running: [ONE] }]));
-      const midline = linesFor("faint")[0];
+      const midline = midlineOf();
       const rule = linesFor("ruling")[0];
 
       expect(midline?.["stroke-dasharray"]).toBeDefined();
@@ -207,7 +220,7 @@ describe("shareChart()", () => {
 
     it("should give the midline a dash distinct from a skipped round, so the two cannot be confused", () => {
       shareChart(sheetOf([{ running: [ONE] }]));
-      const midline = linesFor("faint")[0];
+      const midline = midlineOf();
 
       expect(midline?.["stroke-dasharray"]).not.toBe(SKIP_DASH);
     });
@@ -215,7 +228,7 @@ describe("shareChart()", () => {
     it("should dash the midline with the two-and-eight dotted pattern", () => {
       const MIDLINE_DOTS = "2 8";
       shareChart(sheetOf([{ running: [ONE] }]));
-      const midline = linesFor("faint")[0];
+      const midline = midlineOf();
 
       expect(midline?.["stroke-dasharray"]).toBe(MIDLINE_DOTS);
     });
@@ -404,6 +417,76 @@ describe("shareChart()", () => {
 
       expect(attributesOfText("2")["text-anchor"]).toBe("middle");
       expect(Number(attributesOfText("2").x)).toBeCloseTo(PLOT_RIGHT);
+    });
+
+    it("should set the game labels in the figure ink, not the hairline one", () => {
+      shareChart(sheetOf([{ running: [0.1, 0.2] }]));
+
+      expect(attributesOfText("2").fill).toBe("figure");
+    });
+  });
+
+  describe("the tick under each game label", () => {
+    it("should put a tick under every game label", () => {
+      shareChart(sheetOf([{ running: [0.1, 0.2] }]));
+      const labels = printed().filter((value) => /^\d+$/.test(value));
+
+      expect(ticks()).toHaveLength(labels.length);
+    });
+
+    it("should hang the tick off the bottom edge rather than into the plot", () => {
+      shareChart(sheetOf([{ running: [0.1, 0.2] }]));
+
+      expect(Number(ticks()[NONE]?.y1)).toBe(CHART_TOP + CHART_HEIGHT);
+      expect(Number(ticks()[NONE]?.y2)).toBeGreaterThan(CHART_TOP + CHART_HEIGHT);
+    });
+
+    it("should stand the tick on the label it belongs to", () => {
+      shareChart(sheetOf([{ running: [0.1, 0.2] }]));
+
+      expect(Number(ticks().at(-ONE)?.x1)).toBeCloseTo(Number(attributesOfText("2").x));
+    });
+
+    it("should stop the tick short of the label rather than run through it", () => {
+      shareChart(sheetOf([{ running: [0.1, 0.2] }]));
+
+      expect(Number(ticks()[NONE]?.y2)).toBeLessThan(Number(attributesOfText("2").y));
+    });
+  });
+
+  describe("the dot ending each line", () => {
+    it("should end every player line with a dot", () => {
+      const PLAYERS = 2;
+      shareChart(sheetOf([{ running: [0.1, 0.2] }, { running: [0.3, 0.4] }]));
+
+      expect(dots()).toHaveLength(PLAYERS);
+    });
+
+    it("should give each dot its own column colour", () => {
+      shareChart(sheetOf([{ running: [0.1] }, { running: [0.3] }]));
+
+      expect(dots().map((dot) => dot.fill)).toEqual(["colour-0", "colour-1"]);
+    });
+
+    it("should sit the dot on the last point of the line it ends", () => {
+      shareChart(sheetOf([{ running: [0.1, 0.25, 0.4] }]));
+      const last = pointsOf(NONE).at(-ONE);
+
+      expect(Number(dots()[NONE]?.cx)).toBeCloseTo(Number(last?.[NONE]));
+      expect(Number(dots()[NONE]?.cy)).toBeCloseTo(Number(last?.[ONE]));
+    });
+
+    it("should park the dot at mid-table for a player with no games behind them", () => {
+      shareChart(sheetOf([{ running: [] }]));
+
+      expect(Number(dots()[NONE]?.cx)).toBe(PLOT_LEFT);
+      expect(Number(dots()[NONE]?.cy)).toBe(CHART_TOP + CHART_HEIGHT - NEUTRAL_MOCK * CHART_HEIGHT);
+    });
+
+    it("should give the dot a radius a reader can see", () => {
+      shareChart(sheetOf([{ running: [0.1] }]));
+
+      expect(Number(dots()[NONE]?.r)).toBeGreaterThan(NONE);
     });
   });
 });

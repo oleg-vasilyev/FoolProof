@@ -1,7 +1,7 @@
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
 import { cellKey } from "#scoresheet/render/chronology/cell-key.ts";
 import { chronologyGrid, columnNames } from "#scoresheet/render/chronology/chronology-grid.ts";
-import { layoutOf, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
+import { GRID_LABEL_BASELINE, layoutOf, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import {
   FONT_FAMILY,
   GRID_RIGHT,
@@ -23,9 +23,15 @@ const OMITTED_BASELINE = 286;
 
 const LABEL_LIFT = 40;
 
-const DIVIDER_DROP = 92;
+const DIVIDER_RISE = 64;
 
 const DIVIDER_WIDTH = 1;
+
+interface Section {
+  readonly label: string;
+  readonly hint: string;
+  readonly baseline: number;
+}
 
 const background = (sheet: Sheet): string =>
   rect({ x: NONE, y: NONE, width: IMAGE_WIDTH, height: sheet.height, fill: palette.sheet });
@@ -52,29 +58,27 @@ const omittedNote = (copy: Copy, sheet: Sheet): readonly string[] =>
         }),
       ];
 
-const sectionDivider = (sheet: Sheet): string =>
+const sectionHead = (section: Section): readonly string[] => [
   line({
     x1: PAD,
-    y1: sheet.gridBottom + DIVIDER_DROP,
+    y1: section.baseline - DIVIDER_RISE,
     x2: GRID_RIGHT,
-    y2: sheet.gridBottom + DIVIDER_DROP,
+    y2: section.baseline - DIVIDER_RISE,
     stroke: palette.ruling,
     "stroke-width": DIVIDER_WIDTH,
-  });
-
-const sectionHeading = (copy: Copy, sheet: Sheet): readonly string[] => [
-  text(copy.sheetShareLabel, {
+  }),
+  text(section.label, {
     x: PAD,
-    y: sheet.chartTop - LABEL_LIFT,
+    y: section.baseline,
     fill: palette.inkMuted,
     "font-family": FONT_FAMILY,
     "font-size": fontSize.sectionLabel,
     "letter-spacing": EYEBROW_TRACKING,
   }),
-  text(copy.sheetShareHint, {
+  text(section.hint, {
     x: GRID_RIGHT,
-    y: sheet.chartTop - LABEL_LIFT,
-    fill: palette.inkFaint,
+    y: section.baseline,
+    fill: palette.inkHint,
     "font-family": FONT_FAMILY,
     "font-size": fontSize.hint,
     "text-anchor": "end",
@@ -88,11 +92,19 @@ export const renderScoresheet = (copy: Copy, chronology: SeriesChronology): stri
     background(sheet),
     ...heading(copy, sheet),
     ...omittedNote(copy, sheet),
+    ...sectionHead({
+      label: copy.sheetGridLabel,
+      hint: copy.sheetGridHint,
+      baseline: GRID_LABEL_BASELINE,
+    }),
     ...columnNames(sheet),
     ...chronologyGrid(sheet),
     ...cellKey(copy, sheet),
-    sectionDivider(sheet),
-    ...sectionHeading(copy, sheet),
+    ...sectionHead({
+      label: copy.sheetShareLabel,
+      hint: copy.sheetShareHint,
+      baseline: sheet.chartTop - LABEL_LIFT,
+    }),
     ...shareChart(sheet),
     ...shareLegend(copy, sheet),
   ]);

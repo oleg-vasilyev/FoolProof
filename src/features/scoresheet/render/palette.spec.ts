@@ -21,12 +21,29 @@ describe("palette", () => {
     expect(palette.cellFool).not.toBe(palette.cellPlaced);
   });
 
-  it("should give an absent cell a fill of its own", () => {
-    expect(palette.cellAbsent).not.toBe(palette.cellPlaced);
+  it("should give an absent cell an edge that shows against the sheet it is filled with", () => {
+    expect(palette.cellAbsentEdge).not.toBe(palette.sheet);
   });
 
   it("should give a drawn cell a fill of its own", () => {
     expect(palette.cellDrawn).not.toBe(palette.cellPlaced);
+  });
+
+  it("should give a drawn cell an edge that shows against its own fill", () => {
+    expect(palette.cellDrawnEdge).not.toBe(palette.cellDrawn);
+  });
+
+  it("should keep every player colour out of the grid's own states", () => {
+    const states: readonly string[] = [
+      palette.sheet,
+      palette.cellPlaced,
+      palette.cellDrawn,
+      palette.cellFool,
+    ];
+
+    for (const colour of PLAYER_COLOURS) {
+      expect(states, colour).not.toContain(colour);
+    }
   });
 });
 

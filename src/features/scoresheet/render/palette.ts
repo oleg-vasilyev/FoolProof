@@ -1,11 +1,16 @@
 export const palette = {
   sheet: "#1c1c1c",
-  cellAbsent: "#000000",
-  cellPlaced: "#3a3a3a",
-  cellDrawn: "#2f5d52",
+  cellAbsentEdge: "#4a4a4a",
+  cellPlaced: "#3f3f3f",
+  cellDrawn: "#46505c",
+  cellDrawnEdge: "#93a3b3",
   cellFool: "#c0392b",
+  cellFoolInk: "#ffffff",
   ink: "#f2f2f2",
+  inkHint: "#c8c8c8",
+  inkKey: "#a8a8a8",
   inkMuted: "#9a9a9a",
+  inkFigure: "#8a8a8a",
   inkFaint: "#6a6a6a",
   ruling: "#2e2e2e",
   plateInk: "#1a1a1a",
@@ -15,13 +20,13 @@ export const palette = {
 
 export const PLAYER_COLOURS: readonly string[] = [
   "#e8c547",
-  "#e05c5c",
+  "#9b7de0",
   "#7ba7d7",
-  "#5cc9a7",
-  "#c07bd7",
-  "#d78f5c",
-  "#8fd75c",
-  "#d75c9a",
+  "#4fb3c4",
+  "#e0a3c8",
+  "#cfa46a",
+  "#8f9bb3",
+  "#b58a6a",
 ];
 
 export const colourFor = (column: number): string =>

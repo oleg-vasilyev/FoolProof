@@ -5,7 +5,9 @@ import { GRID_RIGHT, IMAGE_MAX_HEIGHT, PAD, fontSize } from "#scoresheet/render/
 
 export const GUTTER = 86;
 
-export const GRID_TOP = 486;
+export const GRID_LABEL_BASELINE = 428;
+
+export const GRID_TOP = 518;
 
 export const GRID_LEFT = PAD + GUTTER;
 
@@ -13,7 +15,7 @@ const ROW_HEIGHT_MAX = 56;
 
 const ROW_HEIGHT_MIN = 26;
 
-export const GRID_TO_CHART = 190;
+export const GRID_TO_CHART = 210;
 
 export const CHART_HEIGHT = 620;
 
@@ -25,7 +27,7 @@ export const PLOT_RIGHT = GRID_RIGHT - PLOT_INSET;
 
 export const PLOT_WIDTH = PLOT_RIGHT - PLOT_LEFT;
 
-const BOTTOM_PAD = 240;
+const BOTTOM_PAD = 320;
 
 const HALF = 2;
 

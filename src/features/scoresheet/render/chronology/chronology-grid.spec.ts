@@ -16,9 +16,15 @@ const CELL_FONT = 26;
 
 const INDEX_FONT = 20;
 
-const rectSpy = vi.fn();
+const BASELINE = 777;
+
+const COLUMN_NAME_FONT = 34;
 
 const textSpy = vi.fn();
+
+const cellFaceSpy = vi.fn();
+
+const baselineSpy = vi.fn();
 
 const colourForSpy = vi.fn();
 
@@ -33,31 +39,31 @@ const NAME_GUTTER = 20;
 vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
   CELL_INSET: 2,
   CELL_SHRINK: 4,
-  FONT_FAMILY: "Test Sans",
   GRID_LEFT,
   GRID_TOP,
   cellFontOf: () => CELL_FONT,
   columnCentre: (_sheet: unknown, column: number) =>
     GRID_LEFT + column * COLUMN_WIDTH + COLUMN_WIDTH / 2,
-  fontSize: { columnName: 32 },
   nameToFit: (name: string, width: number, largest: number) => nameToFitSpy(name, width, largest),
   indexFontOf: () => INDEX_FONT,
 }));
 
+vi.mock("#scoresheet/render/card-metrics.ts", () => ({
+  FONT_FAMILY: "Test Sans",
+  fontSize: { columnName: COLUMN_NAME_FONT },
+}));
+
+vi.mock("#scoresheet/render/chronology/cell-face.ts", () => ({
+  cellFace: (box: unknown, cell: unknown) => [cellFaceSpy(box, cell)],
+  baselineIn: (box: unknown) => baselineSpy(box),
+}));
+
 vi.mock("#scoresheet/render/palette.ts", () => ({
-  palette: {
-    cellAbsent: "absent",
-    cellPlaced: "placed",
-    cellDrawn: "drawn",
-    cellFool: "fool",
-    ink: "ink",
-    inkFaint: "faint",
-  },
+  palette: { ink: "ink", inkFigure: "figure" },
   colourFor: (column: number) => colourForSpy(column),
 }));
 
 vi.mock("#scoresheet/render/svg-tags.ts", () => ({
-  rect: (attributes: Record<string, unknown>) => rectSpy(attributes),
   text: (value: string, attributes: Record<string, unknown>) => textSpy(value, attributes),
 }));
 
@@ -66,6 +72,8 @@ const { chronologyGrid, columnNames } = await import("#scoresheet/render/chronol
 const NONE = 0;
 
 const ONE = 1;
+
+const CELL_INSET = 2;
 
 const PLACED: Cell = { kind: CellKind.Placed, position: 2 };
 
@@ -92,8 +100,10 @@ const sheetOf = (cells: readonly (readonly Cell[])[], names?: readonly string[])
     height: NONE,
   }) satisfies Sheet;
 
-const rectFor = (call: number): Record<string, unknown> =>
-  (rectSpy.mock.calls[call]?.[0] ?? {}) as Record<string, unknown>;
+const boxFor = (call: number): Record<string, number> =>
+  (cellFaceSpy.mock.calls[call]?.[0] ?? {}) as Record<string, number>;
+
+const cellFor = (call: number): Cell => cellFaceSpy.mock.calls[call]?.[1] as Cell;
 
 const printed = (): readonly string[] => textSpy.mock.calls.map((call) => String(call[0]));
 
@@ -106,8 +116,9 @@ describe("chronology", () => {
 
     nameToFitSpy.mockImplementation((name: string) => ({ text: name, size: FITTED_SIZE }));
 
-    rectSpy.mockImplementation(() => "<rect/>");
     textSpy.mockImplementation(() => "<text/>");
+    cellFaceSpy.mockImplementation(() => "<cell/>");
+    baselineSpy.mockReturnValue(BASELINE);
     colourForSpy.mockImplementation((column: number) => `colour-${String(column)}`);
   });
 
@@ -137,10 +148,13 @@ describe("chronology", () => {
     });
 
     it("should ask for each name to be fitted to its own column", () => {
-      const DESIGN_SIZE = 32;
       columnNames(sheetOf([[]], ["Konstantinovna"]));
 
-      expect(nameToFitSpy).toHaveBeenCalledWith("Konstantinovna", COLUMN_WIDTH - NAME_GUTTER, DESIGN_SIZE);
+      expect(nameToFitSpy).toHaveBeenCalledWith(
+        "Konstantinovna",
+        COLUMN_WIDTH - NAME_GUTTER,
+        COLUMN_NAME_FONT
+      );
     });
 
     it("should print whatever came back fitted, not the name it was given", () => {
@@ -172,12 +186,28 @@ describe("chronology", () => {
   });
 
   describe("chronologyGrid()", () => {
-    it("should draw a block for every player in every round", () => {
+    it("should draw a cell for every player in every round", () => {
       chronologyGrid(sheetOf([[PLACED, PLACED], [PLACED, PLACED]]));
       const PLAYERS = 2;
       const ROUNDS = 2;
 
-      expect(rectSpy).toHaveBeenCalledTimes(PLAYERS * ROUNDS);
+      expect(cellFaceSpy).toHaveBeenCalledTimes(PLAYERS * ROUNDS);
+    });
+
+    it("should hand each cell on untouched, deciding how it looks nowhere here", () => {
+      const FOOL: Cell = { kind: CellKind.Fool, position: 3 };
+      chronologyGrid(sheetOf([[FOOL]]));
+
+      expect(cellFor(NONE)).toBe(FOOL);
+    });
+
+    it("should treat a missing cell as an absence rather than crashing", () => {
+      const shortOfCells = sheetOf([[PLACED]]);
+      const stretched = { ...shortOfCells, rounds: 2 } as Sheet;
+
+      chronologyGrid(stretched);
+
+      expect(cellFor(ONE)).toEqual({ kind: CellKind.Absent });
     });
 
     it("should number every round", () => {
@@ -199,47 +229,11 @@ describe("chronology", () => {
       expect(Number(attributesOfText("01").x)).toBeLessThan(GRID_LEFT);
     });
 
-    it("should print the position inside the block", () => {
+    it("should inset the box so neighbouring cells do not touch", () => {
       chronologyGrid(sheetOf([[PLACED]]));
 
-      expect(printed()).toContain("2");
-    });
-
-    it("should print nothing in a block for a game that was sat out", () => {
-      chronologyGrid(sheetOf([[{ kind: CellKind.Absent }]]));
-
-      expect(printed()).toEqual(["01"]);
-    });
-
-    it("should fill a placed block with the placed colour", () => {
-      chronologyGrid(sheetOf([[PLACED]]));
-
-      expect(rectFor(NONE).fill).toBe("placed");
-    });
-
-    it("should fill an absent block with the absent colour", () => {
-      chronologyGrid(sheetOf([[{ kind: CellKind.Absent }]]));
-
-      expect(rectFor(NONE).fill).toBe("absent");
-    });
-
-    it("should fill a fool's block with the fool colour", () => {
-      chronologyGrid(sheetOf([[{ kind: CellKind.Fool, position: 3 }]]));
-
-      expect(rectFor(NONE).fill).toBe("fool");
-    });
-
-    it("should fill a drawn block with the drawn colour", () => {
-      chronologyGrid(sheetOf([[{ kind: CellKind.Drawn, position: 2 }]]));
-
-      expect(rectFor(NONE).fill).toBe("drawn");
-    });
-
-    it("should inset the block so neighbouring cells do not touch", () => {
-      chronologyGrid(sheetOf([[PLACED]]));
-
-      expect(rectFor(NONE).width).toBeLessThan(COLUMN_WIDTH);
-      expect(rectFor(NONE).height).toBeLessThan(ROW_HEIGHT);
+      expect(boxFor(NONE).width).toBeLessThan(COLUMN_WIDTH);
+      expect(boxFor(NONE).height).toBeLessThan(ROW_HEIGHT);
     });
 
     it("should step down one row height per round", () => {
@@ -247,43 +241,33 @@ describe("chronology", () => {
       const FIRST = 0;
       const SECOND = 1;
 
-      expect(Number(rectFor(SECOND).y) - Number(rectFor(FIRST).y)).toBe(ROW_HEIGHT);
+      expect(Number(boxFor(SECOND).y) - Number(boxFor(FIRST).y)).toBe(ROW_HEIGHT);
+    });
+
+    it("should step across one column width per player", () => {
+      chronologyGrid(sheetOf([[PLACED], [PLACED]]));
+
+      expect(Number(boxFor(ONE).x) - Number(boxFor(NONE).x)).toBe(COLUMN_WIDTH);
     });
 
     it("should start the grid at its top edge", () => {
       chronologyGrid(sheetOf([[PLACED]]));
-      const INSET = 2;
 
-      expect(rectFor(NONE).y).toBe(GRID_TOP + INSET);
+      expect(boxFor(NONE).y).toBe(GRID_TOP + CELL_INSET);
+      expect(boxFor(NONE).x).toBe(GRID_LEFT + CELL_INSET);
     });
 
-    it("should sit the digit's baseline inside its own row", () => {
-      chronologyGrid(sheetOf([[PLACED]]));
-      const baseline = Number(attributesOfText("2").y);
-
-      expect(baseline).toBeGreaterThan(GRID_TOP);
-      expect(baseline).toBeLessThan(GRID_TOP + ROW_HEIGHT);
-    });
-
-    it("should move the digit down exactly one row per round", () => {
-      chronologyGrid(sheetOf([[PLACED, { kind: CellKind.Placed, position: 3 }]]));
-
-      expect(Number(attributesOfText("3").y) - Number(attributesOfText("2").y)).toBe(ROW_HEIGHT);
-    });
-
-    it("should centre the digit in its cell", () => {
+    it("should size the cell from the row it sits in", () => {
       chronologyGrid(sheetOf([[PLACED]]));
 
-      expect(attributesOfText("2")["text-anchor"]).toBe("middle");
-      expect(attributesOfText("2").x).toBe(GRID_LEFT + COLUMN_WIDTH / 2);
+      expect(boxFor(NONE).fontSize).toBe(CELL_FONT);
     });
 
-    it("should sit the round number's baseline inside its row", () => {
+    it("should sit the round number on the baseline of the first cell in its row", () => {
       chronologyGrid(sheetOf([[PLACED]]));
-      const baseline = Number(attributesOfText("01").y);
 
-      expect(baseline).toBeGreaterThan(GRID_TOP);
-      expect(baseline).toBeLessThan(GRID_TOP + ROW_HEIGHT);
+      expect(baselineSpy).toHaveBeenCalledWith(boxFor(NONE));
+      expect(attributesOfText("01").y).toBe(BASELINE);
     });
 
     it("should right-align the round number against the grid's edge", () => {
@@ -292,25 +276,16 @@ describe("chronology", () => {
       expect(attributesOfText("01")["text-anchor"]).toBe("end");
     });
 
-    it("should size the digit from the row it sits in", () => {
-      chronologyGrid(sheetOf([[PLACED]]));
-
-      expect(attributesOfText("2")["font-size"]).toBe(CELL_FONT);
-    });
-
     it("should size the round number from the row it sits in", () => {
       chronologyGrid(sheetOf([[PLACED]]));
 
       expect(attributesOfText("01")["font-size"]).toBe(INDEX_FONT);
     });
 
-    it("should treat a missing cell as an absence rather than crashing", () => {
-      const shortOfCells = sheetOf([[PLACED]]);
-      const stretched = { ...shortOfCells, rounds: 2 } as Sheet;
+    it("should keep the round number quieter than what the cells print", () => {
+      chronologyGrid(sheetOf([[PLACED]]));
 
-      chronologyGrid(stretched);
-
-      expect(rectFor(ONE).fill).toBe("absent");
+      expect(attributesOfText("01").fill).toBe("figure");
     });
   });
 });

@@ -5,7 +5,11 @@ import { copy } from "#scoresheet/copy.en.ts";
 import type { Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 
 
-const IMAGE_WIDTH = 1620;
+const IMAGE_WIDTH = 900;
+
+const SECTION_LABEL_FONT = 33;
+
+const HINT_FONT = 29;
 
 const SHEET_HEIGHT = 2000;
 
@@ -13,9 +17,11 @@ const CHART_TOP = 1400;
 
 const GRID_BOTTOM = 1210;
 
-const GRID_RIGHT = 1560;
+const GRID_RIGHT = 860;
 
-const PAD = 60;
+const GRID_LABEL_BASELINE = 428;
+
+const PAD = 40;
 
 const ROUNDS = 12;
 
@@ -53,16 +59,27 @@ vi.mock("#scoresheet/render/chronology/cell-key.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
+  GRID_LABEL_BASELINE,
+  layoutOf: (chronology: unknown) => layoutOfSpy(chronology),
+}));
+
+vi.mock("#scoresheet/render/card-metrics.ts", () => ({
   FONT_FAMILY: "Test Sans",
   GRID_RIGHT,
   IMAGE_WIDTH,
   PAD,
-  fontSize: { eyebrow: 30, title: 126, date: 52, subtitle: 42, sectionLabel: 30, hint: 24 },
-  layoutOf: (chronology: unknown) => layoutOfSpy(chronology),
+  fontSize: { sectionLabel: SECTION_LABEL_FONT, hint: HINT_FONT },
 }));
 
 vi.mock("#scoresheet/render/palette.ts", () => ({
-  palette: { sheet: "sheet", ink: "ink", inkMuted: "muted", inkFaint: "faint", ruling: "ruling" },
+  palette: {
+    sheet: "sheet",
+    ink: "ink",
+    inkHint: "hint",
+    inkMuted: "muted",
+    inkFaint: "faint",
+    ruling: "ruling",
+  },
 }));
 
 vi.mock("#scoresheet/render/card-heading.ts", () => ({
@@ -122,6 +139,15 @@ const body = (): readonly string[] => (svgOfSpy.mock.calls[0]?.[2] ?? []) as rea
 
 const attributesOfText = (value: string): Record<string, unknown> =>
   (textSpy.mock.calls.find((call) => call[0] === value)?.[1] ?? {}) as Record<string, unknown>;
+
+const dividerFor = (label: string): Record<string, number> => {
+  const baseline = Number(attributesOfText(label).y);
+
+  return lineSpy.mock.calls
+    .map((call) => call[0] as Record<string, number>)
+    .filter((divider) => Number(divider.y1) < baseline)
+    .reduce((closest, divider) => (Number(divider.y1) > Number(closest.y1) ? divider : closest));
+};
 
 describe("renderScoresheet()", () => {
   beforeEach(() => {
@@ -209,11 +235,18 @@ describe("renderScoresheet()", () => {
     });
   });
 
-  describe("the divider between the two sections", () => {
-    const dividerDrawn = (): Record<string, number> =>
-      (lineSpy.mock.calls[0]?.[0] ?? {}) as Record<string, number>;
+  describe("the two sections", () => {
+    const SECTIONS = 2;
 
-    it("should rule across the sheet from margin to margin", () => {
+    it("should open a section over the grid and another over the chart", () => {
+      renderScoresheet(copy, CHRONOLOGY);
+
+      expect(lineSpy).toHaveBeenCalledTimes(SECTIONS);
+      expect(printed()).toContain(copy.sheetGridLabel);
+      expect(printed()).toContain(copy.sheetShareLabel);
+    });
+
+    it("should rule each section across the sheet from margin to margin", () => {
       renderScoresheet(copy, CHRONOLOGY);
 
       expect(lineSpy).toHaveBeenCalledWith(
@@ -221,31 +254,68 @@ describe("renderScoresheet()", () => {
       );
     });
 
-    it("should be flat", () => {
+    it("should keep each divider flat", () => {
       renderScoresheet(copy, CHRONOLOGY);
+      const divider = dividerFor(copy.sheetShareLabel);
 
-      expect(dividerDrawn().y1).toBe(dividerDrawn().y2);
+      expect(divider.y1).toBe(divider.y2);
     });
 
-    it("should hang off the grid's own bottom edge, not a recomputed one", () => {
+    it("should open the grid's section above the grid it labels", () => {
       renderScoresheet(copy, CHRONOLOGY);
 
-      expect(dividerDrawn().y1).toBeGreaterThan(GRID_BOTTOM);
+      expect(dividerFor(copy.sheetGridLabel).y1).toBeLessThan(GRID_LABEL_BASELINE);
+      expect(Number(attributesOfText(copy.sheetGridLabel).y)).toBe(GRID_LABEL_BASELINE);
     });
 
-    it("should sit above the label of the section it opens", () => {
+    it("should hang the chart's divider off the grid's own bottom edge, not a recomputed one", () => {
       renderScoresheet(copy, CHRONOLOGY);
 
-      expect(dividerDrawn().y1).toBeLessThan(
+      expect(dividerFor(copy.sheetShareLabel).y1).toBeGreaterThan(GRID_BOTTOM);
+    });
+
+    it("should sit each divider above the label of the section it opens", () => {
+      renderScoresheet(copy, CHRONOLOGY);
+
+      expect(dividerFor(copy.sheetShareLabel).y1).toBeLessThan(
         Number(attributesOfText(copy.sheetShareLabel).y)
       );
     });
 
-    it("should be drawn after the key and before the chart", () => {
+    it("should print the grid's hint alongside its label", () => {
+      renderScoresheet(copy, CHRONOLOGY);
+      const hint = attributesOfText(copy.sheetGridHint);
+
+      expect(hint.x).toBe(GRID_RIGHT);
+      expect(hint["text-anchor"]).toBe("end");
+      expect(hint.y).toBe(attributesOfText(copy.sheetGridLabel).y);
+    });
+
+    it("should set every hint in the ink kept for a hint", () => {
       renderScoresheet(copy, CHRONOLOGY);
 
-      expect(body().indexOf("<key/>")).toBeLessThan(body().indexOf("<divider/>"));
-      expect(body().indexOf("<divider/>")).toBeLessThan(body().indexOf("<chart/>"));
+      expect(attributesOfText(copy.sheetGridHint).fill).toBe("hint");
+      expect(attributesOfText(copy.sheetShareHint).fill).toBe("hint");
+    });
+
+    it("should set a label and its hint at their own two sizes from the type scale", () => {
+      renderScoresheet(copy, CHRONOLOGY);
+
+      expect(attributesOfText(copy.sheetGridLabel)["font-size"]).toBe(SECTION_LABEL_FONT);
+      expect(attributesOfText(copy.sheetGridHint)["font-size"]).toBe(HINT_FONT);
+    });
+
+    it("should open the grid's section before the headings it covers", () => {
+      renderScoresheet(copy, CHRONOLOGY);
+
+      expect(body().indexOf("<divider/>")).toBeLessThan(body().indexOf("<names/>"));
+    });
+
+    it("should draw the chart's section after the key and before the chart", () => {
+      renderScoresheet(copy, CHRONOLOGY);
+
+      expect(body().indexOf("<key/>")).toBeLessThan(body().lastIndexOf("<divider/>"));
+      expect(body().lastIndexOf("<divider/>")).toBeLessThan(body().indexOf("<chart/>"));
     });
 
     it("should draw the legend after the chart it explains", () => {

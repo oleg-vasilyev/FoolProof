@@ -63,13 +63,15 @@ export const copy = {
 
   sheetEyebrow: "SESSION LOG",
   sheetTitle: "CHRONOLOGY",
+  sheetGridLabel: "GAME BY GAME",
+  sheetGridHint: "columns in seating order · every cell prints the place taken",
   sheetShareLabel: "TABLE SHARE",
   sheetShareHint: "50% is mid-table · 100% is winning every game",
+  sheetLegendLabel: "SORTED BY SHARE",
 
   sheetGameForms: { one: "game", few: "games", many: "games" },
   sheetPlayerForms: { one: "player", few: "players", many: "players" },
 
-  sheetKeyPlaced: "went out",
   sheetKeyDrawn: "drew for last",
   sheetKeyFool: "left the fool",
   sheetKeyAbsent: "did not play",

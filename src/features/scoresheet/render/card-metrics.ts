@@ -17,7 +17,9 @@ export const fontSize = {
   columnName: 32,
   axis: 22,
   legend: 30,
+  legendLabel: 24,
   legendTally: 22,
-  keyLabel: 24,
-  hint: 24,
+  keyCell: 24,
+  keyLabel: 26,
+  hint: 27,
 } as const;
