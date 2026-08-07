@@ -30,6 +30,12 @@ file the phase never opened was already killed in the phase that wrote it, and
 re-proving it costs four minutes of every phase. Breaks below 85% either way.
 Coverage says a line ran; this says a test would have noticed it break.
 
+**`--mutate` takes a glob, and `dir/*.ts` matches the specs too.** Stryker will
+happily mutate `cell-face.spec.ts`, where almost every mutant survives because
+nothing tests the tests — one phase read a 55% total off a run whose per-source
+files were all above 82%. List the source files, or exclude `*.spec.ts`; a total
+far below the per-file numbers means the glob, not the specs.
+
 A file that dropped is a file whose new tests assert too little — strengthen the
 tests, never lower the bar. The instructive ones are usually a spy left dirty by
 the test above, or an optional chain hiding a value that was never set.

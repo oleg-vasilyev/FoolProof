@@ -48,10 +48,23 @@ poster prints. If `docs:check` complained, the trigger already fired.
    cannot swap the two drawings; a slot naming a poster nothing draws, a poster with
    no slot, or a slot holding nested markup instead of one drawing each refuse by
    name rather than splicing something wrong.
-5. **Read what the change made false.** The mockups are now current; the prose
+5. **Check the render against the e2e quiet window.** A poster that grows costs
+   rasterizing time, and `e2e/harness/settling.ts` decides the bot has finished
+   after `QUIET_MS` of silence — a window the slowest single render has to fit
+   inside. This redesign added ~80ms to the chronology (~460ms → ~540ms), crossed
+   the old 600ms window, and announced itself as five scenarios asserting against
+   photos that had not arrived: a wrong answer in a gate, wearing flakiness as a
+   disguise. Measure it before running `e2e:changed`, so a red suite means the bot
+   and not the harness:
+
+   ```
+   node -e "import('./src/features/scoresheet/bot/rasterizer.ts').then(async ({rasterize})=>{const {posters}=await import('./scripts/mockups.ts');for(const [n,s] of Object.entries(posters())){rasterize(s);const t=performance.now();rasterize(s);console.log(n,(performance.now()-t).toFixed(0)+'ms');}})"
+   ```
+
+6. **Read what the change made false.** The mockups are now current; the prose
    around them may not be. A renamed award, a new colour, a changed size — fix the
    sentence and bump the `Rev.` in the header and the footer together.
-6. **Push it back**: `finalize_plan` with the one path, then `write_files` with
+7. **Push it back**: `finalize_plan` with the one path, then `write_files` with
    `localPath`. Read it back and compare against the local file; the write is only
    done when they are byte-identical.
 

@@ -133,6 +133,17 @@ expect(env.requireEnvSpy).toHaveBeenCalledWith(env.loaded, "BOT_TOKEN");
 If a fake needs an `if`, a lookup or a loop to satisfy its caller, it has stopped
 being a fake and started being a second implementation.
 
+**A mocking fault is never in one file.** When you find one — a `vi.mock` whose keys
+the subject never reads, a fake that reimplements, a spy nothing asserts — grep the
+sibling specs for the same shape before moving on. Two specs in `render/chronology/`
+mocked `card-metrics.ts` values into the `chronology-layout.ts` factory, so the
+subject read the *real* table and the mock was dead; the phase that found and fixed
+exactly that in `cell-key.spec.ts` then rewrote both neighbours without carrying the
+fix across, and a review pass had to find it. The tell that a mock is dead is cheap
+to build in: **give it values that differ from the real ones**. A spec whose
+`IMAGE_WIDTH` is 900 while the design says 1620 proves it controls what the subject
+reads; one that repeats 1620 proves nothing and passes either way.
+
 ## Stubs
 
 **Every module in `shared/` has a stub, and a spec uses it rather than writing a
