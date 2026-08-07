@@ -88,6 +88,26 @@ assertions.
 **Chase it when a mutant in `main.ts`'s signal wiring survives**, or when the noise
 first makes somebody miss a real failure in that output.
 
+## Nothing tells the harness when a render outgrows its quiet window
+
+A scenario decides the bot has finished once `QUIET_MS` has passed with nothing
+happening, so the window has to be longer than the slowest thing the bot does
+between two effects — rasterizing one poster. The chronology redesign made that
+render ~80ms slower and it crossed the old 600ms window, and the way it announced
+itself was five scenarios asserting against photos that had not arrived: a wrong
+answer, in a gate, that looked like flakiness. `QUIET_MS` is 1200 now, which buys
+back roughly a doubling of render time.
+
+The debounce has `debounceFitsQuiet()` for exactly this class of coupling, and it
+works because a debounce is a constant a file can be read for. A render time is
+not — it can only be measured, and `e2e/` may not import `src/` to measure it. The
+guard that would actually fit is the other direction: notice that an effect landed
+*after* a settle returned, and fail naming the scenario, so the harness reports its
+own assumption breaking instead of the scenario reporting a bot that is fine.
+
+**Build it the next time a scenario fails in a way that turns out to be timing**,
+or when a poster gains enough to make somebody wonder about the window again.
+
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to

@@ -2,7 +2,16 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 
-export const QUIET_MS = 600;
+// A scenario believes the bot has finished once nothing has happened for this long,
+// so the window has to be longer than the slowest single thing the bot does between
+// two effects — which is rasterizing one poster. Measured on the development machine:
+// the chronology takes ~540ms and the awards ~510ms, and `/stats` sends both, so the
+// gap between the update draining and the first photo is a whole render. At 600ms
+// this had roughly 60ms of headroom, and the chronology redesign spent it: the poster
+// grew taller and gained an outline per cell, the render crossed the window, and five
+// of seventeen scenarios started asserting against photos that had not arrived yet.
+// Raising it is the honest fix — the bot is not slow, the window was.
+export const QUIET_MS = 1200;
 
 const CARD_SERVICE = ["src", "features", "live-game", "bot", "card", "card-service.ts"];
 
