@@ -11,6 +11,14 @@ const NOTHING = 0;
 
 const BOTH_PICTURES = 2;
 
+const WIDTH_AT = 16;
+
+const HEIGHT_AT = 20;
+
+const POSTER_WIDTH = 1620;
+
+const TELEGRAM_HEIGHT_LIMIT = 2560;
+
 const CONFIRM = "✅ Записать";
 
 const FULL_TABLE = [
@@ -131,5 +139,15 @@ describeScenario("the pictures a full table gets back", (chat) => {
 
   it("should say how many sat down, in the form Russian gives ten", () => {
     expect(captionOfLastPhoto(chat)).toBe("1 партия · 10 игроков");
+  });
+
+  it("should draw it at the poster's own width, whatever the names did to the headings", () => {
+    expect(chat.photoBytes()?.readUInt32BE(WIDTH_AT)).toBe(POSTER_WIDTH);
+  });
+
+  it("should keep it inside the height Telegram will send without shrinking", () => {
+    expect(chat.photoBytes()?.readUInt32BE(HEIGHT_AT) ?? NOTHING).toBeLessThanOrEqual(
+      TELEGRAM_HEIGHT_LIMIT
+    );
   });
 });

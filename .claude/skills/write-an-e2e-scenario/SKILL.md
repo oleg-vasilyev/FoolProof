@@ -22,9 +22,32 @@ standing cost, not a one-off. Two things earn one:
   already. Both keyboard features arrived with scenarios and both immediately found
   a wrong assumption about the bot's own behaviour.
 - **A bug that got through the units.** That is evidence the seam is real.
+- **An extreme of real input the product has to survive** — the fullest table, the
+  longest names, the evening that outgrows the sheet. Not because the output will be
+  pretty there, but because nothing else plays the whole chain at that size.
 
 Anything a unit can prove belongs in a unit. A scenario that re-proves a reducer is
 slower, flakier and asserts less.
+
+## When you catch yourself describing a limit, something must assert it
+
+**A sentence about how the product behaves at an edge is an untested claim until a
+test says it.** "At ten players it cuts to five letters and an ellipsis" was written
+in a report, not in a spec, and the ten-player scenario had been green through the
+whole life of the bug it was describing — because it asserted the PNG's magic bytes
+and its caption, and nothing else.
+
+So when a limit turns up in prose, ask the second question too: **can the scenario
+see the thing you just described?** A scenario holds a rasterized PNG, so it can
+prove the picture arrives, its width, and that it fits inside Telegram's height —
+and it can prove nothing whatever about a font size or a truncated word. Those live
+in the SVG, which means the assertion belongs where the SVG is still a string:
+`scoresheet-chain.integration.spec.ts` renders one from a real database, and reading
+attributes out of it is what proves every heading takes the same size.
+
+Splitting it that way is the point. A scenario that asserts only what it can
+actually see is a guard; one that asserts a photo arrived is a green light with
+nothing behind it.
 
 ## The shape
 

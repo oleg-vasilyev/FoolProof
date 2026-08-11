@@ -58,6 +58,43 @@ const TEXT_ELEMENT = /<text[^>]*>([^<]*)<\/text>/g;
 
 const A_PERCENT = /^\d+%$/;
 
+const TEXT_TAG = /<text([^>]*)>([^<]*)<\/text>/g;
+
+const ATTRIBUTES = 1;
+
+const BODY = 2;
+
+const FIRST_GROUP = 1;
+
+const A_FONT_SIZE = /font-size="([^"]+)"/;
+
+const A_BARE_NUMBER = /^\d+$/;
+
+const ELLIPSIS = "…";
+
+const ONE_SIZE = 1;
+
+const FROM_THE_START = 0;
+
+const NONE_CUT = 0;
+
+const THE_FOOL = 1;
+
+const CROWDED_CHAT = -100666;
+
+const A_CROWDED_TABLE = [
+  "Александра-Константиновна",
+  "Владимир-Вячеславович",
+  "Екатерина",
+  "Роман",
+  "Вероника",
+  "Анастасия",
+  "Дмитрий",
+  "Ольга",
+  "Святослав",
+  "Аня",
+];
+
 const SIDECARS = ["", "-wal", "-shm"];
 
 interface LegendEntry {
@@ -77,6 +114,27 @@ const legendIn = (texts: readonly string[]): readonly LegendEntry[] =>
       ? [{ name, share: value, games: texts[index + TEXT_AFTER_NEXT] ?? "" }]
       : [];
   });
+
+interface Heading {
+  readonly text: string;
+  readonly size: string;
+}
+
+const headingsIn = (svg: string): readonly Heading[] =>
+  [...svg.matchAll(TEXT_TAG)]
+    .filter((found) => {
+      const attributes = found[ATTRIBUTES] ?? "";
+
+      return (
+        attributes.includes('text-anchor="middle"') &&
+        attributes.includes('font-weight="bold"') &&
+        !A_BARE_NUMBER.test(found[BODY] ?? "")
+      );
+    })
+    .map((found) => ({
+      text: found[BODY] ?? "",
+      size: A_FONT_SIZE.exec(found[ATTRIBUTES] ?? "")?.[FIRST_GROUP] ?? "",
+    }));
 
 const byName = (
   legend: readonly LegendEntry[],
@@ -186,6 +244,45 @@ describe("an evening reaching the chronology", () => {
 
   it("should say somebody sat out, which only a missing row can tell it", () => {
     expect(texts).toContain(copy.sheetKeyAbsent);
+  });
+});
+
+describe("a table too crowded for the names it seated", () => {
+  let headings: readonly Heading[];
+
+  beforeAll(() => {
+    playGame(
+      CROWDED_CHAT,
+      A_CROWDED_TABLE,
+      A_CROWDED_TABLE.slice(FROM_THE_START, A_CROWDED_TABLE.length - THE_FOOL),
+      A_CROWDED_TABLE[FROM_THE_START] ?? ""
+    );
+
+    headings = headingsIn(renderScoresheet(copy, seriesIn(CROWDED_CHAT)));
+  });
+
+  it("should head every column the table seated", () => {
+    expect(headings).toHaveLength(A_CROWDED_TABLE.length);
+  });
+
+  it("should set every heading at one size, however long the name behind it was", () => {
+    expect(new Set(headings.map((heading) => heading.size)).size).toBe(ONE_SIZE);
+  });
+
+  it("should cut the names that cannot fit rather than shrink them", () => {
+    const cut = headings.filter((heading) => heading.text.endsWith(ELLIPSIS));
+
+    expect(cut.length).toBeGreaterThan(NONE_CUT);
+  });
+
+  it("should leave a name that fits whole and unmarked", () => {
+    expect(headings.map((heading) => heading.text)).toContain("Аня");
+  });
+
+  it("should cut a long name down to the same length as every other cut one", () => {
+    const cut = headings.filter((heading) => heading.text.endsWith(ELLIPSIS));
+
+    expect(new Set(cut.map((heading) => heading.text.length)).size).toBe(ONE_SIZE);
   });
 });
 
