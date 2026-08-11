@@ -1,7 +1,7 @@
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { PlayerColumn, SeriesChronology } from "#shared/repository/repository-contract.ts";
 import type { Award, Honours, TableCurse } from "#scoresheet/domain/awards/award-catalogue.ts";
-import { colourFor } from "#scoresheet/render/palette.ts";
+import { colourFor, palette } from "#scoresheet/render/palette.ts";
 import { PAD } from "#scoresheet/render/card-metrics.ts";
 
 
@@ -190,12 +190,13 @@ const place = (
   height: number
 ): Placed => {
   const names = namesOf(players, award);
+  const wholeTable = names.length === players.length;
 
   return {
     award,
     names,
-    wholeTable: names.length === players.length,
-    colour: colourFor(seatOf(players, award)),
+    wholeTable,
+    colour: wholeTable ? palette.inkHint : colourFor(seatOf(players, award)),
     rank,
     top,
     height,

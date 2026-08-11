@@ -20,7 +20,7 @@ export const copy: Copy = {
   awardsTitle: "НАГРАДЫ",
   awardsCurseLabel: "ПРОКЛЯТИЕ СТОЛА",
   betweenWinners: " и ",
-  everyWinner: "весь стол",
+  everyWinner: "Весь стол",
 
   awardTitles: {
     king: "КОРОЛЬ СТОЛА",
@@ -85,7 +85,7 @@ export const copy: Copy = {
     `Все ${players} отсидели все ${games}. Не пропустил никто.`,
   ironSeatReason: (games: string) => `Ни одной пропущенной партии из ${games}. Никто больше не досидел.`,
   rotationReason: (players: string, games: string) =>
-    `За ${games} дураком успел побывать каждый из ${players}.`,
+    `За ${games} дураком побывали все ${players}.`,
   truceReason: (draws: number, games: string) => `${draws} из ${games}, где не проиграл никто.`,
   pacifistReason: (draws: string) =>
     `Во всех ${draws}, которые кончились вничью. Один за всё не отвечал ни разу.`,

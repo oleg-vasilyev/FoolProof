@@ -6,8 +6,11 @@ import type { Award, Honours, TableCurse } from "#scoresheet/domain/awards/award
 
 const colourForSpy = vi.fn();
 
+const NEUTRAL_INK = "neutral-ink";
+
 vi.mock("#scoresheet/render/palette.ts", () => ({
   colourFor: (column: number) => colourForSpy(column),
+  palette: { inkHint: NEUTRAL_INK },
 }));
 
 const {
@@ -179,6 +182,30 @@ describe("awardsLayoutOf()", () => {
       const sheet = awardsLayoutOf(chronologyOf(A_TABLE_OF_THREE), honours);
 
       expect(sheet.rows[0]?.wholeTable).toBe(false);
+    });
+
+    it("should colour it neutrally, so it cannot be read as the first winner's row", () => {
+      const honours = honoursOf([everyoneOf([0, 1, 2])]);
+
+      const sheet = awardsLayoutOf(chronologyOf(A_TABLE_OF_THREE), honours);
+
+      expect(sheet.rows[0]?.colour).toBe(NEUTRAL_INK);
+    });
+
+    it("should never ask the palette for a seat colour it will not use", () => {
+      const honours = honoursOf([everyoneOf([0, 1, 2])]);
+
+      awardsLayoutOf(chronologyOf(A_TABLE_OF_THREE), honours);
+
+      expect(colourForSpy).not.toHaveBeenCalled();
+    });
+
+    it("should still give an award with one winner that winner's own colour", () => {
+      const honours = honoursOf([untouchableOf(0)]);
+
+      const sheet = awardsLayoutOf(chronologyOf(A_TABLE_OF_THREE), honours);
+
+      expect(sheet.rows[0]?.colour).not.toBe(NEUTRAL_INK);
     });
   });
 
