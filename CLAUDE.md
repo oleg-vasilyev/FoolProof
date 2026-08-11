@@ -343,16 +343,17 @@ the edit instead of at the end of the turn.
 
 A phase is done when the code is *releasable*, not when it works. Seven gates run
 before the final commit — `npm run check`, coverage (70% floor), mutation (breaks
-below 85%), `npm run e2e:changed`, **looking at the poster gallery**, a review pass
-over the whole diff, and a retrospective on how the phase was carried out — and the
-numbers go in the commit message. The gallery is the one gate a machine cannot
-answer: `node scripts/tools.ts gallery` draws both posters at every edge the product
-must survive, and somebody has to open them. The procedure is the **`finish-phase`
-skill**; the review pass has a `phase-reviewer` subagent.
+below 85%), `npm run e2e:changed`, **the poster gallery**, a review of the whole
+diff, and a retrospective — and the numbers go in the commit message. The gallery is
+the gate a machine cannot answer: `node scripts/tools.ts gallery` draws both posters
+at every edge the product must survive, and somebody has to open them. The **review
+is always the `phase-reviewer` subagent** — you cannot review your own diff by
+reading it. The procedure is the **`finish-phase` skill**.
 
 **Say how big the phase is before starting it**, in a line, so it can be argued
-down: a phase inside one feature folder that adds no repository method and changes
-no `shared/` type does not owe a `PLAN.md` section or a `TECH-DEBT.md` entry.
+down: one inside a single feature folder that adds no repository method and changes
+no `shared/` type owes no `PLAN.md` section and no `TECH-DEBT.md` entry. Sizing it is
+also how **independent scopes** surface, and those are delegated without being asked.
 
 ## Configuration
 

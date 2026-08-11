@@ -130,7 +130,14 @@ right edge, and two more crowned a comeback that never fell below mid-table.
 
 Read `git diff <phase-start>..HEAD` against `CLAUDE.md` — the whole diff at once,
 not the individual commits, because a rule breaks across commits more often than
-inside one. The `phase-reviewer` subagent exists for exactly this pass.
+inside one.
+
+**This pass is always the `phase-reviewer` subagent, and never a re-read.** It is
+not a size judgement and not something to ask permission for: you cannot review
+your own diff by reading it, because you are still holding the reasoning that made
+it look right. A phase that reviewed itself here shipped two awards whose sentences
+said the same thing in different words, and only noticed when somebody opened the
+rendered poster two gates later.
 
 **Stop editing before you launch it.** The reviewer reads files, not a snapshot, so
 a tree that moves under it produces findings against code that no longer exists and
@@ -295,9 +302,23 @@ something disjoint. So the policy is not "delegate the mechanical work", it is:
   that were about to ship, including a false sentence written earlier in the same
   phase by the same person who then re-read it and approved it. You cannot review
   your own work by reading it again.
-- **Delegate transcription only when your context is the scarce resource** — after
-  a compaction, or with one clearly coming. With room to spare it is cheaper to
-  type the specs than to brief someone to type them.
+- **An independent scope is delegated on sight, without being asked.** This replaces
+  an earlier rule here — *delegate only when your own context is the scarce resource*
+  — which the owner overruled: the parallelism is to be tried on its own merits, so
+  spotting a delegable scope is part of planning the phase rather than a favour to
+  request. Three conditions, and all three have to hold. The scope touches **no file
+  you have open**, nor one you will open while the agent runs. The brief fits in
+  **one message** — a cold agent that has to guess the skill, the paths or the
+  contract guesses wrong, plausibly, and you find out at merge. And only the
+  **result** matters: a report, a list, a file that compiles and passes or does not.
+- **What never leaves your hands.** Copy, commit messages and document prose — the
+  voice is the product here, and an agent that has not lived the phase writes flat.
+  Gates that are judgement: the gallery needs eyes, and "looks fine" from an agent is
+  the green light with nothing behind it. And anything resting on why-context this
+  session accumulated — why a threshold is 7 and not 5 — which no brief can carry.
+- **Launch parallel agents in one message**, not one after another, and do not block
+  on an agent whose files are disjoint from yours. Their reports are not shown to the
+  user, so relay what matters rather than assuming it arrived.
 - **A background agent that has stalled twice has produced what it is going to
   produce.** Take what landed on disk, finish the rest yourself, and repair whatever
   it left half-edited — resuming a third time costs another watchdog timeout for

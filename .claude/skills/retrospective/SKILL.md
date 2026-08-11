@@ -30,6 +30,16 @@ count is asked for, count. An answer with no number in it is a guess.
    than doing it yourself — what it buys is room in your own context and wall-clock
    spent in parallel. Say whether that trade was worth taking this time, and name
    the agent that was not.
+
+   **Delegating an independent scope is the default now, so this question is the
+   experiment's readout.** Report three numbers rather than an impression: what the
+   agents spent, how much wall-clock they ran alongside your own work, and how much
+   of what they produced survived without rework — a scope delegated and then redone
+   by hand counts against the trade twice. Count the scopes you *could* have
+   delegated and did not, too: the failure mode of a new default is not using it
+   badly, it is quietly not using it. If the answer comes out negative two phases
+   running, say so plainly. The rule was adopted to be tested, and a test that
+   cannot fail was never one.
 4. **Sequencing.** Did an agent write against a subject you were still changing?
    Did you block on one whose files were disjoint from yours and could have run
    alongside?
