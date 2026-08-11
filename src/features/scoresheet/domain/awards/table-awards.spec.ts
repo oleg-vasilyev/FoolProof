@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Finish } from "#scoresheet/domain/game-outcomes.ts";
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
-import { LONG_ENOUGH } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 import { appearanceOf, eveningOf, playerAppearing } from "#scoresheet/domain/session-appearances.stub.ts";
 
@@ -15,9 +14,7 @@ vi.mock("#scoresheet/domain/session-appearances.ts", () => ({
   playedGames: (player: unknown) => playedGamesSpy(player),
 }));
 
-const { fullHouse, thePacifist, theRotation, theTruce } = await import(
-  "#scoresheet/domain/awards/table-awards.ts"
-);
+const { thePacifist, theTruce } = await import("#scoresheet/domain/awards/table-awards.ts");
 
 const NOTHING = 0;
 
@@ -32,8 +29,6 @@ const NINETEEN = 19;
 const DIMA = 2;
 
 const VERONIKA = 5;
-
-const TWO_PLAYERS = 2;
 
 const eveningFor = (players: readonly PlayerAppearances[], rounds = NINETEEN) =>
   eveningOf(rounds, players);
@@ -126,67 +121,5 @@ describe("thePacifist()", () => {
     const PARTNER = playerAppearing(VERONIKA, BOTH_DRAWS.appearances);
 
     expect(thePacifist(eveningFor([BOTH_DRAWS, PARTNER]))?.winners).toEqual([DIMA, VERONIKA]);
-  });
-});
-
-describe("theRotation()", () => {
-  it("should award nothing in an evening too short to go round", () => {
-    expect(theRotation(eveningFor([DREW], ONCE))).toBeNull();
-  });
-
-  it("should award nothing when somebody escaped being the fool", () => {
-    foolCountSpy.mockReturnValueOnce(ONCE).mockReturnValueOnce(NOTHING);
-
-    expect(theRotation(eveningFor([DREW, ALSO_DREW]))).toBeNull();
-  });
-
-  it("should name everybody who sat down when the fool went all the way round", () => {
-    const award = theRotation(eveningFor([DREW, ALSO_DREW]));
-
-    expect(award?.name === AwardName.TheRotation ? [award.winners, award.players] : []).toEqual([
-      [DIMA, VERONIKA],
-      TWO_PLAYERS,
-    ]);
-  });
-
-  it("should leave out somebody who never sat down at all", () => {
-    playedGamesSpy.mockReturnValueOnce(NINETEEN).mockReturnValueOnce(NOTHING);
-
-    expect(theRotation(eveningFor([DREW, ALSO_DREW]))?.winners).toEqual([DIMA]);
-  });
-
-  it("should award nothing when nobody played at all", () => {
-    playedGamesSpy.mockReturnValue(NOTHING);
-
-    expect(theRotation(eveningFor([DREW]))).toBeNull();
-  });
-});
-
-describe("fullHouse()", () => {
-  it("should award nothing in an evening shorter than a long one", () => {
-    expect(fullHouse(eveningFor([DREW], LONG_ENOUGH - ONCE))).toBeNull();
-  });
-
-  it("should award nothing when somebody missed a game", () => {
-    playedGamesSpy.mockImplementation((player: PlayerAppearances) =>
-      player.playerId === VERONIKA ? NINETEEN - ONCE : NINETEEN
-    );
-
-    expect(fullHouse(eveningFor([DREW, ALSO_DREW]))).toBeNull();
-  });
-
-  it("should name the whole table when nobody missed a hand", () => {
-    const award = fullHouse(eveningFor([DREW, ALSO_DREW]));
-
-    expect(award?.name === AwardName.FullHouse ? [award.winners, award.games] : []).toEqual([
-      [DIMA, VERONIKA],
-      NINETEEN,
-    ]);
-  });
-
-  it("should award nothing when nobody played at all", () => {
-    playedGamesSpy.mockReturnValue(NOTHING);
-
-    expect(fullHouse(eveningFor([DREW]))).toBeNull();
   });
 });

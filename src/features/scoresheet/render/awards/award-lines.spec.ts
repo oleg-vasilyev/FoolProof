@@ -44,9 +44,7 @@ const SAMPLES: readonly Award[] = [
   { name: AwardName.TheComeback, winners: [WINNER], percent: oneOf(AwardName.TheComeback), sank: twoOf(AwardName.TheComeback) },
   { name: AwardName.TheLadder, winners: [WINNER], run: oneOf(AwardName.TheLadder) },
   { name: AwardName.SweetRevenge, winners: [WINNER], fools: oneOf(AwardName.SweetRevenge), comebacks: twoOf(AwardName.SweetRevenge) },
-  { name: AwardName.FullHouse, winners: [WINNER], players: oneOf(AwardName.FullHouse), games: twoOf(AwardName.FullHouse) },
   { name: AwardName.IronSeat, winners: [WINNER], games: oneOf(AwardName.IronSeat) },
-  { name: AwardName.TheRotation, winners: [WINNER], players: oneOf(AwardName.TheRotation), games: twoOf(AwardName.TheRotation) },
   { name: AwardName.TheTruce, winners: [WINNER], draws: oneOf(AwardName.TheTruce), games: twoOf(AwardName.TheTruce) },
   { name: AwardName.ThePacifist, winners: [WINNER], draws: oneOf(AwardName.ThePacifist) },
   { name: AwardName.TheNemesis, winners: [WINNER], over: oneOf(AwardName.TheNemesis) },
@@ -179,19 +177,5 @@ describe("award-lines", () => {
       expect(gameTallySpy).toHaveBeenCalledTimes(1);
     });
 
-    it("should count a full house in players rather than in games", () => {
-      const award: Award = {
-        name: AwardName.FullHouse,
-        winners: [WINNER],
-        players: oneOf(AwardName.FullHouse),
-        games: twoOf(AwardName.FullHouse),
-      };
-
-      const reason = awardReason(copy, award);
-
-      expect(reason).toContain(headcountOf(oneOf(AwardName.FullHouse)));
-      expect(playerTallySpy).toHaveBeenCalledWith(copy, oneOf(AwardName.FullHouse));
-      expect(gameTallySpy).toHaveBeenCalledWith(copy, twoOf(AwardName.FullHouse));
-    });
   });
 });

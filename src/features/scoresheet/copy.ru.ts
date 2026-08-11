@@ -34,9 +34,7 @@ export const copy: Copy = {
     theComeback: "ВОЗВРАЩЕНИЕ",
     theLadder: "ЛЕСТНИЦА",
     sweetRevenge: "СЛАДКАЯ МЕСТЬ",
-    fullHouse: "ПОЛНЫЙ СОСТАВ",
     ironSeat: "ЖЕЛЕЗНЫЙ СТУЛ",
-    theRotation: "КРУГ ЗАМКНУЛСЯ",
     theTruce: "ПЕРЕМИРИЕ",
     thePacifist: "ПАЦИФИСТ",
     theNemesis: "ЛИЧНЫЙ КОШМАР",
@@ -81,11 +79,7 @@ export const copy: Copy = {
   ladderReason: (run: number) => `${run} партий подряд — каждая лучше предыдущей.`,
   sweetRevengeReason: (fools: number, comebacks: number) =>
     `Дураком — ${fools}, и в ${comebacks} из них следом вышел первым.`,
-  fullHouseReason: (players: string, games: string) =>
-    `Все ${players} отсидели все ${games}. Не пропустил никто.`,
   ironSeatReason: (games: string) => `Ни одной пропущенной партии из ${games}. Никто больше не досидел.`,
-  rotationReason: (players: string, games: string) =>
-    `За ${games} дураком побывали все ${players}.`,
   truceReason: (draws: number, games: string) => `${draws} из ${games}, где не проиграл никто.`,
   pacifistReason: (draws: string) =>
     `Во всех ${draws}, которые кончились вничью. Один за всё не отвечал ни разу.`,

@@ -26,7 +26,7 @@ describe("RAREST_FIRST", () => {
   });
 
   it("should rank a rarer award ahead of a commoner one", () => {
-    expect(RAREST_FIRST.indexOf(AwardName.FullHouse)).toBeLessThan(
+    expect(RAREST_FIRST.indexOf(AwardName.FalseDawn)).toBeLessThan(
       RAREST_FIRST.indexOf(AwardName.TheTruce) - ONCE
     );
   });

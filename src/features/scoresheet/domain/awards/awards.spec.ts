@@ -81,8 +81,6 @@ vi.mock("#scoresheet/domain/awards/chart-awards.ts", () => ({
 vi.mock("#scoresheet/domain/awards/table-awards.ts", () => ({
   theTruce: ruleFor(AwardName.TheTruce),
   thePacifist: ruleFor(AwardName.ThePacifist),
-  theRotation: ruleFor(AwardName.TheRotation),
-  fullHouse: ruleFor(AwardName.FullHouse),
 }));
 
 vi.mock("#scoresheet/domain/awards/rivalry-awards.ts", () => ({
@@ -219,10 +217,10 @@ describe("honoursFor()", () => {
         AwardName.King,
         AwardName.TheComeback,
         AwardName.TheLadder,
-        AwardName.FullHouse,
         AwardName.TheCameo,
         AwardName.TheFlatline,
         AwardName.TheAnchor,
+        AwardName.TheSlide,
         AwardName.FalseDawn,
         AwardName.FoolOfTheNight,
       ]);

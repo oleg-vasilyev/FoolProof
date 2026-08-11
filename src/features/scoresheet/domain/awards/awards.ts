@@ -42,12 +42,7 @@ import {
   theRollercoaster,
   wireToWire,
 } from "#scoresheet/domain/awards/chart-awards.ts";
-import {
-  fullHouse,
-  thePacifist,
-  theRotation,
-  theTruce,
-} from "#scoresheet/domain/awards/table-awards.ts";
+import { thePacifist, theTruce } from "#scoresheet/domain/awards/table-awards.ts";
 import { theNemesis } from "#scoresheet/domain/awards/rivalry-awards.ts";
 
 
@@ -73,9 +68,7 @@ const RULES_IN_ORDER: readonly ((evening: SessionAppearances) => Award | null)[]
   theComeback,
   theLadder,
   sweetRevenge,
-  fullHouse,
   ironSeat,
-  theRotation,
   theTruce,
   thePacifist,
   theNemesis,

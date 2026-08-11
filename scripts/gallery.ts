@@ -160,7 +160,7 @@ export const GALLERY: readonly Case[] = [
   {
     name: "crowded-and-burned",
     locale: Locale.Ru,
-    asks: "ten long names on one winners line — the awards that crown the whole table",
+    asks: "ten long names over a long evening — the widest winners lines the card can draw",
     players: LONG_NAMES,
     rounds: rotatingRounds(LONG_NAMES.length, A_ROTATING_EVENING),
   },

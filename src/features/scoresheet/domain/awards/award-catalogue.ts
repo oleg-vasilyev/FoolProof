@@ -14,9 +14,7 @@ export const AwardName = {
   TheComeback: "theComeback",
   TheLadder: "theLadder",
   SweetRevenge: "sweetRevenge",
-  FullHouse: "fullHouse",
   IronSeat: "ironSeat",
-  TheRotation: "theRotation",
   TheTruce: "theTruce",
   ThePacifist: "thePacifist",
   TheNemesis: "theNemesis",
@@ -62,9 +60,7 @@ export type Award =
   | Earned<typeof AwardName.TheComeback, { readonly percent: number; readonly sank: number }>
   | Earned<typeof AwardName.TheLadder, { readonly run: number }>
   | Earned<typeof AwardName.SweetRevenge, { readonly fools: number; readonly comebacks: number }>
-  | Earned<typeof AwardName.FullHouse, { readonly players: number; readonly games: number }>
   | Earned<typeof AwardName.IronSeat, { readonly games: number }>
-  | Earned<typeof AwardName.TheRotation, { readonly players: number; readonly games: number }>
   | Earned<typeof AwardName.TheTruce, { readonly draws: number; readonly games: number }>
   | Earned<typeof AwardName.ThePacifist, { readonly draws: number }>
   | Earned<typeof AwardName.TheNemesis, { readonly over: number }>
@@ -91,7 +87,6 @@ export type Award =
   | Earned<typeof AwardName.FoolOfTheNight, { readonly fools: number; readonly games: number }>;
 
 export const RAREST_FIRST: readonly AwardName[] = [
-  AwardName.FullHouse,
   AwardName.FalseDawn,
   AwardName.TheFlatline,
   AwardName.TheComeback,
@@ -99,7 +94,6 @@ export const RAREST_FIRST: readonly AwardName[] = [
   AwardName.TheAnchor,
   AwardName.TheLadder,
   AwardName.TheSlide,
-  AwardName.TheRotation,
   AwardName.SweetRevenge,
   AwardName.ThePendulum,
   AwardName.TheRollercoaster,

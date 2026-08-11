@@ -723,7 +723,7 @@ card is meant to be read at full width. `/stats_chronology` and `/stats_awards`
 send one of the two on their own.
 
 Awards need **five games** in the session. Below that `/stats` sends the chronology
-and says nothing about awards, because a card that fires three of thirty-eight rules
+and says nothing about awards, because a card that fires three of thirty-six rules
 reads as a bug rather than as a thin evening; `/stats_awards` answers in text instead.
 
 The card is read top to bottom from glory to disgrace, and **FOOL OF THE NIGHT is
@@ -732,7 +732,7 @@ whole table: how often whoever opened a game was left the fool in it.
 
 #### Two orders, and why there have to be two
 
-The catalogue holds **thirty-eight** awards and the card holds **nine**, so most
+The catalogue holds **thirty-six** awards and the card holds **nine**, so most
 evenings something is dropped. *Which* nine are chosen and *what order* they print in
 are different questions, and answering both with one list was the flaw the first
 thirteen shipped with: the rules were tried in printing order and the first nine that
@@ -780,9 +780,7 @@ rule finds a winner at all — the number `RAREST_FIRST` is ordered by.
 | THE COMEBACK | lowest on the chart at halfway, back above mid-table since | evening ≥ 8 | 1.3% |
 | THE LADDER | finishing better than the game before, four running | run ≥ 4 | 7% |
 | SWEET REVENGE | leaving first in the game after being the fool | ≥ 2 of them | 13% |
-| FULL HOUSE | nobody at the table missed a single game | evening ≥ 8 | 0.3% |
 | IRON SEAT | the only player who sat through every game | evening ≥ 10 | 23% |
-| THE ROTATION | every player who sat down was the fool at least once | evening ≥ 6 | 11% |
 | THE TRUCE | everybody who was in a drawn game | a draw happened | 58% |
 | THE PACIFIST | being in every drawn game of the evening | ≥ 2 draws | 18% |
 | THE NEMESIS | finishing above the same rival in every game they shared | ≥ 8 shared | 46% |
@@ -866,13 +864,28 @@ kind of question, and the house rule already makes the opener a fact about seati
 whoever sat immediately before the last fool. But `seat_index` stops at the
 repository: `SeriesChronology` carries the players in the order they first appeared,
 not the ring of each game. So a neighbour award costs a repository method, and none
-of the thirty-eight needs one.
+of the thirty-six needs one.
 
 **CURTAIN CALL** — the fool of the evening's last game — is not in the catalogue at
 all: the bot has no signal that an evening has ended, so mid-session it would crown
 whoever lost most recently and then quietly change its mind. The same objection
 retires BOOKENDS, and it is the reason no award in the catalogue reads backwards from
 the most recent game.
+
+**An award that crowns the whole table is not an award.** FULL HOUSE (nobody missed a
+game) and THE ROTATION (everybody was the fool at least once) were both built, drawn
+and then cut. They are facts about the evening rather than about a player, so the
+winners line degenerated into every name at the table joined by an ampersand — which
+at ten players left the card entirely — and, worse, they hand a row of a nine-row card
+to somebody who did nothing in particular. The card exists to say what one person did
+that nobody else did. A fact about the whole table has a home already: the line under
+the fool's plate, where the opener's curse lives.
+
+That leaves THE TRUCE and THE PACIFIST, which look similar and are not: their winners
+are whoever was in a drawn game, which is a subset the evening picked out. When that
+subset happens to be everybody, the winners line says so in words instead of listing
+them — `everyWinner` in the copy table, set in neutral ink so it cannot be read as the
+first winner's row.
 
 ### A session is computed, not a table
 

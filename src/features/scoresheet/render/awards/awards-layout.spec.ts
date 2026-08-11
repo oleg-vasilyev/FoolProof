@@ -154,9 +154,9 @@ describe("awardsLayoutOf()", () => {
     const A_TABLE_OF_THREE = 3;
 
     const everyoneOf = (winners: readonly number[]) => ({
-      name: AwardName.TheRotation,
+      name: AwardName.TheTruce,
       winners,
-      players: winners.length,
+      draws: winners.length,
       games: A_TABLE_OF_THREE,
     });
 

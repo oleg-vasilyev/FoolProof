@@ -1,7 +1,7 @@
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Copy } from "#scoresheet/copy.ts";
-import { gameTally, playerTally } from "#scoresheet/render/session-tally.ts";
+import { gameTally } from "#scoresheet/render/session-tally.ts";
 
 
 export const awardTitle = (copy: Copy, award: Award): string => copy.awardTitles[award.name];
@@ -44,14 +44,8 @@ export const awardReason = (copy: Copy, award: Award): string => {
     case AwardName.SweetRevenge:
       return copy.sweetRevengeReason(award.fools, award.comebacks);
 
-    case AwardName.FullHouse:
-      return copy.fullHouseReason(playerTally(copy, award.players), gameTally(copy, award.games));
-
     case AwardName.IronSeat:
       return copy.ironSeatReason(gameTally(copy, award.games));
-
-    case AwardName.TheRotation:
-      return copy.rotationReason(playerTally(copy, award.players), gameTally(copy, award.games));
 
     case AwardName.TheTruce:
       return copy.truceReason(award.draws, gameTally(copy, award.games));

@@ -33,9 +33,7 @@ export const copy = {
     theComeback: "THE COMEBACK",
     theLadder: "THE LADDER",
     sweetRevenge: "SWEET REVENGE",
-    fullHouse: "FULL HOUSE",
     ironSeat: "IRON SEAT",
-    theRotation: "THE ROTATION",
     theTruce: "THE TRUCE",
     thePacifist: "THE PACIFIST",
     theNemesis: "THE NEMESIS",
@@ -81,11 +79,7 @@ export const copy = {
   ladderReason: (run: number) => `Finished better than the game before, ${run} games running.`,
   sweetRevengeReason: (fools: number, comebacks: number) =>
     `Left the fool ${fools} times; came back to leave first in ${comebacks} of them.`,
-  fullHouseReason: (players: string, games: string) =>
-    `All ${players} sat through all ${games}. Nobody missed a hand.`,
   ironSeatReason: (games: string) => `The only one who sat through all ${games}.`,
-  rotationReason: (players: string, games: string) =>
-    `Across ${games} every one of ${players} was left the fool at least once.`,
   truceReason: (draws: number, games: string) => `${draws} of ${games} that nobody lost.`,
   pacifistReason: (draws: string) =>
     `In every one of the ${draws} that ended level. Never left holding it alone.`,

@@ -18,8 +18,6 @@ const MARKER = "«marker»";
 
 const A_TALLY = "19 games";
 
-const A_HEADCOUNT = "5 players";
-
 const reasonsOf = (copy: Copy): readonly (readonly [string, string])[] => {
   const FIFTY_ONE = 51;
 
@@ -37,9 +35,7 @@ const reasonsOf = (copy: Copy): readonly (readonly [string, string])[] => {
     ["theComeback", copy.comebackReason(TWO, FIFTY_ONE)],
     ["theLadder", copy.ladderReason(EIGHT)],
     ["sweetRevenge", copy.sweetRevengeReason(FIFTY_ONE, EIGHT)],
-    ["fullHouse", copy.fullHouseReason(A_HEADCOUNT, A_TALLY)],
     ["ironSeat", copy.ironSeatReason(A_TALLY)],
-    ["theRotation", copy.rotationReason(A_HEADCOUNT, A_TALLY)],
     ["theTruce", copy.truceReason(TWO, A_TALLY)],
     ["thePacifist", copy.pacifistReason(A_TALLY)],
     ["theNemesis", copy.nemesisReason(A_TALLY)],
