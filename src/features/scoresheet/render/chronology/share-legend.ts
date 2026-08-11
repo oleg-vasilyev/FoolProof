@@ -1,5 +1,5 @@
 import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
-import { PLOT_LEFT, PLOT_WIDTH, chartBottomOf, legendFontOf, nameToFit, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
+import { LEGEND_GUTTER, LEGEND_LABEL_DROP, LEGEND_NAME_DROP, LEGEND_ROW_PITCH, LEGEND_RULE_DROP, LEGEND_SHARE_DROP, LEGEND_TALLY_DROP, PLOT_LEFT, PLOT_WIDTH, chartBottomOf, legendColumnsOf, legendSlotOf, nameToFit, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
@@ -8,16 +8,6 @@ import { gameTally } from "#scoresheet/render/session-tally.ts";
 import { line, text } from "#scoresheet/render/svg-tags.ts";
 import { percentLabel } from "#scoresheet/render/chronology/percent-label.ts";
 
-
-const LEGEND_LABEL_DROP = 96;
-
-const LEGEND_RULE_DROP = 132;
-
-const LEGEND_DROP = 180;
-
-const LEGEND_NAME_DROP = 222;
-
-const LEGEND_TALLY_DROP = 256;
 
 const LABEL_TRACKING = 2;
 
@@ -32,18 +22,6 @@ const SAMPLE_GAP = 14;
 const SAMPLE_LIFT = 7;
 
 const NOTE_ROOM = 230;
-
-const LEGEND_SLOT_MAX = 284;
-
-const LEGEND_GUTTER = 24;
-
-const TALLY_FONT_RATIO = fontSize.legendTally / fontSize.legend;
-
-const slotWidthOf = (sheet: Sheet): number =>
-  Math.min(LEGEND_SLOT_MAX, PLOT_WIDTH / sheet.players.length);
-
-const tallyFontOf = (blockSize: number): number =>
-  Math.min(fontSize.legendTally, Math.round(blockSize * TALLY_FONT_RATIO));
 
 const legendLabel = (copy: Copy, sheet: Sheet): string =>
   text(copy.sheetLegendLabel, {
@@ -62,43 +40,44 @@ const entryOf = (
   column: number,
   rank: number
 ): readonly string[] => {
-  const slotWidth = slotWidthOf(sheet);
-  const left = PLOT_LEFT + rank * slotWidth;
-  const baseline = chartBottomOf(sheet) + LEGEND_DROP;
-  const size = legendFontOf(slotWidth);
-  const fitted = nameToFit(player.displayName, slotWidth - LEGEND_GUTTER, size);
+  const seated = sheet.players.length;
+  const columns = legendColumnsOf(seated);
+  const slotWidth = legendSlotOf(seated);
+  const left = PLOT_LEFT + (rank % columns) * slotWidth;
+  const rowTop = chartBottomOf(sheet) + Math.floor(rank / columns) * LEGEND_ROW_PITCH;
+  const fitted = nameToFit(player.displayName, slotWidth - LEGEND_GUTTER, fontSize.legend);
 
   return [
     line({
       x1: left,
-      y1: chartBottomOf(sheet) + LEGEND_RULE_DROP,
+      y1: rowTop + LEGEND_RULE_DROP,
       x2: left + SAMPLE_WIDTH,
-      y2: chartBottomOf(sheet) + LEGEND_RULE_DROP,
+      y2: rowTop + LEGEND_RULE_DROP,
       stroke: colourFor(column),
       "stroke-width": LINE_WIDTH,
     }),
     text(percentLabel(player.share), {
       x: left,
-      y: baseline,
+      y: rowTop + LEGEND_SHARE_DROP,
       fill: palette.ink,
       "font-family": FONT_FAMILY,
       "font-weight": "bold",
-      "font-size": size,
+      "font-size": fontSize.legend,
     }),
     text(fitted, {
       x: left,
-      y: chartBottomOf(sheet) + LEGEND_NAME_DROP,
+      y: rowTop + LEGEND_NAME_DROP,
       fill: colourFor(column),
       "font-family": FONT_FAMILY,
       "font-weight": "bold",
-      "font-size": size,
+      "font-size": fontSize.legend,
     }),
     text(gameTally(copy, player.games), {
       x: left,
-      y: chartBottomOf(sheet) + LEGEND_TALLY_DROP,
+      y: rowTop + LEGEND_TALLY_DROP,
       fill: palette.inkFigure,
       "font-family": FONT_FAMILY,
-      "font-size": tallyFontOf(size),
+      "font-size": fontSize.legendTally,
     }),
   ];
 };

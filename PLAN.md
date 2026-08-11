@@ -702,18 +702,42 @@ be glanceable without a tap.
 
 The height budget is fixed at 2560, so the number of games is what has to give.
 Row height is `clamp(available ÷ games, 26, 56)` pixels: at 15 games the rows are
-full size, at 30 they are 29. Past 34 games the rows would fall below the
-floor, so the sheet keeps the **most recent** 34 and says so in the corner. Being
-honest about the omission matters more than fitting everything.
+full size, at 30 they are 29. Past the ceiling the rows would fall below the floor,
+so the sheet keeps the **most recent** games that fit and says so in the corner.
+Being honest about the omission matters more than fitting everything.
 
-That ceiling is derived, not chosen, so a change above the grid moves it: the
-labelled section headings and the taller cell key cost five rows when they were
-added. The number is worth spending on the picture — an evening reaching it has
-never happened — but it is a real trade, not a free one.
+That ceiling is derived, not chosen, so anything that takes room away from the grid
+moves it — the labelled section headings and the taller cell key cost five rows when
+they were added. It is **34 games for a table of five or fewer, 28 for six to ten,
+22 for eleven to fifteen**, because the legend under the chart wraps (below) and each
+wrapped row costs six games. Nothing caps the table, so the sequence continues — at
+sixteen players the legend takes four rows and the ceiling is 17. The number is worth
+spending on the picture — an evening reaching any of those has never happened — but
+it is a real trade, not a free one.
 
 The header date is the UTC date of the session's first game. Late-evening games
 can therefore be stamped with the following day. A configured timezone is the fix
 on the day it bothers anyone; inventing one would be worse.
+
+#### The legend wraps rather than shrinks
+
+Every legend entry is set at one size, and a row holds **at most five** of them; a
+sixth player starts a second row, and the rows are balanced, so seven players read
+as four and three rather than five and two.
+
+The rule it replaced scaled the type to the slot — plausible, and worthless. Slot
+and font shrank together, so the *number of characters* that fit barely moved: a
+name got thirteen of them at five players and twelve at ten, while the type fell
+from 30px to 15px and the game count under it to 11px. That is roughly three screen
+pixels once Telegram has scaled the picture down to a phone. The whole reduction
+bought one character.
+
+So the five is derived too: a slot must hold fourteen characters at the design's
+legend size, and the plot is 1390px wide. A wrapped legend costs the games ceiling
+above, which is the honest trade — a ten-player table is nearly impossible at this
+game, and a ten-player table playing more than 28 games is not a case worth paying
+for. Column headings above the grid solve the same problem the other way, by cutting
+the name, because a column cannot wrap.
 
 ### The awards card
 

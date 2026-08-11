@@ -165,6 +165,20 @@ export const GALLERY: readonly Case[] = [
     rounds: rotatingRounds(LONG_NAMES.length, A_ROTATING_EVENING),
   },
   {
+    name: "crowded-past-the-ceiling",
+    locale: Locale.Ru,
+    asks: "ten long names and more games than a two-row legend leaves room for",
+    players: LONG_NAMES,
+    rounds: rotatingRounds(LONG_NAMES.length, PAST_THE_CEILING),
+  },
+  {
+    name: "three-legend-rows",
+    locale: Locale.Ru,
+    asks: "more players than two legend rows hold — the third row, and the ceiling it costs",
+    players: [...LONG_NAMES, ...SHORT_NAMES.slice(NOBODY, THREE_AT_THE_TABLE)],
+    rounds: rotatingRounds(LONG_NAMES.length + THREE_AT_THE_TABLE, A_ROTATING_EVENING),
+  },
+  {
     name: "one-huge-name",
     locale: Locale.Ru,
     asks: "the longest name a player may have, beside two short ones",

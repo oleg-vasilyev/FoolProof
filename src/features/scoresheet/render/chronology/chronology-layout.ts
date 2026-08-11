@@ -27,23 +27,15 @@ export const PLOT_RIGHT = GRID_RIGHT - PLOT_INSET;
 
 export const PLOT_WIDTH = PLOT_RIGHT - PLOT_LEFT;
 
-const BOTTOM_PAD = 320;
-
 const HALF = 2;
 
 export const CELL_INSET = 2;
 
 export const CELL_SHRINK = CELL_INSET * HALF;
 
-const ROWS_HEIGHT = IMAGE_MAX_HEIGHT - GRID_TOP - GRID_TO_CHART - CHART_HEIGHT - BOTTOM_PAD;
-
-export const MAX_ROWS = Math.floor(ROWS_HEIGHT / ROW_HEIGHT_MIN);
-
 const CELL_FONT_RATIO = 0.52;
 
 const INDEX_FONT_RATIO = 0.42;
-
-const LEGEND_FONT_RATIO = 0.11;
 
 const NAME_ADVANCE = 0.58;
 
@@ -68,8 +60,51 @@ export const indexFontOf = (rowHeight: number): number =>
     Math.round(rowHeight * indexStrideOf(rowHeight) * INDEX_FONT_RATIO)
   );
 
-export const legendFontOf = (slotWidth: number): number =>
-  Math.min(fontSize.legend, Math.round(slotWidth * LEGEND_FONT_RATIO));
+export const LEGEND_GUTTER = 24;
+
+export const LEGEND_SLOT_MAX = 284;
+
+export const LEGEND_LABEL_DROP = 96;
+
+export const LEGEND_RULE_DROP = 132;
+
+export const LEGEND_SHARE_DROP = 180;
+
+export const LEGEND_NAME_DROP = 222;
+
+export const LEGEND_TALLY_DROP = 256;
+
+const LEGEND_ROW_GAP = 24;
+
+const LEGEND_TAIL = 64;
+
+export const LEGEND_ROW_PITCH = LEGEND_TALLY_DROP - LEGEND_RULE_DROP + LEGEND_ROW_GAP;
+
+const LEGEND_PAD = LEGEND_TALLY_DROP - LEGEND_ROW_PITCH + LEGEND_TAIL;
+
+const LEGEND_NAME_MIN = 14;
+
+const LEGEND_SLOT_MIN = LEGEND_GUTTER + LEGEND_NAME_MIN * fontSize.legend * NAME_ADVANCE;
+
+const LEGEND_COLUMNS_MAX = Math.floor(PLOT_WIDTH / LEGEND_SLOT_MIN);
+
+export const legendRowsOf = (players: number): number =>
+  Math.ceil(players / LEGEND_COLUMNS_MAX);
+
+export const legendColumnsOf = (players: number): number =>
+  Math.ceil(players / legendRowsOf(players));
+
+export const legendSlotOf = (players: number): number =>
+  Math.min(LEGEND_SLOT_MAX, PLOT_WIDTH / legendColumnsOf(players));
+
+const bottomPadOf = (players: number): number =>
+  LEGEND_PAD + legendRowsOf(players) * LEGEND_ROW_PITCH;
+
+const gamesRoomFor = (players: number): number =>
+  IMAGE_MAX_HEIGHT - GRID_TOP - GRID_TO_CHART - CHART_HEIGHT - bottomPadOf(players);
+
+export const maxGamesFor = (players: number): number =>
+  Math.floor(gamesRoomFor(players) / ROW_HEIGHT_MIN);
 
 export const nameToFit = (name: string, width: number, size: number): string => {
   const fits = Math.floor(width / (size * NAME_ADVANCE));
@@ -92,14 +127,15 @@ export interface Sheet {
   readonly height: number;
 }
 
-const rowHeightFor = (rounds: number): number =>
-  Math.min(ROW_HEIGHT_MAX, Math.max(ROW_HEIGHT_MIN, Math.floor(ROWS_HEIGHT / rounds)));
+const rowHeightFor = (rounds: number, room: number): number =>
+  Math.min(ROW_HEIGHT_MAX, Math.max(ROW_HEIGHT_MIN, Math.floor(room / rounds)));
 
 export const layoutOf = (chronology: SeriesChronology): Sheet => {
-  const shown = chronology.games.slice(-MAX_ROWS);
+  const seated = chronology.players.length;
+  const shown = chronology.games.slice(-maxGamesFor(seated));
   const players = scoreSeries(chronology.players, shown);
   const rounds = shown.length;
-  const rowHeight = rowHeightFor(rounds);
+  const rowHeight = rowHeightFor(rounds, gamesRoomFor(seated));
   const gridHeight = rounds * rowHeight;
   const gridBottom = GRID_TOP + gridHeight;
   const chartTop = gridBottom + GRID_TO_CHART;
@@ -114,7 +150,7 @@ export const layoutOf = (chronology: SeriesChronology): Sheet => {
     gridHeight,
     gridBottom,
     chartTop,
-    height: chartTop + CHART_HEIGHT + BOTTOM_PAD,
+    height: chartTop + CHART_HEIGHT + bottomPadOf(seated),
   };
 };
 

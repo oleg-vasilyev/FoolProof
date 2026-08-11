@@ -6,6 +6,7 @@ import {
   GRID_RIGHT,
   IMAGE_WIDTH,
   PAD,
+  fontSize,
 } from "#scoresheet/render/card-metrics.ts";
 
 
@@ -24,8 +25,9 @@ const {
 
   GRID_TOP,
 
-  MAX_ROWS,
-
+  LEGEND_GUTTER,
+  LEGEND_ROW_PITCH,
+  LEGEND_SLOT_MAX,
   PLOT_INSET,
   PLOT_LEFT,
   PLOT_RIGHT,
@@ -36,7 +38,10 @@ const {
   indexFontOf,
   indexStrideOf,
   layoutOf,
-  legendFontOf,
+  legendColumnsOf,
+  legendRowsOf,
+  legendSlotOf,
+  maxGamesFor,
   nameToFit,
 } = await import("#scoresheet/render/chronology/chronology-layout.ts");
 
@@ -47,6 +52,8 @@ const NONE = 0;
 const ONE = 1;
 
 const SIX = 6;
+
+const MAX_ROWS = maxGamesFor(SIX);
 
 const startedOn = "2026-07-24";
 
@@ -102,6 +109,28 @@ describe("layoutOf()", () => {
       );
 
       expect(Math.max(...tallest)).toBeLessThanOrEqual(TELEGRAM_LONG_SIDE_LIMIT);
+    });
+
+    it("should still fit at every table size, however many rows that table's legend needs", () => {
+      const CROWDED = 12;
+
+      const tallest = Array.from({ length: CROWDED }, (_unused, index) => index + ONE).map(
+        (players) => layoutOf(chronologyOf(maxGamesFor(players), players)).height
+      );
+
+      expect(Math.max(...tallest)).toBeLessThanOrEqual(TELEGRAM_LONG_SIDE_LIMIT);
+    });
+
+    it("should spend the room a taller legend takes on the legend, not on the picture above it", () => {
+      const ONE_ROW = 4;
+
+      const TWO_ROWS = 8;
+
+      const shallow = layoutOf(chronologyOf(ONE, ONE_ROW));
+      const deep = layoutOf(chronologyOf(ONE, TWO_ROWS));
+
+      expect(deep.height - shallow.height).toBe(LEGEND_ROW_PITCH);
+      expect(deep.chartTop).toBe(shallow.chartTop);
     });
 
     it("should still fit when asked to draw more games than fit", () => {
@@ -363,21 +392,123 @@ describe("indexStrideOf()", () => {
 
     expect(ROUND_STEPS).toContain(indexStrideOf(SHORT_ROW));
   });
-});
 
-describe("legendFontOf()", () => {
-  const NARROW_SLOT = 120;
+  it("should number every row at exactly the height a number needs, not one pixel above it", () => {
+    const JUST_ENOUGH = 31;
 
-  const WIDE_SLOT = 2000;
-
-  it("should shrink with a narrower slot", () => {
-    expect(legendFontOf(NARROW_SLOT)).toBeLessThan(legendFontOf(WIDE_SLOT));
+    expect(indexStrideOf(JUST_ENOUGH)).toBe(EVERY_ROW);
+    expect(indexStrideOf(JUST_ENOUGH - ONE)).toBeGreaterThan(EVERY_ROW);
   });
 
-  it("should never grow past the design's legend size, however wide the slot gets", () => {
-    const DESIGN_SIZE = 30;
+  it("should set the number from its own row once that row is the tighter of the two limits", () => {
+    const JUST_ENOUGH = 31;
 
-    expect(legendFontOf(WIDE_SLOT)).toBe(DESIGN_SIZE);
+    expect(indexFontOf(JUST_ENOUGH)).toBeLessThan(indexFontOf(TALL_ROW));
+  });
+});
+
+describe("legendRowsOf(), legendColumnsOf() and legendSlotOf()", () => {
+  const A_SMALL_TABLE = 4;
+
+  const A_FULL_ROW = 5;
+
+  const A_CROWDED_TABLE = 10;
+
+  const AN_ODD_TABLE = 7;
+
+  const A_LONG_NAME = "Александра-Константиновна";
+
+  const TABLE_SIZES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+  it("should keep a table that fits on one row on one row", () => {
+    expect(legendRowsOf(A_SMALL_TABLE)).toBe(ONE);
+    expect(legendRowsOf(A_FULL_ROW)).toBe(ONE);
+  });
+
+  it("should wrap rather than squeeze once a row is full", () => {
+    const TWO_ROWS = 2;
+
+    expect(legendRowsOf(A_FULL_ROW + ONE)).toBe(TWO_ROWS);
+    expect(legendRowsOf(A_CROWDED_TABLE)).toBe(TWO_ROWS);
+  });
+
+  it("should balance the rows rather than strand the last few entries alone", () => {
+    const EVENLY = 4;
+
+    expect(legendColumnsOf(AN_ODD_TABLE)).toBe(EVENLY);
+  });
+
+  it("should never leave a row wider than the entries it holds", () => {
+    for (const players of TABLE_SIZES) {
+      expect(legendColumnsOf(players), String(players)).toBeLessThanOrEqual(players);
+    }
+  });
+
+  it("should fit every entry of every row inside the plot", () => {
+    for (const players of TABLE_SIZES) {
+      const filled = legendColumnsOf(players) * legendSlotOf(players);
+
+      expect(filled, String(players)).toBeLessThanOrEqual(PLOT_WIDTH);
+    }
+  });
+
+  it("should seat everybody somewhere in the grid it chose", () => {
+    for (const players of TABLE_SIZES) {
+      const seats = legendRowsOf(players) * legendColumnsOf(players);
+
+      expect(seats, String(players)).toBeGreaterThanOrEqual(players);
+    }
+  });
+
+  it("should leave a name the same room whatever the table size, which is the point of wrapping", () => {
+    const ROOM_FOR_A_NAME = 14;
+
+    for (const players of TABLE_SIZES) {
+      const fitted = nameToFit(A_LONG_NAME, legendSlotOf(players) - LEGEND_GUTTER, fontSize.legend);
+
+      expect(fitted.length, String(players)).toBeGreaterThanOrEqual(ROOM_FOR_A_NAME);
+    }
+  });
+
+  it("should cap the slot so a small table does not spread its legend across the sheet", () => {
+    expect(legendSlotOf(ONE)).toBe(LEGEND_SLOT_MAX);
+    expect(legendSlotOf(A_SMALL_TABLE)).toBe(LEGEND_SLOT_MAX);
+  });
+});
+
+describe("maxGamesFor()", () => {
+  const A_FULL_ROW = 5;
+
+  it("should hold the three ceilings the specification names, so the document cannot drift", () => {
+    const ON_ONE_ROW = 34;
+
+    const ON_TWO_ROWS = 28;
+
+    const ON_THREE_ROWS = 22;
+
+    const ELEVEN = 11;
+
+    expect(maxGamesFor(A_FULL_ROW)).toBe(ON_ONE_ROW);
+    expect(maxGamesFor(A_FULL_ROW + ONE)).toBe(ON_TWO_ROWS);
+    expect(maxGamesFor(ELEVEN)).toBe(ON_THREE_ROWS);
+  });
+
+  it("should give every table that shares one legend row the same ceiling", () => {
+    expect(maxGamesFor(ONE)).toBe(maxGamesFor(A_FULL_ROW));
+  });
+
+  it("should charge a crowded table the games its second legend row costs", () => {
+    expect(maxGamesFor(A_FULL_ROW + ONE)).toBeLessThan(maxGamesFor(A_FULL_ROW));
+  });
+
+  it("should keep the ceiling falling as the legend grows, never rising", () => {
+    const CROWDED = 12;
+
+    const ceilings = Array.from({ length: CROWDED }, (_unused, index) =>
+      maxGamesFor(index + ONE)
+    );
+
+    expect(ceilings).toEqual([...ceilings].sort((one, other) => other - one));
   });
 });
 

@@ -5,9 +5,9 @@ import type { Cell } from "#scoresheet/domain/scoring.ts";
 import type { Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 
 
-const CHART_HEIGHT = 600;
-
 const CHART_TOP = 1000;
+
+const CHART_BOTTOM = 1600;
 
 const GRID_LEFT = 100;
 
@@ -23,17 +23,31 @@ const PLOT_WIDTH = PLOT_RIGHT - PLOT_LEFT;
 
 const LEGEND_SLOT_MAX = 284;
 
+const LEGEND_GUTTER = 26;
+
+const LEGEND_ROW_PITCH = 150;
+
+const LEGEND_LABEL_DROP = 90;
+
+const LEGEND_RULE_DROP = 130;
+
+const LEGEND_SHARE_DROP = 170;
+
+const LEGEND_NAME_DROP = 210;
+
+const LEGEND_TALLY_DROP = 250;
+
 const SAMPLE_WIDTH = 46;
 
 const SAMPLE_GAP = 14;
 
 const SAMPLE_LIFT = 7;
 
-const LEGEND_FONT = 30;
+const LEGEND_FONT = 33;
 
-const TALLY_FONT = 22;
+const TALLY_FONT = 17;
 
-const LABEL_FONT = 24;
+const LABEL_FONT = 19;
 
 const lineSpy = vi.fn();
 
@@ -45,17 +59,30 @@ const percentLabelSpy = vi.fn();
 
 const gameTallySpy = vi.fn();
 
-const legendFontOfSpy = vi.fn();
+const legendColumnsOfSpy = vi.fn();
+
+const legendSlotOfSpy = vi.fn();
 
 const nameToFitSpy = vi.fn();
 
-vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
+vi.mock("#scoresheet/render/card-metrics.ts", () => ({
   FONT_FAMILY: "Test Sans",
+  fontSize: { legend: LEGEND_FONT, legendLabel: LABEL_FONT, legendTally: TALLY_FONT },
+}));
+
+vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
+  LEGEND_GUTTER,
+  LEGEND_LABEL_DROP,
+  LEGEND_NAME_DROP,
+  LEGEND_ROW_PITCH,
+  LEGEND_RULE_DROP,
+  LEGEND_SHARE_DROP,
+  LEGEND_TALLY_DROP,
   PLOT_LEFT,
   PLOT_WIDTH,
-  chartBottomOf: (sheet: { chartTop: number }) => sheet.chartTop + CHART_HEIGHT,
-  fontSize: { legend: LEGEND_FONT, legendLabel: LABEL_FONT, legendTally: TALLY_FONT },
-  legendFontOf: (slotWidth: number) => legendFontOfSpy(slotWidth),
+  chartBottomOf: () => CHART_BOTTOM,
+  legendColumnsOf: (players: number) => legendColumnsOfSpy(players),
+  legendSlotOf: (players: number) => legendSlotOfSpy(players),
   nameToFit: (name: string, width: number, largest: number) => nameToFitSpy(name, width, largest),
 }));
 
@@ -82,6 +109,8 @@ const { shareLegend } = await import("#scoresheet/render/chronology/share-legend
 const NONE = 0;
 
 const ONE = 1;
+
+const A_FULL_ROW = 5;
 
 const PLACED_CELL: Cell = { kind: CellKind.Placed, position: ONE };
 
@@ -134,7 +163,8 @@ describe("shareLegend()", () => {
     colourForSpy.mockImplementation((column: number) => `colour-${String(column)}`);
     percentLabelSpy.mockImplementation((share: number) => `pct(${String(share)})`);
     gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
-    legendFontOfSpy.mockReturnValue(20);
+    legendColumnsOfSpy.mockReturnValue(A_FULL_ROW);
+    legendSlotOfSpy.mockReturnValue(LEGEND_SLOT_MAX);
   });
 
   describe("the legend", () => {
@@ -167,15 +197,14 @@ describe("shareLegend()", () => {
     it("should sit the legend below the plot, not within it", () => {
       shareLegend(copy, sheetOf([{ running: [0.1] }], ["Oleg"]));
 
-      expect(Number(attributesOfText("Oleg").y)).toBeGreaterThan(CHART_TOP + CHART_HEIGHT);
+      expect(Number(attributesOfText("Oleg").y)).toBeGreaterThan(CHART_BOTTOM);
     });
 
-    it("should set the percentage's own baseline LEGEND_DROP below the plot's own bottom edge", () => {
-      const LEGEND_DROP = 180;
+    it("should set the percentage on its own baseline below the plot, from the layout drop", () => {
       const SHARE = 0.1;
       shareLegend(copy, sheetOf([{ running: [SHARE], share: SHARE }], ["Oleg"]));
 
-      expect(Number(attributesOfText("pct(0.1)").y)).toBe(CHART_TOP + CHART_HEIGHT + LEGEND_DROP);
+      expect(Number(attributesOfText("pct(0.1)").y)).toBe(CHART_BOTTOM + LEGEND_SHARE_DROP);
     });
 
     it("should head the legend, because the grid is in seating order and this is not", () => {
@@ -208,20 +237,29 @@ describe("shareLegend()", () => {
       const rule = lineSpy.mock.calls[NONE]?.[NONE] as Record<string, number>;
 
       expect(rule.x1).toBe(Number(attributesOfText("pct(0.1)").x));
-      expect(rule.y1).toBeGreaterThan(CHART_TOP + CHART_HEIGHT);
+      expect(rule.y1).toBeGreaterThan(CHART_BOTTOM);
       expect(rule.y2).toBe(rule.y1);
       expect(rule.y1).toBeLessThan(Number(attributesOfText("pct(0.1)").y));
       expect(Number(rule.x2) - Number(rule.x1)).toBe(SAMPLE_WIDTH);
     });
 
-    it("should fit each name inside its own slot, with the gutter taken off", () => {
+    it("should fit each name to its own slot, less the gutter, at the size it will be set in", () => {
       shareLegend(copy, sheetOf([{ running: [0.9] }, { running: [0.1] }], ["Oleg", "Anya"]));
-      const width = Number(nameToFitSpy.mock.calls[NONE]?.[ONE]);
+      const [, width, size] = nameToFitSpy.mock.calls[NONE] ?? [];
 
-      expect(width).toBeLessThan(LEGEND_SLOT_MAX);
+      expect(width).toBe(LEGEND_SLOT_MAX - LEGEND_GUTTER);
+      expect(size).toBe(LEGEND_FONT);
     });
 
-    it("should cap the slot at a fixed maximum when there is room to spare", () => {
+    it("should ask the layout for the grid its own table size calls for", () => {
+      shareLegend(copy, sheetOf([{ running: [0.9] }, { running: [0.1] }], ["Oleg", "Anya"]));
+      const TWO_PLAYERS = 2;
+
+      expect(legendSlotOfSpy).toHaveBeenCalledWith(TWO_PLAYERS);
+      expect(legendColumnsOfSpy).toHaveBeenCalledWith(TWO_PLAYERS);
+    });
+
+    it("should step one slot per entry across a row", () => {
       shareLegend(copy, sheetOf([{ running: [0.9] }, { running: [0.1] }], ["Oleg", "Anya"]));
       const first = Number(attributesOfText("Oleg").x);
       const second = Number(attributesOfText("Anya").x);
@@ -229,23 +267,45 @@ describe("shareLegend()", () => {
       expect(second - first).toBe(LEGEND_SLOT_MAX);
     });
 
-    it("should shrink the slot only once there are too many players to fit it at the maximum", () => {
-      const MANY_PLAYERS = 8;
-      const names = Array.from({ length: MANY_PLAYERS }, (_unused, index) => `P${index}`);
-      shareLegend(copy, 
+    it("should start a new row once the entries fill the one before it", () => {
+      const PAIRS_PER_ROW = 2;
+      legendColumnsOfSpy.mockReturnValue(PAIRS_PER_ROW);
+      shareLegend(copy,
         sheetOf(
-          Array.from({ length: MANY_PLAYERS }, (_unused, index) => ({
-            running: [1 - index / MANY_PLAYERS],
-          })),
-          names
+          [{ running: [0.9] }, { running: [0.7] }, { running: [0.5] }],
+          ["Oleg", "Anya", "Roma"]
         )
       );
-      const first = Number(attributesOfText("P0").x);
-      const second = Number(attributesOfText("P1").x);
-      const expectedSlot = PLOT_WIDTH / MANY_PLAYERS;
 
-      expect(second - first).toBeCloseTo(expectedSlot);
-      expect(second - first).toBeLessThan(LEGEND_SLOT_MAX);
+      expect(Number(attributesOfText("Roma").x)).toBe(Number(attributesOfText("Oleg").x));
+      expect(Number(attributesOfText("Roma").y) - Number(attributesOfText("Oleg").y)).toBe(
+        LEGEND_ROW_PITCH
+      );
+    });
+
+    it("should drop a whole block down a row, not only the line the name sits on", () => {
+      const PAIRS_PER_ROW = 2;
+      const SHARE = 0.5;
+      legendColumnsOfSpy.mockReturnValue(PAIRS_PER_ROW);
+      shareLegend(copy,
+        sheetOf(
+          [
+            { running: [0.9], share: 0.9, games: 1 },
+            { running: [0.7], share: 0.7, games: 2 },
+            { running: [SHARE], share: SHARE, games: 3 },
+          ],
+          ["Oleg", "Anya", "Roma"]
+        )
+      );
+      const rules = lineSpy.mock.calls.map((call) => call[0] as Record<string, number>);
+
+      expect(Number(attributesOfText("pct(0.5)").y) - Number(attributesOfText("pct(0.9)").y)).toBe(
+        LEGEND_ROW_PITCH
+      );
+      expect(Number(attributesOfText("tally(3)").y) - Number(attributesOfText("tally(1)").y)).toBe(
+        LEGEND_ROW_PITCH
+      );
+      expect(Number(rules[2]?.y1) - Number(rules[NONE]?.y1)).toBe(LEGEND_ROW_PITCH);
     });
 
     it("should print each player's game tally", () => {
@@ -301,28 +361,29 @@ describe("shareLegend()", () => {
       expect(attributesOfText("tally(4)").fill).toBe("figure");
     });
 
-    it("should size the block's type from the slot width it was given", () => {
-      shareLegend(copy, sheetOf([{ running: [0.5] }], ["Oleg"]));
+    it("should set every entry at the design's legend size, however crowded the table", () => {
+      const CROWDED = 10;
+      const names = Array.from({ length: CROWDED }, (_unused, index) => `P${index}`);
+      shareLegend(copy,
+        sheetOf(
+          Array.from({ length: CROWDED }, (_unused, index) => ({
+            running: [ONE - index / CROWDED],
+          })),
+          names
+        )
+      );
 
-      expect(legendFontOfSpy).toHaveBeenCalledWith(LEGEND_SLOT_MAX);
+      for (const name of names) {
+        expect(attributesOfText(name)["font-size"], name).toBe(LEGEND_FONT);
+      }
     });
 
-    it("should never let the tally grow larger than the name above it", () => {
-      const NARROW_BLOCK_SIZE = 19;
-      legendFontOfSpy.mockReturnValue(NARROW_BLOCK_SIZE);
-      shareLegend(copy, sheetOf([{ running: [0.5], games: 4 }], ["Oleg"]));
-
-      const nameSize = Number(attributesOfText("Oleg")["font-size"]);
-      const tallySize = Number(attributesOfText("tally(4)")["font-size"]);
-
-      expect(tallySize).toBeLessThanOrEqual(nameSize);
-    });
-
-    it("should not grow the tally past the design's legend-tally size for the common case", () => {
-      legendFontOfSpy.mockReturnValue(LEGEND_FONT);
-      shareLegend(copy, sheetOf([{ running: [0.5], games: 4 }], ["Oleg"]));
+    it("should set the tally at the design's tally size, which is smaller than the name above it", () => {
+      const GAMES = 4;
+      shareLegend(copy, sheetOf([{ running: [0.5], games: GAMES }], ["Oleg"]));
 
       expect(Number(attributesOfText("tally(4)")["font-size"])).toBe(TALLY_FONT);
+      expect(TALLY_FONT).toBeLessThan(LEGEND_FONT);
     });
   });
 
