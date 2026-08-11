@@ -357,51 +357,44 @@ describe("nameToFit()", () => {
 
   const ADVANCE = 0.58;
 
-  const MINIMUM = 14;
+  const ELLIPSIS = "…";
 
-  const widthOf = (fitted: { text: string; size: number }): number =>
-    fitted.text.length * fitted.size * ADVANCE;
+  const NAMES_THAT_FIT = 10;
+
+  const widthOf = (fitted: string): number => fitted.length * DESIGN_SIZE * ADVANCE;
 
   it("should leave a short name alone", () => {
-    expect(nameToFit("Al", COLUMN, DESIGN_SIZE).text).toBe("Al");
+    expect(nameToFit("Al", COLUMN, DESIGN_SIZE)).toBe("Al");
   });
 
-  it("should not blow a short name up past the design size", () => {
-    expect(nameToFit("Al", COLUMN, DESIGN_SIZE).size).toBe(DESIGN_SIZE);
+  it("should leave a name that fills the width exactly alone", () => {
+    const exact = "x".repeat(NAMES_THAT_FIT);
+
+    expect(nameToFit(exact, COLUMN, DESIGN_SIZE)).toBe(exact);
   });
 
-  it("should shrink a name that would not fit rather than let it overflow", () => {
-    const long = "Konstantinovna";
+  it("should cut a name one character too long rather than let it overflow", () => {
+    const over = "x".repeat(NAMES_THAT_FIT + 1);
 
-    expect(nameToFit(long, COLUMN, DESIGN_SIZE).size).toBeLessThan(DESIGN_SIZE);
+    expect(nameToFit(over, COLUMN, DESIGN_SIZE)).not.toBe(over);
   });
 
-  it("should size that name so it spans the width it was given", () => {
-    const long = "Konstantinovna";
+  it("should mark a cut name with an ellipsis, so nobody reads it as the whole name", () => {
+    const absurd = "x".repeat(COLUMN);
 
-    expect(widthOf(nameToFit(long, COLUMN, DESIGN_SIZE))).toBeCloseTo(COLUMN);
+    expect(nameToFit(absurd, COLUMN, DESIGN_SIZE).endsWith(ELLIPSIS)).toBe(true);
   });
 
-  it("should keep an absurd name legible rather than shrinking it to nothing", () => {
-    const absurd = "x".repeat(200);
-
-    expect(nameToFit(absurd, COLUMN, DESIGN_SIZE).size).toBe(MINIMUM);
-  });
-
-  it("should cut an absurd name short rather than run it past the width", () => {
-    const absurd = "x".repeat(200);
+  it("should keep a cut name inside the width it was given", () => {
+    const absurd = "x".repeat(COLUMN);
 
     expect(widthOf(nameToFit(absurd, COLUMN, DESIGN_SIZE))).toBeLessThanOrEqual(COLUMN);
   });
 
-  it("should mark a cut name with an ellipsis, so nobody reads it as the whole name", () => {
-    const absurd = "x".repeat(200);
+  it("should count the ellipsis against the width rather than hang it off the end", () => {
+    const absurd = "x".repeat(COLUMN);
 
-    expect(nameToFit(absurd, COLUMN, DESIGN_SIZE).text.endsWith("…")).toBe(true);
-  });
-
-  it("should never cut a name that fits", () => {
-    expect(nameToFit("Konstantinovna", COLUMN, DESIGN_SIZE).text).toBe("Konstantinovna");
+    expect(nameToFit(absurd, COLUMN, DESIGN_SIZE)).toHaveLength(NAMES_THAT_FIT);
   });
 
   it("should fit the longest name a player may have into the narrowest legend slot", () => {
@@ -411,10 +404,16 @@ describe("nameToFit()", () => {
 
     const fitted = nameToFit("x".repeat(LONGEST_NAME), NARROWEST_SLOT, DESIGN_SIZE);
 
-    expect(widthOf(fitted)).toBeLessThanOrEqual(NARROWEST_SLOT);
+    expect(fitted.length * DESIGN_SIZE * ADVANCE).toBeLessThanOrEqual(NARROWEST_SLOT);
+  });
+
+  it("should cut to nothing but the ellipsis when the slot fits no letters at all", () => {
+    const NO_ROOM = 1;
+
+    expect(nameToFit("Konstantinovna", NO_ROOM, DESIGN_SIZE)).toBe(ELLIPSIS);
   });
 
   it("should cope with a name of no length at all", () => {
-    expect(nameToFit("", COLUMN, DESIGN_SIZE)).toEqual({ text: "", size: DESIGN_SIZE });
+    expect(nameToFit("", COLUMN, DESIGN_SIZE)).toBe("");
   });
 });

@@ -19,15 +19,19 @@ const INDEX_DIGITS = 2;
 
 export const columnNames = (sheet: Sheet): readonly string[] =>
   sheet.players.map((player, column) => {
-    const fitted = nameToFit(player.displayName, sheet.columnWidth - NAME_GUTTER, fontSize.columnName);
+    const fitted = nameToFit(
+      player.displayName,
+      sheet.columnWidth - NAME_GUTTER,
+      fontSize.columnName
+    );
 
-    return text(fitted.text, {
+    return text(fitted, {
       x: columnCentre(sheet, column),
       y: GRID_TOP - NAME_LIFT,
       fill: colourFor(column),
       "font-family": FONT_FAMILY,
       "font-weight": "bold",
-      "font-size": fitted.size,
+      "font-size": fontSize.columnName,
       "text-anchor": "middle",
     });
   });

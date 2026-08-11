@@ -32,8 +32,6 @@ const nameToFitSpy = vi.fn();
 
 const FITTED_TEXT = "the-fitted-name";
 
-const FITTED_SIZE = 19;
-
 const NAME_GUTTER = 20;
 
 vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
@@ -114,7 +112,7 @@ describe("chronology", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    nameToFitSpy.mockImplementation((name: string) => ({ text: name, size: FITTED_SIZE }));
+    nameToFitSpy.mockImplementation((name: string) => name);
 
     textSpy.mockImplementation(() => "<text/>");
     cellFaceSpy.mockImplementation(() => "<cell/>");
@@ -158,17 +156,17 @@ describe("chronology", () => {
     });
 
     it("should print whatever came back fitted, not the name it was given", () => {
-      nameToFitSpy.mockReturnValue({ text: FITTED_TEXT, size: FITTED_SIZE });
+      nameToFitSpy.mockReturnValue(FITTED_TEXT);
       columnNames(sheetOf([[]], ["Konstantinovna"]));
 
       expect(printed()).toEqual([FITTED_TEXT]);
     });
 
-    it("should set it at the size that came back with it", () => {
-      nameToFitSpy.mockReturnValue({ text: FITTED_TEXT, size: FITTED_SIZE });
+    it("should set every heading at the design size, however long the name was", () => {
+      nameToFitSpy.mockReturnValue(FITTED_TEXT);
       columnNames(sheetOf([[]], ["Konstantinovna"]));
 
-      expect(Number(attributesOfText(FITTED_TEXT)["font-size"])).toBe(FITTED_SIZE);
+      expect(Number(attributesOfText(FITTED_TEXT)["font-size"])).toBe(COLUMN_NAME_FONT);
     });
 
     it("should centre the heading over its column", () => {

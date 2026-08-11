@@ -127,10 +127,7 @@ describe("shareLegend()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    nameToFitSpy.mockImplementation((name: string, _width: number, largest: number) => ({
-      text: name,
-      size: largest,
-    }));
+    nameToFitSpy.mockImplementation((name: string) => name);
 
     lineSpy.mockImplementation(() => "<line/>");
     textSpy.mockImplementation(() => "<text/>");

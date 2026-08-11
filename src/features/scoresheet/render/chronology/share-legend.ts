@@ -85,13 +85,13 @@ const entryOf = (
       "font-weight": "bold",
       "font-size": size,
     }),
-    text(fitted.text, {
+    text(fitted, {
       x: left,
       y: chartBottomOf(sheet) + LEGEND_NAME_DROP,
       fill: colourFor(column),
       "font-family": FONT_FAMILY,
       "font-weight": "bold",
-      "font-size": fitted.size,
+      "font-size": size,
     }),
     text(gameTally(copy, player.games), {
       x: left,
