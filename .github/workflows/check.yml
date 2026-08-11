@@ -1,0 +1,30 @@
+# Lint, types, documents and tests on every push. `npm run e2e` is deliberately
+# not here: CLAUDE.md makes it a gate for finishing a phase, which is a person
+# deciding something, not a wait to sit through on every push.
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    # x86, because the server is x86: the rasterizer ships a prebuilt binary per
+    # platform, and one that is missing for an architecture must fail here rather
+    # than on the host serving a Friday evening.
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # ci, not install: it fails when package-lock.json and package.json have
+      # drifted, which is exactly the failure that made a clean clone unbuildable.
+      - run: npm ci
+
+      - run: npm run check

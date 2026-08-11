@@ -1,0 +1,25 @@
+# Runs the deploy once. The timer beside it is what calls it; this unit is
+# separate so `systemctl start foolproof-deploy` also deploys on demand.
+
+[Unit]
+Description=Deploy the newest FoolProof tag if it is not already running
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Root, because the last step restarts foolproof.service. Everything before that
+# — fetching, checking out, installing — is dropped to the ubuntu user inside the
+# script, so a deploy never leaves root-owned files in the clone.
+User=root
+# /usr/local/bin, not the copy in the clone: this script checks that clone out,
+# and bash reads a script as it goes — a release that changed the script would
+# have the shell reading half of one version and half of another. The price is
+# that changing it means installing it again, which README.md says.
+ExecStart=/usr/local/bin/foolproof-deploy
+# npm ci on a small host is not fast, and a deploy that is still running must not
+# be killed halfway through installing.
+TimeoutStartSec=900
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=foolproof-deploy

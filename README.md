@@ -251,6 +251,57 @@ One thing to get right before the first start: **stop whatever was polling befor
 for the reason in [Two environments, two databases](#two-environments-two-databases)
 — one token serves one process.
 
+### Deploying a new version
+
+Push a tag and wait. The server looks every five minutes and puts the newest
+released tag live if it is not live already:
+
+```bash
+npm version minor    # writes package.json and package-lock.json, commits, tags
+git push --follow-tags
+```
+
+**The server pulls; nothing pushes to it** — the same property long polling gives
+the bot, and worth keeping for the same reason: no deploy key in anyone else's
+hands, no port opened for one, nothing to rotate, and a public repository means the
+check needs no credentials at all. What it costs is that a release takes up to five
+minutes rather than being instant, and that a deploy is reported in the server's
+journal rather than in a browser.
+
+Nothing has to be true before enabling it: a checkout that already contains the
+newest tag is left alone, so a server sitting on unreleased commits is not
+downgraded. A tag that cannot be installed does not touch the running bot either —
+the previous version is put back and keeps serving the chat. That tag is retried at
+every check and fails the same way each time, which is deliberate: fixing the tag is
+all it takes. Watch one happen, or run one now rather than waiting:
+
+```bash
+journalctl -u foolproof-deploy -f
+sudo systemctl start foolproof-deploy
+```
+
+The last line a deploy prints says the bot is running again, and means only that
+systemd has it: a release that starts and then crash-loops inside the supervisor
+looks the same from outside. The journal above is the thing to read.
+
+Install the script and the two units, and note the **timer** is what gets enabled —
+the service beside it is one deploy, which is what `systemctl start` above runs:
+
+```bash
+sudo install -m 755 deploy/foolproof-deploy.sh /usr/local/bin/foolproof-deploy
+sudo install -m 644 deploy/foolproof-deploy.service /etc/systemd/system/
+sudo install -m 644 deploy/foolproof-deploy.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now foolproof-deploy.timer
+```
+
+The script is installed outside the clone rather than run from it, for the reason
+in `foolproof-deploy.service`. It means a release that changes the deploy script
+needs that first line run by hand; nothing else about a release does.
+
+Every push also runs the checks in GitHub Actions, which is
+[`.github/workflows/check.yml`](.github/workflows/check.yml) and needs no setup.
+
 ## Asking the bot how it is doing
 
 The bot is on a machine you are not sitting at. **`/status`** answers from the chat
@@ -384,7 +435,9 @@ src/
                         telegram, text, timing — a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
 docs/mockups/           the two posters this file shows, drawn by scripts/tools.ts
-deploy/                 the systemd unit a server copy is installed from
+deploy/                 the systemd units a server is installed from, and the
+                        script that puts the newest tag live
+.github/workflows/      the checks that run on every push
 scripts/                dev utilities that are not part of the bot
 e2e/                    the fake Telegram and the scenarios played against it
 ```

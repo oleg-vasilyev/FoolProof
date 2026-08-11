@@ -3,3 +3,5 @@
 # CRLF checkout — this is the guard that keeps it that way, since the file reaches
 # a server without anything in between that would notice.
 *.service text eol=lf
+*.timer text eol=lf
+*.sh text eol=lf
