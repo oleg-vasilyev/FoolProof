@@ -62,6 +62,8 @@ export const copy = {
 
   kingReason: (percent: number, games: string) =>
     `${percent}% table share across ${games}. Nobody sat higher.`,
+  kingPassedReason: (percent: number, games: string) =>
+    `${percent}% table share across ${games}. Only the fool of the night sat higher.`,
   wireToWireReason: (games: string) =>
     `In front on the chart after every game but the first, across ${games}.`,
   favouriteReason: (firsts: number, games: string) =>
@@ -141,7 +143,7 @@ export const copy = {
   sheetKeyAbsent: "did not play",
 
   sheetSubtitle: (games: string, players: string) => `${games} · ${players}`,
-  sheetOmitted: (games: number) => `earliest ${games} not shown`,
+  sheetTableShows: (tally: string) => `the table below shows the last ${tally}`,
 
   months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
   sheetDate: (day: string, month: string, year: string) => `${day} ${month} ${year}`,

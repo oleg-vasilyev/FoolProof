@@ -12,7 +12,9 @@ export const awardWinner = (copy: Copy, names: readonly string[], wholeTable: bo
 export const awardReason = (copy: Copy, award: Award): string => {
   switch (award.name) {
     case AwardName.King:
-      return copy.kingReason(award.percent, gameTally(copy, award.games));
+      return award.passed
+        ? copy.kingPassedReason(award.percent, gameTally(copy, award.games))
+        : copy.kingReason(award.percent, gameTally(copy, award.games));
 
     case AwardName.WireToWire:
       return copy.wireToWireReason(gameTally(copy, award.games));

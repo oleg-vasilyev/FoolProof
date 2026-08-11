@@ -93,8 +93,8 @@ const sheetOf = (cells: readonly (readonly Cell[])[], names?: readonly string[])
   ({
     startedOn: "2026-07-24",
     players: cells.map((own, index) => playerOf(own, index, names?.[index] ?? `P${index}`)),
+    played: cells[0]?.length ?? NONE,
     rounds: cells[0]?.length ?? NONE,
-    omitted: NONE,
     rowHeight: ROW_HEIGHT,
     columnWidth: COLUMN_WIDTH,
     gridHeight: (cells[0]?.length ?? NONE) * ROW_HEIGHT,
@@ -205,8 +205,9 @@ describe("chronology", () => {
     });
 
     it("should treat a missing cell as an absence rather than crashing", () => {
+      const TWO_ROUNDS = 2;
       const shortOfCells = sheetOf([[PLACED]]);
-      const stretched = { ...shortOfCells, rounds: 2 } as Sheet;
+      const stretched = { ...shortOfCells, played: TWO_ROUNDS, rounds: TWO_ROUNDS } as Sheet;
 
       chronologyGrid(stretched);
 
@@ -247,10 +248,86 @@ describe("chronology", () => {
         expect(printed()).not.toContain("03");
       });
 
+      it("should put nothing at all where a number was skipped, not an empty mark", () => {
+        const NUMBERED = 2;
+
+        const drawn = chronologyGrid(sheetOf([Array.from({ length: SIX_ROUNDS }, () => PLACED)]));
+
+        expect(drawn).toHaveLength(SIX_ROUNDS + NUMBERED);
+      });
+
       it("should still draw every cell of the rounds it did not number", () => {
         chronologyGrid(sheetOf([Array.from({ length: SIX_ROUNDS }, () => PLACED)]));
 
         expect(cellFaceSpy).toHaveBeenCalledTimes(SIX_ROUNDS);
+      });
+    });
+
+    describe("when the evening is longer than the grid can draw", () => {
+      const OMITTED = 12;
+
+      const DRAWN = 3;
+
+      const EARLY: Cell = { kind: CellKind.Placed, position: 7 };
+
+      const MARKED: Cell = { kind: CellKind.Fool, position: 4 };
+
+      const trimmed = (): Sheet => {
+        const cells = Array.from({ length: OMITTED + DRAWN }, (_unused, round) =>
+          round < OMITTED ? EARLY : PLACED
+        );
+
+        return { ...sheetOf([cells]), rounds: DRAWN };
+      };
+
+      it("should draw the last games of the evening, not the first ones", () => {
+        chronologyGrid(trimmed());
+
+        expect(cellFaceSpy).toHaveBeenCalledTimes(DRAWN);
+
+        for (const row of Array.from({ length: DRAWN }, (_unused, index) => index)) {
+          expect(cellFor(row), String(row)).toBe(PLACED);
+        }
+      });
+
+      it("should walk forward through the tail, so a later row is a later game", () => {
+        const marked = trimmed();
+        const LAST_DRAWN = OMITTED + DRAWN - ONE;
+        const own = [...(marked.players[NONE]?.cells ?? [])];
+        own[LAST_DRAWN] = MARKED;
+
+        chronologyGrid({
+          ...marked,
+          players: [{ ...marked.players[NONE], cells: own }],
+        } as Sheet);
+
+        expect(cellFor(DRAWN - ONE)).toBe(MARKED);
+      });
+
+      it("should number a row by its place in the evening, so the chart below agrees with it", () => {
+        indexStrideSpy.mockReturnValue(EVERY_ROW);
+
+        chronologyGrid(trimmed());
+
+        expect(printed()).toEqual(["13", "14", "15"]);
+      });
+
+      it("should never number a trimmed row as though the evening started there", () => {
+        indexStrideSpy.mockReturnValue(EVERY_ROW);
+
+        chronologyGrid(trimmed());
+
+        expect(printed()).not.toContain("01");
+      });
+
+      it("should step the stride by the real game number rather than by the row", () => {
+        const EVERY_FIFTH = 5;
+        indexStrideSpy.mockReturnValue(EVERY_FIFTH);
+
+        chronologyGrid(trimmed());
+
+        expect(printed()).toContain("15");
+        expect(printed()).not.toContain("14");
       });
     });
 

@@ -8,7 +8,7 @@ vi.mock("#scoresheet/domain/session-appearances.ts", () => ({
   playedGames: (player: unknown) => playedGamesSpy(player),
 }));
 
-const { bestBy, soleBy } = await import("#scoresheet/domain/awards/pick-winner.ts");
+const { bestBy, soleBy, standoutBy } = await import("#scoresheet/domain/awards/pick-winner.ts");
 
 const NOTHING = 0;
 
@@ -22,6 +22,8 @@ const MANY = 9;
 
 const LOW_ID = 1;
 
+const MIDDLE_ID = 4;
+
 const HIGH_ID = 7;
 
 const playerOf = (playerId: number, share = NOTHING): PlayerAppearances => ({
@@ -32,6 +34,8 @@ const playerOf = (playerId: number, share = NOTHING): PlayerAppearances => ({
 });
 
 const LOW = playerOf(LOW_ID);
+
+const MIDDLE = playerOf(MIDDLE_ID);
 
 const HIGH = playerOf(HIGH_ID);
 
@@ -68,6 +72,12 @@ describe("bestBy()", () => {
     expect(winner).toBe(LOW);
   });
 
+  it("should let the higher merit win over somebody who played more games", () => {
+    playedGamesSpy.mockReturnValueOnce(MANY).mockReturnValueOnce(FEW);
+
+    expect(bestBy([HIGH, LOW], (player) => (player === HIGH ? TWICE : ONCE))).toBe(HIGH);
+  });
+
   it("should break a tie on merit by who played more games", () => {
     playedGamesSpy.mockReturnValueOnce(MANY).mockReturnValueOnce(FEW);
 
@@ -86,14 +96,95 @@ describe("bestBy()", () => {
     expect(bestBy([LOW, HIGH], () => ONCE)).toBe(LOW);
   });
 
+  it("should let more games win even when the challenger's id sorts first", () => {
+    playedGamesSpy.mockReturnValueOnce(FEW).mockReturnValueOnce(MANY);
+
+    expect(bestBy([HIGH, LOW], () => ONCE)).toBe(HIGH);
+  });
+
   it("should break a tie on games by the lower player id", () => {
     expect(bestBy([HIGH, LOW], () => ONCE)).toBe(LOW);
+  });
+
+  it("should leave the lower player id holding when it came first", () => {
+    expect(bestBy([LOW, HIGH], () => ONCE)).toBe(LOW);
   });
 
   it("should hand each player to the merit it is ranking them by", () => {
     const merit = vi.fn().mockReturnValue(ONCE);
 
     bestBy([LOW, HIGH], merit);
+
+    expect(merit).toHaveBeenCalledWith(LOW);
+    expect(merit).toHaveBeenCalledWith(HIGH);
+  });
+});
+
+describe("standoutBy()", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    playedGamesSpy.mockReturnValue(FEW);
+  });
+
+  it("should report nobody when the table is empty", () => {
+    expect(standoutBy([], () => ONCE)).toBeNull();
+  });
+
+  it("should report nobody when no player earned a merit", () => {
+    expect(standoutBy([LOW, HIGH], () => null)).toBeNull();
+  });
+
+  it("should report nobody when every qualified player earned the same merit", () => {
+    expect(standoutBy([LOW, HIGH], () => ONCE)).toBeNull();
+  });
+
+  it("should report nobody when a whole table of three finished level", () => {
+    expect(standoutBy([LOW, MIDDLE, HIGH], () => ONCE)).toBeNull();
+  });
+
+  it("should crown the only player who qualified, since one alone is not a tie", () => {
+    const winner = standoutBy([LOW, HIGH], (player) => (player === HIGH ? null : ONCE));
+
+    expect(winner).toBe(LOW);
+  });
+
+  it("should crown the one player who rose above an otherwise level field", () => {
+    const winner = standoutBy([LOW, MIDDLE, HIGH], (player) => (player === HIGH ? TWICE : ONCE));
+
+    expect(winner).toBe(HIGH);
+  });
+
+  it("should crown nobody when two share the top, however far the rest have fallen behind", () => {
+    const winner = standoutBy([HIGH, LOW, MIDDLE], (player) =>
+      player === MIDDLE ? ONCE : TWICE
+    );
+
+    expect(winner).toBeNull();
+  });
+
+  it("should not read the last bit of a float as standing out", () => {
+    const A_HAIR_HIGHER = 0.5833333333333334;
+
+    const LEVEL = 0.5833333333333333;
+
+    const winner = standoutBy([HIGH, LOW], (player) =>
+      player === HIGH ? A_HAIR_HIGHER : LEVEL
+    );
+
+    expect(winner).toBeNull();
+  });
+
+  it("should still crown a leader who is clear of the field by a real margin", () => {
+    const winner = standoutBy([HIGH, LOW, MIDDLE], (player) => (player === HIGH ? TWICE : ONCE));
+
+    expect(winner).toBe(HIGH);
+  });
+
+  it("should hand each player to the merit it is ranking them by", () => {
+    const merit = vi.fn().mockReturnValue(ONCE);
+
+    standoutBy([LOW, HIGH], merit);
 
     expect(merit).toHaveBeenCalledWith(LOW);
     expect(merit).toHaveBeenCalledWith(HIGH);

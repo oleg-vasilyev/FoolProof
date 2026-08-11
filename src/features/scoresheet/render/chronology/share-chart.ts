@@ -65,7 +65,7 @@ const SKIP_DASH = "14 10";
 const NO_DASH = "none";
 
 const xOf = (sheet: Sheet, point: number): number =>
-  PLOT_LEFT + (point / Math.max(MIN_ROUNDS, sheet.rounds)) * PLOT_WIDTH;
+  PLOT_LEFT + (point / Math.max(MIN_ROUNDS, sheet.played)) * PLOT_WIDTH;
 
 const yOf = (sheet: Sheet, share: number): number => chartBottomOf(sheet) - share * CHART_HEIGHT;
 
@@ -103,9 +103,9 @@ export const midline = (sheet: Sheet): string =>
   });
 
 export const roundLabels = (sheet: Sheet): readonly string[] => {
-  const every = Math.max(MIN_LABEL_STEP, Math.ceil(sheet.rounds / LABEL_TARGET));
+  const every = Math.max(MIN_LABEL_STEP, Math.ceil(sheet.played / LABEL_TARGET));
 
-  return Array.from({ length: sheet.rounds }, (_unused, round) => round + FIRST_ROUND)
+  return Array.from({ length: sheet.played }, (_unused, round) => round + FIRST_ROUND)
     .filter((round) => round % every === NONE)
     .flatMap((round) => [
       line({

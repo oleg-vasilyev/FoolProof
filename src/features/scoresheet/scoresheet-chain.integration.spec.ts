@@ -311,6 +311,7 @@ describe("an evening reaching the awards", () => {
       winners: [idFor(AWARDS_CHAT, OLEG)],
       percent: FULL_PERCENT,
       games: ENOUGH_EVENING,
+      passed: false,
     });
   });
 

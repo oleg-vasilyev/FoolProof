@@ -703,8 +703,22 @@ be glanceable without a tap.
 The height budget is fixed at 2560, so the number of games is what has to give.
 Row height is `clamp(available ÷ games, 26, 56)` pixels: at 15 games the rows are
 full size, at 30 they are 29. Past the ceiling the rows would fall below the floor,
-so the sheet keeps the **most recent** games that fit and says so in the corner.
+so the sheet keeps the **most recent** games that fit and says so above the table.
 Being honest about the omission matters more than fitting everything.
+
+**Only the table is trimmed.** The chart under it has no row to run out of, so it
+draws the whole evening, and the awards card judges the whole evening too — the
+ceiling is a fact about one grid, not about what the session was. Everything the
+reader counts therefore agrees: the header names the evening's real size, the legend
+tallies every game each player sat, and the note says only that the *table below*
+shows the last so-many. The one number that used to disagree was the header, which
+printed the drawn count while the awards card printed the played count, so two
+pictures of the same evening in the same chat quoted different totals.
+
+That is also why a trimmed table numbers its rows **by their place in the evening** —
+13…40, not 01…28. The chart's axis runs to 40, and the same game has to carry the
+same number in both, or the two halves of the picture cannot be read against each
+other.
 
 That ceiling is derived, not chosen, so anything that takes room away from the grid
 moves it — the labelled section headings and the taller cell key cost five rows when
@@ -753,6 +767,43 @@ reads as a bug rather than as a thin evening; `/stats_awards` answers in text in
 The card is read top to bottom from glory to disgrace, and **FOOL OF THE NIGHT is
 always last**, on a red plate. Under it, when it happened at all, one line about the
 whole table: how often whoever opened a game was left the fool in it.
+
+#### A shared title is no title, and nobody is crowned twice
+
+Two rules guard the pair of pinned awards, and both exist because the card once gave
+one player both crowns at the same table.
+
+**A title has to be won outright.** If anybody is level with the leader, the award
+does not fire — not just when the whole table is level, but whenever the top is
+shared. Both justifications claim primacy ("nobody sat higher", "nobody played
+worse"), and that is equally false against one equal as against four. The tie-break
+used to award it anyway, to whoever had the lower `player_id` — which is to say, to
+whoever was typed into the database first. This is not a corner case invented for a
+test: two people splitting six games 3–3 are level on both merits, and fool counts are
+small integers over few games, so two players on two-of-eight is ordinary. **The fool
+plate is therefore absent more often than the catalogue's frequencies suggest**, and
+that is the intended price. One qualified player is not a tie: alone at the top is
+still standing out, and still wins.
+
+Level is compared with a **tolerance of 1e-9**, not exactly. Both merits are means of
+rationals with small denominators — share divides by table size minus one, then by
+games played — so two genuinely different merits differ by more than 1e-7 even at the
+worst table, while summing forty of them accumulates float error around 1e-15. There
+is room either side. Exact equality was tried first and failed on the ten-player level
+evening, where the shares came out `0.5833333333333334` and `0.5833333333333333` and
+one bit decided who was king. If either denominator changes, this is the number to
+re-derive.
+
+**The two titles are mutually exclusive.** Even without a tie a player can hold both
+the best share and the worst fool rate. When that happens the fool keeps the plate and
+the crown passes to the next-best share, because the fool is a count of something that
+happened and the king is a ranking of everybody else. If excluding the fool leaves
+nobody qualified, no king is crowned. A passed crown **says so**: its justification
+becomes "only the fool of the night sat higher", because the ordinary one would be a
+lie about the very evening that produced it.
+
+Only these two rules use the stand-out test; every other award in the catalogue still
+takes the plain best-by-merit winner, ties broken as before.
 
 #### Two orders, and why there have to be two
 

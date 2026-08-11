@@ -95,10 +95,21 @@ describe("layoutOf()", () => {
       expect(scoreSeriesSpy).toHaveBeenCalledWith(chronology.players, chronology.games);
     });
 
-    it("should score only the games it is going to draw", () => {
-      layoutOf(chronologyOf(MAX_ROWS + ONE));
+    it("should score every game the evening had, not only the rows the grid will draw", () => {
+      const OVER = MAX_ROWS + ONE;
 
-      expect(scoreSeriesSpy.mock.calls[0]?.[1]).toHaveLength(MAX_ROWS);
+      layoutOf(chronologyOf(OVER));
+
+      expect(scoreSeriesSpy.mock.calls[0]?.[1]).toHaveLength(OVER);
+    });
+
+    it("should score from the first game, so the chart below opens where the evening did", () => {
+      const OVER = MAX_ROWS + ONE;
+
+      layoutOf(chronologyOf(OVER));
+      const scored = scoreSeriesSpy.mock.calls[0]?.[1] as readonly { gameId: number }[];
+
+      expect(scored[0]?.gameId).toBe(NONE);
     });
   });
 
@@ -184,20 +195,25 @@ describe("layoutOf()", () => {
     it("should report how many games it left out", () => {
       const OVER = MAX_ROWS + 5;
 
-      expect(layoutOf(chronologyOf(OVER)).omitted).toBe(OVER - MAX_ROWS);
+      expect(layoutOf(chronologyOf(OVER)).played - layoutOf(chronologyOf(OVER)).rounds).toBe(OVER - MAX_ROWS);
     });
 
-    it("should keep the most recent games, not the earliest", () => {
-      const OVER = MAX_ROWS + ONE;
+    it("should report the whole evening alongside the rows it drew, so the two cannot be confused", () => {
+      const OVER = MAX_ROWS + 5;
+      const sheet = layoutOf(chronologyOf(OVER));
 
-      layoutOf(chronologyOf(OVER));
-      const scored = scoreSeriesSpy.mock.calls[0]?.[1] as readonly { gameId: number }[];
+      expect(sheet.played).toBe(OVER);
+      expect(sheet.rounds).toBeLessThan(sheet.played);
+    });
 
-      expect(scored[0]?.gameId).toBe(ONE);
+    it("should count the whole evening as played when all of it fits", () => {
+      const FEW = 4;
+
+      expect(layoutOf(chronologyOf(FEW)).played).toBe(FEW);
     });
 
     it("should leave nothing out of a session that fits", () => {
-      expect(layoutOf(chronologyOf(MAX_ROWS)).omitted).toBe(NONE);
+      expect(layoutOf(chronologyOf(MAX_ROWS)).rounds).toBe(MAX_ROWS);
     });
   });
 

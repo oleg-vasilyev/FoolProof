@@ -117,8 +117,8 @@ export const nameToFit = (name: string, width: number, size: number): string => 
 export interface Sheet {
   readonly startedOn: string;
   readonly players: readonly ScoredPlayer[];
+  readonly played: number;
   readonly rounds: number;
-  readonly omitted: number;
   readonly rowHeight: number;
   readonly columnWidth: number;
   readonly gridHeight: number;
@@ -132,9 +132,9 @@ const rowHeightFor = (rounds: number, room: number): number =>
 
 export const layoutOf = (chronology: SeriesChronology): Sheet => {
   const seated = chronology.players.length;
-  const shown = chronology.games.slice(-maxGamesFor(seated));
-  const players = scoreSeries(chronology.players, shown);
-  const rounds = shown.length;
+  const played = chronology.games.length;
+  const players = scoreSeries(chronology.players, chronology.games);
+  const rounds = Math.min(played, maxGamesFor(seated));
   const rowHeight = rowHeightFor(rounds, gamesRoomFor(seated));
   const gridHeight = rounds * rowHeight;
   const gridBottom = GRID_TOP + gridHeight;
@@ -143,8 +143,8 @@ export const layoutOf = (chronology: SeriesChronology): Sheet => {
   return {
     startedOn: chronology.startedOn,
     players,
+    played,
     rounds,
-    omitted: chronology.games.length - rounds,
     rowHeight,
     columnWidth: (GRID_RIGHT - GRID_LEFT) / players.length,
     gridHeight,

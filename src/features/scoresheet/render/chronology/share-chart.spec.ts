@@ -104,8 +104,8 @@ const sheetOf = (players: readonly PlayerFixture[], names?: readonly string[]): 
       share: player.share ?? player.running.at(-ONE) ?? NEUTRAL_MOCK,
       games: player.games ?? player.running.length,
     })),
+    played: players[0]?.running.length ?? NONE,
     rounds: players[0]?.running.length ?? NONE,
-    omitted: NONE,
     rowHeight: NONE,
     columnWidth: NONE,
     gridHeight: NONE,
@@ -150,6 +150,41 @@ describe("shareChart()", () => {
     textSpy.mockImplementation(() => "<text/>");
     colourForSpy.mockImplementation((column: number) => `colour-${String(column)}`);
     percentLabelSpy.mockImplementation((share: number) => `pct(${String(share)})`);
+  });
+
+  describe("when the grid above it was trimmed", () => {
+    const A_LONG_EVENING = 12;
+
+    const DRAWN_ROWS = 3;
+
+    const evening = (): Sheet =>
+      sheetOf([{ running: Array.from({ length: A_LONG_EVENING }, () => NEUTRAL_MOCK) }]);
+
+    const trimmed = (): Sheet =>
+      ({
+        ...evening(),
+        rounds: DRAWN_ROWS,
+      }) satisfies Sheet;
+
+    it("should place every mark exactly where it would be had nothing been dropped", () => {
+      shareChart(evening());
+      const whole = textSpy.mock.calls.map((call) => JSON.stringify(call));
+
+      vi.clearAllMocks();
+      textSpy.mockImplementation(() => "<text/>");
+      percentLabelSpy.mockImplementation((share: number) => `pct(${String(share)})`);
+      shareChart(trimmed());
+
+      expect(textSpy.mock.calls.map((call) => JSON.stringify(call))).toEqual(whole);
+    });
+
+    it("should carry its axis out to the last game of the evening, not the last drawn row", () => {
+      shareChart(trimmed());
+      const lastLabel = textSpy.mock.calls.find((call) => String(call[0]) === String(A_LONG_EVENING));
+
+      expect(lastLabel).toBeDefined();
+      expect(Number((lastLabel?.[1] as Record<string, unknown>).x)).toBe(PLOT_RIGHT);
+    });
   });
 
   describe("the share axis", () => {

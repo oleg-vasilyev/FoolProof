@@ -57,8 +57,8 @@ const sheetOf = (): Sheet =>
   ({
     startedOn: "2026-07-24",
     players: Array.from({ length: AT_THE_TABLE }, () => ({}) as ScoredPlayer),
+    played: NONE,
     rounds: NONE,
-    omitted: NONE,
     rowHeight: NONE,
     columnWidth: NONE,
     gridHeight: NONE,

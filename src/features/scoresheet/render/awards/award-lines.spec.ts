@@ -33,7 +33,7 @@ const oneOf = (name: AwardName): number => NAMES.indexOf(name) + FIRST_FACT;
 const twoOf = (name: AwardName): number => oneOf(name) + SECOND_FACT;
 
 const SAMPLES: readonly Award[] = [
-  { name: AwardName.King, winners: [WINNER], percent: oneOf(AwardName.King), games: twoOf(AwardName.King) },
+  { name: AwardName.King, winners: [WINNER], percent: oneOf(AwardName.King), games: twoOf(AwardName.King), passed: false },
   { name: AwardName.WireToWire, winners: [WINNER], games: oneOf(AwardName.WireToWire) },
   { name: AwardName.TheFavourite, winners: [WINNER], firsts: oneOf(AwardName.TheFavourite), games: twoOf(AwardName.TheFavourite) },
   { name: AwardName.HatTrick, winners: [WINNER], run: oneOf(AwardName.HatTrick) },

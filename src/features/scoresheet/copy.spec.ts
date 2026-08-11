@@ -181,11 +181,17 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
     });
   });
 
-  describe("sheetOmitted()", () => {
-    it("should say how many games were left out", () => {
-      const DROPPED = 7;
+  describe("sheetTableShows()", () => {
+    it("should print the finished tally it was handed rather than a bare number", () => {
+      const DRAWN = "28 games";
 
-      expect(copy.sheetOmitted(DROPPED)).toContain("7");
+      expect(copy.sheetTableShows(DRAWN)).toContain(DRAWN);
+    });
+
+    it("should read as what the table holds rather than as a bare count", () => {
+      const DRAWN = "28 games";
+
+      expect(copy.sheetTableShows(DRAWN).length).toBeGreaterThan(DRAWN.length);
     });
   });
 

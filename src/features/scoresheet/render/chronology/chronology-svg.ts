@@ -14,12 +14,13 @@ import { shareChart } from "#scoresheet/render/chronology/share-chart.ts";
 import { shareLegend } from "#scoresheet/render/chronology/share-legend.ts";
 import type { Copy } from "#scoresheet/copy.ts";
 import { EYEBROW_TRACKING, cardHeading } from "#scoresheet/render/card-heading.ts";
+import { gameTally } from "#scoresheet/render/session-tally.ts";
 import { line, rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
 
 
 const NONE = 0;
 
-const OMITTED_BASELINE = 286;
+const TABLE_NOTE_BASELINE = 344;
 
 const LABEL_LIFT = 40;
 
@@ -40,17 +41,17 @@ const heading = (copy: Copy, sheet: Sheet): readonly string[] =>
   cardHeading(copy, {
     title: copy.sheetTitle,
     startedOn: sheet.startedOn,
-    games: sheet.rounds,
+    games: sheet.played,
     players: sheet.players.length,
   });
 
-const omittedNote = (copy: Copy, sheet: Sheet): readonly string[] =>
-  sheet.omitted === NONE
+const tableNote = (copy: Copy, sheet: Sheet): readonly string[] =>
+  sheet.played === sheet.rounds
     ? []
     : [
-        text(copy.sheetOmitted(sheet.omitted), {
+        text(copy.sheetTableShows(gameTally(copy, sheet.rounds)), {
           x: GRID_RIGHT,
-          y: OMITTED_BASELINE,
+          y: TABLE_NOTE_BASELINE,
           fill: palette.inkFaint,
           "font-family": FONT_FAMILY,
           "font-size": fontSize.sectionLabel,
@@ -91,7 +92,7 @@ export const renderScoresheet = (copy: Copy, chronology: SeriesChronology): stri
   return svgOf(IMAGE_WIDTH, sheet.height, [
     background(sheet),
     ...heading(copy, sheet),
-    ...omittedNote(copy, sheet),
+    ...tableNote(copy, sheet),
     ...sectionHead({
       label: copy.sheetGridLabel,
       hint: copy.sheetGridHint,

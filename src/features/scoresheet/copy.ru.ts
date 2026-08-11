@@ -63,6 +63,8 @@ export const copy: Copy = {
 
   kingReason: (percent: number, games: string) =>
     `${percent}% стола за ${games}. Выше не сидел никто.`,
+  kingPassedReason: (percent: number, games: string) =>
+    `${percent}% стола за ${games}. Выше сидел только дурак вечера.`,
   wireToWireReason: (games: string) =>
     `Впереди на графике после каждой партии, кроме первой, все ${games}.`,
   favouriteReason: (firsts: number, games: string) =>
@@ -140,7 +142,7 @@ export const copy: Copy = {
   sheetKeyAbsent: "пропуск",
 
   sheetSubtitle: (games: string, players: string) => `${games} · ${players}`,
-  sheetOmitted: (games: number) => `первые ${games} не показаны`,
+  sheetTableShows: (tally: string) => `таблица ниже показывает последние ${tally}`,
 
   months: [
     "января",

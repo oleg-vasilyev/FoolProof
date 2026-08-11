@@ -25,6 +25,8 @@ const PAD = 40;
 
 const ROUNDS = 12;
 
+const A_TALLY = "12 games";
+
 const PLAYERS = 5;
 
 const columnNamesSpy = vi.fn();
@@ -48,6 +50,8 @@ const lineSpy = vi.fn();
 const textSpy = vi.fn();
 
 const svgOfSpy = vi.fn();
+
+const gameTallySpy = vi.fn();
 
 vi.mock("#scoresheet/render/chronology/chronology-grid.ts", () => ({
   columnNames: (sheet: unknown) => columnNamesSpy(sheet),
@@ -87,6 +91,10 @@ vi.mock("#scoresheet/render/card-heading.ts", () => ({
   cardHeading: (table: unknown, heading: unknown) => cardHeadingSpy(table, heading),
 }));
 
+vi.mock("#scoresheet/render/session-tally.ts", () => ({
+  gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
+}));
+
 vi.mock("#scoresheet/render/chronology/share-chart.ts", () => ({
   shareChart: (sheet: unknown) => shareChartSpy(sheet),
 }));
@@ -123,8 +131,8 @@ const sheetWith = (omitted: number): Sheet =>
   ({
     startedOn: STARTED_ON,
     players: Array.from({ length: PLAYERS }, (_unused, index) => playerOf(index)),
+    played: ROUNDS + omitted,
     rounds: ROUNDS,
-    omitted,
     rowHeight: 50,
     columnWidth: 200,
     gridHeight: 600,
@@ -164,6 +172,7 @@ describe("renderScoresheet()", () => {
     lineSpy.mockImplementation(() => "<divider/>");
     textSpy.mockImplementation(() => "<text/>");
     svgOfSpy.mockImplementation(() => "<svg/>");
+    gameTallySpy.mockReturnValue(A_TALLY);
   });
 
   describe("what it delegates", () => {
@@ -332,10 +341,21 @@ describe("renderScoresheet()", () => {
       expect(cardHeadingSpy).toHaveBeenCalledWith(copy, expect.objectContaining({ title: copy.sheetTitle }));
     });
 
-    it("should ask cardHeading for the session's own counts, not the layout's rounds label", () => {
+    it("should head the sheet with the whole evening, not with the rows the grid drew", () => {
+      const DROPPED = 7;
+      layoutOfSpy.mockReturnValue(sheetWith(DROPPED));
+
       renderScoresheet(copy, CHRONOLOGY);
 
-      expect(cardHeadingSpy).toHaveBeenCalledWith(copy, 
+      expect(cardHeadingSpy).toHaveBeenCalledWith(copy,
+        expect.objectContaining({ games: ROUNDS + DROPPED, players: PLAYERS })
+      );
+    });
+
+    it("should still head an untrimmed sheet with the games it drew, since they are the same", () => {
+      renderScoresheet(copy, CHRONOLOGY);
+
+      expect(cardHeadingSpy).toHaveBeenCalledWith(copy,
         expect.objectContaining({ games: ROUNDS, players: PLAYERS })
       );
     });
@@ -403,16 +423,25 @@ describe("renderScoresheet()", () => {
     it("should say nothing when every game fits", () => {
       renderScoresheet(copy, CHRONOLOGY);
 
-      expect(printed()).not.toContain(copy.sheetOmitted(NONE));
+      expect(printed()).not.toContain(copy.sheetTableShows(A_TALLY));
     });
 
-    it("should own up to the games it left out", () => {
+    it("should say how much of the evening the table below is showing", () => {
       const DROPPED = 7;
       layoutOfSpy.mockReturnValue(sheetWith(DROPPED));
 
       renderScoresheet(copy, CHRONOLOGY);
 
-      expect(printed()).toContain(copy.sheetOmitted(DROPPED));
+      expect(printed()).toContain(copy.sheetTableShows(A_TALLY));
+    });
+
+    it("should count that note in drawn rows, not in the games the evening had", () => {
+      const DROPPED = 7;
+      layoutOfSpy.mockReturnValue(sheetWith(DROPPED));
+
+      renderScoresheet(copy, CHRONOLOGY);
+
+      expect(gameTallySpy).toHaveBeenCalledWith(copy, ROUNDS);
     });
 
     it("should add exactly one element to the drawing when it owns up", () => {
@@ -432,7 +461,7 @@ describe("renderScoresheet()", () => {
       layoutOfSpy.mockReturnValue(sheetWith(DROPPED));
 
       renderScoresheet(copy, CHRONOLOGY);
-      const note = attributesOfText(copy.sheetOmitted(DROPPED));
+      const note = attributesOfText(copy.sheetTableShows(A_TALLY));
 
       expect(note.x).toBe(GRID_RIGHT);
       expect(note["text-anchor"]).toBe("end");

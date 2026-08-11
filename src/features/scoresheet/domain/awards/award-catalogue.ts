@@ -49,7 +49,10 @@ type Earned<Name extends AwardName, Facts> = {
 } & Facts;
 
 export type Award =
-  | Earned<typeof AwardName.King, { readonly percent: number; readonly games: number }>
+  | Earned<
+      typeof AwardName.King,
+      { readonly percent: number; readonly games: number; readonly passed: boolean }
+    >
   | Earned<typeof AwardName.WireToWire, { readonly games: number }>
   | Earned<typeof AwardName.TheFavourite, { readonly firsts: number; readonly games: number }>
   | Earned<typeof AwardName.HatTrick, { readonly run: number }>

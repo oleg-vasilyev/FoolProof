@@ -50,8 +50,12 @@ const boxIn = (sheet: Sheet, column: number, round: number): CellBox => ({
   fontSize: cellFontOf(sheet.rowHeight),
 });
 
+const cellIndex = (sheet: Sheet, round: number): number => sheet.played - sheet.rounds + round;
+
+const gameAt = (sheet: Sheet, round: number): number => cellIndex(sheet, round) + NEXT_ROUND;
+
 const rowIndex = (sheet: Sheet, round: number): string =>
-  text(String(round + 1).padStart(INDEX_DIGITS, "0"), {
+  text(String(gameAt(sheet, round)).padStart(INDEX_DIGITS, "0"), {
     x: GRID_LEFT - INDEX_GAP,
     y: baselineIn(boxIn(sheet, FIRST_COLUMN, round)),
     fill: palette.inkFigure,
@@ -64,12 +68,12 @@ const cellOf = (sheet: Sheet, cell: Cell, column: number, round: number): readon
   cellFace(boxIn(sheet, column, round), cell);
 
 const printsIndex = (sheet: Sheet, round: number): boolean =>
-  round === FIRST_ROUND || (round + NEXT_ROUND) % indexStrideOf(sheet.rowHeight) === NOTHING;
+  round === FIRST_ROUND || gameAt(sheet, round) % indexStrideOf(sheet.rowHeight) === NOTHING;
 
 export const chronologyGrid = (sheet: Sheet): readonly string[] =>
   Array.from({ length: sheet.rounds }, (_unused, round) => [
     ...(printsIndex(sheet, round) ? [rowIndex(sheet, round)] : []),
     ...sheet.players.flatMap((player, column) =>
-      cellOf(sheet, player.cells[round] ?? { kind: CellKind.Absent }, column, round)
+      cellOf(sheet, player.cells[cellIndex(sheet, round)] ?? { kind: CellKind.Absent }, column, round)
     ),
   ]).flat();
