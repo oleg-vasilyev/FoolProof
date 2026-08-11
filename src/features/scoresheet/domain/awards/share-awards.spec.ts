@@ -38,7 +38,7 @@ const EIGHTEEN = 18;
 
 const TOO_FEW = ENOUGH_GAMES - ONCE;
 
-const winner: PlayerAppearances = { playerId: OLEG, share: SHARE, appearances: [] };
+const winner: PlayerAppearances = { playerId: OLEG, share: SHARE, running: [], appearances: [] };
 
 const EVENING: SessionAppearances = { rounds: EIGHTEEN, players: [winner], starters: [] };
 

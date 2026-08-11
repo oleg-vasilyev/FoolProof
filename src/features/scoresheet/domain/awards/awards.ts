@@ -1,17 +1,54 @@
-import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
+import { AwardName, RAREST_FIRST } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
 import type { Award, Honours } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { sessionAppearances, type SessionAppearances } from "#scoresheet/domain/session-appearances.ts";
 import { foolOfTheNight, kingOfTheTable } from "#scoresheet/domain/awards/share-awards.ts";
-import { allOrNothing, theInvisible, untouchable } from "#scoresheet/domain/awards/position-awards.ts";
-import { encore, sweetRevenge, teflon } from "#scoresheet/domain/awards/streak-awards.ts";
+import {
+  allOrNothing,
+  theAnchor,
+  theFavourite,
+  theInvisible,
+  theUnderstudy,
+  untouchable,
+} from "#scoresheet/domain/awards/position-awards.ts";
+import { encore, secondWind, sweetRevenge, teflon } from "#scoresheet/domain/awards/streak-awards.ts";
 import {
   firstBlood,
   ironSeat,
+  revolvingDoor,
+  theCameo,
   theIrishGoodbye,
-  theTruce,
+  theLatecomer,
 } from "#scoresheet/domain/awards/attendance-awards.ts";
-import { openersCurse, tableCurse } from "#scoresheet/domain/awards/opener-awards.ts";
+import {
+  homeAdvantage,
+  hotSeat,
+  neverAsked,
+  openersCurse,
+  tableCurse,
+  theDoorman,
+} from "#scoresheet/domain/awards/opener-awards.ts";
+import {
+  groundhogDay,
+  hatTrick,
+  thePendulum,
+  theLadder,
+  theSlide,
+} from "#scoresheet/domain/awards/run-awards.ts";
+import {
+  falseDawn,
+  theComeback,
+  theFlatline,
+  theRollercoaster,
+  wireToWire,
+} from "#scoresheet/domain/awards/chart-awards.ts";
+import {
+  fullHouse,
+  thePacifist,
+  theRotation,
+  theTruce,
+} from "#scoresheet/domain/awards/table-awards.ts";
+import { theNemesis } from "#scoresheet/domain/awards/rivalry-awards.ts";
 
 
 export const EVENING_MINIMUM = 5;
@@ -20,27 +57,92 @@ const MOST_AWARDS = 9;
 
 const FROM_THE_TOP = 0;
 
-const THE_FOOL = 1;
+const ONE_ROW = 1;
+
+const NO_ROWS = 0;
 
 const RULES_IN_ORDER: readonly ((evening: SessionAppearances) => Award | null)[] = [
   kingOfTheTable,
+  wireToWire,
+  theFavourite,
+  hatTrick,
+  homeAdvantage,
   untouchable,
   teflon,
+  hotSeat,
+  theComeback,
+  theLadder,
   sweetRevenge,
+  fullHouse,
   ironSeat,
+  theRotation,
   theTruce,
-  allOrNothing,
+  thePacifist,
+  theNemesis,
+  theDoorman,
+  neverAsked,
+  theLatecomer,
+  revolvingDoor,
+  theCameo,
+  secondWind,
+  theUnderstudy,
+  theFlatline,
   theInvisible,
+  groundhogDay,
+  thePendulum,
+  theRollercoaster,
+  allOrNothing,
   theIrishGoodbye,
+  theAnchor,
+  theSlide,
+  falseDawn,
   openersCurse,
   encore,
   firstBlood,
+  foolOfTheNight,
 ];
 
-const repeatsTheFool = (award: Award, fool: Award | null): boolean =>
-  award.name === AwardName.FirstBlood &&
-  fool !== null &&
-  award.winners.some((winner) => fool.winners.includes(winner));
+interface Selection {
+  readonly king: Award | null;
+  readonly fool: Award | null;
+  readonly rest: readonly Award[];
+}
+
+const OVERSHADOWED: readonly (readonly [AwardName, AwardName])[] = [
+  [AwardName.FirstBlood, AwardName.FoolOfTheNight],
+  [AwardName.HotSeat, AwardName.HomeAdvantage],
+];
+
+const sharesAWinner = (award: Award, other: Award): boolean =>
+  award.winners.some((winner) => other.winners.includes(winner));
+
+const saysNothingNew = (award: Award, fired: readonly Award[]): boolean =>
+  OVERSHADOWED.some(
+    ([lesser, greater]) =>
+      award.name === lesser &&
+      fired.some((other) => other.name === greater && sharesAWinner(award, other))
+  );
+
+const rarestFirst = (one: Award, other: Award): number =>
+  RAREST_FIRST.indexOf(one.name) - RAREST_FIRST.indexOf(other.name);
+
+const splitOut = (fired: readonly Award[]): Selection => {
+  const king = fired.find((award) => award.name === AwardName.King) ?? null;
+  const fool = fired.find((award) => award.name === AwardName.FoolOfTheNight) ?? null;
+
+  return {
+    king,
+    fool,
+    rest: fired.filter(
+      (award) => award !== king && award !== fool && !saysNothingNew(award, fired)
+    ),
+  };
+};
+
+const roomFor = (selection: Selection): number =>
+  MOST_AWARDS -
+  (selection.king === null ? NO_ROWS : ONE_ROW) -
+  (selection.fool === null ? NO_ROWS : ONE_ROW);
 
 export const honoursFor = (chronology: SeriesChronology): Honours | null => {
   if (chronology.games.length < EVENING_MINIMUM) {
@@ -48,14 +150,15 @@ export const honoursFor = (chronology: SeriesChronology): Honours | null => {
   }
 
   const evening = sessionAppearances(chronology);
-  const fool = foolOfTheNight(evening);
-  const room = fool === null ? MOST_AWARDS : MOST_AWARDS - THE_FOOL;
-  const earned = RULES_IN_ORDER.flatMap((rule) => rule(evening) ?? [])
-    .filter((award) => !repeatsTheFool(award, fool))
-    .slice(FROM_THE_TOP, room);
+  const fired = RULES_IN_ORDER.flatMap((rule) => rule(evening) ?? []);
+  const selection = splitOut(fired);
+  const chosen = [...selection.rest].sort(rarestFirst).slice(FROM_THE_TOP, roomFor(selection));
+  const printed = fired.filter(
+    (award) => award === selection.king || chosen.includes(award)
+  );
 
   return {
-    awards: fool === null ? earned : [...earned, fool],
+    awards: selection.fool === null ? printed : [...printed, selection.fool],
     curse: tableCurse(evening),
   };
 };

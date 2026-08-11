@@ -1,8 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Finish } from "#scoresheet/domain/game-outcomes.ts";
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
-import type { Appearance, SessionAppearances, PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
+import { ENOUGH_GAMES, LONG_ENOUGH } from "#scoresheet/domain/awards/award-catalogue.ts";
+import type { PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 import type { Merit } from "#scoresheet/domain/awards/pick-winner.ts";
+import {
+  appearanceOf,
+  eveningOf,
+  playerAppearing,
+} from "#scoresheet/domain/session-appearances.stub.ts";
 
 
 const bestBySpy = vi.fn();
@@ -18,23 +24,31 @@ const foolByRoundSpy = vi.fn();
 
 const lastRoundOfSpy = vi.fn();
 
+const firstRoundOfSpy = vi.fn();
+
 const playedGamesSpy = vi.fn();
 
 vi.mock("#scoresheet/domain/session-appearances.ts", () => ({
   foolByRound: (evening: unknown) => foolByRoundSpy(evening),
   lastRoundOf: (player: unknown) => lastRoundOfSpy(player),
+  firstRoundOf: (player: unknown) => firstRoundOfSpy(player),
   playedGames: (player: unknown) => playedGamesSpy(player),
 }));
 
-const { firstBlood, ironSeat, theIrishGoodbye, theTruce } = await import(
-  "#scoresheet/domain/awards/attendance-awards.ts"
-);
+const MOCKED_MIDDLE = 0.4;
+
+vi.mock("#scoresheet/domain/scoring.ts", () => ({ NEUTRAL: MOCKED_MIDDLE }));
+
+const { firstBlood, ironSeat, revolvingDoor, theCameo, theIrishGoodbye, theLatecomer } =
+  await import("#scoresheet/domain/awards/attendance-awards.ts");
 
 const NOTHING = 0;
 
 const ONCE = 1;
 
 const TWICE = 2;
+
+const THRICE = 3;
 
 const SEVEN = 7;
 
@@ -46,22 +60,25 @@ const TEN = 10;
 
 const NINETEEN = 19;
 
+const JUST_ABOVE_MOCKED = 0.45;
+
+const JUST_BELOW_MOCKED = 0.35;
+
+const PERCENT_POINTS = 100;
+
 const DIMA = 2;
 
 const VERONIKA = 5;
 
-const appearing = (
-  playerId: number,
-  ...appearances: readonly Appearance[]
-): PlayerAppearances => ({ playerId, share: NOTHING, appearances });
+const eveningFor = (players: readonly PlayerAppearances[], rounds = NINETEEN) =>
+  eveningOf(rounds, players);
 
-const sessionAppearances = (players: readonly PlayerAppearances[], rounds = NINETEEN): SessionAppearances => ({
-  rounds,
-  players,
-  starters: [],
-});
+const SOMEBODY = playerAppearing(DIMA, [appearanceOf(NOTHING, Finish.First)]);
 
-const SOMEBODY = appearing(DIMA, { round: NOTHING, finish: Finish.First });
+const meritGiven = (): Merit => bestBySpy.mock.calls[NOTHING]?.[ONCE] as Merit;
+
+const qualifierGiven = () =>
+  soleBySpy.mock.calls[NOTHING]?.[ONCE] as (player: PlayerAppearances) => boolean;
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -70,23 +87,24 @@ beforeEach(() => {
   soleBySpy.mockReturnValue(null);
   foolByRoundSpy.mockReturnValue([]);
   lastRoundOfSpy.mockReturnValue(null);
+  firstRoundOfSpy.mockReturnValue(NOTHING);
   playedGamesSpy.mockReturnValue(NOTHING);
 });
 
 describe("ironSeat()", () => {
   it("should not even look for a winner in an evening shorter than ten games", () => {
-    ironSeat(sessionAppearances([SOMEBODY], NINE));
+    ironSeat(eveningFor([SOMEBODY], NINE));
 
     expect(soleBySpy).not.toHaveBeenCalled();
   });
 
   it("should award nothing when more than one player sat through everything", () => {
-    expect(ironSeat(sessionAppearances([SOMEBODY], TEN))).toBeNull();
+    expect(ironSeat(eveningFor([SOMEBODY], TEN))).toBeNull();
   });
 
   it("should report the whole evening as the games sat", () => {
     soleBySpy.mockReturnValue(SOMEBODY);
-    const award = ironSeat(sessionAppearances([SOMEBODY], NINETEEN));
+    const award = ironSeat(eveningFor([SOMEBODY], NINETEEN));
 
     expect(award?.name === AwardName.IronSeat ? [award.winners, award.games] : []).toEqual([
       [DIMA],
@@ -95,18 +113,15 @@ describe("ironSeat()", () => {
   });
 
   describe("who qualifies", () => {
-    const qualifierGiven = () =>
-      soleBySpy.mock.calls[NOTHING]?.[ONCE] as (player: PlayerAppearances) => boolean;
-
     it("should accept a player who played every game of the evening", () => {
-      ironSeat(sessionAppearances([SOMEBODY], TEN));
+      ironSeat(eveningFor([SOMEBODY], TEN));
       playedGamesSpy.mockReturnValue(TEN);
 
       expect(qualifierGiven()(SOMEBODY)).toBe(true);
     });
 
     it("should refuse a player who missed one", () => {
-      ironSeat(sessionAppearances([SOMEBODY], TEN));
+      ironSeat(eveningFor([SOMEBODY], TEN));
       playedGamesSpy.mockReturnValue(NINE);
 
       expect(qualifierGiven()(SOMEBODY)).toBe(false);
@@ -114,87 +129,29 @@ describe("ironSeat()", () => {
   });
 });
 
-describe("theTruce()", () => {
-  const DREW = appearing(
-    DIMA,
-    { round: NOTHING, finish: Finish.Fool },
-    { round: TWICE, finish: Finish.Drawn }
-  );
-
-  const ALSO_DREW = appearing(
-    VERONIKA,
-    { round: NOTHING, finish: Finish.First },
-    { round: TWICE, finish: Finish.Drawn }
-  );
-
-  const NEVER_DREW = appearing(SEVEN, { round: NOTHING, finish: Finish.Fool });
-
-  it("should award nothing when the evening had no draw", () => {
-    expect(theTruce(sessionAppearances([NEVER_DREW]))).toBeNull();
-  });
-
-  it("should name everybody who was in a draw", () => {
-    expect(theTruce(sessionAppearances([DREW, NEVER_DREW, ALSO_DREW]))?.winners).toEqual([DIMA, VERONIKA]);
-  });
-
-  it("should count one draw when two players shared the same last place", () => {
-    const award = theTruce(sessionAppearances([DREW, ALSO_DREW]));
-
-    expect(award?.name === AwardName.TheTruce ? [award.draws, award.games] : []).toEqual([ONCE, NINETEEN]);
-  });
-
-  it("should count two draws played in different games", () => {
-    const twice = appearing(
-      DIMA,
-      { round: NOTHING, finish: Finish.Drawn },
-      { round: ONCE, finish: Finish.First },
-      { round: TWICE, finish: Finish.Drawn }
-    );
-    const award = theTruce(sessionAppearances([twice]));
-
-    expect(award?.name === AwardName.TheTruce ? award.draws : NOTHING).toBe(TWICE);
-  });
-
-  it("should count only the games that were actually drawn", () => {
-    const mixed = appearing(
-      DIMA,
-      { round: NOTHING, finish: Finish.Fool },
-      { round: ONCE, finish: Finish.First },
-      { round: TWICE, finish: Finish.Drawn }
-    );
-    const award = theTruce(sessionAppearances([mixed]));
-
-    expect(award?.name === AwardName.TheTruce ? award.draws : NOTHING).toBe(ONCE);
-  });
-});
-
 describe("theIrishGoodbye()", () => {
-  const SLIPPED_AWAY = appearing(
-    VERONIKA,
-    { round: NOTHING, finish: Finish.First },
-    { round: ONCE, finish: Finish.Fool },
-    { round: SEVEN, finish: Finish.Middle }
-  );
+  const SLIPPED_AWAY = playerAppearing(VERONIKA, [
+    appearanceOf(NOTHING, Finish.First),
+    appearanceOf(ONCE, Finish.Fool),
+    appearanceOf(SEVEN, Finish.Middle),
+  ]);
 
-  const LEFT_BEATEN = appearing(
-    VERONIKA,
-    { round: NOTHING, finish: Finish.First },
-    { round: ONCE, finish: Finish.Middle },
-    { round: SEVEN, finish: Finish.Fool }
-  );
+  const LEFT_BEATEN = playerAppearing(VERONIKA, [
+    appearanceOf(NOTHING, Finish.First),
+    appearanceOf(ONCE, Finish.Middle),
+    appearanceOf(SEVEN, Finish.Fool),
+  ]);
 
-  const NEVER_SAT_DOWN = appearing(DIMA);
-
-  const meritGiven = (): Merit => bestBySpy.mock.calls[NOTHING]?.[ONCE] as Merit;
+  const NEVER_SAT_DOWN = playerAppearing(DIMA, []);
 
   it("should award nothing when the ranking found nobody", () => {
-    expect(theIrishGoodbye(sessionAppearances([SLIPPED_AWAY]))).toBeNull();
+    expect(theIrishGoodbye(eveningFor([SLIPPED_AWAY]))).toBeNull();
   });
 
   it("should report the game they left after, counted from one", () => {
     bestBySpy.mockReturnValue(SLIPPED_AWAY);
     lastRoundOfSpy.mockReturnValue(SEVEN);
-    const award = theIrishGoodbye(sessionAppearances([SLIPPED_AWAY]));
+    const award = theIrishGoodbye(eveningFor([SLIPPED_AWAY]));
 
     expect(award?.name === AwardName.TheIrishGoodbye ? [award.leftAfter, award.games] : []).toEqual([
       EIGHT,
@@ -204,31 +161,221 @@ describe("theIrishGoodbye()", () => {
 
   describe("who is eligible", () => {
     it("should prefer whoever left earliest", () => {
-      theIrishGoodbye(sessionAppearances([SLIPPED_AWAY]));
+      theIrishGoodbye(eveningFor([SLIPPED_AWAY]));
       lastRoundOfSpy.mockReturnValue(SEVEN);
 
       expect(meritGiven()(SLIPPED_AWAY)).toBe(-SEVEN);
     });
 
     it("should refuse somebody who was still there for the last game", () => {
-      theIrishGoodbye(sessionAppearances([SLIPPED_AWAY]));
+      theIrishGoodbye(eveningFor([SLIPPED_AWAY]));
       lastRoundOfSpy.mockReturnValue(NINETEEN - ONCE);
 
       expect(meritGiven()(SLIPPED_AWAY)).toBeNull();
     });
 
     it("should refuse somebody whose last game left them the fool", () => {
-      theIrishGoodbye(sessionAppearances([LEFT_BEATEN]));
+      theIrishGoodbye(eveningFor([LEFT_BEATEN]));
       lastRoundOfSpy.mockReturnValue(SEVEN);
 
       expect(meritGiven()(LEFT_BEATEN)).toBeNull();
     });
 
     it("should refuse somebody who never played at all", () => {
-      theIrishGoodbye(sessionAppearances([NEVER_SAT_DOWN]));
+      theIrishGoodbye(eveningFor([NEVER_SAT_DOWN]));
       lastRoundOfSpy.mockReturnValue(null);
 
       expect(meritGiven()(NEVER_SAT_DOWN)).toBeNull();
+    });
+  });
+});
+
+describe("revolvingDoor()", () => {
+  const WENT_AND_CAME_BACK = playerAppearing(DIMA, [
+    appearanceOf(NOTHING, Finish.First),
+    appearanceOf(ONCE, Finish.Middle),
+    appearanceOf(TEN, Finish.Middle),
+  ]);
+
+  const NEVER_LEFT = playerAppearing(DIMA, [
+    appearanceOf(NOTHING, Finish.First),
+    appearanceOf(ONCE, Finish.Middle),
+    appearanceOf(TWICE, Finish.Middle),
+  ]);
+
+  const MISSED_ONE = playerAppearing(DIMA, [
+    appearanceOf(NOTHING, Finish.First),
+    appearanceOf(TWICE, Finish.Middle),
+  ]);
+
+  it("should award nothing when the ranking found nobody", () => {
+    expect(revolvingDoor(eveningFor([WENT_AND_CAME_BACK]))).toBeNull();
+  });
+
+  it("should report the games missed inside their own stretch of the evening", () => {
+    bestBySpy.mockReturnValue(WENT_AND_CAME_BACK);
+    firstRoundOfSpy.mockReturnValue(NOTHING);
+    lastRoundOfSpy.mockReturnValue(TEN);
+    playedGamesSpy.mockReturnValue(THRICE);
+    const award = revolvingDoor(eveningFor([WENT_AND_CAME_BACK]));
+
+    expect(award?.name === AwardName.RevolvingDoor ? [award.missed, award.games] : []).toEqual([
+      EIGHT,
+      THRICE,
+    ]);
+  });
+
+  it("should name the player who came back", () => {
+    bestBySpy.mockReturnValue(WENT_AND_CAME_BACK);
+
+    expect(revolvingDoor(eveningFor([WENT_AND_CAME_BACK]))?.winners).toEqual([DIMA]);
+  });
+
+  it("should report nothing missed for somebody whose stretch cannot be measured", () => {
+    bestBySpy.mockReturnValue(WENT_AND_CAME_BACK);
+    firstRoundOfSpy.mockReturnValue(null);
+    const award = revolvingDoor(eveningFor([WENT_AND_CAME_BACK]));
+
+    expect(award?.name === AwardName.RevolvingDoor ? award.missed : ONCE).toBe(NOTHING);
+  });
+
+  describe("who is eligible", () => {
+    it("should rank a player by their widest absence", () => {
+      revolvingDoor(eveningFor([WENT_AND_CAME_BACK]));
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES);
+
+      expect(meritGiven()(WENT_AND_CAME_BACK)).toBe(EIGHT);
+    });
+
+    it("should refuse a player who never missed a game in their stretch", () => {
+      revolvingDoor(eveningFor([NEVER_LEFT]));
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES);
+
+      expect(meritGiven()(NEVER_LEFT)).toBeNull();
+    });
+
+    it("should refuse a single missed game, which is not going home", () => {
+      revolvingDoor(eveningFor([MISSED_ONE]));
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES);
+
+      expect(meritGiven()(MISSED_ONE)).toBeNull();
+    });
+
+    it("should refuse a player one game short", () => {
+      revolvingDoor(eveningFor([WENT_AND_CAME_BACK]));
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES - ONCE);
+
+      expect(meritGiven()(WENT_AND_CAME_BACK)).toBeNull();
+    });
+  });
+});
+
+describe("theLatecomer()", () => {
+  const LATE = playerAppearing(VERONIKA, [appearanceOf(THRICE, Finish.First)], JUST_ABOVE_MOCKED);
+
+  it("should award nothing when the ranking found nobody", () => {
+    expect(theLatecomer(eveningFor([LATE]))).toBeNull();
+  });
+
+  it("should report the game they arrived at, counted from one", () => {
+    bestBySpy.mockReturnValue(LATE);
+    firstRoundOfSpy.mockReturnValue(THRICE);
+    const award = theLatecomer(eveningFor([LATE]));
+
+    expect(award?.name === AwardName.TheLatecomer ? award.joinedAt : NOTHING).toBe(THRICE + ONCE);
+  });
+
+  it("should name the player who arrived late", () => {
+    bestBySpy.mockReturnValue(LATE);
+    firstRoundOfSpy.mockReturnValue(THRICE);
+
+    expect(theLatecomer(eveningFor([LATE]))?.winners).toEqual([VERONIKA]);
+  });
+
+  it("should report the share they reached as a percentage", () => {
+    bestBySpy.mockReturnValue(LATE);
+    firstRoundOfSpy.mockReturnValue(THRICE);
+    const award = theLatecomer(eveningFor([LATE]));
+
+    expect(award?.name === AwardName.TheLatecomer ? award.percent : NOTHING).toBe(
+      Math.round(JUST_ABOVE_MOCKED * PERCENT_POINTS)
+    );
+  });
+
+  describe("who is eligible", () => {
+    beforeEach(() => {
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES);
+      firstRoundOfSpy.mockReturnValue(THRICE);
+    });
+
+    it("should rank a late arrival by the share they reached", () => {
+      theLatecomer(eveningFor([LATE]));
+
+      expect(meritGiven()(LATE)).toBe(JUST_ABOVE_MOCKED);
+    });
+
+    it("should measure mid-table against the scoring's own neutral, not its own number", () => {
+      const BELOW = playerAppearing(VERONIKA, LATE.appearances, JUST_BELOW_MOCKED);
+      theLatecomer(eveningFor([BELOW]));
+
+      expect(meritGiven()(BELOW)).toBeNull();
+    });
+
+    it("should refuse somebody who was there from the third game", () => {
+      theLatecomer(eveningFor([LATE]));
+      firstRoundOfSpy.mockReturnValue(THRICE - ONCE);
+
+      expect(meritGiven()(LATE)).toBeNull();
+    });
+
+    it("should refuse somebody who never played", () => {
+      theLatecomer(eveningFor([LATE]));
+      firstRoundOfSpy.mockReturnValue(null);
+
+      expect(meritGiven()(LATE)).toBeNull();
+    });
+  });
+});
+
+describe("theCameo()", () => {
+  it("should not even look for a winner in a short evening", () => {
+    theCameo(eveningFor([SOMEBODY], LONG_ENOUGH - ONCE));
+
+    expect(soleBySpy).not.toHaveBeenCalled();
+  });
+
+  it("should report the evening the one game was lost in", () => {
+    soleBySpy.mockReturnValue(SOMEBODY);
+    const award = theCameo(eveningFor([SOMEBODY], NINETEEN));
+
+    expect(award?.name === AwardName.TheCameo ? award.games : NOTHING).toBe(NINETEEN);
+  });
+
+  it("should name the player who only looked in", () => {
+    soleBySpy.mockReturnValue(SOMEBODY);
+
+    expect(theCameo(eveningFor([SOMEBODY], NINETEEN))?.winners).toEqual([DIMA]);
+  });
+
+  it("should look for a winner in an evening of exactly the long-enough length", () => {
+    theCameo(eveningFor([SOMEBODY], LONG_ENOUGH));
+
+    expect(soleBySpy).toHaveBeenCalled();
+  });
+
+  describe("who qualifies", () => {
+    it("should accept a player who sat exactly one game", () => {
+      theCameo(eveningFor([SOMEBODY], NINETEEN));
+      playedGamesSpy.mockReturnValue(ONCE);
+
+      expect(qualifierGiven()(SOMEBODY)).toBe(true);
+    });
+
+    it("should refuse a player who stayed for two", () => {
+      theCameo(eveningFor([SOMEBODY], NINETEEN));
+      playedGamesSpy.mockReturnValue(TWICE);
+
+      expect(qualifierGiven()(SOMEBODY)).toBe(false);
     });
   });
 });
@@ -237,12 +384,12 @@ describe("firstBlood()", () => {
   it("should award nothing when the first game was drawn", () => {
     foolByRoundSpy.mockReturnValue([null, DIMA]);
 
-    expect(firstBlood(sessionAppearances([SOMEBODY]))).toBeNull();
+    expect(firstBlood(eveningFor([SOMEBODY]))).toBeNull();
   });
 
   it("should name the fool of the very first game, not of a later one", () => {
     foolByRoundSpy.mockReturnValue([VERONIKA, DIMA]);
-    const award = firstBlood(sessionAppearances([SOMEBODY]));
+    const award = firstBlood(eveningFor([SOMEBODY]));
 
     expect(award?.name === AwardName.FirstBlood ? [award.winners, award.games] : []).toEqual([
       [VERONIKA],

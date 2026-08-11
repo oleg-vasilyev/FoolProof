@@ -27,6 +27,7 @@ const HIGH_ID = 7;
 const playerOf = (playerId: number, share = NOTHING): PlayerAppearances => ({
   playerId,
   share,
+  running: [],
   appearances: [],
 });
 

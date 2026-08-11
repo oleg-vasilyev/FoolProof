@@ -3,17 +3,22 @@ import { LOCALES, Locale } from "#shared/locale/locales.ts";
 import { copy as english } from "#scoresheet/copy.en.ts";
 import { copy as russian } from "#scoresheet/copy.ru.ts";
 import { copyIn, type Copy } from "#scoresheet/copy.ts";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 
 
 const ONE = 1;
 
 const TWO = 2;
 
-const AWARDS_IN_THE_CATALOGUE = 13;
+const AWARDS_IN_THE_CATALOGUE = Object.keys(AwardName).length;
 
 const MONTHS_IN_YEAR = 12;
 
 const MARKER = "«marker»";
+
+const A_TALLY = "19 games";
+
+const A_HEADCOUNT = "5 players";
 
 const reasonsOf = (copy: Copy): readonly (readonly [string, string])[] => {
   const FIFTY_ONE = 51;
@@ -21,20 +26,45 @@ const reasonsOf = (copy: Copy): readonly (readonly [string, string])[] => {
   const EIGHT = 8;
 
   return [
-    ["king", copy.kingReason(FIFTY_ONE, "18 games")],
-    ["untouchable", copy.untouchableReason("11 games")],
+    ["king", copy.kingReason(FIFTY_ONE, A_TALLY)],
+    ["wireToWire", copy.wireToWireReason(A_TALLY)],
+    ["theFavourite", copy.favouriteReason(EIGHT, A_TALLY)],
+    ["hatTrick", copy.hatTrickReason(EIGHT)],
+    ["homeAdvantage", copy.homeAdvantageReason(EIGHT, TWO)],
+    ["untouchable", copy.untouchableReason(A_TALLY)],
     ["teflon", copy.teflonReason(EIGHT)],
+    ["hotSeat", copy.hotSeatReason(EIGHT)],
+    ["theComeback", copy.comebackReason(TWO, FIFTY_ONE)],
+    ["theLadder", copy.ladderReason(EIGHT)],
     ["sweetRevenge", copy.sweetRevengeReason(FIFTY_ONE, EIGHT)],
-    ["ironSeat", copy.ironSeatReason("19 games")],
-    ["theTruce", copy.truceReason("1 game", "19 games")],
-    ["allOrNothing", copy.allOrNothingReason(EIGHT, "18 games")],
-    ["theInvisible", copy.invisibleReason(EIGHT, "17 games")],
-    ["theIrishGoodbye", copy.irishGoodbyeReason(EIGHT, "19 games")],
-    ["encore", copy.encoreReason(TWO)],
+    ["fullHouse", copy.fullHouseReason(A_HEADCOUNT, A_TALLY)],
+    ["ironSeat", copy.ironSeatReason(A_TALLY)],
+    ["theRotation", copy.rotationReason(A_HEADCOUNT, A_TALLY)],
+    ["theTruce", copy.truceReason(TWO, A_TALLY)],
+    ["thePacifist", copy.pacifistReason(A_TALLY)],
+    ["theNemesis", copy.nemesisReason(A_TALLY)],
+    ["theDoorman", copy.doormanReason(EIGHT, A_TALLY)],
+    ["neverAsked", copy.neverAskedReason(A_TALLY)],
+    ["theLatecomer", copy.latecomerReason(EIGHT, FIFTY_ONE)],
+    ["revolvingDoor", copy.revolvingDoorReason(A_TALLY, A_TALLY)],
+    ["theCameo", copy.cameoReason(A_TALLY)],
+    ["secondWind", copy.secondWindReason(TWO, A_TALLY)],
+    ["theUnderstudy", copy.understudyReason(EIGHT, A_TALLY)],
+    ["theFlatline", copy.flatlineReason(TWO, A_TALLY)],
+    ["theInvisible", copy.invisibleReason(EIGHT, A_TALLY)],
+    ["groundhogDay", copy.groundhogReason(TWO, EIGHT)],
+    ["thePendulum", copy.pendulumReason(EIGHT)],
+    ["theRollercoaster", copy.rollercoasterReason(FIFTY_ONE, A_TALLY)],
+    ["allOrNothing", copy.allOrNothingReason(EIGHT, A_TALLY)],
+    ["theIrishGoodbye", copy.irishGoodbyeReason(EIGHT, A_TALLY)],
+    ["theAnchor", copy.anchorReason(A_TALLY)],
+    ["theSlide", copy.slideReason(EIGHT)],
+    ["falseDawn", copy.falseDawnReason(EIGHT, FIFTY_ONE)],
     ["openersCurse", copy.openersCurseReason(FIFTY_ONE, TWO)],
-    ["firstBlood", copy.firstBloodReason("19 games")],
-    ["foolOfTheNight", copy.foolReason(TWO, "15 games")],
-    ["curse", copy.curseFact(EIGHT, "19 games")],
+    ["encore", copy.encoreReason(TWO)],
+    ["firstBlood", copy.firstBloodReason(A_TALLY)],
+    ["foolOfTheNight", copy.foolReason(TWO, A_TALLY)],
+    ["curse", copy.curseFact(EIGHT, A_TALLY)],
   ];
 };
 
@@ -194,8 +224,8 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
     it("should print the finished tally it was handed rather than a bare number", () => {
       const FIFTY_ONE = 51;
 
-      expect(copy.kingReason(FIFTY_ONE, "18 games")).toContain("18 games");
-      expect(copy.truceReason("1 game", "19 games")).toContain("1 game");
+      expect(copy.kingReason(FIFTY_ONE, A_TALLY)).toContain(A_TALLY);
+      expect(copy.pacifistReason(A_TALLY)).toContain(A_TALLY);
     });
 
     it("should print both of the numbers an award was given two of", () => {

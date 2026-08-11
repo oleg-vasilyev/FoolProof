@@ -5,8 +5,11 @@ import { copy } from "#scoresheet/copy.en.ts";
 
 const gameTallySpy = vi.fn();
 
+const playerTallySpy = vi.fn();
+
 vi.mock("#scoresheet/render/session-tally.ts", () => ({
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
+  playerTally: (table: unknown, players: number) => playerTallySpy(table, players),
 }));
 
 const { awardReason, awardTitle, awardWinner } = await import(
@@ -15,18 +18,73 @@ const { awardReason, awardTitle, awardWinner } = await import(
 
 const tallyOf = (games: number): string => `tally(${String(games)})`;
 
+const headcountOf = (players: number): string => `heads(${String(players)})`;
+
 const WINNER = 1;
+
+const FIRST_FACT = 101;
+
+const SECOND_FACT = 40;
+
+const NAMES: readonly AwardName[] = Object.values(AwardName);
+
+const oneOf = (name: AwardName): number => NAMES.indexOf(name) + FIRST_FACT;
+
+const twoOf = (name: AwardName): number => oneOf(name) + SECOND_FACT;
+
+const SAMPLES: readonly Award[] = [
+  { name: AwardName.King, winners: [WINNER], percent: oneOf(AwardName.King), games: twoOf(AwardName.King) },
+  { name: AwardName.WireToWire, winners: [WINNER], games: oneOf(AwardName.WireToWire) },
+  { name: AwardName.TheFavourite, winners: [WINNER], firsts: oneOf(AwardName.TheFavourite), games: twoOf(AwardName.TheFavourite) },
+  { name: AwardName.HatTrick, winners: [WINNER], run: oneOf(AwardName.HatTrick) },
+  { name: AwardName.HomeAdvantage, winners: [WINNER], wins: oneOf(AwardName.HomeAdvantage), opens: twoOf(AwardName.HomeAdvantage) },
+  { name: AwardName.Untouchable, winners: [WINNER], games: oneOf(AwardName.Untouchable) },
+  { name: AwardName.Teflon, winners: [WINNER], streak: oneOf(AwardName.Teflon) },
+  { name: AwardName.HotSeat, winners: [WINNER], opens: oneOf(AwardName.HotSeat) },
+  { name: AwardName.TheComeback, winners: [WINNER], percent: oneOf(AwardName.TheComeback), sank: twoOf(AwardName.TheComeback) },
+  { name: AwardName.TheLadder, winners: [WINNER], run: oneOf(AwardName.TheLadder) },
+  { name: AwardName.SweetRevenge, winners: [WINNER], fools: oneOf(AwardName.SweetRevenge), comebacks: twoOf(AwardName.SweetRevenge) },
+  { name: AwardName.FullHouse, winners: [WINNER], players: oneOf(AwardName.FullHouse), games: twoOf(AwardName.FullHouse) },
+  { name: AwardName.IronSeat, winners: [WINNER], games: oneOf(AwardName.IronSeat) },
+  { name: AwardName.TheRotation, winners: [WINNER], players: oneOf(AwardName.TheRotation), games: twoOf(AwardName.TheRotation) },
+  { name: AwardName.TheTruce, winners: [WINNER], draws: oneOf(AwardName.TheTruce), games: twoOf(AwardName.TheTruce) },
+  { name: AwardName.ThePacifist, winners: [WINNER], draws: oneOf(AwardName.ThePacifist) },
+  { name: AwardName.TheNemesis, winners: [WINNER], over: oneOf(AwardName.TheNemesis) },
+  { name: AwardName.TheDoorman, winners: [WINNER], opens: oneOf(AwardName.TheDoorman), games: twoOf(AwardName.TheDoorman) },
+  { name: AwardName.NeverAsked, winners: [WINNER], games: oneOf(AwardName.NeverAsked) },
+  { name: AwardName.TheLatecomer, winners: [WINNER], joinedAt: oneOf(AwardName.TheLatecomer), percent: twoOf(AwardName.TheLatecomer) },
+  { name: AwardName.RevolvingDoor, winners: [WINNER], missed: oneOf(AwardName.RevolvingDoor), games: twoOf(AwardName.RevolvingDoor) },
+  { name: AwardName.TheCameo, winners: [WINNER], games: oneOf(AwardName.TheCameo) },
+  { name: AwardName.SecondWind, winners: [WINNER], burnedBy: oneOf(AwardName.SecondWind), games: twoOf(AwardName.SecondWind) },
+  { name: AwardName.TheUnderstudy, winners: [WINNER], seconds: oneOf(AwardName.TheUnderstudy), games: twoOf(AwardName.TheUnderstudy) },
+  { name: AwardName.TheFlatline, winners: [WINNER], band: oneOf(AwardName.TheFlatline), games: twoOf(AwardName.TheFlatline) },
+  { name: AwardName.TheInvisible, winners: [WINNER], middles: oneOf(AwardName.TheInvisible), games: twoOf(AwardName.TheInvisible) },
+  { name: AwardName.GroundhogDay, winners: [WINNER], place: oneOf(AwardName.GroundhogDay), run: twoOf(AwardName.GroundhogDay) },
+  { name: AwardName.ThePendulum, winners: [WINNER], run: oneOf(AwardName.ThePendulum) },
+  { name: AwardName.TheRollercoaster, winners: [WINNER], swing: oneOf(AwardName.TheRollercoaster), games: twoOf(AwardName.TheRollercoaster) },
+  { name: AwardName.AllOrNothing, winners: [WINNER], edges: oneOf(AwardName.AllOrNothing), games: twoOf(AwardName.AllOrNothing) },
+  { name: AwardName.TheIrishGoodbye, winners: [WINNER], leftAfter: oneOf(AwardName.TheIrishGoodbye), games: twoOf(AwardName.TheIrishGoodbye) },
+  { name: AwardName.TheAnchor, winners: [WINNER], games: oneOf(AwardName.TheAnchor) },
+  { name: AwardName.TheSlide, winners: [WINNER], run: oneOf(AwardName.TheSlide) },
+  { name: AwardName.FalseDawn, winners: [WINNER], ledAt: oneOf(AwardName.FalseDawn), percent: twoOf(AwardName.FalseDawn) },
+  { name: AwardName.OpenersCurse, winners: [WINNER], opens: oneOf(AwardName.OpenersCurse), burns: twoOf(AwardName.OpenersCurse) },
+  { name: AwardName.Encore, winners: [WINNER], run: oneOf(AwardName.Encore) },
+  { name: AwardName.FirstBlood, winners: [WINNER], games: oneOf(AwardName.FirstBlood) },
+  { name: AwardName.FoolOfTheNight, winners: [WINNER], fools: oneOf(AwardName.FoolOfTheNight), games: twoOf(AwardName.FoolOfTheNight) },
+];
+
+const factsIn = (award: Award): readonly number[] =>
+  Object.values(award).filter((fact): fact is number => typeof fact === "number");
 
 describe("award-lines", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
     gameTallySpy.mockImplementation((_table: unknown, games: number) => tallyOf(games));
+    playerTallySpy.mockImplementation((_table: unknown, players: number) => headcountOf(players));
   });
 
   describe("awardTitle()", () => {
-    const NAMES: readonly AwardName[] = Object.values(AwardName);
-
     it.each(NAMES)("should look up %s in the copy table", (name) => {
       const award = { name, winners: [WINNER] } as unknown as Award;
 
@@ -47,167 +105,79 @@ describe("award-lines", () => {
   });
 
   describe("awardReason()", () => {
-    it("should give the king their percent and a tally of the games", () => {
-      const PERCENT = 62;
-      const GAMES = 9;
-      const award: Award = { name: AwardName.King, winners: [WINNER], percent: PERCENT, games: GAMES };
+    it("should have a sample for every award the catalogue names", () => {
+      expect(SAMPLES.map((award) => award.name).sort()).toEqual([...NAMES].sort());
+    });
 
+    it.each(SAMPLES)("should print every fact $name was earned on", (award) => {
       const reason = awardReason(copy, award);
 
-      expect(reason).toContain(String(PERCENT));
-      expect(reason).toContain(tallyOf(GAMES));
-      expect(gameTallySpy).toHaveBeenCalledWith(copy, GAMES);
+      for (const fact of factsIn(award)) {
+        expect(reason, String(fact)).toContain(String(fact));
+      }
+    });
+
+    it("should give every award a justification of its own", () => {
+      const reasons = SAMPLES.map((award) => awardReason(copy, award));
+
+      expect(new Set(reasons).size).toBe(SAMPLES.length);
+    });
+
+    it.each(SAMPLES)("should route $name to a justification that fits its facts", (award) => {
+      expect(awardReason(copy, award)).not.toContain("undefined");
     });
 
     it("should give the untouchable a tally of the games, not the raw count", () => {
-      const GAMES = 6;
-      const award: Award = { name: AwardName.Untouchable, winners: [WINNER], games: GAMES };
-
-      const reason = awardReason(copy, award);
-
-      expect(reason).toContain(tallyOf(GAMES));
-      expect(reason).not.toContain(`${String(GAMES)} games`);
-    });
-
-    it("should give teflon their raw streak, with no tally involved", () => {
-      const STREAK = 7;
-      const award: Award = { name: AwardName.Teflon, winners: [WINNER], streak: STREAK };
-
-      const reason = awardReason(copy, award);
-
-      expect(reason).toContain(String(STREAK));
-      expect(gameTallySpy).not.toHaveBeenCalled();
-    });
-
-    it("should give sweet revenge the raw fools and comebacks, with no tally involved", () => {
-      const FOOLS = 3;
-      const COMEBACKS = 2;
       const award: Award = {
-        name: AwardName.SweetRevenge,
+        name: AwardName.Untouchable,
         winners: [WINNER],
-        fools: FOOLS,
-        comebacks: COMEBACKS,
+        games: oneOf(AwardName.Untouchable),
       };
 
       const reason = awardReason(copy, award);
 
-      expect(reason).toContain(String(FOOLS));
-      expect(reason).toContain(String(COMEBACKS));
+      expect(reason).toContain(tallyOf(oneOf(AwardName.Untouchable)));
+      expect(gameTallySpy).toHaveBeenCalledWith(copy, oneOf(AwardName.Untouchable));
+    });
+
+    it("should give teflon its raw streak, with no tally involved", () => {
+      awardReason(copy, {
+        name: AwardName.Teflon,
+        winners: [WINNER],
+        streak: oneOf(AwardName.Teflon),
+      });
+
       expect(gameTallySpy).not.toHaveBeenCalled();
     });
 
-    it("should give iron seat a tally of the games", () => {
-      const GAMES = 11;
-      const award: Award = { name: AwardName.IronSeat, winners: [WINNER], games: GAMES };
-
-      const reason = awardReason(copy, award);
-
-      expect(reason).toContain(tallyOf(GAMES));
-      expect(gameTallySpy).toHaveBeenCalledWith(copy, GAMES);
-    });
-
-    it("should give the truce a tally of both the draws and the games", () => {
-      const DRAWS = 2;
-      const GAMES = 8;
-      const award: Award = { name: AwardName.TheTruce, winners: [WINNER], draws: DRAWS, games: GAMES };
-
-      const reason = awardReason(copy, award);
-
-      expect(reason).toContain(tallyOf(DRAWS));
-      expect(reason).toContain(tallyOf(GAMES));
-      expect(gameTallySpy).toHaveBeenCalledWith(copy, DRAWS);
-      expect(gameTallySpy).toHaveBeenCalledWith(copy, GAMES);
-    });
-
-    it("should give all or nothing the raw edges and a tally of the games", () => {
-      const EDGES = 4;
-      const GAMES = 10;
-      const award: Award = { name: AwardName.AllOrNothing, winners: [WINNER], edges: EDGES, games: GAMES };
-
-      const reason = awardReason(copy, award);
-
-      expect(reason).toContain(String(EDGES));
-      expect(reason).toContain(tallyOf(GAMES));
-    });
-
-    it("should give the invisible the raw middles and a tally of the games", () => {
-      const MIDDLES = 5;
-      const GAMES = 12;
+    it("should give the truce its draws raw and tally only the games", () => {
       const award: Award = {
-        name: AwardName.TheInvisible,
+        name: AwardName.TheTruce,
         winners: [WINNER],
-        middles: MIDDLES,
-        games: GAMES,
+        draws: oneOf(AwardName.TheTruce),
+        games: twoOf(AwardName.TheTruce),
       };
 
       const reason = awardReason(copy, award);
 
-      expect(reason).toContain(String(MIDDLES));
-      expect(reason).toContain(tallyOf(GAMES));
+      expect(reason).toContain(tallyOf(twoOf(AwardName.TheTruce)));
+      expect(reason).not.toContain(tallyOf(oneOf(AwardName.TheTruce)));
+      expect(gameTallySpy).toHaveBeenCalledTimes(1);
     });
 
-    it("should give the irish goodbye the raw departure game and a tally of the games", () => {
-      const LEFT_AFTER = 3;
-      const GAMES = 9;
+    it("should count a full house in players rather than in games", () => {
       const award: Award = {
-        name: AwardName.TheIrishGoodbye,
+        name: AwardName.FullHouse,
         winners: [WINNER],
-        leftAfter: LEFT_AFTER,
-        games: GAMES,
+        players: oneOf(AwardName.FullHouse),
+        games: twoOf(AwardName.FullHouse),
       };
 
       const reason = awardReason(copy, award);
 
-      expect(reason).toContain(String(LEFT_AFTER));
-      expect(reason).toContain(tallyOf(GAMES));
-    });
-
-    it("should give encore the raw run, with no tally involved", () => {
-      const RUN = 4;
-      const award: Award = { name: AwardName.Encore, winners: [WINNER], run: RUN };
-
-      const reason = awardReason(copy, award);
-
-      expect(reason).toContain(String(RUN));
-      expect(gameTallySpy).not.toHaveBeenCalled();
-    });
-
-    it("should give the opener's curse the raw opens and burns, with no tally involved", () => {
-      const OPENS = 6;
-      const BURNS = 2;
-      const award: Award = { name: AwardName.OpenersCurse, winners: [WINNER], opens: OPENS, burns: BURNS };
-
-      const reason = awardReason(copy, award);
-
-      expect(reason).toContain(String(OPENS));
-      expect(reason).toContain(String(BURNS));
-      expect(gameTallySpy).not.toHaveBeenCalled();
-    });
-
-    it("should give first blood a tally of the games", () => {
-      const GAMES = 5;
-      const award: Award = { name: AwardName.FirstBlood, winners: [WINNER], games: GAMES };
-
-      const reason = awardReason(copy, award);
-
-      expect(reason).toContain(tallyOf(GAMES));
-      expect(gameTallySpy).toHaveBeenCalledWith(copy, GAMES);
-    });
-
-    it("should give fool of the night the raw fool count and a tally of the games", () => {
-      const FOOLS = 4;
-      const GAMES = 9;
-      const award: Award = {
-        name: AwardName.FoolOfTheNight,
-        winners: [WINNER],
-        fools: FOOLS,
-        games: GAMES,
-      };
-
-      const reason = awardReason(copy, award);
-
-      expect(reason).toContain(String(FOOLS));
-      expect(reason).toContain(tallyOf(GAMES));
+      expect(reason).toContain(headcountOf(oneOf(AwardName.FullHouse)));
+      expect(playerTallySpy).toHaveBeenCalledWith(copy, oneOf(AwardName.FullHouse));
+      expect(gameTallySpy).toHaveBeenCalledWith(copy, twoOf(AwardName.FullHouse));
     });
   });
 });

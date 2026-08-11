@@ -208,6 +208,27 @@ export class CardServiceStub {
 }
 ```
 
+## A catalogue is tested with a table, not with a case each
+
+When the subject switches over a closed set that is going to grow — the award
+catalogue, the locales, anything read out of a `const … as const` table — do not
+write one `it` per member. Build a table of samples in the spec, drive it with
+`it.each`, and add **one case asserting the table covers the union**:
+
+```ts
+it("should have a sample for every award the catalogue names", () => {
+  expect(SAMPLES.map((award) => award.name).sort()).toEqual([...NAMES].sort());
+});
+```
+
+That case is the whole point: it turns "somebody forgot to test the new member"
+into a red test instead of a silent gap. Give each sample **values unique to it**
+and add a case asserting the outputs are all distinct — otherwise a `switch` arm
+falling through to its neighbour still produces something plausible and survives.
+Growing the awards from thirteen to thirty-eight is what made this a rule: the
+thirteen hand-written cases would have become thirty-eight, and the four that were
+missing would not have been visible.
+
 ## Shape of the file
 
 - Nest `describe` by unit, then by method.

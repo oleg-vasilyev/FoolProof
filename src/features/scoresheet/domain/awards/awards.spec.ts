@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Mock } from "vitest";
+import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 
 
@@ -8,51 +10,83 @@ vi.mock("#scoresheet/domain/session-appearances.ts", () => ({
   sessionAppearances: (chronology: unknown) => eveningOfSpy(chronology),
 }));
 
-const ruleSpies = {
-  king: vi.fn(),
-  untouchable: vi.fn(),
-  teflon: vi.fn(),
-  sweetRevenge: vi.fn(),
-  ironSeat: vi.fn(),
-  theTruce: vi.fn(),
-  allOrNothing: vi.fn(),
-  theInvisible: vi.fn(),
-  theIrishGoodbye: vi.fn(),
-  openersCurse: vi.fn(),
-  encore: vi.fn(),
-  firstBlood: vi.fn(),
-  foolOfTheNight: vi.fn(),
-};
+type RuleSpy = Mock<(evening: unknown) => unknown>;
+
+const ruleSpies: Record<AwardName, RuleSpy> = Object.fromEntries(
+  Object.values(AwardName).map((name) => [name, vi.fn()])
+) as Record<AwardName, RuleSpy>;
 
 const tableCurseSpy = vi.fn();
 
+const ruleFor =
+  (name: AwardName) =>
+  (evening: unknown): unknown =>
+    ruleSpies[name](evening);
+
 vi.mock("#scoresheet/domain/awards/share-awards.ts", () => ({
-  kingOfTheTable: (evening: unknown) => ruleSpies.king(evening),
-  foolOfTheNight: (evening: unknown) => ruleSpies.foolOfTheNight(evening),
+  kingOfTheTable: ruleFor(AwardName.King),
+  foolOfTheNight: ruleFor(AwardName.FoolOfTheNight),
 }));
 
 vi.mock("#scoresheet/domain/awards/position-awards.ts", () => ({
-  untouchable: (evening: unknown) => ruleSpies.untouchable(evening),
-  allOrNothing: (evening: unknown) => ruleSpies.allOrNothing(evening),
-  theInvisible: (evening: unknown) => ruleSpies.theInvisible(evening),
+  untouchable: ruleFor(AwardName.Untouchable),
+  theFavourite: ruleFor(AwardName.TheFavourite),
+  theUnderstudy: ruleFor(AwardName.TheUnderstudy),
+  theAnchor: ruleFor(AwardName.TheAnchor),
+  allOrNothing: ruleFor(AwardName.AllOrNothing),
+  theInvisible: ruleFor(AwardName.TheInvisible),
 }));
 
 vi.mock("#scoresheet/domain/awards/streak-awards.ts", () => ({
-  teflon: (evening: unknown) => ruleSpies.teflon(evening),
-  sweetRevenge: (evening: unknown) => ruleSpies.sweetRevenge(evening),
-  encore: (evening: unknown) => ruleSpies.encore(evening),
+  teflon: ruleFor(AwardName.Teflon),
+  sweetRevenge: ruleFor(AwardName.SweetRevenge),
+  encore: ruleFor(AwardName.Encore),
+  secondWind: ruleFor(AwardName.SecondWind),
 }));
 
 vi.mock("#scoresheet/domain/awards/attendance-awards.ts", () => ({
-  ironSeat: (evening: unknown) => ruleSpies.ironSeat(evening),
-  theTruce: (evening: unknown) => ruleSpies.theTruce(evening),
-  theIrishGoodbye: (evening: unknown) => ruleSpies.theIrishGoodbye(evening),
-  firstBlood: (evening: unknown) => ruleSpies.firstBlood(evening),
+  ironSeat: ruleFor(AwardName.IronSeat),
+  theIrishGoodbye: ruleFor(AwardName.TheIrishGoodbye),
+  revolvingDoor: ruleFor(AwardName.RevolvingDoor),
+  theLatecomer: ruleFor(AwardName.TheLatecomer),
+  theCameo: ruleFor(AwardName.TheCameo),
+  firstBlood: ruleFor(AwardName.FirstBlood),
 }));
 
 vi.mock("#scoresheet/domain/awards/opener-awards.ts", () => ({
-  openersCurse: (evening: unknown) => ruleSpies.openersCurse(evening),
+  openersCurse: ruleFor(AwardName.OpenersCurse),
+  hotSeat: ruleFor(AwardName.HotSeat),
+  theDoorman: ruleFor(AwardName.TheDoorman),
+  homeAdvantage: ruleFor(AwardName.HomeAdvantage),
+  neverAsked: ruleFor(AwardName.NeverAsked),
   tableCurse: (evening: unknown) => tableCurseSpy(evening),
+}));
+
+vi.mock("#scoresheet/domain/awards/run-awards.ts", () => ({
+  hatTrick: ruleFor(AwardName.HatTrick),
+  theLadder: ruleFor(AwardName.TheLadder),
+  theSlide: ruleFor(AwardName.TheSlide),
+  thePendulum: ruleFor(AwardName.ThePendulum),
+  groundhogDay: ruleFor(AwardName.GroundhogDay),
+}));
+
+vi.mock("#scoresheet/domain/awards/chart-awards.ts", () => ({
+  wireToWire: ruleFor(AwardName.WireToWire),
+  theRollercoaster: ruleFor(AwardName.TheRollercoaster),
+  theComeback: ruleFor(AwardName.TheComeback),
+  falseDawn: ruleFor(AwardName.FalseDawn),
+  theFlatline: ruleFor(AwardName.TheFlatline),
+}));
+
+vi.mock("#scoresheet/domain/awards/table-awards.ts", () => ({
+  theTruce: ruleFor(AwardName.TheTruce),
+  thePacifist: ruleFor(AwardName.ThePacifist),
+  theRotation: ruleFor(AwardName.TheRotation),
+  fullHouse: ruleFor(AwardName.FullHouse),
+}));
+
+vi.mock("#scoresheet/domain/awards/rivalry-awards.ts", () => ({
+  theNemesis: ruleFor(AwardName.TheNemesis),
 }));
 
 const { EVENING_MINIMUM, honoursFor } = await import("#scoresheet/domain/awards/awards.ts");
@@ -71,8 +105,8 @@ const SOME_EVENING = { rounds: NOTHING, players: [], starters: [] };
 
 const CURSE = { burns: ONCE, games: EVENING_MINIMUM };
 
-const awardOf = (name: Award["name"], winner = OLEG): Award =>
-  ({ name, winners: [winner], games: NOTHING, percent: NOTHING }) as Award;
+const awardOf = (name: AwardName, winner = OLEG): Award =>
+  ({ name, winners: [winner], games: NOTHING, percent: NOTHING }) as unknown as Award;
 
 const chronologyOf = (games: number) => ({
   startedOn: "2026-07-31",
@@ -86,10 +120,14 @@ const chronologyOf = (games: number) => ({
 
 const ENOUGH = chronologyOf(EVENING_MINIMUM);
 
-const everyRuleFires = (): void => {
-  for (const [name, spy] of Object.entries(ruleSpies)) {
-    spy.mockReturnValue(awardOf(name as Award["name"]));
+const fires = (...names: readonly AwardName[]): void => {
+  for (const name of names) {
+    ruleSpies[name].mockReturnValue(awardOf(name));
   }
+};
+
+const everyRuleFires = (): void => {
+  fires(...Object.values(AwardName));
 };
 
 const namesOf = (games = ENOUGH): readonly string[] =>
@@ -131,24 +169,22 @@ describe("honoursFor()", () => {
   });
 
   it("should leave out the rules that did not fire", () => {
-    ruleSpies.teflon.mockReturnValue(awardOf("teflon"));
+    fires(AwardName.Teflon);
 
-    expect(namesOf()).toEqual(["teflon"]);
+    expect(namesOf()).toEqual([AwardName.Teflon]);
   });
 
   it("should print the awards from glory to disgrace", () => {
-    ruleSpies.openersCurse.mockReturnValue(awardOf("openersCurse"));
-    ruleSpies.king.mockReturnValue(awardOf("king"));
-    ruleSpies.ironSeat.mockReturnValue(awardOf("ironSeat"));
+    fires(AwardName.OpenersCurse, AwardName.King, AwardName.IronSeat);
 
-    expect(namesOf()).toEqual(["king", "ironSeat", "openersCurse"]);
+    expect(namesOf()).toEqual([AwardName.King, AwardName.IronSeat, AwardName.OpenersCurse]);
   });
 
   it("should keep the fool of the night last, however early it was judged", () => {
-    ruleSpies.foolOfTheNight.mockReturnValue(awardOf("foolOfTheNight", ROMANI));
-    ruleSpies.king.mockReturnValue(awardOf("king"));
+    ruleSpies[AwardName.FoolOfTheNight].mockReturnValue(awardOf(AwardName.FoolOfTheNight, ROMANI));
+    fires(AwardName.King);
 
-    expect(namesOf()).toEqual(["king", "foolOfTheNight"]);
+    expect(namesOf()).toEqual([AwardName.King, AwardName.FoolOfTheNight]);
   });
 
   it("should hand over the table's own fact alongside the awards", () => {
@@ -164,55 +200,131 @@ describe("honoursFor()", () => {
       expect(namesOf()).toHaveLength(MOST_AWARDS);
     });
 
+    it("should keep the king of the table, common as it is", () => {
+      everyRuleFires();
+
+      expect(namesOf()[NOTHING]).toBe(AwardName.King);
+    });
+
     it("should keep the fool of the night even when the card is full", () => {
       everyRuleFires();
 
-      expect(namesOf().at(-ONCE)).toBe("foolOfTheNight");
+      expect(namesOf().at(-ONCE)).toBe(AwardName.FoolOfTheNight);
     });
 
-    it("should drop the tail of the catalogue rather than the head", () => {
+    it("should fill the free slots with the rarest of what fired", () => {
       everyRuleFires();
 
       expect(namesOf()).toEqual([
-        "king",
-        "untouchable",
-        "teflon",
-        "sweetRevenge",
-        "ironSeat",
-        "theTruce",
-        "allOrNothing",
-        "theInvisible",
-        "foolOfTheNight",
+        AwardName.King,
+        AwardName.TheComeback,
+        AwardName.TheLadder,
+        AwardName.FullHouse,
+        AwardName.TheCameo,
+        AwardName.TheFlatline,
+        AwardName.TheAnchor,
+        AwardName.FalseDawn,
+        AwardName.FoolOfTheNight,
       ]);
+    });
+
+    it("should drop the commonest of what fired rather than the last one judged", () => {
+      fires(
+        AwardName.King,
+        AwardName.FoolOfTheNight,
+        AwardName.Untouchable,
+        AwardName.TheFavourite,
+        AwardName.AllOrNothing,
+        AwardName.TheIrishGoodbye,
+        AwardName.TheTruce,
+        AwardName.HotSeat,
+        AwardName.TheInvisible,
+        AwardName.TheLadder
+      );
+
+      expect(namesOf()).toContain(AwardName.TheLadder);
+      expect(namesOf()).not.toContain(AwardName.Untouchable);
+    });
+
+    it("should still print the rarest in the catalogue's order, not in the rarity order", () => {
+      fires(AwardName.TheLadder, AwardName.Untouchable);
+
+      expect(namesOf()).toEqual([AwardName.Untouchable, AwardName.TheLadder]);
     });
 
     it("should still print nine when there is no fool of the night to pin", () => {
       everyRuleFires();
-      ruleSpies.foolOfTheNight.mockReturnValue(null);
+      ruleSpies[AwardName.FoolOfTheNight].mockReturnValue(null);
+
+      expect(namesOf()).toHaveLength(MOST_AWARDS);
+    });
+
+    it("should still print nine when nobody was king either", () => {
+      everyRuleFires();
+      ruleSpies[AwardName.FoolOfTheNight].mockReturnValue(null);
+      ruleSpies[AwardName.King].mockReturnValue(null);
 
       expect(namesOf()).toHaveLength(MOST_AWARDS);
     });
   });
 
+  describe("an award that says nothing the card does not already say", () => {
+    it("should drop the hot seat when the same player also took home advantage", () => {
+      fires(AwardName.HotSeat, AwardName.HomeAdvantage);
+
+      expect(namesOf()).toEqual([AwardName.HomeAdvantage]);
+    });
+
+    it("should keep the hot seat when it names somebody else", () => {
+      ruleSpies[AwardName.HotSeat].mockReturnValue(awardOf(AwardName.HotSeat, ROMANI));
+      fires(AwardName.HomeAdvantage);
+
+      expect(namesOf()).toEqual([AwardName.HomeAdvantage, AwardName.HotSeat]);
+    });
+
+    it("should keep the hot seat when nobody won from their own deal", () => {
+      fires(AwardName.HotSeat);
+
+      expect(namesOf()).toEqual([AwardName.HotSeat]);
+    });
+
+    it("should not let the dropped award take a slot from a rarer one", () => {
+      fires(
+        AwardName.King,
+        AwardName.FoolOfTheNight,
+        AwardName.HotSeat,
+        AwardName.HomeAdvantage,
+        AwardName.Untouchable,
+        AwardName.TheFavourite,
+        AwardName.AllOrNothing,
+        AwardName.TheIrishGoodbye,
+        AwardName.TheTruce,
+        AwardName.TheInvisible
+      );
+
+      expect(namesOf()).toContain(AwardName.Untouchable);
+    });
+  });
+
   describe("first blood", () => {
     it("should be dropped when it would name the fool of the night twice", () => {
-      ruleSpies.firstBlood.mockReturnValue(awardOf("firstBlood", ROMANI));
-      ruleSpies.foolOfTheNight.mockReturnValue(awardOf("foolOfTheNight", ROMANI));
+      ruleSpies[AwardName.FirstBlood].mockReturnValue(awardOf(AwardName.FirstBlood, ROMANI));
+      ruleSpies[AwardName.FoolOfTheNight].mockReturnValue(awardOf(AwardName.FoolOfTheNight, ROMANI));
 
-      expect(namesOf()).toEqual(["foolOfTheNight"]);
+      expect(namesOf()).toEqual([AwardName.FoolOfTheNight]);
     });
 
     it("should stay when somebody else opened the evening badly", () => {
-      ruleSpies.firstBlood.mockReturnValue(awardOf("firstBlood", OLEG));
-      ruleSpies.foolOfTheNight.mockReturnValue(awardOf("foolOfTheNight", ROMANI));
+      ruleSpies[AwardName.FirstBlood].mockReturnValue(awardOf(AwardName.FirstBlood, OLEG));
+      ruleSpies[AwardName.FoolOfTheNight].mockReturnValue(awardOf(AwardName.FoolOfTheNight, ROMANI));
 
-      expect(namesOf()).toEqual(["firstBlood", "foolOfTheNight"]);
+      expect(namesOf()).toEqual([AwardName.FirstBlood, AwardName.FoolOfTheNight]);
     });
 
     it("should stay when nobody was fool of the night at all", () => {
-      ruleSpies.firstBlood.mockReturnValue(awardOf("firstBlood", ROMANI));
+      fires(AwardName.FirstBlood);
 
-      expect(namesOf()).toEqual(["firstBlood"]);
+      expect(namesOf()).toEqual([AwardName.FirstBlood]);
     });
   });
 });

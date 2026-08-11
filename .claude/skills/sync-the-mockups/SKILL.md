@@ -32,8 +32,16 @@ poster prints. If `docs:check` complained, the trigger already fired.
    PNG for both posters. **Commit both.** The SVG is the reviewable half: a colour
    change is one readable line in the diff, where a PNG is an opaque blob. The PNG
    is the half `README.md` shows, because GitHub renders it reliably.
+   Redraw **before** running `npm run check`, not after it complains: the gate runs
+   lint, types, docs and the whole suite, and a stale mockup makes you pay for all
+   of it twice.
 2. **Look at the PNG.** Actually open it. The gate proves the file matches the
-   renderer; it cannot tell you the renderer started drawing nonsense.
+   renderer; it cannot tell you the renderer started drawing nonsense. Read it as a
+   reader, not as a diff — the awards card grew from thirteen rules to thirty-eight
+   with every gate green, and opening the picture is what found the two rows that
+   said the same thing in different words, and a sentence that read "1 game of 12
+   games". Ask specifically: **does any row repeat another, and does every sentence
+   read like English?**
 3. **Pull the design page** with `DesignSync get_file` — project
    `dfdd20cb-3609-4baa-935d-eb20b8257c2c`, path `Durak Stats Poster System.dc.html`
    — into a local file. The same page for a human to open is

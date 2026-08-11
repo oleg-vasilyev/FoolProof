@@ -79,7 +79,10 @@ redraws them whenever the drawing code changes.
 The grid prints the finishing position in every cell, and marks only what an
 ordinary finish is not: drew for last, left the fool, did not play. Under it, each
 player's running share of the table — 50% is mid-table, 100% is winning every game.
-The awards need five games before there are any.
+The awards need five games before there are any. Thirty-eight of them exist and nine
+fit, so the card keeps the king and the fool and fills the rest with
+[the rarest of what the evening earned](PLAN.md#two-orders-and-why-there-have-to-be-two)
+— which is what stops every Friday reading the same.
 
 Every colour, size and rule behind the two is specified in the [poster design
 system](https://claude.ai/design/p/dfdd20cb-3609-4baa-935d-eb20b8257c2c?file=Durak+Stats+Poster+System.dc.html),

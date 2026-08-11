@@ -723,33 +723,37 @@ card is meant to be read at full width. `/stats_chronology` and `/stats_awards`
 send one of the two on their own.
 
 Awards need **five games** in the session. Below that `/stats` sends the chronology
-and says nothing about awards, because a card that fires two of thirteen rules reads
-as a bug rather than as a thin evening; `/stats_awards` answers in text instead.
+and says nothing about awards, because a card that fires three of thirty-eight rules
+reads as a bug rather than as a thin evening; `/stats_awards` answers in text instead.
 
 The card is read top to bottom from glory to disgrace, and **FOOL OF THE NIGHT is
 always last**, on a red plate. Under it, when it happened at all, one line about the
 whole table: how often whoever opened a game was left the fool in it.
 
-| Award | Earned by | Threshold |
-|---|---|---|
-| KING OF THE TABLE | the best table share | ≥ 5 games |
-| UNTOUCHABLE | never the fool all evening | ≥ 5 games |
-| TEFLON | the longest run without being the fool | run ≥ 5 |
-| SWEET REVENGE | leaving first in the game after being the fool | ≥ 2 of them |
-| IRON SEAT | the only player who sat through every game | evening ≥ 10 |
-| THE TRUCE | everybody who was in a drawn game | a draw happened |
-| ALL OR NOTHING | most games finished at an edge — first out or fool | ≥ 60%, ≥ 5 games |
-| THE INVISIBLE | most games finished in the middle | ≥ 60%, ≥ 5 games |
-| THE IRISH GOODBYE | leaving before the end, and not as the fool | left early |
-| OPENER'S CURSE | opening a game and being left the fool in that same game | ≥ 2 times |
-| ENCORE | the fool in two games running | ≥ 2 running |
-| FIRST BLOOD | the fool of the very first game | never the same person as FOOL |
-| FOOL OF THE NIGHT | the worst fool rate | ≥ 5 games |
+#### Two orders, and why there have to be two
 
-That order is also the order they are printed in, and the **cap is nine**: past
-that the tail of the catalogue is dropped, which is why the shame awards are
-listed last. On the evening of 31 July 2026 — nineteen games, five players — nine
-fire and every player takes at least one.
+The catalogue holds **thirty-eight** awards and the card holds **nine**, so most
+evenings something is dropped. *Which* nine are chosen and *what order* they print in
+are different questions, and answering both with one list was the flaw the first
+thirteen shipped with: the rules were tried in printing order and the first nine that
+fired won. The head of the list is the common awards, so the same ones took the card
+every evening and nothing near the tail was ever seen. Adding twenty-five more rules
+under that mechanism would have changed nothing at all.
+
+So there are two orders:
+
+- **KING OF THE TABLE and FOOL OF THE NIGHT are pinned.** They fire on essentially
+  every evening that qualifies, they are the two an evening is expected to have, and
+  a card missing them reads as broken rather than as unusual.
+- **The seven free slots go to the rarest of whatever fired.** The ranking is
+  `RAREST_FIRST` in `award-catalogue.ts`: one list, every award exactly once, rarest
+  first. A spec asserts it is complete, because the selection indexes into it.
+- **The card then prints the chosen nine in the catalogue's own order**, which is
+  glory to disgrace.
+
+A dull evening therefore gets the ordinary awards and a strange one gets the strange
+ones. That is the entire point: the same five people should not read the same nine
+headlines every Friday.
 
 Nine is not a taste decision. The card is drawn at the same 1620 width as the
 chronology and is bound by the same [2560 limit](#what-telegram-does-to-the-image),
@@ -757,6 +761,75 @@ so the row metrics are derived from that budget rather than from how the rows lo
 on their own: nine awards at the dense scale come to 2514, and a tenth would not
 fit. Fewer than six awards switch to a roomier scale, because a short card has the
 height to spare and a sparse one drawn dense reads as unfinished.
+
+#### The catalogue
+
+Printing order, glory to disgrace. **Fires** is the share of evenings on which the
+rule finds a winner at all — the number `RAREST_FIRST` is ordered by.
+
+| Award | Earned by | Threshold | Fires |
+|---|---|---|---|
+| KING OF THE TABLE | the best table share | ≥ 5 games | 100% |
+| WIRE TO WIRE | in front on the chart after every game but the first | evening ≥ 10, ≥ 8 games | 27% |
+| THE FAVOURITE | going out first more often than not | ≥ 50%, ≥ 8 games | 61% |
+| HAT TRICK | going out first in four games running | run ≥ 4 | 54% |
+| HOME ADVANTAGE | opening a game and going out of it first | ≥ 3 times | 46% |
+| UNTOUCHABLE | never the fool all evening | ≥ 8 games | 62% |
+| TEFLON | the longest clean run, by somebody who was burned at least once | run ≥ 7 | 49% |
+| HOT SEAT | opening games and never being left the fool in one | ≥ 4 opens | 57% |
+| THE COMEBACK | lowest on the chart at halfway, back above mid-table since | evening ≥ 8 | 1.3% |
+| THE LADDER | finishing better than the game before, four running | run ≥ 4 | 7% |
+| SWEET REVENGE | leaving first in the game after being the fool | ≥ 2 of them | 13% |
+| FULL HOUSE | nobody at the table missed a single game | evening ≥ 8 | 0.3% |
+| IRON SEAT | the only player who sat through every game | evening ≥ 10 | 23% |
+| THE ROTATION | every player who sat down was the fool at least once | evening ≥ 6 | 11% |
+| THE TRUCE | everybody who was in a drawn game | a draw happened | 58% |
+| THE PACIFIST | being in every drawn game of the evening | ≥ 2 draws | 18% |
+| THE NEMESIS | finishing above the same rival in every game they shared | ≥ 8 shared | 46% |
+| THE DOORMAN | opening more games than anybody else | ≥ 6, alone | 52% |
+| NEVER ASKED | sitting a long evening without ever opening a game | ≥ 10 games | 30% |
+| THE LATECOMER | arriving late and still finishing at or above mid-table | game ≥ 4, ≥ 5 games | 18% |
+| REVOLVING DOOR | missing a stretch in the middle and coming back | gap ≥ 2, ≥ 5 games | 16% |
+| THE CAMEO | playing exactly one game of the evening | evening ≥ 8 | 1.3% |
+| SECOND WIND | the fool early, and never again | in the first 3, ≥ 8 games | 16% |
+| THE UNDERSTUDY | second out again and again, first out never | ≥ 4 seconds, ≥ 5 games | 23% |
+| THE FLATLINE | never leaving the band around mid-table | ≤ 6 points, ≥ 8 games | 0.9% |
+| THE INVISIBLE | most games finished in the middle | ≥ 75%, ≥ 5 games | 56% |
+| GROUNDHOG DAY | taking the exact same place five games running | run ≥ 5 | 50% |
+| THE PENDULUM | swapping halves of the table game after game | run ≥ 6 | 15% |
+| THE ROLLERCOASTER | the widest gap between their best and worst on the chart | ≥ 60 points, evening ≥ 8 | 15% |
+| ALL OR NOTHING | most games finished at an edge — first out or fool | ≥ 75%, ≥ 5 games | 60% |
+| THE IRISH GOODBYE | leaving before the end, and not as the fool | left early | 59% |
+| THE ANCHOR | every game in the bottom half, and never the fool | ≥ 5 games | 2.4% |
+| THE SLIDE | finishing worse than the game before, four running | run ≥ 4 | 8% |
+| FALSE DAWN | leading the chart at halfway, below mid-table since | evening ≥ 8 | 0.6% |
+| OPENER'S CURSE | opening a game and being left the fool in that same game | ≥ 2 times | 42% |
+| ENCORE | the fool in three games running | ≥ 3 running | 72% |
+| FIRST BLOOD | the fool of the very first game | never the same person as FOOL |  92% |
+| FOOL OF THE NIGHT | the worst fool rate | ≥ 5 games | 99% |
+
+The percentages are **modelled, not observed**. Four thousand synthetic evenings —
+four to six players, five to twenty games, with arrivals, departures, missed games,
+draws and the house rule for who opens — scored through the real `scoreSeries` and
+put to each rule. That is enough to rank the catalogue and to catch a rule that fires
+always or never; it is not a record of anything that happened at a real table.
+`RAREST_FIRST` is a hand-written list precisely so that it is one edit to reorder once
+enough real evenings exist to argue with the model.
+
+On the evening of 31 July 2026 — nineteen games, five players — nine fire, the set
+is entirely different from the sample evening's, and every player is named at least
+once.
+
+#### When an award would say nothing the card has not said
+
+Two pairs are nested. The lesser is dropped when the greater names the same player,
+and it is dropped **before** the free slots are handed out, so it cannot cost a rarer
+award its place:
+
+| Dropped | When | Because |
+|---|---|---|
+| FIRST BLOOD | FOOL OF THE NIGHT names the same player | one person, burned twice on one card |
+| HOT SEAT | HOME ADVANTAGE names the same player | winning every game you opened already says you lost none of them |
 
 Three rules about how a winner is chosen, each of which changed who won on that
 evening:
@@ -787,9 +860,19 @@ merely unbuilt:
   is no mapping from a Telegram id to a name at the table, so the award could name
   an account and not a player.
 
+A fourth is merely unbuilt, and the difference matters: **anything about who sat next
+to whom.** The ring is real and [normalised](#seating-is-normalised) for exactly this
+kind of question, and the house rule already makes the opener a fact about seating —
+whoever sat immediately before the last fool. But `seat_index` stops at the
+repository: `SeriesChronology` carries the players in the order they first appeared,
+not the ring of each game. So a neighbour award costs a repository method, and none
+of the thirty-eight needs one.
+
 **CURTAIN CALL** — the fool of the evening's last game — is not in the catalogue at
 all: the bot has no signal that an evening has ended, so mid-session it would crown
-whoever lost most recently and then quietly change its mind.
+whoever lost most recently and then quietly change its mind. The same objection
+retires BOOKENDS, and it is the reason no award in the catalogue reads backwards from
+the most recent game.
 
 ### A session is computed, not a table
 

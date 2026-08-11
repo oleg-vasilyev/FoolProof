@@ -1,37 +1,31 @@
 import { Finish } from "#scoresheet/domain/game-outcomes.ts";
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
-import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
+import { LONG_ENOUGH, type Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import {
   foolCount,
-  type Appearance,
+  playedGames,
   type SessionAppearances,
   type PlayerAppearances,
 } from "#scoresheet/domain/session-appearances.ts";
 import { bestBy } from "#scoresheet/domain/awards/pick-winner.ts";
+import { longestRun } from "#scoresheet/domain/awards/appearance-runs.ts";
 
 
-const CLEAN_RUN = 5;
+const CLEAN_RUN = 7;
+
+const FOOL_RUN = 3;
 
 const TWICE = 2;
+
+const OPENING_GAMES = 3;
 
 const NONE = 0;
 
 const NEXT = 1;
 
-interface Run {
-  readonly best: number;
-  readonly current: number;
-}
+const AFTER = 1;
 
-const longestRun = (player: PlayerAppearances, holds: (appearance: Appearance) => boolean): number =>
-  player.appearances.reduce<Run>(
-    (run, appearance) => {
-      const current = holds(appearance) ? run.current + NEXT : NONE;
-
-      return { best: Math.max(run.best, current), current };
-    },
-    { best: NONE, current: NONE }
-  ).best;
+const LAST = -1;
 
 const comebacks = (player: PlayerAppearances): number =>
   player.appearances.filter(
@@ -45,11 +39,25 @@ const cleanStreak = (player: PlayerAppearances): number =>
 const foolStreak = (player: PlayerAppearances): number =>
   longestRun(player, (appearance) => appearance.finish === Finish.Fool);
 
+const settledAfter = (player: PlayerAppearances): number | null => {
+  const burned = player.appearances
+    .slice(NONE, OPENING_GAMES)
+    .filter((appearance) => appearance.finish === Finish.Fool);
+  const since = player.appearances.slice(OPENING_GAMES);
+  const last = burned.at(LAST);
+
+  return last !== undefined &&
+    playedGames(player) >= LONG_ENOUGH &&
+    since.every((appearance) => appearance.finish !== Finish.Fool)
+    ? last.round + AFTER
+    : null;
+};
+
 export const teflon = (evening: SessionAppearances): Award | null => {
   const winner = bestBy(evening.players, (player) => {
     const run = cleanStreak(player);
 
-    return run >= CLEAN_RUN ? run : null;
+    return foolCount(player) > NONE && run >= CLEAN_RUN ? run : null;
   });
 
   return winner === null
@@ -76,10 +84,29 @@ export const encore = (evening: SessionAppearances): Award | null => {
   const winner = bestBy(evening.players, (player) => {
     const run = foolStreak(player);
 
-    return run >= TWICE ? run : null;
+    return run >= FOOL_RUN ? run : null;
   });
 
   return winner === null
     ? null
     : { name: AwardName.Encore, winners: [winner.playerId], run: foolStreak(winner) };
+};
+
+export const secondWind = (evening: SessionAppearances): Award | null => {
+  const winner = bestBy(evening.players, (player) => {
+    const settled = settledAfter(player);
+
+    return settled === null ? null : playedGames(player) - settled;
+  });
+
+  if (winner === null) {
+    return null;
+  }
+
+  return {
+    name: AwardName.SecondWind,
+    winners: [winner.playerId],
+    burnedBy: settledAfter(winner) ?? NONE,
+    games: playedGames(winner),
+  };
 };

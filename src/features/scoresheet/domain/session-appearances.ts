@@ -7,14 +7,21 @@ const FIRST_OUT = 1;
 
 const LAST = -1;
 
+const HALF = 2;
+
+const EMPTY_TABLE = 0;
+
 export interface Appearance {
   readonly round: number;
   readonly finish: Finish;
+  readonly position: number;
+  readonly tableSize: number;
 }
 
 export interface PlayerAppearances {
   readonly playerId: number;
   readonly share: number;
+  readonly running: readonly number[];
   readonly appearances: readonly Appearance[];
 }
 
@@ -37,20 +44,37 @@ const finishOf = (cell: Exclude<Cell, { kind: typeof CellKind.Absent }>): Finish
   }
 };
 
-const appearancesOf = (cells: readonly Cell[]): readonly Appearance[] =>
+const appearancesOf = (
+  cells: readonly Cell[],
+  tableSizes: readonly number[]
+): readonly Appearance[] =>
   cells.flatMap((cell, round) =>
-    cell.kind === CellKind.Absent ? [] : [{ round, finish: finishOf(cell) }]
+    cell.kind === CellKind.Absent
+      ? []
+      : [
+          {
+            round,
+            finish: finishOf(cell),
+            position: cell.position,
+            tableSize: tableSizes[round] ?? EMPTY_TABLE,
+          },
+        ]
   );
 
-export const sessionAppearances = (chronology: SeriesChronology): SessionAppearances => ({
-  rounds: chronology.games.length,
-  players: scoreSeries(chronology.players, chronology.games).map((player) => ({
-    playerId: player.playerId,
-    share: player.share,
-    appearances: appearancesOf(player.cells),
-  })),
-  starters: chronology.games.map((game) => game.starterId),
-});
+export const sessionAppearances = (chronology: SeriesChronology): SessionAppearances => {
+  const tableSizes = chronology.games.map((game) => game.placements.length);
+
+  return {
+    rounds: chronology.games.length,
+    players: scoreSeries(chronology.players, chronology.games).map((player) => ({
+      playerId: player.playerId,
+      share: player.share,
+      running: player.running,
+      appearances: appearancesOf(player.cells, tableSizes),
+    })),
+    starters: chronology.games.map((game) => game.starterId),
+  };
+};
 
 export const playedGames = (player: PlayerAppearances): number => player.appearances.length;
 
@@ -59,6 +83,12 @@ export const foolCount = (player: PlayerAppearances): number =>
 
 export const lastRoundOf = (player: PlayerAppearances): number | null =>
   player.appearances.at(LAST)?.round ?? null;
+
+export const firstRoundOf = (player: PlayerAppearances): number | null =>
+  player.appearances[EMPTY_TABLE]?.round ?? null;
+
+export const inTopHalf = (appearance: Appearance): boolean =>
+  appearance.position <= appearance.tableSize / HALF;
 
 export const finishIn = (player: PlayerAppearances, round: number): Finish | null =>
   player.appearances.find((appearance) => appearance.round === round)?.finish ?? null;
