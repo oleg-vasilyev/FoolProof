@@ -323,6 +323,13 @@ describe("theComeback()", () => {
 
       expect(meritGiven()(sank)).toBeNull();
     });
+
+    it("should refuse a player who was never below mid-table, lowest or not", () => {
+      const NEVER_FELL = playerAppearing(OLEG, [], HIGH_SHARE, curveOf(JUST_ABOVE_MOCKED));
+      theComeback(eveningFor([NEVER_FELL, stayedUp]));
+
+      expect(meritGiven()(NEVER_FELL)).toBeNull();
+    });
   });
 });
 
@@ -395,6 +402,13 @@ describe("falseDawn()", () => {
       falseDawn(eveningFor([faded, behind]));
 
       expect(meritGiven()(behind)).toBeNull();
+    });
+
+    it("should refuse a lead that was never above mid-table, which is no dawn", () => {
+      const LOW_LEAD = playerAppearing(OLEG, [], JUST_BELOW_MOCKED, curveOf(JUST_BELOW_MOCKED));
+      falseDawn(eveningFor([LOW_LEAD, behind]));
+
+      expect(meritGiven()(LOW_LEAD)).toBeNull();
     });
   });
 });

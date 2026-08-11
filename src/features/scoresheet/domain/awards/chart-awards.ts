@@ -108,6 +108,7 @@ export const theComeback = (evening: SessionAppearances): Award | null => {
       ? bestBy(evening.players, (player) =>
           playedGames(player) >= ENOUGH_GAMES &&
           seatedBy(player, midpoint) &&
+          shareAt(player, midpoint) < NEUTRAL &&
           sankLowest(player) &&
           player.share >= NEUTRAL
             ? player.share
@@ -139,6 +140,7 @@ export const falseDawn = (evening: SessionAppearances): Award | null => {
       ? bestBy(evening.players, (player) =>
           playedGames(player) >= ENOUGH_GAMES &&
           seatedBy(player, midpoint) &&
+          shareAt(player, midpoint) > NEUTRAL &&
           ledThen(player) &&
           player.share < NEUTRAL
             ? NEUTRAL - player.share

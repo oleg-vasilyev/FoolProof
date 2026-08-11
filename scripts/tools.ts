@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";
 import { rootDir } from "#shared/config/env.ts";
 import { refreshDesignPage } from "./design-page.ts";
+import { GALLERY_DIR, gallery } from "./gallery.ts";
 import { MOCKUP_DIR, posters } from "./mockups.ts";
 
 
@@ -34,11 +35,27 @@ const writeMockups = (): void => {
   }
 };
 
+const drawGallery = (): void => {
+  const directory = resolve(rootDir, GALLERY_DIR);
+
+  mkdirSync(directory, { recursive: true });
+
+  for (const drawing of gallery()) {
+    writeFileSync(resolve(directory, `${drawing.file}.png`), rasterize(drawing.svg));
+    console.log(`${GALLERY_DIR}/${drawing.file}.png — ${drawing.asks}`);
+  }
+};
+
 const TOOLS: Readonly<Record<string, Tool>> = {
   mockups: {
     does: `draw the sample evening into ${MOCKUP_DIR}/ as SVG and PNG`,
     usage: "node scripts/tools.ts mockups",
     run: writeMockups,
+  },
+  gallery: {
+    does: `draw every edge of the two posters into ${GALLERY_DIR}/ for a human or an agent to look at`,
+    usage: "node scripts/tools.ts gallery",
+    run: drawGallery,
   },
   "design-page": {
     does: "redraw every mockup on a Claude Design page, leaving its prose alone",

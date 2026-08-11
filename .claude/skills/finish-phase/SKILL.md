@@ -1,12 +1,12 @@
 ---
 name: finish-phase
-description: Run the release ritual that closes a development phase in FoolProof — the six gates (check, coverage, mutation, e2e, diff review, retrospective) and the format of the phase's final commit message. Use when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
+description: Run the release ritual that closes a development phase in FoolProof — the seven gates (check, coverage, mutation, e2e, the poster gallery, diff review, retrospective) and the format of the phase's final commit message. Use when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
 ---
 
 # Finishing a phase
 
 A phase ends with a release, and a phase is done when the code is *releasable* —
-not when it works. Run all six gates before the final commit and act on what
+not when it works. Run all seven gates before the final commit and act on what
 they say. None of them is advisory.
 
 ## 1. `npm run check`
@@ -43,7 +43,7 @@ the test above, or an optional chain hiding a value that was never set.
 Strengthening a spec is the `write-a-spec` skill's job — load it rather than
 reaching for the nearest assertion that turns the mutant red.
 
-Run gate 4's review pass **before** this gate when the diff is small: review
+Run gate 6's review pass **before** this gate when the diff is small: review
 findings edit code, and this is the costliest gate to repeat. An edit made after
 the run re-checks with `--mutate <file>` alone, never a full re-run.
 
@@ -102,7 +102,31 @@ fifteen seconds. Before a tag, run `npm run e2e` in full.
 `npm run e2e:test` covers the harness's own pure parts and takes under a second; it
 is not part of `npm run check` because it belongs to `e2e/`, not to the app.
 
-## 5. A review pass over the phase's whole diff
+## 5. Look at the gallery
+
+`node scripts/tools.ts gallery` draws both posters across every edge the product has
+to survive — one game, two players, ten long names, more games than the sheet holds,
+an evening nobody lost, arrivals and departures, an award that crowns the whole
+table — into `reports/gallery/`. **Open every picture.** Nothing above this gate can
+see a poster that has started drawing nonsense: the SVG matches the renderer, the
+tests match the SVG, and all of it stays green while a line runs off the card.
+
+The output is **specific claims, not a verdict.** "Looked, fine" is the green light
+with nothing behind it that `write-an-e2e-scenario` warns about — if you cannot name
+what you saw on a picture, you did not look at it. Of each, ask:
+
+- does any row repeat another in different words?
+- does every sentence read like the language it is in, plurals included?
+- does anything run past the edge, or get cut where a reader cannot recover it?
+- is a number claiming something the evening did not actually do?
+
+**Fix what is plainly wrong; ask about what is taste or wording.** A line overflowing
+the card is a defect and needs no permission. Which of three phrasings replaces it is
+the user's call, and asking costs one message where guessing costs a rewrite. The
+first run of this gate found both kinds at once: two awards ran their winners off the
+right edge, and two more crowned a comeback that never fell below mid-table.
+
+## 6. A review pass over the phase's whole diff
 
 Read `git diff <phase-start>..HEAD` against `CLAUDE.md` — the whole diff at once,
 not the individual commits, because a rule breaks across commits more often than
@@ -167,7 +191,7 @@ Ask of every touched file:
 And of the feature as a whole: it declares one command per thing it gives the
 player, so can a reader tell from the file names which files serve which?
 
-## 6. A retrospective on how the phase was carried out
+## 7. A retrospective on how the phase was carried out
 
 Gate 4 judges the diff; this one judges what producing it cost — rework, gates run
 twice, subagents briefed too thinly to be useful. Load the **`retrospective`**
@@ -186,7 +210,7 @@ fails gate 1 rather than surviving to the next cleanup.
 
 ## Scaling the ritual to the change
 
-The six gates are not negotiable. What the phase *produces around them* is, and
+The seven gates are not negotiable. What the phase *produces around them* is, and
 the default was written for a phase that changes a contract. A **small** phase —
 one that stays inside a single feature folder, adds no repository method, changes
 no schema and no `shared/` type — earns a shorter path:
