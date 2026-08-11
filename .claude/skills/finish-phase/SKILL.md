@@ -13,6 +13,14 @@ they say. None of them is advisory.
 
 Lint, types, tests. Zero errors, no exceptions.
 
+**A changed signature has callers no gate can see.** `grep` the whole repository
+for the changed name, not just `src/` — `.claude/skills/` and `README.md` hold
+commands that are run by hand, so nothing compiles them and nothing fails when
+they rot. Making `rasterize()` asynchronous left a one-liner in
+`sync-the-mockups` timing a promise instead of a render: it reported `0ms` for
+every poster, in the step whose whole job is catching a render that grew. Green
+gates, a lie in a document.
+
 Most style rules are ESLint rules now (`eslint.config.js`), so a lint failure is
 a convention violation, not a nit — read the message before reaching for a
 disable comment, which is itself banned in `src/`.
