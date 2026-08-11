@@ -20,28 +20,28 @@ const FAILED = 1;
 interface Tool {
   readonly does: string;
   readonly usage: string;
-  run(args: readonly string[]): void;
+  run(args: readonly string[]): void | Promise<void>;
 }
 
-const writeMockups = (): void => {
+const writeMockups = async (): Promise<void> => {
   const directory = resolve(rootDir, MOCKUP_DIR);
 
   mkdirSync(directory, { recursive: true });
 
   for (const [name, svg] of Object.entries(posters())) {
     writeFileSync(resolve(directory, `${name}.svg`), svg, "utf8");
-    writeFileSync(resolve(directory, `${name}.png`), rasterize(svg));
+    writeFileSync(resolve(directory, `${name}.png`), await rasterize(svg));
     console.log(`${MOCKUP_DIR}/${name}.png`);
   }
 };
 
-const drawGallery = (): void => {
+const drawGallery = async (): Promise<void> => {
   const directory = resolve(rootDir, GALLERY_DIR);
 
   mkdirSync(directory, { recursive: true });
 
   for (const drawing of gallery()) {
-    writeFileSync(resolve(directory, `${drawing.file}.png`), rasterize(drawing.svg));
+    writeFileSync(resolve(directory, `${drawing.file}.png`), await rasterize(drawing.svg));
     console.log(`${GALLERY_DIR}/${drawing.file}.png — ${drawing.asks}`);
   }
 };
@@ -93,5 +93,5 @@ if (asked === undefined) {
   listItself();
   process.exit(FAILED);
 } else {
-  tool.run(args);
+  await tool.run(args);
 }

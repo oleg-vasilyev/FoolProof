@@ -108,6 +108,26 @@ own assumption breaking instead of the scenario reporting a bot that is fine.
 **Build it the next time a scenario fails in a way that turns out to be timing**,
 or when a poster gains enough to make somebody wonder about the window again.
 
+## Half of drawing a poster still blocks the event loop
+
+`rasterize()` draws through `renderAsync`, which hands the work to a thread and
+gives the loop back. The encode after it does not: `asPng()` is synchronous and
+**`@resvg/resvg-js` publishes no asynchronous form of it**, so the larger of the two
+costs in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else) still stops
+everything while it runs.
+
+Closing it means running the whole rasterizer in a `node:worker_threads` worker:
+either one spawned per poster, which costs its own startup and undoes some of the
+saving, or a pool, which is a lifecycle to own — starting it, keeping it warm,
+draining it on shutdown alongside the stops `main.ts` already composes. That is a
+real amount of machinery for a bot whose busiest hour is one Friday evening.
+
+**Pick it up when more than a handful of chats use the bot at once**, or the first
+time a tap on a live card visibly waits behind somebody else's `/stats`. The number
+to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
+
+---
+
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to

@@ -79,28 +79,42 @@ describe("the rasterizer against the fonts this repository ships", () => {
     }).not.toThrow();
   });
 
-  it("should turn a rendered scoresheet into a PNG", () => {
-    expect(magicOf(rasterize(renderScoresheet(copy, AN_EVENING)))).toBe(PNG_MAGIC);
+  it("should turn a rendered scoresheet into a PNG", async () => {
+    expect(magicOf(await rasterize(renderScoresheet(copy, AN_EVENING)))).toBe(PNG_MAGIC);
   });
 
-  it("should put ink where the sheet asked for words, not hand back a blank page", () => {
+  it("should put ink where the sheet asked for words, not hand back a blank page", async () => {
     const sheet = renderScoresheet(copy, AN_EVENING);
 
-    const drawn = rasterize(sheet);
-    const wordless = rasterize(sheet.replaceAll(A_TEXT_ELEMENT, NOTHING_AT_ALL));
+    const drawn = await rasterize(sheet);
+    const wordless = await rasterize(sheet.replaceAll(A_TEXT_ELEMENT, NOTHING_AT_ALL));
 
     expect(drawn.equals(wordless)).toBe(false);
   });
 
-  it("should draw a latin name rather than skip a glyph it has no font for", () => {
-    const drawn = rasterize(wordOnItsOwn(A_LATIN_NAME));
+  it("should draw a latin name rather than skip a glyph it has no font for", async () => {
+    const drawn = await rasterize(wordOnItsOwn(A_LATIN_NAME));
 
-    expect(drawn.equals(rasterize(wordOnItsOwn(NOTHING_AT_ALL)))).toBe(false);
+    expect(drawn.equals(await rasterize(wordOnItsOwn(NOTHING_AT_ALL)))).toBe(false);
   });
 
-  it("should draw a cyrillic name too, which is half of what this bot writes", () => {
-    const drawn = rasterize(wordOnItsOwn(A_CYRILLIC_NAME));
+  it("should draw a cyrillic name too, which is half of what this bot writes", async () => {
+    const drawn = await rasterize(wordOnItsOwn(A_CYRILLIC_NAME));
 
-    expect(drawn.equals(rasterize(wordOnItsOwn(NOTHING_AT_ALL)))).toBe(false);
+    expect(drawn.equals(await rasterize(wordOnItsOwn(NOTHING_AT_ALL)))).toBe(false);
+  });
+
+  it("should hand the event loop back while it draws, so one /stats cannot freeze another chat", async () => {
+    let tickedWhileDrawing = false;
+
+    const drawing = rasterize(renderScoresheet(copy, AN_EVENING));
+
+    setImmediate(() => {
+      tickedWhileDrawing = true;
+    });
+
+    await drawing;
+
+    expect(tickedWhileDrawing).toBe(true);
   });
 });

@@ -8,26 +8,14 @@ const env = new EnvStub();
 
 const PNG = Buffer.from("png-bytes");
 
-const resvgSpy = vi.fn();
-
-const renderSpy = vi.fn();
+const renderAsyncSpy = vi.fn();
 
 const asPngSpy = vi.fn();
 
 const existsSyncSpy = vi.fn();
 
 vi.mock("@resvg/resvg-js", () => ({
-  Resvg: class {
-    public constructor(svg: string, options: unknown) {
-      resvgSpy(svg, options);
-    }
-
-    public render(): { asPng: () => Buffer } {
-      renderSpy();
-
-      return { asPng: () => asPngSpy() };
-    }
-  },
+  renderAsync: (svg: string, options: unknown) => renderAsyncSpy(svg, options),
 }));
 
 vi.mock("node:fs", () => ({
@@ -48,35 +36,45 @@ const { rasterize, requireFonts } = await import("#scoresheet/bot/rasterizer.ts"
 
 const SVG = "<svg/>";
 
+const ONCE = 1;
+
 const optionsUsed = (): { font: Record<string, unknown> } =>
-  (resvgSpy.mock.calls[0]?.[1] ?? { font: {} }) as { font: Record<string, unknown> };
+  (renderAsyncSpy.mock.calls[0]?.[1] ?? { font: {} }) as { font: Record<string, unknown> };
 
 describe("rasterize()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
     asPngSpy.mockReturnValue(PNG);
+    renderAsyncSpy.mockResolvedValue({ asPng: () => asPngSpy() as Buffer });
     existsSyncSpy.mockReturnValue(true);
   });
 
-  it("should hand the drawing to the rasterizer untouched", () => {
-    rasterize(SVG);
+  it("should hand the drawing to the rasterizer untouched", async () => {
+    await rasterize(SVG);
 
-    expect(resvgSpy.mock.calls[0]?.[0]).toBe(SVG);
+    expect(renderAsyncSpy.mock.calls[0]?.[0]).toBe(SVG);
   });
 
-  it("should return the bytes the rasterizer produced", () => {
-    expect(rasterize(SVG)).toBe(PNG);
+  it("should return the bytes the rasterizer produced", async () => {
+    expect(await rasterize(SVG)).toBe(PNG);
   });
 
-  it("should refuse the machine's own fonts, so the image is the same everywhere", () => {
-    rasterize(SVG);
+  it("should encode from what the drawing settled to, not from the call itself", async () => {
+    await rasterize(SVG);
+
+    expect(renderAsyncSpy).toHaveBeenCalledTimes(ONCE);
+    expect(asPngSpy).toHaveBeenCalledTimes(ONCE);
+  });
+
+  it("should refuse the machine's own fonts, so the image is the same everywhere", async () => {
+    await rasterize(SVG);
 
     expect(optionsUsed().font.loadSystemFonts).toBe(false);
   });
 
-  it("should load the fonts shipped with the repository", () => {
-    rasterize(SVG);
+  it("should load the fonts shipped with the repository", async () => {
+    await rasterize(SVG);
 
     expect(optionsUsed().font.fontFiles).toEqual([
       `${env.rootDir}/assets/fonts/NotoSans-Regular.ttf`,
@@ -84,15 +82,15 @@ describe("rasterize()", () => {
     ]);
   });
 
-  it("should ship a bold face, since the sheet asks for one", () => {
-    rasterize(SVG);
+  it("should ship a bold face, since the sheet asks for one", async () => {
+    await rasterize(SVG);
     const files = optionsUsed().font.fontFiles as readonly string[];
 
     expect(files.some((file) => file.includes("Bold"))).toBe(true);
   });
 
-  it("should name the same family the drawing asks for", () => {
-    rasterize(SVG);
+  it("should name the same family the drawing asks for", async () => {
+    await rasterize(SVG);
 
     expect(optionsUsed().font.defaultFontFamily).toBe(FONT_FAMILY);
   });

@@ -1,4 +1,4 @@
-import { Resvg } from "@resvg/resvg-js";
+import { renderAsync } from "@resvg/resvg-js";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { rootDir } from "#shared/config/env.ts";
@@ -17,13 +17,14 @@ export const requireFonts = (): void => {
   }
 };
 
-export const rasterize = (svg: string): Buffer =>
-  new Resvg(svg, {
+export const rasterize = async (svg: string): Promise<Buffer> => {
+  const drawn = await renderAsync(svg, {
     font: {
       fontFiles: [...FONT_FILES],
       loadSystemFonts: false,
       defaultFontFamily: FONT_FAMILY,
     },
-  })
-    .render()
-    .asPng();
+  });
+
+  return drawn.asPng();
+};

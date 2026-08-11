@@ -107,7 +107,7 @@ describe("onStats()", () => {
 
     renderScoresheetSpy.mockReturnValue(SHEET_SVG);
     renderAwardsSpy.mockReturnValue(AWARDS_SVG);
-    rasterizeSpy.mockReturnValue(SHEET_PNG);
+    rasterizeSpy.mockResolvedValue(SHEET_PNG);
     honoursForSpy.mockReturnValue(null);
     repo.seriesChronologySpy.mockReturnValue(SESSION);
     gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
@@ -197,7 +197,7 @@ describe("onStats()", () => {
 
     it("should send the two pictures as two photos rather than one album", async () => {
       honoursForSpy.mockReturnValue(HONOURS);
-      rasterizeSpy.mockReturnValueOnce(SHEET_PNG).mockReturnValueOnce(AWARDS_PNG);
+      rasterizeSpy.mockResolvedValueOnce(SHEET_PNG).mockResolvedValueOnce(AWARDS_PNG);
 
       await onStats(context(), ctx.command("/stats"));
 
@@ -206,7 +206,7 @@ describe("onStats()", () => {
 
     it("should send the chronology first and the awards second", async () => {
       honoursForSpy.mockReturnValue(HONOURS);
-      rasterizeSpy.mockReturnValueOnce(SHEET_PNG).mockReturnValueOnce(AWARDS_PNG);
+      rasterizeSpy.mockResolvedValueOnce(SHEET_PNG).mockResolvedValueOnce(AWARDS_PNG);
 
       await onStats(context(), ctx.command("/stats"));
 
@@ -264,7 +264,7 @@ describe("onChronology()", () => {
     ctx = new ContextStub();
 
     renderScoresheetSpy.mockReturnValue(SHEET_SVG);
-    rasterizeSpy.mockReturnValue(SHEET_PNG);
+    rasterizeSpy.mockResolvedValue(SHEET_PNG);
     honoursForSpy.mockReturnValue(HONOURS);
     repo.seriesChronologySpy.mockReturnValue(SESSION);
     gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
@@ -311,7 +311,7 @@ describe("onAwards()", () => {
     ctx = new ContextStub();
 
     renderAwardsSpy.mockReturnValue(AWARDS_SVG);
-    rasterizeSpy.mockReturnValue(AWARDS_PNG);
+    rasterizeSpy.mockResolvedValue(AWARDS_PNG);
     honoursForSpy.mockReturnValue(HONOURS);
     repo.seriesChronologySpy.mockReturnValue(SESSION);
   });

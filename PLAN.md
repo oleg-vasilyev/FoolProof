@@ -700,6 +700,22 @@ including 4000×6320. It is rejected anyway, because the chat shows a file card
 with a 203×320 thumbnail instead of the picture, and the point of the sheet is to
 be glanceable without a tap.
 
+#### What drawing one costs everybody else
+
+One process serves every chat, so time spent turning an SVG into pixels is time no
+other chat's tap is being answered in. Measured on the host the bot runs on — two
+shared vCPUs — a poster costs **about 226 ms to rasterize and another 240 ms to
+encode as PNG**, and `/stats` draws two posters.
+
+Drawing therefore belongs **off the event loop**, and that is a requirement rather
+than an optimisation: with a live card mid-game in another chat, half a second is
+the difference between a tap that feels instant and one that looks ignored. Any
+implementation answering several chats from one process owes the same thing, which
+is why it is written here rather than beside the renderer.
+
+Only the rasterizing half is off the loop today.
+[TECH-DEBT.md](TECH-DEBT.md) has what stands in the way of the other.
+
 #### Fitting a long evening
 
 The height budget is fixed at 2560, so the number of games is what has to give.

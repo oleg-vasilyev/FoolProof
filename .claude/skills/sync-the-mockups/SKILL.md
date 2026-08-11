@@ -66,7 +66,7 @@ poster prints. If `docs:check` complained, the trigger already fired.
    and not the harness:
 
    ```
-   node -e "import('./src/features/scoresheet/bot/rasterizer.ts').then(async ({rasterize})=>{const {posters}=await import('./scripts/mockups.ts');for(const [n,s] of Object.entries(posters())){rasterize(s);const t=performance.now();rasterize(s);console.log(n,(performance.now()-t).toFixed(0)+'ms');}})"
+   node -e "import('./src/features/scoresheet/bot/rasterizer.ts').then(async ({rasterize})=>{const {posters}=await import('./scripts/mockups.ts');for(const [n,s] of Object.entries(posters())){await rasterize(s);const t=performance.now();await rasterize(s);console.log(n,(performance.now()-t).toFixed(0)+'ms');}})"
    ```
 
 6. **Read what the change made false.** The mockups are now current; the prose

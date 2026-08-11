@@ -291,7 +291,10 @@ outside world misbehave:
   with the shipped fonts. A missing font makes resvg draw a **blank page rather
   than fail**, so the assertion is that the raster differs from the same SVG with
   its `<text>` stripped — and separately for a Cyrillic word, since half of what
-  this bot writes is Russian.
+  this bot writes is Russian. It also pins that `renderAsync` really **hands the
+  event loop back** — a `setImmediate` registered after the call has to run before
+  the promise settles. A mocked version of that asserts its own fake resolving, so
+  the case can only live here.
 
 One covers a chain:
 

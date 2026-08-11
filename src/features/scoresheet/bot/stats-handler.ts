@@ -29,7 +29,7 @@ const sendChronology = async (
   chronology: SeriesChronology
 ): Promise<void> => {
   await ctx.replyWithPhoto(
-    new InputFile(rasterize(renderScoresheet(copy, chronology)), SHEET_FILENAME),
+    new InputFile(await rasterize(renderScoresheet(copy, chronology)), SHEET_FILENAME),
     {
       caption: copy.sheetSubtitle(
         gameTally(copy, chronology.games.length),
@@ -46,7 +46,7 @@ const sendAwards = async (
   honours: Honours
 ): Promise<void> => {
   await ctx.replyWithPhoto(
-    new InputFile(rasterize(renderAwards(copy, chronology, honours)), AWARDS_FILENAME)
+    new InputFile(await rasterize(renderAwards(copy, chronology, honours)), AWARDS_FILENAME)
   );
 };
 
