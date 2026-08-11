@@ -19,6 +19,7 @@ export const copy = {
   awardsTitle: "AWARDS",
   awardsCurseLabel: "TABLE CURSE",
   betweenWinners: " & ",
+  everyWinner: "the whole table",
 
   awardTitles: {
     king: "KING OF THE TABLE",

@@ -147,6 +147,41 @@ describe("awardsLayoutOf()", () => {
     });
   });
 
+  describe("telling an award that crowned everybody from one that did not", () => {
+    const A_TABLE_OF_THREE = 3;
+
+    const everyoneOf = (winners: readonly number[]) => ({
+      name: AwardName.TheRotation,
+      winners,
+      players: winners.length,
+      games: A_TABLE_OF_THREE,
+    });
+
+    it("should mark an award whose winners are the whole table", () => {
+      const honours = honoursOf([everyoneOf([0, 1, 2])]);
+
+      const sheet = awardsLayoutOf(chronologyOf(A_TABLE_OF_THREE), honours);
+
+      expect(sheet.rows[0]?.wholeTable).toBe(true);
+    });
+
+    it("should not mark one that left somebody out", () => {
+      const honours = honoursOf([everyoneOf([0, 1])]);
+
+      const sheet = awardsLayoutOf(chronologyOf(A_TABLE_OF_THREE), honours);
+
+      expect(sheet.rows[0]?.wholeTable).toBe(false);
+    });
+
+    it("should not mark a single winner at a table of one as the whole table by accident", () => {
+      const honours = honoursOf([untouchableOf(0)]);
+
+      const sheet = awardsLayoutOf(chronologyOf(A_TABLE_OF_THREE), honours);
+
+      expect(sheet.rows[0]?.wholeTable).toBe(false);
+    });
+  });
+
   describe("stacking the rows", () => {
     it("should start the first row at ROWS_TOP", () => {
       const honours = honoursOf([untouchableOf(0)]);

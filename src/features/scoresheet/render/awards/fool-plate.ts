@@ -64,7 +64,7 @@ export const foolPlate = (copy: Copy, placed: Placed, density: Density): readonl
       "font-size": density.plateFont,
       "letter-spacing": PLATE_TITLE_TRACKING,
     }),
-    text(awardWinner(copy, placed.names), {
+    text(awardWinner(copy, placed.names, placed.wholeTable), {
       x: PLATE_TEXT_LEFT,
       y: baselineOf(placed.top + box.winnerTop, density.plateWinnerFont),
       fill: palette.ink,

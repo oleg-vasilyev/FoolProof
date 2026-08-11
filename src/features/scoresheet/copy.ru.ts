@@ -20,6 +20,7 @@ export const copy: Copy = {
   awardsTitle: "НАГРАДЫ",
   awardsCurseLabel: "ПРОКЛЯТИЕ СТОЛА",
   betweenWinners: " и ",
+  everyWinner: "весь стол",
 
   awardTitles: {
     king: "КОРОЛЬ СТОЛА",

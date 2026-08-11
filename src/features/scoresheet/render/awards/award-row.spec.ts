@@ -113,6 +113,7 @@ const DENSITY = {
 const PLACED: Placed = {
   award: AWARD,
   names: ["Oleg"],
+  wholeTable: false,
   colour: COLOUR,
   rank: RANK,
   top: TOP,

@@ -93,14 +93,28 @@ describe("award-lines", () => {
   });
 
   describe("awardWinner()", () => {
+    const SOME_OF_THEM = false;
+
+    const ALL_OF_THEM = true;
+
     it("should print a single name untouched", () => {
-      expect(awardWinner(copy, ["Oleg"])).toBe("Oleg");
+      expect(awardWinner(copy, ["Oleg"], SOME_OF_THEM)).toBe("Oleg");
     });
 
     it("should join several names with the copy's own separator", () => {
       const names = ["Oleg", "Anya", "Roma"];
 
-      expect(awardWinner(copy, names)).toBe(names.join(copy.betweenWinners));
+      expect(awardWinner(copy, names, SOME_OF_THEM)).toBe(names.join(copy.betweenWinners));
+    });
+
+    it("should name the table rather than list it when the winners are everybody", () => {
+      const names = ["Oleg", "Anya", "Roma", "Dima"];
+
+      expect(awardWinner(copy, names, ALL_OF_THEM)).toBe(copy.everyWinner);
+    });
+
+    it("should say so even when the whole table is two people", () => {
+      expect(awardWinner(copy, ["Oleg", "Anya"], ALL_OF_THEM)).toBe(copy.everyWinner);
     });
   });
 

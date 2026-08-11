@@ -1,6 +1,6 @@
 import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import { type Cell } from "#scoresheet/domain/scoring.ts";
-import { CELL_INSET, CELL_SHRINK, GRID_LEFT, GRID_TOP, cellFontOf, columnCentre, indexFontOf, nameToFit, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
+import { CELL_INSET, CELL_SHRINK, GRID_LEFT, GRID_TOP, cellFontOf, columnCentre, indexFontOf, indexStrideOf, nameToFit, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { type CellBox, baselineIn, cellFace } from "#scoresheet/render/chronology/cell-face.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
@@ -8,6 +8,12 @@ import { text } from "#scoresheet/render/svg-tags.ts";
 
 
 const FIRST_COLUMN = 0;
+
+const FIRST_ROUND = 0;
+
+const NEXT_ROUND = 1;
+
+const NOTHING = 0;
 
 const NAME_LIFT = 30;
 
@@ -57,9 +63,12 @@ const rowIndex = (sheet: Sheet, round: number): string =>
 const cellOf = (sheet: Sheet, cell: Cell, column: number, round: number): readonly string[] =>
   cellFace(boxIn(sheet, column, round), cell);
 
+const printsIndex = (sheet: Sheet, round: number): boolean =>
+  round === FIRST_ROUND || (round + NEXT_ROUND) % indexStrideOf(sheet.rowHeight) === NOTHING;
+
 export const chronologyGrid = (sheet: Sheet): readonly string[] =>
   Array.from({ length: sheet.rounds }, (_unused, round) => [
-    rowIndex(sheet, round),
+    ...(printsIndex(sheet, round) ? [rowIndex(sheet, round)] : []),
     ...sheet.players.flatMap((player, column) =>
       cellOf(sheet, player.cells[round] ?? { kind: CellKind.Absent }, column, round)
     ),

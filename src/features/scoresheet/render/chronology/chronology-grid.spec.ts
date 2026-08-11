@@ -16,6 +16,10 @@ const CELL_FONT = 26;
 
 const INDEX_FONT = 20;
 
+const EVERY_ROW = 1;
+
+const indexStrideSpy = vi.fn(() => EVERY_ROW);
+
 const BASELINE = 777;
 
 const COLUMN_NAME_FONT = 34;
@@ -44,6 +48,7 @@ vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
     GRID_LEFT + column * COLUMN_WIDTH + COLUMN_WIDTH / 2,
   nameToFit: (name: string, width: number, largest: number) => nameToFitSpy(name, width, largest),
   indexFontOf: () => INDEX_FONT,
+  indexStrideOf: () => indexStrideSpy(),
 }));
 
 vi.mock("#scoresheet/render/card-metrics.ts", () => ({
@@ -208,11 +213,45 @@ describe("chronology", () => {
       expect(cellFor(ONE)).toEqual({ kind: CellKind.Absent });
     });
 
-    it("should number every round", () => {
+    it("should number every round while the rows are roomy enough", () => {
       chronologyGrid(sheetOf([[PLACED, PLACED, PLACED]]));
 
       expect(printed()).toContain("01");
       expect(printed()).toContain("03");
+    });
+
+    describe("when the rows are too short to number one by one", () => {
+      const EVERY_FIFTH = 5;
+
+      const SIX_ROUNDS = 6;
+
+      beforeEach(() => {
+        indexStrideSpy.mockReturnValue(EVERY_FIFTH);
+      });
+
+      it("should number the rounds the stride lands on", () => {
+        chronologyGrid(sheetOf([Array.from({ length: SIX_ROUNDS }, () => PLACED)]));
+
+        expect(printed()).toContain("05");
+      });
+
+      it("should still number the first round, so the scale has a start", () => {
+        chronologyGrid(sheetOf([Array.from({ length: SIX_ROUNDS }, () => PLACED)]));
+
+        expect(printed()).toContain("01");
+      });
+
+      it("should leave the rounds between them unnumbered", () => {
+        chronologyGrid(sheetOf([Array.from({ length: SIX_ROUNDS }, () => PLACED)]));
+
+        expect(printed()).not.toContain("03");
+      });
+
+      it("should still draw every cell of the rounds it did not number", () => {
+        chronologyGrid(sheetOf([Array.from({ length: SIX_ROUNDS }, () => PLACED)]));
+
+        expect(cellFaceSpy).toHaveBeenCalledTimes(SIX_ROUNDS);
+      });
     });
 
     it("should pad the round number so the column stays flush", () => {

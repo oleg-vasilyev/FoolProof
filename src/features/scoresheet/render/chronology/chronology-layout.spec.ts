@@ -34,6 +34,7 @@ const {
   chartBottomOf,
   columnCentre,
   indexFontOf,
+  indexStrideOf,
   layoutOf,
   legendFontOf,
   nameToFit,
@@ -324,13 +325,43 @@ describe("type sizes", () => {
     expect(indexFontOf(TALL_ROW)).toBeLessThan(cellFontOf(TALL_ROW));
   });
 
-  it("should shrink the round number with the row", () => {
-    expect(indexFontOf(SHORT_ROW)).toBeLessThan(indexFontOf(TALL_ROW));
+  it("should keep the round number legible when the rows go to their floor", () => {
+    expect(indexFontOf(SHORT_ROW)).toBe(indexFontOf(TALL_ROW));
+  });
+
+  it("should never set the round number larger than a full row would carry", () => {
+    const A_ROOMY_SHEET = 200;
+
+    expect(indexFontOf(A_ROOMY_SHEET)).toBe(indexFontOf(TALL_ROW));
   });
 
   it("should return whole pixels, so glyphs land on the grid", () => {
     expect(cellFontOf(SHORT_ROW) % ONE).toBe(NONE);
     expect(indexFontOf(SHORT_ROW) % ONE).toBe(NONE);
+  });
+});
+
+describe("indexStrideOf()", () => {
+  const TALL_ROW = 56;
+
+  const SHORT_ROW = 26;
+
+  const EVERY_ROW = 1;
+
+  const EVERY_FIFTH = 5;
+
+  it("should number every row while a row has the height to carry a number", () => {
+    expect(indexStrideOf(TALL_ROW)).toBe(EVERY_ROW);
+  });
+
+  it("should skip rows once they are too short to number one by one", () => {
+    expect(indexStrideOf(SHORT_ROW)).toBe(EVERY_FIFTH);
+  });
+
+  it("should step in round numbers, so the ones printed read as a scale", () => {
+    const ROUND_STEPS = [1, 5, 10];
+
+    expect(ROUND_STEPS).toContain(indexStrideOf(SHORT_ROW));
   });
 });
 

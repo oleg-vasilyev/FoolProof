@@ -53,7 +53,20 @@ const ELLIPSIS = "…";
 
 export const cellFontOf = (rowHeight: number): number => Math.round(rowHeight * CELL_FONT_RATIO);
 
-export const indexFontOf = (rowHeight: number): number => Math.round(rowHeight * INDEX_FONT_RATIO);
+const INDEX_ROOM = 31;
+
+const INDEX_STRIDES: readonly number[] = [1, 5, 10];
+
+const WIDEST_STRIDE = 10;
+
+export const indexStrideOf = (rowHeight: number): number =>
+  INDEX_STRIDES.find((stride) => rowHeight * stride >= INDEX_ROOM) ?? WIDEST_STRIDE;
+
+export const indexFontOf = (rowHeight: number): number =>
+  Math.min(
+    Math.round(ROW_HEIGHT_MAX * INDEX_FONT_RATIO),
+    Math.round(rowHeight * indexStrideOf(rowHeight) * INDEX_FONT_RATIO)
+  );
 
 export const legendFontOf = (slotWidth: number): number =>
   Math.min(fontSize.legend, Math.round(slotWidth * LEGEND_FONT_RATIO));

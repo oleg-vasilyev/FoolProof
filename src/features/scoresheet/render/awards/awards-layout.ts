@@ -121,6 +121,7 @@ export const ROOMY: Density = {
 export interface Placed {
   readonly award: Award;
   readonly names: readonly string[];
+  readonly wholeTable: boolean;
   readonly colour: string;
   readonly rank: number;
   readonly top: number;
@@ -187,14 +188,19 @@ const place = (
   rank: number,
   top: number,
   height: number
-): Placed => ({
-  award,
-  names: namesOf(players, award),
-  colour: colourFor(seatOf(players, award)),
-  rank,
-  top,
-  height,
-});
+): Placed => {
+  const names = namesOf(players, award);
+
+  return {
+    award,
+    names,
+    wholeTable: names.length === players.length,
+    colour: colourFor(seatOf(players, award)),
+    rank,
+    top,
+    height,
+  };
+};
 
 const isFool = (award: Award): boolean => award.name === AwardName.FoolOfTheNight;
 

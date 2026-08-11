@@ -48,7 +48,7 @@ export const awardRow = (copy: Copy, placed: Placed, density: Density): readonly
       "font-size": density.titleFont,
       "letter-spacing": ROW_TITLE_TRACKING,
     }),
-    text(awardWinner(copy, placed.names), {
+    text(awardWinner(copy, placed.names, placed.wholeTable), {
       x: TEXT_LEFT,
       y: baselineOf(winnerTop, density.winnerFont),
       fill: placed.colour,

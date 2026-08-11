@@ -6,8 +6,8 @@ import { gameTally, playerTally } from "#scoresheet/render/session-tally.ts";
 
 export const awardTitle = (copy: Copy, award: Award): string => copy.awardTitles[award.name];
 
-export const awardWinner = (copy: Copy, names: readonly string[]): string =>
-  names.join(copy.betweenWinners);
+export const awardWinner = (copy: Copy, names: readonly string[], wholeTable: boolean): string =>
+  wholeTable ? copy.everyWinner : names.join(copy.betweenWinners);
 
 export const awardReason = (copy: Copy, award: Award): string => {
   switch (award.name) {
