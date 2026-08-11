@@ -306,6 +306,13 @@ environment value is ever printed.
 Coverage and mutation write their reports into `reports/`, which is gitignored
 whole — nothing about testing lands next to the source.
 
+Occasional jobs stay out of that table and live behind one script, which lists
+itself and what each one is for when run with no argument:
+
+```bash
+node scripts/tools.ts
+```
+
 ## Watching it play
 
 `npm test` proves the pieces. `npm run e2e` proves the bot: it starts

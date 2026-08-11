@@ -124,9 +124,19 @@ export interface LocaleRepository {
   rememberedChatLocales(): readonly ChatLocaleChoice[];
 }
 
+export interface ForgottenChat {
+  players: number;
+  games: number;
+}
+
+export interface MaintenanceRepository {
+  forgetChat(chatId: number): ForgottenChat;
+}
+
 export interface Repository
   extends CardRepository,
     RosterRepository,
     ScoresheetRepository,
     DiagnosticsRepository,
-    LocaleRepository {}
+    LocaleRepository,
+    MaintenanceRepository {}

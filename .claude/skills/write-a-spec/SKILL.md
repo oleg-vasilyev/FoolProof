@@ -180,7 +180,7 @@ Fixtures live beside stubs and read as builders, not classes:
 `featureOf`.
 
 `*.stub.ts` lives **beside the thing it stands in for**, never in a central
-testing folder — `repository.stub.ts` next to `sqlite-repository.ts`,
+testing folder — `repository-contract.stub.ts` next to the contract it stands for,
 `card-state.stub.ts` next to the reducer, `env.stub.ts` next to `env.ts`. A stub
 for something we did not write (grammY's `Api`, a
 synthetic `Update`, a `Context`) sits next to its only consumer instead, which is

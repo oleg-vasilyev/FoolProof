@@ -47,7 +47,7 @@ connection can only be exercised against a real SQLite, and a real SQLite never
 returns the wrong type for a column — so a defensive branch written in the SQL
 file is unreachable from its own spec, and the mutation score will say so.
 
-## 3. `src/shared/repository/repository.stub.ts`
+## 3. `src/shared/repository/repository-contract.stub.ts`
 
 Add a `<method>Spy` field with a sensible default in the constructor, and a
 method that delegates to it. Every spec that mocks the repository gets the new

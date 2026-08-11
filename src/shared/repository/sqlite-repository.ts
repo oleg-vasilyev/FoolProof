@@ -353,6 +353,20 @@ export const sqliteRepository: Repository = {
       .map(toChatLocaleChoice);
   },
 
+  forgetChat(chatId) {
+    return transact(() => {
+      const games = db.prepare("DELETE FROM games WHERE chat_id = ?").run(chatId);
+      const players = db.prepare("DELETE FROM players WHERE chat_id = ?").run(chatId);
+
+      db.prepare("DELETE FROM chat_locales WHERE chat_id = ?").run(chatId);
+
+      return {
+        players: requireNum(players.changes),
+        games: requireNum(games.changes),
+      };
+    });
+  },
+
   seriesChronology(chatId) {
     const played = db
       .prepare(

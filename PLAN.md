@@ -572,6 +572,38 @@ Three SQLite specifics that are easy to get wrong:
   API caps IDs at 52 significant bits, so they survive the round trip through a JS
   number
 
+### One file for every chat, not one file per chat
+
+`chat_id` is on `players`, `games` and `chat_locales`, and **every query about a
+chat is scoped by it**. The four that read across chats do so on purpose and none
+of them is answering a chat's question: `liveCards` redraws every card at startup,
+`rememberedChatLocales` republishes the menus, `idleCards` sweeps abandoned games,
+and `storageSummary` counts the whole file for `/status`. So a chat is isolated by
+the data model, and a file per chat would buy nothing while costing a connection
+per chat, a schema to apply per file, and a rewritten contract in which every
+method first has to find the right database.
+
+What a file per chat *would* have given for free is throwing one away, so that is
+the one thing the single file has to answer explicitly: **`forgetChat(chatId)`
+deletes the chat's games, then its players, then its language choice, in one
+transaction.** Games first, because **three** columns reference `players(id)` with
+no `ON DELETE` clause — `games.starter_player_id`, `game_players.player_id` and
+`game_events.player_id` — so deleting a player who is still seated, or who started
+a game, or who is named in an exit, is refused. Deleting the games cascades the
+seats and the exits away first and clears the third reference with them. Adding
+`ON DELETE CASCADE` to any one of the three would not free the order; the other two
+would still refuse.
+
+The rows go, but the bytes do not: SQLite leaves deleted rows on free pages and in
+the write-ahead log until a checkpoint or a `VACUUM`. So this **forgets a chat, it
+does not shred it** — enough for a group that left and wants to stop being counted,
+not enough to promise anything to somebody worried about the file itself.
+
+It is deliberately **not a command**. Nobody at the table should be one tap away
+from deleting the evening, and the case it exists for arrives out of band anyway.
+It lives in `scripts/tools.ts`, and [README.md](README.md#scripts) says how to run
+the occasional tools.
+
 ### A live card is a row; a dead one is not
 
 A live card lives in `games` with `confirmed_at IS NULL` — it has to survive a

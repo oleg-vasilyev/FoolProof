@@ -940,3 +940,93 @@ describe("the language a chat chose", () => {
     expect(repo.rememberedChatLocales()).toEqual([{ chatId: CHAT_ID, locale: "en" }]);
   });
 });
+
+describe("forgetChat()", () => {
+  const rowsIn = (table: string): number =>
+    Number(db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get()?.n);
+
+  const anEveningIn = (chatId: number): void => {
+    const [first, second] = [
+      repo.createPlayer(chatId, "Oleg").id,
+      repo.createPlayer(chatId, "Anya").id,
+    ];
+    const gameId = repo.openGame(chatId, [first, second]);
+
+    repo.attachMessage(gameId, MESSAGE_ID);
+    repo.appendExit(gameId, first, ONCE, ACTOR_ID);
+    repo.confirmGame(gameId, [{ playerId: second, position: TWO }], ACTOR_ID, TWO);
+    repo.rememberChatLocale(chatId, "ru");
+  };
+
+  it("should leave the chat with no players", () => {
+    anEveningIn(CHAT_ID);
+
+    repo.forgetChat(CHAT_ID);
+
+    expect(repo.playersInChat(CHAT_ID)).toEqual([]);
+  });
+
+  it("should leave the chat with nothing to draw a scoresheet from", () => {
+    anEveningIn(CHAT_ID);
+
+    repo.forgetChat(CHAT_ID);
+
+    expect(repo.seriesChronology(CHAT_ID)).toBeNull();
+  });
+
+  it("should forget the language the chat chose, so it is asked again", () => {
+    anEveningIn(CHAT_ID);
+
+    repo.forgetChat(CHAT_ID);
+
+    expect(repo.chatLocale(CHAT_ID)).toBeNull();
+  });
+
+  it("should let the schema cascade the seats and the exits away", () => {
+    anEveningIn(CHAT_ID);
+
+    repo.forgetChat(CHAT_ID);
+
+    expect([rowsIn("game_players"), rowsIn("game_events")]).toEqual([NONE, NONE]);
+  });
+
+  it("should forget a card that is still live, not only finished games", () => {
+    const playerIds = seedPlayers("Oleg", "Anya");
+    const gameId = repo.openGame(CHAT_ID, playerIds);
+
+    repo.attachMessage(gameId, MESSAGE_ID);
+    repo.forgetChat(CHAT_ID);
+
+    expect(repo.liveCardInChat(CHAT_ID)).toBeNull();
+  });
+
+  it("should touch no other chat, which is the whole point of one database", () => {
+    anEveningIn(CHAT_ID);
+    anEveningIn(OTHER_CHAT_ID);
+
+    repo.forgetChat(CHAT_ID);
+
+    expect([
+      repo.playersInChat(OTHER_CHAT_ID).length,
+      repo.seriesChronology(OTHER_CHAT_ID)?.games.length,
+      repo.chatLocale(OTHER_CHAT_ID),
+    ]).toEqual([TWO, ONCE, "ru"]);
+  });
+
+  it("should say how much it forgot, so the tool can report it", () => {
+    anEveningIn(CHAT_ID);
+
+    expect(repo.forgetChat(CHAT_ID)).toEqual({ players: TWO, games: ONCE });
+  });
+
+  it("should count only the chat it was asked about", () => {
+    anEveningIn(CHAT_ID);
+    anEveningIn(OTHER_CHAT_ID);
+
+    expect(repo.forgetChat(CHAT_ID)).toEqual({ players: TWO, games: ONCE });
+  });
+
+  it("should forget a chat that was never played in without complaining", () => {
+    expect(repo.forgetChat(CHAT_ID)).toEqual({ players: NONE, games: NONE });
+  });
+});

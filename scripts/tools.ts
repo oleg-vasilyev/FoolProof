@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";
 import { rootDir } from "#shared/config/env.ts";
+import { repository } from "#shared/repository/repository-instance.ts";
 import { refreshDesignPage } from "./design-page.ts";
 import { GALLERY_DIR, gallery } from "./gallery.ts";
 import { MOCKUP_DIR, posters } from "./mockups.ts";
@@ -14,6 +15,8 @@ const TOOL_NAME = 0;
 const PAGE_TO_READ = 1;
 
 const FILE_TO_WRITE = 2;
+
+const CHAT_TO_FORGET = 1;
 
 const FAILED = 1;
 
@@ -46,6 +49,20 @@ const drawGallery = async (): Promise<void> => {
   }
 };
 
+const A_WHOLE_NUMBER = /^-?\d+$/;
+
+const forgetChat = (args: readonly string[]): void => {
+  const asked = args[CHAT_TO_FORGET];
+
+  if (asked === undefined || !A_WHOLE_NUMBER.test(asked)) {
+    throw new Error("forget-chat needs the chat id of the group whose data should go");
+  }
+
+  const gone = repository.forgetChat(Number(asked));
+
+  console.log(`chat ${asked}: forgot ${String(gone.games)} games and ${String(gone.players)} players`);
+};
+
 const TOOLS: Readonly<Record<string, Tool>> = {
   mockups: {
     does: `draw the sample evening into ${MOCKUP_DIR}/ as SVG and PNG`,
@@ -56,6 +73,11 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     does: `draw every edge of the two posters into ${GALLERY_DIR}/ for a human or an agent to look at`,
     usage: "node scripts/tools.ts gallery",
     run: drawGallery,
+  },
+  "forget-chat": {
+    does: "delete one chat's games, players and language choice, leaving every other chat alone",
+    usage: "node scripts/tools.ts forget-chat <chat id>",
+    run: forgetChat,
   },
   "design-page": {
     does: "redraw every mockup on a Claude Design page, leaving its prose alone",
