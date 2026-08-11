@@ -201,10 +201,60 @@ ERROR supervisor: the bot never got going (exit code 1) — fix what the log abo
 [PLAN.md](PLAN.md#what-survives-a-failure) explains what each failure costs and why
 the supervisor does not forward the signal itself.
 
+## Running it on a server
+
+A laptop that has to be awake on a Friday evening is the weakest part of the setup,
+and moving off it is cheap: long polling means the host opens **no port, needs no
+domain and no certificate**, so a firewall with nothing but SSH in it is enough.
+Anything that runs Node 24 will do. This one runs on a free Oracle Cloud VM with
+1 GB of memory, where the two processes idle at about 76 MB and the heaviest `/stats`
+peaks at 411 MB.
+
+```bash
+git clone https://github.com/oleg-vasilyev/FoolProof.git
+cd FoolProof
+npm ci
+cp .env.example .env.production
+chmod 600 .env.production
+```
+
+Put the token in `.env.production`, and point `DB_PATH` at a directory **outside the
+clone**, which `.env.example` explains how to spell:
+
+```
+DB_PATH=/home/ubuntu/data/foolproof.db
+```
+
+Outside, because a deploy pulls into the clone and nothing that deploys should be
+able to reach the games. Copy an existing database there before the first start
+(with its `-wal` and `-shm` sidecars, per the section above); the schema creates
+whatever is missing, so a file from an older version needs no migration.
+
+Then hand it to systemd. [`deploy/foolproof.service`](deploy/foolproof.service) is
+the unit, and it assumes the user `ubuntu`, the clone at `/home/ubuntu/FoolProof`
+and Node at `/usr/local/bin/node` — edit those three lines if yours differ:
+
+```bash
+sudo install -m 644 deploy/foolproof.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now foolproof
+journalctl -u foolproof -f
+```
+
+`systemctl restart foolproof` and `systemctl stop foolproof` reach the bot the same
+way `Ctrl+C` does, so the pending edit is still flushed. The unit brings the bot
+back after a crash or a reboot, and gives up after five failed starts in five
+minutes — [PLAN.md](PLAN.md#what-survives-a-failure) explains which failures it is
+allowed to answer and which are the supervisor's.
+
+One thing to get right before the first start: **stop whatever was polling before**,
+for the reason in [Two environments, two databases](#two-environments-two-databases)
+— one token serves one process.
+
 ## Asking the bot how it is doing
 
-The laptop is at home and you are not. **`/status`** answers from the chat with
-everything the terminal would have told you:
+The bot is on a machine you are not sitting at. **`/status`** answers from the chat
+with everything the terminal would have told you:
 
 ```
 Bot status
@@ -327,6 +377,7 @@ src/
                         telegram, text, timing — a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
 docs/mockups/           the two posters this file shows, drawn by scripts/tools.ts
+deploy/                 the systemd unit a server copy is installed from
 scripts/                dev utilities that are not part of the bot
 e2e/                    the fake Telegram and the scenarios played against it
 ```

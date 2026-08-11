@@ -45,10 +45,12 @@ true — a Telegram bot with long polling is one process by nature. If the produ
 ever outgrows it, the repository interface is the only thing that has to change.
 
 Long polling and no webhook, for the same reason. A webhook needs a public HTTPS
-address with a valid certificate — a domain, a reverse proxy, a VPS — which is
-real infrastructure for a bot that runs on a laptop. Polling inverts who dials
-whom: the bot reaches out, so it works from behind NAT with nothing exposed and
-no secret to verify. The cost is a couple of hundred milliseconds between a tap
+address with a valid certificate — a domain, a reverse proxy, an open port —
+which is real infrastructure for a bot a handful of friends use. Polling inverts
+who dials whom: the bot reaches out, so it works from behind NAT with nothing
+exposed and no secret to verify. Moving it off a laptop and onto a host did not
+change that: the host accepts nothing from the internet at all, which is most of
+why the move was an afternoon. The cost is a couple of hundred milliseconds between a tap
 and the card updating, which nobody will notice, and a process that has to
 actually be running on a Friday evening. A webhook earns its keep at thousands of
 chats; this is one.
@@ -1012,9 +1014,9 @@ bundled with Node 24 is well past both.
 
 ## What survives a failure
 
-A game happens once a week, on a laptop, over home wifi. Every part of the evening
-that a failure could take away has to come back on its own, because nobody is going
-to read a log during a hand of cards. Four failures, four answers:
+A game happens once a week, and nobody is going to read a log during a hand of
+cards. Every part of the evening that a failure could take away has to come back on
+its own. Five failures, five answers:
 
 **The connection drops.** Long polling already survives it: grammY retries
 `getUpdates` every three seconds forever, and only an invalid token (401) or a
@@ -1065,6 +1067,32 @@ same failure once a minute and hiding the one message that says what to fix. Onc
 the bot has worked, it is retried indefinitely — during a game, giving up is the
 worse answer.
 
+**The machine restarts.** The supervisor goes down with everything else, so
+something outside both processes has to bring them back. That is the host's service
+manager rather than code in this repository, and it is given the failures the
+supervisor cannot answer and no others:
+
+- **the host booting**, once the network is routable enough for the first
+  `getUpdates` to leave
+- **the supervisor itself dying** — killed for memory, or crashed
+- **a process that never reached our code**: the runtime refuses to start at all
+  when the env file it is pointed at is missing, so nothing in this repository is
+  ever loaded and nothing here can report it
+
+Everything else is already answered one level down, and the service manager is told
+to keep out of it: an exit code of 0 is the supervisor **deciding** to stop — a stop
+was asked for, or the bot could never start — and starting it again would undo a
+decision that was made for a reason, hammering Telegram with the same broken token
+and burying the one line that says what to fix. The backoff belongs to the
+supervisor; a second restarter that also retried would only be arguing with it.
+
+The third case needs the give-up rule repeated at that level, because it is the one
+failure that leaves the supervisor's own counter unreached. **Five starts within
+five minutes and then stay down** — deliberately the same shape as the five tries
+below, since a host that cannot start the bot at all is the same problem as a bot
+that cannot run, and the answer to both is one legible failure rather than a line
+repeating in the journal for ever.
+
 **Stopping it.** `Ctrl+C` in the terminal reaches both processes, because the console
 sends it to the whole group: the bot flushes its pending edit and exits, and the
 supervisor sees a stop was asked for and does not start it again. The supervisor
@@ -1072,6 +1100,12 @@ therefore does **not** forward the signal itself — a second `SIGINT` would arr
 after the bot's own one-shot handler had gone and kill it outright, losing the flush.
 It only waits, and kills the child after five seconds if it is still there, which is
 what happens when a signal reaches the parent alone.
+
+A service manager asked to stop the bot must reach both processes the same way, and
+systemd does by default — it signals the whole control group. That keeps the server
+on the path `Ctrl+C` has been exercising all along. Configuring it to signal only
+the main process would still work, through the five-second kill, but slowly and
+along a path nothing tests.
 
 Nothing in the recovery path may become a new reason to fail: a feature that throws
 while catching up on startup is logged and skipped, the command menu is allowed to
@@ -1081,8 +1115,9 @@ cannot start is worse than both, which is why it counts its failures.
 
 ### Asking the bot how it is doing
 
-The bot runs on a laptop at home; the person responsible for it has a phone. So the
-bot has to be able to answer the questions the terminal would have answered:
+The bot runs on a machine nobody is sitting at; the person responsible for it has a
+phone. So the bot has to be able to answer the questions the terminal would have
+answered:
 
 - **which database is open** — the file name, its size, and what is recorded in it.
   This is the one that earns the command: a production evening that came up on the
@@ -1119,7 +1154,7 @@ exactly why the supervisor tells the new process how the old one ended.
 
 | Situation | Behaviour |
 |---|---|
-| The wifi drops mid-game | Taps queue on Telegram's side; the card catches up when it returns |
+| The connection drops mid-game | Taps queue on Telegram's side; the card catches up when it returns |
 | The bot is restarted mid-game | The card is redrawn from the database as it starts |
 | Two processes on one token | Telegram splits the updates; 409 ends polling, so run one |
 | A player sits a game out | A new `/game` without them; there must be no live card |

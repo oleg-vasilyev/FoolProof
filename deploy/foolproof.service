@@ -1,0 +1,49 @@
+# The bot as a service on a Linux host. Install it with the steps in
+# README.md#running-it-on-a-server — this file is the copy that is version
+# controlled, /etc/systemd/system/foolproof.service is the copy systemd reads.
+
+[Unit]
+Description=FoolProof, the card-game scoresheet bot
+Documentation=file:///home/ubuntu/FoolProof/README.md
+# Long polling makes an outbound connection at startup, so wait for a route
+# rather than merely for the network stack to exist.
+After=network-online.target
+Wants=network-online.target
+
+# Five tries and then stay down, which is the supervisor's own rule one level up
+# — see PLAN.md, "What survives a failure". The interval has to be longer than
+# RestartSec below or the limit can never be reached and a host that cannot start
+# the bot at all restarts it every ten seconds for ever.
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/FoolProof
+# This is `npm run start:prod` with npm taken out: npm would add a third node
+# process to a 954 MB host and forward the signals systemd already delivers to
+# the whole control group. Keep it in step with the script in package.json.
+ExecStart=/usr/local/bin/node --env-file=.env.production src/supervisor.ts
+
+# on-failure, not always: an exit code of 0 is the supervisor deciding to stop,
+# and PLAN.md, "What survives a failure", says why restarting that is the worse
+# answer. What reaches systemd instead is a failure the supervisor never saw —
+# a missing .env.production, which --env-file refuses before any of our code
+# runs — and the start limit above is what stops those.
+Restart=on-failure
+RestartSec=10
+# The supervisor gives its child 5 s to finish what it was doing; this is that
+# with room to spare.
+TimeoutStopSec=30
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=foolproof
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

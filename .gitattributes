@@ -1,0 +1,5 @@
+# A systemd unit is read by a Linux host, so it is stored and checked out with LF
+# whatever the machine that edited it does. Nothing here has yet been broken by a
+# CRLF checkout — this is the guard that keeps it that way, since the file reaches
+# a server without anything in between that would notice.
+*.service text eol=lf
