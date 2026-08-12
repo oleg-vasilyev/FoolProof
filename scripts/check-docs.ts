@@ -1,7 +1,7 @@
 import { readdirSync, existsSync, readFileSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
 import { MOCKUP_DIR, posters } from "./mockups.ts";
-import { SITE_CSS, SITE_CSS_SOURCE, freshSiteCss } from "./site-css.ts";
+import { SITE_CSS, SITE_PAGES } from "./site-css.ts";
 import { SITE_POSTER_DIR, sitePosters } from "./site-posters.ts";
 
 
@@ -227,17 +227,36 @@ const mockupsOutOfStep = (): readonly string[] =>
 const sitePostersOutOfStep = (): readonly string[] =>
   drawingsOutOfStep(SITE_POSTER_DIR, sitePosters(), "site-posters");
 
+const A_CLASS_ATTRIBUTE = /class="([^"]+)"/g;
+
+const ESCAPED_IN_A_SELECTOR = /[.:[\]/]/g;
+
+const classesUsedIn = (html: string): ReadonlySet<string> =>
+  new Set(
+    [...html.matchAll(A_CLASS_ATTRIBUTE)]
+      .flatMap((match) => (match[FIRST_GROUP] ?? "").split(/\s+/))
+      .filter((token) => token.length > NOTHING)
+  );
+
+const selectorFor = (token: string): string =>
+  `.${token.replaceAll(ESCAPED_IN_A_SELECTOR, (character) => `\\${character}`)}`;
+
 const siteCssOutOfStep = (): readonly string[] => {
   if (!existsSync(SITE_CSS)) {
     return [`${SITE_CSS}: never built — run "node scripts/tools.ts site-css"`];
   }
 
-  return read(SITE_CSS) === freshSiteCss().replaceAll("\r\n", "\n")
-    ? []
-    : [
-        `${SITE_CSS}: not what the pages and ${SITE_CSS_SOURCE} build to today — ` +
-          `run "node scripts/tools.ts site-css"`,
-      ];
+  const css = read(SITE_CSS);
+
+  return SITE_PAGES.flatMap((page) =>
+    [...classesUsedIn(read(page))]
+      .filter((token) => !css.includes(selectorFor(token)))
+      .map(
+        (token) =>
+          `${SITE_CSS}: carries no rule for "${token}", which ${page} uses — ` +
+          `run "node scripts/tools.ts site-css"`
+      )
+  );
 };
 
 const complaints = [

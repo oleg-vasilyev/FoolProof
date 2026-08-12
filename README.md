@@ -450,15 +450,17 @@ Two parts of it are generated rather than written:
 is the deploy, so a forgotten rebuild does not wait to be noticed — it ships. The
 posters are the bot's own renders of the same sample evening as the mockups above,
 English copy with Latin names for one page and Russian for the other, compared
-against what the renderer draws today. The stylesheet is compared by building it
-again and diffing, which is why the Tailwind input lives in `scripts/site.css`
-rather than in the folder being published: it is a source, and everything in `docs/`
-is served.
+against what the renderer draws today. The stylesheet is checked the way its
+failure actually arrives: every class either page uses has to have a rule in it, so
+adding one and forgetting the rebuild is a red gate rather than an unstyled element
+in production.
 
-Building the CSS here rather than loading a script tag in the page is worth the
-extra file — a page that fetches a compiler to colour itself is slower than the
-thing it is selling. The whole first screen is 44 KB, and the posters below it are
-lazy.
+The Tailwind input lives in `scripts/site.css` because everything inside `docs/` is
+served, and a source is not for serving. The compiler itself is **not** a dependency
+of this project — `site-css` fetches it with `npx`. It would otherwise be installed
+on the server on every deploy, to build a stylesheet the server has no idea exists.
+Building the CSS at all, rather than letting a script tag do it in the visitor's
+browser, is what keeps the first screen at 44 KB with the posters below it lazy.
 
 ## Layout
 

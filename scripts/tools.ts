@@ -88,7 +88,7 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     does: `rebuild ${SITE_CSS} from ${SITE_CSS_SOURCE} and the classes the pages use`,
     usage: "node scripts/tools.ts site-css",
     run: () => {
-      buildSiteCss(resolve(rootDir, SITE_CSS));
+      buildSiteCss();
       console.log(SITE_CSS);
     },
   },

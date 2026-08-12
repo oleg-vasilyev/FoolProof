@@ -1,35 +1,22 @@
-import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { execSync } from "node:child_process";
+import { resolve } from "node:path";
 import { rootDir } from "#shared/config/env.ts";
 
 
-const TAILWIND = "node_modules/@tailwindcss/cli/dist/index.mjs";
+const TAILWIND = "@tailwindcss/cli@4";
 
 export const SITE_CSS_SOURCE = "scripts/site.css";
 
 export const SITE_CSS = "docs/styles.css";
 
-export const buildSiteCss = (into: string): void => {
-  execFileSync(
-    process.execPath,
-    [
-      resolve(rootDir, TAILWIND),
-      "--input",
-      resolve(rootDir, SITE_CSS_SOURCE),
-      "--output",
-      into,
-      "--minify",
-    ],
-    { cwd: rootDir, stdio: "pipe" }
-  );
-};
+export const SITE_PAGES = ["docs/index.html", "docs/ru/index.html"];
 
-export const freshSiteCss = (): string => {
-  const scratch = join(mkdtempSync(join(tmpdir(), "site-css-")), "styles.css");
+export const buildSiteCss = (): void => {
+  const input = resolve(rootDir, SITE_CSS_SOURCE);
+  const output = resolve(rootDir, SITE_CSS);
 
-  buildSiteCss(scratch);
-
-  return readFileSync(scratch, "utf8");
+  execSync(`npx --yes ${TAILWIND} --input "${input}" --output "${output}" --minify`, {
+    cwd: rootDir,
+    stdio: "inherit",
+  });
 };
