@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="HAceXbRw0KJbxci9i_XyhYqhdRv54pl5WS2DYeIj7iE">
 
 <title>FoolProof — the Telegram bot that keeps score at Durak</title>
 <meta name="description" content="A free Telegram bot for Podkidnoy Durak. Send the line-up once, tap the names in the order people finish, and get the whole evening back as two posters. No accounts, nothing to install.">
@@ -363,6 +364,9 @@
   </div>
 </footer>
 
+<script data-goatcounter="https://alehvasilyeu.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+
 <script>
 document.documentElement.classList.add("reveal-armed");
 const seen = new IntersectionObserver((entries) => {
@@ -381,6 +385,17 @@ setTimeout(() => {
     }
   });
 }, 2000);
+
+document.querySelectorAll('a[href*="t.me/"]').forEach((link) => {
+  link.addEventListener("click", () => {
+    const action = link.href.includes("startgroup") ? "add-to-group" : "open-bot";
+    window.goatcounter?.count?.({
+      path: action + "-" + document.documentElement.lang,
+      title: "Telegram link",
+      event: true,
+    });
+  });
+});
 </script>
 
 </body>
