@@ -13,12 +13,35 @@
   --color-ink: #f5f1ea;
   --color-muted: #c6bfb4;
   --color-dim: #a79f93;
-  --color-amber: #f2a93b;
-  --color-flare: #ffc46b;
+  --color-accent: #4fb3c4;
+  --color-accent-soft: #7ccfdd;
   --color-fool: #c43b36;
 
   --font-sans: "Golos Text", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-ground);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  [id] {
+    scroll-margin-top: 5.5rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
 }
 
 @layer components {
@@ -42,16 +65,18 @@
     transition:
       background-color 0.15s,
       border-color 0.15s,
-      color 0.15s;
+      color 0.15s,
+      box-shadow 0.15s;
   }
 
-  .btn-amber {
-    background-color: var(--color-amber);
+  .btn-accent {
+    background-color: var(--color-accent);
     color: var(--color-ground);
   }
 
-  .btn-amber:hover {
-    background-color: var(--color-flare);
+  .btn-accent:hover {
+    background-color: var(--color-accent-soft);
+    box-shadow: 0 6px 24px -8px color-mix(in srgb, var(--color-accent) 55%, transparent);
   }
 
   .btn-ghost {
@@ -60,13 +85,13 @@
   }
 
   .btn-ghost:hover {
-    border-color: var(--color-amber);
-    color: var(--color-amber);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
 
   .cmd {
     font-family: var(--font-mono);
-    color: var(--color-amber);
+    color: var(--color-accent);
   }
 
   .key {
@@ -78,5 +103,135 @@
     font-size: 15px;
     font-weight: 500;
     color: var(--color-ink);
+  }
+
+  .lift {
+    transition:
+      border-color 0.25s,
+      box-shadow 0.25s;
+  }
+
+  .lift:hover {
+    border-color: var(--color-edge);
+    box-shadow: 0 14px 32px -18px rgb(0 0 0 / 0.9);
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-rise,
+  .hero-rise-2,
+  .hero-rise-3,
+  .hero-rise-4 {
+    animation: none;
+  }
+
+  .key-live {
+    border-color: var(--color-line);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .btn {
+      transition:
+        background-color 0.15s,
+        border-color 0.15s,
+        color 0.15s,
+        transform 0.15s,
+        box-shadow 0.15s;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .lift {
+      transition:
+        border-color 0.25s,
+        transform 0.25s,
+        box-shadow 0.25s;
+    }
+
+    .lift:hover {
+      transform: translateY(-3px);
+    }
+
+    .reveal-armed .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition:
+        opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal-armed .reveal.is-on {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-armed .reveal:nth-child(2) {
+      transition-delay: 90ms;
+    }
+
+    .reveal-armed .reveal:nth-child(3) {
+      transition-delay: 180ms;
+    }
+
+    .reveal-armed .reveal:nth-child(4) {
+      transition-delay: 90ms;
+    }
+
+    .reveal-armed .reveal:nth-child(5) {
+      transition-delay: 180ms;
+    }
+
+    .reveal-armed .reveal:nth-child(6) {
+      transition-delay: 270ms;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero-rise {
+      animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .hero-rise-2 {
+      animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+    }
+
+    .hero-rise-3 {
+      animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    }
+
+    .hero-rise-4 {
+      animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+    }
+
+    @keyframes key-tap {
+      0%,
+      70%,
+      100% {
+        border-color: var(--color-line);
+        box-shadow: 0 0 0 0 transparent;
+      }
+      82% {
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent) 18%, transparent);
+      }
+    }
+
+    .key-live {
+      animation: key-tap 3.2s ease-in-out 1.2s infinite;
+    }
   }
 }
