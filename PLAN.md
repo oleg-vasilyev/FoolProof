@@ -120,6 +120,28 @@ handler**. A text handler that returns without passing the update along silently
 swallows every command below it. This has already happened here once, and the
 symptom is the worst kind — nothing fails, the commands simply stop existing.
 
+### The first contact is a button, and it has to be answered
+
+Telegram puts a **START** button in front of anyone who opens the bot for the first
+time, and tapping it sends `/start`. A bot that never registers the command answers
+that tap with nothing — and the profile description Telegram was showing disappears
+the moment the chat holds a message, so the newcomer is left looking at their own
+`/start` and silence. That is the first impression, and it reads as broken.
+
+So `/start` answers with what the bot is, the one thing to do next, and a pointer to
+`/help` for the rest. It does not repeat the profile description, which was on the
+screen a second earlier.
+
+In a **private** chat the reply carries a single inline button — a `?startgroup=true`
+deep link built from the bot's own username — because one-on-one the bot has nothing
+to do: a game needs a table, and the table is in a group. That button is the only
+one-tap path there; without it the newcomer has to find "Add to Group" in the bot's
+profile menu. In a **group** both the invitation and the button are dropped, since
+the bot is already where it belongs.
+
+`/start` stays out of `setMyCommands`: Telegram renders it as a button of its own, so
+a menu row would buy nothing.
+
 ### A command with no names asks for them
 
 Tapping a command in Telegram's `/` menu sends it immediately — the client gives

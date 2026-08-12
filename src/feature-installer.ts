@@ -4,10 +4,12 @@ import type { Logger } from "#shared/logging/logger.ts";
 import type { ChatLocaleChoice } from "#shared/repository/repository-contract.ts";
 import { localeFrom, type LocaleReader } from "#shared/locale/chat-locale.ts";
 import { DEFAULT_LOCALE, type Locale } from "#shared/locale/locales.ts";
-import { copyIn } from "#app/copy.ts";
+import { copyIn, type Copy } from "#app/copy.ts";
 
 
 const HELP = "help";
+
+const START = "start";
 
 export interface ChatMenu {
   readonly chatId: number;
@@ -23,7 +25,7 @@ const helpBody = (features: readonly Feature[], locale: Locale): string => {
   const copy = copyIn(locale);
 
   return [
-    copy.helpLead,
+    copy.botLead,
     "",
     ...listedRoutesOf(features).map((route) => route.help(locale)),
     copy.helpSelf,
@@ -31,6 +33,20 @@ const helpBody = (features: readonly Feature[], locale: Locale): string => {
     ...features.flatMap((feature) => feature.notes?.(locale) ?? []),
   ].join("\n");
 };
+
+const startBody = (locale: Locale, alone: boolean): string => {
+  const copy = copyIn(locale);
+
+  return alone
+    ? [copy.botLead, "", copy.startInvite, copy.startHelp].join("\n")
+    : [copy.botLead, "", copy.startHelp].join("\n");
+};
+
+const addToGroupMarkup = (copy: Copy, username: string) => ({
+  inline_keyboard: [
+    [{ text: copy.buttonAddToGroup, url: `https://t.me/${username}?startgroup=true` }],
+  ],
+});
 
 const listenersOn = (bot: Bot): Listeners => ({
   onText: (run) => {
@@ -105,6 +121,15 @@ export const installFeatures = (
 
   bot.command(HELP, async (ctx) => {
     await ctx.reply(helpBody(features, localeIn(ctx.chat.id)));
+  });
+
+  bot.command(START, async (ctx) => {
+    const locale = localeIn(ctx.chat.id);
+    const alone = ctx.hasChatType("private");
+
+    await ctx.reply(startBody(locale, alone), {
+      reply_markup: alone ? addToGroupMarkup(copyIn(locale), ctx.me.username) : undefined,
+    });
   });
 
   for (const feature of features) {

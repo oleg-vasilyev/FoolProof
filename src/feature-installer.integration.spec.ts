@@ -10,7 +10,14 @@ import type { Command } from "#shared/telegram/telegram-contexts.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
 import { cardRecordOf, playerIdOf } from "#shared/repository/database-records.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
-import { botInfoStub, callbackUpdate, messageUpdate, PROMPT_MESSAGE_ID } from "#app/telegram-updates.stub.ts";
+import {
+  BOT_USERNAME,
+  botInfoStub,
+  callbackUpdate,
+  groupMessageUpdate,
+  privateMessageUpdate,
+  PROMPT_MESSAGE_ID,
+} from "#app/telegram-updates.stub.ts";
 
 
 const FAKE_TOKEN = "424242:AAHfake-token-for-tests";
@@ -98,40 +105,73 @@ describe("the bot, driven end to end", () => {
 
   describe("middleware order", () => {
     it("should still answer a command after the text filter was registered", async () => {
-      await bot.handleUpdate(messageUpdate("/game"));
-      await bot.handleUpdate(messageUpdate("/help"));
+      await bot.handleUpdate(groupMessageUpdate("/game"));
+      await bot.handleUpdate(groupMessageUpdate("/help"));
 
       expect(lastCallTo("sendMessage")?.payload.text).toContain("Durak");
     });
 
     it("should reach a feature installed after the one that listens to text", async () => {
-      await bot.handleUpdate(messageUpdate("/stats"));
+      await bot.handleUpdate(groupMessageUpdate("/stats"));
 
       expect(lateCommandSpy).toHaveBeenCalledTimes(ONCE);
     });
 
     it("should let ordinary chatter fall through without a reply", async () => {
-      await bot.handleUpdate(messageUpdate("just talking"));
+      await bot.handleUpdate(groupMessageUpdate("just talking"));
 
       expect(callsTo("sendMessage")).toHaveLength(NEVER);
     });
 
     it("should list every installed feature in the help it sends", async () => {
-      await bot.handleUpdate(messageUpdate("/help"));
+      await bot.handleUpdate(groupMessageUpdate("/help"));
 
       expect(lastCallTo("sendMessage")?.payload.text).toContain("/stats — installed last");
     });
   });
 
+  describe("the first thing a newcomer does", () => {
+    const markupOfLastMessage = () =>
+      lastCallTo("sendMessage")?.payload.reply_markup as
+        | { inline_keyboard: { url: string }[][] }
+        | undefined;
+
+    it("should answer /start, which is silence in a bot that never registered it", async () => {
+      await bot.handleUpdate(privateMessageUpdate("/start"));
+
+      expect(callsTo("sendMessage")).toHaveLength(ONCE);
+    });
+
+    it("should offer a newcomer the button that puts it in a group", async () => {
+      await bot.handleUpdate(privateMessageUpdate("/start"));
+
+      expect(markupOfLastMessage()?.inline_keyboard[0]?.[0]?.url).toBe(
+        `https://t.me/${BOT_USERNAME}?startgroup=true`
+      );
+    });
+
+    it("should answer /start in a group as well", async () => {
+      await bot.handleUpdate(groupMessageUpdate("/start"));
+
+      expect(callsTo("sendMessage")).toHaveLength(ONCE);
+    });
+
+    it("should offer a group no button, since it is already in one", async () => {
+      await bot.handleUpdate(groupMessageUpdate("/start"));
+
+      expect(markupOfLastMessage()).toBeUndefined();
+    });
+  });
+
   describe("opening a card", () => {
     it("should reach the repository from a command with names", async () => {
-      await bot.handleUpdate(messageUpdate("/game Oleg, Anya, Roma"));
+      await bot.handleUpdate(groupMessageUpdate("/game Oleg, Anya, Roma"));
 
       expect(repo.openGameSpy).toHaveBeenCalledTimes(ONCE);
     });
 
     it("should strip the @botname suffix Telegram appends in groups", async () => {
-      await bot.handleUpdate(messageUpdate("/game@foolproof_bot Oleg, Anya"));
+      await bot.handleUpdate(groupMessageUpdate("/game@foolproof_bot Oleg, Anya"));
 
       expect(repo.openGameSpy).toHaveBeenCalledTimes(ONCE);
     });
@@ -140,26 +180,26 @@ describe("the bot, driven end to end", () => {
   describe("the force_reply prompt", () => {
     const answerPrompt = (text: string) =>
       bot.handleUpdate(
-        messageUpdate(text, { messageId: PROMPT_MESSAGE_ID, text: PROMPT_TEXT, fromBot: true })
+        groupMessageUpdate(text, { messageId: PROMPT_MESSAGE_ID, text: PROMPT_TEXT, fromBot: true })
       );
 
     it("should open a card from a reply to the prompt", async () => {
-      await bot.handleUpdate(messageUpdate("/game"));
+      await bot.handleUpdate(groupMessageUpdate("/game"));
       await answerPrompt("Oleg, Anya, Roma");
 
       expect(repo.openGameSpy).toHaveBeenCalledTimes(ONCE);
     });
 
     it("should never delete a prompt that was answered", async () => {
-      await bot.handleUpdate(messageUpdate("/game"));
+      await bot.handleUpdate(groupMessageUpdate("/game"));
       await answerPrompt("Oleg, Anya");
 
       expect(callsTo("deleteMessage")).toHaveLength(NEVER);
     });
 
     it("should delete a prompt that was left standing", async () => {
-      await bot.handleUpdate(messageUpdate("/game"));
-      await bot.handleUpdate(messageUpdate("/game"));
+      await bot.handleUpdate(groupMessageUpdate("/game"));
+      await bot.handleUpdate(groupMessageUpdate("/game"));
 
       expect(lastCallTo("deleteMessage")?.payload.message_id).toBe(PROMPT_MESSAGE_ID);
     });

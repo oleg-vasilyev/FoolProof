@@ -35,7 +35,9 @@ const sender = {
   first_name: "Oleg",
 };
 
-const chat = { id: CHAT_ID, type: "group" as const, title: "Friday" };
+const groupChat = { id: CHAT_ID, type: "group" as const, title: "Friday" };
+
+const privateChat = { id: USER_ID, type: "private" as const, first_name: "Oleg" };
 
 const commandEntities = (text: string): readonly MessageEntity[] | undefined => {
   const firstWord = text.split(" ")[0] ?? "";
@@ -47,7 +49,8 @@ const commandEntities = (text: string): readonly MessageEntity[] | undefined => 
 
 let nextUpdateId = 1;
 
-export const messageUpdate = (
+const messageIn = (
+  chat: object,
   text: string,
   replyTo?: { messageId: number; text: string; fromBot: boolean }
 ): Update =>
@@ -75,6 +78,13 @@ export const messageUpdate = (
     },
   }) as unknown as Update;
 
+export const groupMessageUpdate = (
+  text: string,
+  replyTo?: { messageId: number; text: string; fromBot: boolean }
+): Update => messageIn(groupChat, text, replyTo);
+
+export const privateMessageUpdate = (text: string): Update => messageIn(privateChat, text);
+
 export const callbackUpdate = (data: string): Update =>
   ({
     update_id: nextUpdateId++,
@@ -86,7 +96,7 @@ export const callbackUpdate = (data: string): Update =>
       message: {
         message_id: PROMPT_MESSAGE_ID,
         date: 0,
-        chat,
+        chat: groupChat,
         from: { id: BOT_ID, is_bot: true, first_name: "FoolProof" },
         text: "card",
       },

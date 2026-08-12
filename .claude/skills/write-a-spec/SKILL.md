@@ -336,7 +336,15 @@ Ask, in this order:
 2. Does any assertion belong to another module?
 3. Would every assertion fail if the subject broke? A test that only proves the
    code ran is what the mutation score is for — see the `finish-phase` skill.
-4. **Is it a port?** A spec moved into a new file is rewritten, not copied — the
+4. **Does it tell absence apart from never happening?** `expect(markupOf()).toBeUndefined()`
+   passes when the reply carried no keyboard *and* when there was no reply at all,
+   because the optional chain that reaches for it swallows the difference. So the
+   case guarding "a group gets no button" stayed green against the very silence the
+   phase existed to fix. Any assertion whose subject is something *missing* needs a
+   sibling asserting the interaction happened — `expect(callsTo("sendMessage")).toHaveLength(ONCE)`
+   — or it guards nothing. Inverting a branch does not catch this; unregistering the
+   handler does.
+5. **Is it a port?** A spec moved into a new file is rewritten, not copied — the
    old file's sins travel with it and arrive looking established. Two phases
    running have proved it: splitting a render file silently dropped four
    assertions that had been killing mutants, and splitting a handler file carried

@@ -26,6 +26,12 @@ const UPDATE_ID = 4242;
 
 const CHAT_ID = -100777;
 
+const BOT_USERNAME = "FoolProofMegaBot";
+
+const IN_PRIVATE = true;
+
+const IN_GROUP = false;
+
 class BotMock {
   public registrations: string[] = [];
   public commandSpy = vi.fn();
@@ -81,6 +87,8 @@ describe("installFeatures()", () => {
   let locales: LocaleReaderStub;
 
   const replySpy = vi.fn();
+
+  const chatTypeSpy = vi.fn();
 
   const install = (features: readonly Feature[]) =>
     installFeatures(bot as never, features, logStub, locales.read);
@@ -252,7 +260,7 @@ describe("installFeatures()", () => {
 
   describe("help", () => {
     it("should open with the lead line", async () => {
-      expect(await helpText([featureOf({ name: "game" })])).toContain(copy.helpLead);
+      expect(await helpText([featureOf({ name: "game" })])).toContain(copy.botLead);
     });
 
     it("should list the help line of every command", async () => {
@@ -275,7 +283,7 @@ describe("installFeatures()", () => {
     it("should write the help in that language", async () => {
       locales.readSpy.mockReturnValue(Locale.Ru);
 
-      expect(await helpText([featureOf({ name: "game" })])).toContain(russian.helpLead);
+      expect(await helpText([featureOf({ name: "game" })])).toContain(russian.botLead);
     });
 
     it("should take the command lines in that language too", async () => {
@@ -312,7 +320,7 @@ describe("installFeatures()", () => {
       const text = await helpText([featureOf({ name: "game", notes: () => ["a note"] })]);
 
       expect(text.split("\n")).toEqual([
-        copy.helpLead,
+        copy.botLead,
         "",
         `/game — does it in ${DEFAULT_LOCALE}`,
         copy.helpSelf,
@@ -325,6 +333,114 @@ describe("installFeatures()", () => {
       const lines = (await helpText([featureOf({ name: "game" })])).split("\n");
 
       expect(lines[1]).toBe("");
+    });
+  });
+
+  describe("start", () => {
+    const startIn = async (alone: boolean, chatId = CHAT_ID) => {
+      chatTypeSpy.mockReturnValue(alone);
+      install([featureOf({ name: "game" })]);
+      const registered = bot.commandSpy.mock.calls.find((call) => call[0] === "start")?.[1];
+
+      await (registered as (ctx: unknown) => Promise<void>)({
+        reply: replySpy,
+        chat: { id: chatId },
+        hasChatType: chatTypeSpy,
+        me: { username: BOT_USERNAME },
+      });
+
+      const [text, options] = replySpy.mock.calls[0] ?? [];
+      const markup = (
+        options as { reply_markup?: { inline_keyboard: { text: string; url: string }[][] } }
+      )?.reply_markup;
+
+      return { text: String(text), buttons: markup?.inline_keyboard };
+    };
+
+    it("should register start as a command, not as a listener", () => {
+      install([featureOf({ name: "game" })]);
+
+      expect(bot.registrations).toContain("command:start");
+    });
+
+    it("should answer the button Telegram shows a newcomer at all", async () => {
+      const { text } = await startIn(IN_PRIVATE);
+
+      expect(text).toContain(copy.botLead);
+    });
+
+    it("should name the first thing a newcomer has to do", async () => {
+      const { text } = await startIn(IN_PRIVATE);
+
+      expect(text).toContain(copy.startInvite);
+    });
+
+    it("should point at the command that explains the rest", async () => {
+      const { text } = await startIn(IN_PRIVATE);
+
+      expect(text).toContain(copy.startHelp);
+    });
+
+    it("should ask which language the chat it greets speaks", async () => {
+      await startIn(IN_PRIVATE);
+
+      expect(locales.readSpy).toHaveBeenCalledWith(CHAT_ID);
+    });
+
+    it("should greet in that language", async () => {
+      locales.readSpy.mockReturnValue(Locale.Ru);
+      const { text } = await startIn(IN_PRIVATE);
+
+      expect(text).toContain(russian.startInvite);
+    });
+
+    it("should ask Telegram whether it is alone with the newcomer", async () => {
+      await startIn(IN_PRIVATE);
+
+      expect(chatTypeSpy).toHaveBeenCalledWith("private");
+    });
+
+    it("should offer a button that puts it in a group", async () => {
+      const { buttons } = await startIn(IN_PRIVATE);
+
+      expect(buttons?.[0]?.[0]?.url).toBe(`https://t.me/${BOT_USERNAME}?startgroup=true`);
+    });
+
+    it("should caption that button from the copy table", async () => {
+      const { buttons } = await startIn(IN_PRIVATE);
+
+      expect(buttons?.[0]?.[0]?.text).toBe(copy.buttonAddToGroup);
+    });
+
+    it("should caption it in the language the chat speaks", async () => {
+      locales.readSpy.mockReturnValue(Locale.Ru);
+      const { buttons } = await startIn(IN_PRIVATE);
+
+      expect(buttons?.[0]?.[0]?.text).toBe(russian.buttonAddToGroup);
+    });
+
+    it("should not ask a group to add it to a group", async () => {
+      const { text } = await startIn(IN_GROUP);
+
+      expect(text).not.toContain(copy.startInvite);
+    });
+
+    it("should send a group no button either", async () => {
+      const { buttons } = await startIn(IN_GROUP);
+
+      expect(buttons).toBeUndefined();
+    });
+
+    it("should still tell a group what the bot is and where to read more", async () => {
+      const { text } = await startIn(IN_GROUP);
+
+      expect(text.split("\n")).toEqual([copy.botLead, "", copy.startHelp]);
+    });
+
+    it("should lay a newcomer's greeting out in a fixed shape", async () => {
+      const { text } = await startIn(IN_PRIVATE);
+
+      expect(text.split("\n")).toEqual([copy.botLead, "", copy.startInvite, copy.startHelp]);
     });
   });
 

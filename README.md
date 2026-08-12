@@ -35,6 +35,7 @@ Went first: Oleg
 | `/stats_awards` | The awards picture on its own; needs five games |
 | `/merge` | Folds a name typed twice into the right one |
 | `/language` | Picks the language this chat is played in — English or Russian |
+| `/start` | What the bot is, and a button that puts it in a group |
 | `/help` | What the commands do and how the card works |
 
 This table is the one place the commands are listed; `PLAN.md` says what each one

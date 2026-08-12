@@ -7,8 +7,12 @@ export const copy: Copy = {
 
   commandHelp: "Что умеет бот",
 
-  helpLead: "FoolProof ведёт счёт в дурака.",
+  botLead: "FoolProof ведёт счёт в дурака.",
   helpSelf: "/help — это сообщение",
+
+  startInvite: "Добавьте меня в чат, где играет ваша компания, и отправьте /game с именами.",
+  startHelp: "/help — что делает каждая команда",
+  buttonAddToGroup: "➕ Добавить меня в группу",
 
   tapUnclaimed: "Эта кнопка — из старой версии бота",
 
