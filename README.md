@@ -98,63 +98,47 @@ Node 24 or newer. There is no build step — Node runs the TypeScript directly.
 
 ```bash
 npm install
-cp .env.example .env
+npm run play
 ```
 
-Put a token from [@BotFather](https://t.me/BotFather) in `BOT_TOKEN`, then:
+That prints an address. Open it and you are in a chat with the bot, against a
+**fake Telegram** — no token, no network, nothing to configure. It runs the real
+`src/main.ts`, so what answers you is the bot, not a mock of it.
 
-```bash
-npm start
-```
+**No script here starts the real bot, and none reads an env file.** The bot is
+[running on a server](#running-it-on-a-server), and one token serves exactly one
+process — [PLAN.md](PLAN.md#edge-cases) says what a second one does to the
+updates. The `.env` you keep locally is the *server's* configuration, sent there
+by [`deploy/configure-server.sh`](deploy/configure-server.sh); nothing on this
+machine runs from it.
+
+The cost is that the bot only meets the real Bot API in production. If you need
+to see a change in a real Telegram client first, get a second token from
+[@BotFather](https://t.me/BotFather) and run the supervisor against it by hand —
+that is one command, and the [server section](#running-it-on-a-server) has the
+shape of it.
 
 The bot connects by long polling, so it needs no public address, no certificate
-and no reverse proxy — it works from a laptop behind NAT. It does need to
-actually be running when people play.
+and no reverse proxy. It does need to actually be running when people play.
 
 Add the bot to the group and leave BotFather's privacy mode at its default. In
 that mode a bot sees only commands and replies to its own messages — which is
 exactly what this one needs, and it never reads the rest of the conversation.
 
-## Two environments, two databases
+## Two databases, and only one of them is real
 
-Real evenings and experiments must not land in the same file, so each run names
-its own configuration:
-
-| Command | Env file | Database |
+| Database | Who writes to it | Where it lives |
 |---|---|---|
-| `npm start` | `.env`, skipped if absent | `data/foolproof.dev.db` |
-| `npm run start:prod` | `.env.production`, **required** | `data/foolproof.db` |
+| `data/foolproof.dev.db` | `npm run play`, and every e2e scenario | your machine, gitignored |
+| whatever `DB_PATH` names | the bot on the server | the server, outside the clone |
 
-The two commands run the same code the same way — **the env file, and therefore the
-database, is the only difference**. Whatever you try in dev is what happens on a
-Friday.
+`npm run play` takes `--db=<path>` if you want to play against a copy of
+something else. Nothing local can reach the real one: it is on the server, and the
+`.env.production` naming it is on the server too.
 
-```bash
-cp .env.example .env.production   # then put the token in it
-npm run start:prod
-```
-
-Node loads the file itself (`--env-file`), so there is no dependency and nothing
-to remember about shell syntax. Three properties are worth knowing:
-
-- **Each file is the whole configuration for its run.** Nothing is inherited from
-  `.env`, so a key missing from `.env.production` is missing rather than silently
-  taken from dev — which is how a real Friday would otherwise end up written to the
-  dev database.
-- **`npm run start:prod` refuses to start without `.env.production`.** The dev
-  command tolerates a missing `.env` and then fails on the first missing key, which
-  is the friendlier order for a fresh clone.
-- **The default database is the dev one.** Reaching production takes an explicit
-  command; forgetting a variable cannot.
-
-One bot token serves both, as long as only one process runs at a time — two
-pollers on one token make Telegram hand each update to whichever asked first. The
-same bot answering in the same group is also why dev is best driven from a private
-chat with it: the chat cannot tell you which database is behind it.
-
-Both databases are SQLite files under `data/` (gitignored). Back one up by copying
-the `.db` file **together with its `-wal` and `-shm` sidecars**, or after stopping
-the bot — the write-ahead log can hold games the main file does not have yet.
+Both are SQLite files. Back one up by copying the `.db` file **together with its
+`-wal` and `-shm` sidecars**, or after stopping the bot — the write-ahead log can
+hold games the main file does not have yet.
 
 `/stats` draws a PNG, which needs the two font files in `assets/fonts/`. They are
 committed, so a clone has them; the bot refuses to start without them, because a
@@ -210,25 +194,39 @@ Anything that runs Node 24 will do. This one runs on a free Oracle Cloud VM with
 1 GB of memory, where the two processes idle at about 76 MB and the heaviest `/stats`
 peaks at 411 MB.
 
+On the server, once:
+
 ```bash
 git clone https://github.com/oleg-vasilyev/FoolProof.git
 cd FoolProof
 npm ci
-cp .env.example .env.production
-chmod 600 .env.production
 ```
 
-Put the token in `.env.production`, and point `DB_PATH` at a directory **outside the
-clone**, which `.env.example` explains how to spell:
+Then send it its configuration, **from your machine**, where `.env` is the copy you
+can edit:
 
-```
-DB_PATH=/home/ubuntu/data/foolproof.db
+```bash
+cp .env.example .env    # fill in the token, then
+deploy/configure-server.sh
 ```
 
-Outside, because a deploy pulls into the clone and nothing that deploys should be
-able to reach the games. Copy an existing database there before the first start
-(with its `-wal` and `-shm` sidecars, per the section above); the schema creates
-whatever is missing, so a file from an older version needs no migration.
+That writes `.env.production` on the server with mode 600, restarts the bot, and
+prints the key names and their lengths — never a value. It rewrites one key on the
+way: `DB_PATH` becomes an absolute path **outside the clone**, because a deploy
+checks the clone out from under itself and nothing that deploys should be able to
+reach the games.
+
+Then it waits — up to ninety seconds — for the bot to say it is polling, and puts
+the previous configuration back if the bot stops instead. Ninety, because a wrong
+token does not stop the service: it makes the bot die and be restarted until the
+supervisor gives up, about forty seconds in, and anything quicker would call a
+crash-looping bot healthy. If the wait runs out with the service still up but
+nothing said, the script leaves the new file in place and tells you to read the
+journal — rolling back a configuration that may be fine is the worse mistake.
+
+Copy an existing database to that path before the first start (with its `-wal` and
+`-shm` sidecars, per the section above); the schema creates whatever is missing, so
+a file from an older version needs no migration.
 
 Then hand it to systemd. [`deploy/foolproof.service`](deploy/foolproof.service) is
 the unit, and it assumes the user `ubuntu`, the clone at `/home/ubuntu/FoolProof`
@@ -248,8 +246,7 @@ minutes — [PLAN.md](PLAN.md#what-survives-a-failure) explains which failures i
 allowed to answer and which are the supervisor's.
 
 One thing to get right before the first start: **stop whatever was polling before**,
-for the reason in [Two environments, two databases](#two-environments-two-databases)
-— one token serves one process.
+for the reason in [Running it](#running-it) — one token serves one process.
 
 ### Deploying a new version
 
@@ -333,10 +330,16 @@ environment value is ever printed.
 
 ## Scripts
 
+They are listed in `package.json` in the order you reach for them: the one that
+runs the bot, the gate, its four parts, then the two test families.
+
 | Script | What it runs |
 |---|---|
-| `npm start` | The bot on the dev database, under the supervisor |
-| `npm run start:prod` | The bot on the production database, under the supervisor |
+| `npm run play` | The bot in a browser against a fake Telegram — the only way to run it from here |
+| `npm run check` | Lint, types, documents and tests — the gate to keep at zero |
+| `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run docs:check` | Links, anchors, the source tree and the script table above |
 | `npm test` | Vitest, once — units and integration together |
 | `npm run test:unit` | Only the unit specs, where everything outside the file is mocked |
 | `npm run test:integration` | Only `*.integration.spec.ts` — the seams where third-party code runs for real |
@@ -344,15 +347,15 @@ environment value is ever printed.
 | `npm run test:coverage` | Vitest with coverage; fails below 70% on any metric |
 | `npm run test:mutation:changed` | Stryker over the files that differ from `origin/main`, about a minute |
 | `npm run test:mutation` | Stryker over everything, about five minutes; both fail below 85% |
-| `npm run check` | Lint, types and tests — the gate to keep at zero |
-| `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
-| `npm run typecheck` | `tsc --noEmit` |
 | `npm run e2e` | Whole scenarios against the real bot and a fake Telegram |
+| `npm run e2e:changed` | Only the scenarios the diff against `origin/main` can reach |
 | `npm run e2e:watch` | The same run, slowed down, in one browser tab |
-| `npm run e2e:play` | A chat in the browser to try things by hand |
 | `npm run e2e:test` | Units for the harness's own pure parts |
 | `npm run e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
-| `npm run docs:check` | Links, anchors, the source tree and the script table above |
+
+Production is not in this table: it is a systemd unit and a pushed tag, and
+[`deploy/foolproof.service`](deploy/foolproof.service) is the only place that
+knows how a real run begins.
 
 Coverage and mutation write their reports into `reports/`, which is gitignored
 whole — nothing about testing lands next to the source.
@@ -403,7 +406,7 @@ scenarios have finished and their bots are gone; it says so in the header rather
 than looking broken. Ctrl+C in the terminal ends it.
 
 ```bash
-npm run e2e:play
+npm run play
 ```
 
 One chat, nobody driving it, pointed at the dev database. Type in the box and tap
@@ -435,8 +438,9 @@ src/
                         telegram, text, timing — a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
 docs/mockups/           the two posters this file shows, drawn by scripts/tools.ts
-deploy/                 the systemd units a server is installed from, and the
-                        script that puts the newest tag live
+deploy/                 the systemd units a server is installed from, the script
+                        that puts the newest tag live, and the one that sends the
+                        server its configuration
 .github/workflows/      the checks that run on every push
 scripts/                dev utilities that are not part of the bot
 e2e/                    the fake Telegram and the scenarios played against it

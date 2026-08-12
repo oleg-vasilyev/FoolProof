@@ -21,9 +21,11 @@ StartLimitBurst=5
 Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/FoolProof
-# This is `npm run start:prod` with npm taken out: npm would add a third node
-# process to a 954 MB host and forward the signals systemd already delivers to
-# the whole control group. Keep it in step with the script in package.json.
+# This line is the only place that knows how a real run begins — there is no npm
+# script for it, deliberately, because a second poller on the same token would
+# split the updates with the bot running here. Node rather than npm, too: npm
+# would add a third node process to a 954 MB host and forward the signals systemd
+# already delivers to the whole control group.
 ExecStart=/usr/local/bin/node --env-file=.env.production src/supervisor.ts
 
 # on-failure, not always: an exit code of 0 is the supervisor deciding to stop,

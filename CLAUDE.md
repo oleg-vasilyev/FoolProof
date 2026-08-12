@@ -169,7 +169,7 @@ src/
     diagnostics/        the /status report about the bot itself
     language/           the /language screen a chat picks its language on
   shared/
-    config/             reading .env, and where the project root is
+    config/             reading the environment, and where the project root is
     lifecycle/          draining the stops, restarting after a crash
     locale/             the language table, the plural rules, the chat's choice
     logging/            the scoped logger
@@ -357,23 +357,19 @@ also how **independent scopes** surface, and those are delegated without being a
 
 ## Configuration
 
-Secrets live in `.env` and `.env.production`, both gitignored, next to
-`.env.example` — the shareable template, which must list every key the app reads.
-Read them in one place, `shared/config/env.ts`, and pass values down: no
-`process.env` in feature code.
+**No npm script reads an env file, and none starts the real bot** — the only env
+file ever loaded is the server's, and [README.md](README.md#running-it) says why.
+`.env.example` is its template and must list every key the app reads. Read the
+environment in one place, `shared/config/env.ts`, and pass values down — no
+`process.env` in feature code. Two rules follow from there being one loaded file:
 
-**Node loads the file, we do not parse it.** `--env-file` on the start scripts means
-`loadEnv()` is a copy of `process.env` and nothing else. The hand-rolled reader that
-used to live here made `.env` readable during a production run, so a key missing
-from `.env.production` was inherited instead of missing. Two consequences to keep:
-
-- **One file is the whole configuration for its run.** No fallback between them.
-- **The unsafe target needs an explicit command.** `DB_PATH` defaults to the dev
-  database, so forgetting a variable cannot reach production, and `--env-file` (not
-  `--env-file-if-exists`) makes the production command refuse to start without its
-  file.
+- **It is the whole configuration for its run.** No fallback to another. Node loads
+  it and we do not parse it; a hand-rolled reader once inherited a missing key from
+  a second file instead of reporting it.
+- **A key left empty counts as missing.** `requireEnv` refuses it, `optionalEnv`
+  falls back; `.env.example` has the outage that made it a rule.
 
 `loadEnv(source = process.env)` takes its source as an argument. That is not
 configurability — it is the only way to exercise the `undefined` branch its type
-demands, since `process.env` never holds one. What each environment means for
-whoever runs the bot is in [README.md](README.md#two-environments-two-databases).
+demands, since `process.env` never holds one. What a run costs whoever operates it
+is in [README.md](README.md#running-it-on-a-server).
