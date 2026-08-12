@@ -5,6 +5,8 @@ import { rootDir } from "#shared/config/env.ts";
 import { repository } from "#shared/repository/repository-instance.ts";
 import { refreshDesignPage } from "./design-page.ts";
 import { GALLERY_DIR, gallery } from "./gallery.ts";
+import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
+import { SITE_POSTER_DIR, sitePosters } from "./site-posters.ts";
 import { MOCKUP_DIR, posters } from "./mockups.ts";
 
 
@@ -26,17 +28,25 @@ interface Tool {
   run(args: readonly string[]): void | Promise<void>;
 }
 
-const writeMockups = async (): Promise<void> => {
-  const directory = resolve(rootDir, MOCKUP_DIR);
+const drawInto = async (
+  folder: string,
+  drawings: Readonly<Record<string, string>>
+): Promise<void> => {
+  const directory = resolve(rootDir, folder);
 
   mkdirSync(directory, { recursive: true });
 
-  for (const [name, svg] of Object.entries(posters())) {
+  for (const [name, svg] of Object.entries(drawings)) {
     writeFileSync(resolve(directory, `${name}.svg`), svg, "utf8");
     writeFileSync(resolve(directory, `${name}.png`), await rasterize(svg));
-    console.log(`${MOCKUP_DIR}/${name}.png`);
+    console.log(`${folder}/${name}.png`);
   }
 };
+
+const writeMockups = (): Promise<void> => drawInto(MOCKUP_DIR, posters());
+
+const writeSitePosters = (): Promise<void> =>
+  drawInto(SITE_POSTER_DIR, sitePosters());
 
 const drawGallery = async (): Promise<void> => {
   const directory = resolve(rootDir, GALLERY_DIR);
@@ -68,6 +78,19 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     does: `draw the sample evening into ${MOCKUP_DIR}/ as SVG and PNG`,
     usage: "node scripts/tools.ts mockups",
     run: writeMockups,
+  },
+  "site-posters": {
+    does: `draw the same evening in both languages into ${SITE_POSTER_DIR}/`,
+    usage: "node scripts/tools.ts site-posters",
+    run: writeSitePosters,
+  },
+  "site-css": {
+    does: `rebuild ${SITE_CSS} from ${SITE_CSS_SOURCE} and the classes the pages use`,
+    usage: "node scripts/tools.ts site-css",
+    run: () => {
+      buildSiteCss(resolve(rootDir, SITE_CSS));
+      console.log(SITE_CSS);
+    },
   },
   gallery: {
     does: `draw every edge of the two posters into ${GALLERY_DIR}/ for a human or an agent to look at`,

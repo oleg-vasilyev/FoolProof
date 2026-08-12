@@ -430,6 +430,36 @@ The harness is deliberately walled off from the app, and it is **a release gate*
 [`e2e/README.md`](e2e/README.md) has its rules, `TECH-DEBT.md` has the one thing
 still wrong with it.
 
+## The website
+
+Telegram has no bot store, so nothing outside it can find the bot on its own.
+[oleg-vasilyev.github.io/FoolProof](https://oleg-vasilyev.github.io/FoolProof/) is
+the address a directory listing, a forum post or a search result can point at. It is
+two static pages — English, and Russian under `/ru/` — served by GitHub Pages
+straight out of `docs/` on `main`, so a push is the whole deploy: no workflow, no
+second branch, nothing to keep in step by hand.
+
+Two parts of it are generated rather than written:
+
+| What | Rebuilt by |
+|---|---|
+| `docs/posters/` — the four pictures the pages show | `node scripts/tools.ts site-posters` |
+| `docs/styles.css` — Tailwind, minified and committed | `node scripts/tools.ts site-css` |
+
+**`npm run docs:check` fails on either being stale**, and that is the point: a push
+is the deploy, so a forgotten rebuild does not wait to be noticed — it ships. The
+posters are the bot's own renders of the same sample evening as the mockups above,
+English copy with Latin names for one page and Russian for the other, compared
+against what the renderer draws today. The stylesheet is compared by building it
+again and diffing, which is why the Tailwind input lives in `scripts/site.css`
+rather than in the folder being published: it is a source, and everything in `docs/`
+is served.
+
+Building the CSS here rather than loading a script tag in the page is worth the
+extra file — a page that fetches a compiler to colour itself is slower than the
+thing it is selling. The whole first screen is 44 KB, and the posters below it are
+lazy.
+
 ## Layout
 
 A feature is a folder you can delete: nothing outside it imports it except the
@@ -449,7 +479,9 @@ src/
   shared/               config, lifecycle, locale, logging, repository,
                         telegram, text, timing — a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
-docs/mockups/           the two posters this file shows, drawn by scripts/tools.ts
+docs/                   the website GitHub Pages serves — everything in here is public
+docs/mockups/           the two posters this file shows, drawn by scripts/tools.ts,
+                        served along with the site because they live inside it
 deploy/                 the systemd units a server is installed from, the script
                         that puts the newest tag live, and the one that sends the
                         server its configuration
@@ -475,3 +507,8 @@ and a framework import in `domain/` are both build errors.
   trigger that would make each item worth picking up.
 
 `CLAUDE.md` opens with the question that decides which file a fact goes in.
+
+## Licence
+
+MIT — [`LICENSE`](LICENSE). Run your own copy, change it, or take a piece of it;
+the only condition is that the notice travels with it.

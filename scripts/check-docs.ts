@@ -1,6 +1,8 @@
 import { readdirSync, existsSync, readFileSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
 import { MOCKUP_DIR, posters } from "./mockups.ts";
+import { SITE_CSS, SITE_CSS_SOURCE, freshSiteCss } from "./site-css.ts";
+import { SITE_POSTER_DIR, sitePosters } from "./site-posters.ts";
 
 
 const DOCUMENTS = [
@@ -199,12 +201,16 @@ const schemaOutOfStep = (): readonly string[] => {
   });
 };
 
-const mockupsOutOfStep = (): readonly string[] =>
-  Object.entries(posters()).flatMap(([name, svg]) => {
-    const committed = `${MOCKUP_DIR}/${name}.svg`;
+const drawingsOutOfStep = (
+  folder: string,
+  drawings: Readonly<Record<string, string>>,
+  tool: string
+): readonly string[] =>
+  Object.entries(drawings).flatMap(([name, svg]) => {
+    const committed = `${folder}/${name}.svg`;
 
     if (!existsSync(committed)) {
-      return [`${committed}: never drawn — run "node scripts/tools.ts mockups"`];
+      return [`${committed}: never drawn — run "node scripts/tools.ts ${tool}"`];
     }
 
     return read(committed) === svg
@@ -215,6 +221,25 @@ const mockupsOutOfStep = (): readonly string[] =>
         ];
   });
 
+const mockupsOutOfStep = (): readonly string[] =>
+  drawingsOutOfStep(MOCKUP_DIR, posters(), "mockups");
+
+const sitePostersOutOfStep = (): readonly string[] =>
+  drawingsOutOfStep(SITE_POSTER_DIR, sitePosters(), "site-posters");
+
+const siteCssOutOfStep = (): readonly string[] => {
+  if (!existsSync(SITE_CSS)) {
+    return [`${SITE_CSS}: never built — run "node scripts/tools.ts site-css"`];
+  }
+
+  return read(SITE_CSS) === freshSiteCss().replaceAll("\r\n", "\n")
+    ? []
+    : [
+        `${SITE_CSS}: not what the pages and ${SITE_CSS_SOURCE} build to today — ` +
+          `run "node scripts/tools.ts site-css"`,
+      ];
+};
+
 const complaints = [
   ...brokenLinks(),
   ...featuresMissingFromTheTree(),
@@ -222,6 +247,8 @@ const complaints = [
   ...crowdedLayers(),
   ...schemaOutOfStep(),
   ...mockupsOutOfStep(),
+  ...sitePostersOutOfStep(),
+  ...siteCssOutOfStep(),
   ...overBudget(),
 ];
 

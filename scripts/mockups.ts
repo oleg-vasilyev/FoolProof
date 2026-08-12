@@ -55,10 +55,10 @@ export const sampleEvening = (): SeriesChronology => ({
   })),
 });
 
-export interface Posters {
+export type Posters = {
   readonly chronology: string;
   readonly awards: string;
-}
+};
 
 export const posters = (): Posters => {
   const evening = sampleEvening();
