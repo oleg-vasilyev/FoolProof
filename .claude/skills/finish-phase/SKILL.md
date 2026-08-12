@@ -25,6 +25,16 @@ Most style rules are ESLint rules now (`eslint.config.js`), so a lint failure is
 a convention violation, not a nit — read the message before reaching for a
 disable comment, which is itself banned in `src/`.
 
+**A phase that touched `package.json` runs `npm ci --dry-run` before committing.**
+`npm run check` uses the `node_modules/` already on this machine, so it cannot see
+that the lock file it produced is unsatisfiable somewhere else. Adding
+`@tailwindcss/cli` on Windows wrote a lock whose wasm fallback conflicted with the
+one vitest brings; every local gate stayed green and GitHub Actions failed on
+`npm ci` before running a single test. The dry run reproduces that in one second,
+here. Whichever way it is then fixed, ask first what the dependency costs the
+**server**, which runs `npm ci` on every deploy and would have installed a CSS
+compiler it has no use for.
+
 ## 2. `npm run test:coverage`
 
 70% floor on every metric. A file that dropped is a file whose new branches
