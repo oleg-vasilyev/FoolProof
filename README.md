@@ -236,7 +236,7 @@ a file from an older version needs no migration.
 
 Then hand it to systemd. [`deploy/foolproof.service`](deploy/foolproof.service) is
 the unit, and it assumes the user `ubuntu`, the clone at `/home/ubuntu/FoolProof`
-and Node at `/usr/local/bin/node` — edit those three lines if yours differ:
+and npm at `/usr/local/bin/npm` — edit those three lines if yours differ:
 
 ```bash
 sudo install -m 644 deploy/foolproof.service /etc/systemd/system/
@@ -244,6 +244,11 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now foolproof
 journalctl -u foolproof -f
 ```
+
+The unit runs `npm run start:prod`, so **changing how production starts is a change
+to `package.json`**, which a release delivers by itself. Changing the unit is not:
+a deploy never touches `/etc`, so a release that edits `foolproof.service` needs
+that first line run again by hand — the same as the deploy script.
 
 `systemctl restart foolproof` and `systemctl stop foolproof` reach the bot the same
 way `Ctrl+C` does, so the pending edit is still flushed. The unit brings the bot

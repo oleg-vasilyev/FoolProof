@@ -24,8 +24,10 @@ WorkingDirectory=/home/ubuntu/FoolProof
 # Through npm rather than node, so that `start:prod` in package.json is the real
 # production command and not a copy of it that can drift. A release changes how
 # production starts by changing that line, and this unit does not have to know.
-# The cost is npm and its shell staying resident beside the two node processes;
-# it was measured on this host before being accepted.
+# The cost was measured on this host rather than guessed: npm and its shell stay
+# resident beside the two node processes, taking the service from 78.6 MB to
+# 94.5 MB. Stopping still reaches the bot, because KillMode is left at
+# control-group and systemd signals all four.
 ExecStart=/usr/local/bin/npm run start:prod
 
 # on-failure, not always: an exit code of 0 is the supervisor deciding to stop,
