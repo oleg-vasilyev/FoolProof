@@ -12,6 +12,12 @@ export function requireEnv(env: Record<string, string>, key: string): string {
   return value;
 }
 
+export function optionalEnv(env: Record<string, string>, key: string): string | null {
+  const value = env[key];
+
+  return value === undefined || value === "" ? null : value;
+}
+
 export function loadEnv(
   source: Record<string, string | undefined> = process.env
 ): Record<string, string> {

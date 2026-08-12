@@ -33,17 +33,19 @@ const PREVIOUS_EXIT = "exit code 1";
 
 const OPERATOR_TG_ID = "777";
 
+const OPTIONAL_KEYS = 4;
+
 const CHOSEN_CHAT_ID = -100888;
 
 const CHAT_MENUS = [{ chatId: CHOSEN_CHAT_ID, locale: "ru" }];
 
-const env = new EnvStub({
-  BOT_TOKEN: TOKEN_FROM_ENV,
-  LOG_LEVEL: LOG_LEVEL_FROM_ENV,
-  BOT_START_ATTEMPT: String(START_ATTEMPT),
-  BOT_PREVIOUS_EXIT: PREVIOUS_EXIT,
-  OPERATOR_TG_ID,
-});
+const env = new EnvStub({ BOT_TOKEN: TOKEN_FROM_ENV });
+
+env.optionalEnvSpy
+  .mockReturnValueOnce(LOG_LEVEL_FROM_ENV)
+  .mockReturnValueOnce(String(START_ATTEMPT))
+  .mockReturnValueOnce(PREVIOUS_EXIT)
+  .mockReturnValueOnce(OPERATOR_TG_ID);
 
 const shutdown = new ShutdownStub();
 
@@ -236,6 +238,21 @@ describe("main.ts", () => {
 
   it("should pass on who may ask for the status", () => {
     expect(diagnostics.depsGiven()?.operatorTgId).toBe(OPERATOR_TG_ID);
+  });
+
+  it("should read every optional key through the reader that treats empty as missing", () => {
+    expect(env.optionalEnvSpy.mock.calls.map((call) => call[1])).toEqual([
+      "LOG_LEVEL",
+      "BOT_START_ATTEMPT",
+      "BOT_PREVIOUS_EXIT",
+      "OPERATOR_TG_ID",
+    ]);
+  });
+
+  it("should read every one of them out of the environment it loaded, not another one", () => {
+    expect(env.optionalEnvSpy.mock.calls.map((call) => call[FIRST])).toEqual(
+      Array<unknown>(OPTIONAL_KEYS).fill(env.loaded)
+    );
   });
 
   it("should install the features before publishing the menu", () => {

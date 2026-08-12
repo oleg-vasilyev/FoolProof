@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
-import { rootDir, loadEnv } from "#shared/config/env.ts";
+import { rootDir, loadEnv, optionalEnv } from "#shared/config/env.ts";
 
 
 export const SERIES_GAP_SECONDS = 3 * 60 * 60;
@@ -10,7 +10,7 @@ const DEFAULT_DB_PATH = "data/foolproof.dev.db";
 
 const BUSY_TIMEOUT_MS = 5000;
 
-export const dbFile = resolve(rootDir, loadEnv().DB_PATH ?? DEFAULT_DB_PATH);
+export const dbFile = resolve(rootDir, optionalEnv(loadEnv(), "DB_PATH") ?? DEFAULT_DB_PATH);
 mkdirSync(dirname(dbFile), { recursive: true });
 
 export const db = new DatabaseSync(dbFile);

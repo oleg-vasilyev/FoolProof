@@ -1,14 +1,15 @@
 import type { BotConfig, Context } from "grammy";
 import type { Logger } from "#shared/logging/logger.ts";
+import { optionalEnv } from "#shared/config/env.ts";
 
 
 export const botClientOptions = (
   env: Record<string, string>,
   log: Logger
 ): BotConfig<Context> | undefined => {
-  const apiRoot = env.BOT_API_ROOT;
+  const apiRoot = optionalEnv(env, "BOT_API_ROOT");
 
-  if (apiRoot === undefined) {
+  if (apiRoot === null) {
     return undefined;
   }
 

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { join } from "node:path";
-import { loadEnv, requireEnv, rootDir } from "#shared/config/env.ts";
+import { loadEnv, optionalEnv, requireEnv, rootDir } from "#shared/config/env.ts";
 
 
 const PROBE = "FOOLPROOF_PROBE_KEY";
@@ -36,6 +36,28 @@ describe("requireEnv()", () => {
 
   it("should not confuse one key with another", () => {
     expect(() => requireEnv({ LOG_LEVEL: "info" }, "BOT_TOKEN")).toThrow(/BOT_TOKEN/);
+  });
+});
+
+describe("optionalEnv()", () => {
+  it("should return a value that is present", () => {
+    expect(optionalEnv({ OPERATOR_TG_ID: "777" }, "OPERATOR_TG_ID")).toBe("777");
+  });
+
+  it("should be null when the key is absent", () => {
+    expect(optionalEnv({}, "OPERATOR_TG_ID")).toBeNull();
+  });
+
+  it("should be null when the key is present but empty, as .env.example ships it", () => {
+    expect(optionalEnv({ OPERATOR_TG_ID: "" }, "OPERATOR_TG_ID")).toBeNull();
+  });
+
+  it("should keep a value that is falsy but meant, since a key can legitimately be zero", () => {
+    expect(optionalEnv({ BOT_START_ATTEMPT: "0" }, "BOT_START_ATTEMPT")).toBe("0");
+  });
+
+  it("should not confuse one key with another", () => {
+    expect(optionalEnv({ LOG_LEVEL: "debug" }, "OPERATOR_TG_ID")).toBeNull();
   });
 });
 

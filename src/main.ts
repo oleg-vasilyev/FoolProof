@@ -10,7 +10,7 @@ import {
   republishChatMenus,
   resumeFeatures,
 } from "#app/feature-installer.ts";
-import { loadEnv, requireEnv } from "#shared/config/env.ts";
+import { loadEnv, optionalEnv, requireEnv } from "#shared/config/env.ts";
 import { installCrashExit } from "#shared/lifecycle/crash-exit.ts";
 import { createShutdown } from "#shared/lifecycle/shutdown.ts";
 import { createLocaleReader } from "#shared/locale/chat-locale.ts";
@@ -47,10 +47,10 @@ const features = [
     repo: repository,
     localeIn,
     log,
-    logLevel: env.LOG_LEVEL ?? DEFAULT_LOG_LEVEL,
-    startAttempt: Number(env.BOT_START_ATTEMPT ?? FIRST_START),
-    previousExit: env.BOT_PREVIOUS_EXIT ?? null,
-    operatorTgId: env.OPERATOR_TG_ID ?? null,
+    logLevel: optionalEnv(env, "LOG_LEVEL") ?? DEFAULT_LOG_LEVEL,
+    startAttempt: Number(optionalEnv(env, "BOT_START_ATTEMPT") ?? FIRST_START),
+    previousExit: optionalEnv(env, "BOT_PREVIOUS_EXIT"),
+    operatorTgId: optionalEnv(env, "OPERATOR_TG_ID"),
   }),
   createLanguageFeature({ repo: repository, localeIn, publishMenu }),
 ];

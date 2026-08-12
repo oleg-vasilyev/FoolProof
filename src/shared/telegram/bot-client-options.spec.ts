@@ -1,7 +1,13 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { botClientOptions } from "#shared/telegram/bot-client-options.ts";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { EnvStub } from "#shared/config/env.stub.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
 
+
+const env = new EnvStub();
+
+vi.mock("#shared/config/env.ts", () => env.module);
+
+const { botClientOptions } = await import("#shared/telegram/bot-client-options.ts");
 
 const NEVER = 0;
 
@@ -11,31 +17,46 @@ describe("botClientOptions()", () => {
   let log: LoggerStub;
 
   beforeEach(() => {
+    vi.clearAllMocks();
+
+    env.optionalEnvSpy.mockReturnValue(null);
     log = new LoggerStub();
   });
 
+  it("should ask for the root by name, so an empty one counts as none", () => {
+    botClientOptions(env.loaded, log);
+
+    expect(env.optionalEnvSpy).toHaveBeenCalledWith(env.loaded, "BOT_API_ROOT");
+  });
+
   it("should give grammY nothing to override when no root is set", () => {
-    expect(botClientOptions({}, log)).toBeUndefined();
+    expect(botClientOptions(env.loaded, log)).toBeUndefined();
   });
 
   it("should say nothing when the bot is talking to Telegram itself", () => {
-    botClientOptions({}, log);
+    botClientOptions(env.loaded, log);
 
     expect(log.warnSpy.mock.calls).toHaveLength(NEVER);
   });
 
   it("should point the client at the root it was given", () => {
-    expect(botClientOptions({ BOT_API_ROOT: FAKE_ROOT }, log)?.client?.apiRoot).toBe(FAKE_ROOT);
+    env.optionalEnvSpy.mockReturnValue(FAKE_ROOT);
+
+    expect(botClientOptions(env.loaded, log)?.client?.apiRoot).toBe(FAKE_ROOT);
   });
 
   it("should warn loudly, because a run pointed elsewhere is not a real run", () => {
-    botClientOptions({ BOT_API_ROOT: FAKE_ROOT }, log);
+    env.optionalEnvSpy.mockReturnValue(FAKE_ROOT);
+
+    botClientOptions(env.loaded, log);
 
     expect(log.warnSpy).toHaveBeenCalledWith(expect.stringContaining(FAKE_ROOT));
   });
 
   it("should say in the warning that nothing reaches a real chat", () => {
-    botClientOptions({ BOT_API_ROOT: FAKE_ROOT }, log);
+    env.optionalEnvSpy.mockReturnValue(FAKE_ROOT);
+
+    botClientOptions(env.loaded, log);
 
     expect(log.warnSpy).toHaveBeenCalledWith(expect.stringContaining("real chat"));
   });
