@@ -1,4 +1,5 @@
 import { FailureKind, SettledKind } from "#shared/telegram/call-outcomes.ts";
+import { recordCallTrouble } from "#shared/telegram/api-call-tally.ts";
 import { setTimeout as delay } from "node:timers/promises";
 import type { Transformer } from "grammy";
 import type { ApiResponse } from "grammy/types";
@@ -123,6 +124,10 @@ const afterResponse = <T>(
     return { kind: SettledKind.Response, response };
   }
 
+  if (response.error_code === FLOOD_LIMIT) {
+    recordCallTrouble("rateLimit");
+  }
+
   const plan = planFor(
     {
       kind: FailureKind.Refused,
@@ -133,9 +138,12 @@ const afterResponse = <T>(
   );
 
   if (!plan.retry) {
+    recordCallTrouble("refusal");
+
     return { kind: SettledKind.Response, response };
   }
 
+  recordCallTrouble("retried");
   context.log.debug(`${method} was refused with ${response.error_code}, retrying in ${plan.delayMs}ms`);
 
   return { kind: SettledKind.Retry, delayMs: plan.delayMs };
@@ -156,7 +164,13 @@ const afterThrow = <T>(
 
   const plan = planFor({ kind: FailureKind.Unreachable }, attempt);
 
-  return plan.retry ? { kind: SettledKind.Retry, delayMs: plan.delayMs } : { kind: SettledKind.Error, error };
+  if (!plan.retry) {
+    return { kind: SettledKind.Error, error };
+  }
+
+  recordCallTrouble("retried");
+
+  return { kind: SettledKind.Retry, delayMs: plan.delayMs };
 };
 
 const callWithRetries = async <T>(

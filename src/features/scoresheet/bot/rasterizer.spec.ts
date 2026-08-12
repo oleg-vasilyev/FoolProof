@@ -1,10 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { EnvStub } from "#shared/config/env.stub.ts";
+import { SlowestRenderStub } from "#shared/timing/slowest-render.stub.ts";
 
 
 const FONT_FAMILY = "Test Sans";
 
 const env = new EnvStub();
+
+const timing = new SlowestRenderStub();
 
 const PNG = Buffer.from("png-bytes");
 
@@ -27,6 +30,8 @@ vi.mock("node:path", () => ({
 }));
 
 vi.mock("#shared/config/env.ts", () => env.module);
+
+vi.mock("#shared/timing/slowest-render.ts", () => timing.module);
 
 vi.mock("#scoresheet/render/card-metrics.ts", () => ({
   FONT_FAMILY,
@@ -93,6 +98,40 @@ describe("rasterize()", () => {
     await rasterize(SVG);
 
     expect(optionsUsed().font.defaultFontFamily).toBe(FONT_FAMILY);
+  });
+
+  it("should time the drawing, since /status reports the slowest one", async () => {
+    await rasterize(SVG);
+
+    expect(timing.finishedSpy).toHaveBeenCalledTimes(ONCE);
+  });
+
+  it("should start the clock before handing the drawing over", async () => {
+    renderAsyncSpy.mockImplementation(() => {
+      expect(timing.startTimingSpy).toHaveBeenCalledTimes(ONCE);
+
+      return Promise.resolve({ asPng: () => asPngSpy() as Buffer });
+    });
+
+    await rasterize(SVG);
+  });
+
+  it("should stop the clock only once the bytes exist", async () => {
+    asPngSpy.mockImplementation(() => {
+      expect(timing.finishedSpy).not.toHaveBeenCalled();
+
+      return PNG;
+    });
+
+    await rasterize(SVG);
+  });
+
+  it("should not time a drawing that failed", async () => {
+    renderAsyncSpy.mockRejectedValue(new Error("resvg gave up"));
+
+    await expect(rasterize(SVG)).rejects.toThrow();
+
+    expect(timing.finishedSpy).not.toHaveBeenCalled();
   });
 });
 

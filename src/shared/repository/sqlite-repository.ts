@@ -5,9 +5,11 @@ import {
   requireNum,
   requireText,
 } from "#shared/repository/column-values.ts";
+import { Locale } from "#shared/locale/locales.ts";
 import {
   groupByGame,
   toChatLocaleChoice,
+  toChatSummary,
   toExit,
   toGame,
   toPlayer,
@@ -28,6 +30,29 @@ import type {
 const FIRST_GAME = 1;
 
 const NO_PLAYERS = 0;
+
+const SINCE_A_DAY = "-1 day";
+
+const SINCE_A_WEEK = "-7 days";
+
+const CHAT_SUMMARY = `WITH chat_sightings AS (
+     SELECT chat_id, started_at AS at FROM games
+     UNION ALL
+     SELECT chat_id, chosen_at AS at FROM chat_locales
+   ),
+   chat_first_seen AS (
+     SELECT chat_id, MIN(at) AS first_at FROM chat_sightings GROUP BY chat_id
+   )
+   SELECT
+     (SELECT COUNT(*) FROM chat_first_seen) AS chats,
+     (SELECT COUNT(*) FROM chat_first_seen WHERE first_at >= datetime('now', ?))
+       AS chats_new_in_week,
+     (SELECT COUNT(DISTINCT chat_id) FROM games WHERE started_at >= datetime('now', ?))
+       AS chats_played_in_week,
+     (SELECT COUNT(*) FROM games WHERE started_at >= datetime('now', ?)) AS games_in_day,
+     (SELECT COUNT(*) FROM games WHERE started_at >= datetime('now', ?)) AS games_in_week,
+     (SELECT COUNT(*) FROM chat_locales WHERE locale = ?) AS chose_russian,
+     (SELECT COUNT(*) FROM chat_locales WHERE locale = ?) AS chose_english`;
 
 const placeholdersFor = (values: readonly number[]): string => values.map(() => "?").join(",");
 
@@ -197,6 +222,14 @@ export const sqliteRepository: Repository = {
     return toStorageSummary(row, dbFile);
   },
 
+  chatSummary() {
+    return toChatSummary(
+      db
+        .prepare(CHAT_SUMMARY)
+        .get(SINCE_A_WEEK, SINCE_A_WEEK, SINCE_A_DAY, SINCE_A_WEEK, Locale.Ru, Locale.En)
+    );
+  },
+
   liveCards() {
     return db
       .prepare("SELECT * FROM games WHERE confirmed_at IS NULL ORDER BY id")
@@ -342,7 +375,7 @@ export const sqliteRepository: Repository = {
   rememberChatLocale(chatId, locale) {
     db.prepare(
       `INSERT INTO chat_locales (chat_id, locale) VALUES (?, ?)
-       ON CONFLICT(chat_id) DO UPDATE SET locale = excluded.locale, chosen_at = datetime('now')`
+       ON CONFLICT(chat_id) DO UPDATE SET locale = excluded.locale`
     ).run(chatId, locale);
   },
 

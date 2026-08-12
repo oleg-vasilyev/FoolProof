@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { humanDuration, humanSize, type UnitLabels } from "#diagnostics/render/human-units.ts";
+import {
+  humanDuration,
+  humanSeconds,
+  humanSize,
+  type UnitLabels,
+} from "#diagnostics/render/human-units.ts";
 
 
 const SECOND_MS = 1000;
@@ -28,8 +33,10 @@ const UNITS: UnitLabels = {
   days: "<days>",
   hours: "<hours>",
   minutes: "<minutes>",
+  seconds: "<seconds>",
   kilobytes: "<kb>",
   megabytes: "<mb>",
+  decimal: "<point>",
 };
 
 describe("humanDuration()", () => {
@@ -59,6 +66,34 @@ describe("humanDuration()", () => {
 
   it("should say zero minutes for a bot that has only just started", () => {
     expect(humanDuration(NOTHING, UNITS)).toBe("0<minutes>");
+  });
+});
+
+describe("humanSeconds()", () => {
+  const TWO_AND_A_BIT_MS = 2400;
+
+  const NEARLY_TWO_AND_A_HALF_MS = 2449;
+
+  const HALF_A_SECOND_MS = 500;
+
+  it("should give seconds with one decimal, since a poster takes about one", () => {
+    expect(humanSeconds(TWO_AND_A_BIT_MS, UNITS)).toBe("2<point>4 <seconds>");
+  });
+
+  it("should spell the point with the label, because Russian writes a comma", () => {
+    expect(humanSeconds(TWO_AND_A_BIT_MS, { ...UNITS, decimal: "," })).toBe("2,4 <seconds>");
+  });
+
+  it("should round to the nearest tenth rather than truncate", () => {
+    expect(humanSeconds(NEARLY_TWO_AND_A_HALF_MS, UNITS)).toBe("2<point>4 <seconds>");
+  });
+
+  it("should keep the whole part when there is none, not start with the point", () => {
+    expect(humanSeconds(HALF_A_SECOND_MS, UNITS)).toBe("0<point>5 <seconds>");
+  });
+
+  it("should give a whole second a zero decimal, so the width does not jump", () => {
+    expect(humanSeconds(SECOND_MS, UNITS)).toBe("1<point>0 <seconds>");
   });
 });
 

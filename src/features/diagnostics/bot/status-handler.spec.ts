@@ -38,7 +38,7 @@ describe("onStatus()", () => {
   let locales: LocaleReaderStub;
   let takeSnapshot: ReturnType<typeof vi.fn>;
 
-  const contextWith = (operatorTgId: string | null) => ({
+  const contextWith = (operatorTgId: string) => ({
     takeSnapshot: takeSnapshot as unknown as () => never,
     operatorTgId,
     log,
@@ -91,14 +91,6 @@ describe("onStatus()", () => {
     await onStatus(contextWith(OPERATOR_TG_ID), ctx.context);
 
     expect(ctx.replySpy.mock.calls[0]?.[1]).toBeUndefined();
-  });
-
-  it("should answer anyone when no operator was named", async () => {
-    ctx = new CommandContextStub(SOMEONE_ELSE);
-
-    await onStatus(contextWith(null), ctx.context);
-
-    expect(ctx.replySpy).toHaveBeenCalledTimes(ONCE);
   });
 
   it("should stay silent for anyone but the operator", async () => {

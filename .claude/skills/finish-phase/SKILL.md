@@ -165,9 +165,17 @@ by saying so, and every finding then needed confirming twice. Land the fixes, ge
 `npm run check` green, *then* review.
 
 **Spend the waiting on read-only work** — a control run, a report, the
-retrospective's counting. This rule has now been broken twice, and neither time by a
-decision: both times it was one small fix that seemed free because the agent was
+retrospective's counting. This rule has now been broken three times, and never by a
+decision: every time it was one small fix that seemed free because the agent was
 out. If the diff is worth reviewing, it is worth holding still for five minutes.
+
+The three breaks had one shape, so the fix is a question asked **before** launching,
+not more resolve afterwards: **what does this phase change outside `src/`?** Deploy
+scripts, the unit file, the server's env file, the CI workflow — nothing there is
+touched by `npm run check`, so it surfaces late, feels urgent, and lands under a
+running agent. The third time, `OPERATOR_TG_ID` became required in `main.ts` and
+`deploy/configure-server.sh` still guarded only `BOT_TOKEN`, which would have shipped
+a config that crash-loops. Answer the question, make those edits, *then* launch.
 
 **When the phase is mostly a restructure, run this gate on the source before the
 specs exist.** Everything a move is judged on — does the file's name describe what

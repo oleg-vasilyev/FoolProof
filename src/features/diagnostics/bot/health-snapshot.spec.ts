@@ -1,21 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { LogHistoryStub } from "#shared/logging/log-history.stub.ts";
+import { ApiCallTallyStub } from "#shared/telegram/api-call-tally.stub.ts";
+import { SlowestRenderStub } from "#shared/timing/slowest-render.stub.ts";
 import { AppVersionStub } from "#diagnostics/bot/app-version.stub.ts";
 
 
 const history = new LogHistoryStub();
 
+const calls = new ApiCallTallyStub();
+
+const timing = new SlowestRenderStub();
+
 const version = new AppVersionStub();
 
 vi.mock("#shared/logging/log-history.ts", () => history.module);
+
+vi.mock("#shared/telegram/api-call-tally.ts", () => calls.module);
+
+vi.mock("#shared/timing/slowest-render.ts", () => timing.module);
 
 vi.mock("#diagnostics/bot/app-version.ts", () => version.module);
 
 const { takeHealthSnapshot } = await import("#diagnostics/bot/health-snapshot.ts");
 
-
-const LOG_LEVEL = "info";
 
 const START_ATTEMPT = 2;
 
@@ -38,13 +46,26 @@ const STORAGE = {
   lastGameAt: "2026-07-31 19:42:10",
 };
 
+const CHATS = {
+  chats: 14,
+  chatsNewInWeek: 3,
+  chatsPlayedInWeek: 9,
+  gamesInDay: 5,
+  gamesInWeek: 31,
+  choseRussian: 6,
+  choseEnglish: 2,
+};
+
+const CALLS = { retried: 9, rateLimit: 1, refusal: 2 };
+
+const SLOWEST_RENDER_MS = 2400;
+
 describe("takeHealthSnapshot()", () => {
   let repo: RepositoryStub;
 
   const snapshot = () =>
     takeHealthSnapshot({
       repo,
-      logLevel: LOG_LEVEL,
       startAttempt: START_ATTEMPT,
       previousExit: PREVIOUS_EXIT,
     });
@@ -54,6 +75,9 @@ describe("takeHealthSnapshot()", () => {
 
     repo = new RepositoryStub();
     repo.storageSummarySpy.mockReturnValue(STORAGE);
+    repo.chatSummarySpy.mockReturnValue(CHATS);
+    calls.callTallySpy.mockReturnValue(CALLS);
+    timing.slowestRenderMsSpy.mockReturnValue(SLOWEST_RENDER_MS);
     history.problemTallySpy.mockReturnValue({ warn: WARNINGS, error: ERRORS });
     history.problemsSeenSpy.mockReturnValue([]);
     vi.spyOn(process, "uptime").mockReturnValue(UPTIME_SECONDS);
@@ -75,8 +99,22 @@ describe("takeHealthSnapshot()", () => {
     expect(snapshot().previousExit).toBe(PREVIOUS_EXIT);
   });
 
-  it("should carry the log level through", () => {
-    expect(snapshot().logLevel).toBe(LOG_LEVEL);
+  it("should ask the repository who has been using the bot", () => {
+    expect(snapshot().chats).toBe(CHATS);
+  });
+
+  it("should take what went wrong with Telegram from the call tally", () => {
+    expect(snapshot().calls).toBe(CALLS);
+  });
+
+  it("should take the slowest drawing from the render clock", () => {
+    expect(snapshot().slowestRenderMs).toBe(SLOWEST_RENDER_MS);
+  });
+
+  it("should pass on that nothing has been drawn yet rather than inventing a time", () => {
+    timing.slowestRenderMsSpy.mockReturnValue(null);
+
+    expect(snapshot().slowestRenderMs).toBeNull();
   });
 
   it("should take the warning count from the log's own tally", () => {
@@ -110,5 +148,12 @@ describe("takeHealthSnapshot()", () => {
     snapshot();
 
     expect(history.problemTallySpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("should count the chats fresh on every call, since that is what /status is for", () => {
+    snapshot();
+    snapshot();
+
+    expect(repo.chatSummarySpy).toHaveBeenCalledTimes(2);
   });
 });

@@ -29,6 +29,10 @@ const TWO = 2;
 
 const THREE = 3;
 
+const LONGER_THAN_A_DAY = "-2 days";
+
+const LONGER_THAN_A_WEEK = "-8 days";
+
 const seedPlayers = (...names: readonly string[]): readonly number[] =>
   names.map((name) => repo.createPlayer(CHAT_ID, name).id);
 
@@ -53,6 +57,10 @@ const playFullGame = (
   );
 
   return gameId;
+};
+
+const ageGame = (gameId: number, interval: string): void => {
+  db.prepare(`UPDATE games SET started_at = datetime('now', ?) WHERE id = ?`).run(interval, gameId);
 };
 
 const ageAllGames = (interval: string): void => {
@@ -412,6 +420,116 @@ describe("storageSummary()", () => {
     playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
 
     expect(repo.storageSummary().lastGameAt).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+  });
+});
+
+describe("chatSummary()", () => {
+  const playOnce = (): number => {
+    const ids = seedPlayers("Oleg", "Anya");
+
+    return playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+  };
+
+  it("should count a chat that has played", () => {
+    playOnce();
+
+    expect(repo.chatSummary().chats).toBe(ONCE);
+  });
+
+  it("should count a chat that only picked a language, since it is a chat all the same", () => {
+    repo.rememberChatLocale(OTHER_CHAT_ID, "ru");
+
+    expect(repo.chatSummary().chats).toBe(ONCE);
+  });
+
+  it("should count a chat once when it has both played and picked", () => {
+    playOnce();
+    repo.rememberChatLocale(CHAT_ID, "ru");
+
+    expect(repo.chatSummary().chats).toBe(ONCE);
+  });
+
+  it("should call a chat new when its first game is inside the week", () => {
+    playOnce();
+
+    expect(repo.chatSummary().chatsNewInWeek).toBe(ONCE);
+  });
+
+  it("should call a chat that only picked a language new, since arriving is the point", () => {
+    repo.rememberChatLocale(OTHER_CHAT_ID, "ru");
+
+    expect(repo.chatSummary()).toMatchObject({ chatsNewInWeek: ONCE, chatsPlayedInWeek: NONE });
+  });
+
+  it("should not make an old chat new again by letting it change language", () => {
+    repo.rememberChatLocale(OTHER_CHAT_ID, "ru");
+    db.prepare("UPDATE chat_locales SET chosen_at = datetime('now', ?)").run(LONGER_THAN_A_WEEK);
+    repo.rememberChatLocale(OTHER_CHAT_ID, "en");
+
+    expect(repo.chatSummary()).toMatchObject({ chats: ONCE, chatsNewInWeek: NONE });
+  });
+
+  it("should still change the language it answers in when a chat picks again", () => {
+    repo.rememberChatLocale(OTHER_CHAT_ID, "ru");
+    repo.rememberChatLocale(OTHER_CHAT_ID, "en");
+
+    expect(repo.chatLocale(OTHER_CHAT_ID)).toBe("en");
+  });
+
+  it("should stop calling a chat new once its first game is older, though it played today", () => {
+    ageGame(playOnce(), LONGER_THAN_A_WEEK);
+    playOnce();
+
+    expect(repo.chatSummary()).toMatchObject({
+      chatsNewInWeek: NONE,
+      chatsPlayedInWeek: ONCE,
+    });
+  });
+
+  it("should stop counting a chat as playing once its games fall out of the week", () => {
+    ageGame(playOnce(), LONGER_THAN_A_WEEK);
+
+    expect(repo.chatSummary()).toMatchObject({ chats: ONCE, chatsPlayedInWeek: NONE });
+  });
+
+  it("should count only the games of the last day", () => {
+    ageGame(playOnce(), LONGER_THAN_A_DAY);
+    playOnce();
+
+    expect(repo.chatSummary().gamesInDay).toBe(ONCE);
+  });
+
+  it("should count the games of the last week, which the day would have missed", () => {
+    ageGame(playOnce(), LONGER_THAN_A_DAY);
+    playOnce();
+
+    expect(repo.chatSummary().gamesInWeek).toBe(TWO);
+  });
+
+  it("should drop a game older than the week", () => {
+    ageGame(playOnce(), LONGER_THAN_A_WEEK);
+    playOnce();
+
+    expect(repo.chatSummary().gamesInWeek).toBe(ONCE);
+  });
+
+  it("should keep the two languages apart", () => {
+    repo.rememberChatLocale(CHAT_ID, "ru");
+    repo.rememberChatLocale(OTHER_CHAT_ID, "en");
+
+    expect(repo.chatSummary()).toMatchObject({ choseRussian: ONCE, choseEnglish: ONCE });
+  });
+
+  it("should count nothing in an empty database", () => {
+    expect(repo.chatSummary()).toEqual({
+      chats: NONE,
+      chatsNewInWeek: NONE,
+      chatsPlayedInWeek: NONE,
+      gamesInDay: NONE,
+      gamesInWeek: NONE,
+      choseRussian: NONE,
+      choseEnglish: NONE,
+    });
   });
 });
 

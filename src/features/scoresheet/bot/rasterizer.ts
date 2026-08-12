@@ -2,6 +2,7 @@ import { renderAsync } from "@resvg/resvg-js";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { rootDir } from "#shared/config/env.ts";
+import { startTiming } from "#shared/timing/slowest-render.ts";
 import { FONT_FAMILY } from "#scoresheet/render/card-metrics.ts";
 
 
@@ -18,6 +19,8 @@ export const requireFonts = (): void => {
 };
 
 export const rasterize = async (svg: string): Promise<Buffer> => {
+  const finished = startTiming();
+
   const drawn = await renderAsync(svg, {
     font: {
       fontFiles: [...FONT_FILES],
@@ -26,5 +29,8 @@ export const rasterize = async (svg: string): Promise<Buffer> => {
     },
   });
 
-  return drawn.asPng();
+  const png = drawn.asPng();
+  finished();
+
+  return png;
 };

@@ -1200,14 +1200,44 @@ answered:
   bot that will not run
 - **how long this process has been up**, which start it is, and how the previous one
   ended — a restart nobody saw is otherwise invisible
-- **the log level**, since it decides what the log could even hold
 - **how many warnings and errors** have happened since the start, and the last
   handful of them verbatim
+- **whether anybody is using it** — how many chats there are in all, how many played
+  in the last week, how many were first seen in that week, and how many games landed
+  in the last day and the last week. A total on its own cannot tell tonight from last
+  spring. The three chat numbers are counted independently and are **not** nested: a
+  chat that ran `/language` this week and has not played yet is first-seen but not
+  playing, which is exactly the arrival worth noticing
+- **which languages those chats picked**, counted three ways: chose Russian, chose
+  English, never asked. `chat_locales` holds only an explicit choice, so a chat with
+  no row is on the default rather than on English by preference — collapsing the two
+  would hide whether `/language` is findable at all
+- **what Telegram did to the calls** since the start: how many retries were made, how
+  many rate limits arrived, how many calls were finally refused. Nothing here counts
+  successes; the number that matters is trouble. These three overlap on purpose and
+  are not a partition — one call refused three times before landing is three retries,
+  and a flood limit that is then retried is counted as both. Retries are attempts
+  rather than calls because three retries of one call is a worse night than one retry
+  of three, and the report exists to show the worse night
+- **the slowest poster drawn** since the start, because rasterizing is the heaviest
+  thing the bot does and the first thing a small server will run out of room for
+
+Three definitions the numbers depend on. **A chat is one that has played or picked a
+language** — the union of `games` and `chat_locales` — so the three language counts
+add up to the chat count, and a chat that chose Russian before its first game still
+counts. **First seen is the earliest of those two**, which is why `chat_locales`
+keeps the timestamp of the *first* choice and a later `/language` overwrites only the
+locale: a chat that changes its mind is not a new chat. **The windows are rolling**, a
+day and seven days back from the moment of asking, not calendar days: the bot has no
+timezone to hold a calendar in, and Friday's game recorded after midnight belongs to
+Friday's evening either way.
 
 `/status` is **hidden**: registered like any command, but left out of `/help` and out
-of `setMyCommands`, so the group never learns it exists. `OPERATOR_TG_ID` may name
-the one Telegram user it answers; with no id set it answers anyone, because nothing
-in the report is a secret. **No environment value is ever printed** — not the token,
+of `setMyCommands`, so the group never learns it exists. `OPERATOR_TG_ID` is
+**required** — it names the one Telegram user the command answers, and a bot with no
+operator set refuses to start. It was optional while the bot lived in one chat and
+the report was about that chat; the report now counts every chat the bot is in, which
+is nobody else's business. **No environment value is ever printed** — not the token,
 not any other key: the report is built from a typed snapshot, not from the
 environment.
 

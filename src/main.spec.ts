@@ -25,15 +25,13 @@ const TWO = 2;
 
 const TOKEN_FROM_ENV = "424242:token-from-env";
 
-const LOG_LEVEL_FROM_ENV = "debug";
-
 const START_ATTEMPT = 3;
 
 const PREVIOUS_EXIT = "exit code 1";
 
 const OPERATOR_TG_ID = "777";
 
-const OPTIONAL_KEYS = 4;
+const OPTIONAL_KEYS = 2;
 
 const CHOSEN_CHAT_ID = -100888;
 
@@ -42,10 +40,8 @@ const CHAT_MENUS = [{ chatId: CHOSEN_CHAT_ID, locale: "ru" }];
 const env = new EnvStub({ BOT_TOKEN: TOKEN_FROM_ENV });
 
 env.optionalEnvSpy
-  .mockReturnValueOnce(LOG_LEVEL_FROM_ENV)
   .mockReturnValueOnce(String(START_ATTEMPT))
-  .mockReturnValueOnce(PREVIOUS_EXIT)
-  .mockReturnValueOnce(OPERATOR_TG_ID);
+  .mockReturnValueOnce(PREVIOUS_EXIT);
 
 const shutdown = new ShutdownStub();
 
@@ -168,7 +164,7 @@ vi.mock("#shared/repository/repository-instance.ts", () => repository.module);
 
 describe("main.ts", () => {
   beforeAll(async () => {
-    env.requireEnvSpy.mockReturnValue(TOKEN_FROM_ENV);
+    env.requireEnvSpy.mockReturnValueOnce(TOKEN_FROM_ENV).mockReturnValueOnce(OPERATOR_TG_ID);
     clientOptions.botClientOptionsSpy.mockReturnValue(CLIENT_OPTIONS);
     repository.stub.rememberedChatLocalesSpy.mockReturnValue(CHAT_MENUS);
     vi.spyOn(process, "once").mockImplementation(((event: string, handler: () => void) => {
@@ -224,8 +220,8 @@ describe("main.ts", () => {
     expect(diagnostics.depsGiven()?.repo).toBe(repository.stub);
   });
 
-  it("should tell diagnostics which log level is in force", () => {
-    expect(diagnostics.depsGiven()?.logLevel).toBe(LOG_LEVEL_FROM_ENV);
+  it("should ask for OPERATOR_TG_ID the same way, so an unset one stops the bot", () => {
+    expect(env.requireEnvSpy).toHaveBeenCalledWith(env.loaded, "OPERATOR_TG_ID");
   });
 
   it("should tell diagnostics which start this is, so a restart is visible", () => {
@@ -242,10 +238,8 @@ describe("main.ts", () => {
 
   it("should read every optional key through the reader that treats empty as missing", () => {
     expect(env.optionalEnvSpy.mock.calls.map((call) => call[1])).toEqual([
-      "LOG_LEVEL",
       "BOT_START_ATTEMPT",
       "BOT_PREVIOUS_EXIT",
-      "OPERATOR_TG_ID",
     ]);
   });
 

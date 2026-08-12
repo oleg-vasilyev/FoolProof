@@ -8,13 +8,13 @@ import { copyIn } from "#diagnostics/copy.ts";
 
 export interface StatusContext {
   readonly takeSnapshot: () => HealthSnapshot;
-  readonly operatorTgId: string | null;
+  readonly operatorTgId: string;
   readonly log: Logger;
   readonly localeIn: LocaleReader;
 }
 
-const askedByOperator = (operatorTgId: string | null, askedBy: number | undefined): boolean =>
-  operatorTgId === null || operatorTgId === String(askedBy);
+const askedByOperator = (operatorTgId: string, askedBy: number | undefined): boolean =>
+  operatorTgId === String(askedBy);
 
 export const onStatus = async (context: StatusContext, ctx: Command): Promise<void> => {
   if (!askedByOperator(context.operatorTgId, ctx.from?.id)) {

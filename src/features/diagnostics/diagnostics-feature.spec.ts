@@ -10,7 +10,6 @@ import { CommandContextStub } from "#diagnostics/bot/grammy-context.stub.ts";
 
 const ONCE = 1;
 
-const LOG_LEVEL = "info";
 
 const START_ATTEMPT = 2;
 
@@ -45,7 +44,6 @@ describe("createDiagnosticsFeature()", () => {
       repo,
       localeIn: locales.read,
       log,
-      logLevel: LOG_LEVEL,
       startAttempt: START_ATTEMPT,
       previousExit: PREVIOUS_EXIT,
       operatorTgId: OPERATOR_TG_ID,
@@ -151,9 +149,6 @@ describe("createDiagnosticsFeature()", () => {
       expect(await snapshotDeps()).toEqual(expect.objectContaining({ repo }));
     });
 
-    it("should carry the log level", async () => {
-      expect(await snapshotDeps()).toEqual(expect.objectContaining({ logLevel: LOG_LEVEL }));
-    });
 
     it("should carry which start this is", async () => {
       expect(await snapshotDeps()).toEqual(

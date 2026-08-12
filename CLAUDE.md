@@ -174,10 +174,10 @@ src/
     locale/             the language table, the plural rules, the chat's choice
     logging/            the scoped logger
     repository/         the connection, the contract, the SQL
-    telegram/           context types, the feature contract, api retries,
-                        the client options that let a run be pointed elsewhere
+    telegram/           context types, the feature contract, api retries and
+                        what they cost, the client options pointing a run elsewhere
     text/               HTML escaping
-    timing/             the edit debouncer
+    timing/             the edit debouncer, the slowest render this run drew
 ```
 
 **Everything in `shared/` lives in a folder named after its subject**, including the

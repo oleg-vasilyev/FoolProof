@@ -21,8 +21,6 @@ import { createApiRetry } from "#shared/telegram/api-retry.ts";
 import { botClientOptions } from "#shared/telegram/bot-client-options.ts";
 
 
-const DEFAULT_LOG_LEVEL = "info";
-
 const FIRST_START = 1;
 
 const log = createLogger("polling");
@@ -47,10 +45,9 @@ const features = [
     repo: repository,
     localeIn,
     log,
-    logLevel: optionalEnv(env, "LOG_LEVEL") ?? DEFAULT_LOG_LEVEL,
     startAttempt: Number(optionalEnv(env, "BOT_START_ATTEMPT") ?? FIRST_START),
     previousExit: optionalEnv(env, "BOT_PREVIOUS_EXIT"),
-    operatorTgId: optionalEnv(env, "OPERATOR_TG_ID"),
+    operatorTgId: requireEnv(env, "OPERATOR_TG_ID"),
   }),
   createLanguageFeature({ repo: repository, localeIn, publishMenu }),
 ];

@@ -1,7 +1,8 @@
 import type { Problem } from "#shared/logging/log-history.ts";
-import type { StorageSummary } from "#shared/repository/repository-contract.ts";
+import type { ChatSummary, StorageSummary } from "#shared/repository/repository-contract.ts";
+import type { CallTally } from "#shared/telegram/api-call-tally.ts";
 import { counted } from "#shared/locale/plural-rules.ts";
-import { humanDuration, humanSize } from "#diagnostics/render/human-units.ts";
+import { humanDuration, humanSeconds, humanSize } from "#diagnostics/render/human-units.ts";
 import type { Copy } from "#diagnostics/copy.ts";
 
 
@@ -15,14 +16,16 @@ const ISO_TIME_TO = 19;
 
 export interface HealthSnapshot {
   readonly storage: StorageSummary;
+  readonly chats: ChatSummary;
   readonly version: string | null;
   readonly uptimeMs: number;
   readonly startAttempt: number;
   readonly previousExit: string | null;
-  readonly logLevel: string;
   readonly warnings: number;
   readonly errors: number;
   readonly problems: readonly Problem[];
+  readonly calls: CallTally;
+  readonly slowestRenderMs: number | null;
 }
 
 const fileNameOf = (path: string): string => path.replace(/^.*[\\/]/, "");
@@ -39,6 +42,18 @@ const tallyLine = (copy: Copy, snapshot: HealthSnapshot): string =>
         counted(copy.locale, snapshot.warnings, copy.warningForms),
         counted(copy.locale, snapshot.errors, copy.errorForms)
       );
+
+const callLine = (copy: Copy, calls: CallTally): string =>
+  calls.retried === NONE && calls.rateLimit === NONE && calls.refusal === NONE
+    ? copy.noCallTrouble
+    : copy.callTally(
+        counted(copy.locale, calls.retried, copy.retryForms),
+        counted(copy.locale, calls.rateLimit, copy.limitForms),
+        counted(copy.locale, calls.refusal, copy.refusalForms)
+      );
+
+const posterLines = (copy: Copy, slowestRenderMs: number | null): readonly string[] =>
+  slowestRenderMs === null ? [] : [copy.slowestPoster(humanSeconds(slowestRenderMs, copy.units))];
 
 const problemLines = (copy: Copy, problems: readonly Problem[]): readonly string[] =>
   problems.length === NONE
@@ -69,10 +84,23 @@ export const renderHealthReport = (copy: Copy, snapshot: HealthSnapshot): string
       ? copy.noGamesYet
       : copy.lastGame(snapshot.storage.lastGameAt),
     "",
+    copy.chats(
+      snapshot.chats.chats,
+      snapshot.chats.chatsPlayedInWeek,
+      snapshot.chats.chatsNewInWeek
+    ),
+    copy.games(snapshot.chats.gamesInDay, snapshot.chats.gamesInWeek),
+    copy.languages(
+      snapshot.chats.choseRussian,
+      snapshot.chats.choseEnglish,
+      snapshot.chats.chats - snapshot.chats.choseRussian - snapshot.chats.choseEnglish
+    ),
+    "",
     snapshot.version === null ? copy.versionUnknown : copy.version(snapshot.version),
     copy.uptime(humanDuration(snapshot.uptimeMs, copy.units)),
     startLine(copy, snapshot),
-    copy.logLevel(snapshot.logLevel),
     tallyLine(copy, snapshot),
+    callLine(copy, snapshot.calls),
+    ...posterLines(copy, snapshot.slowestRenderMs),
     ...problemLines(copy, snapshot.problems),
   ].join("\n");

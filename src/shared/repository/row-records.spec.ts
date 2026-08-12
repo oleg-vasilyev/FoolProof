@@ -14,6 +14,7 @@ const {
   toPlayer,
   toPlayerColumn,
   toPlayerTally,
+  toChatSummary,
   toSeat,
   toStorageSummary,
 } = await import("#shared/repository/row-records.ts");
@@ -35,6 +36,20 @@ const AS_NULLABLE_NUMBER = 222;
 const AS_TEXT = "as-text";
 
 const AS_NULLABLE_TEXT = "as-nullable-text";
+
+const CHATS = 14;
+
+const CHATS_NEW_IN_WEEK = 3;
+
+const CHATS_PLAYED_IN_WEEK = 9;
+
+const GAMES_IN_DAY = 5;
+
+const GAMES_IN_WEEK = 31;
+
+const CHOSE_RUSSIAN = 6;
+
+const CHOSE_ENGLISH = 2;
 
 describe("row mappers", () => {
   beforeEach(() => {
@@ -218,6 +233,46 @@ describe("row mappers", () => {
 
     it("should still name the file when there is no row", () => {
       expect(toStorageSummary(undefined, DB_FILE).file).toBe(DB_FILE);
+    });
+  });
+
+  describe("toChatSummary()", () => {
+    const row = {
+      chats: CHATS,
+      chats_new_in_week: CHATS_NEW_IN_WEEK,
+      chats_played_in_week: CHATS_PLAYED_IN_WEEK,
+      games_in_day: GAMES_IN_DAY,
+      games_in_week: GAMES_IN_WEEK,
+      chose_russian: CHOSE_RUSSIAN,
+      chose_english: CHOSE_ENGLISH,
+    };
+
+    beforeEach(() => {
+      values.requireNumSpy.mockImplementation((value) => Number(value));
+    });
+
+    it("should land every count on the field the report reads it from", () => {
+      expect(toChatSummary(row)).toEqual({
+        chats: CHATS,
+        chatsNewInWeek: CHATS_NEW_IN_WEEK,
+        chatsPlayedInWeek: CHATS_PLAYED_IN_WEEK,
+        gamesInDay: GAMES_IN_DAY,
+        gamesInWeek: GAMES_IN_WEEK,
+        choseRussian: CHOSE_RUSSIAN,
+        choseEnglish: CHOSE_ENGLISH,
+      });
+    });
+
+    it("should take every count through the numeric coercion", () => {
+      values.requireNumSpy.mockReturnValue(AS_NUMBER);
+
+      expect(toChatSummary(row).chats).toBe(AS_NUMBER);
+    });
+
+    it("should hand a missing row's columns to the coercion, which is what refuses them", () => {
+      toChatSummary(undefined);
+
+      expect(values.requireNumSpy).toHaveBeenCalledWith(undefined);
     });
   });
 });

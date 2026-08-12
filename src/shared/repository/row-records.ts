@@ -6,6 +6,7 @@ import {
 } from "#shared/repository/column-values.ts";
 import type {
   ChatLocaleChoice,
+  ChatSummary,
   ChronologyGame,
   ExitRecord,
   GameRecord,
@@ -72,6 +73,16 @@ export const toStorageSummary = (row: Row | undefined, file: string): StorageSum
   games: requireNum(row?.games),
   liveCards: requireNum(row?.live_cards),
   lastGameAt: nullableText(row?.last_game_at),
+});
+
+export const toChatSummary = (row: Row | undefined): ChatSummary => ({
+  chats: requireNum(row?.chats),
+  chatsNewInWeek: requireNum(row?.chats_new_in_week),
+  chatsPlayedInWeek: requireNum(row?.chats_played_in_week),
+  gamesInDay: requireNum(row?.games_in_day),
+  gamesInWeek: requireNum(row?.games_in_week),
+  choseRussian: requireNum(row?.chose_russian),
+  choseEnglish: requireNum(row?.chose_english),
 });
 
 export const groupByGame = (rows: readonly Row[]): readonly ChronologyGame[] =>

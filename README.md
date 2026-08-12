@@ -213,7 +213,7 @@ Then send it its configuration, **from your machine**, where `.env` is the copy 
 can edit:
 
 ```bash
-cp .env.example .env    # fill in the token, then
+cp .env.example .env    # fill in the token and your own id, then
 deploy/configure-server.sh
 ```
 
@@ -319,14 +319,20 @@ with everything the terminal would have told you:
 ```
 Bot status
 
-Database: foolproof.db (44 KB)
-Recorded: 6 players, 28 games, 0 live
-Last game: 2026-07-31 19:42:10 UTC
+Database: foolproof.db (512 KB)
+Recorded: 52 players, 186 games, 2 live
+Last game: 2026-08-13 21:07:44 UTC
 
+Chats: 14 in all, 9 played in the last week, 3 first seen in it
+Games: 5 in the last day, 31 in the last week
+Language: 6 chose Russian, 2 chose English, 6 never asked
+
+Version: 1.11.0
 Up for 3h 12m
 Start #2 — the one before it ended with exit code 1
-Log level: info
 Since this start: 1 warning, 0 errors
+Telegram: 9 retries, 1 rate limit, 2 refusals
+Slowest poster: 2.4 s
 
 Latest:
 19:31:04 WARN polling: could not edit message 500: message to edit not found
@@ -334,9 +340,11 @@ Latest:
 
 The database line is the one that matters most: it names the file, so a production
 run that quietly came up on the dev database is one glance away from being caught.
+The middle block is the one that grew when the bot stopped being yours alone.
 
 The command is **hidden** — not in `/help`, not in the `/` menu — and
-`OPERATOR_TG_ID` in the env file makes it answer only you. `PLAN.md` explains
+`OPERATOR_TG_ID` in the env file is **required**: it names the only Telegram user
+the bot will answer, and without it the bot refuses to start. `PLAN.md` explains
 [what it reports and why](PLAN.md#asking-the-bot-how-it-is-doing), including why no
 environment value is ever printed.
 

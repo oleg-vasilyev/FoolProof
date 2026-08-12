@@ -20,6 +20,14 @@ export const copy: Copy = {
 
   noGamesYet: "Последняя партия: пока ни одной",
 
+  chats: (all: number, played: number, fresh: number) =>
+    `Чаты: ${all} всего, ${played} играли за неделю, впервые замечено — ${fresh}`,
+
+  games: (day: number, week: number) => `Партии: ${day} за сутки, ${week} за неделю`,
+
+  languages: (russian: number, english: number, silent: number) =>
+    `Язык: русский — ${russian}, английский — ${english}, не выбирали — ${silent}`,
+
   version: (version: string) => `Версия: ${version}`,
 
   versionUnknown: "Версия: не читается",
@@ -31,11 +39,16 @@ export const copy: Copy = {
   restarted: (attempt: number, previousExit: string) =>
     `Запуск №${attempt} — предыдущий закончился так: ${previousExit}`,
 
-  logLevel: (level: string) => `Уровень логов: ${level}`,
-
   problemTally: (warnings: string, errors: string) => `С этого запуска: ${warnings}, ${errors}`,
 
   noProblems: "С этого запуска: ничего не сломалось",
+
+  callTally: (retries: string, limits: string, refusals: string) =>
+    `Телеграм: ${retries}, ${limits}, ${refusals}`,
+
+  noCallTrouble: "Телеграм: ничего не пришлось повторять",
+
+  slowestPoster: (seconds: string) => `Самый долгий постер: ${seconds}`,
 
   recentProblems: "Последнее:",
 
@@ -43,6 +56,17 @@ export const copy: Copy = {
   gameForms: { one: "партия", few: "партии", many: "партий" },
   warningForms: { one: "предупреждение", few: "предупреждения", many: "предупреждений" },
   errorForms: { one: "ошибка", few: "ошибки", many: "ошибок" },
+  retryForms: { one: "повтор", few: "повтора", many: "повторов" },
+  limitForms: { one: "лимит", few: "лимита", many: "лимитов" },
+  refusalForms: { one: "отказ", few: "отказа", many: "отказов" },
 
-  units: { days: "д", hours: "ч", minutes: "мин", kilobytes: "КБ", megabytes: "МБ" },
+  units: {
+    days: "д",
+    hours: "ч",
+    minutes: "мин",
+    seconds: "с",
+    kilobytes: "КБ",
+    megabytes: "МБ",
+    decimal: ",",
+  },
 };

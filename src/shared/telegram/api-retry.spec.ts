@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FailureKind } from "#shared/telegram/call-outcomes.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
+import { ApiCallTallyStub } from "#shared/telegram/api-call-tally.stub.ts";
 
 
 const FIRST_ATTEMPT = 1;
@@ -49,9 +50,13 @@ const OK_RESPONSE = { ok: true as const, result: true };
 
 const delaySpy = vi.fn(async (_ms: number): Promise<void> => undefined);
 
+const tally = new ApiCallTallyStub();
+
 vi.mock("node:timers/promises", () => ({
   setTimeout: (ms: number) => delaySpy(ms),
 }));
+
+vi.mock("#shared/telegram/api-call-tally.ts", () => tally.module);
 
 const { createApiRetry, createOutageLog, planFor } = await import("#shared/telegram/api-retry.ts");
 
@@ -355,5 +360,84 @@ describe("createApiRetry()", () => {
     await callThrough(log, prev);
 
     expect(log.infoSpy).toHaveBeenCalledTimes(ONCE);
+  });
+
+  describe("what it leaves for the status report", () => {
+    it("should count nothing when the call lands first time", async () => {
+      const prev = vi.fn<PrevCall>().mockResolvedValue(OK_RESPONSE);
+
+      await callThrough(log, prev);
+
+      expect(tally.troublesRecorded()).toEqual([]);
+    });
+
+    it("should count a retry after a network failure", async () => {
+      const prev = vi
+        .fn<PrevCall>()
+        .mockRejectedValueOnce(new Error("fetch failed"))
+        .mockResolvedValue(OK_RESPONSE);
+
+      await callThrough(log, prev);
+
+      expect(tally.troublesRecorded()).toEqual(["retried"]);
+    });
+
+    it("should count every attempt a single call needed, not the call once", async () => {
+      const prev = vi
+        .fn<PrevCall>()
+        .mockRejectedValueOnce(new Error("fetch failed"))
+        .mockRejectedValueOnce(new Error("fetch failed"))
+        .mockResolvedValue(OK_RESPONSE);
+
+      await callThrough(log, prev);
+
+      expect(tally.troublesRecorded()).toEqual(["retried", "retried"]);
+    });
+
+    it("should count a retry after a refusal Telegram may recover from", async () => {
+      const prev = vi
+        .fn<PrevCall>()
+        .mockResolvedValueOnce(refusal(SERVER_ERROR))
+        .mockResolvedValue(OK_RESPONSE);
+
+      await callThrough(log, prev);
+
+      expect(tally.troublesRecorded()).toEqual(["retried"]);
+    });
+
+    it("should count a refusal it will not repeat", async () => {
+      const prev = vi.fn<PrevCall>().mockResolvedValue(refusal(BAD_REQUEST));
+
+      await callThrough(log, prev);
+
+      expect(tally.troublesRecorded()).toEqual(["refusal"]);
+    });
+
+    it("should count a flood limit as its own kind of trouble", async () => {
+      const prev = vi
+        .fn<PrevCall>()
+        .mockResolvedValueOnce(refusal(FLOOD_LIMIT, SHORT_WAIT_SECONDS))
+        .mockResolvedValue(OK_RESPONSE);
+
+      await callThrough(log, prev);
+
+      expect(tally.troublesRecorded()).toEqual(["rateLimit", "retried"]);
+    });
+
+    it("should count a flood limit it gave up on as a refusal too", async () => {
+      const prev = vi.fn<PrevCall>().mockResolvedValue(refusal(FLOOD_LIMIT, LONG_WAIT_SECONDS));
+
+      await callThrough(log, prev);
+
+      expect(tally.troublesRecorded()).toEqual(["rateLimit", "refusal"]);
+    });
+
+    it("should not call an unreachable server a refusal, since it never answered", async () => {
+      const prev = vi.fn<PrevCall>().mockRejectedValue(new Error("fetch failed"));
+
+      await expect(callThrough(log, prev)).rejects.toThrow();
+
+      expect(tally.troublesRecorded()).not.toContain("refusal");
+    });
   });
 });

@@ -12,12 +12,16 @@ const NONE = 0;
 
 const ONE_DECIMAL = 1;
 
+const TENTHS_PER_SECOND = 10;
+
 export interface UnitLabels {
   readonly days: string;
   readonly hours: string;
   readonly minutes: string;
+  readonly seconds: string;
   readonly kilobytes: string;
   readonly megabytes: string;
+  readonly decimal: string;
 }
 
 export const humanDuration = (ms: number, units: UnitLabels): string => {
@@ -34,6 +38,13 @@ export const humanDuration = (ms: number, units: UnitLabels): string => {
   }
 
   return `${minutes}${units.minutes}`;
+};
+
+export const humanSeconds = (ms: number, units: UnitLabels): string => {
+  const tenths = Math.round((ms / MS_PER_SECOND) * TENTHS_PER_SECOND);
+  const whole = Math.floor(tenths / TENTHS_PER_SECOND);
+
+  return `${whole}${units.decimal}${tenths % TENTHS_PER_SECOND} ${units.seconds}`;
 };
 
 export const humanSize = (bytes: number, units: UnitLabels): string => {

@@ -33,7 +33,9 @@ SERVICE=foolproof.service
 PATIENCE_SECONDS=90
 POLL_SECONDS=3
 LIVE="listening for updates"
-REQUIRED_KEY=BOT_TOKEN
+# Every key the bot refuses to start without. src/main.ts calls requireEnv on each
+# of these, so an empty one here is a crash loop the moment the unit restarts.
+REQUIRED_KEYS="BOT_TOKEN OPERATOR_TG_ID"
 
 say() {
   echo "configure: $*"
@@ -44,10 +46,12 @@ if [ ! -f "$SOURCE" ]; then
   exit 1
 fi
 
-if ! grep -qE "^${REQUIRED_KEY}=.+" "$SOURCE"; then
-  say "$SOURCE has no $REQUIRED_KEY, or it is empty — the bot would not start"
-  exit 1
-fi
+for key in $REQUIRED_KEYS; do
+  if ! grep -qE "^${key}=.+" "$SOURCE"; then
+    say "$SOURCE has no $key, or it is empty — the bot would not start"
+    exit 1
+  fi
+done
 
 say "sending $SOURCE, with DB_PATH replaced by the server's own"
 

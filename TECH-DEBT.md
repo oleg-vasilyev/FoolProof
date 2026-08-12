@@ -179,6 +179,6 @@ Listed so nobody "fixes" them:
 - **`logger.ts` and `sqlite-connection.ts` read the environment at module scope.**
   A logger is created wherever code runs and the connection opens at import, so
   neither can be handed values the way feature code is — which is what "read in
-  one place, pass values down" actually polices. The visible cost is that
-  `LOG_LEVEL` has two readers: the logger's threshold, and the copy `main.ts`
-  hands the diagnostics for `/status` to report.
+  one place, pass values down" actually polices. There is no visible cost left now
+  that `/status` has stopped reporting the log level: `LOG_LEVEL` has one reader
+  again. Pick this up if a second module ever needs the same value.

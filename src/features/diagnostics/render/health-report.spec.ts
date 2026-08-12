@@ -10,15 +10,20 @@ const SIZE = "40 KB";
 
 const COUNTED = "some counted thing";
 
+const SECONDS = "2.4 s";
+
 const humanDurationSpy = vi.fn();
 
 const humanSizeSpy = vi.fn();
+
+const humanSecondsSpy = vi.fn();
 
 const plural = new PluralRulesStub();
 
 vi.mock("#diagnostics/render/human-units.ts", () => ({
   humanDuration: (ms: number, units: unknown) => humanDurationSpy(ms, units),
   humanSize: (bytes: number, units: unknown) => humanSizeSpy(bytes, units),
+  humanSeconds: (ms: number, units: unknown) => humanSecondsSpy(ms, units),
 }));
 
 vi.mock("#shared/locale/plural-rules.ts", () => plural.module);
@@ -50,11 +55,39 @@ const ONE_PROBLEM = 1;
 
 const THREE_LINES = 3;
 
+const ONE_LINE = 1;
+
 const LAST_GAME_AT = "2026-07-31 19:42:10";
 
 const PREVIOUS_EXIT = "exit code 1";
 
 const VERSION = "1.10.0";
+
+const CHATS = 14;
+
+const CHATS_NEW_IN_WEEK = 3;
+
+const CHATS_PLAYED_IN_WEEK = 9;
+
+const GAMES_IN_DAY = 5;
+
+const GAMES_IN_WEEK = 31;
+
+const CHOSE_RUSSIAN = 6;
+
+const CHOSE_ENGLISH = 2;
+
+const NEVER_ASKED = 6;
+
+const RETRIED = 9;
+
+const RATE_LIMIT = 1;
+
+const REFUSAL = 2;
+
+const SLOWEST_RENDER_MS = 2400;
+
+const QUIET_CALLS = { retried: NOTHING, rateLimit: NOTHING, refusal: NOTHING };
 
 const snapshotOf = (over: Record<string, unknown> = {}) => ({
   version: VERSION,
@@ -66,13 +99,23 @@ const snapshotOf = (over: Record<string, unknown> = {}) => ({
     liveCards: LIVE_CARDS,
     lastGameAt: LAST_GAME_AT,
   },
+  chats: {
+    chats: CHATS,
+    chatsNewInWeek: CHATS_NEW_IN_WEEK,
+    chatsPlayedInWeek: CHATS_PLAYED_IN_WEEK,
+    gamesInDay: GAMES_IN_DAY,
+    gamesInWeek: GAMES_IN_WEEK,
+    choseRussian: CHOSE_RUSSIAN,
+    choseEnglish: CHOSE_ENGLISH,
+  },
   uptimeMs: UPTIME_MS,
   startAttempt: FIRST_START,
   previousExit: null,
-  logLevel: "info",
   warnings: NOTHING,
   errors: NOTHING,
   problems: [],
+  calls: QUIET_CALLS,
+  slowestRenderMs: null,
   ...over,
 });
 
@@ -187,8 +230,32 @@ describe("renderHealthReport()", () => {
       expect(report({ startAttempt: THIRD_START, previousExit: null })).toContain(copy.firstStart);
     });
 
-    it("should name the log level, since it decides what the log will hold", () => {
-      expect(report({ logLevel: "debug" })).toContain(copy.logLevel("debug"));
+  });
+
+  describe("who is using the bot", () => {
+    it("should count the chats, which is the number a public bot is judged by", () => {
+      expect(report()).toContain(
+        copy.chats(CHATS, CHATS_PLAYED_IN_WEEK, CHATS_NEW_IN_WEEK)
+      );
+    });
+
+    it("should count the games of the day and of the week apart", () => {
+      expect(report()).toContain(copy.games(GAMES_IN_DAY, GAMES_IN_WEEK));
+    });
+
+    it("should split the languages three ways, since a default is not a choice", () => {
+      expect(report()).toContain(copy.languages(CHOSE_RUSSIAN, CHOSE_ENGLISH, NEVER_ASKED));
+    });
+
+    it("should count nobody as silent when every chat has chosen", () => {
+      const chosen = {
+        ...snapshotOf().chats,
+        choseRussian: CHATS - CHOSE_ENGLISH,
+      };
+
+      expect(report({ chats: chosen })).toContain(
+        copy.languages(CHATS - CHOSE_ENGLISH, CHOSE_ENGLISH, NOTHING)
+      );
     });
   });
 
@@ -256,6 +323,71 @@ describe("renderHealthReport()", () => {
     });
   });
 
+  describe("what Telegram did", () => {
+    it("should say nothing needed retrying when nothing did", () => {
+      expect(report()).toContain(copy.noCallTrouble);
+    });
+
+    it("should count the trouble when there was some", () => {
+      expect(report({ calls: { retried: RETRIED, rateLimit: RATE_LIMIT, refusal: REFUSAL } }))
+        .toContain(copy.callTally(COUNTED, COUNTED, COUNTED));
+    });
+
+    it("should report a retry on its own", () => {
+      expect(report({ calls: { ...QUIET_CALLS, retried: RETRIED } })).toContain(
+        copy.callTally(COUNTED, COUNTED, COUNTED)
+      );
+    });
+
+    it("should report a rate limit on its own", () => {
+      expect(report({ calls: { ...QUIET_CALLS, rateLimit: RATE_LIMIT } })).toContain(
+        copy.callTally(COUNTED, COUNTED, COUNTED)
+      );
+    });
+
+    it("should report a refusal on its own", () => {
+      expect(report({ calls: { ...QUIET_CALLS, refusal: REFUSAL } })).toContain(
+        copy.callTally(COUNTED, COUNTED, COUNTED)
+      );
+    });
+
+    it("should have the retries counted with their own noun", () => {
+      report({ calls: { retried: RETRIED, rateLimit: RATE_LIMIT, refusal: REFUSAL } });
+
+      expect(plural.countedSpy).toHaveBeenCalledWith(copy.locale, RETRIED, copy.retryForms);
+    });
+
+    it("should have the rate limits counted with theirs", () => {
+      report({ calls: { retried: RETRIED, rateLimit: RATE_LIMIT, refusal: REFUSAL } });
+
+      expect(plural.countedSpy).toHaveBeenCalledWith(copy.locale, RATE_LIMIT, copy.limitForms);
+    });
+
+    it("should have the refusals counted with theirs", () => {
+      report({ calls: { retried: RETRIED, rateLimit: RATE_LIMIT, refusal: REFUSAL } });
+
+      expect(plural.countedSpy).toHaveBeenCalledWith(copy.locale, REFUSAL, copy.refusalForms);
+    });
+  });
+
+  describe("the slowest poster", () => {
+    it("should say nothing at all before anything has been drawn", () => {
+      expect(report()).not.toContain(copy.slowestPoster(SECONDS));
+    });
+
+    it("should report the slowest drawing once there is one", () => {
+      humanSecondsSpy.mockReturnValue(SECONDS);
+
+      expect(report({ slowestRenderMs: SLOWEST_RENDER_MS })).toContain(copy.slowestPoster(SECONDS));
+    });
+
+    it("should hand the time to the formatter in milliseconds, with the labels to spell it in", () => {
+      report({ slowestRenderMs: SLOWEST_RENDER_MS });
+
+      expect(humanSecondsSpy).toHaveBeenCalledWith(SLOWEST_RENDER_MS, copy.units);
+    });
+  });
+
   it("should lead with a title, since this arrives in a chat of card messages", () => {
     expect(report().startsWith(copy.reportTitle)).toBe(true);
   });
@@ -283,12 +415,24 @@ describe("renderHealthReport()", () => {
       copy.contents(COUNTED, COUNTED, LIVE_CARDS),
       copy.lastGame(LAST_GAME_AT),
       "",
+      copy.chats(CHATS, CHATS_PLAYED_IN_WEEK, CHATS_NEW_IN_WEEK),
+      copy.games(GAMES_IN_DAY, GAMES_IN_WEEK),
+      copy.languages(CHOSE_RUSSIAN, CHOSE_ENGLISH, NEVER_ASKED),
+      "",
       copy.version(VERSION),
       copy.uptime(DURATION),
       copy.firstStart,
-      copy.logLevel("info"),
       copy.noProblems,
+      copy.noCallTrouble,
     ]);
+  });
+
+  it("should keep the slowest poster with the rest of what this run has done", () => {
+    humanSecondsSpy.mockReturnValue(SECONDS);
+
+    expect(report({ slowestRenderMs: SLOWEST_RENDER_MS }).split("\n").at(-ONE_LINE)).toBe(
+      copy.slowestPoster(SECONDS)
+    );
   });
 
   it("should set the problems apart with a blank line and a heading", () => {

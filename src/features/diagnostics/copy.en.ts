@@ -19,6 +19,15 @@ export const copy = {
 
   noGamesYet: "Last game: none yet",
 
+  chats: (all: number, played: number, fresh: number) =>
+    `Chats: ${all} in all, ${played} played in the last week, ${fresh} first seen in it`,
+
+  games: (day: number, week: number) =>
+    `Games: ${day} in the last day, ${week} in the last week`,
+
+  languages: (russian: number, english: number, silent: number) =>
+    `Language: ${russian} chose Russian, ${english} chose English, ${silent} never asked`,
+
   version: (version: string) => `Version: ${version}`,
 
   versionUnknown: "Version: unreadable",
@@ -30,11 +39,16 @@ export const copy = {
   restarted: (attempt: number, previousExit: string) =>
     `Start #${attempt} — the one before it ended with ${previousExit}`,
 
-  logLevel: (level: string) => `Log level: ${level}`,
-
   problemTally: (warnings: string, errors: string) => `Since this start: ${warnings}, ${errors}`,
 
   noProblems: "Since this start: nothing went wrong",
+
+  callTally: (retries: string, limits: string, refusals: string) =>
+    `Telegram: ${retries}, ${limits}, ${refusals}`,
+
+  noCallTrouble: "Telegram: nothing needed retrying",
+
+  slowestPoster: (seconds: string) => `Slowest poster: ${seconds}`,
 
   recentProblems: "Latest:",
 
@@ -42,8 +56,19 @@ export const copy = {
   gameForms: { one: "game", few: "games", many: "games" },
   warningForms: { one: "warning", few: "warnings", many: "warnings" },
   errorForms: { one: "error", few: "errors", many: "errors" },
+  retryForms: { one: "retry", few: "retries", many: "retries" },
+  limitForms: { one: "rate limit", few: "rate limits", many: "rate limits" },
+  refusalForms: { one: "refusal", few: "refusals", many: "refusals" },
 
-  units: { days: "d", hours: "h", minutes: "m", kilobytes: "KB", megabytes: "MB" },
+  units: {
+    days: "d",
+    hours: "h",
+    minutes: "m",
+    seconds: "s",
+    kilobytes: "KB",
+    megabytes: "MB",
+    decimal: ".",
+  },
 };
 
 export type Copy = typeof copy;

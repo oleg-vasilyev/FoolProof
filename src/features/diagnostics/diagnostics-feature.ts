@@ -11,10 +11,9 @@ export interface DiagnosticsDeps {
   readonly repo: DiagnosticsRepository;
   readonly localeIn: LocaleReader;
   readonly log: Logger;
-  readonly logLevel: string;
   readonly startAttempt: number;
   readonly previousExit: string | null;
-  readonly operatorTgId: string | null;
+  readonly operatorTgId: string;
 }
 
 export const createDiagnosticsFeature = (deps: DiagnosticsDeps): Feature => {
@@ -22,7 +21,6 @@ export const createDiagnosticsFeature = (deps: DiagnosticsDeps): Feature => {
     takeSnapshot: () =>
       takeHealthSnapshot({
         repo: deps.repo,
-        logLevel: deps.logLevel,
         startAttempt: deps.startAttempt,
         previousExit: deps.previousExit,
       }),

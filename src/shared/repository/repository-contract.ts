@@ -109,8 +109,19 @@ export interface StorageSummary {
   lastGameAt: string | null;
 }
 
+export interface ChatSummary {
+  chats: number;
+  chatsNewInWeek: number;
+  chatsPlayedInWeek: number;
+  gamesInDay: number;
+  gamesInWeek: number;
+  choseRussian: number;
+  choseEnglish: number;
+}
+
 export interface DiagnosticsRepository {
   storageSummary(): StorageSummary;
+  chatSummary(): ChatSummary;
 }
 
 export interface ChatLocaleChoice {

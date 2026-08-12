@@ -2,6 +2,7 @@ import { vi } from "vitest";
 import type {
   CardRecord,
   ChatLocaleChoice,
+  ChatSummary,
   Finalist,
   ForgottenChat,
   GameRecord,
@@ -27,6 +28,16 @@ const EMPTY_STORAGE: StorageSummary = {
   lastGameAt: null,
 };
 
+const QUIET_CHATS: ChatSummary = {
+  chats: NOTHING,
+  chatsNewInWeek: NOTHING,
+  chatsPlayedInWeek: NOTHING,
+  gamesInDay: NOTHING,
+  gamesInWeek: NOTHING,
+  choseRussian: NOTHING,
+  choseEnglish: NOTHING,
+};
+
 export class RepositoryStub implements Repository {
   public playersInChatSpy = vi.fn();
   public createPlayerSpy = vi.fn();
@@ -49,6 +60,7 @@ export class RepositoryStub implements Repository {
   public gameNumberInSeriesSpy = vi.fn();
   public seriesChronologySpy = vi.fn();
   public storageSummarySpy = vi.fn();
+  public chatSummarySpy = vi.fn();
   public chatLocaleSpy = vi.fn();
   public rememberChatLocaleSpy = vi.fn();
   public rememberedChatLocalesSpy = vi.fn();
@@ -72,6 +84,7 @@ export class RepositoryStub implements Repository {
     this.gameNumberInSeriesSpy.mockReturnValue(FIRST_GAME_NUMBER);
     this.seriesChronologySpy.mockReturnValue(null);
     this.storageSummarySpy.mockReturnValue(EMPTY_STORAGE);
+    this.chatSummarySpy.mockReturnValue(QUIET_CHATS);
     this.chatLocaleSpy.mockReturnValue(null);
     this.rememberedChatLocalesSpy.mockReturnValue([]);
     this.forgetChatSpy.mockReturnValue({ players: NOTHING, games: NOTHING });
@@ -166,6 +179,10 @@ export class RepositoryStub implements Repository {
 
   public storageSummary(): StorageSummary {
     return this.storageSummarySpy();
+  }
+
+  public chatSummary(): ChatSummary {
+    return this.chatSummarySpy();
   }
 
   public gameNumberInSeries(chatId: number): number {
