@@ -16,7 +16,8 @@
     "#language/*": "./src/features/language/*"
   },
   "scripts": {
-    "play": "node e2e/play.ts",
+    "start": "node e2e/play.ts",
+    "start:prod": "node --env-file=.env.production src/supervisor.ts",
     "check": "npm run lint && npm run typecheck && npm run docs:check && npm run test",
     "lint": "eslint src scripts",
     "lint:fix": "eslint --fix src scripts",

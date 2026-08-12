@@ -21,12 +21,12 @@ StartLimitBurst=5
 Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/FoolProof
-# This line is the only place that knows how a real run begins — there is no npm
-# script for it, deliberately, because a second poller on the same token would
-# split the updates with the bot running here. Node rather than npm, too: npm
-# would add a third node process to a 954 MB host and forward the signals systemd
-# already delivers to the whole control group.
-ExecStart=/usr/local/bin/node --env-file=.env.production src/supervisor.ts
+# Through npm rather than node, so that `start:prod` in package.json is the real
+# production command and not a copy of it that can drift. A release changes how
+# production starts by changing that line, and this unit does not have to know.
+# The cost is npm and its shell staying resident beside the two node processes;
+# it was measured on this host before being accepted.
+ExecStart=/usr/local/bin/npm run start:prod
 
 # on-failure, not always: an exit code of 0 is the supervisor deciding to stop,
 # and PLAN.md, "What survives a failure", says why restarting that is the worse

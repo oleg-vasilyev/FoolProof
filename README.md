@@ -98,19 +98,23 @@ Node 24 or newer. There is no build step — Node runs the TypeScript directly.
 
 ```bash
 npm install
-npm run play
+npm start
 ```
 
 That prints an address. Open it and you are in a chat with the bot, against a
 **fake Telegram** — no token, no network, nothing to configure. It runs the real
 `src/main.ts`, so what answers you is the bot, not a mock of it.
 
-**No script here starts the real bot, and none reads an env file.** The bot is
-[running on a server](#running-it-on-a-server), and one token serves exactly one
-process — [PLAN.md](PLAN.md#edge-cases) says what a second one does to the
-updates. The `.env` you keep locally is the *server's* configuration, sent there
-by [`deploy/configure-server.sh`](deploy/configure-server.sh); nothing on this
-machine runs from it.
+**`npm run start:prod` is how the bot really starts**, and the systemd unit on the
+server runs exactly that — so `package.json` describes production rather than
+paraphrasing it. Do not run it here: the bot is [running on a
+server](#running-it-on-a-server), one token serves exactly one process, and
+[PLAN.md](PLAN.md#edge-cases) says what a second one does to the updates. It needs
+`.env.production`, which exists only on the server for the same reason.
+
+The `.env` you keep locally is the *server's* configuration, sent there by
+[`deploy/configure-server.sh`](deploy/configure-server.sh); nothing on this machine
+runs from it.
 
 The cost is that the bot only meets the real Bot API in production. If you need
 to see a change in a real Telegram client first, get a second token from
@@ -129,10 +133,10 @@ exactly what this one needs, and it never reads the rest of the conversation.
 
 | Database | Who writes to it | Where it lives |
 |---|---|---|
-| `data/foolproof.dev.db` | `npm run play`, and every e2e scenario | your machine, gitignored |
+| `data/foolproof.dev.db` | `npm start`, and every e2e scenario | your machine, gitignored |
 | whatever `DB_PATH` names | the bot on the server | the server, outside the clone |
 
-`npm run play` takes `--db=<path>` if you want to play against a copy of
+`npm start` takes `--db=<path>` if you want to play against a copy of
 something else. Nothing local can reach the real one: it is on the server, and the
 `.env.production` naming it is on the server too.
 
@@ -149,9 +153,11 @@ machine that will run the bot rather than copied from another one.
 
 ## When something goes wrong
 
-Both commands start a **supervisor**, which runs the bot as a child process and
+`start:prod` starts a **supervisor**, which runs the bot as a child process and
 starts it again if it dies — 1 s, then 2, 4, 8, up to a minute apart. Everything the
-bot prints still goes straight to your terminal; the extra lines say `supervisor:`.
+bot prints still goes straight to the journal; the extra lines say `supervisor:`.
+(`npm start` skips it: the harness runs `src/main.ts` itself, so a crash there is a
+crash you are meant to see.)
 
 ```
 INFO  supervisor: starting the bot
@@ -335,7 +341,8 @@ runs the bot, the gate, its four parts, then the two test families.
 
 | Script | What it runs |
 |---|---|
-| `npm run play` | The bot in a browser against a fake Telegram — the only way to run it from here |
+| `npm run start:prod` | The bot for real, under the supervisor. **This is what the server runs** — [`deploy/foolproof.service`](deploy/foolproof.service) calls this line, so it cannot drift from it |
+| `npm start` | The same bot in a browser against a fake Telegram — no token, no network, and the one to run here |
 | `npm run check` | Lint, types, documents and tests — the gate to keep at zero |
 | `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
 | `npm run typecheck` | `tsc --noEmit` |
@@ -353,9 +360,8 @@ runs the bot, the gate, its four parts, then the two test families.
 | `npm run e2e:test` | Units for the harness's own pure parts |
 | `npm run e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
 
-Production is not in this table: it is a systemd unit and a pushed tag, and
-[`deploy/foolproof.service`](deploy/foolproof.service) is the only place that
-knows how a real run begins.
+`start:prod` is the only one that reads an env file, and the only one that talks to
+Telegram. Everything else runs against the fake one in `e2e/`.
 
 Coverage and mutation write their reports into `reports/`, which is gitignored
 whole — nothing about testing lands next to the source.
@@ -406,7 +412,7 @@ scenarios have finished and their bots are gone; it says so in the header rather
 than looking broken. Ctrl+C in the terminal ends it.
 
 ```bash
-npm run play
+npm start
 ```
 
 One chat, nobody driving it, pointed at the dev database. Type in the box and tap

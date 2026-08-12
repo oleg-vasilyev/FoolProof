@@ -357,11 +357,12 @@ also how **independent scopes** surface, and those are delegated without being a
 
 ## Configuration
 
-**No npm script reads an env file, and none starts the real bot** — the only env
-file ever loaded is the server's, and [README.md](README.md#running-it) says why.
-`.env.example` is its template and must list every key the app reads. Read the
-environment in one place, `shared/config/env.ts`, and pass values down — no
-`process.env` in feature code. Two rules follow from there being one loaded file:
+**One npm script starts the real bot, and the server's unit calls that script** —
+so `start:prod` is production rather than a description of it, and the two cannot
+drift. It is also the only script that loads an env file: the server's, the only
+one that exists. `.env.example` is its template and must list every key the app
+reads. Read the environment in one place, `shared/config/env.ts`, and pass values
+down — no `process.env` in feature code. Two rules follow from one loaded file:
 
 - **It is the whole configuration for its run.** No fallback to another. Node loads
   it and we do not parse it; a hand-rolled reader once inherited a missing key from
