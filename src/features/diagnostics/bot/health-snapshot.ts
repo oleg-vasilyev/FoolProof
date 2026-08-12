@@ -1,3 +1,4 @@
+import { appVersion } from "#diagnostics/bot/app-version.ts";
 import { problemsSeen, problemTally } from "#shared/logging/log-history.ts";
 import type { DiagnosticsRepository } from "#shared/repository/repository-contract.ts";
 import type { HealthSnapshot } from "#diagnostics/render/health-report.ts";
@@ -17,6 +18,7 @@ export const takeHealthSnapshot = (deps: HealthDeps): HealthSnapshot => {
 
   return {
     storage: deps.repo.storageSummary(),
+    version: appVersion(),
     uptimeMs: process.uptime() * MS_PER_SECOND,
     startAttempt: deps.startAttempt,
     previousExit: deps.previousExit,

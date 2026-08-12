@@ -1,11 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { LogHistoryStub } from "#shared/logging/log-history.stub.ts";
+import { AppVersionStub } from "#diagnostics/bot/app-version.stub.ts";
 
 
 const history = new LogHistoryStub();
 
+const version = new AppVersionStub();
+
 vi.mock("#shared/logging/log-history.ts", () => history.module);
+
+vi.mock("#diagnostics/bot/app-version.ts", () => version.module);
 
 const { takeHealthSnapshot } = await import("#diagnostics/bot/health-snapshot.ts");
 
@@ -87,6 +92,17 @@ describe("takeHealthSnapshot()", () => {
     history.problemsSeenSpy.mockReturnValue(kept);
 
     expect(snapshot().problems).toBe(kept);
+  });
+
+  it("should carry the running version through", () => {
+    expect(snapshot().version).toBe(version.version);
+  });
+
+  it("should read the version fresh on every call, so a deploy shows up", () => {
+    snapshot();
+    snapshot();
+
+    expect(version.appVersionSpy).toHaveBeenCalledTimes(2);
   });
 
   it("should read the tally fresh on every call, not once at build time", () => {

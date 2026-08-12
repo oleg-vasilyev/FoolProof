@@ -1192,6 +1192,12 @@ answered:
 - **which database is open** — the file name, its size, and what is recorded in it.
   This is the one that earns the command: a production evening that came up on the
   dev database looks completely normal in the chat, and nothing else would reveal it
+- **which version is running**, read from `package.json` at the moment of asking. A
+  deploy here is a timer that pulls a tag on its own schedule, so "did it land?" is a
+  real question with no terminal to answer it. The manifest is read rather than baked
+  in because there is no build step to bake anything into; if it cannot be read the
+  report says so instead of refusing to start, since a cosmetic line is not worth a
+  bot that will not run
 - **how long this process has been up**, which start it is, and how the previous one
   ended — a restart nobody saw is otherwise invisible
 - **the log level**, since it decides what the log could even hold

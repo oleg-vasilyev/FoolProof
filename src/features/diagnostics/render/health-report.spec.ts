@@ -54,7 +54,10 @@ const LAST_GAME_AT = "2026-07-31 19:42:10";
 
 const PREVIOUS_EXIT = "exit code 1";
 
+const VERSION = "1.10.0";
+
 const snapshotOf = (over: Record<string, unknown> = {}) => ({
+  version: VERSION,
   storage: {
     file: "D:\\Temp\\FoolProof\\data\\foolproof.db",
     sizeBytes: SIZE_BYTES,
@@ -142,6 +145,18 @@ describe("renderHealthReport()", () => {
   });
 
   describe("the run", () => {
+    it("should name the version, which is how a deploy is checked from the chat", () => {
+      expect(report()).toContain(copy.version(VERSION));
+    });
+
+    it("should say so plainly when the version could not be read", () => {
+      expect(report({ version: null })).toContain(copy.versionUnknown);
+    });
+
+    it("should not claim a version it does not have", () => {
+      expect(report({ version: null })).not.toContain(copy.version(VERSION));
+    });
+
     it("should say how long it has been up", () => {
       expect(report()).toContain(copy.uptime(DURATION));
     });
@@ -268,6 +283,7 @@ describe("renderHealthReport()", () => {
       copy.contents(COUNTED, COUNTED, LIVE_CARDS),
       copy.lastGame(LAST_GAME_AT),
       "",
+      copy.version(VERSION),
       copy.uptime(DURATION),
       copy.firstStart,
       copy.logLevel("info"),

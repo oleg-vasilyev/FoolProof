@@ -15,6 +15,7 @@ const ISO_TIME_TO = 19;
 
 export interface HealthSnapshot {
   readonly storage: StorageSummary;
+  readonly version: string | null;
   readonly uptimeMs: number;
   readonly startAttempt: number;
   readonly previousExit: string | null;
@@ -68,6 +69,7 @@ export const renderHealthReport = (copy: Copy, snapshot: HealthSnapshot): string
       ? copy.noGamesYet
       : copy.lastGame(snapshot.storage.lastGameAt),
     "",
+    snapshot.version === null ? copy.versionUnknown : copy.version(snapshot.version),
     copy.uptime(humanDuration(snapshot.uptimeMs, copy.units)),
     startLine(copy, snapshot),
     copy.logLevel(snapshot.logLevel),

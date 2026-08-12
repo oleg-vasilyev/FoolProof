@@ -19,6 +19,10 @@ export const copy = {
 
   noGamesYet: "Last game: none yet",
 
+  version: (version: string) => `Version: ${version}`,
+
+  versionUnknown: "Version: unreadable",
+
   uptime: (duration: string) => `Up for ${duration}`,
 
   firstStart: "This is the first start since the supervisor came up",

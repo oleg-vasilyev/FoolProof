@@ -20,6 +20,10 @@ export const copy: Copy = {
 
   noGamesYet: "Последняя партия: пока ни одной",
 
+  version: (version: string) => `Версия: ${version}`,
+
+  versionUnknown: "Версия: не читается",
+
   uptime: (duration: string) => `В строю ${duration}`,
 
   firstStart: "Это первый запуск с тех пор, как поднялся супервизор",
