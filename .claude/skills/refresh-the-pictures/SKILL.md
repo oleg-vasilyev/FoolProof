@@ -1,6 +1,6 @@
 ---
 name: refresh-the-pictures
-description: Audit every committed picture after an implemented visual change and regenerate the stale ones — the /stats mockups, the site posters, the OG previews, the favicon and the touch icon. Use when a design change has landed in code, when npm run check reports mockups or posters out of step, or whenever a committed PNG might no longer match what the product draws.
+description: Audit every committed picture after an implemented visual change and regenerate the stale ones — the /stats mockups, the site posters, the OG previews, the favicon and the touch icon. Use after the diff review, when a design change has landed in code, when docs:check reports mockups or posters out of step — it runs in check:push and check:release, not in the phase loop — or whenever a committed PNG might no longer match what the product draws.
 ---
 
 # Refreshing the committed pictures

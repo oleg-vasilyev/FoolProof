@@ -1,6 +1,6 @@
 ---
 name: retrospective
-description: Review how a stretch of development was actually carried out — rework, repeated gate runs, subagent use, sequencing, re-reading — and convert each lesson into a durable rule. Use as the last gate of finish-phase, when the context is about to be compacted, or whenever the user asks how the work could have gone faster or cheaper.
+description: Review how a stretch of development was actually carried out — rework, repeated gate runs, subagent use, sequencing, re-reading — and convert each lesson into a durable rule. Use as the last gate of finish-phase, which falls BEFORE the release rather than after it, when the context is about to be compacted, or whenever the user asks how the work could have gone faster or cheaper. Nothing in a phase asks for this gate, because its whole value goes to the next one — so reaching the final commit is itself the cue.
 ---
 
 # Reviewing the process, not the code

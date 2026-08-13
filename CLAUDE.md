@@ -17,6 +17,7 @@ beside the code it describes:
 | A committed picture may have gone stale | `refresh-the-pictures` skill |
 | The Claude Design page fell behind the code | `update-the-design-page` skill |
 | Changing the e2e harness itself | [`e2e/README.md`](e2e/README.md) |
+| A weekly look at the project and its server | `deep-checkup` agent |
 
 Four documents, one job each:
 
@@ -344,19 +345,17 @@ the edit instead of at the end of the turn.
 
 ### Finishing a phase
 
-A phase is done when the code is *releasable*, not when it works. Seven gates run
-before the final commit — lint and types, coverage (70% floor), mutation (breaks
-below 85%), `npm run e2e:changed`, a review of the whole diff, **the poster
-gallery** when the phase drew anything, and a retrospective — and the numbers go in
-the commit message. The gallery is the gate a machine cannot answer, so somebody
-has to open every picture. The **review is always the `phase-reviewer` subagent**
-— you cannot review your own diff by reading it. The procedure is the
-**`finish-phase` skill**.
-
+**Any list of changes to this repository is a phase**, feature or not — closing
+findings, refactoring, tooling. A phase is done when the code is *releasable*, not
+when it works: seven gates run before the final commit — lint and types, coverage
+(70% floor), mutation (breaks below 85%), `npm run e2e:changed`, a review of the
+whole diff, **the poster gallery** when the phase drew anything, and a
+retrospective — and the numbers go in the commit message. The **review is always
+the `phase-reviewer` subagent**; you cannot review your own diff by reading it.
 **Say how big the phase is before starting it**, in a line, so it can be argued
-down: one inside a single feature folder that adds no repository method and changes
-no `shared/` type owes no `PLAN.md` section and no `TECH-DEBT.md` entry. Sizing it is
-also how **independent scopes** surface, and those are delegated without being asked.
+down — that is also how **independent scopes** surface, and those are delegated
+without being asked. The procedure is the **`finish-phase` skill**, and the list
+somebody hands you never contains the gates.
 
 ## Configuration
 

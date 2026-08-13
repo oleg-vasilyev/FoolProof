@@ -1,6 +1,6 @@
 ---
 name: write-a-spec
-description: Write or rewrite a test in FoolProof — what to mock, how to shape a stub, how to name and structure cases, and when a test is allowed to be an integration test instead. Use whenever adding a *.spec.ts, changing an existing one, or judging whether a spec is testing the file it names.
+description: Write or rewrite a test in FoolProof — what to mock, how to shape a stub, how to name and structure cases, and when a test is allowed to be an integration test instead. Use whenever adding a *.spec.ts, changing an existing one, or judging whether a spec is testing the file it names — and while framing a feature, before its interfaces are frozen, because what a spec can mock decides what a signature may take.
 ---
 
 # Writing a spec

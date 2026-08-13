@@ -1,6 +1,6 @@
 ---
 name: write-a-doc
-description: Decide which FoolProof document a fact belongs in, and how to add it without duplicating what another file already says. Use before editing README.md, PLAN.md, CLAUDE.md, TECH-DEBT.md or any folder README — and whenever closing a phase that changed behaviour.
+description: Decide which FoolProof document a fact belongs in, and how to add it without duplicating what another file already says. Use before editing README.md, PLAN.md, CLAUDE.md, TECH-DEBT.md or any folder README, whenever a rule changes wording anywhere, and at the end of a phase that changed behaviour.
 ---
 
 # Writing a document here
@@ -58,6 +58,15 @@ Two consequences worth spelling out, because both have been got wrong:
    left it stale in three — including `write-an-e2e-scenario`, the skill that owns
    the judgement, so the document a reader would consult gave the wrong answer.
    `docs:check` cannot see this: a rule restated in prose is not a link.
+
+   **Grep the frontmatter too, and grep it first.** A skill's `description:` is not
+   documentation about the skill — it is the trigger that decides whether the skill
+   is loaded at all, so a stale one is worse than stale prose: nobody reads the
+   corrected body because nothing opens the file. This rule was written, and one
+   commit later the same phase moved when `finish-phase` applies, updated the
+   routing table and a memory note, and left the skill's own description saying
+   "use when a phase is being wrapped up" — the one copy that decides whether any
+   of the others are ever seen.
 3. **Write it once, in the home the table names.** If you find yourself explaining
    the same thing in a second file "briefly", stop: that is the duplication being
    born. A link is shorter and cannot drift.

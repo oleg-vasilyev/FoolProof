@@ -1,6 +1,6 @@
 ---
 name: finish-phase
-description: Run the release ritual that closes a development phase in FoolProof — the seven gates (check, coverage, mutation, e2e, diff review, the poster gallery, retrospective) and the format of the phase's final commit message. Use when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
+description: Run a development phase in FoolProof from the work being taken on to the release that ends it — the seven gates (lint and types, coverage, mutation, e2e, diff review, the poster gallery, retrospective) and the format of the phase's final commit message. Load it when ANY list of changes to this repository is accepted — closing audit findings, refactoring, cleanup, tooling, a new feature — because such a list is a phase whether or not it adds a feature, and the list somebody hands you never contains the gates. Also when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
 ---
 
 # Finishing a phase
