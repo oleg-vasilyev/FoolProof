@@ -5,7 +5,8 @@ The bot is developed by an AI agent — Claude Code, driven by the skills in
 authority: each stage's rules live in the skill it names, and on any
 disagreement the skill wins, then the drawing is fixed. The retrospective
 stage keeps it honest — a lesson that changes a default redraws the step it
-touches, in the same commit. The colours are pinned on purpose: every message
+touches, in the same commit, and a redraw of this drawing is always reported
+in the closing message with the numbers behind it, never made quietly. The colours are pinned on purpose: every message
 sits on a light stage band, so the forced dark text stays readable in both of
 GitHub's themes.
 
@@ -140,7 +141,9 @@ sequenceDiagram
     K-->>C: five questions about how the work went, each answered with a count
     C->>C: count in numbers: what was rebuilt, what ran for nothing
     C->>K: land a new rule in the skills, so the mistake cannot repeat
-    C->>C: a lesson that changed the flow itself redraws this very diagram
+    opt the lesson changes the flow itself, not just a rule inside a skill
+        C->>C: redraw this very diagram, and keep the evidence that forced it for the closing report
+    end
     C->>C: save the takeaway to persistent memory — it outlives this session
     C->>K: the write-a-doc skill
     K-->>C: every fact has one home document, and CLAUDE.md has a line budget
@@ -163,6 +166,9 @@ sequenceDiagram
         C->>C: the pre-push hook runs npm run check:release — a red tag cannot leave the machine
         C->>G: the tag is pushed
         C->>U: a chat message: the release is cut — the version, and what it changes
+        opt this diagram was redrawn
+            C->>U: the work is done, but the flow was not optimal — what changed here, and the numbers that forced it
+        end
         G->>G: CI repeats the full battery on a clean clone — the second opinion
         note right of V: the server does not wait for CI — the local hook is the gate
         V->>G: asks every five minutes whether a new tag appeared

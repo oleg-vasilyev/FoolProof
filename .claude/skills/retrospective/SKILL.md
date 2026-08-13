@@ -57,6 +57,22 @@ disagreement is resolved in the skill's favour, then the drawing is fixed.
 the same commit** — a flow chart still showing the old habit is the same bug
 as a stale document.
 
+The drawing is deliberately broad, so most lessons never reach it: a new rule
+inside a skill lands under a step that already describes it. That makes the
+test mechanical — **did the fix require editing `DEVELOPMENT-FLOW.md`?** When it
+did, something about how this product gets built has changed: a participant
+stopped earning its place, a stage changed shape, two steps swapped order.
+
+**Such a redraw is never silent and never a request for permission.** Both
+failure modes are real. Asking stalls a phase on a question the owner has
+already delegated — they want the work finished, not a decision meeting. But
+changing the drawing quietly edits the process the owner reads as his own, and
+he would find it by diff, months later, with the reasoning gone. So: make the
+change, then **say it in the closing message** — the work is done, the flow was
+not optimal, here is what moved and here are the numbers that forced it. The
+five questions above are where those numbers come from; a redraw argued from an
+impression rather than a count is the one that should not have been made.
+
 ## The output is a diff, not a paragraph
 
 Every lesson that would apply to a future phase becomes a **durable change** — a
