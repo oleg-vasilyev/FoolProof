@@ -44,11 +44,16 @@ Retro: <the default that changed, or plainly that none did>.
 ```
 
 Four rules inside it. Every gate is named even when skipped — a skipped gate
-carries its reason (`gallery not opened: no SVG changed`), never silence. **The
-`Retro:` line exists because that is the gate a phase forgets**: the release feels
-like the end, the retrospective sits after it in nobody's head, and its own
-evidence — the transcript — is the thing that disappears. A phase shipped with the
-line missing entirely and nobody noticed until somebody asked.
+carries its reason (`gallery not opened: no SVG changed`), never silence.
+
+**The `Retro:` line is here because this paragraph is the only thing that asks.**
+Gates 1 to 5 are pulled in by the work: nothing ships without compiling, passing
+and being reviewed. The retrospective is the one gate whose whole value goes to the
+*next* phase, so this phase never needs it and never notices its absence. The
+proof is a phase that skipped it: the same paragraph, lacking a retro line but
+carrying a gallery one, produced a written verdict on the gallery — "not opened, no
+renderer changed" — and total silence about the retrospective. The template asked
+about one and not the other, and that alone decided which happened.
 Coverage is four numbers in statements/branches/functions/lines order. A
 mutation survivor left alive on purpose gets its own sentence after the
 paragraph, naming the mutant and why its death is not worth buying.

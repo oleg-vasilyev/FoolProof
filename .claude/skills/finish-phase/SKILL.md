@@ -329,6 +329,15 @@ prose about a change that has nothing new to say.
 The judgement call is honest sizing, so name the size **before** starting, in one
 line, and let the user shrink it.
 
+**A list somebody hands you is not this list.** Work driven by an audit's findings
+register, a review's report or a user's numbered requests carries its own sense of
+completeness: the last item closes and the work feels finished, because the list
+that defined it is empty. It is not finished — that list never contained the gates.
+A phase that closed eleven audit findings ran gates 1 to 5 by reflex, considered the
+sixth because a commit template asked, and skipped the retrospective entirely,
+having never once opened this file. **When an external list runs out, that is the
+moment to load this skill, not the moment to commit.**
+
 ## Where the budget actually goes
 
 A phase's cost is dominated by two things, and neither of them is thinking:
