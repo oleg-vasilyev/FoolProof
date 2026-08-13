@@ -10,6 +10,7 @@ beside the code it describes:
 | Adding a query | `add-repository-method` skill |
 | Writing or changing any spec | `write-a-spec` skill |
 | Closing a phase, running the gates | `finish-phase` skill |
+| Judging how the work itself went | `retrospective` skill |
 | Writing a commit message, cutting a release | `write-a-commit` skill |
 | Writing or changing any document | `write-a-doc` skill |
 | Writing or changing an e2e scenario | `write-an-e2e-scenario` skill |
@@ -347,11 +348,10 @@ A phase is done when the code is *releasable*, not when it works. Seven gates ru
 before the final commit — lint and types, coverage (70% floor), mutation (breaks
 below 85%), `npm run e2e:changed`, a review of the whole diff, **the poster
 gallery** when the phase drew anything, and a retrospective — and the numbers go in
-the commit message. The gallery is the gate a machine cannot answer:
-`node scripts/tools.ts gallery` draws both posters at every edge the product must
-survive, and somebody has to open them. The **review is always the
-`phase-reviewer` subagent** — you cannot review your own diff by reading it. The
-procedure is the **`finish-phase` skill**.
+the commit message. The gallery is the gate a machine cannot answer, so somebody
+has to open every picture. The **review is always the `phase-reviewer` subagent**
+— you cannot review your own diff by reading it. The procedure is the
+**`finish-phase` skill**.
 
 **Say how big the phase is before starting it**, in a line, so it can be argued
 down: one inside a single feature folder that adds no repository method and changes
