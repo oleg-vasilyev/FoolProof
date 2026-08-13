@@ -9,7 +9,7 @@ beside the code it describes:
 | Adding a command, a screen, a feature folder | `add-a-feature` skill |
 | Adding a query | `add-repository-method` skill |
 | Writing or changing any spec | `write-a-spec` skill |
-| Closing a phase, running the gates | `finish-phase` skill |
+| Taking on a list of changes, and closing it | `finish-phase` skill |
 | Judging how the work itself went | `retrospective` skill |
 | Writing a commit message, cutting a release | `write-a-commit` skill |
 | Writing or changing any document | `write-a-doc` skill |
