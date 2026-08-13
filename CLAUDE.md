@@ -10,6 +10,7 @@ beside the code it describes:
 | Adding a query | `add-repository-method` skill |
 | Writing or changing any spec | `write-a-spec` skill |
 | Closing a phase, running the gates | `finish-phase` skill |
+| Writing a commit message, cutting a release | `write-a-commit` skill |
 | Writing or changing any document | `write-a-doc` skill |
 | Writing or changing an e2e scenario | `write-an-e2e-scenario` skill |
 | Changing anything the `/stats` picture draws | `sync-the-mockups` skill |
