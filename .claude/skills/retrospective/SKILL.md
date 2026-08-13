@@ -48,10 +48,10 @@ count is asked for, count. An answer with no number in it is a guess.
 
 ## The flow this gate audits is drawn
 
-README's [How a change becomes a release](../../../README.md#how-a-change-becomes-a-release)
-section draws the whole loop — six stages from the owner's first message to the
-tag going live, as a Mermaid block GitHub renders in place. It is the map, not
-the authority: every stage's rules live in the skill the drawing names, and a
+[`DEVELOPMENT-FLOW.md`](../../../DEVELOPMENT-FLOW.md) draws the whole loop —
+six stages from the owner's first message to the tag going live, as a Mermaid
+block GitHub renders in place, linked from the README. It is the map, not the
+authority: every stage's rules live in the skill the drawing names, and a
 disagreement is resolved in the skill's favour, then the drawing is fixed.
 **A lesson below that changes a default also redraws the step it touches, in
 the same commit** — a flow chart still showing the old habit is the same bug
