@@ -315,9 +315,37 @@ const flowOutOfStep = (): readonly string[] => {
   ];
 };
 
+const AGENTS_FOLDER = ".claude/agents";
+
+const A_MARKDOWN_FILE = /\.md$/;
+
+const unreachableHelp = (): readonly string[] => {
+  const session = read(SESSION_DOCUMENT);
+  const skills = readdirSync(SKILLS_FOLDER);
+  const agents = readdirSync(AGENTS_FOLDER).map((file) => file.replace(A_MARKDOWN_FILE, ""));
+
+  return [
+    ...skills
+      .filter((skill) => !session.includes(skill))
+      .map(
+        (skill) =>
+          `${SESSION_DOCUMENT}: names no route to the "${skill}" skill — a skill ` +
+          `nothing points at is one nobody loads`
+      ),
+    ...agents
+      .filter((agent) => !session.includes(agent))
+      .map(
+        (agent) =>
+          `${SESSION_DOCUMENT}: names no route to the "${agent}" agent — an agent ` +
+          `nothing points at never runs`
+      ),
+  ];
+};
+
 const complaints = [
   ...brokenLinks(),
   ...flowOutOfStep(),
+  ...unreachableHelp(),
   ...featuresMissingFromTheTree(),
   ...scriptsOutOfStep(),
   ...crowdedLayers(),

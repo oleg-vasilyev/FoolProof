@@ -453,7 +453,7 @@ runs the bot, the gates, their parts, then the two test families.
 | `npm run check:release` | The full battery: `check:push`, then coverage, all mutants, every scenario. **CI runs this on every release tag** |
 | `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run docs:check` | Links, anchors, the source tree and the script table above |
+| `npm run docs:check` | Links, anchors, the source tree, the script table above, and that every skill and agent is reachable from `CLAUDE.md` |
 | `npm test` | Vitest, once — units and integration together |
 | `npm run test:unit` | Only the unit specs, where everything outside the file is mocked |
 | `npm run test:integration` | Only `*.integration.spec.ts` — the seams where third-party code runs for real |

@@ -86,6 +86,34 @@ encourage harm; is any file so long the model reading it will not comply.
 Verdict per document: keep / fix / delete. A stale document is worse than none
 — it is fed to every future session and multiplies its own error.
 
+**Then audit every skill and agent `description:` as a trigger rather than as a
+summary.** That line is not documentation about the file — it is what decides
+whether the file is ever opened, so a wrong one is worse than wrong prose: the
+corrected body is never read because nothing loads it. `docs:check` now proves
+each skill and agent is *named* somewhere in `CLAUDE.md`, which is reachability
+only; whether it fires at the right **moment** is yours. For each of the twelve,
+lay three things side by side — the `description:`, the row in `CLAUDE.md`'s
+routing table, and the stage in `DEVELOPMENT-FLOW.md` that names it — and ask:
+
+- **Does the description fire when the drawing calls for it?** A skill the flow
+  consults while framing a feature, described as something to use at the end,
+  never opens in time. This has happened to three at once: `finish-phase` said "use
+  when a phase is being wrapped up" while its own rule had moved to the work being
+  taken on; `retrospective` claimed to be the last gate without saying that gate
+  falls *before* the release; `write-a-spec` triggered on writing a spec though the
+  flow consults it a stage earlier, while interfaces are still being frozen.
+- **Does it name a command or a gate that still exists?** `refresh-the-pictures`
+  pointed at a report `npm run check` produced and the phase loop no longer does.
+- **Does the routing row promise what the description delivers?** A row saying
+  "closing a phase" and a description saying "any list of changes" are two rules,
+  and a reader gets whichever they opened first.
+- **Is anything reachable only by luck?** An agent named in no document runs only
+  because somebody remembered it in a chat that has since scrolled away.
+
+Report these as findings like any other, with the file and the wording. A whole
+audit missed this class once — including this one, whose first run judged the
+documents accurate while every description above was stale.
+
 ## Phase 3½ — Claude Code memory and configuration outside the repo
 
 Everything injected into future sessions lives partly outside the repo, where
