@@ -313,7 +313,10 @@ needs that first line run by hand; nothing else about a release does.
 
 Every evening ever played lives in one SQLite file on one virtual disk, so the
 only question that matters is what happens when that disk stops existing. A
-daily timer answers it:
+monthly timer answers it — monthly because one table of friends adds a few
+kilobytes a month, so a month is both what the snapshot holds and what losing
+the disk would cost. A second table playing is the moment to make it daily,
+which is one line in the timer:
 
 ```bash
 sudo install -m 644 deploy/foolproof-backup.service /etc/systemd/system/
@@ -331,11 +334,17 @@ read-only connection, without asking the bot to stop.
 
 It then **opens the snapshot it just wrote**, runs `PRAGMA integrity_check` and
 counts the games and players. A backup that has never been read is a guess, and
-the count is what turns the daily message into evidence rather than a habit.
-Fourteen snapshots are kept in `/home/ubuntu/backups`, and each is also sent to
-the operator's own Telegram chat — off the box, over a credential that already
-exists, to the one place the operator is already looking. The absence of the
-daily file is the alarm; there is no other monitoring.
+the count is what turns the message into evidence rather than a habit. Fourteen
+snapshots are kept in `/home/ubuntu/backups` — fourteen months at this rate —
+and each is also sent to the operator's own Telegram chat: off the box, over a
+credential that already exists, to the one place the operator is already
+looking.
+
+That arriving file is also the only monitoring there is, which a monthly rate
+makes thin: a timer that breaks in February announces itself in April, if
+anyone is counting months. `systemctl list-timers foolproof-backup.timer` is
+the direct answer meanwhile, and a backup can always be taken by hand with
+`sudo systemctl start foolproof-backup`.
 
 To get the games back, on the server:
 

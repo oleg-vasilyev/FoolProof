@@ -17,21 +17,22 @@ Two rules for this file, so it stays useful:
 
 ## A backup that stops happening announces it by silence
 
-The daily timer sends each snapshot to the operator's chat, so a run that fails
-is noticed by a file *not* arriving. That works because somebody looks at that
-chat daily — which is a habit, and habits are exactly what left this project with
-no backups until an audit went looking. Nothing polls the timer's state, and
-`/status` reports the database it is using without saying when it was last copied.
+The timer sends each snapshot to the operator's chat, so a run that fails is
+noticed by a file *not* arriving. That was thin when the timer was daily. It runs
+monthly now — while one table plays, a month of cards is worth a few kilobytes —
+and noticing an absence on a monthly rhythm is not something a person does.
+Nothing polls the timer's state, and `/status` reports the database it is using
+without saying when it was last copied.
 
 The honest fix is one line in the diagnostics report: the age of the newest file
-in the backup directory, red past two days. It is small, and it is deliberately
+in the backup directory, red past forty days. It is small, and it is deliberately
 not done yet, because it needs `/status` to read a path that is not the database
 — the first time that feature would touch the filesystem for a reason other than
 the one it was built for.
 
-**Pick it up the first time a backup is missing and nobody noticed within a
-week** — or sooner if the answer to "when did this last run" is ever needed while
-something is actually broken.
+**Pick it up when the timer goes back to daily**, which is the same trigger as a
+second table starting to play — or sooner, the first time the answer to "when did
+this last run" is wanted while something is actually broken.
 
 ---
 

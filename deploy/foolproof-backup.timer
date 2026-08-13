@@ -1,16 +1,20 @@
-# Once a day. The database gains a few kilobytes per evening of cards, so the
-# most a failure can cost is one evening — and the copies are small enough that
-# keeping a fortnight of them costs nothing worth counting.
+# Once a month, on the first. The rate is chosen against how fast the games
+# accumulate rather than against what a snapshot costs: with one table of friends
+# playing, a month of cards is a few kilobytes, and a month is what a lost disk
+# would cost. Raise it — daily is `*-*-* 03:17:00` — the moment a second table
+# starts playing, because from then on the arithmetic is somebody else's evenings.
 #
 # Persistent=true because the host is not guaranteed to be up at three in the
-# morning: a missed run happens shortly after boot instead of being skipped,
-# which is the difference between a backup schedule and a backup habit.
+# morning on the first: a missed run happens shortly after boot instead of being
+# skipped, which is the difference between a backup schedule and a backup habit.
+# On a monthly timer that property stops being a nicety — a skipped run is the
+# whole month.
 
 [Unit]
-Description=Take a FoolProof backup every day
+Description=Take a FoolProof backup every month
 
 [Timer]
-OnCalendar=*-*-* 03:17:00 UTC
+OnCalendar=*-*-01 03:17:00 UTC
 Persistent=true
 # Not on the hour, and not on the same minute as anything else: the deploy timer
 # fires every five minutes, and a snapshot taken while npm ci rewrites the clone
