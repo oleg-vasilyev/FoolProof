@@ -1,0 +1,22 @@
+# Once a day. The database gains a few kilobytes per evening of cards, so the
+# most a failure can cost is one evening — and the copies are small enough that
+# keeping a fortnight of them costs nothing worth counting.
+#
+# Persistent=true because the host is not guaranteed to be up at three in the
+# morning: a missed run happens shortly after boot instead of being skipped,
+# which is the difference between a backup schedule and a backup habit.
+
+[Unit]
+Description=Take a FoolProof backup every day
+
+[Timer]
+OnCalendar=*-*-* 03:17:00 UTC
+Persistent=true
+# Not on the hour, and not on the same minute as anything else: the deploy timer
+# fires every five minutes, and a snapshot taken while npm ci rewrites the clone
+# is a snapshot taken during the noisiest moment of the day.
+RandomizedDelaySec=300
+Unit=foolproof-backup.service
+
+[Install]
+WantedBy=timers.target

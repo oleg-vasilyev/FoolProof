@@ -15,6 +15,26 @@ Two rules for this file, so it stays useful:
 
 ---
 
+## A backup that stops happening announces it by silence
+
+The daily timer sends each snapshot to the operator's chat, so a run that fails
+is noticed by a file *not* arriving. That works because somebody looks at that
+chat daily — which is a habit, and habits are exactly what left this project with
+no backups until an audit went looking. Nothing polls the timer's state, and
+`/status` reports the database it is using without saying when it was last copied.
+
+The honest fix is one line in the diagnostics report: the age of the newest file
+in the backup directory, red past two days. It is small, and it is deliberately
+not done yet, because it needs `/status` to read a path that is not the database
+— the first time that feature would touch the filesystem for a reason other than
+the one it was built for.
+
+**Pick it up the first time a backup is missing and nobody noticed within a
+week** — or sooner if the answer to "when did this last run" is ever needed while
+something is actually broken.
+
+---
+
 ## A graceful shutdown is the one path e2e cannot play
 
 `bot-process.ts` stops a bot by killing it, because a spawned parent on Windows

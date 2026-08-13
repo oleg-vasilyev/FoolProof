@@ -309,6 +309,50 @@ The script is installed outside the clone rather than run from it, for the reaso
 in `foolproof-deploy.service`. It means a release that changes the deploy script
 needs that first line run by hand; nothing else about a release does.
 
+### Backups, and getting the games back
+
+Every evening ever played lives in one SQLite file on one virtual disk, so the
+only question that matters is what happens when that disk stops existing. A
+daily timer answers it:
+
+```bash
+sudo install -m 644 deploy/foolproof-backup.service /etc/systemd/system/
+sudo install -m 644 deploy/foolproof-backup.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now foolproof-backup.timer
+```
+
+[`scripts/backup-database.ts`](scripts/backup-database.ts) takes the snapshot
+with `VACUUM INTO` rather than copying the file. That matters: the database runs
+in WAL mode, so the newest games are in `foolproof.db-wal` and not in
+`foolproof.db` at all — a copied file is a backup of everything except what
+happened most recently. `VACUUM INTO` writes one consistent file, from a
+read-only connection, without asking the bot to stop.
+
+It then **opens the snapshot it just wrote**, runs `PRAGMA integrity_check` and
+counts the games and players. A backup that has never been read is a guess, and
+the count is what turns the daily message into evidence rather than a habit.
+Fourteen snapshots are kept in `/home/ubuntu/backups`, and each is also sent to
+the operator's own Telegram chat — off the box, over a credential that already
+exists, to the one place the operator is already looking. The absence of the
+daily file is the alarm; there is no other monitoring.
+
+To get the games back, on the server:
+
+```bash
+sudo systemctl stop foolproof
+gunzip -c ~/backups/foolproof-<stamp>Z.db.gz > /home/ubuntu/data/foolproof.db
+rm -f /home/ubuntu/data/foolproof.db-wal /home/ubuntu/data/foolproof.db-shm
+sudo systemctl start foolproof
+```
+
+Deleting the two sidecars is the step that is easy to miss and expensive to get
+wrong: a stale `-wal` beside a restored database is a journal describing pages
+that file has never had. The snapshot is already whole, so they have nothing to
+add. Ask the bot for `/status` afterwards — the game and player counts there
+should match the caption of the backup you restored from, and that is the check
+that the restore worked rather than merely finished.
+
 The gate that actually stands before a release is local: a **pre-push hook**
 (installed by `npm install`, which points git at [`.githooks/`](.githooks/))
 runs the full `check:release` before any `v*` tag leaves the machine — every

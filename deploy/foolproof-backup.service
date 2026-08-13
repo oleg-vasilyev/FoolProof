@@ -1,0 +1,35 @@
+# Takes one verified snapshot of the database and sends it off the box. The timer
+# beside it is what calls it; this unit is separate so `systemctl start
+# foolproof-backup` also takes a backup on demand — which is what a restore
+# rehearsal starts with.
+
+[Unit]
+Description=Snapshot the FoolProof database and send it to the operator
+# The snapshot is local, but the copy that matters leaves over the network.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# The ubuntu user owns the database and the env file; nothing here needs root,
+# and a backup that ran as root would leave root-owned snapshots behind.
+User=ubuntu
+WorkingDirectory=/home/ubuntu/FoolProof
+# --env-file, the same way start:prod reads its configuration: the token that
+# sends the copy and the path of the database both live in .env.production, and
+# neither is repeated here.
+ExecStart=/usr/local/bin/node --env-file=/home/ubuntu/FoolProof/.env.production scripts/backup-database.ts
+# Outside the clone, for the reason DB_PATH is: a deploy checks this directory's
+# parent out at a different tag, and backups are not part of any release.
+Environment=BACKUP_DIR=/home/ubuntu/backups
+# A snapshot of a 48 KB database takes about a second. If it ever takes minutes,
+# something is wrong and the timer should not stack runs on top of each other.
+TimeoutStartSec=300
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=foolproof-backup
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
