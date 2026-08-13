@@ -57,11 +57,20 @@ say "$newest is newer than what is running — deploying it"
 # so a failure puts the previous commit back and stops without touching the
 # service. The handler turns -e off first: it runs under it otherwise, and a
 # failing line would abort the rollback halfway, silently.
+#
+# It covers the restart as well, and that is the point rather than an extra: the
+# checkout is what the *next* run compares against, so a deploy that installed the
+# code and then failed to start it used to leave HEAD equal to the new tag while
+# the old code ran. Every later run then found nothing to do and exited 0, and the
+# drift was invisible for as long as nobody read the journal. Rolling the checkout
+# back is what keeps "HEAD is what is running" true, which is the only claim this
+# script's own idempotence rests on.
 restore() {
   set +e
-  say "deploying $newest failed — putting the previous version back, the bot is untouched"
+  say "deploying $newest failed — putting the previous version back"
   as_owner git checkout --quiet --detach "$running" || say "could not check $running back out"
   as_owner npm ci --silent || say "could not install $running back either — the tree is not clean"
+  systemctl restart "$SERVICE" || say "could not restart the bot on $running either — journalctl -u $SERVICE"
   exit 1
 }
 trap restore ERR
@@ -71,12 +80,9 @@ as_owner git checkout --quiet --detach "$wanted"
 # package-lock.json describes, which is the tree the checks ran against.
 as_owner npm ci --silent
 
-trap - ERR
-
-if ! systemctl restart "$SERVICE"; then
-  say "$newest is installed but the service would not restart — journalctl -u $SERVICE"
-  exit 1
-fi
+# The restart and the settle run under the trap, so a bot that will not come back
+# takes the checkout back with it.
+systemctl restart "$SERVICE"
 
 sleep "$SETTLE_SECONDS"
 
@@ -84,9 +90,8 @@ sleep "$SETTLE_SECONDS"
 # keeps the unit active while it restarts a child that keeps dying. A release that
 # starts and then crash-loops looks like a success here and like a problem in the
 # journal, which is where a deploy has to be checked anyway.
-if ! systemctl is-active --quiet "$SERVICE"; then
-  say "$newest is installed but the service did not come back — journalctl -u $SERVICE"
-  exit 1
-fi
+systemctl is-active --quiet "$SERVICE"
+
+trap - ERR
 
 say "$newest is installed and the bot is running again"

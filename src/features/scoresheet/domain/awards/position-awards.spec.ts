@@ -53,6 +53,10 @@ const FOUR_SECONDS = 4;
 
 const RUNNER_UP = 2;
 
+const LOPSIDED_RATE = 0.75;
+
+const EIGHT_GAMES = 8;
+
 const ANYA = 4;
 
 const LOPSIDED = appearingAs(
@@ -196,6 +200,38 @@ describe("theFavourite()", () => {
 
       expect(meritGiven()(MIDDLING)).toBeNull();
     });
+
+    it("should refuse a high rate one game short of a long evening", () => {
+      const MOSTLY_FIRST = appearingAs(
+        ANYA,
+        Finish.First,
+        Finish.First,
+        Finish.First,
+        Finish.First,
+        Finish.First,
+        Finish.First
+      );
+      theFavourite(eveningFor(MOSTLY_FIRST));
+      playedGamesSpy.mockReturnValue(LONG_ENOUGH - ONCE);
+
+      expect(meritGiven()(MOSTLY_FIRST)).toBeNull();
+    });
+
+    it("should accept a high rate sitting exactly on the long-evening floor", () => {
+      const MOSTLY_FIRST = appearingAs(
+        ANYA,
+        Finish.First,
+        Finish.First,
+        Finish.First,
+        Finish.First,
+        Finish.First,
+        Finish.First
+      );
+      theFavourite(eveningFor(MOSTLY_FIRST));
+      playedGamesSpy.mockReturnValue(LONG_ENOUGH);
+
+      expect(meritGiven()(MOSTLY_FIRST)).not.toBeNull();
+    });
   });
 });
 
@@ -252,6 +288,20 @@ describe("theUnderstudy()", () => {
 
       expect(meritGiven()(THREE_SECONDS)).toBeNull();
     });
+
+    it("should refuse a runner-up one game short of enough games", () => {
+      theUnderstudy(eveningFor(RUNNER_UP_ALWAYS));
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES - ONCE);
+
+      expect(meritGiven()(RUNNER_UP_ALWAYS)).toBeNull();
+    });
+
+    it("should accept a runner-up sitting exactly on the enough-games floor", () => {
+      theUnderstudy(eveningFor(RUNNER_UP_ALWAYS));
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES);
+
+      expect(meritGiven()(RUNNER_UP_ALWAYS)).toBe(FOUR_SECONDS);
+    });
   });
 });
 
@@ -297,6 +347,13 @@ describe("theAnchor()", () => {
     it("should refuse a player who was the fool", () => {
       theAnchor(eveningFor(MIDDLING));
       foolCountSpy.mockReturnValue(ONCE);
+
+      expect(meritGiven()(MIDDLING)).toBeNull();
+    });
+
+    it("should refuse a player one game short of enough games", () => {
+      theAnchor(eveningFor(MIDDLING));
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES - ONCE);
 
       expect(meritGiven()(MIDDLING)).toBeNull();
     });
@@ -349,6 +406,24 @@ describe("allOrNothing()", () => {
       playedGamesSpy.mockReturnValue(ENOUGH_GAMES - ONCE);
 
       expect(meritGiven()(LOPSIDED)).toBeNull();
+    });
+
+    it("should accept a player sitting exactly on the lopsided threshold", () => {
+      const SIX_EDGES = appearingAs(
+        ANYA,
+        Finish.First,
+        Finish.Fool,
+        Finish.First,
+        Finish.Fool,
+        Finish.First,
+        Finish.Fool,
+        Finish.Middle,
+        Finish.Middle
+      );
+      allOrNothing(eveningFor(SIX_EDGES));
+      playedGamesSpy.mockReturnValue(EIGHT_GAMES);
+
+      expect(meritGiven()(SIX_EDGES)).toBeCloseTo(LOPSIDED_RATE);
     });
   });
 });

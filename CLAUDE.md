@@ -304,9 +304,9 @@ source tree, so they are here:
 `e2e/` is a different world with its own rules: writing one is the
 `write-an-e2e-scenario` skill and the harness is [`e2e/README.md`](e2e/README.md).
 It is **a gate now, not a parked experiment** — `npm run e2e:changed` plays the
-scenarios the diff can reach. One obligation reaches back here: **a feature with an
-inline keyboard gets scenarios**, because whether a tap reaches the feature that
-owns it is a fact about real grammY.
+scenarios the diff can reach. One obligation reaches back here: **a keyboard whose
+buttons carry `callback_data` gets scenarios**, because whether a tap reaches the
+feature owning it is a fact about real grammY. A URL button routes nothing back.
 
 ## Checks
 

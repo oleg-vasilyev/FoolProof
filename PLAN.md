@@ -767,8 +767,13 @@ the difference between a tap that feels instant and one that looks ignored. Any
 implementation answering several chats from one process owes the same thing, which
 is why it is written here rather than beside the renderer.
 
-Only the rasterizing half is off the loop today.
-[TECH-DEBT.md](TECH-DEBT.md) has what stands in the way of the other.
+Only the rasterizing half is off the loop today, and freeing the loop turns out not
+to be the whole requirement: `bot.start()` consumes updates **one at a time**, so a
+`/stats` that is awaiting two posters delays the next tap in every chat by that long
+whether or not the loop is busy. Timers and debounced edits do run during a render —
+that much was won — but the queue behind it is the thing a second table would feel.
+[TECH-DEBT.md](TECH-DEBT.md) has what stands in the way of the rest, and the trigger
+is the same: a second chat playing.
 
 #### Fitting a long evening
 

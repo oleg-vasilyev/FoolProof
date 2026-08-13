@@ -558,6 +558,17 @@ describe("createCardService()", () => {
         expect(repo.appendExitSpy).toHaveBeenCalledTimes(NEVER);
       });
 
+      it("should touch neither exit list when a tap leaves the exit count unchanged", async () => {
+        repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE, { id: GAME_ID }, [ROMA]));
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ exits: [ROMA] }) });
+
+        await cards.tap(copy, payload("pick", OLEG), ACTOR_ID);
+
+        expect(repo.appendExitSpy).toHaveBeenCalledTimes(NEVER);
+        expect(repo.dropLastExitSpy).toHaveBeenCalledTimes(NEVER);
+        expect(repo.updateCardSpy).toHaveBeenCalledTimes(ONCE);
+      });
+
       it("should drop the last exit when the reducer took one back", async () => {
         repo.cardByIdSpy.mockReturnValue(cardRecordOf(THREE, { id: GAME_ID }, [ROMA]));
         applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ exits: [] }) });

@@ -174,6 +174,13 @@ describe("sweetRevenge()", () => {
       expect(meritGiven()(ONE_COMEBACK)).toBeNull();
     });
 
+    it("should not count going out first twice as a comeback without a fool behind it", () => {
+      const NEVER_FOULED = appearingAs(DIMA, Finish.First, Finish.First, Finish.First);
+      sweetRevenge(eveningFor(NEVER_FOULED));
+
+      expect(meritGiven()(NEVER_FOULED)).toBeNull();
+    });
+
     it("should not credit a fool in the last game, which has no next game", () => {
       const LATE_FOOL = appearingAs(
         DIMA,
@@ -300,6 +307,19 @@ describe("secondWind()", () => {
       secondWind(eveningFor(BURNED_LATE));
 
       expect(meritGiven()(BURNED_LATE)).toBeNull();
+    });
+
+    it("should refuse a player who slipped again after settling, even briefly", () => {
+      const SLIPPED_AGAIN = playerAppearing(DIMA, [
+        appearanceOf(NOTHING, Finish.Fool),
+        appearanceOf(ONCE, Finish.Middle),
+        appearanceOf(TWICE, Finish.First),
+        appearanceOf(THRICE, Finish.Middle),
+        appearanceOf(THRICE + ONCE, Finish.Fool),
+      ]);
+      secondWind(eveningFor(SLIPPED_AGAIN));
+
+      expect(meritGiven()(SLIPPED_AGAIN)).toBeNull();
     });
 
     it("should refuse a player who was never the fool in the opening three", () => {

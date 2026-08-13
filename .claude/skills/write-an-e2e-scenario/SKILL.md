@@ -17,10 +17,13 @@ Usually not. A scenario is the slowest test this project has, and `npm run
 e2e:changed` will play it on every phase that touches its feature — so it is a
 standing cost, not a one-off. Two things earn one:
 
-- **A feature with an inline keyboard.** Whether a tap reaches the feature that owns
-  it is a fact about real grammY that no unit can reach, and it was wrong once
-  already. Both keyboard features arrived with scenarios and both immediately found
-  a wrong assumption about the bot's own behaviour.
+- **A keyboard whose buttons carry `callback_data`.** Whether a tap reaches the
+  feature that owns it is a fact about real grammY that no unit can reach, and it was
+  wrong once already. Both such features arrived with scenarios and both immediately
+  found a wrong assumption about the bot's own behaviour. A **URL** button is not
+  this: nothing routes back to the bot, so there is no dispatch to prove. `/start`
+  offers one and earns no scenario — `feature-installer.integration.spec.ts` drives a
+  real grammY `Bot` over it, which is the whole of what could break.
 - **A bug that got through the units.** That is evidence the seam is real.
 - **An extreme of real input the product has to survive** — the fullest table, the
   longest names, the evening that outgrows the sheet. Not because the output will be

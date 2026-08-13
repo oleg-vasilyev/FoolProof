@@ -21,7 +21,7 @@
     "start": "node e2e/play.ts",
     "start:prod": "node --env-file=.env.production src/supervisor.ts",
     "check": "npm run lint && npm run typecheck && npm run docs:check && npm run test",
-    "check:push": "npm run lint && npm run typecheck && npm run docs:check",
+    "check:push": "npm run lint && npm run typecheck && npm run e2e:typecheck && npm run e2e:test && npm run docs:check",
     "check:phase": "npm run lint && npm run typecheck && npm run test:coverage && npm run test:mutation:changed && npm run e2e:changed",
     "check:release": "npm run check:push && npm run test:coverage && npm run test:mutation && npm run e2e",
     "lint": "eslint src scripts",
@@ -40,6 +40,9 @@
     "e2e:watch": "node e2e/watch-live.ts",
     "e2e:test": "vitest run --config e2e/vitest.harness.config.ts",
     "e2e:typecheck": "tsc -p e2e --noEmit && tsc -p e2e/pages --noEmit"
+  },
+  "overrides": {
+    "qs": "^6.15.2"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

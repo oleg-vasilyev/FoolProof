@@ -30,6 +30,10 @@ const A_LONGER_REIGN = 10;
 
 const NINETEEN = 19;
 
+const IRRELEVANT_ROUND = 99;
+
+const WEAK_POSITION = 9;
+
 const OLEG = 3;
 
 const DIMA = 2;
@@ -123,6 +127,39 @@ describe("theNemesis()", () => {
       theNemesis(eveningFor([ABSENT, STAYED_ALL_NIGHT]));
 
       expect(meritGiven()(ABSENT)).toBeNull();
+    });
+
+    it("should refuse a reign broken by even one game where they did not finish above", () => {
+      const RIVAL_WITH_ONE_TIE = playerAppearing(DIMA, [
+        ...Array.from({ length: SHARED_ENOUGH - ONCE }, (_unused, round) =>
+          appearanceOf(round, Finish.Middle, RUNNER_UP)
+        ),
+        appearanceOf(SHARED_ENOUGH - ONCE, Finish.Middle, WENT_OUT_FIRST),
+      ]);
+      theNemesis(eveningFor([DOMINATOR, RIVAL_WITH_ONE_TIE]));
+
+      expect(meritGiven()(DOMINATOR)).toBeNull();
+    });
+
+    it("should compare each shared game to its own matching round, not just any of the rival's games", () => {
+      const DECOYED_RIVAL = playerAppearing(DIMA, [
+        appearanceOf(IRRELEVANT_ROUND, Finish.Middle, WENT_OUT_FIRST),
+        ...Array.from({ length: SHARED_ENOUGH }, (_unused, round) =>
+          appearanceOf(round, Finish.Middle, WEAK_POSITION)
+        ),
+      ]);
+      const CANDIDATE = sittingAt(OLEG, RUNNER_UP, SHARED_ENOUGH);
+      theNemesis(eveningFor([CANDIDATE, DECOYED_RIVAL]));
+
+      expect(meritGiven()(CANDIDATE)).toBe(SHARED_ENOUGH);
+    });
+
+    it("should refuse a tie, which is not finishing above the rival", () => {
+      const TIED_CANDIDATE = sittingAt(OLEG, THIRD, SHARED_ENOUGH);
+      const TIED_RIVAL = sittingAt(DIMA, THIRD, SHARED_ENOUGH);
+      theNemesis(eveningFor([TIED_CANDIDATE, TIED_RIVAL]));
+
+      expect(meritGiven()(TIED_CANDIDATE)).toBeNull();
     });
   });
 });

@@ -66,6 +66,8 @@ const JUST_BELOW_MOCKED = 0.35;
 
 const PERCENT_POINTS = 100;
 
+const A_REAL_GAP = 2;
+
 const DIMA = 2;
 
 const VERONIKA = 5;
@@ -159,6 +161,13 @@ describe("theIrishGoodbye()", () => {
     ]);
   });
 
+  it("should name the player who left early", () => {
+    bestBySpy.mockReturnValue(SLIPPED_AWAY);
+    lastRoundOfSpy.mockReturnValue(SEVEN);
+
+    expect(theIrishGoodbye(eveningFor([SLIPPED_AWAY]))?.winners).toEqual([VERONIKA]);
+  });
+
   describe("who is eligible", () => {
     it("should prefer whoever left earliest", () => {
       theIrishGoodbye(eveningFor([SLIPPED_AWAY]));
@@ -208,6 +217,11 @@ describe("revolvingDoor()", () => {
     appearanceOf(TWICE, Finish.Middle),
   ]);
 
+  const MISSED_EXACTLY_TWO = playerAppearing(DIMA, [
+    appearanceOf(NOTHING, Finish.First),
+    appearanceOf(THRICE, Finish.Middle),
+  ]);
+
   it("should award nothing when the ranking found nobody", () => {
     expect(revolvingDoor(eveningFor([WENT_AND_CAME_BACK]))).toBeNull();
   });
@@ -239,6 +253,38 @@ describe("revolvingDoor()", () => {
     expect(award?.name === AwardName.RevolvingDoor ? award.missed : ONCE).toBe(NOTHING);
   });
 
+  it("should report nothing missed when only the first game cannot be found", () => {
+    bestBySpy.mockReturnValue(WENT_AND_CAME_BACK);
+    firstRoundOfSpy.mockReturnValue(null);
+    lastRoundOfSpy.mockReturnValue(TEN);
+    playedGamesSpy.mockReturnValue(THRICE);
+    const award = revolvingDoor(eveningFor([WENT_AND_CAME_BACK]));
+
+    expect(award?.name === AwardName.RevolvingDoor ? award.missed : ONCE).toBe(NOTHING);
+  });
+
+  it("should report nothing missed when only the last game cannot be found", () => {
+    bestBySpy.mockReturnValue(WENT_AND_CAME_BACK);
+    firstRoundOfSpy.mockReturnValue(TWICE);
+    lastRoundOfSpy.mockReturnValue(null);
+    playedGamesSpy.mockReturnValue(THRICE);
+    const award = revolvingDoor(eveningFor([WENT_AND_CAME_BACK]));
+
+    expect(award?.name === AwardName.RevolvingDoor ? award.missed : ONCE).toBe(NOTHING);
+  });
+
+  it("should subtract the first game from the last, not add them", () => {
+    bestBySpy.mockReturnValue(WENT_AND_CAME_BACK);
+    firstRoundOfSpy.mockReturnValue(TWICE);
+    lastRoundOfSpy.mockReturnValue(TEN);
+    playedGamesSpy.mockReturnValue(THRICE);
+    const award = revolvingDoor(eveningFor([WENT_AND_CAME_BACK]));
+
+    expect(award?.name === AwardName.RevolvingDoor ? award.missed : NOTHING).toBe(
+      TEN - TWICE + ONCE - THRICE
+    );
+  });
+
   describe("who is eligible", () => {
     it("should rank a player by their widest absence", () => {
       revolvingDoor(eveningFor([WENT_AND_CAME_BACK]));
@@ -259,6 +305,13 @@ describe("revolvingDoor()", () => {
       playedGamesSpy.mockReturnValue(ENOUGH_GAMES);
 
       expect(meritGiven()(MISSED_ONE)).toBeNull();
+    });
+
+    it("should accept an absence sitting exactly on the real-gap threshold", () => {
+      revolvingDoor(eveningFor([MISSED_EXACTLY_TWO]));
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES);
+
+      expect(meritGiven()(MISSED_EXACTLY_TWO)).toBe(A_REAL_GAP);
     });
 
     it("should refuse a player one game short", () => {
@@ -319,6 +372,20 @@ describe("theLatecomer()", () => {
       theLatecomer(eveningFor([BELOW]));
 
       expect(meritGiven()(BELOW)).toBeNull();
+    });
+
+    it("should accept a late arrival sitting exactly on mid-table", () => {
+      const EXACTLY_LEVEL = playerAppearing(VERONIKA, LATE.appearances, MOCKED_MIDDLE);
+      theLatecomer(eveningFor([EXACTLY_LEVEL]));
+
+      expect(meritGiven()(EXACTLY_LEVEL)).toBe(MOCKED_MIDDLE);
+    });
+
+    it("should refuse a player one game short of enough games", () => {
+      theLatecomer(eveningFor([LATE]));
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES - ONCE);
+
+      expect(meritGiven()(LATE)).toBeNull();
     });
 
     it("should refuse somebody who was there from the third game", () => {

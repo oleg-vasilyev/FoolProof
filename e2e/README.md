@@ -18,9 +18,11 @@ owed, the verbs a scenario drives the chat with, and what it must assert are the
 harness does, and the two jobs were being read as one. What is left here is what
 must not be re-derived by whoever picks the harness up.
 
-One obligation survives the parking: **a feature with an inline keyboard gets
-scenarios.** Whether a tap reaches the feature that owns it is a fact about real
-grammY that no unit can reach, and it was already wrong once.
+One obligation survives the parking: **a keyboard whose buttons carry
+`callback_data` gets scenarios.** Whether a tap reaches the feature that owns it is
+a fact about real grammY that no unit can reach, and it was already wrong once. A
+URL button routes nothing back and earns none; the `write-an-e2e-scenario` skill
+owns the judgement and says why.
 
 ## The separation is structural, not a convention to remember
 

@@ -108,8 +108,11 @@ never fired, both silently:
   function interpolates; it never decides** — choosing between `1 game` and
   `2 games` is a `render/` job, because specs leave the copy table real and a
   decision made inside it is compared against itself.
-- A feature with an inline keyboard gets e2e scenarios; see
-  [`e2e/README.md`](../../../e2e/README.md).
+- A keyboard whose buttons carry `callback_data` gets e2e scenarios; see
+  [`e2e/README.md`](../../../e2e/README.md). A **URL** button does not earn one on
+  its own — nothing routes back to the bot, so there is no dispatch to prove.
+  `/start` offers one and is covered by `feature-installer.integration.spec.ts`,
+  which drives a real grammY `Bot`.
 - A new feature that adds a repository method or a screen with states is a
   contract-changing phase: it owes a `PLAN.md` section. The `finish-phase` skill has
   the table and the gates.

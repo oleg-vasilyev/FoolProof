@@ -11,7 +11,42 @@ import { resolve } from "node:path";
 // grew taller and gained an outline per cell, the render crossed the window, and five
 // of seventeen scenarios started asserting against photos that had not arrived yet.
 // Raising it is the honest fix — the bot is not slow, the window was.
-export const QUIET_MS = 1200;
+//
+// 1500 rather than 1200 for that same reason, one measurement later: the heaviest
+// poster the product can draw — the chronology at its ceiling, 40 games by 10
+// players — takes about 1290ms, so 1200 was already short of what the product can
+// ask for, and only luck kept it from mattering: no scenario draws that edge yet.
+// Measured either side of the change, the suite pays 24s for it — 128s to 152s —
+// which is the cheapest correctness in this file.
+export const QUIET_MS = 1500;
+
+const NO_UPDATES = 0;
+
+// A window is a guess about the slowest thing the bot does, and the guess above went
+// stale once without anybody noticing. This is what notices next time, so the failure
+// arrives as an accusation rather than as a scenario reporting a bot that is fine.
+//
+// The evidence is available for free. When a verb has just sent its update and the
+// bot has not consumed it yet, any effect newer than the previous settle's return
+// belongs to the *previous* verb — work that arrived after the scenario had been
+// told the bot was finished. Nothing else can produce that combination.
+export type LateEffect = { readonly late: true; readonly afterQuiet: number } | { readonly late: false };
+
+export const workedOnAfterSettling = (
+  settledAt: number | null,
+  lastEffectAt: number,
+  pendingUpdates: number
+): LateEffect =>
+  settledAt !== null && pendingUpdates > NO_UPDATES && lastEffectAt > settledAt
+    ? { late: true, afterQuiet: lastEffectAt - settledAt }
+    : { late: false };
+
+export const lateEffectComplaint = (afterQuiet: number): string =>
+  `the bot was still working ${String(afterQuiet)}ms after a scenario believed it had ` +
+  `finished, so the previous step asserted against a half-drawn chat. QUIET_MS is ` +
+  `${String(QUIET_MS)}ms and something the bot does now takes longer — a poster render ` +
+  `is the usual answer. Measure it (the refresh-the-pictures skill has the one-liner) ` +
+  `and raise QUIET_MS in e2e/harness/settling.ts past what you find.`;
 
 const CARD_SERVICE = ["src", "features", "live-game", "bot", "card", "card-service.ts"];
 

@@ -72,6 +72,18 @@ const A_FLAT_CURVE = 0.42;
 
 const A_FLATTER_STEP = 0.41;
 
+const A_STEP_PAST = 0.01;
+
+const MID_SHARE = 0.5;
+
+const HIGHER_STILL = 0.95;
+
+const EVEN_LOWER_SHARE = 0.1;
+
+const VERONIKA = 5;
+
+const DIMA = 2;
+
 const curveOf = (value: number): readonly number[] => Array.from({ length: TWELVE }, () => value);
 
 const leader = playerAppearing(OLEG, [appearanceOf(NOTHING, Finish.First)], HIGH_SHARE, [
@@ -159,6 +171,34 @@ describe("wireToWire()", () => {
 
       expect(meritGiven()(leader)).toBeNull();
     });
+
+    it("should check the second game itself, not skip straight past it", () => {
+      const rival = playerAppearing(DIMA, [], NOTHING, curveOf(MID_SHARE));
+      const headedAtSecondGame = playerAppearing(OLEG, [], HIGH_SHARE, [
+        HIGH_SHARE,
+        LOW_SHARE,
+        ...curveOf(HIGH_SHARE).slice(ONCE).slice(ONCE),
+      ]);
+      wireToWire(eveningFor([headedAtSecondGame, rival]));
+
+      expect(meritGiven()(headedAtSecondGame)).toBeNull();
+    });
+
+    it("should still credit a tie for the lead", () => {
+      const tiedAtSecondGame = playerAppearing(OLEG, [], HIGH_SHARE, [
+        HIGH_SHARE,
+        MID_SHARE,
+        ...curveOf(HIGH_SHARE).slice(ONCE).slice(ONCE),
+      ]);
+      const rival = playerAppearing(DIMA, [], NOTHING, [
+        LOW_SHARE,
+        MID_SHARE,
+        ...curveOf(LOW_SHARE).slice(ONCE).slice(ONCE),
+      ]);
+      wireToWire(eveningFor([tiedAtSecondGame, rival]));
+
+      expect(meritGiven()(tiedAtSecondGame)).not.toBeNull();
+    });
   });
 });
 
@@ -222,6 +262,13 @@ describe("theRollercoaster()", () => {
 
     it("should measure only from the game the player arrived at", () => {
       firstRoundOfSpy.mockReturnValue(ONCE);
+      theRollercoaster(eveningFor([swinging]));
+
+      expect(meritGiven()(swinging)).toBeNull();
+    });
+
+    it("should refuse a player whose arrival could not be found, rather than reading their whole line", () => {
+      firstRoundOfSpy.mockReturnValue(null);
       theRollercoaster(eveningFor([swinging]));
 
       expect(meritGiven()(swinging)).toBeNull();
@@ -291,6 +338,13 @@ describe("theComeback()", () => {
     expect(meritGiven()(sank)).not.toBeNull();
   });
 
+  it("should refuse a player one game short", () => {
+    theComeback(eveningFor([sank, stayedUp]));
+    playedGamesSpy.mockReturnValue(ENOUGH_GAMES - ONCE);
+
+    expect(meritGiven()(sank)).toBeNull();
+  });
+
   it("should name the player who climbed back", () => {
     bestBySpy.mockReturnValue(sank);
 
@@ -330,6 +384,51 @@ describe("theComeback()", () => {
 
       expect(meritGiven()(NEVER_FELL)).toBeNull();
     });
+
+    it("should refuse a lead that sank to mid-table exactly, which is no fall", () => {
+      const LEVEL_AT_MIDPOINT = playerAppearing(OLEG, [], HIGH_SHARE, curveOf(MOCKED_MIDDLE));
+      theComeback(eveningFor([LEVEL_AT_MIDPOINT, stayedUp]));
+
+      expect(meritGiven()(LEVEL_AT_MIDPOINT)).toBeNull();
+    });
+
+    it("should refuse a player who never sat down at all", () => {
+      firstRoundOfSpy.mockReturnValue(null);
+      theComeback(eveningFor([sank, stayedUp]));
+
+      expect(meritGiven()(sank)).toBeNull();
+    });
+
+    it("should accept a player who sat down exactly at the halfway mark", () => {
+      firstRoundOfSpy.mockReturnValue(MIDPOINT);
+      theComeback(eveningFor([sank, stayedUp]));
+
+      expect(meritGiven()(sank)).not.toBeNull();
+    });
+
+    it("should refuse a player who sank lowest only compared to some, not all, of the table", () => {
+      const evenLower = playerAppearing(DIMA, [], EVEN_LOWER_SHARE, curveOf(EVEN_LOWER_SHARE));
+      theComeback(eveningFor([sank, stayedUp, evenLower]));
+
+      expect(meritGiven()(sank)).toBeNull();
+    });
+
+    it("should not let an unseated rival with a low share count against them", () => {
+      const notYetSeated = playerAppearing(VERONIKA, [], EVEN_LOWER_SHARE, curveOf(EVEN_LOWER_SHARE));
+      firstRoundOfSpy.mockImplementation((player: PlayerAppearances) =>
+        player.playerId === VERONIKA ? MIDPOINT + ONCE : NOTHING
+      );
+      theComeback(eveningFor([sank, stayedUp, notYetSeated]));
+
+      expect(meritGiven()(sank)).not.toBeNull();
+    });
+
+    it("should accept a tie at the bottom, not just a player strictly lowest", () => {
+      const tiedAtBottom = playerAppearing(VERONIKA, [], LOW_SHARE, curveOf(LOW_SHARE));
+      theComeback(eveningFor([sank, tiedAtBottom]));
+
+      expect(meritGiven()(sank)).not.toBeNull();
+    });
   });
 });
 
@@ -347,6 +446,12 @@ describe("falseDawn()", () => {
 
   it("should award nothing when the ranking found nobody", () => {
     expect(falseDawn(eveningFor([faded, behind]))).toBeNull();
+  });
+
+  it("should not even look for a winner in a short evening", () => {
+    falseDawn(eveningFor([faded, behind], CHART_EVENING - ONCE));
+
+    expect(bestBySpy).not.toHaveBeenCalled();
   });
 
   it("should look for a winner in an evening of exactly eight games", () => {
@@ -410,6 +515,34 @@ describe("falseDawn()", () => {
 
       expect(meritGiven()(LOW_LEAD)).toBeNull();
     });
+
+    it("should refuse a player one game short", () => {
+      falseDawn(eveningFor([faded, behind]));
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES - ONCE);
+
+      expect(meritGiven()(faded)).toBeNull();
+    });
+
+    it("should refuse a lead that only reached mid-table exactly, not above it", () => {
+      const LEVEL_AT_MIDPOINT = playerAppearing(OLEG, [], JUST_BELOW_MOCKED, curveOf(MOCKED_MIDDLE));
+      falseDawn(eveningFor([LEVEL_AT_MIDPOINT, behind]));
+
+      expect(meritGiven()(LEVEL_AT_MIDPOINT)).toBeNull();
+    });
+
+    it("should refuse a lead broken by just one rival who was higher at the midpoint", () => {
+      const toppedAtMid = playerAppearing(DIMA, [], HIGH_SHARE, curveOf(HIGHER_STILL));
+      falseDawn(eveningFor([faded, behind, toppedAtMid]));
+
+      expect(meritGiven()(faded)).toBeNull();
+    });
+
+    it("should accept a rival tied with them at the midpoint, not just strictly behind", () => {
+      const tiedAtMid = playerAppearing(DIMA, [], HIGH_SHARE, curveOf(HIGH_SHARE));
+      falseDawn(eveningFor([faded, tiedAtMid]));
+
+      expect(meritGiven()(faded)).not.toBeNull();
+    });
   });
 });
 
@@ -423,6 +556,12 @@ describe("theFlatline()", () => {
     expect(theFlatline(eveningFor([flat]))).toBeNull();
   });
 
+  it("should not even look for a winner in a short evening", () => {
+    theFlatline(eveningFor([flat], CHART_EVENING - ONCE));
+
+    expect(bestBySpy).not.toHaveBeenCalled();
+  });
+
   it("should look for a winner in an evening of exactly eight games", () => {
     theFlatline(eveningFor([flat], CHART_EVENING));
 
@@ -433,7 +572,10 @@ describe("theFlatline()", () => {
     const ON_THE_EDGE = playerAppearing(OLEG, [], MOCKED_MIDDLE, curveOf(MOCKED_MIDDLE + FLAT_BAND));
     theFlatline(eveningFor([ON_THE_EDGE]));
 
-    expect(meritGiven()(ON_THE_EDGE)).toBeCloseTo(NOTHING);
+    const merit = meritGiven()(ON_THE_EDGE);
+
+    expect(merit).not.toBeNull();
+    expect(merit).toBeCloseTo(NOTHING);
   });
 
   it("should still rank a player with exactly a long evening behind them", () => {
@@ -475,6 +617,18 @@ describe("theFlatline()", () => {
       playedGamesSpy.mockReturnValue(LONG_ENOUGH - ONCE);
 
       expect(meritGiven()(flat)).toBeNull();
+    });
+
+    it("should refuse a line stepping just past the edge of the band", () => {
+      const JUST_PAST_THE_EDGE = playerAppearing(
+        OLEG,
+        [],
+        MOCKED_MIDDLE,
+        curveOf(MOCKED_MIDDLE + FLAT_BAND + A_STEP_PAST)
+      );
+      theFlatline(eveningFor([JUST_PAST_THE_EDGE]));
+
+      expect(meritGiven()(JUST_PAST_THE_EDGE)).toBeNull();
     });
   });
 });

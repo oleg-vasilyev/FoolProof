@@ -291,7 +291,7 @@ no schema and no `shared/` type — earns a shorter path:
 | `README.md` | a row in the commands table | a row, plus a screen if the shape is new |
 | `CLAUDE.md` | untouched | edited only when a *rule* changed |
 | `TECH-DEBT.md` | untouched | an entry only if something is actually owed |
-| `e2e/` | scenarios only if it has an inline keyboard | same |
+| `e2e/` | scenarios only if a button carries `callback_data` | same |
 | Gates | all seven, mutation and e2e over the diff | all seven, mutation and e2e over the diff |
 
 The test rules do not bend: every file still gets a spec, because that is what

@@ -44,6 +44,8 @@ const TWICE = 2;
 
 const THRICE = 3;
 
+const FOUR = 4;
+
 const WINNING_RUN = 4;
 
 const MOVING_RUN = 4;
@@ -122,6 +124,12 @@ describe("hatTrick()", () => {
 
     expect(meritGiven()(A_PLAYER)).toBeNull();
   });
+
+  it("should accept a run sitting exactly on the threshold", () => {
+    hatTrick(eveningFor(A_PLAYER));
+
+    expect(meritGiven()(A_PLAYER)).toBe(WINNING_RUN);
+  });
 });
 
 describe("theLadder()", () => {
@@ -163,6 +171,13 @@ describe("theLadder()", () => {
 
       expect(linksGiven()(LOW, appearanceOf(ONCE, Finish.Drawn, ONCE))).toBe(false);
     });
+
+    it("should not link two games finished in the same place", () => {
+      theLadder(eveningFor(A_PLAYER));
+      meritGiven()(A_PLAYER);
+
+      expect(linksGiven()(HIGH, HIGH)).toBe(false);
+    });
   });
 
   it("should refuse a climb one game short", () => {
@@ -170,6 +185,12 @@ describe("theLadder()", () => {
     longestChainSpy.mockReturnValue(MOVING_RUN - ONCE);
 
     expect(meritGiven()(A_PLAYER)).toBeNull();
+  });
+
+  it("should accept a climb sitting exactly on the threshold", () => {
+    theLadder(eveningFor(A_PLAYER));
+
+    expect(meritGiven()(A_PLAYER)).toBe(MOVING_RUN);
   });
 });
 
@@ -219,6 +240,20 @@ describe("theSlide()", () => {
 
       expect(linksGiven()(HIGH, appearanceOf(ONCE, Finish.Drawn, SAME_SPOT_RUN))).toBe(false);
     });
+
+    it("should not link two games finished in the same place", () => {
+      theSlide(eveningFor(A_PLAYER));
+      meritGiven()(A_PLAYER);
+
+      expect(linksGiven()(HIGH, HIGH)).toBe(false);
+    });
+  });
+
+  it("should accept a slide sitting exactly on the threshold", () => {
+    theSlide(eveningFor(A_PLAYER));
+    longestChainSpy.mockReturnValue(MOVING_RUN);
+
+    expect(meritGiven()(A_PLAYER)).toBe(MOVING_RUN);
   });
 });
 
@@ -267,6 +302,13 @@ describe("thePendulum()", () => {
     longestChainSpy.mockReturnValue(SWINGING_RUN - ONCE);
 
     expect(meritGiven()(A_PLAYER)).toBeNull();
+  });
+
+  it("should accept a swing sitting exactly on the threshold", () => {
+    thePendulum(eveningFor(A_PLAYER));
+    longestChainSpy.mockReturnValue(SWINGING_RUN);
+
+    expect(meritGiven()(A_PLAYER)).toBe(SWINGING_RUN);
   });
 });
 
@@ -327,6 +369,42 @@ describe("groundhogDay()", () => {
       groundhogDay(eveningFor(BROKEN_THEN_STUCK));
 
       expect(meritGiven()(BROKEN_THEN_STUCK)).toBe(SAME_SPOT_RUN);
+    });
+
+    it("should report the place of the longest rut, not the place of the last one", () => {
+      const LONG_THEN_SHORT = playerAppearing(ROMANI, [
+        appearanceOf(NOTHING, Finish.Middle, FOUR),
+        appearanceOf(ONCE, Finish.Middle, FOUR),
+        appearanceOf(TWICE, Finish.Middle, FOUR),
+        appearanceOf(THRICE, Finish.Middle, TWICE),
+      ]);
+      bestBySpy.mockReturnValue(LONG_THEN_SHORT);
+
+      const award = groundhogDay(eveningFor(LONG_THEN_SHORT));
+
+      expect(award?.name === AwardName.GroundhogDay ? [award.place, award.run] : []).toEqual([
+        FOUR,
+        THRICE,
+      ]);
+    });
+
+    it("should keep the earlier rut when a later one only ties its length", () => {
+      const TIED_RUTS = playerAppearing(ROMANI, [
+        appearanceOf(NOTHING, Finish.Middle, FOUR),
+        appearanceOf(ONCE, Finish.Middle, FOUR),
+        appearanceOf(TWICE, Finish.Middle, FOUR),
+        appearanceOf(THRICE, Finish.Middle, TWICE),
+        appearanceOf(FOUR, Finish.Middle, TWICE),
+        appearanceOf(FOUR + ONCE, Finish.Middle, TWICE),
+      ]);
+      bestBySpy.mockReturnValue(TIED_RUTS);
+
+      const award = groundhogDay(eveningFor(TIED_RUTS));
+
+      expect(award?.name === AwardName.GroundhogDay ? [award.place, award.run] : []).toEqual([
+        FOUR,
+        THRICE,
+      ]);
     });
   });
 });

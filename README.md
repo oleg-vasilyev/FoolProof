@@ -199,15 +199,29 @@ A laptop that has to be awake on a Friday evening is the weakest part of the set
 and moving off it is cheap: long polling means the host opens **no port, needs no
 domain and no certificate**, so a firewall with nothing but SSH in it is enough.
 Anything that runs Node 24 will do. This one runs on a free Oracle Cloud VM with
-1 GB of memory, where the two processes idle at about 76 MB and the heaviest `/stats`
-peaks at 411 MB.
+1 GB of memory, where the service idles at about 95 MB — 100.8 MB after half a day
+up, against a 148.8 MB peak — and the heaviest `/stats` peaks at 411 MB.
 
-On the server, once:
+On the server, once. Ubuntu's own Node is too old, and the unit files name
+`/usr/local/bin`, which is where the tarball puts it:
 
 ```bash
+curl -fsSLO https://nodejs.org/dist/v24.19.0/node-v24.19.0-linux-x64.tar.xz
+sudo tar -xJf node-v24.19.0-linux-x64.tar.xz -C /usr/local --strip-components=1
+node -v && npm -v
+
 git clone https://github.com/oleg-vasilyev/FoolProof.git
 cd FoolProof
 npm ci
+```
+
+The deploy timer and `configure-server.sh` both run `sudo systemctl` **without a
+password prompt**, from a non-interactive session that has nowhere to type one, so
+the account needs that granted once:
+
+```bash
+echo 'ubuntu ALL=(ALL) NOPASSWD: /usr/bin/systemctl' | sudo tee /etc/sudoers.d/foolproof
+sudo chmod 440 /etc/sudoers.d/foolproof
 ```
 
 Then send it its configuration, **from your machine**, where `.env` is the copy you
@@ -434,7 +448,7 @@ runs the bot, the gates, their parts, then the two test families.
 | `npm run start:prod` | The bot for real, under the supervisor. **This is what the server runs** — [`deploy/foolproof.service`](deploy/foolproof.service) calls this line, so it cannot drift from it |
 | `npm start` | The same bot in a browser against a fake Telegram — no token, no network, and the one to run here |
 | `npm run check` | Lint, types, documents and tests — the everyday gate to keep at zero |
-| `npm run check:push` | What a push to `main` must not break — lint, types, documents; the website ships from `main`, tests wait for the tag. **CI runs this on every push** |
+| `npm run check:push` | What a push to `main` must not break — lint, types (app and harness), the harness's own tests, documents; the website ships from `main`, the app's tests wait for the tag. **CI runs this on every push** |
 | `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — each test run exactly once. No `docs:check`: documents and pictures are finished after the review, in their own stages |
 | `npm run check:release` | The full battery: `check:push`, then coverage, all mutants, every scenario. **CI runs this on every release tag** |
 | `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |

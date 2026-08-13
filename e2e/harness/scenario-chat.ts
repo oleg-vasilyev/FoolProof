@@ -7,7 +7,7 @@ import type { Person, PublishedCommand, Prompt } from "../fake-telegram/fake-tel
 import { databaseForWorker, portForWorker } from "../world-ports.ts";
 import { claimWorld } from "./world-claim.ts";
 import { announceTo } from "./hub-announce.ts";
-import { QUIET_MS } from "./settling.ts";
+import { QUIET_MS, lateEffectComplaint, workedOnAfterSettling } from "./settling.ts";
 
 
 
@@ -112,9 +112,22 @@ export const createChat = (): Chat => {
     polling: world.telegram.polling(),
   });
 
+  let settledAt: number | null = null;
+
   const settle = async (): Promise<void> => {
     const start = Date.now();
     let drainedAt: number | null = null;
+
+    const entry = refresh();
+    const late = workedOnAfterSettling(
+      settledAt,
+      Date.now() - entry.msSinceLastEffect,
+      entry.pendingUpdates
+    );
+
+    if (late.late) {
+      throw new Error(lateEffectComplaint(late.afterQuiet));
+    }
 
     while (Date.now() - start < SETTLE_TIMEOUT_MS) {
       const state = refresh();
@@ -130,6 +143,7 @@ export const createChat = (): Chat => {
       const lastEffectAt = Date.now() - state.msSinceLastEffect;
 
       if (Date.now() - Math.max(drainedAt, lastEffectAt) >= QUIET_MS) {
+        settledAt = Date.now();
         await sleep(paceMs());
 
         return;

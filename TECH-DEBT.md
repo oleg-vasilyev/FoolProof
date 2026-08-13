@@ -15,6 +15,21 @@ Two rules for this file, so it stays useful:
 
 ---
 
+## One dependency is held past its own maintainer
+
+`package.json` carries an `overrides` block with a single entry lifting `qs` past
+a denial-of-service advisory. Nothing here depends on `qs`: Stryker pins
+`typed-rest-client ~2.3.0`, that pins the vulnerable `qs`, and Stryker 9.6.1 is
+the newest release there is — so the choice was an override or a standing advisory
+that costs attention at every audit. It is a development dependency and never runs
+on the server, which is why this is a tidiness problem rather than a security one.
+
+An override is a claim that a package works against a version its own author never
+tested. The mutation run is what keeps that claim honest, and it passes.
+
+**Delete the block when Stryker ships a release that bumps `typed-rest-client`
+itself** — `npm audit` going quiet without it is the check.
+
 ## A backup that stops happening announces it by silence
 
 The timer sends each snapshot to the operator's chat, so a run that fails is
@@ -109,26 +124,6 @@ assertions.
 **Chase it when a mutant in `main.ts`'s signal wiring survives**, or when the noise
 first makes somebody miss a real failure in that output.
 
-## Nothing tells the harness when a render outgrows its quiet window
-
-A scenario decides the bot has finished once `QUIET_MS` has passed with nothing
-happening, so the window has to be longer than the slowest thing the bot does
-between two effects — rasterizing one poster. The chronology redesign made that
-render ~80ms slower and it crossed the old 600ms window, and the way it announced
-itself was five scenarios asserting against photos that had not arrived: a wrong
-answer, in a gate, that looked like flakiness. `QUIET_MS` is 1200 now, which buys
-back roughly a doubling of render time.
-
-The debounce has `debounceFitsQuiet()` for exactly this class of coupling, and it
-works because a debounce is a constant a file can be read for. A render time is
-not — it can only be measured, and `e2e/` may not import `src/` to measure it. The
-guard that would actually fit is the other direction: notice that an effect landed
-*after* a settle returned, and fail naming the scenario, so the harness reports its
-own assumption breaking instead of the scenario reporting a bot that is fine.
-
-**Build it the next time a scenario fails in a way that turns out to be timing**,
-or when a poster gains enough to make somebody wonder about the window again.
-
 ## Half of drawing a poster still blocks the event loop
 
 `rasterize()` draws through `renderAsync`, which hands the work to a thread and
@@ -157,11 +152,11 @@ be awkward, with the trigger that would make the split pay for itself.
 | File | Lines | Why it is on the list | Split it when |
 |---|---|---|---|
 | `features/live-game/bot/card/card-service.ts` | 398 | The largest file in `src/`, and the only one doing four jobs: looking a card up, applying a tap, scheduling the debounced edit, and sweeping idle cards. It reads as a skeleton, which is why it has survived. | A fifth job arrives, or something other than the card service needs the debouncer |
-| `shared/repository/sqlite-repository.ts` | 383 | Every query in the app. It is meant to be the only file with SQL, so length is the price of that rule, not a smell. | The scoresheet's queries and the live card's queries stop overlapping — then two files behind one contract |
+| `shared/repository/sqlite-repository.ts` | 443 | Every query in the app. It is meant to be the only file with SQL, so length is the price of that rule, not a smell. | The scoresheet's queries and the live card's queries stop overlapping — then two files behind one contract |
 | `e2e/fake-telegram/fake-telegram.ts` | 406 | One `switch` over nine Bot API methods, mixing protocol shapes with the chat log. A `bot-api-methods.ts` was planned and folded in to save a file; that was probably the wrong trade. | A tenth method is needed, or the fake starts refusing more than two things |
 | `e2e/harness/scenario-chat.ts` | 273 | Module-level singletons plus a 25-member `Chat` interface that scenarios use as a language. The interface grows every time a scenario wants a new question answered. | The interface passes ~30 members — then split the driving verbs from the queries |
 | `e2e/hub/hub-server.ts` | 259 | Proxy, cache, page serving and port probing in one file. | Anything is added to the hub |
-| `src/main.ts` | 70 | Two `??` defaults left inline in the diagnostics wiring, still the only place in `src/` with branch coverage at 50% (lines 50–51), and the one surviving mutant in the file. `optionalEnv()` took the other two and the empty-means-missing bug with them; these two remain because the fallback runs only when the key is absent, and `main.spec.ts` imports the module once, with the spy returning a value. | A second spec file reaches both branches — vitest isolates files, so no `vi.resetModules()` is involved. What stops it is the price: 180 lines of setup and fifteen `vi.mock` calls duplicated for two branches. Do it once that header is worth extracting for another reason |
+| `src/main.ts` | 67 | Two `??` defaults left inline in the diagnostics wiring, still the only place in `src/` with branch coverage at 50% (lines 48–49), and the one surviving mutant in the file. `optionalEnv()` took the other two and the empty-means-missing bug with them; these two remain because the fallback runs only when the key is absent, and `main.spec.ts` imports the module once, with the spy returning a value. | A second spec file reaches both branches — vitest isolates files, so no `vi.resetModules()` is involved. What stops it is the price: 180 lines of setup and fifteen `vi.mock` calls duplicated for two branches. Do it once that header is worth extracting for another reason |
 
 ---
 

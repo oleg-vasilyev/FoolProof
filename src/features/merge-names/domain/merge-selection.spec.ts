@@ -206,6 +206,7 @@ describe("apply()", () => {
         because: Refusal.UnknownName,
       });
     });
+
   });
 
   describe("cancelling", () => {
