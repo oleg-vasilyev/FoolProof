@@ -170,6 +170,13 @@ urgent, and lands under a running agent. The third time, `OPERATOR_TG_ID` became
 `deploy/configure-server.sh` still guarded only `BOT_TOKEN`, which would have shipped
 a config that crash-loops. Answer the question, make those edits, *then* launch.
 
+**The reviewer reads the diff — it does not run anything.** Whatever this phase
+changed outside `src/` has to be *executed* by somebody as well, and the two catch
+different faults: the same night that four reviews each found a real bug, two more
+were sitting in a bash script that read perfectly (`set -e` without `-E` never
+calls an `ERR` trap from inside a function) and surfaced only when the script ran.
+A green review of a shell script, a systemd unit or a workflow is half a gate.
+
 **When the phase is mostly a restructure, run this gate on the source before the
 specs exist.** Everything a move is judged on — does the file's name describe what
 is in it, is it a bucket, does the type name collide with one next door — is
@@ -354,10 +361,16 @@ re-reads the subject, the skill and the spec that are already in your context. I
 buys two things — room in your own window, and wall-clock while you work on
 something disjoint. So the policy is not "delegate the mechanical work", it is:
 
-- **The review pass is the one that always pays.** 89k tokens found three things
-  that were about to ship, including a false sentence written earlier in the same
-  phase by the same person who then re-read it and approved it. You cannot review
-  your own work by reading it again.
+- **The review pass is the one that always pays, and that is measured, not assumed.**
+  89k tokens found three things that were about to ship, including a false sentence
+  written earlier in the same phase by the same person who then re-read it and
+  approved it. Four phases in one night then went four for four, each on a real bug
+  rather than a matter of style: a systemd unit that would have restarted the bot
+  every ten seconds forever when `.env.production` was missing, a measuring command
+  in a skill left broken by a signature change, a test that by construction could
+  not fail, a false claim in `PLAN.md` about cross-chat queries, and a deploy that
+  would have rolled production back onto an older tag. You cannot review your own
+  work by reading it again.
 - **An independent scope is delegated on sight, without being asked.** This replaces
   an earlier rule here — *delegate only when your own context is the scarce resource*
   — which the owner overruled: the parallelism is to be tried on its own merits, so
