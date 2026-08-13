@@ -46,6 +46,16 @@ count is asked for, count. An answer with no number in it is a guess.
 5. **Reading.** What did you read, re-read or print that you already had in
    context?
 
+## The flow this gate audits is drawn
+
+[`development-flow.mmd`](development-flow.mmd) beside this file draws the whole
+loop — six stages from the owner's first message to the tag going live, in
+Mermaid, viewable by pasting it into mermaid.live. It is the map, not the
+authority: every stage's rules live in the skill the drawing names, and a
+disagreement is resolved in the skill's favour, then the drawing is fixed.
+**A lesson below that changes a default also redraws the step it touches** — a
+flow chart still showing the old habit is the same bug as a stale document.
+
 ## The output is a diff, not a paragraph
 
 Every lesson that would apply to a future phase becomes a **durable change** — a
