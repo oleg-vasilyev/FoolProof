@@ -26,9 +26,12 @@ mechanism.
 
 ## The procedure for the generated rows
 
-1. **Redraw before running `npm run check`, not after it complains** — the gate
-   runs lint, types, docs and the whole suite, and a stale mockup makes you pay
-   for all of it twice. **Commit both halves.** The SVG is the reviewable one: a
+1. **Redraw after the review, before the final commit.** The pictures stage
+   sits between the diff review and the retrospective so that a review finding
+   cannot force a second redraw — `docs:check` was taken out of `check:phase`
+   for exactly that reason. It still compares the SVGs in CI (`check:push`) and
+   before a tag (`check:release`), so a stale mockup that reaches the push is a
+   red check. **Commit both halves.** The SVG is the reviewable one: a
    colour change is one readable diff line where a PNG is an opaque blob. The
    PNG is the one `README.md` and the site actually show.
 2. **Open every PNG and read it as a reader, not as a diff.** The gate proves

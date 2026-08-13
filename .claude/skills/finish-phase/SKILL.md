@@ -9,14 +9,21 @@ A phase ends with a release, and a phase is done when the code is *releasable* �
 not when it works. Run all seven gates before the final commit and act on what
 they say. None of them is advisory.
 
-Gates 1–4 are one command: **`npm run check:phase`** — lint, types, documents,
-the suite under coverage, mutation over the diff, e2e over the diff, with the
-tests counted once. A red gate is then re-run **alone** after the fix, never by
+Gates 1–4 are one command: **`npm run check:phase`** — lint, types, the suite
+under coverage, mutation over the diff, e2e over the diff, with the tests
+counted once. A red gate is then re-run **alone** after the fix, never by
 repeating the whole chain; gate 3's rules about re-runs still apply.
+**`docs:check` is deliberately not in it**: documents and pictures are finished
+after the review, in their own stages, so checking them here fails on work not
+yet due — and a review finding would force an expensive redraw twice. The line
+still holds where it matters: `check:push` in CI and `check:release` at the tag
+both run `docs:check`.
 
-## 1. `npm run check`
+## 1. Lint and types
 
-Lint, types, tests. Zero errors, no exceptions.
+Zero errors, no exceptions. (`npm run check` is the standalone everything
+command; the phase loop runs lint and types via `check:phase`, without
+`docs:check` — see above.)
 
 **A changed signature has callers no gate can see.** `grep` the whole repository
 for the changed name, not just `src/` — `.claude/skills/` and `README.md` hold
@@ -156,9 +163,10 @@ out. If the diff is worth reviewing, it is worth holding still for five minutes.
 
 The three breaks had one shape, so the fix is a question asked **before** launching,
 not more resolve afterwards: **what does this phase change outside `src/`?** Deploy
-scripts, the unit file, the server's env file, the CI workflow — nothing there is
-touched by `npm run check`, so it surfaces late, feels urgent, and lands under a
-running agent. The third time, `OPERATOR_TG_ID` became required in `main.ts` and
+scripts, the unit file, the server's env file, the CI workflow — almost nothing
+there has an automatic check (`docs:check` does compare `configure-server.sh`'s
+`REQUIRED_KEYS` against `main.ts`, and nothing else), so it surfaces late, feels
+urgent, and lands under a running agent. The third time, `OPERATOR_TG_ID` became required in `main.ts` and
 `deploy/configure-server.sh` still guarded only `BOT_TOKEN`, which would have shipped
 a config that crash-loops. Answer the question, make those edits, *then* launch.
 
@@ -260,8 +268,8 @@ Load the **`write-a-doc`** skill before touching any of them: it routes a fact t
 one file and says how to add it without creating the second copy that will drift.
 Two steps from it matter most at the end of a phase — search the other documents for
 what you are about to write, and search for the sentence the phase just made false.
-`npm run docs:check` runs inside `npm run check`, so a broken link or a stale tree
-fails gate 1 rather than surviving to the next cleanup.
+Run `npm run docs:check` once the documents are updated — it is the last step of
+the retrospective stage, and CI's `check:push` holds the same line after the push.
 
 ## Scaling the ritual to the change
 

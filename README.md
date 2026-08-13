@@ -373,7 +373,7 @@ runs the bot, the gates, their parts, then the two test families.
 | `npm start` | The same bot in a browser against a fake Telegram — no token, no network, and the one to run here |
 | `npm run check` | Lint, types, documents and tests — the everyday gate to keep at zero |
 | `npm run check:push` | What a push to `main` must not break — lint, types, documents; the website ships from `main`, tests wait for the tag. **CI runs this on every push** |
-| `npm run check:phase` | The phase gates in one command: `check:push`, then coverage, mutation over the diff, e2e over the diff — each test run exactly once |
+| `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — each test run exactly once. No `docs:check`: documents and pictures are finished after the review, in their own stages |
 | `npm run check:release` | The full battery: `check:push`, then coverage, all mutants, every scenario. **CI runs this on every release tag** |
 | `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
 | `npm run typecheck` | `tsc --noEmit` |

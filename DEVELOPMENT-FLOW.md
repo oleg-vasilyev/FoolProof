@@ -94,11 +94,11 @@ sequenceDiagram
     K-->>C: the order of the gates and their thresholds
     loop while any gate is red — fix, then re-run only the one that fell
         C->>C: npm run check:phase — one command, every gate in a row, the tests run once
-        C->>C: lint and types, documents checked against the code, the suite under coverage with a 70% floor
+        C->>C: lint and types, the suite under coverage with a 70% floor
         C->>C: Stryker mutates the diff — the tests must notice, 85% threshold
         C->>C: e2e over the diff — the real bot against a fake Telegram
     end
-    C->>C: walk everything outside src/ — deploy scripts, systemd units, CI config: no automatic gate sees them
+    C->>C: walk everything outside src/ — deploy scripts, systemd units, CI config: almost nothing there has an automatic gate
     end
 
     rect rgb(240, 249, 255)
@@ -111,6 +111,11 @@ sequenceDiagram
         else not worth fixing now
             C->>C: record it in TECH-DEBT.md with the trigger that would make it worth doing
         end
+    end
+    opt the feature gained an inline keyboard, or a bug got past the units
+        C->>K: the write-an-e2e-scenario skill
+        K-->>C: when a scenario is owed, and how to drive a whole evening against a fake Telegram
+        C->>C: write the scenario and play it — the real bot on a real database
     end
     end
 
@@ -131,6 +136,8 @@ sequenceDiagram
 
     rect rgb(253, 242, 248)
     note over C,K: Stage 6. Retrospective — fixing the process and the documents
+    C->>K: the retrospective skill
+    K-->>C: five questions about how the work went, each answered with a count
     C->>C: count in numbers: what was rebuilt, what ran for nothing
     C->>K: land a new rule in the skills, so the mistake cannot repeat
     C->>C: a lesson that changed the flow itself redraws this very diagram
@@ -138,7 +145,7 @@ sequenceDiagram
     C->>K: the write-a-doc skill
     K-->>C: every fact has one home document, and CLAUDE.md has a line budget
     C->>C: update README, PLAN and whatever else the phase owes
-    C->>C: npm run docs:check — links resolve, nothing is duplicated, the budget holds
+    C->>C: npm run docs:check — links resolve, the tables match the code, the budget holds
     end
 
     rect rgb(237, 233, 254)
@@ -155,12 +162,12 @@ sequenceDiagram
         C->>C: npm version with the release message
         C->>C: the pre-push hook runs npm run check:release — a red tag cannot leave the machine
         C->>G: the tag is pushed
+        C->>U: a chat message: the release is cut — the version, and what it changes
         G->>G: CI repeats the full battery on a clean clone — the second opinion
         note right of V: the server does not wait for CI — the local hook is the gate
         V->>G: asks every five minutes whether a new tag appeared
         G-->>V: the newest release tag
-        V->>V: installs it: npm ci and a service restart
-        V-->>U: the bot is updated, and a failed install rolls back on its own
+        V->>V: installs it — npm ci and a service restart, a failed install rolling back on its own
     end
     end
 ```

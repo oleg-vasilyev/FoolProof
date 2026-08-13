@@ -22,7 +22,7 @@
     "start:prod": "node --env-file=.env.production src/supervisor.ts",
     "check": "npm run lint && npm run typecheck && npm run docs:check && npm run test",
     "check:push": "npm run lint && npm run typecheck && npm run docs:check",
-    "check:phase": "npm run check:push && npm run test:coverage && npm run test:mutation:changed && npm run e2e:changed",
+    "check:phase": "npm run lint && npm run typecheck && npm run test:coverage && npm run test:mutation:changed && npm run e2e:changed",
     "check:release": "npm run check:push && npm run test:coverage && npm run test:mutation && npm run e2e",
     "lint": "eslint src scripts",
     "lint:fix": "eslint --fix src scripts",

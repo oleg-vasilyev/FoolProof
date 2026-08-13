@@ -344,7 +344,7 @@ the edit instead of at the end of the turn.
 ### Finishing a phase
 
 A phase is done when the code is *releasable*, not when it works. Seven gates run
-before the final commit — `npm run check`, coverage (70% floor), mutation (breaks
+before the final commit — lint and types, coverage (70% floor), mutation (breaks
 below 85%), `npm run e2e:changed`, a review of the whole diff, **the poster
 gallery** when the phase drew anything, and a retrospective — and the numbers go in
 the commit message. The gallery is the gate a machine cannot answer:

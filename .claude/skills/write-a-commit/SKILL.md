@@ -51,10 +51,17 @@ paragraph, naming the mutant and why its death is not worth buying.
 **Trailer, always the last line:**
 
 ```
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
 ```
 
+The model name in the trailer is whichever Claude actually wrote the commit.
+
 ## The release
+
+A release starts from a green `main`: after pushing the phase commits, wait for
+the push CI (`gh run watch --exit-status`, about a minute) and fix a red
+`check:push` before cutting anything — a tag must not point at a commit the
+site is already failing on.
 
 A release is `npm version` with `-m`, so the commit and the tag carry the same
 message; `%s` becomes the version:
@@ -65,7 +72,7 @@ npm version minor -m "Release %s
 A minor: <one paragraph — what this tag gives the player or the operator,
 in plain words, no gate numbers, no file names>.
 
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 git push --follow-tags
 ```
 
