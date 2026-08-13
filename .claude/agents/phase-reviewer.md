@@ -1,6 +1,6 @@
 ---
 name: phase-reviewer
-description: Reads a phase's whole diff against the project's own rules and reports what drifted. Use as gate 4 of finish-phase, or whenever a stretch of work is about to be committed as a release.
+description: Reads a phase's whole diff against the project's own rules and reports what drifted. Use as gate 5 of finish-phase, or whenever a stretch of work is about to be committed as a release.
 tools: Read, Grep, Glob, Bash
 model: fable
 ---

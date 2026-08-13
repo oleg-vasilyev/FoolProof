@@ -50,7 +50,7 @@ sequenceDiagram
     end
     C->>U: the size of the phase in one line, tripped debt included
     U-->>C: agreed, or cut it down
-    opt the feature shows the user something
+    opt the feature affects the app's visuals
         C->>D: build a mockup on the existing design system
         D-->>C: the rendered mockup
         C->>U: mockup for approval
@@ -90,11 +90,6 @@ sequenceDiagram
 
     rect rgb(240, 253, 244)
     note over C,H: Stage 3. Quality gates
-    opt the task changed what the bot or the site draws
-        C->>K: the refresh-the-pictures skill
-        K-->>C: the table of every committed picture, what draws it, and which have no gate but the table
-        C->>C: regenerate the stale ones and open every PNG — mockups, posters, previews, icons
-    end
     C->>K: the finish-phase skill
     K-->>C: the order of the gates and their thresholds
     loop while any gate is red — fix, then re-run only the one that fell
@@ -103,7 +98,6 @@ sequenceDiagram
         C->>C: Stryker mutates the diff — the tests must notice, 85% threshold
         C->>C: e2e over the diff — the real bot against a fake Telegram
     end
-    C->>C: the poster gallery: open every picture myself, look for overflowing text and broken lines
     C->>C: walk everything outside src/ — deploy scripts, systemd units, CI config: no automatic gate sees them
     end
 
@@ -120,8 +114,23 @@ sequenceDiagram
     end
     end
 
+    rect rgb(255, 247, 237)
+    note over C,K: Stage 5. Syncing every picture the project holds
+    opt the change touched what the bot or the site draws
+        C->>C: the poster gallery: open every picture myself, look for overflowing text and broken lines
+        C->>K: the refresh-the-pictures skill
+        K-->>C: the table of every committed picture, what draws it, and which have no gate but the table
+        C->>C: regenerate the stale ones and open every PNG — mockups, posters, previews, icons
+        opt the redrawn pictures also live on the design page
+            C->>K: the update-the-design-page skill
+            K-->>C: pull the page, splice the real drawings in, bump the revision
+            C->>D: the implemented reality, pushed back to the design page
+        end
+    end
+    end
+
     rect rgb(253, 242, 248)
-    note over C,K: Stage 5. Retrospective — fixing the process and the documents
+    note over C,K: Stage 6. Retrospective — fixing the process and the documents
     C->>C: count in numbers: what was rebuilt, what ran for nothing
     C->>K: land a new rule in the skills, so the mistake cannot repeat
     C->>C: a lesson that changed the flow itself redraws this very diagram
@@ -129,16 +138,11 @@ sequenceDiagram
     C->>K: the write-a-doc skill
     K-->>C: every fact has one home document, and CLAUDE.md has a line budget
     C->>C: update README, PLAN and whatever else the phase owes
-    opt the design moved mid-phase, or the pictures were redrawn
-        C->>K: the update-the-design-page skill
-        K-->>C: pull the page, splice the real drawings in, bump the revision
-        C->>D: the implemented reality, pushed back to the design page
-    end
     C->>C: npm run docs:check — links resolve, nothing is duplicated, the budget holds
     end
 
     rect rgb(237, 233, 254)
-    note over C,V: Stage 6. Release to production
+    note over C,V: Stage 7. Release to production
     C->>K: the write-a-commit skill
     K-->>C: the title says what the bot does differently, the body says why the old shape was wrong, plus the Gates paragraph
     C->>G: commit and push to main
@@ -147,10 +151,10 @@ sequenceDiagram
         G-->>C: the failure report
         C->>C: fix and push again
     else green
-        G-->>U: a green check on the commit
-        U->>U: npm version with the release message
-        U->>U: the pre-push hook runs npm run check:release — a red tag cannot leave the machine
-        U->>G: the tag is pushed
+        G-->>C: a green check on the commit
+        C->>C: npm version with the release message
+        C->>C: the pre-push hook runs npm run check:release — a red tag cannot leave the machine
+        C->>G: the tag is pushed
         G->>G: CI repeats the full battery on a clean clone — the second opinion
         note right of V: the server does not wait for CI — the local hook is the gate
         V->>G: asks every five minutes whether a new tag appeared

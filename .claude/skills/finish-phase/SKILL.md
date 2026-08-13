@@ -1,6 +1,6 @@
 ---
 name: finish-phase
-description: Run the release ritual that closes a development phase in FoolProof — the seven gates (check, coverage, mutation, e2e, the poster gallery, diff review, retrospective) and the format of the phase's final commit message. Use when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
+description: Run the release ritual that closes a development phase in FoolProof — the seven gates (check, coverage, mutation, e2e, diff review, the poster gallery, retrospective) and the format of the phase's final commit message. Use when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
 ---
 
 # Finishing a phase
@@ -69,7 +69,7 @@ the test above, or an optional chain hiding a value that was never set.
 Strengthening a spec is the `write-a-spec` skill's job — load it rather than
 reaching for the nearest assertion that turns the mutant red.
 
-Run gate 6's review pass **before** this gate when the diff is small: review
+Run gate 5's review pass **before** this gate when the diff is small: review
 findings edit code, and this is the costliest gate to repeat. An edit made after
 the run re-checks with `--mutate <file>` alone, never a full re-run.
 
@@ -129,31 +129,7 @@ same pre-push hook that runs the rest of `check:release`.
 `npm run e2e:test` covers the harness's own pure parts and takes under a second; it
 is not part of `npm run check` because it belongs to `e2e/`, not to the app.
 
-## 5. Look at the gallery
-
-`node scripts/tools.ts gallery` draws both posters across every edge the product has
-to survive — one game, two players, ten long names, more games than the sheet holds,
-an evening nobody lost, arrivals and departures, an award that crowns the whole
-table — into `reports/gallery/`. **Open every picture.** Nothing above this gate can
-see a poster that has started drawing nonsense: the SVG matches the renderer, the
-tests match the SVG, and all of it stays green while a line runs off the card.
-
-The output is **specific claims, not a verdict.** "Looked, fine" is the green light
-with nothing behind it that `write-an-e2e-scenario` warns about — if you cannot name
-what you saw on a picture, you did not look at it. Of each, ask:
-
-- does any row repeat another in different words?
-- does every sentence read like the language it is in, plurals included?
-- does anything run past the edge, or get cut where a reader cannot recover it?
-- is a number claiming something the evening did not actually do?
-
-**Fix what is plainly wrong; ask about what is taste or wording.** A line overflowing
-the card is a defect and needs no permission. Which of three phrasings replaces it is
-the user's call, and asking costs one message where guessing costs a rewrite. The
-first run of this gate found both kinds at once: two awards ran their winners off the
-right edge, and two more crowned a comeback that never fell below mid-table.
-
-## 6. A review pass over the phase's whole diff
+## 5. A review pass over the phase's whole diff
 
 Read `git diff <phase-start>..HEAD` against `CLAUDE.md` — the whole diff at once,
 not the individual commits, because a rule breaks across commits more often than
@@ -164,7 +140,7 @@ not a size judgement and not something to ask permission for: you cannot review
 your own diff by reading it, because you are still holding the reasoning that made
 it look right. A phase that reviewed itself here shipped two awards whose sentences
 said the same thing in different words, and only noticed when somebody opened the
-rendered poster two gates later.
+rendered poster one gate later.
 
 **Stop editing before you launch it.** The reviewer reads files, not a snapshot, so
 a tree that moves under it produces findings against code that no longer exists and
@@ -233,9 +209,46 @@ Ask of every touched file:
 And of the feature as a whole: it declares one command per thing it gives the
 player, so can a reader tell from the file names which files serve which?
 
+## 6. The pictures — only when the phase drew something
+
+This gate runs after the review, because review findings edit code and edited code
+can change a drawing. It opens when the diff touched anything a picture is made of
+— an SVG template, geometry, copy that lands on a poster, the site's pages — and
+stays shut otherwise, with the commit message carrying the reason
+(`write-a-commit` has the shape).
+
+`node scripts/tools.ts gallery` draws both posters across every edge the product has
+to survive — one game, two players, ten long names, more games than the sheet holds,
+an evening nobody lost, arrivals and departures, an award that crowns the whole
+table — into `reports/gallery/`. **Open every picture.** Nothing above this gate can
+see a poster that has started drawing nonsense: the SVG matches the renderer, the
+tests match the SVG, and all of it stays green while a line runs off the card.
+
+The output is **specific claims, not a verdict.** "Looked, fine" is the green light
+with nothing behind it that `write-an-e2e-scenario` warns about — if you cannot name
+what you saw on a picture, you did not look at it. Of each, ask:
+
+- does any row repeat another in different words?
+- does every sentence read like the language it is in, plurals included?
+- does anything run past the edge, or get cut where a reader cannot recover it?
+- is a number claiming something the evening did not actually do?
+
+**Fix what is plainly wrong; ask about what is taste or wording.** A line overflowing
+the card is a defect and needs no permission. Which of three phrasings replaces it is
+the user's call, and asking costs one message where guessing costs a rewrite. The
+first run of this gate found both kinds at once: two awards ran their winners off the
+right edge, and two more crowned a comeback that never fell below mid-table.
+
+The gallery is drawn fresh, but the repository also holds **committed** pictures
+that fall behind the code silently. The same trigger opens the
+**`refresh-the-pictures`** skill — its table lists every one, mockups to icons,
+including the hand-made rows no automatic check watches — and when a redrawn
+picture also lives on the Claude Design page, **`update-the-design-page`** carries
+it back there.
+
 ## 7. A retrospective on how the phase was carried out
 
-Gate 4 judges the diff; this one judges what producing it cost — rework, gates run
+Gate 5 judges the diff; this one judges what producing it cost — rework, gates run
 twice, subagents briefed too thinly to be useful. Load the **`retrospective`**
 skill and answer its five questions with counts, then land each lesson as a rule
 somewhere durable. It runs before the final commit, while the transcript that is
@@ -264,7 +277,7 @@ no schema and no `shared/` type — earns a shorter path:
 | `CLAUDE.md` | untouched | edited only when a *rule* changed |
 | `TECH-DEBT.md` | untouched | an entry only if something is actually owed |
 | `e2e/` | scenarios only if it has an inline keyboard | same |
-| Gates | all six, mutation and e2e over the diff | all six, mutation and e2e over the diff |
+| Gates | all seven, mutation and e2e over the diff | all seven, mutation and e2e over the diff |
 
 The test rules do not bend: every file still gets a spec, because that is what
 holds the mutation score up and it is the cheapest part to write. What bends is
