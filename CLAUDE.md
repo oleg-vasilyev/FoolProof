@@ -13,7 +13,8 @@ beside the code it describes:
 | Writing a commit message, cutting a release | `write-a-commit` skill |
 | Writing or changing any document | `write-a-doc` skill |
 | Writing or changing an e2e scenario | `write-an-e2e-scenario` skill |
-| Changing anything the `/stats` picture draws | `sync-the-mockups` skill |
+| A committed picture may have gone stale | `refresh-the-pictures` skill |
+| The Claude Design page fell behind the code | `update-the-design-page` skill |
 | Changing the e2e harness itself | [`e2e/README.md`](e2e/README.md) |
 
 Four documents, one job each:

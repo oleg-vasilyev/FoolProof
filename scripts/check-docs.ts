@@ -239,7 +239,8 @@ const drawingsOutOfStep = (
       ? []
       : [
           `${committed}: the renderer draws something else now — the ` +
-            `"sync-the-mockups" skill redraws this and the Claude Design page it belongs to`,
+            `"refresh-the-pictures" skill redraws this, and the Claude Design ` +
+            `page then follows via "update-the-design-page"`,
         ];
   });
 
