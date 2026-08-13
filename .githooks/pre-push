@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# Refuse to push a release tag from a machine where the full battery is red.
+# The deploy server pulls whatever tag appears on its own timer and does not
+# wait for CI, so this hook is the only gate that actually stands between a
+# red suite and production — CI's release-check is the second opinion on a
+# clean clone, not the gate. Installed by npm install: the prepare script
+# points core.hooksPath at this folder.
+#
+# git feeds one line per ref being pushed: <local ref> <sha> <remote ref> <sha>.
+
+releasing=0
+
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  case "$remote_ref" in
+    refs/tags/v*) releasing=1 ;;
+  esac
+done
+
+if [ "$releasing" = 1 ]; then
+  echo "pre-push: a release tag is leaving — running the full battery first"
+  npm run check:release || {
+    echo "pre-push: red. The tag stays here until the battery is green."
+    exit 1
+  }
+fi
+
+exit 0

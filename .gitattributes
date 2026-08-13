@@ -5,6 +5,8 @@
 *.service text eol=lf
 *.timer text eol=lf
 *.sh text eol=lf
+# Git hooks run under sh too, and have no extension to be caught by the rule above.
+.githooks/* text eol=lf
 # Not read by a host, but copied to .env and sent to one — a CRLF checkout would
 # put a carriage return on the end of every value, including the token.
 .env.example text eol=lf

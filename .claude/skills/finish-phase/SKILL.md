@@ -22,7 +22,7 @@ Lint, types, tests. Zero errors, no exceptions.
 for the changed name, not just `src/` — `.claude/skills/` and `README.md` hold
 commands that are run by hand, so nothing compiles them and nothing fails when
 they rot. Making `rasterize()` asynchronous left a one-liner in
-`sync-the-mockups` timing a promise instead of a render: it reported `0ms` for
+`refresh-the-pictures` timing a promise instead of a render: it reported `0ms` for
 every poster, in the step whose whole job is catching a render that grew. Green
 gates, a lie in a document.
 
@@ -50,7 +50,10 @@ nobody exercised. Find the branch, not a way to reach the number.
 Stryker over the files this phase touched — about a minute. The **full**
 `npm run test:mutation` runs once, before a tag, not during a phase: a mutant in a
 file the phase never opened was already killed in the phase that wrote it, and
-re-proving it costs four minutes of every phase. Breaks below 85% either way.
+re-proving it costs four minutes of every phase. The pre-push hook enforces the
+before-a-tag half — pushing a `v*` tag runs `check:release`, full mutation
+included, and a red battery keeps the tag on the machine. Breaks below 85%
+either way.
 Coverage says a line ran; this says a test would have noticed it break.
 
 **`--mutate` takes a glob, and `dir/*.ts` matches the specs too.** Stryker will
@@ -120,7 +123,8 @@ so everything runs rather than nothing.
 
 This is a real gate rather than a smoke test, and it is cheap because it is
 selective: a phase inside one feature usually plays two or three files in about
-fifteen seconds. Before a tag, run `npm run e2e` in full.
+fifteen seconds. The full `npm run e2e` runs before a tag — enforced by the
+same pre-push hook that runs the rest of `check:release`.
 
 `npm run e2e:test` covers the harness's own pure parts and takes under a second; it
 is not part of `npm run check` because it belongs to `e2e/`, not to the app.

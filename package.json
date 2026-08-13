@@ -17,6 +17,7 @@
     "#language/*": "./src/features/language/*"
   },
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks",
     "start": "node e2e/play.ts",
     "start:prod": "node --env-file=.env.production src/supervisor.ts",
     "check": "npm run lint && npm run typecheck && npm run docs:check && npm run test",
