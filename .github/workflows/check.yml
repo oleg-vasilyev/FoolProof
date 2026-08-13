@@ -1,6 +1,8 @@
-# Lint, types, documents and tests on every push. `npm run e2e` is deliberately
-# not here: CLAUDE.md makes it a gate for finishing a phase, which is a person
-# deciding something, not a wait to sit through on every push.
+# The push gate: lint, types and documents only. main is released by tag, so a
+# red test on main is tolerable — but the website ships straight out of docs/ on
+# main with every push, and npm ci catches a lock file that only fails on a clean
+# clone. The full battery, tests included, runs on the release tag instead:
+# release-check.yml next to this file.
 name: check
 
 on:
@@ -10,9 +12,6 @@ on:
 
 jobs:
   check:
-    # x86, because the server is x86: the rasterizer ships a prebuilt binary per
-    # platform, and one that is missing for an architecture must fail here rather
-    # than on the host serving a Friday evening.
     runs-on: ubuntu-latest
 
     steps:
@@ -27,4 +26,4 @@ jobs:
       # drifted, which is exactly the failure that made a clean clone unbuildable.
       - run: npm ci
 
-      - run: npm run check
+      - run: npm run check:push

@@ -308,8 +308,15 @@ The script is installed outside the clone rather than run from it, for the reaso
 in `foolproof-deploy.service`. It means a release that changes the deploy script
 needs that first line run by hand; nothing else about a release does.
 
-Every push also runs the checks in GitHub Actions, which is
-[`.github/workflows/check.yml`](.github/workflows/check.yml) and needs no setup.
+GitHub Actions needs no setup and runs two different checks. Every push runs
+`check:push` ([`.github/workflows/check.yml`](.github/workflows/check.yml)):
+`main` is released only by tag, so a broken test there is tolerable, but the
+website ships straight from `main` and the documents may not rot. A release tag
+runs the full `check:release`
+([`.github/workflows/release-check.yml`](.github/workflows/release-check.yml)) —
+every scenario and every mutant. The server does not wait for it: the tag goes
+live on the timer regardless, so a red run on a tag is the alarm to push a fixed
+tag, not a gate that would have held the release.
 
 ## Asking the bot how it is doing
 
@@ -351,13 +358,16 @@ environment value is ever printed.
 ## Scripts
 
 They are listed in `package.json` in the order you reach for them: the one that
-runs the bot, the gate, its four parts, then the two test families.
+runs the bot, the gates, their parts, then the two test families.
 
 | Script | What it runs |
 |---|---|
 | `npm run start:prod` | The bot for real, under the supervisor. **This is what the server runs** — [`deploy/foolproof.service`](deploy/foolproof.service) calls this line, so it cannot drift from it |
 | `npm start` | The same bot in a browser against a fake Telegram — no token, no network, and the one to run here |
-| `npm run check` | Lint, types, documents and tests — the gate to keep at zero |
+| `npm run check` | Lint, types, documents and tests — the everyday gate to keep at zero |
+| `npm run check:push` | What a push to `main` must not break — lint, types, documents; the website ships from `main`, tests wait for the tag. **CI runs this on every push** |
+| `npm run check:phase` | The phase gates in one command: `check:push`, then coverage, mutation over the diff, e2e over the diff — each test run exactly once |
+| `npm run check:release` | The full battery: `check:push`, then coverage, all mutants, every scenario. **CI runs this on every release tag** |
 | `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run docs:check` | Links, anchors, the source tree and the script table above |

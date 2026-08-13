@@ -9,6 +9,11 @@ A phase ends with a release, and a phase is done when the code is *releasable* �
 not when it works. Run all seven gates before the final commit and act on what
 they say. None of them is advisory.
 
+Gates 1–4 are one command: **`npm run check:phase`** — lint, types, documents,
+the suite under coverage, mutation over the diff, e2e over the diff, with the
+tests counted once. A red gate is then re-run **alone** after the fix, never by
+repeating the whole chain; gate 3's rules about re-runs still apply.
+
 ## 1. `npm run check`
 
 Lint, types, tests. Zero errors, no exceptions.
@@ -367,8 +372,5 @@ something disjoint. So the policy is not "delegate the mechanical work", it is:
 
 ## The final commit message
 
-Put the resulting numbers in it — test count, coverage, mutation score. A score
-is only useful if a later regression has something to be compared against.
-
-State what changed and *why the previous shape was wrong*. A commit that says
-what a reader could get from the diff has wasted the message.
+Load the **`write-a-commit`** skill and follow it — it holds the title and body
+rules, the gate numbers a phase-final commit carries, and the release format.

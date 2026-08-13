@@ -1,0 +1,28 @@
+# The full battery on every release tag: check:push, coverage, every mutant,
+# every e2e scenario. The server pulls the newest tag on its own five-minute
+# timer and does not wait for this run — a red result here cannot hold a
+# release back, it is the alarm that says push a fixed tag now.
+name: release-check
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  release-check:
+    # x86, because the server is x86: the rasterizer ships a prebuilt binary per
+    # platform, and one that is missing for an architecture must fail here rather
+    # than on the host serving a Friday evening.
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run check:release
