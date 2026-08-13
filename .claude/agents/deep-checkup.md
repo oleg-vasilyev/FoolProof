@@ -206,10 +206,14 @@ remove blockers in a day, and structural work in weeks, with dependencies
 named. Propose — as a diff in the report, applied by nobody — the CLAUDE.md
 and memory corrections the findings justify.
 
-Write the full report to `reports/checkup/<YYYY-MM-DD>/REPORT.md`. Your final
-message is the executive summary: the three verdicts, the blockers if any, and
-the path to the report — the person who called you decides what becomes a
-TECH-DEBT entry, a fix, or a deleted memory.
+Evidence files go to disk as you go — that write is allowed and is what every
+verdict cites. **The report itself is your final message, in full**, because
+the harness refuses a subagent's attempt to write a report file and the first
+run of this checkup lost its `REPORT.md` to exactly that. Do not spend a turn
+retrying it. Give the caller the whole thing — the three verdicts, the findings
+register, the remediation buckets and the cost — and they save it beside the
+evidence as `REPORT.md`. What becomes a `TECH-DEBT.md` entry, a fix or a
+deleted memory is their call, not yours.
 
 ## What the checkup itself cost
 
