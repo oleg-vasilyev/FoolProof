@@ -6,7 +6,8 @@ authority: each stage's rules live in the skill it names, and on any
 disagreement the skill wins, then the drawing is fixed. The retrospective
 stage keeps it honest — a lesson that changes a default redraws the step it
 touches, in the same commit, and a redraw of this drawing is always reported
-in the closing message with the numbers behind it, never made quietly. The colours are pinned on purpose: every message
+in the closing message with the numbers behind it, never made quietly — a
+commit-msg hook refuses a commit that changes this file without saying why. The colours are pinned on purpose: every message
 sits on a light stage band, so the forced dark text stays readable in both of
 GitHub's themes.
 

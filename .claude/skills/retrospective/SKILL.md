@@ -73,6 +73,16 @@ not optimal, here is what moved and here are the numbers that forced it. The
 five questions above are where those numbers come from; a redraw argued from an
 impression rather than a count is the one that should not have been made.
 
+Both halves are enforced, because both were reasoned about once and would
+otherwise be forgotten by the phase that most needs them. A `PostToolUse` hook
+says the obligation out loud the moment the file is edited, and
+`.githooks/commit-msg` refuses the commit unless the message carries the
+`Flow:` paragraph **and** the commit carries the thing the moved step stands on
+— a skill, `CLAUDE.md`, a command, a hook, the CI. A drawing that changes while
+nothing it draws does has stopped describing this project and started
+describing an intention. `npm run docs:check` guards the same seam from the
+other side: every skill and every `npm run` the drawing names has to exist.
+
 ## The output is a diff, not a paragraph
 
 Every lesson that would apply to a future phase becomes a **durable change** — a

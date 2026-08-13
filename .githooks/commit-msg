@@ -1,0 +1,65 @@
+#!/bin/sh
+#
+# Keep DEVELOPMENT-FLOW.md honest in the two ways a machine can check.
+#
+# It is the owner's map of how this product gets built. The retrospective may
+# redraw it without asking — stalling a finished phase on a decision already
+# delegated is the worse failure — but a silent redraw leaves him to meet the
+# change as a diff months later with the reasoning gone. A chat message does
+# not fix that: it scrolls away. The commit message is where the reason
+# survives next to the change, so that is what is gated.
+#
+# The second gate is drift. A drawing that changes while nothing it draws does
+# has stopped describing the project and started describing an intention. So a
+# commit that edits the *process* — an arrow, a stage, a branch — must also
+# carry the thing that process lives in: a skill, the rules, the commands, the
+# hooks, the CI. Editing the prose or the colours around the drawing is not
+# that, and is not asked for either.
+#
+# Installed by npm install: prepare points core.hooksPath at this folder.
+
+message_file="$1"
+
+staged=$(git diff --cached --name-only)
+
+if ! echo "$staged" | grep -q '^DEVELOPMENT-FLOW\.md$'; then
+  exit 0
+fi
+
+if ! grep -q '^Flow:' "$message_file"; then
+  echo "commit-msg: this commit redraws DEVELOPMENT-FLOW.md and the message does not say why."
+  echo
+  echo "Add a paragraph starting with 'Flow:' that names what moved and the counts"
+  echo "that forced it — a redraw argued from an impression is one that should not"
+  echo "have been made. A wording-only edit says so in the same line."
+  echo
+  echo "  Flow: stage 2 loses the subagents — three phases running, delegation cost"
+  echo "  more than it returned (493k tokens, two scopes redone by hand)."
+  exit 1
+fi
+
+process_changed=$(git diff --cached -U0 -- DEVELOPMENT-FLOW.md |
+  grep -E '^[+-]' |
+  grep -cE '(->>|--\)|note over|^[+-][[:space:]]*(opt|alt|else|loop|par|and|rect|end)([[:space:]]|$))')
+
+if [ "$process_changed" -eq 0 ]; then
+  exit 0
+fi
+
+if echo "$staged" | grep -qE '^(\.claude/|CLAUDE\.md$|package\.json$|\.githooks/|\.github/)'; then
+  exit 0
+fi
+
+echo "commit-msg: the drawn process changed and nothing it draws did."
+echo
+echo "DEVELOPMENT-FLOW.md is the map, not the authority: a step only means something"
+echo "because a skill, a rule, a command or a hook stands behind it. A commit that"
+echo "moves an arrow on its own leaves the drawing describing an intention rather"
+echo "than this project."
+echo
+echo "Carry the change it reflects in the same commit — a file under .claude/,"
+echo "CLAUDE.md, package.json, .githooks/ or .github/. If the drawing was simply"
+echo "wrong about what the project already does, the fix belongs in the file that"
+echo "was right, not only here."
+
+exit 1

@@ -315,6 +315,15 @@ runs the full `check:release` before any `v*` tag leaves the machine — every
 scenario, every mutant. It has to be local, because the server pulls whatever
 tag appears and waits for nobody.
 
+The same folder holds a **commit-msg hook** guarding one file. The bot is
+developed by an agent that is also allowed to improve its own process, and
+[DEVELOPMENT-FLOW.md](DEVELOPMENT-FLOW.md) is where that process is written
+down — so a commit that moves an arrow on that drawing must say why in a
+`Flow:` paragraph, and must carry the skill, rule, command or hook the moved
+step stands on. Neither is a request for permission: the agent changes the
+process and reports it, and the reason survives in the message rather than in
+a chat that scrolls away.
+
 GitHub Actions needs no setup and runs two checks behind that. Every push runs
 `check:push` ([`.github/workflows/check.yml`](.github/workflows/check.yml)):
 `main` is released only by tag, so a broken test there is tolerable, but the
@@ -390,7 +399,7 @@ runs the bot, the gates, their parts, then the two test families.
 | `npm run e2e:watch` | The same run, slowed down, in one browser tab |
 | `npm run e2e:test` | Units for the harness's own pure parts |
 | `npm run e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
-| `npm run prepare` | Run by `npm install` itself: points git at `.githooks/`, where the pre-push tag gate lives |
+| `npm run prepare` | Run by `npm install` itself: points git at `.githooks/`, where the pre-push tag gate and the commit-msg flow gate live |
 
 `start:prod` is the only one that reads an env file, and the only one that talks to
 Telegram. Everything else runs against the fake one in `e2e/`.

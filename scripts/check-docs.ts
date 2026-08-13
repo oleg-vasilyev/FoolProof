@@ -282,8 +282,42 @@ const siteCssOutOfStep = (): readonly string[] => {
   );
 };
 
+const FLOW_DOCUMENT = "DEVELOPMENT-FLOW.md";
+
+const SKILLS_FOLDER = ".claude/skills";
+
+const A_NAMED_SKILL = /the ([a-z][a-z-]*[a-z]) skill/g;
+
+const A_NAMED_COMMAND = /npm run ([a-z][a-z:-]*[a-z])/g;
+
+const namesIn = (text: string, pattern: RegExp): readonly string[] =>
+  [...text.matchAll(pattern)].map((match) => match[FIRST_GROUP] ?? "");
+
+const flowOutOfStep = (): readonly string[] => {
+  const drawing = read(FLOW_DOCUMENT);
+  const installed = new Set(readdirSync(SKILLS_FOLDER));
+  const scripts = new Set(Object.keys(JSON.parse(read("package.json")).scripts));
+
+  return [
+    ...namesIn(drawing, A_NAMED_SKILL)
+      .filter((skill) => !installed.has(skill))
+      .map(
+        (skill) =>
+          `${FLOW_DOCUMENT}: draws a step reaching for the "${skill}" skill, ` +
+          `which is not in ${SKILLS_FOLDER}`
+      ),
+    ...namesIn(drawing, A_NAMED_COMMAND)
+      .filter((command) => !scripts.has(command))
+      .map(
+        (command) =>
+          `${FLOW_DOCUMENT}: draws "npm run ${command}", which package.json does not have`
+      ),
+  ];
+};
+
 const complaints = [
   ...brokenLinks(),
+  ...flowOutOfStep(),
   ...featuresMissingFromTheTree(),
   ...scriptsOutOfStep(),
   ...crowdedLayers(),
