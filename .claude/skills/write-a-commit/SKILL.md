@@ -40,10 +40,15 @@ Gates: check:phase green — <N> tests in <M> files, coverage <st>/<br>/<fn>/<ln
 mutation <score>% over <the diff | everything>, e2e <N> cases in <M> files.
 Gallery: <one specific claim about what was seen, or why it stayed shut>.
 Review: <N> findings, <their fate in a clause>.
+Retro: <the default that changed, or plainly that none did>.
 ```
 
-Three rules inside it. Every gate is named even when skipped — a skipped gate
-carries its reason (`gallery not opened: no SVG changed`), never silence.
+Four rules inside it. Every gate is named even when skipped — a skipped gate
+carries its reason (`gallery not opened: no SVG changed`), never silence. **The
+`Retro:` line exists because that is the gate a phase forgets**: the release feels
+like the end, the retrospective sits after it in nobody's head, and its own
+evidence — the transcript — is the thing that disappears. A phase shipped with the
+line missing entirely and nobody noticed until somebody asked.
 Coverage is four numbers in statements/branches/functions/lines order. A
 mutation survivor left alive on purpose gets its own sentence after the
 paragraph, naming the mutant and why its death is not worth buying.

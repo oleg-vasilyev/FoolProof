@@ -37,6 +37,22 @@ Most style rules are ESLint rules now (`eslint.config.js`), so a lint failure is
 a convention violation, not a nit — read the message before reaching for a
 disable comment, which is itself banned in `src/`.
 
+**A lock file rewritten here can be wrong somewhere else, and the dry run will not
+say so.** `npm install` on Windows prunes optional packages this platform has no
+use for — the wasm fallbacks a native binding carries — and leaves the package that
+*depends* on them behind, which Linux then refuses to install. Both times this has
+happened, every local gate was green and GitHub Actions failed on `npm ci` before
+running a test. So after any change to `package-lock.json`, **diff it for removals**
+and put back what was dropped:
+
+```bash
+git diff -- package-lock.json | grep -E "^-\s+\"node_modules/"
+```
+
+A removal that no dependency change explains is the bug. Restore those entries from
+the last lock CI accepted rather than regenerating — `npm install --package-lock-only`
+prunes them again, because it resolves for this machine too.
+
 **A phase that touched `package.json` runs `npm ci --dry-run` before committing.**
 `npm run check` uses the `node_modules/` already on this machine, so it cannot see
 that the lock file it produced is unsatisfiable somewhere else. Adding
@@ -80,6 +96,14 @@ Run gate 5's review pass **before** this gate when the diff is small: review
 findings edit code, and this is the costliest gate to repeat. An edit made after
 the run re-checks with `--mutate <file>` alone, never a full re-run.
 
+**Size is the wrong test, though — what matters is where the findings will land.**
+A phase that is mostly specs and documents has every review finding aimed straight
+at what mutation and e2e cover, so running them first buys nothing and pays twice.
+One such phase — 671 lines, 74% of them specs — ran the full battery, then took
+five review findings, then ran the whole battery again: twenty-seven minutes of
+Stryker to learn the same thing twice. Ask before launching either: *could a
+reviewer's note change a file this run measures?* If yes, review first.
+
 **Everything a check writes goes under `reports/`** — coverage, mutation, and
 Stryker's sandbox via `tempDirName`. One gitignored directory, and nothing about
 testing appears next to the source. A new check that wants somewhere to write has
@@ -87,9 +111,13 @@ that answer already; `.gitignore` says the same thing in one line.
 
 Rules about *running* it, learned by burning most of a phase's budget on them:
 
-- **Never re-run a gate to re-read its output.** Every run writes
-  `reports/mutation/mutation.json` and `reports/mutation/index.html`, and a
-  backgrounded run keeps its own log — read those. `/merge` was closed with eight
+- **Never re-run a gate to re-read its output, and never truncate the run that
+  produced it.** Piping a battery through `Select-Object -Last 30` throws away the
+  coverage table and the mutation summary the commit message then needs, and the
+  cheapest way back is running something again — which is the rule this one
+  protects. Send the whole thing to a file (`Tee-Object`) and read the file. Every
+  run also writes `reports/mutation/mutation.json` and `reports/mutation/index.html`,
+  and a backgrounded run keeps its own log — read those. `/merge` was closed with eight
   Stryker invocations where two would have done, three of them the same full run
   repeated to look at three slices of one table.
 - **One round of survivor-killing per phase, and only for mutants whose death

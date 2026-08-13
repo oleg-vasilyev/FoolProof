@@ -49,6 +49,15 @@ Two consequences worth spelling out, because both have been got wrong:
    written before it existed. Deleting that sentence is part of the change, not
    cleanup for later. `/merge` shipped while three places still said merging was
    manual, and one of them was an invariant.
+
+   **Narrowing a rule is the hard case, and it needs the opposite search: grep for
+   the rule's *old* wording, not its new one.** The new phrasing exists only where
+   you have already been, so searching for it finds exactly the places that need no
+   work. A phase narrowed "a feature with an inline keyboard gets scenarios" to
+   "a keyboard whose buttons carry `callback_data`", changed it in two files, and
+   left it stale in three — including `write-an-e2e-scenario`, the skill that owns
+   the judgement, so the document a reader would consult gave the wrong answer.
+   `docs:check` cannot see this: a rule restated in prose is not a link.
 3. **Write it once, in the home the table names.** If you find yourself explaining
    the same thing in a second file "briefly", stop: that is the duplication being
    born. A link is shorter and cannot drift.
