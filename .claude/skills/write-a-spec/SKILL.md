@@ -327,6 +327,19 @@ One trap worth keeping: `bot.catch` only participates in `bot.start()`.
 `handleUpdate` rethrows, so an error handler is exercised through
 `bot.errorHandler` — or, better, on the mock.
 
+## A green spec is not a checked spec
+
+`vitest run` does not typecheck. A spec can pass every case while asserting
+something the compiler would refuse — most often a property read off a
+discriminated union without narrowing it, which is exactly what a fact or an
+award or a cell is. `expect(theBogey(...)?.duels)` runs happily and fails
+`tsc`, because `duels` lives on one member of twenty.
+
+So **run `npx tsc --noEmit` after editing a spec, not just the spec itself.**
+The phase gate catches it either way; the difference is whether you find out in
+one second or after an eight-minute battery. Comparing the whole returned object
+with `toEqual` avoids the narrowing question altogether and asserts more.
+
 ## Judging a spec you did not write
 
 Ask, in this order:

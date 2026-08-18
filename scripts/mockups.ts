@@ -62,7 +62,22 @@ export const sampleEvening = (): SeriesChronology => ({
   })),
 });
 
-const NIGHTS_IN_A_CAREER = 6;
+const NIGHTS_IN_A_CAREER = 8;
+
+const AWAY_ON: readonly (readonly number[])[] = [
+  [],
+  [5],
+  [],
+  [3, 5],
+  [5],
+  [],
+  [2],
+  [5],
+];
+
+const SUBJECTS_BOGEY = 4;
+
+const ENOUGH_TO_PLAY = 3;
 
 const DAYS_BETWEEN_NIGHTS = 7;
 
@@ -72,10 +87,25 @@ const SAMPLE_SUBJECT = 1;
 
 const DATE_START = 0;
 
-const FIRST_SEAT = 0;
-
 const rotated = (order: readonly number[], by: number): readonly number[] =>
   order.map((_, index) => order[(index + by) % order.length] ?? FIRST_PLACE);
+
+const present = (order: readonly number[], night: number): readonly number[] =>
+  order.filter((playerId) => !(AWAY_ON[night] ?? []).includes(playerId));
+
+const burnedByTheBogey = (order: readonly number[], game: number): readonly number[] => {
+  const facing = order.slice(order.length - SHARED_LAST);
+
+  return game % SHARED_LAST === DATE_START &&
+    facing.includes(SAMPLE_SUBJECT) &&
+    facing.includes(SUBJECTS_BOGEY)
+    ? [
+        ...order.slice(DATE_START, order.length - SHARED_LAST),
+        SUBJECTS_BOGEY,
+        SAMPLE_SUBJECT,
+      ]
+    : order;
+};
 
 const nightOf = (night: number): readonly CareerGame[] => {
   const playedOn = new Date(
@@ -84,15 +114,23 @@ const nightOf = (night: number): readonly CareerGame[] => {
     .toISOString()
     .slice(DATE_START, SAMPLE_DATE.length);
 
-  return EXIT_ORDERS.map((order, index) => {
-    const spun = rotated(order, night);
+  return EXIT_ORDERS.flatMap((order, index) => {
+    const seated = present(rotated(order, night), night);
 
-    return {
-      seriesNo: night + FIRST_ID,
-      playedOn,
-      starterId: spun[FIRST_SEAT] ?? null,
-      placements: placementsOf(spun, index === DRAWN_GAME),
-    };
+    if (seated.length < ENOUGH_TO_PLAY) {
+      return [];
+    }
+
+    const spun = burnedByTheBogey(seated, index);
+
+    return [
+      {
+        seriesNo: night + FIRST_ID,
+        playedOn,
+        starterId: spun[(night + index) % spun.length] ?? null,
+        placements: placementsOf(spun, index === DRAWN_GAME),
+      },
+    ];
   });
 };
 

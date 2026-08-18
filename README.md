@@ -81,8 +81,10 @@ redraws them whenever the drawing code changes.
 `/personal` answers with a third: one player's card for everything they have ever
 played here. Pick a name from the keyboard it offers and it draws the numbers, the
 share of the table evening by evening, what stuck, and who has been the worst news.
+Twenty facts can stick and a card prints at most four, so two players at the same
+table get two different cards.
 
-| The player card — six numbers, a career chart, three facts and a rival |
+| The player card — six numbers, a career chart, and whichever facts this player earned |
 |---|
 | [![The player card poster](docs/mockups/personal.png)](docs/mockups/personal.png) |
 

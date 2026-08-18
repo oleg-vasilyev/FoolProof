@@ -171,19 +171,61 @@ export const copy: Copy = {
   personalChartHint: "каждая точка — один вечер · 50% — середина стола",
 
   personalFactsLabel: "ЧТО ЗАПОМНИЛОСЬ",
-  factBest: "ЛУЧШИЙ ВЕЧЕР",
-  factWorst: "ХУДШИЙ ВЕЧЕР",
-  factStreak: "ДЛИННЕЙШАЯ СЕРИЯ",
-  bestReason: (games: string, share: string) =>
-    `${games}, доля стола ${share} — выше не было ни одного вечера.`,
-  worstReason: (games: string, share: string) =>
-    `${games}, доля стола ${share} — ниже не было ни одного вечера.`,
-  streakHolder: (games: string) => `${games} начисто`,
-  streakReason: (from: string, until: string) => `С ${from} по ${until} — ни одного пожара.`,
-
-  rivalTitle: "ГЛАВНЫЙ ВРАГ",
-  rivalReason: (duels: string, lost: number, name: string) =>
-    `Оставались в конце вдвоём ${duels} — в ${lost} из них дураком остался ${name}.`,
+  factTitles: {
+    theBlinder: "ВЕЧЕР В УДАРЕ",
+    theNightmare: "КОШМАРНЫЙ ВЕЧЕР",
+    theCharm: "СЧАСТЛИВЫЙ ТАЛИСМАН",
+    theJinx: "ЧЁРНАЯ КОШКА",
+    thePatsy: "ЛЁГКАЯ ДОБЫЧА",
+    theBogey: "НЕУДОБНЫЙ СОПЕРНИК",
+    bigTableCharm: "ЕСТЬ ГДЕ РАЗВЕРНУТЬСЯ",
+    bigTableCurse: "ТЕРЯЕТСЯ В ТОЛПЕ",
+    openersGift: "ДАР РАЗДАЮЩЕГО",
+    openersCurse: "ПРОКЛЯТИЕ РАЗДАЮЩЕГО",
+    theHomecoming: "ВОЗВРАЩЕНИЕ",
+    neverDealt: "НИ РАЗУ НЕ РАЗДАВАЛ",
+    theHeadStart: "ВЕЧНО РАЗДАЁТ",
+    theBadPatch: "ЧЁРНАЯ ПОЛОСА",
+    theCleanRun: "ЧИСТАЯ СЕРИЯ",
+    theSurvivor: "ВЫХОДИТ СУХИМ",
+    lightningRod: "ГРОМООТВОД",
+    everPresent: "НЕ ПРОПУСТИЛ НИ ОДНОГО",
+    foundingMember: "С САМОГО НАЧАЛА",
+    theNewcomer: "НОВИЧОК",
+  },
+  blinderReason: (firsts: number, games: string) =>
+    `Вышел первым ${firsts} раз за ${games} — лучший вечер в карьере.`,
+  nightmareReason: (burns: number, games: string) =>
+    `Дурак ${burns} раз за ${games}. Не шло ничего.`,
+  charmReason: (burns: number, games: string, usual: string) =>
+    `Всего ${burns} пожаров за ${games} рядом с ним; обычно у тебя ${usual}.`,
+  jinxReason: (burns: number, games: string, usual: string) =>
+    `${burns} пожаров за ${games} рядом с ним; обычно у тебя ${usual}.`,
+  patsyReason: (won: number, duels: string) =>
+    `Оставались в конце вдвоём ${duels} — ты ушёл сухим из ${won}.`,
+  bogeyReason: (lost: number, duels: string) =>
+    `Оставались в конце вдвоём ${duels} — ты сгорел в ${lost}.`,
+  tableCharmReason: (burns: number, games: string) =>
+    `${burns} пожаров за ${games} таким составом. Большой стол тебе к лицу.`,
+  tableCurseReason: (burns: number, games: string) =>
+    `${burns} пожаров за ${games} таким составом. Больше, чем просит место.`,
+  atTableOf: (seats: number) => `стол на ${seats}`,
+  dealtGiftReason: (firsts: number) => `И вышел первым в ${firsts} из них.`,
+  dealtCurseReason: (burns: number) => `И сгорел в ${burns} из них.`,
+  homecomingReason: (missed: string) => `Вернулся за стол, пропустив ${missed}.`,
+  neverDealtHolder: (games: string) => `${games}, ни разу`,
+  neverDealtReason: "Раздача так ни разу и не дошла до тебя.",
+  headStartReason: (games: string) => `Из ${games} — куда чаще, чем даёт место за столом.`,
+  badPatchHolder: (games: string) => `${games} в огне`,
+  betweenDates: (from: string, until: string) => `С ${from} по ${until}.`,
+  cleanRunHolder: (games: string) => `${games} начисто`,
+  survivorReason: (games: string, expected: string) =>
+    `За ${games} одно только место предсказывает ${expected}. У тебя вышло меньше.`,
+  lightningRodReason: (games: string, expected: string) =>
+    `За ${games} одно только место предсказывает ${expected}. У тебя вышло больше.`,
+  everPresentReason: "За этим столом не было ни одного вечера без тебя.",
+  foundingReason: (evenings: string) => `Первый вечер в записях, ${evenings} назад.`,
+  newcomerReason: (evenings: string) => `${evenings} за плечами. Стол ещё присматривается.`,
 
   months: [
     "января",

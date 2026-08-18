@@ -172,19 +172,61 @@ export const copy = {
   personalChartHint: "one point per evening · 50% is mid-table",
 
   personalFactsLabel: "WHAT STUCK",
-  factBest: "BEST EVENING",
-  factWorst: "WORST EVENING",
-  factStreak: "LONGEST CLEAN RUN",
-  bestReason: (games: string, share: string) =>
-    `${games}, ${share} of the table — no evening went higher.`,
-  worstReason: (games: string, share: string) =>
-    `${games}, ${share} of the table — no evening went lower.`,
-  streakHolder: (games: string) => `${games} clean`,
-  streakReason: (from: string, until: string) => `From ${from} to ${until} — not one fire.`,
-
-  rivalTitle: "CHIEF RIVAL",
-  rivalReason: (duels: string, lost: number, name: string) =>
-    `Left at the end together ${duels} — ${lost} of them ${name} was the fool.`,
+  factTitles: {
+    theBlinder: "THE BLINDER",
+    theNightmare: "THE NIGHTMARE",
+    theCharm: "THE LUCKY CHARM",
+    theJinx: "THE JINX",
+    thePatsy: "THE PATSY",
+    theBogey: "THE BOGEY",
+    bigTableCharm: "ROOM TO BREATHE",
+    bigTableCurse: "LOST IN THE CROWD",
+    openersGift: "DEALER'S GIFT",
+    openersCurse: "DEALER'S CURSE",
+    theHomecoming: "THE HOMECOMING",
+    neverDealt: "NEVER ONCE DEALT",
+    theHeadStart: "ALWAYS DEALING",
+    theBadPatch: "THE BAD PATCH",
+    theCleanRun: "THE CLEAN RUN",
+    theSurvivor: "THE SURVIVOR",
+    lightningRod: "THE LIGHTNING ROD",
+    everPresent: "NEVER MISSED ONE",
+    foundingMember: "THERE FROM THE START",
+    theNewcomer: "THE NEWCOMER",
+  },
+  blinderReason: (firsts: number, games: string) =>
+    `Out first ${firsts} times in ${games} — the best night you have had.`,
+  nightmareReason: (burns: number, games: string) =>
+    `The fool ${burns} times in ${games}. Nothing went right.`,
+  charmReason: (burns: number, games: string, usual: string) =>
+    `Only ${burns} fires in ${games} at their table; ${usual} is your usual.`,
+  jinxReason: (burns: number, games: string, usual: string) =>
+    `${burns} fires in ${games} at their table; ${usual} is your usual.`,
+  patsyReason: (won: number, duels: string) =>
+    `Left at the end together ${duels} — you walked away from ${won}.`,
+  bogeyReason: (lost: number, duels: string) =>
+    `Left at the end together ${duels} — you burned in ${lost}.`,
+  tableCharmReason: (burns: number, games: string) =>
+    `${burns} fires in ${games} that size. The big table suits you.`,
+  tableCurseReason: (burns: number, games: string) =>
+    `${burns} fires in ${games} that size. More than the seat asks for.`,
+  atTableOf: (seats: number) => `${seats} at the table`,
+  dealtGiftReason: (firsts: number) => `Went out first in ${firsts} of them.`,
+  dealtCurseReason: (burns: number) => `Burned in ${burns} of them.`,
+  homecomingReason: (missed: string) => `Back at the table after ${missed} away.`,
+  neverDealtHolder: (games: string) => `${games}, never once`,
+  neverDealtReason: "The deal has never come round to you.",
+  headStartReason: (games: string) => `Out of ${games} — far more than the seat gives.`,
+  badPatchHolder: (games: string) => `${games} on fire`,
+  betweenDates: (from: string, until: string) => `From ${from} to ${until}.`,
+  cleanRunHolder: (games: string) => `${games} clean`,
+  survivorReason: (games: string, expected: string) =>
+    `In ${games} the seat alone predicts ${expected}. You come in under it.`,
+  lightningRodReason: (games: string, expected: string) =>
+    `In ${games} the seat alone predicts ${expected}. You come in over it.`,
+  everPresentReason: "Not one evening at this table without you.",
+  foundingReason: (evenings: string) => `The first evening on record, ${evenings} ago.`,
+  newcomerReason: (evenings: string) => `${evenings} in. The table is still working you out.`,
 
   months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
   sheetDate: (day: string, month: string, year: string) => `${day} ${month} ${year}`,

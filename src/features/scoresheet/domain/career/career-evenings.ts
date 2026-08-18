@@ -17,7 +17,9 @@ export interface EveningShare {
   readonly seriesNo: number;
   readonly playedOn: string;
   readonly games: number;
+  readonly decided: number;
   readonly fools: number;
+  readonly firsts: number;
   readonly share: number;
 }
 
@@ -48,7 +50,9 @@ const summarise = (night: Night): readonly EveningShare[] => {
           seriesNo: opening.seriesNo,
           playedOn: opening.playedOn,
           games: night.length,
+          decided: night.filter((appearance) => appearance.finish !== Finish.Drawn).length,
           fools: night.filter((appearance) => appearance.finish === Finish.Fool).length,
+          firsts: night.filter((appearance) => appearance.finish === Finish.First).length,
           share: shareAcross(night),
         },
       ];

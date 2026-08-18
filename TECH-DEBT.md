@@ -72,23 +72,28 @@ evidence that the gap costs more than the seam would.
 
 ---
 
-## Picking the holder of a title is written three times
+## Picking the holder of a title is written four times
 
 `awards/pick-winner.ts` generalises "keep the challenger when it outranks the
-holder" for the evening's awards. `career/career-evenings.ts` and
-`career/career-rival.ts` each rewrite the same reduce with their own private
-`outranks`, because neither fits the existing one: the evenings pick needs a
-direction so one function can serve both the best and the worst night, and the
-rival ranks on three keys rather than a single merit. So the shapes genuinely
-differ, and collapsing them now would mean a `Merit` that carries a direction and
-a tie-break list — more machinery than the three call sites are asking for.
+holder" for the evening's awards. Three more reduces of the same shape live in
+`career/`: `career-evenings.ts` carries a direction so one function serves both the
+best and the worst night, `rival-facts.ts` ranks pairings by a merit with two
+tie-breaks, and `rarest-of.ts` keeps the lowest binomial tail with none at all.
 
-Worth naming rather than leaving unsaid: this phase deleted the inline-keyboard
-entry for hitting exactly this trigger, and created the next one in the same diff.
+This is the second phase in a row to move the count rather than settle it. The last
+one deleted the inline-keyboard entry for hitting exactly this trigger and created
+the next one; this one deleted `career-rival.ts`'s copy and added two. The trigger
+as written — "collapse them when a fourth ranking appears" — has now fired and been
+stepped over, which means it was the wrong trigger: a count does not say whether
+the shapes actually want to be one function, and these four genuinely differ in
+what they rank on (a merit, a merit plus direction, a merit plus tie-breaks, a bare
+minimum).
 
-**Collapse them when a fourth ranking appears**, or the first time two of the
-three disagree about a tie-break and the difference is a bug rather than a
-decision.
+So the trigger is replaced by the one that would actually pay: **collapse them the
+first time two of the four disagree about a tie-break and the difference turns out
+to be a bug rather than a decision.** Until then the duplication costs four small
+reduces; the shared `Merit` carrying a direction, a tie-break list and an ordering
+would cost more than that at every call site.
 
 ## Counting games is spelled out twice
 

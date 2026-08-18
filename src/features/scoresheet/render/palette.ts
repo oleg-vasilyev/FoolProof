@@ -16,6 +16,7 @@ export const palette = {
   plateInk: "#1a1a1a",
   plateSoft: "#f7c9c2",
   plateCap: "#3a0e07",
+  plateShade: "#2b2b2b",
 } as const;
 
 export const PLAYER_COLOURS: readonly string[] = [

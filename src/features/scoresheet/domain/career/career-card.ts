@@ -7,8 +7,8 @@ import {
   worstEvening,
   type EveningShare,
 } from "#scoresheet/domain/career/career-evenings.ts";
-import { longestCleanStreak, type CleanStreak } from "#scoresheet/domain/career/clean-streak.ts";
-import { chiefRival, type Rival } from "#scoresheet/domain/career/career-rival.ts";
+import { careerFacts } from "#scoresheet/domain/career/facts/career-facts.ts";
+import type { CareerFact } from "#scoresheet/domain/career/facts/fact-catalogue.ts";
 
 
 const FIRST = 0;
@@ -22,8 +22,7 @@ export interface CareerCard {
   readonly nights: readonly EveningShare[];
   readonly best: EveningShare | null;
   readonly worst: EveningShare | null;
-  readonly streak: CleanStreak | null;
-  readonly rival: Rival | null;
+  readonly facts: readonly CareerFact[];
 }
 
 const otherThan = (worst: EveningShare | null, best: EveningShare | null): EveningShare | null =>
@@ -39,17 +38,17 @@ export const careerCard = (history: CareerHistory, playerId: number): CareerCard
 
   const nights = eveningShares(career.appearances);
   const best = bestEvening(nights);
+  const tally = careerTally(career.appearances);
 
   return {
     playerId,
     displayName: career.displayName,
     since: opening.playedOn,
     share: career.share,
-    tally: careerTally(career.appearances),
+    tally,
     nights,
     best,
     worst: otherThan(worstEvening(nights), best),
-    streak: longestCleanStreak(career.appearances),
-    rival: chiefRival(history, playerId),
+    facts: careerFacts({ history, career, tally, nights }),
   };
 };

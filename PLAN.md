@@ -1069,19 +1069,49 @@ Two denominators are used on purpose:
 - **out-first and dealt are over every game played**, because a draw still has a
   first player out and still had somebody deal.
 
-Three facts are printed below the numbers — best evening, worst evening, longest
-clean run — each one a fixed slot rather than a chosen one. A best or worst evening
-needs at least three games before it means anything, and a clean run is only worth
-naming from four games up; below those thresholds the slot is left out and the sheet
-gets shorter rather than printing noise. When one evening is both the best and the
-worst — which happens as soon as exactly one evening qualifies — only the best is
-printed, so the same night never appears twice.
+Twenty facts sit below the numbers, and a card prints at most four of them: three
+numbered rows and one plate. The point is that two players at the same table get
+different cards — the same machinery the evening's awards use, pointed at one
+career instead of one night. A rule looks at the whole history and returns its fact
+or nothing; `RAREST_FIRST` orders whatever fired; a fact about a rival takes the
+plate, the rest fill the rows in order, and the sheet shrinks when little fires.
 
-The chief rival is the pairwise fact: among the games where the two of them were
-left in the last two places, how often the subject was the one holding it. It needs
-five such duels and at least one loss, or the plate is left off. The rival is picked
-by losses first, then by duels, then by the lower player id, so the choice is
-deterministic when a table has two equally bad enemies.
+The facts split by what makes them worth printing, and the split is the design:
+
+- **A descriptive fact is true whatever the sample size.** The chief rival is one:
+  among the games where the two were left in the last two places, how often the
+  subject was the one holding it. It needs six such duels and one loss, picks by
+  losses, then duels, then name, and states raw counts. It is not a claim that the
+  rival is *better* — a duel is a coin flip, and proving a bias in one honestly
+  needs about a dozen of them, which would mean the fact this feature was asked for
+  almost never appeared.
+- **A conditional fact claims something surprising, so it has to earn it.** "You
+  burn far more than your own usual rate whenever they are at the table" is a claim
+  about chance, and chance is what the binomial tail measures: `k` occurrences in
+  `m` opportunities against a stated `p₀`. Which `p₀` is the whole content — against
+  the seat (`1/tableSize`) for what a random player would post, against the
+  subject's own rate for what changes their odds.
+
+**The tail is a qualifier and a within-family chooser. It is never printed and
+never spoken.** The copy says "left at the end together 14 times — you burned in
+13", which is true about the data whatever the sample. "You statistically lose to
+Dima" is a claim about the world, and picking the winner after looking at thirty
+hypotheses is exactly how that claim goes wrong.
+
+**The floor is corrected for how many candidates the fact beat.** A nightmare
+chosen from thirty evenings is thirty guesses, not one, so it must clear
+`NOISE_FLOOR / candidates` rather than `NOISE_FLOOR`. The numbers are measured, not
+taste: simulating a table of five over two hundred purely random games, a raw 5%
+floor put at least one false fact on 87% of cards — the failure where the poster
+confidently names a nemesis for everybody, always. The same floor corrected per
+family drops that to 19%, and at 1% to 4%, while a player carrying a genuine
+fifteen-point handicap still shows something on 93% of cards. So the floor is 1%,
+corrected.
+
+Some facts have no honest null and do not use the tail at all — never having been
+dealt, never having missed an evening, being there for the first evening on record,
+still being new. These qualify on plain counts, the way most awards do, and they
+are what stops a young table's card from being empty.
 
 The evening chart needs five evenings to be worth drawing; below that it is three
 points and a straight line, so the section disappears and the sheet shrinks again.

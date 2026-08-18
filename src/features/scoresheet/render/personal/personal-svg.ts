@@ -14,7 +14,7 @@ import {
 import { careerTiles } from "#scoresheet/render/personal/career-tiles.ts";
 import { eveningChart } from "#scoresheet/render/personal/evening-chart.ts";
 import { factRows } from "#scoresheet/render/personal/fact-rows.ts";
-import { rivalPlate } from "#scoresheet/render/personal/rival-plate.ts";
+import { topFactPlate } from "#scoresheet/render/personal/top-fact-plate.ts";
 import type { CareerCard } from "#scoresheet/domain/career/career-card.ts";
 import type { Copy } from "#scoresheet/copy.ts";
 
@@ -132,9 +132,7 @@ export const renderPersonalCard = (copy: Copy, card: CareerCard, column: number)
     ...(sheet.factsLabel === null
       ? []
       : sectionLabel(copy.personalFactsLabel, null, sheet.factsLabel)),
-    ...factRows(copy, card, sheet.facts, ink),
-    ...(sheet.plateTop === null || card.rival === null
-      ? []
-      : rivalPlate(copy, card.rival, card.displayName, sheet.plateTop)),
+    ...factRows(copy, sheet.facts, ink),
+    ...(sheet.plate === null ? [] : topFactPlate(copy, sheet.plate, ink)),
   ]);
 };

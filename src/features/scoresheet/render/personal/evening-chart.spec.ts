@@ -66,6 +66,10 @@ const A_NIGHT = 3;
 
 const NO_FOOLS = 0;
 
+const ALL_DECIDED = A_NIGHT;
+
+const NO_FIRSTS = 0;
+
 const PLOT_TOP = 1000;
 
 const INK = "player-ink";
@@ -84,7 +88,9 @@ const eveningOf = (seriesNo: number): EveningShare => ({
   seriesNo,
   playedOn: "2026-07-24",
   games: A_NIGHT,
+  decided: ALL_DECIDED,
   fools: NO_FOOLS,
+  firsts: NO_FIRSTS,
   share: shareAt(seriesNo),
 });
 

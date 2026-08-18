@@ -60,6 +60,8 @@ const DISMAL = 0.1;
 
 const NO_FOOLS = 0;
 
+const NO_FIRSTS = 0;
+
 const playedAs = (
   seriesNo: number,
   finish: Finish,
@@ -81,7 +83,15 @@ const nightOf = (
   games: number,
   share: number,
   playedOn: string = A_DAY
-): EveningShare => ({ seriesNo, playedOn, games, fools: NO_FOOLS, share });
+): EveningShare => ({
+  seriesNo,
+  playedOn,
+  games,
+  decided: games,
+  fools: NO_FOOLS,
+  firsts: NO_FIRSTS,
+  share,
+});
 
 const ENOUGH_GAMES = ENOUGH_TO_JUDGE_A_NIGHT;
 
@@ -153,6 +163,30 @@ describe("eveningShares()", () => {
     ];
 
     expect(eveningShares(career).map((night) => night.fools)).toEqual([ONCE, ONCE]);
+  });
+
+  it("should count a game of that night as decided unless it was drawn", () => {
+    const career = [
+      playedAs(FIRST_NIGHT, Finish.Drawn),
+      playedAs(FIRST_NIGHT, Finish.Fool),
+      playedAs(FIRST_NIGHT, Finish.First),
+      playedAs(SECOND_NIGHT, Finish.Drawn),
+    ];
+
+    expect(eveningShares(career).map((night) => night.decided)).toEqual([TWICE, NOTHING]);
+  });
+
+  it("should count the games gone out first of that night and of no other", () => {
+    const career = [
+      playedAs(FIRST_NIGHT, Finish.First),
+      playedAs(FIRST_NIGHT, Finish.First),
+      playedAs(FIRST_NIGHT, Finish.Middle),
+      playedAs(FIRST_NIGHT, Finish.Drawn),
+      playedAs(FIRST_NIGHT, Finish.Fool),
+      playedAs(SECOND_NIGHT, Finish.Middle),
+    ];
+
+    expect(eveningShares(career).map((night) => night.firsts)).toEqual([TWICE, NOTHING]);
   });
 
   it("should average the shares the scoring gave across the night", () => {

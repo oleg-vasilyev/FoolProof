@@ -4,8 +4,7 @@ import type { CareerHistory } from "#shared/repository/repository-contract.ts";
 import type { Career, CareerAppearance } from "#scoresheet/domain/career/career-appearances.ts";
 import type { CareerTally } from "#scoresheet/domain/career/career-tally.ts";
 import type { EveningShare } from "#scoresheet/domain/career/career-evenings.ts";
-import type { CleanStreak } from "#scoresheet/domain/career/clean-streak.ts";
-import type { Rival } from "#scoresheet/domain/career/career-rival.ts";
+import type { CareerFact } from "#scoresheet/domain/career/facts/fact-catalogue.ts";
 
 
 const careerOfSpy = vi.fn();
@@ -18,9 +17,7 @@ const bestEveningSpy = vi.fn();
 
 const worstEveningSpy = vi.fn();
 
-const longestCleanStreakSpy = vi.fn();
-
-const chiefRivalSpy = vi.fn();
+const careerFactsSpy = vi.fn();
 
 vi.mock("#scoresheet/domain/career/career-appearances.ts", () => ({
   careerOf: (history: unknown, playerId: number) => careerOfSpy(history, playerId),
@@ -36,17 +33,15 @@ vi.mock("#scoresheet/domain/career/career-evenings.ts", () => ({
   worstEvening: (nights: unknown) => worstEveningSpy(nights),
 }));
 
-vi.mock("#scoresheet/domain/career/clean-streak.ts", () => ({
-  longestCleanStreak: (appearances: unknown) => longestCleanStreakSpy(appearances),
-}));
-
-vi.mock("#scoresheet/domain/career/career-rival.ts", () => ({
-  chiefRival: (history: unknown, playerId: number) => chiefRivalSpy(history, playerId),
+vi.mock("#scoresheet/domain/career/facts/career-facts.ts", () => ({
+  careerFacts: (subject: unknown) => careerFactsSpy(subject),
 }));
 
 const { careerCard } = await import("#scoresheet/domain/career/career-card.ts");
 
 const ONCE = 1;
+
+const THE_ONLY_CALL = 0;
 
 const A_ROUND = 0;
 
@@ -60,7 +55,11 @@ const ANOTHER_NIGHT = 8;
 
 const SOME_GAMES = 6;
 
+const ALL_DECIDED = 6;
+
 const NO_FOOLS = 0;
+
+const SOME_FIRSTS = 2;
 
 const A_SHARE = 0.8;
 
@@ -68,19 +67,11 @@ const OLEGS_SHARE = 0.61;
 
 const OLEG = 1;
 
-const ANYA = 2;
-
 const OLEGS_NAME = "Oleg";
-
-const ANYAS_NAME = "Anya";
 
 const OPENING_DAY = "2026-05-01";
 
 const NEXT_DAY = "2026-05-08";
-
-const ONE_BURN = 1;
-
-const SOME_DUELS = 9;
 
 const HISTORY: CareerHistory = { players: [], games: [] };
 
@@ -107,7 +98,9 @@ const nightOf = (seriesNo: number): EveningShare => ({
   seriesNo,
   playedOn: OPENING_DAY,
   games: SOME_GAMES,
+  decided: ALL_DECIDED,
   fools: NO_FOOLS,
+  firsts: SOME_FIRSTS,
   share: A_SHARE,
 });
 
@@ -119,14 +112,9 @@ const NIGHTS = [THE_BEST_NIGHT, ANOTHER_GOOD_NIGHT];
 
 const A_TALLY = { games: SOME_GAMES } as unknown as CareerTally;
 
-const A_STREAK: CleanStreak = { games: SOME_GAMES, from: OPENING_DAY, until: NEXT_DAY };
+const A_FACT = { games: SOME_GAMES } as unknown as CareerFact;
 
-const A_RIVAL: Rival = {
-  playerId: ANYA,
-  displayName: ANYAS_NAME,
-  duels: SOME_DUELS,
-  lost: ONE_BURN,
-};
+const THE_FACTS = [A_FACT];
 
 describe("careerCard()", () => {
   beforeEach(() => {
@@ -137,8 +125,7 @@ describe("careerCard()", () => {
     eveningSharesSpy.mockReturnValue(NIGHTS);
     bestEveningSpy.mockReturnValue(THE_BEST_NIGHT);
     worstEveningSpy.mockReturnValue(ANOTHER_GOOD_NIGHT);
-    longestCleanStreakSpy.mockReturnValue(A_STREAK);
-    chiefRivalSpy.mockReturnValue(A_RIVAL);
+    careerFactsSpy.mockReturnValue(THE_FACTS);
   });
 
   it("should read the career out of the history it was handed", () => {
@@ -160,6 +147,7 @@ describe("careerCard()", () => {
     careerOfSpy.mockReturnValue({ ...CAREER, appearances: [] });
 
     expect(careerCard(HISTORY, OLEG)).toBeNull();
+    expect(careerFactsSpy).not.toHaveBeenCalled();
   });
 
   it("should report the player asked for", () => {
@@ -217,13 +205,29 @@ describe("careerCard()", () => {
     expect(careerCard(HISTORY, OLEG)?.worst).toBeNull();
   });
 
-  it("should carry the longest clean streak of those same games", () => {
-    expect(careerCard(HISTORY, OLEG)?.streak).toBe(A_STREAK);
-    expect(longestCleanStreakSpy).toHaveBeenCalledWith(APPEARANCES);
+  it("should carry the facts the catalogue drew out of the career", () => {
+    expect(careerCard(HISTORY, OLEG)?.facts).toBe(THE_FACTS);
+    expect(careerFactsSpy).toHaveBeenCalledTimes(ONCE);
   });
 
-  it("should name the chief rival out of the whole history", () => {
-    expect(careerCard(HISTORY, OLEG)?.rival).toBe(A_RIVAL);
-    expect(chiefRivalSpy).toHaveBeenCalledWith(HISTORY, OLEG);
+  it("should draw those facts from the history, career, tally and evenings it has", () => {
+    careerCard(HISTORY, OLEG);
+
+    expect(careerFactsSpy).toHaveBeenCalledWith({
+      history: HISTORY,
+      career: CAREER,
+      tally: A_TALLY,
+      nights: NIGHTS,
+    });
+  });
+
+  it("should hand the facts the very tally and evenings it put on the card", () => {
+    const card = careerCard(HISTORY, OLEG);
+    const [subject] = careerFactsSpy.mock.calls[THE_ONLY_CALL] ?? [];
+
+    expect(subject.history).toBe(HISTORY);
+    expect(subject.career).toBe(CAREER);
+    expect(subject.tally).toBe(card?.tally);
+    expect(subject.nights).toBe(card?.nights);
   });
 });

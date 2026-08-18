@@ -1,3 +1,4 @@
+import type { CareerFact } from "#scoresheet/domain/career/facts/fact-catalogue.ts";
 import type { CareerCard } from "#scoresheet/domain/career/career-card.ts";
 import { ENOUGH_NIGHTS_TO_CHART } from "#scoresheet/domain/career/career-evenings.ts";
 import {
@@ -23,18 +24,12 @@ const NOTHING = 0;
 
 const ONE_ROW = 1;
 
+export const MOST_ROWS = 3;
+
 const ROWS_BELOW_THE_FIRST = Math.ceil(TILE_COUNT / TILES_PER_ROW) - ONE_ROW;
 
-export const FactName = {
-  Best: "best",
-  Worst: "worst",
-  Streak: "streak",
-} as const;
-
-export type FactName = (typeof FactName)[keyof typeof FactName];
-
 export interface PlacedFact {
-  readonly name: FactName;
+  readonly fact: CareerFact;
   readonly top: number;
 }
 
@@ -44,14 +39,19 @@ export interface PersonalLayout {
   readonly plotTop: number | null;
   readonly factsLabel: number | null;
   readonly facts: readonly PlacedFact[];
-  readonly plateTop: number | null;
+  readonly plate: PlacedFact | null;
 }
 
-const factsIn = (card: CareerCard): readonly FactName[] => [
-  ...(card.best === null ? [] : [FactName.Best]),
-  ...(card.worst === null ? [] : [FactName.Worst]),
-  ...(card.streak === null ? [] : [FactName.Streak]),
-];
+export const aboutARival = (fact: CareerFact): boolean => "rival" in fact;
+
+export const plateFactIn = (facts: readonly CareerFact[]): CareerFact | null =>
+  facts.find(aboutARival) ?? null;
+
+export const rowFactsIn = (facts: readonly CareerFact[]): readonly CareerFact[] => {
+  const plated = plateFactIn(facts);
+
+  return facts.filter((fact) => fact !== plated).slice(NOTHING, MOST_ROWS);
+};
 
 export const personalLayoutOf = (card: CareerCard): PersonalLayout => {
   const afterTiles =
@@ -62,14 +62,16 @@ export const personalLayoutOf = (card: CareerCard): PersonalLayout => {
   const plotTop = chartLabel === null ? null : chartLabel + CHART_TOP_DROP;
   const afterChart = plotTop === null ? afterTiles : plotTop + PLOT_HEIGHT + CHART_BOTTOM_GAP;
 
-  const named = factsIn(card);
+  const rows = rowFactsIn(card.facts);
   const factsTop = afterChart + FACTS_TOP_DROP;
-  const facts = named.map((name, index) => ({ name, top: factsTop + index * FACT_HEIGHT }));
-  const factsLabel = named.length === NOTHING ? null : afterChart + SECTION_LABEL_DROP;
-  const afterFacts = named.length === NOTHING ? afterChart : factsTop + named.length * FACT_HEIGHT;
+  const facts = rows.map((fact, index) => ({ fact, top: factsTop + index * FACT_HEIGHT }));
+  const showing = card.facts.length > NOTHING;
+  const factsLabel = showing ? afterChart + SECTION_LABEL_DROP : null;
+  const afterFacts = showing ? factsTop + rows.length * FACT_HEIGHT : afterChart;
 
-  const plateTop = card.rival === null ? null : afterFacts + PLATE_GAP;
-  const afterPlate = plateTop === null ? afterFacts : plateTop + PLATE_HEIGHT;
+  const plated = plateFactIn(card.facts);
+  const plate = plated === null ? null : { fact: plated, top: afterFacts + PLATE_GAP };
+  const afterPlate = plate === null ? afterFacts : plate.top + PLATE_HEIGHT;
 
-  return { height: afterPlate + SHEET_BOTTOM, chartLabel, plotTop, factsLabel, facts, plateTop };
+  return { height: afterPlate + SHEET_BOTTOM, chartLabel, plotTop, factsLabel, facts, plate };
 };

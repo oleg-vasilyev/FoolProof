@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GRID_RIGHT, IMAGE_WIDTH, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { PLAYER_COLOURS, palette } from "#scoresheet/render/palette.ts";
 import { HEADING_RULE, SECTION_LABEL_DROP, TILE_TRACKING, personalFont } from "#scoresheet/render/personal/personal-metrics.ts";
+import { CareerFactName, type CareerFact } from "#scoresheet/domain/career/facts/fact-catalogue.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import type { CareerCard } from "#scoresheet/domain/career/career-card.ts";
 import type { PersonalLayout } from "#scoresheet/render/personal/personal-layout.ts";
@@ -15,7 +16,7 @@ const eveningChartSpy = vi.fn();
 
 const factRowsSpy = vi.fn();
 
-const rivalPlateSpy = vi.fn();
+const topFactPlateSpy = vi.fn();
 
 const eveningTallySpy = vi.fn();
 
@@ -46,13 +47,12 @@ vi.mock("#scoresheet/render/personal/evening-chart.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/personal/fact-rows.ts", () => ({
-  factRows: (table: unknown, card: unknown, facts: unknown, ink: unknown) =>
-    factRowsSpy(table, card, facts, ink),
+  factRows: (table: unknown, facts: unknown, ink: unknown) => factRowsSpy(table, facts, ink),
 }));
 
-vi.mock("#scoresheet/render/personal/rival-plate.ts", () => ({
-  rivalPlate: (table: unknown, rival: unknown, subject: unknown, top: unknown) =>
-    rivalPlateSpy(table, rival, subject, top),
+vi.mock("#scoresheet/render/personal/top-fact-plate.ts", () => ({
+  topFactPlate: (table: unknown, placed: unknown, ink: unknown) =>
+    topFactPlateSpy(table, placed, ink),
 }));
 
 vi.mock("#scoresheet/render/card-heading.ts", () => ({ EYEBROW_TRACKING }));
@@ -103,15 +103,19 @@ const SINCE = "2026-01-05";
 
 const SUBJECT = "Oleg";
 
-const RIVAL = { playerId: 3, displayName: "Anna", duels: 7, lost: 4 };
-
-const NIGHTS = [{ seriesNo: 1, playedOn: SINCE, games: 3, fools: 0, share: 0.5 }];
+const NIGHTS = [{ seriesNo: 1, playedOn: SINCE, games: 3, decided: 3, fools: 0, firsts: 1, share: 0.5 }];
 
 const BEST = NIGHTS[0];
 
 const WORST = null;
 
-const FACTS = [{ top: FACT_TOP }] as unknown as PersonalLayout["facts"];
+const ROW_FACT = { name: CareerFactName.TheBlinder } as unknown as CareerFact;
+
+const PLATE_FACT = { name: CareerFactName.TheBogey } as unknown as CareerFact;
+
+const FACTS = [{ fact: ROW_FACT, top: FACT_TOP }] as unknown as PersonalLayout["facts"];
+
+const PLATE = { fact: PLATE_FACT, top: PLATE_TOP } as unknown as PersonalLayout["plate"];
 
 const INK = PLAYER_COLOURS[COLUMN];
 
@@ -140,7 +144,6 @@ const CARD = {
   nights: NIGHTS,
   best: BEST,
   worst: WORST,
-  rival: RIVAL,
 } as unknown as CareerCard;
 
 const sheetOf = (overrides: Partial<PersonalLayout> = {}): PersonalLayout =>
@@ -150,7 +153,7 @@ const sheetOf = (overrides: Partial<PersonalLayout> = {}): PersonalLayout =>
     plotTop: PLOT_TOP,
     factsLabel: FACTS_LABEL,
     facts: FACTS,
-    plateTop: PLATE_TOP,
+    plate: PLATE,
     ...overrides,
   }) as unknown as PersonalLayout;
 
@@ -159,7 +162,7 @@ const BARE_SHEET: Partial<PersonalLayout> = {
   plotTop: null,
   factsLabel: null,
   facts: [],
-  plateTop: null,
+  plate: null,
 };
 
 const body = (): readonly string[] => (svgOfSpy.mock.calls[0]?.[2] ?? []) as readonly string[];
@@ -186,7 +189,7 @@ describe("renderPersonalCard()", () => {
     careerTilesSpy.mockReturnValue([TILES_MARK]);
     eveningChartSpy.mockReturnValue([CHART_MARK]);
     factRowsSpy.mockReturnValue([FACTS_MARK]);
-    rivalPlateSpy.mockReturnValue([PLATE_MARK]);
+    topFactPlateSpy.mockReturnValue([PLATE_MARK]);
     eveningTallySpy.mockReturnValue(EVENING_TALLY_MARK);
     gameTallySpy.mockReturnValue(GAME_TALLY_MARK);
     sessionDateSpy.mockReturnValue(DATE_MARK);
@@ -319,11 +322,12 @@ describe("renderPersonalCard()", () => {
       expect(attributesOf(SUBJECT).fill).toBe(INK);
     });
 
-    it("should give the chart and the facts the same ink as the title", () => {
+    it("should give the chart, the rows and the plate the same ink as the title", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
       expect(eveningChartSpy).toHaveBeenCalledWith(expect.objectContaining({ ink: INK }));
-      expect(factRowsSpy).toHaveBeenCalledWith(copy, CARD, FACTS, INK);
+      expect(factRowsSpy).toHaveBeenCalledWith(copy, FACTS, INK);
+      expect(topFactPlateSpy).toHaveBeenCalledWith(copy, PLATE, INK);
     });
 
     it("should change the ink with the column, not fix it", () => {
@@ -414,7 +418,7 @@ describe("renderPersonalCard()", () => {
     });
   });
 
-  describe("the facts", () => {
+  describe("the fact rows", () => {
     it("should label the facts where the layout put the label, with no hint beside it", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
@@ -466,26 +470,26 @@ describe("renderPersonalCard()", () => {
       expect(textSpy).not.toHaveBeenCalledWith(copy.personalFactsLabel, expect.anything());
     });
 
-    it("should hand the fact rows the very facts the layout placed", () => {
+    it("should hand the fact rows the very facts the layout placed, and not the card", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
       expect(factRowsSpy).toHaveBeenCalledTimes(ONCE);
-      expect(factRowsSpy).toHaveBeenCalledWith(copy, CARD, FACTS, INK);
+      expect(factRowsSpy).toHaveBeenCalledWith(copy, FACTS, INK);
     });
 
-    it("should draw the facts under the chart", () => {
+    it("should draw the rows under the chart", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
       expect(body().indexOf(FACTS_MARK)).toBeGreaterThan(body().indexOf(CHART_MARK));
     });
   });
 
-  describe("the rival plate", () => {
-    it("should draw the plate where the layout put it, naming the card's own player", () => {
+  describe("the top fact plate", () => {
+    it("should plate the very fact the layout placed there", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
-      expect(rivalPlateSpy).toHaveBeenCalledTimes(ONCE);
-      expect(rivalPlateSpy).toHaveBeenCalledWith(copy, RIVAL, SUBJECT, PLATE_TOP);
+      expect(topFactPlateSpy).toHaveBeenCalledTimes(ONCE);
+      expect(topFactPlateSpy).toHaveBeenCalledWith(copy, PLATE, INK);
     });
 
     it("should draw the plate last of all", () => {
@@ -495,18 +499,23 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should draw no plate when the layout left it out", () => {
-      personalLayoutOfSpy.mockReturnValue(sheetOf({ plateTop: null }));
+      personalLayoutOfSpy.mockReturnValue(sheetOf({ plate: null }));
 
       renderPersonalCard(copy, CARD, COLUMN);
 
-      expect(rivalPlateSpy).toHaveBeenCalledTimes(NEVER);
+      expect(topFactPlateSpy).toHaveBeenCalledTimes(NEVER);
       expect(body()).not.toContain(PLATE_MARK);
+      expect(svgOfSpy).toHaveBeenCalledTimes(ONCE);
     });
 
-    it("should draw no plate when the card found no rival to name", () => {
-      renderPersonalCard(copy, { ...CARD, rival: null } as unknown as CareerCard, COLUMN);
+    it("should follow the plate the layout picked rather than reading the card", () => {
+      const ANOTHER_PLATE = { fact: ROW_FACT, top: PLATE_TOP } as unknown as PersonalLayout["plate"];
 
-      expect(rivalPlateSpy).toHaveBeenCalledTimes(NEVER);
+      personalLayoutOfSpy.mockReturnValue(sheetOf({ plate: ANOTHER_PLATE }));
+
+      renderPersonalCard(copy, CARD, COLUMN);
+
+      expect(topFactPlateSpy).toHaveBeenCalledWith(copy, ANOTHER_PLATE, INK);
     });
   });
 
@@ -534,7 +543,7 @@ describe("renderPersonalCard()", () => {
 
       renderPersonalCard(copy, CARD, COLUMN);
 
-      expect(factRowsSpy).toHaveBeenCalledWith(copy, CARD, [], INK);
+      expect(factRowsSpy).toHaveBeenCalledWith(copy, [], INK);
     });
 
     it("should rule off the heading and nothing more", () => {

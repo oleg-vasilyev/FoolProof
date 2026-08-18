@@ -470,7 +470,21 @@ something disjoint. So the policy is not "delegate the mechanical work", it is:
 - **Never delegate against a subject that is not settled.** Delegation multiplies
   the cost of rework: a placement decision you would fix in five minutes yourself
   cost a whole second agent here, and cost a stopped agent in the phase before.
-  Two phases, same cause. If a design question is still open, answer it first.
+  **Three phases now, same cause**, which means the rule as written does not bite —
+  every one of those phases believed its subject was settled. So it needs a test
+  rather than a resolution:
+
+  **A subject that draws something is not settled until you have looked at what it
+  draws.** The /personal phase spawned four spec agents and first opened the
+  rendered poster eleven minutes later; both corrections it then had to send —
+  a rule rewritten from inferential to descriptive, an ordering flipped — came
+  from finally seeing the output. Neither was a late idea. Both were visible in
+  the first PNG. Generate the artifact, open it, *then* delegate.
+
+  The general form, for a subject that draws nothing: name the observation that
+  would change your mind, and make it before you brief anybody. If you cannot name
+  one, the design is settled. If you can, that observation is the phase's next
+  step, not the agents'.
 
 ## The final commit message
 
