@@ -19,10 +19,14 @@ Two rules for this file, so it stays useful:
 
 `package.json` carries an `overrides` block with a single entry lifting `qs` past
 a denial-of-service advisory. Nothing here depends on `qs`: Stryker pins
-`typed-rest-client ~2.3.0`, that pins the vulnerable `qs`, and Stryker 9.6.1 is
-the newest release there is — so the choice was an override or a standing advisory
-that costs attention at every audit. It is a development dependency and never runs
-on the server, which is why this is a tidiness problem rather than a security one.
+`typed-rest-client ~2.3.0`, and that pins the vulnerable `qs` — so the choice was
+an override or a standing advisory that costs attention at every audit. It is a
+development dependency and never runs on the server, which is why this is a
+tidiness problem rather than a security one.
+
+**Stryker 10.0.0 was checked on 19 Aug 2026 and carries the same
+`typed-rest-client ~2.3.0`.** So a major bump does not close this, and there is no
+reason to take one for this alone.
 
 An override is a claim that a package works against a version its own author never
 tested. The mutation run is what keeps that claim honest, and it passes.

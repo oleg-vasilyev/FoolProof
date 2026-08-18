@@ -12,6 +12,14 @@ between it and being trusted. Six are closed and the seventh is in
 [TECH-DEBT.md](../TECH-DEBT.md): a graceful shutdown cannot be played on Windows.
 So it is **a gate now**, and `npm run e2e:changed` plays only what a diff can reach.
 
+Which means the reach has to be kept honest. `EVERYTHING` in
+[`scripts/e2e-changed.ts`](../scripts/e2e-changed.ts) lists the paths that force
+every scenario to play, and a file missing from it is a hole rather than a
+saving: `vitest.e2e.config.ts` was absent, so a change to how the whole suite
+runs — worker count included — reported "nothing a scenario covers changed" and
+played nothing. **Anything that decides how scenarios run belongs in that list,
+not just the code they exercise.**
+
 **This file is about the harness, not about writing a scenario.** Whether one is
 owed, the verbs a scenario drives the chat with, and what it must assert are the
 `write-an-e2e-scenario` skill — a scenario gets edited far more often than the

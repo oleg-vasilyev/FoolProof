@@ -73,11 +73,25 @@ nobody exercised. Find the branch, not a way to reach the number.
 Stryker over the files this phase touched — about a minute. The **full**
 `npm run test:mutation` runs once, before a tag, not during a phase: a mutant in a
 file the phase never opened was already killed in the phase that wrote it, and
-re-proving it costs four minutes of every phase. The pre-push hook enforces the
+re-proving it costs ten minutes of every phase. The pre-push hook enforces the
 before-a-tag half — pushing a `v*` tag runs `check:release`, full mutation
 included, and a red battery keeps the tag on the machine. Breaks below 85%
 either way.
 Coverage says a line ran; this says a test would have noticed it break.
+
+**That full run grows with the code**: 5637 mutants at v1.14.0, of which one
+feature phase added about 2100. It took sixteen minutes until `concurrency`
+stopped being a hard `4` — a quarter of this machine — and became `"75%"`, which
+is measured rather than guessed: 960s at four workers, 689s at eight, 596s at
+twelve, with the score at 98.28 and exactly ten timeouts in all three, so the
+verdict never moved.
+
+The percentage is not there to speed CI up — Stryker computes
+`max(1, round(cores × 0.75))`, so the four-vCPU runner gets three workers where
+the old constant gave it four. It is there so a number tuned on a sixteen-core
+machine cannot oversubscribe a small one. Tune for the machine you measured on,
+express it as a share, and check what it computes to on four cores before
+committing.
 
 **`--mutate` takes a glob, and `dir/*.ts` matches the specs too.** Worse, the CLI
 flag **replaces** the config's `!src/**/*.spec.ts` rather than adding to it, so the

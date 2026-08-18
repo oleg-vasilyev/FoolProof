@@ -16,7 +16,7 @@
     "fileName": "reports/mutation/index.html"
   },
   "coverageAnalysis": "perTest",
-  "concurrency": 4,
+  "concurrency": "75%",
   "timeoutMS": 20000,
   "mutate": [
     "src/**/*.ts",

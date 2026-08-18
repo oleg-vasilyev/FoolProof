@@ -1,3 +1,4 @@
+import { availableParallelism } from "node:os";
 import { resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 
@@ -17,6 +18,24 @@ import { defineConfig } from "vitest/config";
 // would be built again for every scenario: the chat would lose its history and
 // two consecutive files would race for the same port. Isolation between scenarios
 // comes from wiping the database and restarting the bot, not from the runner.
+// One worker is one world: a port, a bot process and a database of its own. Two
+// separate ceilings apply and the lower one wins.
+//
+// `MOST_WORLDS` in world-ports.ts is the hard one — a worker handed an id the hub
+// has no port for throws, loudly, naming both knobs. Note that file also records
+// that Vitest has been seen using ids above the worker count, so the gap below
+// MOST_WORLDS is an absorber for that, not slack: at four workers it was five
+// ids wide, here it is one.
+//
+// The machine is the soft one. Eight was measured at 109s and 105s against 165s
+// at four, all 161 cases green — but on the 4-vCPU runner that plays the release
+// battery, eight bot processes on four cores is oversubscription nobody measured,
+// and a case slowed past `caseTimeoutMs` would redden the gate only there. So the
+// count follows the machine and stops at eight, which is what the ports allow.
+const MOST_WORLDS_WORTH_RUNNING = 8;
+
+const WORLDS_TO_RUN = Math.min(MOST_WORLDS_WORTH_RUNNING, availableParallelism());
+
 const TIMEOUT_MS = 60000;
 
 const MOST_ACTIONS_IN_A_CASE = 40;
@@ -35,7 +54,7 @@ export default defineConfig({
     environment: "node",
     globalSetup: ["e2e/harness/run-lifecycle.ts"],
     fileParallelism: true,
-    maxWorkers: 4,
+    maxWorkers: WORLDS_TO_RUN,
     isolate: false,
     sequence: { concurrent: false },
     testTimeout: caseTimeoutMs,
