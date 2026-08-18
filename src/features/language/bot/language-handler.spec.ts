@@ -1,10 +1,13 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { InlineKeyboardStub } from "#shared/telegram/inline-keyboard.stub.ts";
 import { DEFAULT_LOCALE, Locale } from "#shared/locale/locales.ts";
 import { copy } from "#language/copy.en.ts";
 import { CHAT_ID, ContextStub } from "#language/bot/grammy-context.stub.ts";
 
+
+const keyboards = new InlineKeyboardStub();
 
 const decodeLanguageCallbackSpy = vi.fn();
 
@@ -23,6 +26,8 @@ vi.mock("#language/render/language-keyboard.ts", () => ({
     renderLanguageKeyboardSpy(table, spoken),
 }));
 
+vi.mock("#shared/telegram/inline-keyboard.ts", () => keyboards.module);
+
 vi.mock("#language/render/language-message.ts", () => ({
   renderLanguageScreen: (table: unknown) => renderLanguageScreenSpy(table),
   renderLanguageChosen: (table: unknown, chosen: unknown) =>
@@ -36,6 +41,8 @@ const SCREEN = "the-screen";
 const CHOSEN = "the-chosen-message";
 
 const KEYBOARD = [[{ text: "English", callback_data: "l:en" }]];
+
+const MARKUP = { inline_keyboard: [[{ text: "converted", callback_data: "converted" }]] };
 
 const TAP_DATA = "l:ru";
 
@@ -63,6 +70,7 @@ describe("language-handler", () => {
     renderLanguageScreenSpy.mockReturnValue(SCREEN);
     renderLanguageChosenSpy.mockReturnValue(CHOSEN);
     renderLanguageKeyboardSpy.mockReturnValue(KEYBOARD);
+    keyboards.toMarkupSpy.mockReturnValue(MARKUP);
   });
 
   describe("onLanguage()", () => {
@@ -89,9 +97,8 @@ describe("language-handler", () => {
     it("should hang the keyboard on the message", async () => {
       await onLanguage(context(), ctx.command());
 
-      expect(ctx.lastReply().options).toMatchObject({
-        reply_markup: { inline_keyboard: KEYBOARD },
-      });
+      expect(keyboards.toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
+      expect(ctx.lastReply().options).toMatchObject({ reply_markup: MARKUP });
     });
 
     it("should send the screen as HTML, since the heading is bold", async () => {

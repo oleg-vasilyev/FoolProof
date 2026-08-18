@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { percentLabel } from "#scoresheet/render/chronology/percent-label.ts";
+import { percentLabel } from "#scoresheet/render/percent-label.ts";
 
 
 describe("percentLabel()", () => {

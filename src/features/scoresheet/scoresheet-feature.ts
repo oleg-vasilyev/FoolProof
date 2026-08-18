@@ -1,4 +1,4 @@
-import type { Feature } from "#shared/telegram/feature-contract.ts";
+import type { Feature, Listeners } from "#shared/telegram/feature-contract.ts";
 import type { ScoresheetRepository } from "#shared/repository/repository-contract.ts";
 import type { LocaleReader } from "#shared/locale/chat-locale.ts";
 import { copyIn } from "#scoresheet/copy.ts";
@@ -8,6 +8,8 @@ import {
   onStats,
   type ScoresheetContext,
 } from "#scoresheet/bot/stats-handler.ts";
+import { onPersonal, onPersonalTap } from "#scoresheet/bot/personal-handler.ts";
+import { PERSONAL_TAPS } from "#scoresheet/render/personal/personal-callback-codec.ts";
 import { requireFonts } from "#scoresheet/bot/rasterizer.ts";
 
 
@@ -41,6 +43,16 @@ export const createScoresheetFeature = (deps: ScoresheetDeps): Feature => {
         help: (locale) => copyIn(locale).helpAwards,
         run: (ctx) => onAwards(context, ctx),
       },
+      {
+        command: "personal",
+        menuDescription: (locale) => copyIn(locale).commandPersonal,
+        help: (locale) => copyIn(locale).helpPersonal,
+        run: (ctx) => onPersonal(context, ctx),
+      },
     ],
+
+    listen: (listeners: Listeners) => {
+      listeners.onTap(PERSONAL_TAPS, (ctx) => onPersonalTap(context, ctx));
+    },
   };
 };

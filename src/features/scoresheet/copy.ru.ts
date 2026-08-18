@@ -144,6 +144,47 @@ export const copy: Copy = {
   sheetSubtitle: (games: string, players: string) => `${games} · ${players}`,
   sheetTableShows: (tally: string) => `таблица ниже показывает последние ${tally}`,
 
+  commandPersonal: "Карточка одного игрока",
+  helpPersonal: "/personal — карточка игрока за всё время, что он играл",
+
+  personalPick: "Чья карточка?",
+  personalNobody: "Здесь ещё не доиграли ни одной партии. Начните с /game.",
+  personalStale: "Этот экран остался от старой версии бота",
+  personalDrawing: (name: string) => `Рисую карточку: ${name}…`,
+
+  personalEyebrow: "КАРТОЧКА ИГРОКА",
+  personalSince: (date: string) => `с ${date}`,
+  personalSubtitle: (games: string, evenings: string) => `${games} · ${evenings}`,
+  sheetEveningForms: { one: "вечер", few: "вечера", many: "вечеров" },
+  sheetTimeForms: { one: "раз", few: "раза", many: "раз" },
+
+  tileGames: "ПАРТИЙ",
+  tileEvenings: "ВЕЧЕРОВ",
+  tileShare: "ДОЛЯ СТОЛА",
+  tileShareNote: "50% — середина стола",
+  tileFool: "ОСТАВАЛСЯ ДУРАКОМ",
+  tileFirst: "ВЫХОДИЛ ПЕРВЫМ",
+  tileDealt: "ХОДИЛ ПЕРВЫМ",
+  tileTimesExpected: (times: string, expected: string) => `${times} · ожидаемо ${expected}`,
+
+  personalChartLabel: "ДОЛЯ СТОЛА ПО ВЕЧЕРАМ",
+  personalChartHint: "каждая точка — один вечер · 50% — середина стола",
+
+  personalFactsLabel: "ЧТО ЗАПОМНИЛОСЬ",
+  factBest: "ЛУЧШИЙ ВЕЧЕР",
+  factWorst: "ХУДШИЙ ВЕЧЕР",
+  factStreak: "ДЛИННЕЙШАЯ СЕРИЯ",
+  bestReason: (games: string, share: string) =>
+    `${games}, доля стола ${share} — выше не было ни одного вечера.`,
+  worstReason: (games: string, share: string) =>
+    `${games}, доля стола ${share} — ниже не было ни одного вечера.`,
+  streakHolder: (games: string) => `${games} начисто`,
+  streakReason: (from: string, until: string) => `С ${from} по ${until} — ни одного пожара.`,
+
+  rivalTitle: "ГЛАВНЫЙ ВРАГ",
+  rivalReason: (duels: string, lost: number, name: string) =>
+    `Оставались в конце вдвоём ${duels} — в ${lost} из них дураком остался ${name}.`,
+
   months: [
     "января",
     "февраля",

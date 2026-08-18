@@ -16,8 +16,8 @@ import {
 } from "#live-game/domain/card-state.ts";
 import type { CallbackPayload } from "#live-game/render/callback-data-codec.ts";
 import { renderCard, renderResult } from "#live-game/render/card-message.ts";
-import { renderKeyboard, type InlineKeyboardRows } from "#live-game/render/inline-keyboard.ts";
-import { toMarkup } from "#live-game/bot/inline-markup.ts";
+import { renderKeyboard } from "#live-game/render/card-keyboard.ts";
+import { toMarkup, type InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { LocaleReader } from "#shared/locale/chat-locale.ts";
 import { copyIn, type Copy } from "#live-game/copy.ts";
 

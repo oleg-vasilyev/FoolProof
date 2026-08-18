@@ -100,7 +100,26 @@ never fired, both silently:
 - minimatch reads a leading `#` as a **comment**, so `#live-game/**` matches
   nothing — alias bans are compiled to `regex` patterns instead.
 
-## 5. Tests, copy, and how big the phase is
+## 5. If the feature draws anything, open the drawings first
+
+Before sketching a new poster or screen, **open the committed PNGs in
+`docs/mockups/` and look at them**. Not the renderer, not the palette module —
+the pictures. The visual language here is carried by things no source file states:
+sheets run past two thousand pixels tall, sections are dense, a row is a numbered
+index plus a coloured spine plus a title plus a muted reason, and the headline bad
+news is a full-width red plate.
+
+A mockup drawn from reading `palette.ts` and `card-metrics.ts` came back from the
+owner twice — "не очень информативный и выбивается дизайном от остальных" — and the
+fix both times was already sitting in `docs/mockups/awards.png`. Two `Read` calls
+would have skipped both rounds.
+
+Then draw the mockup with the real renderer as soon as one exists, and **look at
+the rasterized PNG yourself** before asking anybody else to. The two defects that
+survived into review — an axis with a single label, and a sheet 36px past
+`IMAGE_MAX_HEIGHT` — were both visible in the picture and invisible in the code.
+
+## 6. Tests, copy, and how big the phase is
 
 - Every file gets a spec beside it, and everything it imports is mocked. Load the
   `write-a-spec` skill before writing them.

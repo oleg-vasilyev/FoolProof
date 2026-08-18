@@ -18,11 +18,26 @@ vi.mock("#scoresheet/bot/rasterizer.ts", () => ({
   requireFonts: () => requireFontsSpy(),
 }));
 
+const onPersonalSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
+
+const onPersonalTapSpy = vi.fn(
+  async (_context: unknown, _ctx: unknown): Promise<void> => undefined
+);
+
+const PERSONAL_TAPS = /^pc:([0-9]+)$/;
+
 vi.mock("#scoresheet/bot/stats-handler.ts", () => ({
   onStats: (context: unknown, ctx: unknown) => onStatsSpy(context, ctx),
   onChronology: (context: unknown, ctx: unknown) => onChronologySpy(context, ctx),
   onAwards: (context: unknown, ctx: unknown) => onAwardsSpy(context, ctx),
 }));
+
+vi.mock("#scoresheet/bot/personal-handler.ts", () => ({
+  onPersonal: (context: unknown, ctx: unknown) => onPersonalSpy(context, ctx),
+  onPersonalTap: (context: unknown, ctx: unknown) => onPersonalTapSpy(context, ctx),
+}));
+
+vi.mock("#scoresheet/render/personal/personal-callback-codec.ts", () => ({ PERSONAL_TAPS }));
 
 const { createScoresheetFeature } = await import("#scoresheet/scoresheet-feature.ts");
 
@@ -78,6 +93,7 @@ describe("createScoresheetFeature()", () => {
         "stats",
         "stats_chronology",
         "stats_awards",
+        "personal",
       ]);
     });
 
@@ -86,6 +102,7 @@ describe("createScoresheetFeature()", () => {
         copy.commandStats,
         copy.commandChronology,
         copy.commandAwards,
+        copy.commandPersonal,
       ]);
     });
 
@@ -94,6 +111,7 @@ describe("createScoresheetFeature()", () => {
         copy.helpStats,
         copy.helpChronology,
         copy.helpAwards,
+        copy.helpPersonal,
       ]);
     });
 
@@ -102,6 +120,7 @@ describe("createScoresheetFeature()", () => {
         russian.commandStats,
         russian.commandChronology,
         russian.commandAwards,
+        russian.commandPersonal,
       ]);
     });
 
@@ -110,6 +129,7 @@ describe("createScoresheetFeature()", () => {
         russian.helpStats,
         russian.helpChronology,
         russian.helpAwards,
+        russian.helpPersonal,
       ]);
     });
 
@@ -132,13 +152,38 @@ describe("createScoresheetFeature()", () => {
       expect(onAwardsSpy).toHaveBeenCalledWith({ repo, localeIn: locales.read }, "the-context");
       expect(onChronologySpy).toHaveBeenCalledTimes(NEVER);
     });
+
+    it("should route the personal card to its own handler", async () => {
+      await routeFor("personal")?.run("the-context" as never);
+
+      expect(onPersonalSpy).toHaveBeenCalledWith({ repo, localeIn: locales.read }, "the-context");
+      expect(onAwardsSpy).toHaveBeenCalledTimes(NEVER);
+    });
+  });
+
+  describe("the taps it claims", () => {
+    const tapsClaimed = () => {
+      const onTap = vi.fn();
+
+      build().listen?.({ onTap, onText: vi.fn() } as never);
+
+      return onTap;
+    };
+
+    it("should claim exactly one pattern, the one its own codec owns", () => {
+      expect(tapsClaimed().mock.calls.map((call) => call[0])).toEqual([PERSONAL_TAPS]);
+    });
+
+    it("should hand a tap on that pattern to the personal handler", () => {
+      const onTap = tapsClaimed();
+
+      (onTap.mock.calls[0]?.[1] as (ctx: unknown) => void)("the-tap");
+
+      expect(onPersonalTapSpy).toHaveBeenCalledWith({ repo, localeIn: locales.read }, "the-tap");
+    });
   });
 
   describe("what it does not do", () => {
-    it("should listen to nothing, since it only answers a command", () => {
-      expect(build().listen).toBeUndefined();
-    });
-
     it("should have nothing to stop, since it holds no timers", () => {
       expect(build().stop).toBeUndefined();
     });

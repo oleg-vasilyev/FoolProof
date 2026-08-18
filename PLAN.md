@@ -1039,6 +1039,56 @@ subset happens to be everybody, the winners line says so in words instead of lis
 them — `everyWinner` in the copy table, set in neutral ink so it cannot be read as the
 first winner's row.
 
+### One player's card, for all time
+
+`/stats` answers *how is tonight going*. `/personal` answers *who am I at this
+table*, and the difference in scope is the whole feature: it reads every confirmed
+game the chat has ever played, not the latest session.
+
+The bot cannot know which player a person is — names are typed, not tagged — so
+`/personal` takes no argument. It answers with the roster as a keyboard, one name
+per row, and the card is drawn for whichever name is tapped. That also keeps the
+input at one tap, which is what the product is for.
+
+**A player exists inside a chat.** `players.chat_id` means the same human playing in
+two chats is two players with two careers, and nothing links them. A card therefore
+says *for all time in this chat*, never *for all time*.
+
+Six numbers are always shown, and two of them carry a baseline, because a raw
+percentage is not comparable between players: whoever mostly played three-handed
+burns roughly a third of the time by the shape of the game, and whoever played
+six-handed roughly a sixth. So next to the observed rate the card prints the rate a
+player would post if places fell at random — the mean of `1 / tableSize` across the
+games they actually sat in.
+
+Two denominators are used on purpose:
+
+- **the fool rate is over decided games**, with draws excluded from both the count
+  and its baseline, because a drawn game has no fool and leaving it in would flatter
+  everybody at the table;
+- **out-first and dealt are over every game played**, because a draw still has a
+  first player out and still had somebody deal.
+
+Three facts are printed below the numbers — best evening, worst evening, longest
+clean run — each one a fixed slot rather than a chosen one. A best or worst evening
+needs at least three games before it means anything, and a clean run is only worth
+naming from four games up; below those thresholds the slot is left out and the sheet
+gets shorter rather than printing noise. When one evening is both the best and the
+worst — which happens as soon as exactly one evening qualifies — only the best is
+printed, so the same night never appears twice.
+
+The chief rival is the pairwise fact: among the games where the two of them were
+left in the last two places, how often the subject was the one holding it. It needs
+five such duels and at least one loss, or the plate is left off. The rival is picked
+by losses first, then by duels, then by the lower player id, so the choice is
+deterministic when a table has two equally bad enemies.
+
+The evening chart needs five evenings to be worth drawing; below that it is three
+points and a straight line, so the section disappears and the sheet shrinks again.
+**Every section of this card is optional, and the sheet's height is the sum of
+whatever survived** — a chat that played one evening gets a short, honest card
+rather than a tall one full of gaps.
+
 ### A session is computed, not a table
 
 A session is a chain of games where consecutive starts are less than 3 hours apart.

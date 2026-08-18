@@ -6,15 +6,9 @@ import {
   type Selection,
 } from "#merge-names/domain/merge-selection.ts";
 import { encodeMergeCallback } from "#merge-names/render/merge-callback-codec.ts";
+import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#merge-names/copy.ts";
 
-
-export interface InlineButton {
-  readonly text: string;
-  readonly callback_data: string;
-}
-
-export type InlineKeyboardRows = readonly (readonly InlineButton[])[];
 
 const NOTHING_PICKED = 0;
 

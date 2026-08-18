@@ -91,7 +91,7 @@ vi.mock("#scoresheet/render/card-heading.ts", () => ({
   cardHeading: (table: unknown, heading: unknown) => cardHeadingSpy(table, heading),
 }));
 
-vi.mock("#scoresheet/render/session-tally.ts", () => ({
+vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
 }));
 

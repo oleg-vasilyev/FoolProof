@@ -5,6 +5,7 @@ import {
   requireText,
 } from "#shared/repository/column-values.ts";
 import type {
+  CareerGame,
   ChatLocaleChoice,
   ChatSummary,
   ChronologyGame,
@@ -84,6 +85,42 @@ export const toChatSummary = (row: Row | undefined): ChatSummary => ({
   choseRussian: requireNum(row?.chose_russian),
   choseEnglish: requireNum(row?.chose_english),
 });
+
+interface CareerRun {
+  readonly gameId: number;
+  readonly games: readonly CareerGame[];
+}
+
+const NO_GAME_YET = 0;
+
+const intoCareerGames = (run: CareerRun, row: Row): CareerRun => {
+  const gameId = requireNum(row.game_id);
+  const placement = { playerId: requireNum(row.player_id), position: requireNum(row.position) };
+  const open = run.games.at(LAST);
+
+  if (open === undefined || run.gameId !== gameId) {
+    return {
+      gameId,
+      games: [
+        ...run.games,
+        {
+          seriesNo: requireNum(row.series_no),
+          playedOn: requireText(row.played_on),
+          starterId: nullableNum(row.starter_id),
+          placements: [placement],
+        },
+      ],
+    };
+  }
+
+  return {
+    gameId,
+    games: [...run.games.slice(0, LAST), { ...open, placements: [...open.placements, placement] }],
+  };
+};
+
+export const groupByCareerGame = (rows: readonly Row[]): readonly CareerGame[] =>
+  rows.reduce<CareerRun>(intoCareerGames, { gameId: NO_GAME_YET, games: [] }).games;
 
 export const groupByGame = (rows: readonly Row[]): readonly ChronologyGame[] =>
   rows.reduce<readonly ChronologyGame[]>((games, row) => {

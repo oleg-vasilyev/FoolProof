@@ -79,11 +79,24 @@ included, and a red battery keeps the tag on the machine. Breaks below 85%
 either way.
 Coverage says a line ran; this says a test would have noticed it break.
 
-**`--mutate` takes a glob, and `dir/*.ts` matches the specs too.** Stryker will
-happily mutate `cell-face.spec.ts`, where almost every mutant survives because
-nothing tests the tests — one phase read a 55% total off a run whose per-source
-files were all above 82%. List the source files, or exclude `*.spec.ts`; a total
-far below the per-file numbers means the glob, not the specs.
+**`--mutate` takes a glob, and `dir/*.ts` matches the specs too.** Worse, the CLI
+flag **replaces** the config's `!src/**/*.spec.ts` rather than adding to it, so the
+exclusion has to be repeated on the command line every time:
+
+```
+npx stryker run --mutate "src/features/<x>/*.ts,!src/**/*.spec.ts" --reporters clear-text
+```
+
+Stryker will otherwise mutate `cell-face.spec.ts`, where almost every mutant
+survives because nothing tests the tests — one phase read a 55% total off a run
+whose per-source files were all above 82%, and a later one read 49% off a folder
+that was actually at 100%. A total far below the per-file numbers means the glob,
+not the specs.
+
+**Paste that line into a subagent's brief rather than describing it.** This rule
+was already written here when two briefs went out carrying the naive command; both
+agents caught it themselves, but a brief that hands over the wrong command is
+asking for an afternoon of strengthening tests that were never weak.
 
 A file that dropped is a file whose new tests assert too little — strengthen the
 tests, never lower the bar. The instructive ones are usually a spy left dirty by

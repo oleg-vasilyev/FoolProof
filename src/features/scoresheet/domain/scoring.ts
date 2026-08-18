@@ -72,6 +72,9 @@ const cellFor = (round: Round, playerId: number): Cell => {
     : { kind: CellKind.Drawn, position: exit.position };
 };
 
+export const shareAt = (position: number, tableSize: number): number =>
+  (tableSize - position) / Math.max(FEWEST_RIVALS, tableSize - ONE_SEAT);
+
 const shareOf = (cell: Cell, tableSize: number): number | null => {
   switch (cell.kind) {
     case CellKind.Absent:
@@ -80,7 +83,7 @@ const shareOf = (cell: Cell, tableSize: number): number | null => {
     case CellKind.Placed:
     case CellKind.Drawn:
     case CellKind.Fool:
-      return (tableSize - cell.position) / Math.max(FEWEST_RIVALS, tableSize - ONE_SEAT);
+      return shareAt(cell.position, tableSize);
   }
 };
 

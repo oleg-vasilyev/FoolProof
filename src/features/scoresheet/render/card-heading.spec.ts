@@ -22,7 +22,7 @@ vi.mock("#scoresheet/render/svg-tags.ts", () => ({
   text: (value: string, attributes: Record<string, unknown>) => textSpy(value, attributes),
 }));
 
-vi.mock("#scoresheet/render/session-tally.ts", () => ({
+vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
   playerTally: (table: unknown, players: number) => playerTallySpy(table, players),
 }));

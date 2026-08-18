@@ -11,15 +11,9 @@ import {
   type CardState,
 } from "#live-game/domain/card-state.ts";
 import { encodeCallback } from "#live-game/render/callback-data-codec.ts";
+import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#live-game/copy.ts";
 
-
-export interface InlineButton {
-  readonly text: string;
-  readonly callback_data: string;
-}
-
-export type InlineKeyboardRows = readonly (readonly InlineButton[])[];
 
 const captionFor = (
   copy: Copy,

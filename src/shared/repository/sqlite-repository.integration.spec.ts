@@ -1148,3 +1148,107 @@ describe("forgetChat()", () => {
     expect(repo.forgetChat(CHAT_ID)).toEqual({ players: NONE, games: NONE });
   });
 });
+
+describe("careerHistory()", () => {
+  const anotherChatPlays = (): void => {
+    const first = repo.createPlayer(OTHER_CHAT_ID, "Dima").id;
+    const second = repo.createPlayer(OTHER_CHAT_ID, "Vera").id;
+    const gameId = repo.openGame(OTHER_CHAT_ID, [first, second]);
+
+    repo.attachMessage(gameId, MESSAGE_ID);
+    repo.appendExit(gameId, first, ONCE, ACTOR_ID);
+    repo.confirmGame(gameId, [{ playerId: second, position: TWO }], ACTOR_ID, TWO);
+  };
+
+  it("should report nothing for a chat that has never played", () => {
+    expect(repo.careerHistory(CHAT_ID)).toBeNull();
+  });
+
+  it("should keep the evenings that seriesChronology drops", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    ageAllGames(LONGER_THAN_A_DAY);
+    playFullGame(ids, [ids[1] ?? NONE], [ids[0] ?? NONE]);
+
+    expect([
+      repo.careerHistory(CHAT_ID)?.games.length,
+      repo.seriesChronology(CHAT_ID)?.games.length,
+    ]).toEqual([TWO, ONCE]);
+  });
+
+  it("should number the evenings so games can be grouped by night", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    playFullGame(ids, [ids[1] ?? NONE], [ids[0] ?? NONE]);
+    ageAllGames(LONGER_THAN_A_DAY);
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+
+    expect(repo.careerHistory(CHAT_ID)?.games.map((game) => game.seriesNo)).toEqual([
+      ONCE,
+      ONCE,
+      TWO,
+    ]);
+  });
+
+  it("should date every game so a career can say when it started", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+
+    expect(repo.careerHistory(CHAT_ID)?.games[0]?.playedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("should report every place taken in a game, not only the fool", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
+
+    expect(repo.careerHistory(CHAT_ID)?.games[0]?.placements).toEqual([
+      { playerId: ids[0], position: ONCE },
+      { playerId: ids[1], position: TWO },
+      { playerId: ids[2], position: THREE },
+    ]);
+  });
+
+  it("should report who dealt each game", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    const gameId = playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
+    repo.updateCard(gameId, "RECORDING", ONCE, ids[1] ?? NONE);
+
+    expect(repo.careerHistory(CHAT_ID)?.games[0]?.starterId).toBe(ids[1]);
+  });
+
+  it("should report nobody opening a game whose starter was never set", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+
+    expect(repo.careerHistory(CHAT_ID)?.games[0]?.starterId).toBeNull();
+  });
+
+  it("should list players in the order they first sat down", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    const withRoma = [...ids, repo.createPlayer(CHAT_ID, "Roma").id];
+    playFullGame(withRoma, [withRoma[2] ?? NONE, ids[0] ?? NONE], [ids[1] ?? NONE]);
+
+    expect(repo.careerHistory(CHAT_ID)?.players.map((player) => player.displayName)).toEqual([
+      "Oleg",
+      "Anya",
+      "Roma",
+    ]);
+  });
+
+  it("should never mix one chat's games into another's career", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    anotherChatPlays();
+
+    expect(repo.careerHistory(CHAT_ID)?.games).toHaveLength(ONCE);
+  });
+
+  it("should leave out a game that was opened and never confirmed", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    repo.openGame(CHAT_ID, ids);
+
+    expect(repo.careerHistory(CHAT_ID)?.games).toHaveLength(ONCE);
+  });
+});

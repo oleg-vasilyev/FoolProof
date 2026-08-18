@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ActionKind, Outcome } from "#merge-names/domain/merge-states.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { InlineKeyboardStub } from "#shared/telegram/inline-keyboard.stub.ts";
 import { Locale } from "#shared/locale/locales.ts";
 import { Role } from "#merge-names/domain/merge-states.ts";
 import type { Candidate, Transition } from "#merge-names/domain/merge-selection.ts";
@@ -10,6 +11,8 @@ import { CHAT_ID, ContextStub } from "#merge-names/bot/grammy-context.stub.ts";
 
 
 const MIN_TO_MERGE = 2;
+
+const keyboards = new InlineKeyboardStub();
 
 const applySpy = vi.fn();
 
@@ -45,6 +48,8 @@ vi.mock("#merge-names/render/merge-keyboard.ts", () => ({
     renderMergeKeyboardSpy(table, roster, selection),
 }));
 
+vi.mock("#shared/telegram/inline-keyboard.ts", () => keyboards.module);
+
 vi.mock("#merge-names/copy.ts", () => ({
   copyIn: (locale: unknown) => copyInSpy(locale),
 }));
@@ -69,6 +74,8 @@ const TAP_DATA = "the-tap-data";
 const SCREEN = "the-screen";
 
 const KEYBOARD = [[{ text: "a-button", callback_data: "a" }]];
+
+const MARKUP = { inline_keyboard: [[{ text: "converted", callback_data: "converted" }]] };
 
 const RESULT = "the-result";
 
@@ -119,6 +126,7 @@ describe("merge-handler", () => {
     copyInSpy.mockReturnValue(copy);
     renderMergeScreenSpy.mockReturnValue(SCREEN);
     renderMergeKeyboardSpy.mockReturnValue(KEYBOARD);
+    keyboards.toMarkupSpy.mockReturnValue(MARKUP);
     renderMergedSpy.mockReturnValue(RESULT);
     renderCancelledSpy.mockReturnValue(CANCELLED);
     joinedNamesSpy.mockReturnValue(NAMES);
@@ -141,9 +149,8 @@ describe("merge-handler", () => {
     it("should hang the keyboard on that message", async () => {
       await onMerge(context(), ctx.command());
 
-      expect(ctx.lastReply().options).toMatchObject({
-        reply_markup: { inline_keyboard: KEYBOARD },
-      });
+      expect(keyboards.toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
+      expect(ctx.lastReply().options).toMatchObject({ reply_markup: MARKUP });
     });
 
     it("should let Telegram parse the names as HTML", async () => {
@@ -242,9 +249,8 @@ describe("merge-handler", () => {
       it("should redraw the keyboard for the new selection", async () => {
         await onTap(context(), ctx.callbackTap(TAP_DATA));
 
-        expect(ctx.lastEdit().options).toMatchObject({
-          reply_markup: { inline_keyboard: KEYBOARD },
-        });
+        expect(keyboards.toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
+        expect(ctx.lastEdit().options).toMatchObject({ reply_markup: MARKUP });
       });
 
       it("should answer a step back without naming anybody", async () => {

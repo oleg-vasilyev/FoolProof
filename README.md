@@ -33,6 +33,7 @@ Went first: Oleg
 | `/stats` | How the current session is going: the chronology, then the awards |
 | `/stats_chronology` | The chronology picture on its own |
 | `/stats_awards` | The awards picture on its own; needs five games |
+| `/personal` | One player's card for all time — pick a name, get the poster |
 | `/merge` | Folds a name typed twice into the right one |
 | `/language` | Picks the language this chat is played in — English or Russian |
 | `/start` | What the bot is, and a button that puts it in a group |
@@ -76,6 +77,14 @@ redraws them whenever the drawing code changes.
 | The chronology — a row per game, a column per player | The awards — at most nine, and the fool last |
 |---|---|
 | [![The chronology poster](docs/mockups/chronology.png)](docs/mockups/chronology.png) | [![The awards poster](docs/mockups/awards.png)](docs/mockups/awards.png) |
+
+`/personal` answers with a third: one player's card for everything they have ever
+played here. Pick a name from the keyboard it offers and it draws the numbers, the
+share of the table evening by evening, what stuck, and who has been the worst news.
+
+| The player card — six numbers, a career chart, three facts and a rival |
+|---|
+| [![The player card poster](docs/mockups/personal.png)](docs/mockups/personal.png) |
 
 The grid prints the finishing position in every cell, and marks only what an
 ordinary finish is not: drew for last, left the fool, did not play. Under it, each
@@ -602,14 +611,14 @@ src/
   features/
     live-game/          playing a game on a live card of buttons
     merge-names/        the /merge screen
-    scoresheet/         the picture /stats sends back
+    scoresheet/         the pictures /stats and /personal send back
     diagnostics/        the /status report about the bot itself
     language/           the /language screen that picks the chat's language
   shared/               config, lifecycle, locale, logging, repository,
                         telegram, text, timing — a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
 docs/                   the website GitHub Pages serves — everything in here is public
-docs/mockups/           the two posters this file shows, drawn by scripts/tools.ts,
+docs/mockups/           the posters this file shows, drawn by scripts/tools.ts,
                         served along with the site because they live inside it
 deploy/                 the systemd units a server is installed from, the script
                         that puts the newest tag live, and the one that sends the

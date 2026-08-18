@@ -1,7 +1,7 @@
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Copy } from "#scoresheet/copy.ts";
-import { gameTally } from "#scoresheet/render/session-tally.ts";
+import { gameTally } from "#scoresheet/render/tally-phrases.ts";
 
 
 export const awardTitle = (copy: Copy, award: Award): string => copy.awardTitles[award.name];

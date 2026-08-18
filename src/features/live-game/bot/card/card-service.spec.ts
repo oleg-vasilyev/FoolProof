@@ -5,6 +5,7 @@ import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { DebounceStub } from "#shared/timing/debounce.stub.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
 import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { InlineKeyboardStub } from "#shared/telegram/inline-keyboard.stub.ts";
 import { seatsOf } from "#live-game/domain/card-state.stub.ts";
 import type { CallbackAction, CallbackPayload } from "#live-game/render/callback-data-codec.ts";
 import { copy } from "#live-game/copy.en.ts";
@@ -12,6 +13,8 @@ import { TelegramApiStub } from "#live-game/bot/grammy-api.stub.ts";
 
 
 const debounce = new DebounceStub();
+
+const keyboards = new InlineKeyboardStub();
 
 const applySpy = vi.fn();
 
@@ -55,18 +58,14 @@ vi.mock("#live-game/copy.ts", () => ({
   copyIn: (locale: unknown) => copyInSpy(locale),
 }));
 
-vi.mock("#live-game/render/inline-keyboard.ts", () => ({
+vi.mock("#live-game/render/card-keyboard.ts", () => ({
   renderKeyboard: (table: unknown, state: unknown, gameId: number, version: number) =>
     renderKeyboardSpy(table, state, gameId, version),
 }));
 
-const toMarkupSpy = vi.fn();
+const MARKUP = { inline_keyboard: [[{ text: "converted", callback_data: "converted" }]] };
 
-const MARKUP = { inline_keyboard: "converted" };
-
-vi.mock("#live-game/bot/inline-markup.ts", () => ({
-  toMarkup: (rows: unknown) => toMarkupSpy(rows),
-}));
+vi.mock("#shared/telegram/inline-keyboard.ts", () => keyboards.module);
 
 const { createCardService } = await import("#live-game/bot/card/card-service.ts");
 
@@ -150,7 +149,7 @@ describe("createCardService()", () => {
     renderCardSpy.mockReturnValue(CARD_TEXT);
     renderResultSpy.mockReturnValue(RESULT_TEXT);
     renderKeyboardSpy.mockReturnValue(KEYBOARD);
-    toMarkupSpy.mockReturnValue(MARKUP);
+    keyboards.toMarkupSpy.mockReturnValue(MARKUP);
     nameAtSpy.mockReturnValue("Oleg");
     phaseOfSpy.mockReturnValue("RECORDING");
     remainingSlotsSpy.mockReturnValue([]);
@@ -836,7 +835,7 @@ describe("createCardService()", () => {
     it("should send the keyboard as inline buttons, not as the rows it was given", async () => {
       await cards.open(copy, CHAT_ID, seatsOf(...THREE), null);
 
-      expect(toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
+      expect(keyboards.toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
       expect(telegram.lastSend().markup).toBe(MARKUP);
     });
 
@@ -854,7 +853,7 @@ describe("createCardService()", () => {
         keyboard: KEYBOARD,
       });
 
-      expect(toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
+      expect(keyboards.toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
       expect(telegram.lastEdit().markup).toBe(MARKUP);
     });
 

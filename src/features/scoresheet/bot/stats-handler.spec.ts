@@ -4,13 +4,14 @@ import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { Locale } from "#shared/locale/locales.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import { CHAT_ID, ContextStub } from "#scoresheet/bot/grammy-context.stub.ts";
+import { InputFileStub } from "#scoresheet/bot/grammy-input-file.stub.ts";
 
+
+const inputFile = new InputFileStub();
 
 const renderScoresheetSpy = vi.fn();
 
 const rasterizeSpy = vi.fn();
-
-const inputFileSpy = vi.fn();
 
 const gameTallySpy = vi.fn();
 
@@ -43,7 +44,7 @@ vi.mock("#scoresheet/domain/awards/awards.ts", () => ({
   honoursFor: (chronology: unknown) => honoursForSpy(chronology),
 }));
 
-vi.mock("#scoresheet/render/session-tally.ts", () => ({
+vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
   playerTally: (table: unknown, players: number) => playerTallySpy(table, players),
 }));
@@ -52,13 +53,7 @@ vi.mock("#scoresheet/bot/rasterizer.ts", () => ({
   rasterize: (svg: string) => rasterizeSpy(svg),
 }));
 
-vi.mock("grammy", () => ({
-  InputFile: class {
-    public constructor(source: unknown, filename: string) {
-      inputFileSpy(source, filename);
-    }
-  },
-}));
+vi.mock("grammy", () => inputFile.module);
 
 const { onAwards, onChronology, onStats } = await import("#scoresheet/bot/stats-handler.ts");
 
@@ -135,7 +130,7 @@ describe("onStats()", () => {
   it("should send the rasterized bytes as a photo", async () => {
     await onStats(context(), ctx.command("/stats"));
 
-    expect(inputFileSpy).toHaveBeenCalledWith(SHEET_PNG, "chronology.png");
+    expect(inputFile.builtSpy).toHaveBeenCalledWith(SHEET_PNG, "chronology.png");
     expect(ctx.replyWithPhotoSpy).toHaveBeenCalledTimes(ONCE);
   });
 
@@ -210,7 +205,7 @@ describe("onStats()", () => {
 
       await onStats(context(), ctx.command("/stats"));
 
-      expect(inputFileSpy.mock.calls.map((call) => call[1])).toEqual([
+      expect(inputFile.builtSpy.mock.calls.map((call) => call[1])).toEqual([
         "chronology.png",
         "awards.png",
       ]);
@@ -319,7 +314,7 @@ describe("onAwards()", () => {
   it("should send the awards picture and nothing else", async () => {
     await onAwards(context(), ctx.command("/stats_awards"));
 
-    expect(inputFileSpy).toHaveBeenCalledWith(AWARDS_PNG, "awards.png");
+    expect(inputFile.builtSpy).toHaveBeenCalledWith(AWARDS_PNG, "awards.png");
     expect(renderScoresheetSpy).toHaveBeenCalledTimes(NEVER);
   });
 

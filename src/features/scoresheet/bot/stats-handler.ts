@@ -10,7 +10,7 @@ import { EVENING_MINIMUM, honoursFor } from "#scoresheet/domain/awards/awards.ts
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { copyIn, type Copy } from "#scoresheet/copy.ts";
-import { gameTally, playerTally } from "#scoresheet/render/session-tally.ts";
+import { gameTally, playerTally } from "#scoresheet/render/tally-phrases.ts";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";
 
 

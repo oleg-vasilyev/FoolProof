@@ -1,7 +1,7 @@
 import { ActionKind } from "#live-game/domain/card-states.ts";
 import { seatNumberOf, type SeatingPlan } from "#live-game/domain/seating-plan.ts";
 import { encodeSeatingCallback } from "#live-game/render/seating-screen/seating-callback-codec.ts";
-import type { InlineButton, InlineKeyboardRows } from "#live-game/render/inline-keyboard.ts";
+import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#live-game/copy.ts";
 
 

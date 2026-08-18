@@ -65,6 +65,18 @@ export interface SeriesChronology {
   games: readonly ChronologyGame[];
 }
 
+export interface CareerGame {
+  seriesNo: number;
+  playedOn: string;
+  starterId: number | null;
+  placements: readonly Finalist[];
+}
+
+export interface CareerHistory {
+  players: readonly PlayerColumn[];
+  games: readonly CareerGame[];
+}
+
 export interface CardRepository {
   playersInChat(chatId: number): readonly PlayerRecord[];
   createPlayer(chatId: number, displayName: string): PlayerRecord;
@@ -98,6 +110,7 @@ export interface RosterRepository {
 
 export interface ScoresheetRepository {
   seriesChronology(chatId: number): SeriesChronology | null;
+  careerHistory(chatId: number): CareerHistory | null;
 }
 
 export interface StorageSummary {

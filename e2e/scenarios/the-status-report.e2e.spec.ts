@@ -75,6 +75,7 @@ describeScenario("/help and the / menu agree", (chat) => {
       "stats",
       "stats_chronology",
       "stats_awards",
+      "personal",
       "language",
       "help",
     ]);

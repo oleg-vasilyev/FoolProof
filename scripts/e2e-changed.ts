@@ -26,7 +26,7 @@ const SCENARIOS_OF: Record<string, readonly string[]> = {
     "edge/a-table-too-big",
   ],
   "merge-names": ["merging-two-names"],
-  scoresheet: ["the-stats-picture", "the-pictures-in-russian"],
+  scoresheet: ["the-stats-picture", "the-pictures-in-russian", "a-players-own-card"],
   diagnostics: ["the-status-report"],
   language: ["picking-a-language", "the-pictures-in-russian"],
 };

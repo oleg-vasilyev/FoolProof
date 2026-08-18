@@ -2,7 +2,7 @@ import { FONT_FAMILY, GRID_RIGHT, PAD, fontSize } from "#scoresheet/render/card-
 import { palette } from "#scoresheet/render/palette.ts";
 import type { Copy } from "#scoresheet/copy.ts";
 import { sessionDate } from "#scoresheet/render/session-date.ts";
-import { gameTally, playerTally } from "#scoresheet/render/session-tally.ts";
+import { gameTally, playerTally } from "#scoresheet/render/tally-phrases.ts";
 import { text } from "#scoresheet/render/svg-tags.ts";
 
 

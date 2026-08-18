@@ -7,6 +7,7 @@ import {
 } from "#shared/repository/column-values.ts";
 import { Locale } from "#shared/locale/locales.ts";
 import {
+  groupByCareerGame,
   groupByGame,
   toChatLocaleChoice,
   toChatSummary,
@@ -439,5 +440,48 @@ export const sqliteRepository: Repository = {
       .map(toPlayerColumn);
 
     return { startedOn: requireText(startedOn), players, games: groupByGame(played) };
+  },
+
+  careerHistory(chatId) {
+    const played = db
+      .prepare(
+        `SELECT g.series_no,
+                date(g.started_at) AS played_on,
+                g.id AS game_id,
+                g.starter_player_id AS starter_id,
+                ge.player_id,
+                ge.position
+         FROM game_series g
+         JOIN game_events ge ON ge.game_id = g.id
+         WHERE g.chat_id = ?
+         ORDER BY g.started_at, g.id, ge.position, ge.player_id`
+      )
+      .all(chatId);
+
+    if (played.length === 0) {
+      return null;
+    }
+
+    const players = db
+      .prepare(
+        `SELECT player_id, display_name FROM (
+           SELECT p.id AS player_id,
+                  p.display_name,
+                  g.started_at,
+                  g.id AS game_id,
+                  gp.seat_index,
+                  ROW_NUMBER() OVER (PARTITION BY p.id ORDER BY g.started_at, g.id) AS appearance
+           FROM game_series g
+           JOIN game_players gp ON gp.game_id = g.id
+           JOIN players p ON p.id = gp.player_id
+           WHERE g.chat_id = ?
+         )
+         WHERE appearance = 1
+         ORDER BY started_at, game_id, seat_index`
+      )
+      .all(chatId)
+      .map(toPlayerColumn);
+
+    return { players, games: groupByCareerGame(played) };
   },
 };

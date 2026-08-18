@@ -11,10 +11,8 @@ import {
   type Selection,
 } from "#merge-names/domain/merge-selection.ts";
 import { decodeMergeCallback } from "#merge-names/render/merge-callback-codec.ts";
-import {
-  renderMergeKeyboard,
-  type InlineKeyboardRows,
-} from "#merge-names/render/merge-keyboard.ts";
+import { renderMergeKeyboard } from "#merge-names/render/merge-keyboard.ts";
+import { toMarkup } from "#shared/telegram/inline-keyboard.ts";
 import {
   joinedNames,
   renderCancelled,
@@ -30,10 +28,6 @@ export interface MergeContext {
 }
 
 const NO_SELECTION: Selection = [];
-
-const toMarkup = (rows: InlineKeyboardRows) => ({
-  inline_keyboard: rows.map((row) => row.map((button) => ({ ...button }))),
-});
 
 const screenOptions = (copy: Copy, roster: readonly Candidate[], selection: Selection) => ({
   parse_mode: "HTML" as const,

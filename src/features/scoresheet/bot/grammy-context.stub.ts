@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import type { Command } from "#shared/telegram/telegram-contexts.ts";
+import type { CallbackTap, Command } from "#shared/telegram/telegram-contexts.ts";
 
 
 export const CHAT_ID = -100777;
@@ -9,10 +9,27 @@ export const SENT_MESSAGE_ID = 500;
 export class ContextStub {
   public replySpy = vi.fn();
   public replyWithPhotoSpy = vi.fn();
+  public editMessageTextSpy = vi.fn();
+  public answerCallbackQuerySpy = vi.fn();
 
   public constructor() {
     this.replySpy.mockResolvedValue({ message_id: SENT_MESSAGE_ID });
     this.replyWithPhotoSpy.mockResolvedValue({ message_id: SENT_MESSAGE_ID });
+    this.editMessageTextSpy.mockResolvedValue({ message_id: SENT_MESSAGE_ID });
+    this.answerCallbackQuerySpy.mockResolvedValue(true);
+  }
+
+  public tap(data: string): CallbackTap {
+    return { ...this.tapWithoutChat(data), chat: { id: CHAT_ID } } as unknown as CallbackTap;
+  }
+
+  public tapWithoutChat(data: string): CallbackTap {
+    return {
+      callbackQuery: { data },
+      editMessageText: this.editMessageTextSpy,
+      answerCallbackQuery: this.answerCallbackQuerySpy,
+      replyWithPhoto: this.replyWithPhotoSpy,
+    } as unknown as CallbackTap;
   }
 
   public command(text: string): Command {

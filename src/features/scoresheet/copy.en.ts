@@ -145,6 +145,47 @@ export const copy = {
   sheetSubtitle: (games: string, players: string) => `${games} · ${players}`,
   sheetTableShows: (tally: string) => `the table below shows the last ${tally}`,
 
+  commandPersonal: "One player's card",
+  helpPersonal: "/personal — one player's card, across everything they have played",
+
+  personalPick: "Whose card?",
+  personalNobody: "Nobody has finished a game here yet. Start one with /game.",
+  personalStale: "That screen is from an older version of the bot",
+  personalDrawing: (name: string) => `Drawing ${name}'s card…`,
+
+  personalEyebrow: "PLAYER CARD",
+  personalSince: (date: string) => `since ${date}`,
+  personalSubtitle: (games: string, evenings: string) => `${games} · ${evenings}`,
+  sheetEveningForms: { one: "evening", few: "evenings", many: "evenings" },
+  sheetTimeForms: { one: "time", few: "times", many: "times" },
+
+  tileGames: "GAMES",
+  tileEvenings: "EVENINGS",
+  tileShare: "TABLE SHARE",
+  tileShareNote: "50% is mid-table",
+  tileFool: "LEFT THE FOOL",
+  tileFirst: "OUT FIRST",
+  tileDealt: "DEALT",
+  tileTimesExpected: (times: string, expected: string) => `${times} · expected ${expected}`,
+
+  personalChartLabel: "TABLE SHARE BY EVENING",
+  personalChartHint: "one point per evening · 50% is mid-table",
+
+  personalFactsLabel: "WHAT STUCK",
+  factBest: "BEST EVENING",
+  factWorst: "WORST EVENING",
+  factStreak: "LONGEST CLEAN RUN",
+  bestReason: (games: string, share: string) =>
+    `${games}, ${share} of the table — no evening went higher.`,
+  worstReason: (games: string, share: string) =>
+    `${games}, ${share} of the table — no evening went lower.`,
+  streakHolder: (games: string) => `${games} clean`,
+  streakReason: (from: string, until: string) => `From ${from} to ${until} — not one fire.`,
+
+  rivalTitle: "CHIEF RIVAL",
+  rivalReason: (duels: string, lost: number, name: string) =>
+    `Left at the end together ${duels} — ${lost} of them ${name} was the fool.`,
+
   months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
   sheetDate: (day: string, month: string, year: string) => `${day} ${month} ${year}`,
 };

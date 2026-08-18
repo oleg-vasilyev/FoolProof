@@ -61,7 +61,7 @@ vi.mock("#scoresheet/render/palette.ts", () => ({
   colourFor: (column: number) => colourForSpy(column),
 }));
 
-vi.mock("#scoresheet/render/chronology/percent-label.ts", () => ({
+vi.mock("#scoresheet/render/percent-label.ts", () => ({
   percentLabel: (share: number) => percentLabelSpy(share),
 }));
 

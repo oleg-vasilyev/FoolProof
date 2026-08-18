@@ -35,7 +35,7 @@ sequenceDiagram
     participant C as Claude Code, the AI developer
     participant D as Claude Design, the design system
     participant K as Project skills, .claude/skills
-    participant S as Sonnet subagents
+    participant S as Subagents, one per piece of work
     participant H as Auto-linter, fires on its own
     participant R as Second AI agent, the reviewer
     participant G as GitHub, repository and CI
@@ -53,8 +53,11 @@ sequenceDiagram
     C->>U: the size of the phase in one line, tripped debt included
     U-->>C: agreed, or cut it down
     opt the feature affects the app's visuals
-        C->>D: build a mockup on the existing design system
-        D-->>C: the rendered mockup
+        C->>S: the poster-designer agent — the requirements, in words
+        S->>D: read the design system before drawing anything
+        D-->>S: every colour, size and rule the existing posters obey
+        S->>S: draw, rasterize with the real fonts, look at the PNG, redraw
+        S-->>C: the picture, its SVG, and which numbers it assumes exist
         C->>U: mockup for approval
         U-->>C: approved, or changes
     end

@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import type {
   CardRecord,
+  CareerHistory,
   ChatLocaleChoice,
   ChatSummary,
   Finalist,
@@ -59,6 +60,7 @@ export class RepositoryStub implements Repository {
   public idleCardsSpy = vi.fn();
   public gameNumberInSeriesSpy = vi.fn();
   public seriesChronologySpy = vi.fn();
+  public careerHistorySpy = vi.fn();
   public storageSummarySpy = vi.fn();
   public chatSummarySpy = vi.fn();
   public chatLocaleSpy = vi.fn();
@@ -83,6 +85,7 @@ export class RepositoryStub implements Repository {
     this.idleCardsSpy.mockReturnValue([]);
     this.gameNumberInSeriesSpy.mockReturnValue(FIRST_GAME_NUMBER);
     this.seriesChronologySpy.mockReturnValue(null);
+    this.careerHistorySpy.mockReturnValue(null);
     this.storageSummarySpy.mockReturnValue(EMPTY_STORAGE);
     this.chatSummarySpy.mockReturnValue(QUIET_CHATS);
     this.chatLocaleSpy.mockReturnValue(null);
@@ -191,6 +194,10 @@ export class RepositoryStub implements Repository {
 
   public seriesChronology(chatId: number): SeriesChronology | null {
     return this.seriesChronologySpy(chatId);
+  }
+
+  public careerHistory(chatId: number): CareerHistory | null {
+    return this.careerHistorySpy(chatId);
   }
 
   public chatLocale(chatId: number): string | null {

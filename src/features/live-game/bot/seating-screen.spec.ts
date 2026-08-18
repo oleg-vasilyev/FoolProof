@@ -6,8 +6,11 @@ import { cardRecordOf } from "#shared/repository/database-records.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
 import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
+import { InlineKeyboardStub } from "#shared/telegram/inline-keyboard.stub.ts";
 import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
 
+
+const keyboards = new InlineKeyboardStub();
 
 const rotateToLowestIdSpy = vi.fn();
 
@@ -45,11 +48,7 @@ vi.mock("#live-game/render/seating-screen/seating-message.ts", () => ({
   renderSeatingScreen: (table: unknown) => renderSeatingScreenSpy(table),
 }));
 
-const toMarkupSpy = vi.fn();
-
-vi.mock("#live-game/bot/inline-markup.ts", () => ({
-  toMarkup: (rows: unknown) => toMarkupSpy(rows),
-}));
+vi.mock("#shared/telegram/inline-keyboard.ts", () => keyboards.module);
 
 vi.mock("#live-game/bot/card/card-service.ts", () => ({
   PICKED_BY_HAND: null,
@@ -95,7 +94,7 @@ const CANCELLED_TEXT = "nothing started";
 
 const KEYBOARD = [[{ text: "Oleg", callback_data: "d" }]];
 
-const MARKUP = { inline_keyboard: "converted" };
+const MARKUP = { inline_keyboard: [[{ text: "converted", callback_data: "converted" }]] };
 
 const DATA = "s:3.7.f:0:p:7";
 
@@ -125,7 +124,7 @@ describe("seating-screen", () => {
     renderSeatedSpy.mockReturnValue(SEATED_TEXT);
     renderSeatingCancelledSpy.mockReturnValue(CANCELLED_TEXT);
     renderSeatingKeyboardSpy.mockReturnValue(KEYBOARD);
-    toMarkupSpy.mockReturnValue(MARKUP);
+    keyboards.toMarkupSpy.mockReturnValue(MARKUP);
     decodeSeatingCallbackSpy.mockReturnValue({
       order: ORDER,
       placed: NONE_PLACED,
@@ -145,7 +144,7 @@ describe("seating-screen", () => {
     it("should send the keyboard as markup, parsed as HTML", async () => {
       await askSeating(copy, ctx.command("/next_with Kim"), SEATS);
 
-      expect(toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
+      expect(keyboards.toMarkupSpy).toHaveBeenCalledWith(KEYBOARD);
       expect(ctx.lastReply().options).toEqual({ parse_mode: "HTML", reply_markup: MARKUP });
     });
 

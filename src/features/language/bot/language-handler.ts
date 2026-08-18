@@ -3,10 +3,8 @@ import type { LocaleRepository } from "#shared/repository/repository-contract.ts
 import type { LocaleReader } from "#shared/locale/chat-locale.ts";
 import { DEFAULT_LOCALE, type Locale } from "#shared/locale/locales.ts";
 import { decodeLanguageCallback } from "#language/render/language-callback-codec.ts";
-import {
-  renderLanguageKeyboard,
-  type InlineKeyboardRows,
-} from "#language/render/language-keyboard.ts";
+import { renderLanguageKeyboard } from "#language/render/language-keyboard.ts";
+import { toMarkup } from "#shared/telegram/inline-keyboard.ts";
 import {
   renderLanguageChosen,
   renderLanguageScreen,
@@ -19,10 +17,6 @@ export interface LanguageContext {
   readonly localeIn: LocaleReader;
   readonly publishMenu: (chatId: number, locale: Locale) => Promise<void>;
 }
-
-const toMarkup = (rows: InlineKeyboardRows) => ({
-  inline_keyboard: rows.map((row) => row.map((button) => ({ ...button }))),
-});
 
 const screenOptions = (copy: Copy, spoken: Locale) => ({
   parse_mode: "HTML" as const,

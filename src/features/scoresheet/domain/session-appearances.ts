@@ -1,5 +1,4 @@
-import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
-import { scoreSeries, type Cell } from "#scoresheet/domain/scoring.ts";
+import { scoreSeries, type Cell, type Contender, type Round } from "#scoresheet/domain/scoring.ts";
 import { CellKind, Finish } from "#scoresheet/domain/game-outcomes.ts";
 
 
@@ -61,7 +60,16 @@ const appearancesOf = (
         ]
   );
 
-export const sessionAppearances = (chronology: SeriesChronology): SessionAppearances => {
+export interface DealtGame extends Round {
+  readonly starterId: number | null;
+}
+
+export interface DealtSeries {
+  readonly players: readonly Contender[];
+  readonly games: readonly DealtGame[];
+}
+
+export const sessionAppearances = (chronology: DealtSeries): SessionAppearances => {
   const tableSizes = chronology.games.map((game) => game.placements.length);
 
   return {

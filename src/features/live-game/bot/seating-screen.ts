@@ -10,7 +10,7 @@ import {
   renderSeatingCancelled,
   renderSeatingScreen,
 } from "#live-game/render/seating-screen/seating-message.ts";
-import { toMarkup } from "#live-game/bot/inline-markup.ts";
+import { toMarkup } from "#shared/telegram/inline-keyboard.ts";
 import { PICKED_BY_HAND } from "#live-game/bot/card/card-service.ts";
 import { DEFAULT_LOCALE } from "#shared/locale/locales.ts";
 import { copyIn, type Copy } from "#live-game/copy.ts";

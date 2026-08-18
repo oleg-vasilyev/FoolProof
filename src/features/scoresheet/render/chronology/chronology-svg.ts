@@ -14,7 +14,7 @@ import { shareChart } from "#scoresheet/render/chronology/share-chart.ts";
 import { shareLegend } from "#scoresheet/render/chronology/share-legend.ts";
 import type { Copy } from "#scoresheet/copy.ts";
 import { EYEBROW_TRACKING, cardHeading } from "#scoresheet/render/card-heading.ts";
-import { gameTally } from "#scoresheet/render/session-tally.ts";
+import { gameTally } from "#scoresheet/render/tally-phrases.ts";
 import { line, rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
 
 

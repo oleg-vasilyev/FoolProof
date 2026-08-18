@@ -68,19 +68,23 @@ evidence that the gap costs more than the seam would.
 
 ---
 
-## An inline keyboard is described twice
+## Picking the holder of a title is written three times
 
-`live-game/render/inline-keyboard.ts` and `merge-names/render/merge-keyboard.ts`
-each declare their own `InlineButton` and `InlineKeyboardRows`, and each feature's
-`bot/` layer has its own `toMarkup` that copies the rows into the mutable shape
-grammY wants. The types are duplicated on purpose — `render/` may not import grammY,
-and a feature may not import another feature — so the alternative is
-`shared/telegram/`.
+`awards/pick-winner.ts` generalises "keep the challenger when it outranks the
+holder" for the evening's awards. `career/career-evenings.ts` and
+`career/career-rival.ts` each rewrite the same reduce with their own private
+`outranks`, because neither fits the existing one: the evenings pick needs a
+direction so one function can serve both the best and the worst night, and the
+rival ranks on three keys rather than a single merit. So the shapes genuinely
+differ, and collapsing them now would mean a `Merit` that carries a direction and
+a tie-break list — more machinery than the three call sites are asking for.
 
-**Move them when a third feature grows a keyboard.** Two copies of a six-line type
-is cheaper than a shared module nobody else needs; three is not.
+Worth naming rather than leaving unsaid: this phase deleted the inline-keyboard
+entry for hitting exactly this trigger, and created the next one in the same diff.
 
----
+**Collapse them when a fourth ranking appears**, or the first time two of the
+three disagree about a tie-break and the difference is a bug rather than a
+decision.
 
 ## Counting games is spelled out twice
 

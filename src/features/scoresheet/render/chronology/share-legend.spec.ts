@@ -91,11 +91,11 @@ vi.mock("#scoresheet/render/palette.ts", () => ({
   colourFor: (column: number) => colourForSpy(column),
 }));
 
-vi.mock("#scoresheet/render/chronology/percent-label.ts", () => ({
+vi.mock("#scoresheet/render/percent-label.ts", () => ({
   percentLabel: (share: number) => percentLabelSpy(share),
 }));
 
-vi.mock("#scoresheet/render/session-tally.ts", () => ({
+vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
 }));
 

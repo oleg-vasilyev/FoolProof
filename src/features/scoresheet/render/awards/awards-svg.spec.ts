@@ -74,7 +74,7 @@ vi.mock("#scoresheet/render/palette.ts", () => ({
   palette: { sheet: "sheet", cellFool: "fool-red", inkMuted: "muted" },
 }));
 
-vi.mock("#scoresheet/render/session-tally.ts", () => ({
+vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
 }));
 

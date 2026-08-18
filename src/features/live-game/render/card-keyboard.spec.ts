@@ -35,7 +35,7 @@ vi.mock("#live-game/render/callback-data-codec.ts", () => ({
   encodeCallback: (payload: CallbackPayload) => encodeCallbackSpy(payload),
 }));
 
-const { renderKeyboard } = await import("#live-game/render/inline-keyboard.ts");
+const { renderKeyboard } = await import("#live-game/render/card-keyboard.ts");
 
 const GAME_ID = 42;
 

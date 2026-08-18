@@ -17,6 +17,7 @@ beside the code it describes:
 | A committed picture may have gone stale | `refresh-the-pictures` skill |
 | The Claude Design page fell behind the code | `update-the-design-page` skill |
 | Changing the e2e harness itself | [`e2e/README.md`](e2e/README.md) |
+| A mockup for anything the bot draws | `poster-designer` agent |
 | A weekly look at the project and its server | `deep-checkup` agent |
 
 Four documents, one job each:

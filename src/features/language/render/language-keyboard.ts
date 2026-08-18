@@ -1,14 +1,8 @@
 import { LOCALES, type Locale } from "#shared/locale/locales.ts";
 import { encodeLanguageCallback } from "#language/render/language-callback-codec.ts";
+import type { InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#language/copy.ts";
 
-
-export interface InlineButton {
-  readonly text: string;
-  readonly callback_data: string;
-}
-
-export type InlineKeyboardRows = readonly (readonly InlineButton[])[];
 
 const captionFor = (copy: Copy, offered: Locale, spoken: Locale): string => {
   const name = copy.languageNames[offered];

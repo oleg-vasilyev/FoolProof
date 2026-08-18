@@ -4,9 +4,9 @@ import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
 import type { Copy } from "#scoresheet/copy.ts";
-import { gameTally } from "#scoresheet/render/session-tally.ts";
+import { gameTally } from "#scoresheet/render/tally-phrases.ts";
 import { line, text } from "#scoresheet/render/svg-tags.ts";
-import { percentLabel } from "#scoresheet/render/chronology/percent-label.ts";
+import { percentLabel } from "#scoresheet/render/percent-label.ts";
 
 
 const LABEL_TRACKING = 2;
