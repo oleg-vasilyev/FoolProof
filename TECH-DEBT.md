@@ -157,6 +157,32 @@ to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
 
 ---
 
+## Every `docs:check` rule is proven once, by hand, and never again
+
+`scripts/` has no specs and Stryker mutates only `src/**`, so the checks in
+`scripts/check-docs.ts` are held up by lint and the type checker alone. Neither can
+see the thing that actually goes wrong with them: a rule that runs, reports nothing,
+and would report nothing whatever the repository looked like. That has already
+shipped here — a poster rule whose regexp lost a backslash on the way through a
+generated patch matched every path and passed forever, and the same escaping bug
+was caught again while writing the approved-cases rule, one substring check away
+from shipping twice.
+
+The standing answer is the probe: break each branch on purpose, watch the complaint,
+put the repository back. It works, it caught both, and it is a thing a person
+remembers to do rather than a thing that happens. A rule added in a hurry is a rule
+with no proof, and it looks exactly like the others.
+
+Nothing here is cheap. Specs for `scripts/` would be the first in the folder and
+would need the whole filesystem stubbed; running each rule against a fixture
+repository means building one.
+
+**Give `check-docs.ts` a spec the first time a rule is found to have been passing
+vacuously in the field** — that is the second occurrence of a failure that has now
+happened once, and it is the evidence that a probe at authoring time is not enough.
+
+---
+
 ## The design page's sync marker proves the splice, not the push
 
 `docs/mockups/design-page.sync` holds the fingerprint of the drawings

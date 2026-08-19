@@ -249,6 +249,14 @@ const GALLERY_ENTRY = "gallery.ts";
 
 const A_GALLERY_SOURCE = /^gallery(-[a-z-]+)?\.ts$/;
 
+const AN_APPROVED_CASE_LIST = /^(gallery(-[a-z-]+)?)\.cases\.txt$/;
+
+const A_CASE_NAME = /^([a-z][a-z0-9-]*) — \S/;
+
+const A_LINE = /\r?\n/;
+
+const A_TS_FILE = /\.ts$/;
+
 const A_SPEC = /\.spec\.ts$/;
 
 const ASSEMBLES_A_POSTER = "svgOf(";
@@ -305,6 +313,58 @@ const postersOutOfTheGallery = (): readonly string[] => {
           `gathers, so nothing draws them — the cases and the rule that counts them ` +
           `would both stay green`
       ),
+  ];
+};
+
+const approvedListsIn = (): readonly string[] =>
+  readdirSync(MOCKUP_DIR).filter((name) => AN_APPROVED_CASE_LIST.test(name));
+
+const scriptBehind = (list: string): string =>
+  `${AN_APPROVED_CASE_LIST.exec(list)?.[FIRST_GROUP] ?? ""}.ts`;
+
+const casesApprovedIn = (list: string): readonly string[] =>
+  read(join(MOCKUP_DIR, list))
+    .split(A_LINE)
+    .map((line) => A_CASE_NAME.exec(line))
+    .filter((named) => named !== null)
+    .map((named) => named[FIRST_GROUP] ?? "");
+
+const casesMissingFrom = (list: string): readonly string[] => {
+  const script = scriptBehind(list);
+
+  if (!gallerySources().includes(script)) {
+    return [
+      `${MOCKUP_DIR}/${list}: names ${SCRIPTS_FOLDER}/${script}, which does not exist ` +
+        `— an approved list of edges that nothing was ever written to draw`,
+    ];
+  }
+
+  const drawn = read(join(SCRIPTS_FOLDER, script));
+
+  return casesApprovedIn(list)
+    .filter((approved) => !drawn.includes(`name: "${approved}"`))
+    .map(
+      (approved) =>
+        `${MOCKUP_DIR}/${list}: "${approved}" was approved on a contact sheet and ` +
+          `${SCRIPTS_FOLDER}/${script} draws no case by that name — an edge the owner ` +
+          `looked at is now drawn by nobody`
+    );
+};
+
+const casesOutOfStep = (): readonly string[] => {
+  const lists = approvedListsIn();
+
+  return [
+    ...gallerySources()
+      .filter((script) => !lists.some((list) => scriptBehind(list) === script))
+      .map(
+        (script) =>
+          `${SCRIPTS_FOLDER}/${script}: draws cases no approved list holds — put the ` +
+            `edges the owner signed off into ` +
+            `${MOCKUP_DIR}/${script.replace(A_TS_FILE, "")}.cases.txt, or the gallery ` +
+            `is judged against nothing`
+      ),
+    ...lists.flatMap(casesMissingFrom),
   ];
 };
 
@@ -493,6 +553,7 @@ const complaints = [
   ...crowdedLayers(),
   ...schemaOutOfStep(),
   ...postersOutOfTheGallery(),
+  ...casesOutOfStep(),
   ...mockupsOutOfStep(),
   ...designPageOutOfStep(),
   ...sitePostersOutOfStep(),

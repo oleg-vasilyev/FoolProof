@@ -61,9 +61,12 @@ sequenceDiagram
         C->>S: the poster-designer agent — the requirements, in words
         S->>D: read the design system before drawing anything
         D-->>S: every colour, size and rule the existing posters obey
-        S->>S: draw, rasterize with the real fonts, look at the PNG, redraw
-        S-->>C: the picture, its SVG, and which numbers it assumes exist
-        C->>U: mockup for approval
+        S->>S: name the cases the drawing must survive before drawing: emptiest, fullest, widest, each optional part gone, a tie
+        S->>S: draw every named case, rasterize with the real fonts, look at each PNG, redraw
+        S->>S: lay them into one contact sheet: every case, the neighbour it will sit next to, and an inventory naming every mark and label in a player's words
+        S->>C: commit the named cases as docs/mockups/[gallery script].cases.txt — docs:check later holds the gallery to them
+        S-->>C: the sheet, the SVG behind each panel, and which numbers the drawing assumes exist
+        C->>U: the contact sheet for approval — everything to compare, in one image
         U-->>C: approved, or changes
     end
     C->>K: the add-a-feature skill
@@ -142,7 +145,7 @@ sequenceDiagram
     note over C,K: Stage 5. Syncing every picture the project holds
     opt the change touched what the bot or the site draws
         opt the phase added a poster the gallery has never drawn
-            C->>C: give the new renderer its own gallery cases — npm run docs:check fails on one nobody drew
+            C->>C: copy the cases named at stage 1 into the gallery — npm run docs:check fails on a poster nobody drew
         end
         C->>C: the poster gallery: open every picture myself, look for overflowing text and broken lines
         C->>K: the refresh-the-pictures skill

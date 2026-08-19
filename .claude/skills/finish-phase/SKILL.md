@@ -135,6 +135,14 @@ five review findings, then ran the whole battery again: twenty-seven minutes of
 Stryker to learn the same thing twice. Ask before launching either: *could a
 reviewer's note change a file this run measures?* If yes, review first.
 
+**Answer that question about the diff the review will leave behind, not the one you
+have.** A phase touching no code at all looks immune — nothing the battery measures
+can change — so it was run alongside the review, and the review's best finding was
+that a list of edge cases travelled between two stages through memory. Closing it
+meant a new rule in `scripts/check-docs.ts`, and the battery ran again. Prose can
+turn into code; that is what a good finding does. So the default is **review first**,
+and running in parallel needs a reason you can say out loud.
+
 **Everything a check writes goes under `reports/`** — coverage, mutation, and
 Stryker's sandbox via `tempDirName`. One gitignored directory, and nothing about
 testing appears next to the source. A new check that wants somewhere to write has
@@ -305,8 +313,21 @@ green over both of them — then the first case written for it found a name runn
 the card and through the counter beside it, in the one place the bot prints user data
 at 126px. So `docs:check` now fails when a `render/**/*-svg.ts` exists that no
 `scripts/gallery*.ts` imports; a phase that adds a poster owes it cases in the same
-phase, and the cases are chosen the way the old ones were — the emptiest thing the
-renderer can be handed, the fullest, and the widest name.
+phase. **The cases are not invented here.** They were named at stage 1, before the
+mockup was drawn, and the owner approved a picture of each one — so this gate copies
+that list into the gallery and draws it against the real renderer. The list is a
+committed file — `docs/mockups/<gallery script>.cases.txt` — and `docs:check` fails
+when the gallery stops drawing something it holds, so **losing a case is mechanical
+now and needs no vigilance here.** What is still yours is the other direction: a case
+appearing for the first time at this gate was approved by nobody, and it is worth
+saying so out loud rather than quietly adding it.
+
+Both rules below are stated again in the `poster-designer` brief, deliberately — a
+subagent cannot load a skill, and a list of edges written without them is the very
+failure they describe. The brief carries a third they do not need here, since the
+list is written there: a case that cannot be constructed is a finding, not a panel
+quietly dropped. Two wordings, nothing checking them against each other — change one
+and change the other.
 
 **An edge case has to be hostile, not merely realistic.** A gallery case built from a
 plausible extreme is a sample, and a sample passes a broken limit as easily as a
@@ -337,6 +358,11 @@ same event; a chart captioned "one point per evening" drew no points at all, onl
 line and two unlabelled marks; and the one poster that explained its own percentage
 scale was not the one a player reads their own number off. Two of the three were
 reported by the owner, from the finished pictures, after the gate had passed.
+
+All three were comparisons, and comparisons are now made twice: the contact sheet at
+stage 1 puts the new drawing beside its neighbour before a renderer exists, and this
+gate reads the finished set again. The earlier pass is the cheaper one and does not
+replace this one — it judges a mockup, and only this gate sees what the code drew.
 
 **The cross-reading is also where the answer usually already is.** A new section that
 does the same job as one on another poster should copy that section's *structure*
