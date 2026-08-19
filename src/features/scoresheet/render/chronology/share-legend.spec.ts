@@ -65,9 +65,17 @@ const legendSlotOfSpy = vi.fn();
 
 const nameToFitSpy = vi.fn();
 
+const THE_USUAL_ADVANCE = 0.5;
+
 vi.mock("#scoresheet/render/card-metrics.ts", () => ({
   FONT_FAMILY: "Test Sans",
+  USUAL_ADVANCE: THE_USUAL_ADVANCE,
   fontSize: { legend: LEGEND_FONT, legendLabel: LABEL_FONT, legendTally: TALLY_FONT },
+}));
+
+vi.mock("#scoresheet/render/name-to-fit.ts", () => ({
+  nameToFit: (name: string, width: number, largest: number, advance: number) =>
+    nameToFitSpy(name, width, largest, advance),
 }));
 
 vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
@@ -83,7 +91,6 @@ vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
   chartBottomOf: () => CHART_BOTTOM,
   legendColumnsOf: (players: number) => legendColumnsOfSpy(players),
   legendSlotOf: (players: number) => legendSlotOfSpy(players),
-  nameToFit: (name: string, width: number, largest: number) => nameToFitSpy(name, width, largest),
 }));
 
 vi.mock("#scoresheet/render/palette.ts", () => ({
@@ -245,10 +252,11 @@ describe("shareLegend()", () => {
 
     it("should fit each name to its own slot, less the gutter, at the size it will be set in", () => {
       shareLegend(copy, sheetOf([{ running: [0.9] }, { running: [0.1] }], ["Oleg", "Anya"]));
-      const [, width, size] = nameToFitSpy.mock.calls[NONE] ?? [];
+      const [, width, size, advance] = nameToFitSpy.mock.calls[NONE] ?? [];
 
       expect(width).toBe(LEGEND_SLOT_MAX - LEGEND_GUTTER);
       expect(size).toBe(LEGEND_FONT);
+      expect(advance).toBe(THE_USUAL_ADVANCE);
     });
 
     it("should ask the layout for the grid its own table size calls for", () => {

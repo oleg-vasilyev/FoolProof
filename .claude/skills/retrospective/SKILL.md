@@ -5,6 +5,8 @@ description: Review how a stretch of development was actually carried out — re
 
 # Reviewing the process, not the code
 
+> **Stage 6** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
+
 Gate 5 asks whether the diff is releasable. This asks whether producing it was
 worth what it cost. It is the only gate whose subject is the transcript, so it has
 to run **while the transcript is still there** — at the end of a phase, or before

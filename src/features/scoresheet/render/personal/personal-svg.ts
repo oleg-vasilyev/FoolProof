@@ -1,9 +1,10 @@
-import { FONT_FAMILY, GRID_RIGHT, IMAGE_WIDTH, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { FONT_FAMILY, GRID_RIGHT, IMAGE_WIDTH, USUAL_ADVANCE, PAD, WIDEST_ADVANCE, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
 import { EYEBROW_TRACKING } from "#scoresheet/render/card-heading.ts";
 import { eveningTally, gameTally } from "#scoresheet/render/tally-phrases.ts";
 import { sessionDate } from "#scoresheet/render/session-date.ts";
 import { line, rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
+import { nameToFit, widthOf } from "#scoresheet/render/name-to-fit.ts";
 import { personalLayoutOf } from "#scoresheet/render/personal/personal-layout.ts";
 import {
   HEADING_RULE,
@@ -29,6 +30,17 @@ const TITLE_BASELINE = 286;
 
 const SUBTITLE_BASELINE = 227;
 
+const TITLE_GAP = 40;
+
+const subtitleOf = (copy: Copy, card: CareerCard): string =>
+  copy.personalSubtitle(
+    gameTally(copy, card.tally.games),
+    eveningTally(copy, card.tally.evenings)
+  );
+
+const titleRoom = (copy: Copy, card: CareerCard): number =>
+  GRID_RIGHT - PAD - TITLE_GAP - widthOf(subtitleOf(copy, card), fontSize.subtitle, USUAL_ADVANCE);
+
 const heading = (copy: Copy, card: CareerCard, ink: string): readonly string[] => [
   text(copy.personalEyebrow, {
     x: PAD,
@@ -38,7 +50,7 @@ const heading = (copy: Copy, card: CareerCard, ink: string): readonly string[] =
     "font-size": fontSize.eyebrow,
     "letter-spacing": EYEBROW_TRACKING,
   }),
-  text(card.displayName, {
+  text(nameToFit(card.displayName, titleRoom(copy, card), fontSize.title, WIDEST_ADVANCE), {
     x: PAD,
     y: TITLE_BASELINE,
     fill: ink,
@@ -54,20 +66,14 @@ const heading = (copy: Copy, card: CareerCard, ink: string): readonly string[] =
     "font-size": fontSize.date,
     "text-anchor": "end",
   }),
-  text(
-    copy.personalSubtitle(
-      gameTally(copy, card.tally.games),
-      eveningTally(copy, card.tally.evenings)
-    ),
-    {
-      x: GRID_RIGHT,
-      y: SUBTITLE_BASELINE,
-      fill: palette.inkMuted,
-      "font-family": FONT_FAMILY,
-      "font-size": fontSize.subtitle,
-      "text-anchor": "end",
-    }
-  ),
+  text(subtitleOf(copy, card), {
+    x: GRID_RIGHT,
+    y: SUBTITLE_BASELINE,
+    fill: palette.inkMuted,
+    "font-family": FONT_FAMILY,
+    "font-size": fontSize.subtitle,
+    "text-anchor": "end",
+  }),
   line({
     x1: PAD,
     y1: HEADING_RULE,

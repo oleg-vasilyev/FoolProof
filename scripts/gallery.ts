@@ -4,6 +4,7 @@ import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import type { Finalist, SeriesChronology } from "#shared/repository/repository-contract.ts";
+import { personalCards } from "./gallery-careers.ts";
 
 
 export const GALLERY_DIR = "reports/gallery";
@@ -258,4 +259,7 @@ const drawingsFor = (shown: Case): readonly Drawing[] => {
   ];
 };
 
-export const gallery = (): readonly Drawing[] => GALLERY.flatMap(drawingsFor);
+export const gallery = (): readonly Drawing[] => [
+  ...GALLERY.flatMap(drawingsFor),
+  ...personalCards(),
+];

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GRID_RIGHT, IMAGE_WIDTH, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { GRID_RIGHT, IMAGE_WIDTH, USUAL_ADVANCE, PAD, WIDEST_ADVANCE, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { PLAYER_COLOURS, palette } from "#scoresheet/render/palette.ts";
 import { HEADING_RULE, SECTION_LABEL_DROP, TILE_TRACKING, personalFont } from "#scoresheet/render/personal/personal-metrics.ts";
 import { CareerFactName, type CareerFact } from "#scoresheet/domain/career/facts/fact-catalogue.ts";
@@ -32,6 +32,10 @@ const svgOfSpy = vi.fn();
 
 const textSpy = vi.fn();
 
+const nameToFitSpy = vi.fn();
+
+const widthOfSpy = vi.fn();
+
 const EYEBROW_TRACKING = 9;
 
 vi.mock("#scoresheet/render/personal/personal-layout.ts", () => ({
@@ -57,6 +61,12 @@ vi.mock("#scoresheet/render/personal/top-fact-plate.ts", () => ({
 
 vi.mock("#scoresheet/render/card-heading.ts", () => ({ EYEBROW_TRACKING }));
 
+vi.mock("#scoresheet/render/name-to-fit.ts", () => ({
+  nameToFit: (name: string, width: number, size: number, advance: number) =>
+    nameToFitSpy(name, width, size, advance),
+  widthOf: (name: string, size: number, advance: number) => widthOfSpy(name, size, advance),
+}));
+
 vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
   eveningTally: (table: unknown, evenings: number) => eveningTallySpy(table, evenings),
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
@@ -81,6 +91,10 @@ const ONCE = 1;
 
 const ORIGIN = 0;
 
+const FIRST_CALL = 0;
+
+const ROOM_ASKED_FOR = 1;
+
 const COLUMN = 2;
 
 const SHEET_HEIGHT = 2400;
@@ -102,6 +116,10 @@ const EVENINGS = 11;
 const SINCE = "2026-01-05";
 
 const SUBJECT = "Oleg";
+
+const FITTED_NAME = "the-fitted-name";
+
+const SUBTITLE_WIDTH = 500;
 
 const NIGHTS = [{ seriesNo: 1, playedOn: SINCE, games: 3, decided: 3, fools: 0, firsts: 1, share: 0.5 }];
 
@@ -193,6 +211,8 @@ describe("renderPersonalCard()", () => {
     eveningTallySpy.mockReturnValue(EVENING_TALLY_MARK);
     gameTallySpy.mockReturnValue(GAME_TALLY_MARK);
     sessionDateSpy.mockReturnValue(DATE_MARK);
+    nameToFitSpy.mockReturnValue(FITTED_NAME);
+    widthOfSpy.mockReturnValue(SUBTITLE_WIDTH);
     lineSpy.mockImplementation(() => RULE_MARK);
     rectSpy.mockImplementation(() => BACKGROUND_MARK);
     svgOfSpy.mockImplementation(() => "<svg/>");
@@ -257,15 +277,54 @@ describe("renderPersonalCard()", () => {
     it("should title the card with the player's own name", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
-      expect(attributesOf(SUBJECT).x).toBe(PAD);
-      expect(attributesOf(SUBJECT)["font-weight"]).toBe("bold");
-      expect(attributesOf(SUBJECT)["font-size"]).toBe(fontSize.title);
+      expect(attributesOf(FITTED_NAME).x).toBe(PAD);
+      expect(attributesOf(FITTED_NAME)["font-weight"]).toBe("bold");
+      expect(attributesOf(FITTED_NAME)["font-size"]).toBe(fontSize.title);
+    });
+
+    it("should print the name it was handed back, never the name it was given", () => {
+      renderPersonalCard(copy, CARD, COLUMN);
+
+      expect(nameToFitSpy).toHaveBeenCalledWith(
+        SUBJECT,
+        expect.any(Number),
+        fontSize.title,
+        WIDEST_ADVANCE
+      );
+      expect(textSpy).not.toHaveBeenCalledWith(SUBJECT, expect.anything());
+    });
+
+    it("should measure the subtitle at the size and weight it is actually set in", () => {
+      renderPersonalCard(copy, CARD, COLUMN);
+
+      expect(widthOfSpy).toHaveBeenCalledWith(SUBTITLE, fontSize.subtitle, USUAL_ADVANCE);
+    });
+
+    it("should take the subtitle's own width out of the room the name is fitted to", () => {
+      const A_WIDER_SUBTITLE = SUBTITLE_WIDTH * 2;
+
+      renderPersonalCard(copy, CARD, COLUMN);
+      const roomy = nameToFitSpy.mock.calls[FIRST_CALL]?.[ROOM_ASKED_FOR] as number;
+
+      widthOfSpy.mockReturnValue(A_WIDER_SUBTITLE);
+      nameToFitSpy.mockClear();
+      renderPersonalCard(copy, CARD, COLUMN);
+      const tight = nameToFitSpy.mock.calls[FIRST_CALL]?.[ROOM_ASKED_FOR] as number;
+
+      expect(roomy - tight).toBe(A_WIDER_SUBTITLE - SUBTITLE_WIDTH);
+    });
+
+    it("should leave the name a gap short of the subtitle rather than butt them together", () => {
+      renderPersonalCard(copy, CARD, COLUMN);
+      const room = nameToFitSpy.mock.calls[FIRST_CALL]?.[ROOM_ASKED_FOR] as number;
+
+      expect(room).toBeLessThan(GRID_RIGHT - PAD - SUBTITLE_WIDTH);
     });
 
     it("should hang the title below the eyebrow that introduces it", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
-      expect(attributesOf(SUBJECT).y as number).toBeGreaterThan(
+      expect(attributesOf(FITTED_NAME).y as number).toBeGreaterThan(
         attributesOf(copy.personalEyebrow).y as number
       );
     });
@@ -319,7 +378,7 @@ describe("renderPersonalCard()", () => {
     it("should title the card in the colour of the column it was given", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
-      expect(attributesOf(SUBJECT).fill).toBe(INK);
+      expect(attributesOf(FITTED_NAME).fill).toBe(INK);
     });
 
     it("should give the chart, the rows and the plate the same ink as the title", () => {
@@ -335,8 +394,8 @@ describe("renderPersonalCard()", () => {
 
       renderPersonalCard(copy, CARD, ANOTHER_COLUMN);
 
-      expect(attributesOf(SUBJECT).fill).toBe(PLAYER_COLOURS[ANOTHER_COLUMN]);
-      expect(attributesOf(SUBJECT).fill).not.toBe(INK);
+      expect(attributesOf(FITTED_NAME).fill).toBe(PLAYER_COLOURS[ANOTHER_COLUMN]);
+      expect(attributesOf(FITTED_NAME).fill).not.toBe(INK);
     });
   });
 
@@ -351,7 +410,7 @@ describe("renderPersonalCard()", () => {
     it("should draw the tiles under the heading", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
-      expect(body().indexOf(TILES_MARK)).toBeGreaterThan(body().indexOf(marked(SUBJECT)));
+      expect(body().indexOf(TILES_MARK)).toBeGreaterThan(body().indexOf(marked(FITTED_NAME)));
     });
   });
 
@@ -452,7 +511,7 @@ describe("renderPersonalCard()", () => {
       expect(body()).toEqual([
         BACKGROUND_MARK,
         marked(copy.personalEyebrow),
-        marked(SUBJECT),
+        marked(FITTED_NAME),
         marked(SINCE_LINE),
         marked(SUBTITLE),
         RULE_MARK,
@@ -529,7 +588,7 @@ describe("renderPersonalCard()", () => {
       expect(body()).toEqual([
         BACKGROUND_MARK,
         marked(copy.personalEyebrow),
-        marked(SUBJECT),
+        marked(FITTED_NAME),
         marked(SINCE_LINE),
         marked(SUBTITLE),
         RULE_MARK,

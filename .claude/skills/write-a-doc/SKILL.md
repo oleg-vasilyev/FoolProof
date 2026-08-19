@@ -5,6 +5,8 @@ description: Decide which FoolProof document a fact belongs in, and how to add i
 
 # Writing a document here
 
+> **Stage 6** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
+
 The five documents have been de-duplicated **twice**. Both times the cause was the
 same: a phase had twenty facts to record, the dividing question is applied to one
 fact at a time, and when a fact seems to fit two files the safe-feeling move is to

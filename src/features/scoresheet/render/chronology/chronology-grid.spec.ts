@@ -38,6 +38,13 @@ const FITTED_TEXT = "the-fitted-name";
 
 const NAME_GUTTER = 20;
 
+const THE_USUAL_ADVANCE = 0.5;
+
+vi.mock("#scoresheet/render/name-to-fit.ts", () => ({
+  nameToFit: (name: string, width: number, largest: number, advance: number) =>
+    nameToFitSpy(name, width, largest, advance),
+}));
+
 vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
   CELL_INSET: 2,
   CELL_SHRINK: 4,
@@ -46,13 +53,13 @@ vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
   cellFontOf: () => CELL_FONT,
   columnCentre: (_sheet: unknown, column: number) =>
     GRID_LEFT + column * COLUMN_WIDTH + COLUMN_WIDTH / 2,
-  nameToFit: (name: string, width: number, largest: number) => nameToFitSpy(name, width, largest),
   indexFontOf: () => INDEX_FONT,
   indexStrideOf: () => indexStrideSpy(),
 }));
 
 vi.mock("#scoresheet/render/card-metrics.ts", () => ({
   FONT_FAMILY: "Test Sans",
+  USUAL_ADVANCE: THE_USUAL_ADVANCE,
   fontSize: { columnName: COLUMN_NAME_FONT },
 }));
 
@@ -156,7 +163,8 @@ describe("chronology", () => {
       expect(nameToFitSpy).toHaveBeenCalledWith(
         "Konstantinovna",
         COLUMN_WIDTH - NAME_GUTTER,
-        COLUMN_NAME_FONT
+        COLUMN_NAME_FONT,
+        THE_USUAL_ADVANCE
       );
     });
 

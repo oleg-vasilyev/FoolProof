@@ -5,6 +5,8 @@ description: Bring the Durak Stats Poster System page in Claude Design back in s
 
 # Updating the design page
 
+> **Stage 5** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
+
 The page is the design's home and the renderer is the drawing's home; whichever
 moved, the page must end up showing what the code actually draws. A page
 showing an intention instead is exactly the state Rev. 1.0 was found in: eight

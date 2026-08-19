@@ -213,7 +213,7 @@ not a gap in the audit.
 
 What the e2e suite never asks: `node:sqlite` is synchronous — no transaction
 can hold across an await, but every query blocks the event loop, so measure
-the slowest one. Rasterizing is the CPU-hot path: time both posters at the
+the slowest one. Rasterizing is the CPU-hot path: time every poster at the
 worst edges (the refresh-the-pictures skill has the measuring one-liner) and
 compare against the e2e quiet window `QUIET_MS`. Check whether grammY consumes
 updates sequentially (the default) and what one slow render does to the next
@@ -265,6 +265,49 @@ Both numbers exist to be acted on, not admired: they are what the next checkup
 is planned from. A phase that ran for an hour and found nothing three runs in a
 row belongs on the cut list below, and say so in the report rather than leaving
 the next reader to rediscover it.
+
+## Calibrating this agent — plant a fault and see whether it is found
+
+A checkup that reports nothing looks exactly like a checkup that looked at
+nothing, which is the same problem a lint zone has: this project has shipped two
+zones that never fired, and a documents rule whose regex had lost its escaping
+and could not match on the platform it ran on. Both were found by breaking
+something on purpose. This agent deserves the same treatment, and the owner asked
+for it.
+
+**Plant only where nothing else looks.** A fault in `src/` is caught by the tests
+this agent already runs, so it proves nothing. The menu is the places with no
+automatic gate, one per phase this brief claims:
+
+| Phase | A fault worth planting |
+|---|---|
+| 2 | the unit file on disk edited away from the repo's copy |
+| 3 | a `PLAN.md` sentence made false — a limit, a refusal, a measured number |
+| 3½ | a memory file naming a flag or a file the code no longer has |
+| 5 | a spec whose assertion cannot fail, added to a file with a good score |
+| 7 | a guard dropped from `deploy/configure-server.sh` |
+| 8 | a committed picture replaced with an older render |
+| 9½ | a measuring command in a skill left broken by a signature change |
+
+**Choose from the table, never by inspiration.** A fault invented on the spot
+lands where the planter already believes the agent looks, which measures
+confidence rather than coverage.
+
+**Never plant into `main` and never into a tag.** This agent clones the released
+tag cold, so a working-tree edit is invisible to it and a committed one would be
+a deliberate bug in the history. A calibration run gets a throwaway clone prepared
+in advance and is told to audit *that path* instead of cloning for itself — the
+one time the isolation rule in phase 0 is handed its subject rather than taking
+it.
+
+**Grade per phase, not overall.** A miss inside a phase this brief claims is a
+real miss and becomes an edit to that phase's instructions. A miss outside every
+phase is a gap in the brief, which is a different repair and a more valuable one.
+
+**Run one rarely.** A calibration costs a whole checkup. Earn it: two consecutive
+checkups that came back thin, or a rewrite of this brief, or a new phase added
+here. A calibration that changes nothing in this file was not worth its price, and
+that verdict belongs in its report.
 
 ## If time runs short
 

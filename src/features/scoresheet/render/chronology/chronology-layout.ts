@@ -1,6 +1,6 @@
 import { scoreSeries, type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
-import { GRID_RIGHT, IMAGE_MAX_HEIGHT, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { GRID_RIGHT, IMAGE_MAX_HEIGHT, USUAL_ADVANCE, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
 
 
 export const GUTTER = 86;
@@ -36,12 +36,6 @@ export const CELL_SHRINK = CELL_INSET * HALF;
 const CELL_FONT_RATIO = 0.52;
 
 const INDEX_FONT_RATIO = 0.42;
-
-const NAME_ADVANCE = 0.58;
-
-const NOTHING = 0;
-
-const ELLIPSIS = "…";
 
 export const cellFontOf = (rowHeight: number): number => Math.round(rowHeight * CELL_FONT_RATIO);
 
@@ -84,7 +78,7 @@ const LEGEND_PAD = LEGEND_TALLY_DROP - LEGEND_ROW_PITCH + LEGEND_TAIL;
 
 const LEGEND_NAME_MIN = 14;
 
-const LEGEND_SLOT_MIN = LEGEND_GUTTER + LEGEND_NAME_MIN * fontSize.legend * NAME_ADVANCE;
+const LEGEND_SLOT_MIN = LEGEND_GUTTER + LEGEND_NAME_MIN * fontSize.legend * USUAL_ADVANCE;
 
 const LEGEND_COLUMNS_MAX = Math.floor(PLOT_WIDTH / LEGEND_SLOT_MIN);
 
@@ -105,14 +99,6 @@ const gamesRoomFor = (players: number): number =>
 
 export const maxGamesFor = (players: number): number =>
   Math.floor(gamesRoomFor(players) / ROW_HEIGHT_MIN);
-
-export const nameToFit = (name: string, width: number, size: number): string => {
-  const fits = Math.floor(width / (size * NAME_ADVANCE));
-
-  return name.length <= fits
-    ? name
-    : `${name.slice(NOTHING, Math.max(fits - ELLIPSIS.length, NOTHING))}${ELLIPSIS}`;
-};
 
 export interface Sheet {
   readonly startedOn: string;

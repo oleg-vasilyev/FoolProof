@@ -157,6 +157,43 @@ to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
 
 ---
 
+## The `/personal` roster keyboard is the only one with no ceiling
+
+`roster-keyboard.ts` draws one row per player the chat has ever seated, and nothing
+caps the list. Every other keyboard in the bot is bounded by the table — at most ten
+seats — but this one grows with the chat's whole history, and it is a *reply markup*,
+which the Bot API limits by payload size rather than by a documented row count. Nine
+players today, so nothing is close; what the real limit is has never been measured,
+only assumed, and the failure mode would be `/personal` refusing to send its screen
+at all rather than degrading.
+
+**Measure the real ceiling and paginate when a chat passes twenty players** — or
+sooner, the first time a `sendMessage` carrying this markup is refused. The measuring
+is the work: a scenario that builds the markup for fifty names and asks a real
+`getMe`-less grammY to serialize it says more than the documentation does.
+
+---
+
+## Two attendance facts fire together, on the same players, forever
+
+`everPresent` and `foundingMember` are structural rather than earned: whoever has
+been at every evening since the first gets both, on every card they ever draw, and
+they outrank most of the measured facts once a career is long. The gallery's
+`a-long-career` and `always-burned` cases show it — two of the three rows are the
+same two facts, and only the top row and the plate differ. For the regulars, who are
+exactly the people asking for the card most often, that is less variety than the
+twenty rules suggest.
+
+The fix is not obvious enough to guess at: it could be overshadowing (a founder who
+never missed one needs only one of the two lines), a decay by career length, or a
+rule that a card may carry at most one attendance fact.
+
+**Pick one when a chat has run twenty evenings** — that is when a regular's card has
+had the same two rows on it long enough to be worth complaining about, and when
+there is real data to choose between the three shapes rather than argue.
+
+---
+
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to

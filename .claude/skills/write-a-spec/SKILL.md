@@ -5,6 +5,8 @@ description: Write or rewrite a test in FoolProof — what to mock, how to shape
 
 # Writing a spec
 
+> **Stage 1** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
+
 ## The rule
 
 **A spec tests one file. Everything that file imports is mocked.**

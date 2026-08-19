@@ -8,7 +8,7 @@ import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { decodePersonalCallback } from "#scoresheet/render/personal/personal-callback-codec.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
 import { renderRosterKeyboard } from "#scoresheet/render/personal/roster-keyboard.ts";
-import { copyIn, type Copy } from "#scoresheet/copy.ts";
+import { copyIn } from "#scoresheet/copy.ts";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";
 
 
@@ -34,8 +34,8 @@ export const onPersonal = async (context: PersonalContext, ctx: Command): Promis
   });
 };
 
-const refuse = async (copy: Copy, ctx: CallbackTap): Promise<void> => {
-  await ctx.answerCallbackQuery(copy.personalStale);
+const refuse = async (ctx: CallbackTap, notice: string): Promise<void> => {
+  await ctx.answerCallbackQuery(notice);
 };
 
 export const onPersonalTap = async (context: PersonalContext, ctx: CallbackTap): Promise<void> => {
@@ -45,13 +45,13 @@ export const onPersonalTap = async (context: PersonalContext, ctx: CallbackTap):
   const history = chatId === undefined ? null : context.repo.careerHistory(chatId);
 
   if (history === null || playerId === null) {
-    return refuse(copy, ctx);
+    return refuse(ctx, copy.personalStale);
   }
 
   const card = careerCard(history, playerId);
 
   if (card === null) {
-    return refuse(copy, ctx);
+    return refuse(ctx, copy.personalStale);
   }
 
   await ctx.editMessageText(copy.personalDrawing(card.displayName));

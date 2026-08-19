@@ -5,6 +5,8 @@ description: Add a query or write to the FoolProof repository layer. Use wheneve
 
 # Adding a repository method
 
+> **Stage 1** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
+
 Features never touch the database. They depend on the interface and call named
 domain methods, so adding a query means adding a method — never a query built at
 the call site.

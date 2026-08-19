@@ -214,7 +214,7 @@ describe("personal-handler", () => {
       expect(locales.readSpy).toHaveBeenCalledTimes(NEVER);
     });
 
-    it("should refuse a tap naming a player the career no longer holds", async () => {
+    it("should refuse a tap the career cannot build a card for", async () => {
       careerCardSpy.mockReturnValue(null);
 
       await onPersonalTap(contextOf(), ctx.tap(TAP_DATA));

@@ -333,6 +333,25 @@ describe("theBadPatch()", () => {
     });
   });
 
+  it("should keep the first of two patches of the same length, not the later one", () => {
+    const career = [
+      playedAs(Finish.Fool, FIRST_DAY),
+      playedAs(Finish.Fool, SECOND_DAY),
+      playedAs(Finish.Fool, THIRD_DAY),
+      playedAs(Finish.Middle, FOURTH_DAY),
+      playedAs(Finish.Fool, FIFTH_DAY),
+      playedAs(Finish.Fool, SIXTH_DAY),
+      playedAs(Finish.Fool, SEVENTH_DAY),
+    ];
+
+    expect(theBadPatch(subjectOf(career))).toEqual({
+      name: CareerFactName.TheBadPatch,
+      games: ENOUGH_TO_HURT,
+      from: FIRST_DAY,
+      until: THIRD_DAY,
+    });
+  });
+
   it("should not let a drawn game break a patch of burns", () => {
     const career = [
       playedAs(Finish.Fool, FIRST_DAY),

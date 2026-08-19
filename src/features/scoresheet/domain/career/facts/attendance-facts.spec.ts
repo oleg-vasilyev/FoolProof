@@ -78,6 +78,10 @@ const EIGHTH_DAY = "2026-05-08";
 
 const NINTH_DAY = "2026-05-09";
 
+const TENTH_DAY = "2026-05-10";
+
+const ELEVENTH_DAY = "2026-05-11";
+
 const DAYS: readonly string[] = [
   FIRST_DAY,
   SECOND_DAY,
@@ -88,6 +92,8 @@ const DAYS: readonly string[] = [
   SEVENTH_DAY,
   EIGHTH_DAY,
   NINTH_DAY,
+  TENTH_DAY,
+  ELEVENTH_DAY,
 ];
 
 const FIRST_EVENING = 1;
@@ -103,6 +109,8 @@ const SIXTH_EVENING = 6;
 const SEVENTH_EVENING = 7;
 
 const NINTH_EVENING = 9;
+
+const ELEVENTH_EVENING = 11;
 
 const A_TALLY: CareerTally = {
   games: SOME_GAMES,
@@ -292,6 +300,18 @@ describe("theHomecoming()", () => {
       name: CareerFactName.TheHomecoming,
       missed: LONG_ENOUGH_AWAY,
       playedOn: NINTH_DAY,
+    });
+  });
+
+  it("should keep the first of two absences of the same length, not the latest", () => {
+    const A_LONGER_HISTORY = evenings(ELEVENTH_EVENING);
+
+    const attended = [FIRST_EVENING, SIXTH_EVENING, ELEVENTH_EVENING];
+
+    expect(theHomecoming(subjectOf(A_LONGER_HISTORY, attended))).toEqual({
+      name: CareerFactName.TheHomecoming,
+      missed: LONG_ENOUGH_AWAY,
+      playedOn: SIXTH_DAY,
     });
   });
 

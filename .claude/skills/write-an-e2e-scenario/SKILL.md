@@ -5,6 +5,8 @@ description: Write or change a scenario in FoolProof's e2e/ folder — when one 
 
 # Writing an e2e scenario
 
+> **Stage 4** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
+
 A unit mocks everything around one file. A scenario does the opposite: it plays a
 whole evening against a **real `src/main.ts` process** on a real SQLite file, with a
 fake Telegram on the other end. How the harness is built, and what is wrong with it,

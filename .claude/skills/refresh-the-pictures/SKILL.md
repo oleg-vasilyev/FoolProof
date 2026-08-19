@@ -5,6 +5,8 @@ description: Audit every committed picture after an implemented visual change an
 
 # Refreshing the committed pictures
 
+> **Stage 5** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
+
 Every picture in the repository is a copy of something the code or the design
 can change without it. Two families are gated, the rest have nothing but this
 table — so the skill *is* the checklist: after any implemented visual change,

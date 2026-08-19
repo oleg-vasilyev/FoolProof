@@ -1,6 +1,7 @@
 import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
-import { LEGEND_GUTTER, LEGEND_LABEL_DROP, LEGEND_NAME_DROP, LEGEND_ROW_PITCH, LEGEND_RULE_DROP, LEGEND_SHARE_DROP, LEGEND_TALLY_DROP, PLOT_LEFT, PLOT_WIDTH, chartBottomOf, legendColumnsOf, legendSlotOf, nameToFit, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
-import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { LEGEND_GUTTER, LEGEND_LABEL_DROP, LEGEND_NAME_DROP, LEGEND_ROW_PITCH, LEGEND_RULE_DROP, LEGEND_SHARE_DROP, LEGEND_TALLY_DROP, PLOT_LEFT, PLOT_WIDTH, chartBottomOf, legendColumnsOf, legendSlotOf, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
+import { FONT_FAMILY, USUAL_ADVANCE, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { nameToFit } from "#scoresheet/render/name-to-fit.ts";
 import { type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
 import type { Copy } from "#scoresheet/copy.ts";
@@ -45,7 +46,7 @@ const entryOf = (
   const slotWidth = legendSlotOf(seated);
   const left = PLOT_LEFT + (rank % columns) * slotWidth;
   const rowTop = chartBottomOf(sheet) + Math.floor(rank / columns) * LEGEND_ROW_PITCH;
-  const fitted = nameToFit(player.displayName, slotWidth - LEGEND_GUTTER, fontSize.legend);
+  const fitted = nameToFit(player.displayName, slotWidth - LEGEND_GUTTER, fontSize.legend, USUAL_ADVANCE);
 
   return [
     line({

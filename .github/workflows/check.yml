@@ -1,4 +1,4 @@
-# The push gate: lint, types and documents only. main is released by tag, so a
+# The push gate: lint, types, the e2e harness's own tests, and documents. main is released by tag, so a
 # red test on main is tolerable — but the website ships straight out of docs/ on
 # main with every push, and npm ci catches a lock file that only fails on a clean
 # clone. The full battery, tests included, runs on the release tag instead:

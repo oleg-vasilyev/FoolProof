@@ -5,6 +5,8 @@ description: Add a new feature folder to FoolProof — the layers, the feature c
 
 # Adding a feature
 
+> **Stage 1** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
+
 **A feature is a folder you can delete.** Removing `features/scoresheet/` must leave
 the rest compiling and passing, and adding one must not require editing another.
 The cost is paid in exactly two files — `src/main.ts` and `package.json` — and

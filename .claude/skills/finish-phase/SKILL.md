@@ -5,6 +5,10 @@ description: Run a development phase in FoolProof from the work being taken on t
 
 # Finishing a phase
 
+> **Stage 3** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md) — where
+> the flow enters this skill. The gates it opens run on through the four stages after
+> that one, which reach for their own skills as they go.
+
 A phase ends with a release, and a phase is done when the code is *releasable* —
 not when it works. Run all seven gates before the final commit and act on what
 they say. None of them is advisory.
@@ -287,12 +291,32 @@ can change a drawing. It opens when the diff touched anything a picture is made 
 stays shut otherwise, with the commit message carrying the reason
 (`write-a-commit` has the shape).
 
-`node scripts/tools.ts gallery` draws both posters across every edge the product has
+`node scripts/tools.ts gallery` draws every poster across every edge the product has
 to survive — one game, two players, ten long names, more games than the sheet holds,
-an evening nobody lost, arrivals and departures, an award that crowns the whole
-table — into `reports/gallery/`. **Open every picture.** Nothing above this gate can
-see a poster that has started drawing nonsense: the SVG matches the renderer, the
-tests match the SVG, and all of it stays green while a line runs off the card.
+an evening nobody lost, arrivals and departures, a career one evening old, a career
+too long for the sheet, the longest name a player may have — into `reports/gallery/`.
+**Open every picture.** Nothing above this gate can see a poster that has started
+drawing nonsense: the SVG matches the renderer, the tests match the SVG, and all of
+it stays green while a line runs off the card.
+
+**A poster the gallery never draws is a gate that silently does not apply.**
+`/personal` shipped in two releases without a single gallery case, and this gate ran
+green over both of them — then the first case written for it found a name running off
+the card and through the counter beside it, in the one place the bot prints user data
+at 126px. So `docs:check` now fails when a `render/**/*-svg.ts` exists that no
+`scripts/gallery*.ts` imports; a phase that adds a poster owes it cases in the same
+phase, and the cases are chosen the way the old ones were — the emptiest thing the
+renderer can be handed, the fullest, and the widest name.
+
+**An edge case has to be hostile, not merely realistic.** A gallery case built from a
+plausible extreme is a sample, and a sample passes a broken limit as easily as a
+working one. The name fix above was measured, written, drawn and *looked at* against
+a 32-character Russian name, and it read perfectly; the same 32 characters made of
+the widest letter in the alphabet still ran through the counter beside it, because
+the width model was out by a third for bold. One case, one character changed, and a
+shipped-looking fix became a real one. So the widest input is **constructed** —
+the widest glyph, the longest run, the emptiest history — and never drawn from what
+a player plausibly types.
 
 The output is **specific claims, not a verdict.** "Looked, fine" is the green light
 with nothing behind it that `write-an-e2e-scenario` warns about — if you cannot name
@@ -355,6 +379,18 @@ prose about a change that has nothing new to say.
 
 The judgement call is honest sizing, so name the size **before** starting, in one
 line, and let the user shrink it.
+
+**A finding that says UNVERIFIED is a question, not a task.** An audit reports what
+it could not establish as well as what it found, and that word is the whole content
+of the entry: resolving it can delete the work rather than direct it. A checkup
+reported that one refusal toast "also answers this case; reachability UNVERIFIED",
+and the phase closing it wrote the second notice, in two languages, with its handler
+branch, its spec case and a `PLAN.md` paragraph — then the reviewer asked the
+question, and forty minutes of reading the schema showed the state cannot occur:
+only confirmed games reach the roster, confirming places every seat, and `/merge`
+moves both tables. All five files came back out. The paragraph that replaced them —
+*why* the two tables cannot disagree — is worth more than the feature was, and it
+was available before the first line was written. Answer the word first.
 
 **A list somebody hands you is not this list.** Work driven by an audit's findings
 register, a review's report or a user's numbered requests carries its own sense of

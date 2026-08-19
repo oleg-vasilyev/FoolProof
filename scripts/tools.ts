@@ -93,7 +93,7 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     },
   },
   gallery: {
-    does: `draw every edge of the two posters into ${GALLERY_DIR}/ for a human or an agent to look at`,
+    does: `draw every edge of every poster into ${GALLERY_DIR}/ for a human or an agent to look at`,
     usage: "node scripts/tools.ts gallery",
     run: drawGallery,
   },

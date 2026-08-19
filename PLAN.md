@@ -1113,6 +1113,24 @@ dealt, never having missed an evening, being there for the first evening on reco
 still being new. These qualify on plain counts, the way most awards do, and they
 are what stops a young table's card from being empty.
 
+**The name in the heading is the one place the bot sets user data at 126px, and it
+shares that band with the counter on the right**, so it is cut to fit rather than
+allowed to overrun — the same ellipsis the chronology's column heads use. Fitting is
+by character count against an assumed advance, and there is no font metric to hand:
+measured off the rendered posters, ordinary text runs about 0.58 of the size and the
+widest bold Cyrillic about 0.8. The heading reserves the wider figure because being
+wrong there prints one line on top of another, while being wrong in a chronology
+column only crowds a gutter.
+
+**Everyone the roster offers has a card to draw**, which is not obvious from the
+schema: the roster is built from who was *seated* (`game_players`) and the card from
+who was *placed* (`game_events`), two different tables that could in principle
+disagree. They cannot. Only confirmed games reach either query, confirming a card
+writes a placement for every remaining seat rather than only the recorded exits, and
+`/merge` moves both tables together. So the single refusal a tap can get is about the
+*screen* being older than the bot, and there is no second refusal for a player with
+an empty career — a state the bot has no way to produce.
+
 The evening chart needs five evenings to be worth drawing; below that it is three
 points and a straight line, so the section disappears and the sheet shrinks again.
 **Every section of this card is optional, and the sheet's height is the sum of

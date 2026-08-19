@@ -3,7 +3,12 @@
 The bot is developed by an AI agent — Claude Code, driven by the skills in
 [`.claude/skills/`](.claude/skills/). This drawing is the map, not the
 authority: each stage's rules live in the skill it names, and on any
-disagreement the skill wins, then the drawing is fixed. The retrospective
+disagreement the skill wins, then the drawing is fixed. The two are tied
+together in both directions — every skill opens by naming the stage it belongs
+to, and `npm run docs:check` fails when a stage reaches for a skill that names a
+different one, so neither can be renumbered quietly. **Stages** are what a skill
+may cite; the step numbers beside the arrows are positional and shift the moment
+a step is inserted, so nothing outside this file refers to them. The retrospective
 stage keeps it honest — a lesson that changes a default redraws the step it
 touches, in the same commit, and a redraw of this drawing is always reported
 in the closing message with the numbers behind it, never made quietly — a
@@ -127,6 +132,9 @@ sequenceDiagram
     rect rgb(255, 247, 237)
     note over C,K: Stage 5. Syncing every picture the project holds
     opt the change touched what the bot or the site draws
+        opt the phase added a poster the gallery has never drawn
+            C->>C: give the new renderer its own gallery cases — npm run docs:check fails on one nobody drew
+        end
         C->>C: the poster gallery: open every picture myself, look for overflowing text and broken lines
         C->>K: the refresh-the-pictures skill
         K-->>C: the table of every committed picture, what draws it, and which have no gate but the table
@@ -160,7 +168,7 @@ sequenceDiagram
     C->>K: the write-a-commit skill
     K-->>C: the title says what the bot does differently, the body says why the old shape was wrong, plus the Gates paragraph
     C->>G: commit and push to main
-    G->>G: CI on push — npm run check:push: lint, types, documents — the site ships straight from main, tests wait for the tag
+    G->>G: CI on push — npm run check:push: lint, types, the e2e harness's own tests, documents — the site ships straight from main, the app's tests wait for the tag
     alt push check red
         G-->>C: the failure report
         C->>C: fix and push again
@@ -178,6 +186,28 @@ sequenceDiagram
         V->>G: asks every five minutes whether a new tag appeared
         G-->>V: the newest release tag
         V->>V: installs it — npm ci and a service restart, a failed install rolling back on its own
+    end
+    end
+
+    rect rgb(236, 254, 255)
+    note over U,V: Stage 8. The checkup — occasional, and it is allowed to fix nothing
+    opt roughly weekly, and always after a release worth watching
+        U->>C: look the whole thing over
+        C->>S: the deep-checkup agent
+        S->>G: clone the released tag cold and run the full battery on it — trust nothing already on this machine
+        S->>V: ask the running bot and its server what is true, rather than what should be
+        V-->>S: the service, the timers, the disk, which tag is actually deployed
+        S->>S: execute the edges instead of reasoning about them, and write evidence beside every claim
+        S-->>C: findings, most severe first — and not one thing repaired
+        loop for each finding
+            C->>C: check it myself before believing it — a confident agent is not evidence
+            alt worth doing now
+                C->>C: it becomes the next phase, and that phase owes all seven gates
+            else not now
+                C->>C: TECH-DEBT.md with the trigger, or persistent memory when the lesson outlives the code
+            end
+        end
+        C->>U: what was found, what I verified, and the one thing I would do first
     end
     end
 ```

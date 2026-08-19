@@ -6,6 +6,7 @@ import {
   GRID_RIGHT,
   IMAGE_WIDTH,
   PAD,
+  USUAL_ADVANCE,
   fontSize,
 } from "#scoresheet/render/card-metrics.ts";
 
@@ -42,7 +43,6 @@ const {
   legendRowsOf,
   legendSlotOf,
   maxGamesFor,
-  nameToFit,
 } = await import("#scoresheet/render/chronology/chronology-layout.ts");
 
 const TELEGRAM_LONG_SIDE_LIMIT = 2560;
@@ -432,8 +432,6 @@ describe("legendRowsOf(), legendColumnsOf() and legendSlotOf()", () => {
 
   const AN_ODD_TABLE = 7;
 
-  const A_LONG_NAME = "Александра-Константиновна";
-
   const TABLE_SIZES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
   it("should keep a table that fits on one row on one row", () => {
@@ -480,9 +478,9 @@ describe("legendRowsOf(), legendColumnsOf() and legendSlotOf()", () => {
     const ROOM_FOR_A_NAME = 14;
 
     for (const players of TABLE_SIZES) {
-      const fitted = nameToFit(A_LONG_NAME, legendSlotOf(players) - LEGEND_GUTTER, fontSize.legend);
+      const room = (legendSlotOf(players) - LEGEND_GUTTER) / (fontSize.legend * USUAL_ADVANCE);
 
-      expect(fitted.length, String(players)).toBeGreaterThanOrEqual(ROOM_FOR_A_NAME);
+      expect(Math.floor(room), String(players)).toBeGreaterThanOrEqual(ROOM_FOR_A_NAME);
     }
   });
 
@@ -525,73 +523,5 @@ describe("maxGamesFor()", () => {
     );
 
     expect(ceilings).toEqual([...ceilings].sort((one, other) => other - one));
-  });
-});
-
-describe("nameToFit()", () => {
-  const DESIGN_SIZE = 32;
-
-  const COLUMN = 200;
-
-  const ADVANCE = 0.58;
-
-  const ELLIPSIS = "…";
-
-  const NAMES_THAT_FIT = 10;
-
-  const widthOf = (fitted: string): number => fitted.length * DESIGN_SIZE * ADVANCE;
-
-  it("should leave a short name alone", () => {
-    expect(nameToFit("Al", COLUMN, DESIGN_SIZE)).toBe("Al");
-  });
-
-  it("should leave a name that fills the width exactly alone", () => {
-    const exact = "x".repeat(NAMES_THAT_FIT);
-
-    expect(nameToFit(exact, COLUMN, DESIGN_SIZE)).toBe(exact);
-  });
-
-  it("should cut a name one character too long rather than let it overflow", () => {
-    const over = "x".repeat(NAMES_THAT_FIT + 1);
-
-    expect(nameToFit(over, COLUMN, DESIGN_SIZE)).not.toBe(over);
-  });
-
-  it("should mark a cut name with an ellipsis, so nobody reads it as the whole name", () => {
-    const absurd = "x".repeat(COLUMN);
-
-    expect(nameToFit(absurd, COLUMN, DESIGN_SIZE).endsWith(ELLIPSIS)).toBe(true);
-  });
-
-  it("should keep a cut name inside the width it was given", () => {
-    const absurd = "x".repeat(COLUMN);
-
-    expect(widthOf(nameToFit(absurd, COLUMN, DESIGN_SIZE))).toBeLessThanOrEqual(COLUMN);
-  });
-
-  it("should count the ellipsis against the width rather than hang it off the end", () => {
-    const absurd = "x".repeat(COLUMN);
-
-    expect(nameToFit(absurd, COLUMN, DESIGN_SIZE)).toHaveLength(NAMES_THAT_FIT);
-  });
-
-  it("should fit the longest name a player may have into the narrowest legend slot", () => {
-    const LONGEST_NAME = 32;
-
-    const NARROWEST_SLOT = 120;
-
-    const fitted = nameToFit("x".repeat(LONGEST_NAME), NARROWEST_SLOT, DESIGN_SIZE);
-
-    expect(fitted.length * DESIGN_SIZE * ADVANCE).toBeLessThanOrEqual(NARROWEST_SLOT);
-  });
-
-  it("should cut to nothing but the ellipsis when the slot fits no letters at all", () => {
-    const NO_ROOM = 1;
-
-    expect(nameToFit("Konstantinovna", NO_ROOM, DESIGN_SIZE)).toBe(ELLIPSIS);
-  });
-
-  it("should cope with a name of no length at all", () => {
-    expect(nameToFit("", COLUMN, DESIGN_SIZE)).toBe("");
   });
 });

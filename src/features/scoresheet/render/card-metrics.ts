@@ -8,6 +8,10 @@ export const GRID_RIGHT = IMAGE_WIDTH - PAD;
 
 export const FONT_FAMILY = "Noto Sans";
 
+export const USUAL_ADVANCE = 0.58;
+
+export const WIDEST_ADVANCE = 0.8;
+
 export const fontSize = {
   eyebrow: 30,
   title: 126,

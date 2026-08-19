@@ -5,6 +5,8 @@ description: Write a commit message or a release message in this repository's vo
 
 # Writing a commit message
 
+> **Stage 7** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
+
 Two kinds exist here, and nothing else: a **working commit** on `main`, and a
 **release** made by `npm version`. Both are prose in the project's voice — no
 conventional-commit prefixes, no scopes, no bullet-list changelogs, no file

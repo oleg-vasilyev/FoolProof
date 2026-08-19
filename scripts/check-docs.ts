@@ -244,6 +244,69 @@ const drawingsOutOfStep = (
         ];
   });
 
+const GALLERY_ENTRY = "gallery.ts";
+
+const A_GALLERY_SOURCE = /^gallery(-[a-z-]+)?\.ts$/;
+
+const A_SPEC = /\.spec\.ts$/;
+
+const ASSEMBLES_A_POSTER = "svgOf(";
+
+const RENDER_LAYER = "render";
+
+const SCRIPTS_FOLDER = "scripts";
+
+const PAST_THE_FEATURES_FOLDER = 2;
+
+const filesIn = (folder: string): readonly string[] =>
+  readdirSync(folder, { withFileTypes: true }).flatMap((entry) =>
+    entry.isDirectory() ? filesIn(join(folder, entry.name)) : [join(folder, entry.name)]
+  );
+
+const everyPoster = (): readonly string[] =>
+  readdirSync(FEATURE_FOLDERS, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((feature) => join(FEATURE_FOLDERS, feature.name, RENDER_LAYER))
+    .filter((layer) => existsSync(layer))
+    .flatMap(filesIn)
+    .filter((file) => !A_SPEC.test(file))
+    .filter((file) => read(file).includes(ASSEMBLES_A_POSTER));
+
+const aliasFor = (poster: string): string =>
+  `#${normalize(poster).split(/[\\/]/).slice(PAST_THE_FEATURES_FOLDER).join("/")}`;
+
+const gallerySources = (): readonly string[] =>
+  readdirSync(SCRIPTS_FOLDER).filter((name) => A_GALLERY_SOURCE.test(name));
+
+const galleryText = (): string =>
+  gallerySources()
+    .map((name) => read(join(SCRIPTS_FOLDER, name)))
+    .join("");
+
+const postersOutOfTheGallery = (): readonly string[] => {
+  const drawn = galleryText();
+  const entry = read(join(SCRIPTS_FOLDER, GALLERY_ENTRY));
+
+  return [
+    ...everyPoster()
+      .filter((poster) => !drawn.includes(aliasFor(poster)))
+      .map(
+        (poster) =>
+          `${poster}: assembles a poster the gallery draws no case through, so the ` +
+          `poster gate has nothing to say about it — give it cases in ${SCRIPTS_FOLDER}/`
+      ),
+    ...gallerySources()
+      .filter((name) => name !== GALLERY_ENTRY)
+      .filter((name) => !entry.includes(`./${name}`))
+      .map(
+        (name) =>
+          `${SCRIPTS_FOLDER}/${name}: holds gallery cases that ${GALLERY_ENTRY} never ` +
+          `gathers, so nothing draws them — the cases and the rule that counts them ` +
+          `would both stay green`
+      ),
+  ];
+};
+
 const mockupsOutOfStep = (): readonly string[] =>
   drawingsOutOfStep(MOCKUP_DIR, posters(), "mockups");
 
@@ -286,12 +349,72 @@ const FLOW_DOCUMENT = "DEVELOPMENT-FLOW.md";
 
 const SKILLS_FOLDER = ".claude/skills";
 
-const A_NAMED_SKILL = /the ([a-z][a-z-]*[a-z]) skill/g;
+const A_NAMED_SKILL = /the ([a-z][a-z0-9-]*[a-z0-9]) skill/g;
 
 const A_NAMED_COMMAND = /npm run ([a-z][a-z:-]*[a-z])/g;
 
 const namesIn = (text: string, pattern: RegExp): readonly string[] =>
   [...text.matchAll(pattern)].map((match) => match[FIRST_GROUP] ?? "");
+
+const A_STAGE = /^\s*note over [^:]+: Stage (\d+)\./gm;
+
+const A_DECLARED_STAGE = /^> \*\*Stages? ([^*]+)\*\*/m;
+
+const A_NUMBER = /\d+/g;
+
+const NEXT_MARK = 1;
+
+const skillFile = (skill: string): string => join(SKILLS_FOLDER, skill, "SKILL.md");
+
+const skillsByStage = (drawing: string): readonly (readonly [string, number])[] => {
+  const marks = [...drawing.matchAll(A_STAGE)];
+
+  return marks.flatMap((mark, index) => {
+    const opens = mark.index ?? NOTHING;
+    const closes = marks[index + NEXT_MARK]?.index ?? drawing.length;
+
+    return namesIn(drawing.slice(opens, closes), A_NAMED_SKILL).map(
+      (skill) => [skill, Number(mark[FIRST_GROUP])] as const
+    );
+  });
+};
+
+const stagesClaimedBy = (skill: string): readonly number[] => {
+  if (!existsSync(skillFile(skill))) {
+    return [];
+  }
+
+  const declared = A_DECLARED_STAGE.exec(withoutFencedBlocks(read(skillFile(skill))));
+
+  return (declared?.[FIRST_GROUP]?.match(A_NUMBER) ?? []).map(Number);
+};
+
+const stagesOutOfStep = (): readonly string[] => {
+  const reached = skillsByStage(read(FLOW_DOCUMENT));
+
+  const reaches = (skill: string, stage: number): boolean =>
+    reached.some(([named, drawn]) => named === skill && drawn === stage);
+
+  return [
+    ...reached
+      .filter(([skill, stage]) => !stagesClaimedBy(skill).includes(stage))
+      .map(
+        ([skill, stage]) =>
+          `${skillFile(skill)}: ${FLOW_DOCUMENT} reaches for this skill in stage ` +
+          `${String(stage)}, and the skill claims no such stage — say "> **Stage ` +
+          `${String(stage)}**" under its title`
+      ),
+    ...readdirSync(SKILLS_FOLDER).flatMap((skill) =>
+      stagesClaimedBy(skill)
+        .filter((stage) => !reaches(skill, stage))
+        .map(
+          (stage) =>
+            `${skillFile(skill)}: claims stage ${String(stage)}, which ${FLOW_DOCUMENT} ` +
+            `does not reach for it in — a claim nobody draws is a number that drifts`
+        )
+    ),
+  ];
+};
 
 const flowOutOfStep = (): readonly string[] => {
   const drawing = read(FLOW_DOCUMENT);
@@ -345,11 +468,13 @@ const unreachableHelp = (): readonly string[] => {
 const complaints = [
   ...brokenLinks(),
   ...flowOutOfStep(),
+  ...stagesOutOfStep(),
   ...unreachableHelp(),
   ...featuresMissingFromTheTree(),
   ...scriptsOutOfStep(),
   ...crowdedLayers(),
   ...schemaOutOfStep(),
+  ...postersOutOfTheGallery(),
   ...mockupsOutOfStep(),
   ...sitePostersOutOfStep(),
   ...siteCssOutOfStep(),
