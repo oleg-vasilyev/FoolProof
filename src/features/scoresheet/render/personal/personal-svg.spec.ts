@@ -47,7 +47,7 @@ vi.mock("#scoresheet/render/personal/career-tiles.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/personal/evening-chart.ts", () => ({
-  eveningChart: (chart: unknown) => eveningChartSpy(chart),
+  eveningChart: (table: unknown, chart: unknown) => eveningChartSpy(table, chart),
 }));
 
 vi.mock("#scoresheet/render/personal/fact-rows.ts", () => ({
@@ -384,7 +384,7 @@ describe("renderPersonalCard()", () => {
     it("should give the chart, the rows and the plate the same ink as the title", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
-      expect(eveningChartSpy).toHaveBeenCalledWith(expect.objectContaining({ ink: INK }));
+      expect(eveningChartSpy).toHaveBeenCalledWith(copy, expect.objectContaining({ ink: INK }));
       expect(factRowsSpy).toHaveBeenCalledWith(copy, FACTS, INK);
       expect(topFactPlateSpy).toHaveBeenCalledWith(copy, PLATE, INK);
     });
@@ -427,9 +427,9 @@ describe("renderPersonalCard()", () => {
     it("should hang the section's hint off the right edge on the label's baseline", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
-      expect(attributesOf(copy.personalChartHint).x).toBe(GRID_RIGHT);
-      expect(attributesOf(copy.personalChartHint).y).toBe(CHART_LABEL);
-      expect(attributesOf(copy.personalChartHint)["text-anchor"]).toBe("end");
+      expect(attributesOf(copy.sheetShareHint).x).toBe(GRID_RIGHT);
+      expect(attributesOf(copy.sheetShareHint).y).toBe(CHART_LABEL);
+      expect(attributesOf(copy.sheetShareHint)["text-anchor"]).toBe("end");
     });
 
     it("should rule the section off above its own label, flat across the card", () => {
@@ -449,7 +449,7 @@ describe("renderPersonalCard()", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
       expect(eveningChartSpy).toHaveBeenCalledTimes(ONCE);
-      expect(eveningChartSpy).toHaveBeenCalledWith({
+      expect(eveningChartSpy).toHaveBeenCalledWith(copy, {
         nights: NIGHTS,
         top: PLOT_TOP,
         best: BEST,
@@ -464,7 +464,7 @@ describe("renderPersonalCard()", () => {
       renderPersonalCard(copy, CARD, COLUMN);
 
       expect(textSpy).not.toHaveBeenCalledWith(copy.personalChartLabel, expect.anything());
-      expect(textSpy).not.toHaveBeenCalledWith(copy.personalChartHint, expect.anything());
+      expect(textSpy).not.toHaveBeenCalledWith(copy.sheetShareHint, expect.anything());
     });
 
     it("should plot nothing when the layout left the plot out", () => {

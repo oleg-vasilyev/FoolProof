@@ -125,10 +125,10 @@ export const renderPersonalCard = (copy: Copy, card: CareerCard, column: number)
     ...careerTiles(copy, card),
     ...(sheet.chartLabel === null
       ? []
-      : sectionLabel(copy.personalChartLabel, copy.personalChartHint, sheet.chartLabel)),
+      : sectionLabel(copy.personalChartLabel, copy.sheetShareHint, sheet.chartLabel)),
     ...(sheet.plotTop === null
       ? []
-      : eveningChart({
+      : eveningChart(copy, {
           nights: card.nights,
           top: sheet.plotTop,
           best: card.best,

@@ -62,32 +62,20 @@ export const eveningShares = (
   appearances: readonly CareerAppearance[]
 ): readonly EveningShare[] => byNight(appearances).flatMap(summarise);
 
-const outranks = (challenger: EveningShare, holder: EveningShare, wanted: number): boolean => {
-  const theirs = challenger.share * wanted;
-  const held = holder.share * wanted;
+const ALONE = 1;
 
-  return (
-    theirs > held ||
-    (theirs === held && challenger.games > holder.games) ||
-    (theirs === held && challenger.games === holder.games && challenger.seriesNo < holder.seriesNo)
-  );
+type Furthest = (...shares: readonly number[]) => number;
+
+const pick = (nights: readonly EveningShare[], furthestOf: Furthest): EveningShare | null => {
+  const judged = nights.filter((night) => night.games >= ENOUGH_TO_JUDGE_A_NIGHT);
+  const furthest = furthestOf(...judged.map((night) => night.share));
+  const holders = judged.filter((night) => night.share === furthest);
+
+  return holders.length === ALONE ? (holders[FIRST] ?? null) : null;
 };
 
-const pick = (nights: readonly EveningShare[], wanted: number): EveningShare | null =>
-  nights
-    .filter((night) => night.games >= ENOUGH_TO_JUDGE_A_NIGHT)
-    .reduce<EveningShare | null>(
-      (holder, challenger) =>
-        holder === null || outranks(challenger, holder, wanted) ? challenger : holder,
-      null
-    );
-
-const HIGHEST = 1;
-
-const LOWEST = -1;
-
 export const bestEvening = (nights: readonly EveningShare[]): EveningShare | null =>
-  pick(nights, HIGHEST);
+  pick(nights, Math.max);
 
 export const worstEvening = (nights: readonly EveningShare[]): EveningShare | null =>
-  pick(nights, LOWEST);
+  pick(nights, Math.min);

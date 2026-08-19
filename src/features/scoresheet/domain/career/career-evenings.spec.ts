@@ -56,6 +56,8 @@ const BRILLIANT = 0.9;
 
 const MIDDLING = 0.5;
 
+const A_GOOD_NIGHT = 0.75;
+
 const DISMAL = 0.1;
 
 const NO_FOOLS = 0;
@@ -246,31 +248,49 @@ describe("bestEvening()", () => {
     expect(bestEvening(nights)?.seriesNo).toBe(SECOND_NIGHT);
   });
 
-  it("should prefer the longer evening when two went equally well", () => {
+  it("should name no best evening when two evenings went equally well", () => {
     const nights = [
       nightOf(FIRST_NIGHT, ENOUGH_GAMES, MIDDLING),
       nightOf(SECOND_NIGHT, ONE_GAME_MORE, MIDDLING),
     ];
 
-    expect(bestEvening(nights)?.seriesNo).toBe(SECOND_NIGHT);
+    expect(bestEvening(nights)).toBeNull();
   });
 
-  it("should prefer the earlier evening when share and length both tie", () => {
+  it("should not let a longer evening break a tie on share", () => {
     const nights = [
       nightOf(LATE_NIGHT, ENOUGH_GAMES, MIDDLING),
       nightOf(EARLY_NIGHT, ENOUGH_GAMES, MIDDLING),
     ];
 
-    expect(bestEvening(nights)?.seriesNo).toBe(EARLY_NIGHT);
+    expect(bestEvening(nights)).toBeNull();
   });
 
-  it("should keep the first of two nights of the same evening", () => {
+  it("should still name the best when only one evening holds the highest share", () => {
+    const nights = [
+      nightOf(FIRST_NIGHT, ENOUGH_GAMES, MIDDLING),
+      nightOf(SECOND_NIGHT, ENOUGH_GAMES, A_GOOD_NIGHT),
+    ];
+
+    expect(bestEvening(nights)?.seriesNo).toBe(SECOND_NIGHT);
+  });
+
+  it("should ignore a tie held by evenings too short to judge", () => {
+    const nights = [
+      nightOf(FIRST_NIGHT, ENOUGH_GAMES, MIDDLING),
+      nightOf(SECOND_NIGHT, ONE_GAME_SHORT, MIDDLING),
+    ];
+
+    expect(bestEvening(nights)?.seriesNo).toBe(FIRST_NIGHT);
+  });
+
+  it("should name nothing when two nights of one evening hold the same share", () => {
     const nights = [
       nightOf(FIRST_NIGHT, ENOUGH_GAMES, MIDDLING, A_DAY),
       nightOf(FIRST_NIGHT, ENOUGH_GAMES, MIDDLING, NEXT_DAY),
     ];
 
-    expect(bestEvening(nights)?.playedOn).toBe(A_DAY);
+    expect(bestEvening(nights)).toBeNull();
   });
 
   it("should not let a longer evening beat a better one", () => {
@@ -291,13 +311,13 @@ describe("bestEvening()", () => {
     expect(bestEvening(nights)?.seriesNo).toBe(LATE_NIGHT);
   });
 
-  it("should not let an earlier evening beat a longer one of the same share", () => {
+  it("should let no length or order break a tie on share", () => {
     const nights = [
       nightOf(LATE_NIGHT, ONE_GAME_MORE, MIDDLING),
       nightOf(EARLY_NIGHT, ENOUGH_GAMES, MIDDLING),
     ];
 
-    expect(bestEvening(nights)?.seriesNo).toBe(LATE_NIGHT);
+    expect(bestEvening(nights)).toBeNull();
   });
 });
 
@@ -328,22 +348,22 @@ describe("worstEvening()", () => {
     expect(worstEvening(nights)?.seriesNo).toBe(SECOND_NIGHT);
   });
 
-  it("should prefer the longer evening when two went equally badly", () => {
+  it("should still name the worst when only one evening holds the lowest share", () => {
     const nights = [
       nightOf(FIRST_NIGHT, ENOUGH_GAMES, MIDDLING),
-      nightOf(SECOND_NIGHT, ONE_GAME_MORE, MIDDLING),
+      nightOf(SECOND_NIGHT, ENOUGH_GAMES, A_GOOD_NIGHT),
     ];
 
-    expect(worstEvening(nights)?.seriesNo).toBe(SECOND_NIGHT);
+    expect(worstEvening(nights)?.seriesNo).toBe(FIRST_NIGHT);
   });
 
-  it("should prefer the earlier evening when share and length both tie", () => {
+  it("should name no worst evening when two evenings went equally badly", () => {
     const nights = [
       nightOf(LATE_NIGHT, ENOUGH_GAMES, MIDDLING),
       nightOf(EARLY_NIGHT, ENOUGH_GAMES, MIDDLING),
     ];
 
-    expect(worstEvening(nights)?.seriesNo).toBe(EARLY_NIGHT);
+    expect(worstEvening(nights)).toBeNull();
   });
 
   it("should not let a longer evening beat a worse one", () => {

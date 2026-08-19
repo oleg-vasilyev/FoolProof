@@ -1133,6 +1133,20 @@ an empty career — a state the bot has no way to produce.
 
 The evening chart needs five evenings to be worth drawing; below that it is three
 points and a straight line, so the section disappears and the sheet shrinks again.
+It carries a point per evening and singles out two of them, **and it singles them
+out only when they are the sole holders of their share**: a ring on one of six
+evenings that all went equally badly claims a distinction the data does not have,
+and the reader cannot see the tie-break that chose it. So an extreme that is shared
+is not marked at all, which also means the two marks disappear together on a career
+that never varied.
+
+**The same event carries the same name everywhere a player can read it.** Who moved
+first is picked on the live card, counted on the player card and celebrated in two
+facts, and for two releases the live card called it *going first* while the stats
+card credited *the dealer* — a different action, in both languages. The bot deals
+nothing; the fool's neighbour attacks first. This is a documentation rule with
+teeth only because a poster and a screen are reviewed apart: the gallery gate now
+reads the finished pictures against each other and against the live card.
 **Every section of this card is optional, and the sheet's height is the sum of
 whatever survived** — a chat that played one evening gets a short, honest card
 rather than a tall one full of gaps.

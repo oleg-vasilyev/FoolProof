@@ -318,6 +318,36 @@ shipped-looking fix became a real one. So the widest input is **constructed** �
 the widest glyph, the longest run, the emptiest history — and never drawn from what
 a player plausibly types.
 
+**And a case earns its description only after the drawing agrees with it.** A gallery
+case here was added to exercise two marks that only appear when a best and a worst
+evening are unique, and its own sentence promised "evenings that actually differ" —
+but the fate behind it repeated on a three-night cycle, so the shares tied, the marks
+stayed hidden, and the case proved nothing while reading as though it proved the one
+thing it was written for. The sentence beside a case is a claim about the picture, so
+open the picture before believing it.
+
+**Then read the pictures against each other, not only each on its own.** A poster can
+be flawless alone and still contradict the one beside it, and no single-picture pass
+can see it. Lay the set out and ask: does the same thing carry the same name on every
+poster and on the live card; does every symbol drawn have something that says what it
+means; does a caption promise something the picture does not show. All three failed at
+once here, and none of them was visible in a single image: the live card asked *who
+went first* while the stats card credited *the dealer*, in both languages, for the
+same event; a chart captioned "one point per evening" drew no points at all, only a
+line and two unlabelled marks; and the one poster that explained its own percentage
+scale was not the one a player reads their own number off. Two of the three were
+reported by the owner, from the finished pictures, after the gate had passed.
+
+**The cross-reading is also where the answer usually already is.** A new section that
+does the same job as one on another poster should copy that section's *structure*
+before a word of new copy is written for it. The chart caption here was written three
+times — scale and legend crammed into one line, which collided with its own section
+label in Russian; then split across two places; then finally shaped like the
+chronology's, which puts the scale in the caption and the symbols somewhere else and
+had been sitting in the gallery the whole time. The owner settled it in one glance by
+putting the two charts side by side. Look at the working example first; three renders
+were spent reasoning about text lengths instead.
+
 The output is **specific claims, not a verdict.** "Looked, fine" is the green light
 with nothing behind it that `write-an-e2e-scenario` warns about — if you cannot name
 what you saw on a picture, you did not look at it. Of each, ask:

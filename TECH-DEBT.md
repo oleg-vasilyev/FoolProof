@@ -157,6 +157,24 @@ to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
 
 ---
 
+## The keys still say "dealt" where the strings now say "first move"
+
+Every user-visible string about who opens a game was moved off dealing wording, in
+both languages, because the bot deals nothing — the fool's neighbour attacks first,
+and the live card had always called it *going first*. The identifiers were left
+behind: `tileDealt` now holds `THE FIRST MOVE`, `neverDealt` holds
+`NEVER ONCE WENT FIRST`, and `dealtGiftReason` / `dealtCurseReason` sit beside them,
+backed by `CareerFactName.NeverDealt` and `neverDealt()` in `opening-facts.ts`. So a
+key claims something its contents contradict — the fault CLAUDE.md names for file
+names, one level down. Nothing a player can see, and the rename runs through the
+fact catalogue, `RAREST_FIRST`, the fact-lines switch and four specs.
+
+**Rename when the opening facts are next opened for any other reason** — the cost is
+almost entirely in the same files that change then, and doing it alone buys nothing a
+reader could not get from this entry.
+
+---
+
 ## The `/personal` roster keyboard is the only one with no ceiling
 
 `roster-keyboard.ts` draws one row per player the chat has ever seated, and nothing

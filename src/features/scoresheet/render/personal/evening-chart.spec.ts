@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { copy } from "#scoresheet/copy.en.ts";
 import { FONT_FAMILY, GRID_RIGHT } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
 import {
   MARK_RADIUS,
+  POINT_RADIUS,
   MARK_STROKE,
+  CHART_TOP_DROP,
   PLOT_AXIS_DROP,
   PLOT_HEIGHT,
   PLOT_LEFT,
@@ -76,6 +79,8 @@ const INK = "player-ink";
 
 const CURVE_MARK = "the-curve";
 
+const FIRST_EVENING = 0;
+
 const BEST_AT = 2;
 
 const WORST_AT = 5;
@@ -121,6 +126,15 @@ const gridlineAt = (share: number): Record<string, unknown> =>
 const points = (): readonly (readonly [number, number])[] =>
   (polylineSpy.mock.calls[0]?.[0] ?? []) as readonly (readonly [number, number])[];
 
+const circlesOf = (radius: number): readonly Record<string, unknown>[] =>
+  circleSpy.mock.calls
+    .map((call) => call[0] as Record<string, unknown>)
+    .filter((attributes) => attributes.r === radius);
+
+const marks = (): readonly Record<string, unknown>[] => circlesOf(MARK_RADIUS);
+
+const dots = (): readonly Record<string, unknown>[] => circlesOf(POINT_RADIUS);
+
 const curveAttributes = (): Record<string, unknown> =>
   (pathSpy.mock.calls[0]?.[0] ?? {}) as Record<string, unknown>;
 
@@ -138,27 +152,27 @@ describe("eveningChart()", () => {
 
   describe("the grid behind the curve", () => {
     it("should rule exactly five lines across the plot", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(lineSpy).toHaveBeenCalledTimes(GRIDLINES);
     });
 
     it("should rule from the plot's own left edge to the card's right edge", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(gridlineAt(MIDDLE).x1).toBe(PLOT_LEFT);
       expect(gridlineAt(MIDDLE).x2).toBe(GRID_RIGHT);
     });
 
     it("should put the floor line at the bottom and the ceiling at the top", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(gridlineAt(FLOOR).y1).toBe(BOTTOM);
       expect(gridlineAt(CEILING).y1).toBe(PLOT_TOP);
     });
 
     it("should keep every gridline flat", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       for (const share of [FLOOR, QUARTER, MIDDLE, THREE_QUARTERS, CEILING]) {
         expect(gridlineAt(share).y2).toBe(gridlineAt(share).y1);
@@ -166,13 +180,13 @@ describe("eveningChart()", () => {
     });
 
     it("should dash the mid-table line so it reads as the reference", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(gridlineAt(MIDDLE)["stroke-dasharray"]).toBeTruthy();
     });
 
     it("should leave every other line solid", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       for (const share of [FLOOR, QUARTER, THREE_QUARTERS, CEILING]) {
         expect(gridlineAt(share)["stroke-dasharray"]).toBeUndefined();
@@ -180,7 +194,7 @@ describe("eveningChart()", () => {
     });
 
     it("should stroke the mid-table line differently from its neighbours", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(gridlineAt(MIDDLE).stroke).toBe(palette.ruling);
       expect(gridlineAt(QUARTER).stroke).toBe(palette.cellAbsentEdge);
@@ -188,7 +202,7 @@ describe("eveningChart()", () => {
     });
 
     it("should number every gridline through the percent label", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       for (const share of [FLOOR, QUARTER, MIDDLE, THREE_QUARTERS, CEILING]) {
         expect(percentLabelSpy).toHaveBeenCalledWith(share);
@@ -197,14 +211,14 @@ describe("eveningChart()", () => {
     });
 
     it("should hang the share numbers outside the plot, ending at its edge", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(attributesOf(pct(MIDDLE)).x as number).toBeLessThan(PLOT_LEFT);
       expect(attributesOf(pct(MIDDLE))["text-anchor"]).toBe("end");
     });
 
     it("should sit a share number just under its own line, not above it", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(attributesOf(pct(MIDDLE)).y as number).toBeGreaterThan(
         gridlineAt(MIDDLE).y1 as number
@@ -212,7 +226,7 @@ describe("eveningChart()", () => {
     });
 
     it("should set the share numbers in the card's own axis type", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(attributesOf(pct(MIDDLE))["font-size"]).toBe(personalFont.axis);
       expect(attributesOf(pct(MIDDLE))["font-family"]).toBe(FONT_FAMILY);
@@ -222,27 +236,27 @@ describe("eveningChart()", () => {
 
   describe("the curve through the evenings", () => {
     it("should plot one point per night", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(points()).toHaveLength(NIGHTS);
     });
 
     it("should start at the plot's left edge and end at the card's right edge", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(points()[0]?.[0]).toBe(PLOT_LEFT);
       expect(points().at(-ONCE)?.[0]).toBe(GRID_RIGHT);
     });
 
     it("should space the nights evenly across the plot", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
       const step = (points()[1]?.[0] ?? NEVER) - (points()[0]?.[0] ?? NEVER);
 
       expect((points()[BEST_AT]?.[0] ?? NEVER) - (points()[1]?.[0] ?? NEVER)).toBe(step);
     });
 
     it("should lift a better evening higher up the plot", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(points()[0]?.[1] as number).toBeGreaterThan(points().at(-ONCE)?.[1] as number);
     });
@@ -250,20 +264,20 @@ describe("eveningChart()", () => {
     it("should put a night's own share where its gridline would be", () => {
       const night = eveningOf(NEVER);
 
-      eveningChart(chartOf({ nights: [night, eveningOf(ONCE)] }));
+      eveningChart(copy, chartOf({ nights: [night, eveningOf(ONCE)] }));
 
       expect(points()[0]?.[1]).toBe(BOTTOM - night.share * PLOT_HEIGHT);
     });
 
     it("should draw the curve as the polyline it just built", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(curveAttributes().d).toBe(CURVE_MARK);
       expect(polylineSpy).toHaveBeenCalledTimes(ONCE);
     });
 
     it("should stroke the curve in the player's own colour and never fill it", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(curveAttributes().stroke).toBe(INK);
       expect(curveAttributes().fill).toBe("none");
@@ -271,7 +285,7 @@ describe("eveningChart()", () => {
     });
 
     it("should place a single evening at the plot's left edge without dividing by nothing", () => {
-      eveningChart(chartOf({ nights: [eveningOf(NEVER)] }));
+      eveningChart(copy, chartOf({ nights: [eveningOf(NEVER)] }));
 
       expect(points()).toHaveLength(ONCE);
       expect(points()[0]?.[0]).toBe(PLOT_LEFT);
@@ -280,9 +294,35 @@ describe("eveningChart()", () => {
     });
   });
 
+  describe("a point for every evening", () => {
+    it("should draw one point per evening, so the hint that says so is true", () => {
+      eveningChart(copy, chartOf());
+
+      expect(dots()).toHaveLength(NIGHTS);
+    });
+
+    it("should sit each point exactly on the curve's own vertex", () => {
+      eveningChart(copy, chartOf());
+
+      expect(dots().map((dot) => [dot.cx, dot.cy])).toEqual(
+        points().map((point) => [point[0], point[1]])
+      );
+    });
+
+    it("should draw the points in the player's own ink", () => {
+      eveningChart(copy, chartOf());
+
+      expect(dots().every((dot) => dot.fill === INK)).toBe(true);
+    });
+
+    it("should keep a point smaller than the marks that single an evening out", () => {
+      expect(POINT_RADIUS).toBeLessThan(MARK_RADIUS);
+    });
+  });
+
   describe("marking the best and the worst evening", () => {
     it("should fill a mark on the best evening's own point", () => {
-      eveningChart(chartOf({ best: eveningOf(BEST_AT) }));
+      eveningChart(copy, chartOf({ best: eveningOf(BEST_AT) }));
 
       expect(circleSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -295,7 +335,7 @@ describe("eveningChart()", () => {
     });
 
     it("should ring the worst evening in red rather than filling it", () => {
-      eveningChart(chartOf({ worst: eveningOf(WORST_AT) }));
+      eveningChart(copy, chartOf({ worst: eveningOf(WORST_AT) }));
 
       expect(circleSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -312,50 +352,128 @@ describe("eveningChart()", () => {
     it("should mark both evenings when the card names both", () => {
       const TWO_MARKS = 2;
 
-      eveningChart(chartOf({ best: eveningOf(BEST_AT), worst: eveningOf(WORST_AT) }));
+      eveningChart(copy, chartOf({ best: eveningOf(BEST_AT), worst: eveningOf(WORST_AT) }));
 
-      expect(circleSpy).toHaveBeenCalledTimes(TWO_MARKS);
+      expect(marks()).toHaveLength(TWO_MARKS);
     });
 
     it("should draw no filled mark when the card names no best evening", () => {
-      eveningChart(chartOf({ best: null, worst: eveningOf(WORST_AT) }));
+      eveningChart(copy, chartOf({ best: null, worst: eveningOf(WORST_AT) }));
 
-      expect(circleSpy).toHaveBeenCalledTimes(ONCE);
-      expect(circleSpy).not.toHaveBeenCalledWith(expect.objectContaining({ fill: INK }));
+      expect(marks()).toHaveLength(ONCE);
+      expect(marks()).not.toContainEqual(expect.objectContaining({ fill: INK }));
     });
 
     it("should draw no ring when the card names no worst evening", () => {
-      eveningChart(chartOf({ best: eveningOf(BEST_AT), worst: null }));
+      eveningChart(copy, chartOf({ best: eveningOf(BEST_AT), worst: null }));
 
-      expect(circleSpy).toHaveBeenCalledTimes(ONCE);
-      expect(circleSpy).not.toHaveBeenCalledWith(
+      expect(marks()).toHaveLength(ONCE);
+      expect(marks()).not.toContainEqual(
         expect.objectContaining({ stroke: palette.cellFool })
       );
     });
 
     it("should draw no mark at all when the card names neither", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
-      expect(circleSpy).toHaveBeenCalledTimes(NEVER);
+      expect(marks()).toHaveLength(NEVER);
     });
 
     it("should mark nothing for an evening that is not among the nights plotted", () => {
-      eveningChart(chartOf({ best: eveningOf(UNPLAYED_SERIES) }));
+      eveningChart(copy, chartOf({ best: eveningOf(UNPLAYED_SERIES) }));
 
-      expect(circleSpy).toHaveBeenCalledTimes(NEVER);
+      expect(marks()).toHaveLength(NEVER);
+    });
+  });
+
+  describe("saying what the two marks mean", () => {
+    it("should name the best evening beside its own mark", () => {
+      eveningChart(copy, chartOf({ best: eveningOf(BEST_AT) }));
+
+      expect(attributesOf(copy.personalBestEvening).x).toBe(points()[BEST_AT]?.[0]);
+    });
+
+    it("should name the worst evening beside its own mark", () => {
+      eveningChart(copy, chartOf({ worst: eveningOf(WORST_AT) }));
+
+      expect(attributesOf(copy.personalWorstEvening).x).toBe(points()[WORST_AT]?.[0]);
+    });
+
+    it("should lift the best evening's name above its mark, where nothing can be drawn", () => {
+      eveningChart(copy, chartOf({ best: eveningOf(BEST_AT) }));
+
+      expect(attributesOf(copy.personalBestEvening).y as number).toBeLessThan(
+        points()[BEST_AT]?.[1] ?? NEVER
+      );
+    });
+
+    it("should drop the worst evening's name below its mark, off the curve", () => {
+      eveningChart(copy, chartOf({ worst: eveningOf(WORST_AT) }));
+
+      expect(attributesOf(copy.personalWorstEvening).y as number).toBeGreaterThan(
+        points()[WORST_AT]?.[1] ?? NEVER
+      );
+    });
+
+    it("should keep the worst evening's name inside the plot when its mark sits on the floor", () => {
+      const onTheFloor = { ...eveningOf(WORST_AT), share: FLOOR };
+
+      const nights = nightsOf(NIGHTS).map((night) =>
+        night.seriesNo === WORST_AT ? onTheFloor : night
+      );
+
+      eveningChart(copy, chartOf({ nights, worst: onTheFloor }));
+
+      expect(attributesOf(copy.personalWorstEvening).y as number).toBeLessThan(BOTTOM);
+    });
+
+    it("should say nothing about a mark it did not draw", () => {
+      eveningChart(copy, chartOf());
+
+      expect(textSpy).not.toHaveBeenCalledWith(copy.personalBestEvening, expect.anything());
+      expect(textSpy).not.toHaveBeenCalledWith(copy.personalWorstEvening, expect.anything());
+    });
+
+    it("should centre a name over a mark that sits away from both edges", () => {
+      eveningChart(copy, chartOf({ best: eveningOf(BEST_AT) }));
+
+      expect(attributesOf(copy.personalBestEvening)["text-anchor"]).toBe("middle");
+    });
+
+    it("should hold a name inside the plot when its mark sits at either edge", () => {
+      const LAST = NIGHTS - ONCE;
+
+      eveningChart(copy, chartOf({ best: eveningOf(FIRST_EVENING), worst: eveningOf(LAST) }));
+
+      expect(attributesOf(copy.personalBestEvening)["text-anchor"]).toBe("start");
+      expect(attributesOf(copy.personalWorstEvening)["text-anchor"]).toBe("end");
+    });
+
+    it("should keep the best evening's name clear of the label above the plot", () => {
+      const atTheCeiling = { ...eveningOf(BEST_AT), share: CEILING };
+
+      const nights = nightsOf(NIGHTS).map((night) =>
+        night.seriesNo === BEST_AT ? atTheCeiling : night
+      );
+
+      eveningChart(copy, chartOf({ nights, best: atTheCeiling }));
+
+      expect(attributesOf(copy.personalBestEvening).y as number).toBeGreaterThan(
+        PLOT_TOP - CHART_TOP_DROP
+      );
     });
   });
 
   describe("numbering the evenings along the bottom", () => {
     it("should number every fourth evening, counting from one", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       expect(textSpy).toHaveBeenCalledWith(String(AXIS_EVERY), expect.anything());
       expect(textSpy).toHaveBeenCalledWith(String(NIGHTS), expect.anything());
     });
 
     it("should leave the evenings in between unnumbered", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
 
       for (const skipped of [ONCE, BEST_AT, AXIS_EVERY + ONCE]) {
         expect(textSpy).not.toHaveBeenCalledWith(String(skipped), expect.anything());
@@ -363,19 +481,19 @@ describe("eveningChart()", () => {
     });
 
     it("should still number the last evening on a chart shorter than the interval", () => {
-      eveningChart(chartOf({ nights: nightsOf(AXIS_EVERY - ONCE) }));
+      eveningChart(copy, chartOf({ nights: nightsOf(AXIS_EVERY - ONCE) }));
 
       expect(textSpy).toHaveBeenCalledWith(String(AXIS_EVERY - ONCE), expect.anything());
     });
 
     it("should leave the evenings before it unnumbered on such a chart", () => {
-      eveningChart(chartOf({ nights: nightsOf(AXIS_EVERY - ONCE) }));
+      eveningChart(copy, chartOf({ nights: nightsOf(AXIS_EVERY - ONCE) }));
 
       expect(textSpy).not.toHaveBeenCalledWith(String(AXIS_EVERY - TWO_BACK), expect.anything());
     });
 
     it("should hang a number under the plot on its own evening's column", () => {
-      eveningChart(chartOf());
+      eveningChart(copy, chartOf());
       const fourth = attributesOf(String(AXIS_EVERY));
 
       expect(fourth.y).toBe(BOTTOM + PLOT_AXIS_DROP);
@@ -391,8 +509,11 @@ describe("eveningChart()", () => {
 
     const TWO_MARKS = 2;
 
+    const A_MARK_AND_ITS_LABEL = 2;
+
     it("should hand back the grid, the curve, the marks and the numbers, in that order", () => {
       const drawn = eveningChart(
+        copy,
         chartOf({ best: eveningOf(BEST_AT), worst: eveningOf(WORST_AT) })
       );
 
@@ -402,19 +523,25 @@ describe("eveningChart()", () => {
     });
 
     it("should hand back the grid, the curve and the numbers when it marked nothing", () => {
-      expect(eveningChart(chartOf())).toHaveLength(GRID_ELEMENTS + ONCE + AXIS_NUMBERS);
+      expect(eveningChart(copy, chartOf())).toHaveLength(
+        GRID_ELEMENTS + ONCE + NIGHTS + AXIS_NUMBERS
+      );
     });
 
-    it("should add exactly one element for each mark it did draw", () => {
-      const drawn = eveningChart(chartOf({ best: eveningOf(BEST_AT), worst: eveningOf(WORST_AT) }));
+    it("should add a circle and a name for each mark it did draw", () => {
+      const drawn = eveningChart(copy, chartOf({ best: eveningOf(BEST_AT), worst: eveningOf(WORST_AT) }));
 
-      expect(drawn).toHaveLength(GRID_ELEMENTS + ONCE + TWO_MARKS + AXIS_NUMBERS);
+      expect(drawn).toHaveLength(
+        GRID_ELEMENTS + ONCE + NIGHTS + TWO_MARKS * A_MARK_AND_ITS_LABEL + AXIS_NUMBERS
+      );
     });
 
     it("should add one number and no more when only the last evening earns one", () => {
-      const drawn = eveningChart(chartOf({ nights: nightsOf(AXIS_EVERY - ONCE) }));
+      const SHORT = AXIS_EVERY - ONCE;
 
-      expect(drawn).toHaveLength(GRID_ELEMENTS + ONCE + ONCE);
+      const drawn = eveningChart(copy, chartOf({ nights: nightsOf(SHORT) }));
+
+      expect(drawn).toHaveLength(GRID_ELEMENTS + ONCE + SHORT + ONCE);
     });
   });
 });

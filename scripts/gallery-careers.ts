@@ -40,7 +40,7 @@ const EVERY_OTHER = 2;
 
 const EVERY_FOURTH = 4;
 
-type Fate = (order: readonly number[], game: number) => readonly number[];
+type Fate = (order: readonly number[], game: number, night: number) => readonly number[];
 
 type Away = (playerId: number, night: number) => boolean;
 
@@ -76,6 +76,16 @@ const winsEveryGame: Fate = (order) =>
 
 const burnsEveryGame: Fate = (order) =>
   order.includes(THE_SUBJECT) ? [...without(order, THE_SUBJECT), THE_SUBJECT] : order;
+
+const climbingNights: Fate = (order, game, night) => {
+  if (!order.includes(THE_SUBJECT)) {
+    return order;
+  }
+
+  return game < night
+    ? [THE_SUBJECT, ...without(order, THE_SUBJECT)]
+    : [...without(order, THE_SUBJECT), THE_SUBJECT];
+};
 
 const burnedByTheBogey: Fate = (order, game) =>
   game % EVERY_OTHER === FIRST && order.includes(THE_SUBJECT) && order.includes(THE_BOGEY)
@@ -118,7 +128,7 @@ const nightOf = (shown: CareerCase, night: number): readonly CareerGame[] => {
     seriesNo: night + NIGHT_ONE,
     playedOn: nightDate(night),
     starterId: seated[(night + game) % seated.length] ?? null,
-    placements: placementsOf(shown.fate(rotate(seated, game), game), drawn(game)),
+    placements: placementsOf(shown.fate(rotate(seated, game), game, night), drawn(game)),
   }));
 };
 
@@ -153,6 +163,8 @@ const ONE_NIGHT = 1;
 const JUST_UNDER_THE_CHART = 4;
 
 const A_LONG_CAREER = 12;
+
+const A_CLIMBING_CAREER = 7;
 
 const A_SHORT_NIGHT = 3;
 
@@ -222,6 +234,15 @@ const CAREERS: readonly CareerCase[] = [
     nights: A_LONG_CAREER,
     gamesEachNight: A_FULL_NIGHT,
     fate: burnsEveryGame,
+  },
+  {
+    name: "an-uneven-career",
+    locale: Locale.En,
+    asks: "every evening a different share — the only card that can single out a best and a worst",
+    players: SHORT_NAMES,
+    nights: A_CLIMBING_CAREER,
+    gamesEachNight: A_FULL_NIGHT,
+    fate: climbingNights,
   },
   {
     name: "comes-and-goes",

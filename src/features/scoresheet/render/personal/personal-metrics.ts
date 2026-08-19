@@ -78,6 +78,8 @@ export const TILE_TRACKING = 3;
 
 export const PLOT_LINE_WIDTH = 4;
 
+export const POINT_RADIUS = 6;
+
 export const MARK_RADIUS = 10;
 
 export const MARK_STROKE = 5;

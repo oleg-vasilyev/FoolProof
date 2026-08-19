@@ -88,7 +88,7 @@ export const copy = {
   nemesisReason: (over: string) =>
     `Finished above the same player in all ${over} the two of them shared.`,
   doormanReason: (opens: number, games: string) =>
-    `Opened ${opens} of ${games}. The deal kept coming back round.`,
+    `Opened ${opens} of ${games}. The first move kept coming back round.`,
   neverAskedReason: (games: string) => `${games}, and not once the one to open.`,
   latecomerReason: (joinedAt: number, percent: number) =>
     `Arrived at game ${joinedAt} and is sitting on ${percent}% anyway.`,
@@ -165,11 +165,12 @@ export const copy = {
   tileShareNote: "50% is mid-table",
   tileFool: "LEFT THE FOOL",
   tileFirst: "OUT FIRST",
-  tileDealt: "DEALT",
+  tileDealt: "THE FIRST MOVE",
   tileTimesExpected: (times: string, expected: string) => `${times} · expected ${expected}`,
 
   personalChartLabel: "TABLE SHARE BY EVENING",
-  personalChartHint: "one point per evening · 50% is mid-table",
+  personalBestEvening: "best evening",
+  personalWorstEvening: "worst evening",
 
   personalFactsLabel: "WHAT STUCK",
   factTitles: {
@@ -181,11 +182,11 @@ export const copy = {
     theBogey: "THE BOGEY",
     bigTableCharm: "ROOM TO BREATHE",
     bigTableCurse: "LOST IN THE CROWD",
-    openersGift: "DEALER'S GIFT",
-    openersCurse: "DEALER'S CURSE",
+    openersGift: "THE FIRST MOVE'S GIFT",
+    openersCurse: "THE FIRST MOVE'S CURSE",
     theHomecoming: "THE HOMECOMING",
-    neverDealt: "NEVER ONCE DEALT",
-    theHeadStart: "ALWAYS DEALING",
+    neverDealt: "NEVER ONCE WENT FIRST",
+    theHeadStart: "ALWAYS GOING FIRST",
     theBadPatch: "THE BAD PATCH",
     theCleanRun: "THE CLEAN RUN",
     theSurvivor: "THE SURVIVOR",
@@ -215,7 +216,7 @@ export const copy = {
   dealtCurseReason: (burns: number) => `Burned in ${burns} of them.`,
   homecomingReason: (missed: string) => `Back at the table after ${missed} away.`,
   neverDealtHolder: (games: string) => `${games}, never once`,
-  neverDealtReason: "The deal has never come round to you.",
+  neverDealtReason: "The first move has never come round to you.",
   headStartReason: (games: string) => `Out of ${games} — far more than the seat gives.`,
   badPatchHolder: (games: string) => `${games} on fire`,
   betweenDates: (from: string, until: string) => `From ${from} to ${until}.`,
