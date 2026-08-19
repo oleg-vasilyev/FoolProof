@@ -75,6 +75,15 @@ sequenceDiagram
         K-->>C: five files that only change together
     end
     C->>C: now, knowing the rules, freeze the interfaces: what each function takes and returns
+    opt the phase adds something a player can reach, or changes a contract other code depends on
+        C->>S: the plan-reviewer agent — the owner's own words and the frozen signatures, nothing retold
+        S->>S: derive the rest from the repository: the schema, the limits, what already solves this
+        S-->>C: what the plan promises, each checked against a file, and what it has not accounted for
+        opt a finding changes what the owner already approved
+            C->>U: the finding, while nothing is written yet
+            U-->>C: decided
+        end
+    end
     end
 
     rect rgb(245, 245, 245)

@@ -410,11 +410,34 @@ no schema and no `shared/` type — earns a shorter path:
 | `CLAUDE.md` | untouched | edited only when a *rule* changed |
 | `TECH-DEBT.md` | untouched | an entry only if something is actually owed |
 | `e2e/` | scenarios only if a button carries `callback_data` | same |
+| The plan | judged by the size line alone | the `plan-reviewer` agent, before the first file |
 | Gates | all seven, mutation and e2e over the diff | all seven, mutation and e2e over the diff |
 
 The test rules do not bend: every file still gets a spec, because that is what
 holds the mutation score up and it is the cheapest part to write. What bends is
 prose about a change that has nothing new to say.
+
+The plan review is the one row that happens **before** any of this, at the end of
+stage 1 once the interfaces are frozen. **This is the definition of what earns it,
+and the only one** — the drawing, the routing table in `CLAUDE.md` and the agent's
+own `description:` point here rather than restating it:
+
+> A phase earns the plan review when it **adds something a player can reach that
+> did not exist** — a command, a screen, a notice, a state — or **changes a
+> contract other code depends on**: a repository method, the schema, a type in
+> `shared/`.
+
+That is deliberately **not** the small-versus-contract-changing predicate of the
+table above, and the difference is the whole point. The five-file notice described
+below was small by that measure — one feature folder, no query, no schema, no
+shared type — and it is the exact defect this pass exists to catch. A predicate
+that excludes its own motivating example is not a predicate, so this one is
+written out separately and paid for with the extra line.
+
+The pass is priced this way because gate 5 reads a diff: everything it finds has
+already been written. The notice below is the proof — gate 5 did kill it, which is
+the system working, but only after five files and their specs existed and were
+green. That is the cost being moved earlier, not a gate being replaced.
 
 The judgement call is honest sizing, so name the size **before** starting, in one
 line, and let the user shrink it.

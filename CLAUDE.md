@@ -18,6 +18,7 @@ beside the code it describes:
 | The Claude Design page fell behind the code | `update-the-design-page` skill |
 | Changing the e2e harness itself | [`e2e/README.md`](e2e/README.md) |
 | A mockup for anything the bot draws | `poster-designer` agent |
+| A frozen plan, before any code is written for it | `plan-reviewer` agent |
 | A weekly look at the project and its server | `deep-checkup` agent |
 
 Four documents, one job each:
@@ -312,11 +313,8 @@ feature owning it is a fact about real grammY. A URL button routes nothing back.
 
 ## Checks
 
-`README.md` lists what each npm script runs. Two rules about that list: **never put
-comment keys (`"// ...": "..."`) in `package.json`** — the script name has to say
-what it does — and **keep it short**, because it is the first thing a new reader
-sees. Anything occasional goes behind one `scripts/tools.ts` that lists itself when
-run with no argument.
+`README.md` lists what each npm script runs, and the rules that list obeys live in
+the `write-a-doc` skill, which is where a script is added from.
 
 ### What enforces what
 

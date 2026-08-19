@@ -14,7 +14,22 @@ Read the **whole diff at once** (`git diff <base>..HEAD`), not commit by commit.
 Rules break across commits more often than inside one: a file that was a skeleton
 in the commit that created it has usually stopped being one three commits later.
 
-## What to look for
+## First, name what has to be true
+
+Before the checklist, write down what this diff **promises** — the handful of
+statements that must hold for it to be correct — and check each one. Derive them
+from the diff itself rather than from the list below: a new nullable branch
+promises its case can occur, a new copy key promises every language has it, a new
+constant promises the widest real input still fits under it, a new query promises
+the index it will run on exists.
+
+Report them with a verdict each, above the findings. The checklist then catches
+what the promises did not, and this ordering is what makes an empty result mean
+something: a pass ending in seven checked promises and no findings is a
+conclusion, which a bare "nothing found" can never be, because nobody can tell it
+apart from a pass that looked at nothing.
+
+## Then, what to look for
 
 Most style rules are enforced by ESLint now, so do not spend the pass on them —
 run `npm run check` and trust it. Spend the pass on what no rule can check:
@@ -66,9 +81,11 @@ run `npm run check` and trust it. Spend the pass on what no rule can check:
 
 ## How to report
 
-Report findings most-severe first, each naming the file, the line, and *what
-would go wrong* — not merely which rule it matches. If the phase is clean, say so
-plainly and do not manufacture findings to look thorough.
+Open with the promises and their verdicts, then the findings most-severe first,
+each naming the file, the line, and *what would go wrong* — not merely which rule
+it matches. If the phase is clean, say so plainly and do not manufacture findings
+to look thorough; the promise list is what proves the pass happened, so it is
+never the part you shorten.
 
 Do not fix anything. The pass produces a list; the decision to act on it belongs
 to whoever ran you.

@@ -77,6 +77,34 @@ Two consequences worth spelling out, because both have been got wrong:
    list was first written. What it checks is enumerated once, in `CLAUDE.md`; do not
    re-list it here. Read the complaint rather than guessing which check fired.
 
+## The script table in `README.md`
+
+`docs:check` compares that table against `package.json`, so the two cannot drift —
+but three things about it are judgement, and they arrived here from `CLAUDE.md`
+when a new rule pushed that file over its budget:
+
+- **Never put comment keys (`"// …": "…"`) in `package.json`.** The script name has
+  to say what it does; a comment beside it is an admission that it does not.
+- **Keep the table short.** It is the first thing a new reader sees, and a reader
+  who has to scan twenty rows to find `npm start` has been told the project is
+  complicated before learning anything about it.
+- **Anything occasional goes behind `scripts/tools.ts`**, which lists itself when
+  run with no argument, so a one-off never earns a permanent row.
+
+## When the document argues for something you want
+
+A rule needs a reason, the reason is usually a story this project already paid
+for, and the story is written down somewhere else — so **re-read it before citing
+it**. Writing prose in favour of a change you are making is the one moment the
+author is not a neutral witness, and the drift is always in the same direction:
+the evidence comes out slightly stronger than the source says.
+
+This has happened, in the phase that added an adversarial reviewer of all places.
+The paragraph justifying it claimed a defect had slipped past *every* gate; the
+story it cited, thirty lines below in the same file, says the reviewer caught it.
+The review found it in the diff. Nobody would have found it in the released prose,
+because a reason nobody checks reads exactly like a reason that holds.
+
 ## The budget is the point
 
 `CLAUDE.md` has a **line budget**, enforced by `docs:check`. It exists so that adding

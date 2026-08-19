@@ -462,6 +462,9 @@ where the name was last time.
 
 - `callback_data` is limited to 64 bytes. Do not put names in it.
   Format: `<game_id_b62>:<action>:<slot>:<state_version>`
+- A message body is limited to 4096 characters, so anything that grows with the
+  number of players — a roster, a tally, a list of events — has a length nobody
+  has hit yet and a size at which it starts failing.
 - `state_version` is incremented on every transition. A callback that arrives with
   an old version → `answerCallbackQuery` with the text "Card updated", and the
   state is left unchanged. This protects against double taps under lag and against
