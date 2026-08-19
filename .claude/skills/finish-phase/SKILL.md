@@ -363,6 +363,15 @@ the user's call, and asking costs one message where guessing costs a rewrite. Th
 first run of this gate found both kinds at once: two awards ran their winners off the
 right edge, and two more crowned a comeback that never fell below mid-table.
 
+**A gate that covers part of a checklist replaces that part, never the list.** Two
+phases in a row redrew the mockups here without ever loading `refresh-the-pictures`,
+because `docs:check` had already named which pictures were stale — so the loop ran
+off the failing gate, and the rows that had no gate were never walked. The Claude
+Design page was one of them, and it went two releases without a poster that had been
+shipping all along. It has a gate now, which the skill that owns it describes; the
+lesson that generalises is the other half — when a check tells you what to fix, ask
+what that check cannot see before believing the list is finished.
+
 The gallery is drawn fresh, but the repository also holds **committed** pictures
 that fall behind the code silently. The same trigger opens the
 **`refresh-the-pictures`** skill — its table lists every one, mockups to icons,

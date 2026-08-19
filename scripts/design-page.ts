@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { posters, type Posters } from "./mockups.ts";
 
@@ -41,7 +42,28 @@ export const withFreshPosters = (page: string): string => {
   return spliced;
 };
 
+export const DESIGN_PAGE_SYNC = "docs/mockups/design-page.sync";
+
+export const fingerprintOf = (drawn: Posters): string =>
+  createHash("sha256")
+    .update(
+      Object.entries(drawn)
+        .map(([name, svg]) => `${name}\n${svg}`)
+        .sort()
+        .join("\n")
+    )
+    .digest("hex");
+
 export const refreshDesignPage = (from: string, to: string): void => {
-  writeFileSync(to, withFreshPosters(readFileSync(from, "utf8")), "utf8");
+  const spliced = withFreshPosters(readFileSync(from, "utf8"));
+
+  writeFileSync(to, spliced, "utf8");
+  writeFileSync(
+    DESIGN_PAGE_SYNC,
+    `mockups: ${fingerprintOf(posters())}\n`,
+    "utf8"
+  );
+
   console.log(`${to} — every named slot redrawn, every other line left alone`);
+  console.log(`${DESIGN_PAGE_SYNC} — the fingerprint of what was spliced in`);
 };

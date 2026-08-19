@@ -83,7 +83,7 @@ const DAYS_BETWEEN_NIGHTS = 7;
 
 const MS_IN_A_DAY = 86_400_000;
 
-const SAMPLE_SUBJECT = 1;
+export const SAMPLE_SUBJECT = 1;
 
 const DATE_START = 0;
 

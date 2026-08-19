@@ -6,7 +6,7 @@
 <meta name="google-site-verification" content="HAceXbRw0KJbxci9i_XyhYqhdRv54pl5WS2DYeIj7iE">
 
 <title>FoolProof — телеграм-бот, который ведёт счёт в дурака</title>
-<meta name="description" content="Бесплатный бот для подкидного дурака. Состав отправляется один раз, дальше вы отмечаете, кто вышел, а в конце вечера бот рисует хронологию и награды. Без регистрации, ставить ничего не нужно.">
+<meta name="description" content="Бесплатный бот для подкидного дурака. Состав отправляется один раз, дальше вы отмечаете, кто вышел, а в конце вечера бот рисует хронологию и награды — и всю карьеру любого игрока отдельной карточкой. Без регистрации, ставить ничего не нужно.">
 <link rel="canonical" href="https://oleg-vasilyev.github.io/FoolProof/ru/">
 
 <link rel="alternate" hreflang="en" href="https://oleg-vasilyev.github.io/FoolProof/">
@@ -19,7 +19,7 @@
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:url" content="https://oleg-vasilyev.github.io/FoolProof/ru/">
 <meta property="og:title" content="FoolProof — телеграм-бот, который ведёт счёт в дурака">
-<meta property="og:description" content="Состав отправляется один раз, дальше вы отмечаете, кто вышел. В конце вечера бот рисует всё, что было, двумя постерами.">
+<meta property="og:description" content="Состав отправляется один раз, дальше вы отмечаете, кто вышел. В конце вечера бот рисует всё, что было, — и отдельной карточкой всё, что игрок сыграл за всё время.">
 <meta property="og:image" content="https://oleg-vasilyev.github.io/FoolProof/previews/og-cover-ru.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -27,7 +27,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="FoolProof — телеграм-бот, который ведёт счёт в дурака">
-<meta name="twitter:description" content="Состав отправляется один раз, дальше вы отмечаете, кто вышел. В конце вечера бот рисует всё, что было, двумя постерами.">
+<meta name="twitter:description" content="Состав отправляется один раз, дальше вы отмечаете, кто вышел. В конце вечера бот рисует всё, что было, — и отдельной карточкой всё, что игрок сыграл за всё время.">
 <meta name="twitter:image" content="https://oleg-vasilyev.github.io/FoolProof/previews/og-cover-ru.png">
 
 <meta name="theme-color" content="#0B0A09">
@@ -51,7 +51,7 @@
       "url": "https://oleg-vasilyev.github.io/FoolProof/ru/",
       "sameAs": ["https://github.com/oleg-vasilyev/FoolProof", "https://t.me/FoolProofMegaBot"],
       "inLanguage": ["ru", "en"],
-      "description": "Телеграм-бот, который ведёт счёт компании, играющей в подкидного дурака: записывает порядок выхода и того, кто остался дураком, а потом рисует вечер двумя постерами.",
+      "description": "Телеграм-бот, который ведёт счёт компании, играющей в подкидного дурака: записывает порядок выхода и того, кто остался дураком, а потом рисует вечер двумя постерами, а карьеру любого игрока — третьим.",
       "license": "https://github.com/oleg-vasilyev/FoolProof/blob/main/LICENSE",
       "isAccessibleForFree": true,
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RUB" }
@@ -118,7 +118,7 @@
         <p class="hero-rise-2 mt-6 max-w-[68ch] text-[18px] leading-relaxed text-muted">
           Добавьте бота в чат, где собирается ваша компания. Состав присылается один раз,
           дальше — одно нажатие, когда кто-то вышел из партии. К концу вечера бот
-          возвращает всё сыгранное двумя постерами.
+          возвращает всё сыгранное двумя постерами, а карьеру любого игрока — третьим.
         </p>
 
         <div class="hero-rise-3 mt-9 flex flex-wrap gap-3">
@@ -183,7 +183,8 @@
           <h3 class="mt-3 text-[21px] font-bold">Спросите, как всё прошло</h3>
           <p class="mt-3 text-[16px] leading-relaxed text-muted">
             <code class="cmd">/stats</code> рисует хронологию, а с пятой партии — ещё и
-            награды. <code class="cmd">/next</code> открывает тот же стол заново: первым
+            награды. <code class="cmd">/personal</code> рисует одного игрока за все вечера,
+            что он сыграл. <code class="cmd">/next</code> открывает тот же стол заново: первым
             ходит сосед дурака.
           </p>
         </li>
@@ -193,12 +194,12 @@
 
   <section id="posters" aria-labelledby="posters-heading">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p class="eyebrow">Что присылает /stats</p>
+      <p class="eyebrow">Что рисует бот</p>
       <h2 id="posters-heading" class="mt-4 max-w-[68ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">
-        Вечер, нарисованный, а не перечисленный
+        Нарисованное, а не перечисленное
       </h2>
       <p class="mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-        Обе картинки бот рисует сам — с таким запасом, чтобы они читались через стол
+        Все три картинки бот рисует сам — с таким запасом, чтобы они читались через стол
         даже после того, как Телеграм их пережмёт.
       </p>
 
@@ -222,6 +223,17 @@
             <strong class="font-semibold text-ink">Награды.</strong> Их тридцать шесть, а
             на постере девять: король и дурак — всегда, остальные места достаются самому
             редкому из заработанного. Поэтому две пятницы не выглядят одинаково.
+          </figcaption>
+        </figure>
+
+        <figure class="reveal">
+          <img src="../posters/personal-ru.png" width="1620" height="2540" loading="lazy" decoding="async"
+               alt="Карточка игрока: шесть чисел про одного человека, график его доли стола по вечерам и факты, которые запомнились за всю карьеру."
+               class="w-full rounded-xl border border-line">
+          <figcaption class="mt-4 text-[16px] leading-relaxed text-muted">
+            <strong class="font-semibold text-ink">Карточка игрока.</strong> Один человек за
+            всё, что он сыграл. Двадцать фактов борются за четыре места, поэтому у двоих за
+            одним столом карточки не совпадают ничем.
           </figcaption>
         </figure>
       </div>

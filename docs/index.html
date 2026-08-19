@@ -6,7 +6,7 @@
 <meta name="google-site-verification" content="HAceXbRw0KJbxci9i_XyhYqhdRv54pl5WS2DYeIj7iE">
 
 <title>FoolProof — the Telegram bot that keeps score at Durak</title>
-<meta name="description" content="A free Telegram bot for Podkidnoy Durak. Send the line-up once, tap the names in the order people finish, and get the whole evening back as two posters. No accounts, nothing to install.">
+<meta name="description" content="A free Telegram bot for Podkidnoy Durak. Send the line-up once, tap the names in the order people finish, and get the whole evening back as posters — and any player's whole record on one card. No accounts, nothing to install.">
 <link rel="canonical" href="https://oleg-vasilyev.github.io/FoolProof/">
 
 <link rel="alternate" hreflang="en" href="https://oleg-vasilyev.github.io/FoolProof/">
@@ -19,7 +19,7 @@
 <meta property="og:locale:alternate" content="ru_RU">
 <meta property="og:url" content="https://oleg-vasilyev.github.io/FoolProof/">
 <meta property="og:title" content="FoolProof — the Telegram bot that keeps score at Durak">
-<meta property="og:description" content="Send the line-up once, tap the names in the order people finish, and get the whole evening back as two posters.">
+<meta property="og:description" content="Send the line-up once, tap the names in the order people finish, and get the whole evening back as posters — and any player's whole record on one card.">
 <meta property="og:image" content="https://oleg-vasilyev.github.io/FoolProof/previews/og-cover.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -27,7 +27,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="FoolProof — the Telegram bot that keeps score at Durak">
-<meta name="twitter:description" content="Send the line-up once, tap the names in the order people finish, and get the whole evening back as two posters.">
+<meta name="twitter:description" content="Send the line-up once, tap the names in the order people finish, and get the whole evening back as posters — and any player's whole record on one card.">
 <meta name="twitter:image" content="https://oleg-vasilyev.github.io/FoolProof/previews/og-cover.png">
 
 <meta name="theme-color" content="#0B0A09">
@@ -51,7 +51,7 @@
       "url": "https://oleg-vasilyev.github.io/FoolProof/",
       "sameAs": ["https://github.com/oleg-vasilyev/FoolProof", "https://t.me/FoolProofMegaBot"],
       "inLanguage": ["en", "ru"],
-      "description": "A Telegram bot that keeps the score for a group playing Podkidnoy Durak: it records the finishing order and who was left the fool, then draws the evening as two posters.",
+      "description": "A Telegram bot that keeps the score for a group playing Podkidnoy Durak: it records the finishing order and who was left the fool, then draws the evening as two posters and any player's whole record as a third.",
       "license": "https://github.com/oleg-vasilyev/FoolProof/blob/main/LICENSE",
       "isAccessibleForFree": true,
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
@@ -118,7 +118,7 @@
         <p class="hero-rise-2 mt-6 max-w-[68ch] text-[18px] leading-relaxed text-muted">
           Add it to the group chat where your table gathers. Send the line-up once, then
           one tap for each player as they go out. By the end of the night, the whole
-          evening comes back as two posters.
+          evening comes back as two posters — and any player's whole record as a third.
         </p>
 
         <div class="hero-rise-3 mt-9 flex flex-wrap gap-3">
@@ -183,8 +183,9 @@
           <h3 class="mt-3 text-[21px] font-bold">Ask how it went</h3>
           <p class="mt-3 text-[16px] leading-relaxed text-muted">
             <code class="cmd">/stats</code> draws the chronology, and the awards too once five
-            games are in. <code class="cmd">/next</code> opens the same table again — the fool's
-            neighbour goes first.
+            games are in. <code class="cmd">/personal</code> draws one player across every evening
+            they have played. <code class="cmd">/next</code> opens the same table again — the
+            fool's neighbour goes first.
           </p>
         </li>
       </ol>
@@ -193,12 +194,12 @@
 
   <section id="posters" aria-labelledby="posters-heading">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p class="eyebrow">What /stats sends back</p>
+      <p class="eyebrow">What the bot draws</p>
       <h2 id="posters-heading" class="mt-4 max-w-[68ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">
-        The evening, drawn rather than listed
+        Drawn rather than listed
       </h2>
       <p class="mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-        Both pictures are drawn by the bot itself, sized to be read at arm's length across
+        All three are drawn by the bot itself, sized to be read at arm's length across
         a table after Telegram has recompressed them.
       </p>
 
@@ -222,6 +223,17 @@
             <strong class="font-semibold text-ink">The awards.</strong> Thirty-six exist and
             nine fit, so the card keeps the king and the fool and fills the rest with the
             rarest of what the evening earned — which is what stops every Friday reading the same.
+          </figcaption>
+        </figure>
+
+        <figure class="reveal">
+          <img src="posters/personal-en.png" width="1620" height="2540" loading="lazy" decoding="async"
+               alt="The player card: six numbers about one player, a chart of their table share evening by evening, and the facts that stuck across their whole record."
+               class="w-full rounded-xl border border-line">
+          <figcaption class="mt-4 text-[16px] leading-relaxed text-muted">
+            <strong class="font-semibold text-ink">The player's card.</strong> One player across
+            everything they ever played. Twenty facts compete for four places, so two people at
+            the same table get cards that read nothing alike.
           </figcaption>
         </figure>
       </div>

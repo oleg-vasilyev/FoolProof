@@ -1,5 +1,6 @@
 import { readdirSync, existsSync, readFileSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
+import { DESIGN_PAGE_SYNC, fingerprintOf } from "./design-page.ts";
 import { MOCKUP_DIR, posters } from "./mockups.ts";
 import { SITE_CSS, SITE_PAGES } from "./site-css.ts";
 import { SITE_POSTER_DIR, sitePosters } from "./site-posters.ts";
@@ -310,6 +311,23 @@ const postersOutOfTheGallery = (): readonly string[] => {
 const mockupsOutOfStep = (): readonly string[] =>
   drawingsOutOfStep(MOCKUP_DIR, posters(), "mockups");
 
+const A_SYNCED_FINGERPRINT = /^mockups: ([0-9a-f]{64})$/m;
+
+const designPageOutOfStep = (): readonly string[] => {
+  const behind =
+    `${DESIGN_PAGE_SYNC}: the Claude Design page was last synced from different ` +
+    `drawings than the code now produces — the "update-the-design-page" skill carries ` +
+    `them back, and rewrites this file with the fingerprint it pushed`;
+
+  if (!existsSync(DESIGN_PAGE_SYNC)) {
+    return [behind];
+  }
+
+  return A_SYNCED_FINGERPRINT.exec(read(DESIGN_PAGE_SYNC))?.[FIRST_GROUP] === fingerprintOf(posters())
+    ? []
+    : [behind];
+};
+
 const sitePostersOutOfStep = (): readonly string[] =>
   drawingsOutOfStep(SITE_POSTER_DIR, sitePosters(), "site-posters");
 
@@ -476,6 +494,7 @@ const complaints = [
   ...schemaOutOfStep(),
   ...postersOutOfTheGallery(),
   ...mockupsOutOfStep(),
+  ...designPageOutOfStep(),
   ...sitePostersOutOfStep(),
   ...siteCssOutOfStep(),
   ...requiredKeysOutOfStep(),

@@ -157,6 +157,27 @@ to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
 
 ---
 
+## The design page's sync marker proves the splice, not the push
+
+`docs/mockups/design-page.sync` holds the fingerprint of the drawings
+`node scripts/tools.ts design-page` put into the page, and `docs:check` fails while
+that fingerprint and the mockups disagree — which is what stopped the page falling
+two releases behind again. But the splice writes the marker locally and the push
+happens afterwards, by hand, over the MCP. So a phase that sees the gate red and
+reruns the tool goes green without the page ever receiving anything, and `git add -A`
+takes the marker along. The `update-the-design-page` skill orders the two — commit
+the marker only after the byte-identical read-back — and that ordering is prose,
+which is the kind of thing this gate exists because prose failed at.
+
+Nothing cheap closes it: the page lives behind a login, so no check that runs in CI
+can ask what the page currently holds.
+
+**Move the marker's write to the end of the push when the MCP can be driven from a
+script** — or the first time the gate is cleared by a rerun that pushed nothing,
+which is the failure this entry exists to make recognisable.
+
+---
+
 ## The keys still say "dealt" where the strings now say "first move"
 
 Every user-visible string about who opens a game was moved off dealing wording, in

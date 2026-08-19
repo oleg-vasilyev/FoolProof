@@ -41,9 +41,15 @@ Two directions lead here:
 3. **Read what the change made false.** The drawings are now current; the prose
    around them may not be. A renamed award, a new colour, a changed size — fix
    the sentence, and bump the `Rev.` in the header and the footer together.
-4. **Push it back**: `finalize_plan` with the one path, then `write_files` with
-   `localPath`. Read it back and compare against the local file — the write is
-   done only when they are byte-identical.
+4. **Push it back**: `finalize_plan` with the one path (it wants `deletes` too,
+   even empty), then `write_files` with `localPath`. Read it back and compare
+   against the local file — the write is done only when they are byte-identical.
+5. **The splice already wrote `docs/mockups/design-page.sync`**, which holds the
+   fingerprint of the drawings it put on the page, and `docs:check` fails while
+   that fingerprint and the mockups disagree. Commit it with the phase — but only
+   after step 4 passed, because until then it claims a sync that did not happen.
+   That file is the whole reason this skill can no longer be forgotten: the page
+   lives behind a login, so nothing else in the repository can notice it is stale.
 
 ## What the page is, and is not
 

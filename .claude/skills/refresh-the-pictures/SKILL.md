@@ -1,6 +1,6 @@
 ---
 name: refresh-the-pictures
-description: Audit every committed picture after an implemented visual change and regenerate the stale ones — the /stats mockups, the site posters, the OG previews, the favicon and the touch icon. Use after the diff review, when a design change has landed in code, when docs:check reports mockups or posters out of step — it runs in check:push and check:release, not in the phase loop — or whenever a committed PNG might no longer match what the product draws.
+description: Audit every committed picture after an implemented visual change and regenerate the stale ones — the /stats mockups, the site posters, the Claude Design page, the OG previews, the favicon and the touch icon. Use after the diff review, when a design change has landed in code, when docs:check reports mockups or posters out of step — it runs in check:push and check:release, not in the phase loop — or whenever a committed PNG might no longer match what the product draws.
 ---
 
 # Refreshing the committed pictures
@@ -8,7 +8,7 @@ description: Audit every committed picture after an implemented visual change an
 > **Stage 5** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
 
 Every picture in the repository is a copy of something the code or the design
-can change without it. Two families are gated, the rest have nothing but this
+can change without it. Three families are gated, the rest have nothing but this
 table — so the skill *is* the checklist: after any implemented visual change,
 walk it top to bottom and say for each row why it does or does not need
 redrawing. Skipping a row silently is how an icon ships in last year's colour.
@@ -19,6 +19,7 @@ redrawing. Skipping a row silently is how an icon ships in last year's colour.
 | `docs/posters/*-{en,ru}.svg` + `.png` | `node scripts/tools.ts site-posters` | `docs:check` compares the SVG |
 | `docs/previews/og-cover*.png` | by hand, from the site's own look | nothing — this row |
 | `docs/favicon.png`, `docs/apple-touch-icon.png` | by hand, from the bot's avatar | nothing — this row |
+| the Claude Design page | the `update-the-design-page` skill, end to end | `docs:check` compares `design-page.sync` |
 
 The gate deliberately compares **SVG, never PNG** — rasterizing would drag the
 native resvg binary into a documentation gate. So a resvg upgrade can change
