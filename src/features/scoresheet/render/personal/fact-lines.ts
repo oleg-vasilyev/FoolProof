@@ -5,6 +5,8 @@ import { sessionDate } from "#scoresheet/render/session-date.ts";
 import type { Copy } from "#scoresheet/copy.ts";
 
 
+const THE_FIRST_EVENING_ITSELF = 1;
+
 export interface FactLines {
   readonly title: string;
   readonly holder: string;
@@ -133,7 +135,9 @@ const bodyOf = (copy: Copy, fact: CareerFact): Body => {
     case CareerFactName.FoundingMember:
       return {
         holder: sessionDate(copy, fact.playedOn),
-        reason: copy.foundingReason(eveningTally(copy, fact.evenings)),
+        reason: copy.foundingReason(
+          eveningTally(copy, fact.evenings - THE_FIRST_EVENING_ITSELF)
+        ),
       };
 
     case CareerFactName.TheNewcomer:

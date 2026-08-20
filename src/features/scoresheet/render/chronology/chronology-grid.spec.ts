@@ -4,6 +4,8 @@ import type { Cell, ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import type { Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 
 
+const A_BIGGEST_TABLE = 7;
+
 const ROW_HEIGHT = 50;
 
 const COLUMN_WIDTH = 200;
@@ -100,6 +102,8 @@ const sheetOf = (cells: readonly (readonly Cell[])[], names?: readonly string[])
   ({
     startedOn: "2026-07-24",
     players: cells.map((own, index) => playerOf(own, index, names?.[index] ?? `P${index}`)),
+    biggestTable: A_BIGGEST_TABLE,
+
     played: cells[0]?.length ?? NONE,
     rounds: cells[0]?.length ?? NONE,
     rowHeight: ROW_HEIGHT,

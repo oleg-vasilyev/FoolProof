@@ -78,7 +78,7 @@ export const copy = {
     `Opened ${opens} games and was left the fool in none of them.`,
   comebackReason: (sank: number, percent: number) =>
     `Bottom of the chart at halfway on ${sank}%, back up to ${percent}% since.`,
-  ladderReason: (run: number) => `Finished better than the game before, ${run} games running.`,
+  ladderReason: (run: number) => `A climb of ${run} games — each one after the first bettered the last.`,
   sweetRevengeReason: (fools: number, comebacks: number) =>
     `Left the fool ${fools} times; came back to leave first in ${comebacks} of them.`,
   ironSeatReason: (games: string) => `The only one who sat through all ${games}.`,
@@ -93,7 +93,7 @@ export const copy = {
   latecomerReason: (joinedAt: number, percent: number) =>
     `Arrived at game ${joinedAt} and is sitting on ${percent}% anyway.`,
   revolvingDoorReason: (missed: string, games: string) =>
-    `Sat out ${missed} in the middle of the evening and came back for ${games}.`,
+    `Played ${games}, sitting out ${missed} in the middle of the evening.`,
   cameoReason: (games: string) => `One game out of ${games}, and then gone.`,
   secondWindReason: (burnedBy: number, games: string) =>
     `The fool by game ${burnedBy} and never again across ${games}.`,
@@ -102,7 +102,7 @@ export const copy = {
   flatlineReason: (band: number, games: string) =>
     `Never more than ${band} points off mid-table across ${games}.`,
   invisibleReason: (middles: number, games: string) =>
-    `${middles} of ${games} finished quietly in the middle.`,
+    `${middles} of ${games} — neither the top nor the bottom.`,
   groundhogReason: (place: number, run: number) =>
     `The same place ${run} games running: number ${place}, every time.`,
   pendulumReason: (run: number) =>
@@ -114,7 +114,7 @@ export const copy = {
   irishGoodbyeReason: (leftAfter: number, games: string) =>
     `Left after game ${leftAfter} of ${games} and was never the fool again.`,
   anchorReason: (games: string) => `${games} in the bottom half of the table, and never the fool.`,
-  slideReason: (run: number) => `Finished worse than the game before, ${run} games running.`,
+  slideReason: (run: number) => `A slide of ${run} games — each one after the first fell short of the last.`,
   falseDawnReason: (ledAt: number, percent: number) =>
     `Leading the chart at game ${ledAt}; down to ${percent}% since.`,
   openersCurseReason: (opens: number, burns: number) =>

@@ -103,6 +103,7 @@ export const maxGamesFor = (players: number): number =>
 export interface Sheet {
   readonly startedOn: string;
   readonly players: readonly ScoredPlayer[];
+  readonly biggestTable: number;
   readonly played: number;
   readonly rounds: number;
   readonly rowHeight: number;
@@ -115,6 +116,14 @@ export interface Sheet {
 
 const rowHeightFor = (rounds: number, room: number): number =>
   Math.min(ROW_HEIGHT_MAX, Math.max(ROW_HEIGHT_MIN, Math.floor(room / rounds)));
+
+const NO_SEATS = 0;
+
+const biggestTableIn = (chronology: SeriesChronology): number =>
+  chronology.games.reduce(
+    (biggest, game) => Math.max(biggest, game.placements.length),
+    NO_SEATS
+  );
 
 export const layoutOf = (chronology: SeriesChronology): Sheet => {
   const seated = chronology.players.length;
@@ -129,6 +138,7 @@ export const layoutOf = (chronology: SeriesChronology): Sheet => {
   return {
     startedOn: chronology.startedOn,
     players,
+    biggestTable: biggestTableIn(chronology),
     played,
     rounds,
     rowHeight,

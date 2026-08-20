@@ -82,6 +82,10 @@ const CLEAN_RUN_UNTIL = "2026-07-17";
 
 const FOUNDING_DATE = "2026-08-18";
 
+const ON_RECORD = 38;
+
+const SINCE_THE_FIRST = 37;
+
 const CHARM_RIVAL = "Rina";
 
 const JINX_RIVAL = "Nadia";
@@ -215,12 +219,12 @@ const SAMPLES: readonly Sample[] = [
     }
   ),
   sampleOf(
-    { name: CareerFactName.FoundingMember, playedOn: FOUNDING_DATE, evenings: 38 },
+    { name: CareerFactName.FoundingMember, playedOn: FOUNDING_DATE, evenings: ON_RECORD },
     {
       dates: [FOUNDING_DATE],
-      eveningsWith: [38],
+      eveningsWith: [SINCE_THE_FIRST],
       holderShows: dated(FOUNDING_DATE),
-      whyShows: [evenings(38)],
+      whyShows: [evenings(SINCE_THE_FIRST)],
     }
   ),
   sampleOf(

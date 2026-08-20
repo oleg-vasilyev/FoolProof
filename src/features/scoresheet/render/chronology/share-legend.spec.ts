@@ -5,6 +5,8 @@ import type { Cell } from "#scoresheet/domain/scoring.ts";
 import type { Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 
 
+const A_BIGGEST_TABLE = 7;
+
 const CHART_TOP = 1000;
 
 const CHART_BOTTOM = 1600;
@@ -144,6 +146,7 @@ const sheetOf = (players: readonly PlayerFixture[], names?: readonly string[]): 
       share: player.share ?? player.running.at(-ONE) ?? 0.5,
       games: player.games ?? player.running.length,
     })),
+    biggestTable: A_BIGGEST_TABLE,
     played: players[0]?.running.length ?? NONE,
     rounds: players[0]?.running.length ?? NONE,
     rowHeight: NONE,

@@ -78,7 +78,7 @@ export const copy: Copy = {
   hotSeatReason: (opens: number) => `Ходил первым ${opens} раз и ни разу за это не поплатился.`,
   comebackReason: (sank: number, percent: number) =>
     `К середине — дно графика и ${sank}%, сейчас — ${percent}%.`,
-  ladderReason: (run: number) => `${run} партий подряд — каждая лучше предыдущей.`,
+  ladderReason: (run: number) => `${run} партий подряд — каждая следующая лучше предыдущей.`,
   sweetRevengeReason: (fools: number, comebacks: number) =>
     `Дураком — ${fools}, и в ${comebacks} из них следом вышел первым.`,
   ironSeatReason: (games: string) => `Ни одной пропущенной партии из ${games}. Никто больше не досидел.`,
@@ -93,7 +93,7 @@ export const copy: Copy = {
   latecomerReason: (joinedAt: number, percent: number) =>
     `Пришёл к партии ${joinedAt} — и всё равно ${percent}%.`,
   revolvingDoorReason: (missed: string, games: string) =>
-    `Пропустил ${missed} в середине вечера и вернулся ещё на ${games}.`,
+    `Сыграл ${games}, пропустив ${missed} в середине вечера.`,
   cameoReason: (games: string) => `Одна партия из ${games} — и всё.`,
   secondWindReason: (burnedBy: number, games: string) =>
     `Дураком к партии ${burnedBy} — и больше ни разу за ${games}.`,
@@ -102,7 +102,7 @@ export const copy: Copy = {
   flatlineReason: (band: number, games: string) =>
     `Ни разу не отошёл от середины стола дальше чем на ${band} пунктов за ${games}.`,
   invisibleReason: (middles: number, games: string) =>
-    `${middles} из ${games} — тихо, в середине.`,
+    `${middles} из ${games} — ни верх, ни низ.`,
   groundhogReason: (place: number, run: number) =>
     `${run} партий подряд — одно и то же место: ${place}.`,
   pendulumReason: (run: number) =>
@@ -114,7 +114,7 @@ export const copy: Copy = {
   irishGoodbyeReason: (leftAfter: number, games: string) =>
     `Ушёл на партии ${leftAfter} из ${games} — и дураком больше ни разу.`,
   anchorReason: (games: string) => `${games} в нижней половине стола — и ни разу дураком.`,
-  slideReason: (run: number) => `${run} партий подряд — каждая хуже предыдущей.`,
+  slideReason: (run: number) => `${run} партий подряд — каждая следующая хуже предыдущей.`,
   falseDawnReason: (ledAt: number, percent: number) =>
     `Вёл график на партии ${ledAt}; с тех пор — ${percent}%.`,
   openersCurseReason: (opens: number, burns: number) =>

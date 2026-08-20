@@ -5,6 +5,8 @@ import type { Cell, ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import type { Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 
 
+const A_BIGGEST_TABLE = 7;
+
 const GRID_LEFT = 146;
 
 const KEY_CELL_FONT = 24;
@@ -57,6 +59,8 @@ const sheetOf = (): Sheet =>
   ({
     startedOn: "2026-07-24",
     players: Array.from({ length: AT_THE_TABLE }, () => ({}) as ScoredPlayer),
+    biggestTable: A_BIGGEST_TABLE,
+
     played: NONE,
     rounds: NONE,
     rowHeight: NONE,
@@ -103,10 +107,10 @@ describe("cellKey()", () => {
     ]);
   });
 
-  it("should number the fool sample last at the table it is drawn for", () => {
+  it("should number the fool sample last at the biggest table the evening seated", () => {
     cellKey(copy, sheetOf());
 
-    expect(cellFor(1)).toEqual({ kind: CellKind.Fool, position: AT_THE_TABLE });
+    expect(cellFor(1)).toEqual({ kind: CellKind.Fool, position: A_BIGGEST_TABLE });
   });
 
   it("should number the drawn sample one place above the fool", () => {
@@ -114,8 +118,15 @@ describe("cellKey()", () => {
 
     expect(cellFor(0)).toEqual({
       kind: CellKind.Drawn,
-      position: AT_THE_TABLE - PLACE_ABOVE_FOOL,
+      position: A_BIGGEST_TABLE - PLACE_ABOVE_FOOL,
     });
+  });
+
+  it("should take that number off the biggest game rather than the whole roster", () => {
+    cellKey(copy, sheetOf());
+
+    expect(A_BIGGEST_TABLE).not.toBe(AT_THE_TABLE);
+    expect(cellFor(1)).toEqual({ kind: CellKind.Fool, position: A_BIGGEST_TABLE });
   });
 
   it("should leave the absent sample without a place, because nobody took one", () => {

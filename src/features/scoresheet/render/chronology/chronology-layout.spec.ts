@@ -525,3 +525,46 @@ describe("maxGamesFor()", () => {
     expect(ceilings).toEqual([...ceilings].sort((one, other) => other - one));
   });
 });
+
+describe("the biggest table the evening seated", () => {
+  const A_SMALL_GAME = 3;
+
+  const A_BIG_GAME = 9;
+
+  const seatedIn = (sizes: readonly number[]): SeriesChronology => ({
+    startedOn,
+    players: playersOf(SIX),
+    games: sizes.map((size, index) => ({
+      gameId: index,
+      starterId: null,
+      placements: Array.from({ length: size }, (_unused, seat) => ({
+        playerId: seat,
+        position: seat + ONE,
+      })),
+    })),
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    scoreSeriesSpy.mockImplementation(
+      (players: readonly { playerId: number; displayName: string }[]): readonly ScoredPlayer[] =>
+        players.map((player) => ({ ...player, cells: [], running: [], share: NONE, games: NONE }))
+    );
+  });
+
+  it("should take the biggest game, not the smallest", () => {
+    expect(layoutOf(seatedIn([A_SMALL_GAME, A_BIG_GAME])).biggestTable).toBe(A_BIG_GAME);
+  });
+
+  it("should find it wherever in the evening it sits", () => {
+    expect(layoutOf(seatedIn([A_BIG_GAME, A_SMALL_GAME])).biggestTable).toBe(A_BIG_GAME);
+  });
+
+  it("should read the seats of a game rather than the roster of the evening", () => {
+    const sheet = layoutOf(seatedIn([A_SMALL_GAME, A_SMALL_GAME]));
+
+    expect(sheet.biggestTable).toBe(A_SMALL_GAME);
+    expect(sheet.players).toHaveLength(SIX);
+  });
+});

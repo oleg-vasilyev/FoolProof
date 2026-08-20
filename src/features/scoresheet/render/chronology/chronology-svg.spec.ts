@@ -5,6 +5,8 @@ import { copy } from "#scoresheet/copy.en.ts";
 import type { Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 
 
+const A_BIGGEST_TABLE = 7;
+
 const IMAGE_WIDTH = 900;
 
 const SECTION_LABEL_FONT = 33;
@@ -131,6 +133,7 @@ const sheetWith = (omitted: number): Sheet =>
   ({
     startedOn: STARTED_ON,
     players: Array.from({ length: PLAYERS }, (_unused, index) => playerOf(index)),
+    biggestTable: A_BIGGEST_TABLE,
     played: ROUNDS + omitted,
     rounds: ROUNDS,
     rowHeight: 50,

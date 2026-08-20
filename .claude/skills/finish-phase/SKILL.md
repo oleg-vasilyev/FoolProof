@@ -607,6 +607,14 @@ A phase's cost is dominated by two things, and neither of them is thinking:
   `toHaveBeenCalledWith(copy, copy, …)`. Anchor on the call as it appears —
   `expect(fooSpy).toHaveBeenCalledWith(` — and let the failures name the rest.
 
+  **And it reports every replacement it did not make, then exits non-zero.**
+  `String.replace` returns the string unchanged when the needle is absent, so a
+  script that prints its own success afterwards lies for free. One here announced
+  "cases rewritten" over a file it had not touched — CRLF against LF-shaped needles
+  — and the lie held until the suite failed with the old case names still in it.
+  Check each needle before replacing, print the misses, and fail the run; a bulk
+  edit whose report cannot say *nothing matched* is not evidence of anything.
+
 **Mechanical work goes to a subagent on a cheaper model.** Once the design is
 settled, writing five spec files, adding a stub, or updating an expectation is
 transcription, not judgement. Delegate it as one batch with `model: "sonnet"`, and

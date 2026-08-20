@@ -62,7 +62,7 @@ const entryOf = (copy: Copy, sheet: Sheet, kind: KeyKind, slot: number): readonl
   const box = boxIn(sheet, slot);
 
   return [
-    ...cellFace(box, sampleFor(kind, sheet.players.length)),
+    ...cellFace(box, sampleFor(kind, sheet.biggestTable)),
     text(labelFor(copy, kind), {
       x: box.x + MINI_WIDTH + LABEL_GAP,
       y: baselineIn(box),
