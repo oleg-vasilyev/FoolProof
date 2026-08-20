@@ -37,8 +37,9 @@ const tilesOf = (copy: Copy, card: CareerCard): readonly Tile[] => [
   {
     label: copy.tileFool,
     value: percentLabel(card.tally.foolRate),
-    note: copy.tileTimesExpected(
-      timeTally(copy, card.tally.fools),
+    note: copy.tileFoolNote(
+      card.tally.fools,
+      card.tally.decided,
       percentLabel(card.tally.expectedFoolRate)
     ),
     ink: palette.cellFool,

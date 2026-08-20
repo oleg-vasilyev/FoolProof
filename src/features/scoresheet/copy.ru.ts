@@ -74,7 +74,7 @@ export const copy: Copy = {
     `Ходил первым ${opens} раз и в ${wins} из них вышел первым.`,
   untouchableReason: (games: string) => `${games} — и ни разу дураком. Ни единого пятна.`,
   teflonReason: (streak: number) =>
-    `${streak} подряд начисто — уже побывав дураком. Лучшая серия вечера.`,
+    `Побывал дураком — и всё равно ${streak} подряд начисто. Лучшая серия вечера.`,
   hotSeatReason: (opens: number) => `Ходил первым ${opens} раз и ни разу за это не поплатился.`,
   comebackReason: (sank: number, percent: number) =>
     `К середине — дно графика и ${sank}%, сейчас — ${percent}%.`,
@@ -137,7 +137,7 @@ export const copy: Copy = {
   sheetGameForms: { one: "партия", few: "партии", many: "партий" },
   sheetPlayerForms: { one: "игрок", few: "игрока", many: "игроков" },
 
-  sheetKeyDrawn: "ничья",
+  sheetKeyDrawn: "ничья за последнее",
   sheetKeyFool: "дурак",
   sheetKeyAbsent: "пропуск",
 
@@ -168,6 +168,8 @@ export const copy: Copy = {
   tileFirst: "ВЫХОДИЛ ПЕРВЫМ",
   tileDealt: "ПЕРВЫЙ ХОД",
   tileTimesExpected: (times: string, expected: string) => `${times} · ожидаемо ${expected}`,
+  tileFoolNote: (fools: number, decided: number, expected: string) =>
+    `${fools} из ${decided}, где был дурак · ожидаемо ${expected}`,
 
   personalChartLabel: "ДОЛЯ СТОЛА ПО ВЕЧЕРАМ",
   personalChartArrives: (evenings: string) => `появится через ${evenings}`,

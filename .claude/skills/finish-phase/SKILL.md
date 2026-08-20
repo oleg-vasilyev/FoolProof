@@ -436,6 +436,18 @@ own rule about one thing carrying one name everywhere a player reads it. The rev
 caught it and the fix deleted a copy key rather than adding one. The question to ask
 before writing any new label: **is this a new thing, or an old thing in a new state?**
 
+**A cold reading reports the symptom; the defect is usually one level away from where
+it points.** Three findings in a row here were real and none was where it read. "30%
+over 28 times with 96 games — the percentage is wrong" was a correct percentage over
+the games that *had* a fool, and the fix was to print that denominator. "These two
+awards contradict each other arithmetically" was two awards that can both hold, and
+the fix was a phrase implying an order the rule never checks. "The number is off by
+one" was a number the grid could confirm and a sentence claiming one comparison too
+many. So before changing either half, ask **which of the number and the words is
+wrong** — and check the rule that produced the number, not the sentence that reported
+it. Changing the arithmetic to match a sentence is how a correct statistic gets
+broken by a reading of it.
+
 The output is **specific claims, not a verdict.** "Looked, fine" is the green light
 with nothing behind it that `write-an-e2e-scenario` warns about — which is why the
 reader is required to write down what each line said to it before it may report

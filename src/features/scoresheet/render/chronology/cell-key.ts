@@ -24,6 +24,12 @@ type KeyKind = typeof CellKind.Drawn | typeof CellKind.Fool | typeof CellKind.Ab
 
 const KEY_KINDS: readonly KeyKind[] = [CellKind.Drawn, CellKind.Fool, CellKind.Absent];
 
+const drawnIn = (sheet: Sheet, kind: KeyKind): boolean =>
+  sheet.players.some((player) => player.cells.some((cell) => cell.kind === kind));
+
+const kindsOn = (sheet: Sheet): readonly KeyKind[] =>
+  KEY_KINDS.filter((kind) => drawnIn(sheet, kind));
+
 const labelFor = (copy: Copy, kind: KeyKind): string => {
   switch (kind) {
     case CellKind.Drawn:
@@ -74,4 +80,4 @@ const entryOf = (copy: Copy, sheet: Sheet, kind: KeyKind, slot: number): readonl
 };
 
 export const cellKey = (copy: Copy, sheet: Sheet): readonly string[] =>
-  KEY_KINDS.flatMap((kind, slot) => entryOf(copy, sheet, kind, slot));
+  kindsOn(sheet).flatMap((kind, slot) => entryOf(copy, sheet, kind, slot));

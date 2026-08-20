@@ -55,10 +55,20 @@ const FIRST_SLOT = 0;
 
 const SECOND_SLOT = 1;
 
-const sheetOf = (): Sheet =>
+const EVERY_MARK: readonly Cell[] = [
+  { kind: CellKind.Drawn, position: PLACE_ABOVE_FOOL },
+  { kind: CellKind.Fool, position: AT_THE_TABLE },
+  { kind: CellKind.Absent },
+  { kind: CellKind.Placed, position: PLACE_ABOVE_FOOL },
+];
+
+const seatedWith = (cells: readonly Cell[]): readonly ScoredPlayer[] =>
+  Array.from({ length: AT_THE_TABLE }, () => ({ cells }) as unknown as ScoredPlayer);
+
+const sheetOf = (cells: readonly Cell[] = EVERY_MARK): Sheet =>
   ({
     startedOn: "2026-07-24",
-    players: Array.from({ length: AT_THE_TABLE }, () => ({}) as ScoredPlayer),
+    players: seatedWith(cells),
     biggestTable: A_BIGGEST_TABLE,
 
     played: NONE,
@@ -182,5 +192,92 @@ describe("cellKey()", () => {
 
     expect(attributesOfText(copy.sheetKeyAbsent).fill).toBe("key ink");
     expect(attributesOfText(copy.sheetKeyAbsent)["font-size"]).toBe(KEY_LABEL_FONT);
+  });
+});
+
+describe("cellKey() over an evening that never drew a mark", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    baselineSpy.mockReturnValue(BASELINE);
+    cellFaceSpy.mockReturnValue([]);
+    textSpy.mockReturnValue("");
+  });
+
+  it("should explain no draw when no game ended level", () => {
+    cellKey(copy, sheetOf([{ kind: CellKind.Fool, position: AT_THE_TABLE }, { kind: CellKind.Absent }]));
+
+    expect(printed()).not.toContain(copy.sheetKeyDrawn);
+    expect(printed()).toContain(copy.sheetKeyFool);
+  });
+
+  it("should explain no absence when everybody sat every game", () => {
+    cellKey(copy, sheetOf([{ kind: CellKind.Drawn, position: PLACE_ABOVE_FOOL }]));
+
+    expect(printed()).not.toContain(copy.sheetKeyAbsent);
+    expect(printed()).toContain(copy.sheetKeyDrawn);
+  });
+
+  it("should close the gap rather than leave an empty slot where a mark was skipped", () => {
+    cellKey(copy, sheetOf([{ kind: CellKind.Absent }]));
+
+    expect(boxFor(FIRST_SLOT)["x"]).toBe(GRID_LEFT);
+    expect(printed()).toEqual([copy.sheetKeyAbsent]);
+  });
+
+  it("should say nothing at all about a grid holding only ordinary places", () => {
+    cellKey(copy, sheetOf([{ kind: CellKind.Placed, position: PLACE_ABOVE_FOOL }]));
+
+    expect(printed()).toEqual([]);
+    expect(cellFaceSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe("cellKey() over a mark only one player carries", () => {
+  const ORDINARY: readonly Cell[] = [{ kind: CellKind.Placed, position: PLACE_ABOVE_FOOL }];
+
+  const oneApartFrom = (mark: Cell): Sheet =>
+    ({
+      startedOn: "2026-07-24",
+      players: [
+        { cells: [mark] },
+        ...Array.from({ length: AT_THE_TABLE - PLACE_ABOVE_FOOL }, () => ({ cells: ORDINARY })),
+      ] as unknown as readonly ScoredPlayer[],
+      biggestTable: A_BIGGEST_TABLE,
+
+      played: NONE,
+      rounds: NONE,
+      rowHeight: NONE,
+      columnWidth: NONE,
+      gridHeight: NONE,
+      gridBottom: GRID_BOTTOM,
+      chartTop: NONE,
+      height: NONE,
+    }) satisfies Sheet;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    cellFaceSpy.mockImplementation(() => ["<rect/>"]);
+    baselineSpy.mockReturnValue(BASELINE);
+    textSpy.mockImplementation((value: string) => `<text:${value}>`);
+  });
+
+  it("should explain an absence that only one player ever had", () => {
+    cellKey(copy, oneApartFrom({ kind: CellKind.Absent }));
+
+    expect(printed()).toEqual([copy.sheetKeyAbsent]);
+  });
+
+  it("should explain a fool that only one player ever was", () => {
+    cellKey(copy, oneApartFrom({ kind: CellKind.Fool, position: AT_THE_TABLE }));
+
+    expect(printed()).toEqual([copy.sheetKeyFool]);
+  });
+
+  it("should explain a draw that only one player ever shared", () => {
+    cellKey(copy, oneApartFrom({ kind: CellKind.Drawn, position: PLACE_ABOVE_FOOL }));
+
+    expect(printed()).toEqual([copy.sheetKeyDrawn]);
   });
 });

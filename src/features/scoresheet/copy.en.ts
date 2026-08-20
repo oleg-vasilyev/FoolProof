@@ -73,7 +73,7 @@ export const copy = {
     `Opened ${opens} games and went out first in ${wins} of them.`,
   untouchableReason: (games: string) => `${games}, never the fool. Untouched all evening.`,
   teflonReason: (streak: number) =>
-    `${streak} straight games clean after being the fool. The longest run of the night.`,
+    `Was the fool, and still put ${streak} straight games together clean. The longest run of the night.`,
   hotSeatReason: (opens: number) =>
     `Opened ${opens} games and was left the fool in none of them.`,
   comebackReason: (sank: number, percent: number) =>
@@ -169,6 +169,8 @@ export const copy = {
   tileFirst: "OUT FIRST",
   tileDealt: "THE FIRST MOVE",
   tileTimesExpected: (times: string, expected: string) => `${times} · expected ${expected}`,
+  tileFoolNote: (fools: number, decided: number, expected: string) =>
+    `${fools} of the ${decided} that had a fool · expected ${expected}`,
 
   personalChartLabel: "TABLE SHARE BY EVENING",
   personalChartArrives: (evenings: string) => `appears after ${evenings}`,

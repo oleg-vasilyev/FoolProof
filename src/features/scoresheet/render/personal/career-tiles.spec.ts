@@ -36,7 +36,9 @@ const { careerTiles } = await import("#scoresheet/render/personal/career-tiles.t
 
 const RATED_TILES = 6;
 
-const TALLIED_TILES = 3;
+const TALLIED_TILES = 2;
+
+const DECIDED = 94;
 
 const NOTES_IN_TOP_ROW = 1;
 
@@ -70,6 +72,7 @@ const CARD = {
     games: GAMES,
     evenings: EVENINGS,
     fools: FOOLS,
+    decided: DECIDED,
     foolRate: FOOL_RATE,
     expectedFoolRate: EXPECTED_FOOL_RATE,
     firsts: FIRSTS,
@@ -162,7 +165,6 @@ describe("careerTiles()", () => {
     it("should count the times behind each note through the tally", () => {
       careerTiles(copy, CARD);
 
-      expect(timeTallySpy).toHaveBeenCalledWith(copy, FOOLS);
       expect(timeTallySpy).toHaveBeenCalledWith(copy, FIRSTS);
       expect(timeTallySpy).toHaveBeenCalledWith(copy, OPENS);
       expect(timeTallySpy).toHaveBeenCalledTimes(TALLIED_TILES);
@@ -172,7 +174,7 @@ describe("careerTiles()", () => {
       careerTiles(copy, CARD);
 
       expect(textSpy).toHaveBeenCalledWith(
-        copy.tileTimesExpected(times(FOOLS), pct(EXPECTED_FOOL_RATE)),
+        copy.tileFoolNote(FOOLS, DECIDED, pct(EXPECTED_FOOL_RATE)),
         expect.anything()
       );
     });
@@ -322,5 +324,31 @@ describe("careerTiles()", () => {
       expect(textSpy).toHaveBeenCalledTimes(DRAWN_ELEMENTS);
       expect(new Set(lines).size).toBe(DRAWN_ELEMENTS);
     });
+  });
+});
+
+describe("careerTiles() and the denominator the fool tile is read against", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    percentLabelSpy.mockImplementation((share: number) => pct(share));
+    timeTallySpy.mockImplementation((_table: unknown, count: number) => times(count));
+    textSpy.mockImplementation((value: string) => `<text:${value}>`);
+  });
+
+  it("should name the games that had a fool, not every game played", () => {
+    careerTiles(copy, CARD);
+
+    expect(textSpy).toHaveBeenCalledWith(
+      expect.stringContaining(String(DECIDED)),
+      expect.anything()
+    );
+    expect(DECIDED).not.toBe(GAMES);
+  });
+
+  it("should leave the fool count out of the times tally, since it is read against them", () => {
+    careerTiles(copy, CARD);
+
+    expect(timeTallySpy).not.toHaveBeenCalledWith(copy, FOOLS);
   });
 });
