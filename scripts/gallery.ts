@@ -130,6 +130,16 @@ const GONE_FROM = 2;
 
 const BACK_AT = 7;
 
+const OVER_THE_EVENING = 13;
+
+const RESTING_EACH_GAME = 3;
+
+const restsThisRound = (player: number, round: number): boolean =>
+  Array.from(
+    { length: RESTING_EACH_GAME },
+    (_unused, at) => ((round * RESTING_EACH_GAME) % OVER_THE_EVENING + at) % OVER_THE_EVENING
+  ).includes(player);
+
 const LATE_JOINER = 3;
 
 const EARLY_LEAVER = 4;
@@ -154,7 +164,7 @@ export const GALLERY: readonly Case[] = [
   {
     name: "crowded-table",
     locale: Locale.Ru,
-    asks: "ten columns of long names — headings, legend and colours at their limit",
+    asks: "ten long names who all stayed — headings, legend and colours at the limit one game may seat",
     players: LONG_NAMES,
     rounds: rotatingRounds(LONG_NAMES.length, A_QUALIFYING_EVENING),
   },
@@ -166,18 +176,22 @@ export const GALLERY: readonly Case[] = [
     rounds: rotatingRounds(LONG_NAMES.length, A_ROTATING_EVENING),
   },
   {
+    name: "three-legend-rows",
+    locale: Locale.Ru,
+    asks: "thirteen players over one evening, never more than ten at a table at once — the third legend row, and the lower ceiling it costs",
+    players: [...LONG_NAMES, ...SHORT_NAMES.slice(NOBODY, THREE_AT_THE_TABLE)],
+    rounds: seatedRounds(
+      OVER_THE_EVENING,
+      A_ROTATING_EVENING,
+      (player, round) => !restsThisRound(player, round)
+    ),
+  },
+  {
     name: "crowded-past-the-ceiling",
     locale: Locale.Ru,
     asks: "ten long names and more games than a two-row legend leaves room for",
     players: LONG_NAMES,
     rounds: rotatingRounds(LONG_NAMES.length, PAST_THE_CEILING),
-  },
-  {
-    name: "three-legend-rows",
-    locale: Locale.Ru,
-    asks: "more players than two legend rows hold — the third row, and the ceiling it costs",
-    players: [...LONG_NAMES, ...SHORT_NAMES.slice(NOBODY, THREE_AT_THE_TABLE)],
-    rounds: rotatingRounds(LONG_NAMES.length + THREE_AT_THE_TABLE, A_ROTATING_EVENING),
   },
   {
     name: "one-huge-name",

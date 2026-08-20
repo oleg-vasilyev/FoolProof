@@ -354,12 +354,13 @@ now and needs no vigilance here.** What is still yours is the other direction: a
 appearing for the first time at this gate was approved by nobody, and it is worth
 saying so out loud rather than quietly adding it.
 
-Both rules below are stated again in the `poster-designer` brief, deliberately — a
-subagent cannot load a skill, and a list of edges written without them is the very
-failure they describe. The brief carries a third they do not need here, since the
-list is written there: a case that cannot be constructed is a finding, not a panel
-quietly dropped. Two wordings, nothing checking them against each other — change one
-and change the other.
+All three rules below are stated again in the `poster-designer` brief, deliberately —
+a subagent cannot load a skill, and a list of edges written without them is the very
+failure they describe. The brief carries a fourth it needs and this gate does not,
+since the list is written there: a case that cannot be constructed is a finding, not a
+panel quietly dropped. Two wordings, nothing checking them against each other — change
+one and change the other, **and recount them when you do**, because the sentence you
+are reading is the one that goes stale first.
 
 **An edge case has to be hostile, not merely realistic.** A gallery case built from a
 plausible extreme is a sample, and a sample passes a broken limit as easily as a
@@ -370,6 +371,26 @@ the width model was out by a third for bold. One case, one character changed, an
 shipped-looking fix became a real one. So the widest input is **constructed** —
 the widest glyph, the longest run, the emptiest history — and never drawn from what
 a player plausibly types.
+
+**And it is constructed inside the product's own limits — checked at the level where
+the state lives, not the level the number is written at.** The other half of the same
+rule, and the one that bit hardest. A fixture answers only to the script that writes
+it, so nothing stops it building a state the bot refuses: `three-legend-rows` seated
+thirteen players in every game where `MOST_PLAYERS` is ten. Illegal, and it had
+survived every gate, because each one asked whether the picture was drawn correctly
+and none asked whether it could happen.
+
+**But an illegal fixture is not an unreachable state, and confusing the two nearly
+deleted a documented feature.** The cap is on one *game*; the chronology draws an
+*evening*, and `seriesChronology` gathers every distinct player of it, so swapping
+somebody in mid-evening reaches eleven players with ten seated throughout —
+`PLAN.md` had costed that state in games years before the case did. The verdict
+"unreachable, delete it" was drawn from a correct measurement of `legendRowsOf` and a
+wrong reading of which limit governs, and only the review caught it. So: name the
+limit you are pressing **and** the level it applies to, then check the state against
+that level. A case whose fixture is illegal is **repaired** — here by seating a
+subset each round — and only a state the product genuinely cannot reach earns a
+deletion, which is a finding worth saying out loud rather than a tidy-up.
 
 **And a case earns its description only after the drawing agrees with it.** A gallery
 case here was added to exercise two marks that only appear when a best and a worst

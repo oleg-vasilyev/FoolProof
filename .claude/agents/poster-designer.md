@@ -141,9 +141,9 @@ watched to fail: a case in the list that the script does not draw, a list naming
 script nobody wrote, and a script whose cases no list ever approved. So an edge the
 owner looked at cannot quietly stop being drawn.
 
-Three rules the list inherits, all already paid for; the last two are stated again in
+Four rules the list inherits, all already paid for; the last three are stated again in
 gate 6 of the `finish-phase` skill, which you cannot load, so keep the two wordings in
-step if you ever change one.
+step if you ever change one — and recount them when you do.
 
 **A case you cannot construct is a finding, not a panel you quietly drop** — if the
 widest name will not fit, say that instead of drawing a narrower one.
@@ -152,6 +152,16 @@ widest name will not fit, say that instead of drawing a narrower one.
 plausible long name. A fix here was measured, drawn and looked at against a realistic
 32-character Russian name and read perfectly; the same 32 characters made of the
 widest letter still ran through the counter beside it.
+
+**And constructed inside the product's own limits — at the level the limit governs.**
+A fixture answers only to the script that writes it, so nothing stops you building a
+state the bot refuses: one gallery case seated thirteen players in every game where the
+cap is ten. But the cap is per *game*, and the poster draws an *evening*, which may
+hold more distinct players than ever sat down together — so the fix was to seat a legal
+subset each round, not to drop the panel. Name, for every extreme you build, the limit
+you are pressing **and** the level it applies to; an illegal fixture is repaired, and
+only a state the product truly cannot reach is a finding worth reporting instead of
+drawing.
 
 **A case earns its sentence only after the drawing agrees with it.** The `asks` line
 is a claim about the panel, and you write both — so open the panel and check it says

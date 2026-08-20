@@ -1,9 +1,9 @@
 one-game — the shortest evening that draws anything at all
 two-players — the narrowest table, where every game is a win or a fool
-crowded-table — ten columns of long names — headings, legend and colours at their limit
+crowded-table — ten long names who all stayed — headings, legend and colours at the limit one game may seat
 crowded-and-burned — ten long names over a long evening — the widest winners lines the card can draw
+three-legend-rows — thirteen players over one evening, never more than ten at a table at once — the third legend row, and the lower ceiling it costs
 crowded-past-the-ceiling — ten long names and more games than a two-row legend leaves room for
-three-legend-rows — more players than two legend rows hold — the third row, and the ceiling it costs
 one-huge-name — the longest name a player may have, beside two short ones
 over-the-ceiling — more games than the sheet holds — row height at its floor, and the note that says so
 all-drawn — an evening nobody lost — no fool plate, and the draw states everywhere
