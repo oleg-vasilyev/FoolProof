@@ -94,7 +94,7 @@ describeScenario("a long evening, with the table changing under it", (chat) => {
 
     await chat.say("/stats_awards");
 
-    expect(chat.lastText()).not.toContain("Too early for awards");
+    expect(chat.lastText()).not.toContain("and the awards appear");
     expect(chat.photosSent()).toBe(before + ONE_PICTURE);
   });
 

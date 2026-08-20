@@ -87,7 +87,9 @@ vi.mock("#scoresheet/domain/awards/rivalry-awards.ts", () => ({
   theNemesis: ruleFor(AwardName.TheNemesis),
 }));
 
-const { EVENING_MINIMUM, honoursFor } = await import("#scoresheet/domain/awards/awards.ts");
+const { EVENING_MINIMUM, gamesShortOfAwards, honoursFor } = await import(
+  "#scoresheet/domain/awards/awards.ts"
+);
 
 const NOTHING = 0;
 
@@ -324,5 +326,37 @@ describe("honoursFor()", () => {
 
       expect(namesOf()).toEqual([AwardName.FirstBlood]);
     });
+  });
+});
+
+describe("gamesShortOfAwards()", () => {
+  it("should ask for the whole threshold when nothing has been played", () => {
+    expect(gamesShortOfAwards(NOTHING)).toBe(EVENING_MINIMUM);
+  });
+
+  it("should ask for one more game on the evening one game short", () => {
+    expect(gamesShortOfAwards(EVENING_MINIMUM - ONCE)).toBe(ONCE);
+  });
+
+  it("should ask for nothing on exactly the game that earns the awards", () => {
+    expect(gamesShortOfAwards(EVENING_MINIMUM)).toBe(NOTHING);
+  });
+
+  it("should ask for nothing rather than a negative on a long evening", () => {
+    expect(gamesShortOfAwards(EVENING_MINIMUM + MOST_AWARDS)).toBe(NOTHING);
+  });
+
+  it("should count down one for one as the evening goes on", () => {
+    const early = gamesShortOfAwards(ONCE);
+    const later = gamesShortOfAwards(ONCE + ONCE);
+
+    expect(early - later).toBe(ONCE);
+  });
+
+  it("should agree with the threshold the same module refuses on", () => {
+    const short = EVENING_MINIMUM - ONCE;
+
+    expect(honoursFor(chronologyOf(short))).toBeNull();
+    expect(gamesShortOfAwards(short)).toBeGreaterThan(NOTHING);
   });
 });

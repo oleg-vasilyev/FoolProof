@@ -56,6 +56,8 @@ const ONE_ROW = 1;
 
 const NO_ROWS = 0;
 
+const NOT_SHORT = 0;
+
 const RULES_IN_ORDER: readonly ((evening: SessionAppearances) => Award | null)[] = [
   kingOfTheTable,
   wireToWire,
@@ -136,6 +138,9 @@ const roomFor = (selection: Selection): number =>
   MOST_AWARDS -
   (selection.king === null ? NO_ROWS : ONE_ROW) -
   (selection.fool === null ? NO_ROWS : ONE_ROW);
+
+export const gamesShortOfAwards = (played: number): number =>
+  Math.max(EVENING_MINIMUM - played, NOT_SHORT);
 
 export const honoursFor = (chronology: SeriesChronology): Honours | null => {
   if (chronology.games.length < EVENING_MINIMUM) {

@@ -374,6 +374,15 @@ had been sitting in the gallery the whole time. The owner settled it in one glan
 putting the two charts side by side. Look at the working example first; three renders
 were spent reasoning about text lengths instead.
 
+**And it borrows that section's *name*, never invents a second one.** A section drawn
+in two states — full and empty, present and promised — is one thing to a player, so
+it keeps one label and lets a hint carry the difference. A phase gave the empty state
+of the evening chart its own name, wrote a copy key for it, and asserted in a spec
+that the two names differ — a designed tension that walked straight into `PLAN.md`'s
+own rule about one thing carrying one name everywhere a player reads it. The review
+caught it and the fix deleted a copy key rather than adding one. The question to ask
+before writing any new label: **is this a new thing, or an old thing in a new state?**
+
 The output is **specific claims, not a verdict.** "Looked, fine" is the green light
 with nothing behind it that `write-an-e2e-scenario` warns about — if you cannot name
 what you saw on a picture, you did not look at it. Of each, ask:
@@ -522,6 +531,17 @@ A phase's cost is dominated by two things, and neither of them is thinking:
   and a screenshot. A phase that starts a subagent while waiting on such an answer
   has already lost that agent's work.
 
+- **A design settled in a session that has ended is not settled.** Frozen
+  signatures, an approved mockup and a decisions note survive a restart; the owner's
+  agreement does not, because what he agreed to was a picture he can no longer see.
+  So a resumed phase **shows the drawing again before writing a line against it**,
+  and the cost of not doing so is not a delay — it is the code. A phase resumed from
+  a handover note wrote the module its notes had frozen, and the owner reopened the
+  question with his first look at the mockup that was already on disk; the module was
+  deleted the same hour, and the answer that replaced it came from a fresh designer
+  who had been told what was rejected and why. The tell is cheap: **if you are
+  reading a decision instead of remembering making it, it needs re-showing.**
+
 - **Rewriting the same shape in fifty files by hand.** A signature that gains a
   parameter changes every call site and every mock factory; do it with a **script
   written to a file** and run with `node`, never a heredoc — two heredocs died on
@@ -591,6 +611,15 @@ something disjoint. So the policy is not "delegate the mechanical work", it is:
   interrupted may finish after you looked. One was reported here as having written
   nothing, which was true at that moment and false ten minutes later; its seven
   spec files were nearly rewritten by hand.
+- **"Launched" is not "running" — confirm the id resolves before saying it works.**
+  A launch can return success and leave nothing behind: no task, an empty output
+  file, no folder on disk. One designer failed that way here and was reported to the
+  owner as still thinking, and only his own doubt got it checked; the relaunch was
+  the whole fix, thirteen minutes late. So a background launch is followed
+  immediately by a non-blocking status check, and a brief for an agent that produces
+  files tells it to **create its output folder as its first step**, so progress is
+  visible on disk instead of inferred. Never report an agent's state from the launch
+  result — that is the one thing the launch result does not tell you.
 - **Never delegate against a subject that is not settled.** Delegation multiplies
   the cost of rework: a placement decision you would fix in five minutes yourself
   cost a whole second agent here, and cost a stopped agent in the phase before.

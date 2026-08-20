@@ -15,7 +15,9 @@ const rasterizeSpy = vi.fn();
 
 const gameTallySpy = vi.fn();
 
-const playerTallySpy = vi.fn();
+const chronologyCaptionSpy = vi.fn();
+
+const gamesShortOfAwardsSpy = vi.fn();
 
 const renderAwardsSpy = vi.fn();
 
@@ -37,16 +39,17 @@ vi.mock("#scoresheet/render/awards/awards-svg.ts", () => ({
     renderAwardsSpy(table, chronology, honours),
 }));
 
-const EVENING_MINIMUM = 5;
-
 vi.mock("#scoresheet/domain/awards/awards.ts", () => ({
-  EVENING_MINIMUM,
+  gamesShortOfAwards: (played: number) => gamesShortOfAwardsSpy(played),
   honoursFor: (chronology: unknown) => honoursForSpy(chronology),
+}));
+
+vi.mock("#scoresheet/render/chronology/chronology-caption.ts", () => ({
+  chronologyCaption: (table: unknown, played: number) => chronologyCaptionSpy(table, played),
 }));
 
 vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
-  playerTally: (table: unknown, players: number) => playerTallySpy(table, players),
 }));
 
 vi.mock("#scoresheet/bot/rasterizer.ts", () => ({
@@ -64,6 +67,10 @@ const TWICE = 2;
 const NEVER = 0;
 
 const FIFTY = 50;
+
+const SHORT_BY = 2;
+
+const CAPTION_MARK = "the-caption";
 
 const SHEET_SVG = "<svg>chronology</svg>";
 
@@ -105,8 +112,7 @@ describe("onStats()", () => {
     rasterizeSpy.mockResolvedValue(SHEET_PNG);
     honoursForSpy.mockReturnValue(null);
     repo.seriesChronologySpy.mockReturnValue(SESSION);
-    gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
-    playerTallySpy.mockImplementation((_table: unknown, players: number) => `roster(${String(players)})`);
+    chronologyCaptionSpy.mockReturnValue(CAPTION_MARK);
   });
 
   it("should ask the repository for this chat's session", async () => {
@@ -134,22 +140,27 @@ describe("onStats()", () => {
     expect(ctx.replyWithPhotoSpy).toHaveBeenCalledTimes(ONCE);
   });
 
-  it("should ask the tally renderers for the session's size", async () => {
+  it("should ask the caption maker how the session stands", async () => {
     await onStats(context(), ctx.command("/stats"));
 
-    expect(gameTallySpy).toHaveBeenCalledWith(copy, SESSION.games.length);
-    expect(playerTallySpy).toHaveBeenCalledWith(copy, SESSION.players.length);
+    expect(chronologyCaptionSpy).toHaveBeenCalledTimes(ONCE);
+    expect(chronologyCaptionSpy).toHaveBeenCalledWith(copy, SESSION.games.length);
   });
 
-  it("should caption the photo by joining the two finished tallies", async () => {
+  it("should caption the photo with whatever the caption maker returned", async () => {
     await onStats(context(), ctx.command("/stats"));
 
-    expect(ctx.lastPhoto().options.caption).toBe(
-      copy.sheetSubtitle(
-        gameTallySpy.mock.results[0]?.value as string,
-        playerTallySpy.mock.results[0]?.value as string
-      )
-    );
+    expect(ctx.replyWithPhotoSpy).toHaveBeenCalledTimes(ONCE);
+    expect(ctx.lastPhoto().options.caption).toBe(CAPTION_MARK);
+  });
+
+  it("should leave the photo uncaptioned when the caption maker had nothing to add", async () => {
+    chronologyCaptionSpy.mockReturnValue(undefined);
+
+    await onStats(context(), ctx.command("/stats"));
+
+    expect(ctx.replyWithPhotoSpy).toHaveBeenCalledTimes(ONCE);
+    expect(ctx.lastPhoto().options.caption).toBeUndefined();
   });
 
   it("should count every game of the session in the caption, not only the drawn rows", async () => {
@@ -163,7 +174,7 @@ describe("onStats()", () => {
 
     await onStats(context(), ctx.command("/stats"));
 
-    expect(gameTallySpy).toHaveBeenCalledWith(copy, FIFTY);
+    expect(chronologyCaptionSpy).toHaveBeenCalledWith(copy, FIFTY);
   });
 
   it("should say nothing is recorded when the chat has no session yet", async () => {
@@ -262,8 +273,7 @@ describe("onChronology()", () => {
     rasterizeSpy.mockResolvedValue(SHEET_PNG);
     honoursForSpy.mockReturnValue(HONOURS);
     repo.seriesChronologySpy.mockReturnValue(SESSION);
-    gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
-    playerTallySpy.mockImplementation((_table: unknown, players: number) => `roster(${String(players)})`);
+    chronologyCaptionSpy.mockReturnValue(CAPTION_MARK);
   });
 
   it("should send one photo and never reach for the awards", async () => {
@@ -309,6 +319,8 @@ describe("onAwards()", () => {
     rasterizeSpy.mockResolvedValue(AWARDS_PNG);
     honoursForSpy.mockReturnValue(HONOURS);
     repo.seriesChronologySpy.mockReturnValue(SESSION);
+    gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
+    gamesShortOfAwardsSpy.mockReturnValue(SHORT_BY);
   });
 
   it("should send the awards picture and nothing else", async () => {
@@ -330,16 +342,17 @@ describe("onAwards()", () => {
 
     await onAwards(context(), ctx.command("/stats_awards"));
 
-    expect(ctx.lastReply().text).toBe(copy.awardsTooSoon("tally(5)"));
+    expect(ctx.lastReply().text).toBe(copy.awardsTooSoon(`tally(${String(SHORT_BY)})`));
     expect(ctx.replyWithPhotoSpy).toHaveBeenCalledTimes(NEVER);
   });
 
-  it("should quote the threshold the domain holds, not one of its own", async () => {
+  it("should name what is still missing rather than the threshold itself", async () => {
     honoursForSpy.mockReturnValue(null);
 
     await onAwards(context(), ctx.command("/stats_awards"));
 
-    expect(gameTallySpy).toHaveBeenCalledWith(copy, EVENING_MINIMUM);
+    expect(gamesShortOfAwardsSpy).toHaveBeenCalledWith(SESSION.games.length);
+    expect(gameTallySpy).toHaveBeenCalledWith(copy, SHORT_BY);
   });
 
   it("should say nothing is recorded when the chat has no session yet", async () => {

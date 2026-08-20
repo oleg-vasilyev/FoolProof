@@ -13,6 +13,9 @@ export const ENOUGH_TO_JUDGE_A_NIGHT = 3;
 
 export const ENOUGH_NIGHTS_TO_CHART = 5;
 
+export const eveningsShortOfChart = (nights: number): number =>
+  Math.max(ENOUGH_NIGHTS_TO_CHART - nights, NOTHING);
+
 export interface EveningShare {
   readonly seriesNo: number;
   readonly playedOn: string;

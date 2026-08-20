@@ -233,7 +233,7 @@ describe("personal-handler", () => {
     it("should close the screen so no keyboard is left behind", async () => {
       await onPersonalTap(contextOf(), ctx.tap(TAP_DATA));
 
-      expect(ctx.editMessageTextSpy).toHaveBeenCalledWith(copy.personalDrawing(CARD.displayName));
+      expect(ctx.editMessageTextSpy).toHaveBeenCalledWith(copy.personalPicked(CARD.displayName));
     });
 
     it("should answer the tap before spending time on the drawing", async () => {

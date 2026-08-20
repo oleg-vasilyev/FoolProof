@@ -841,8 +841,13 @@ card is meant to be read at full width. `/stats_chronology` and `/stats_awards`
 send one of the two on their own.
 
 Awards need **five games** in the session. Below that `/stats` sends the chronology
-and says nothing about awards, because a card that fires three of thirty-six rules
-reads as a bug rather than as a thin evening; `/stats_awards` answers in text instead.
+without the second picture, because a card that fires three of thirty-six rules reads
+as a bug rather than as a thin evening — but it captions the chronology with the games
+still owed, and `/stats_awards` answers in text with the same remainder. **Both name
+what is missing, never the threshold**: a player who has played three games is told to
+play two more, not that awards need five, because the remainder is the only half of
+that arithmetic they cannot do at a glance. The caption is silent once the awards are
+earned, so it never annotates a picture that is already there.
 
 The card is read top to bottom from glory to disgrace, and **FOOL OF THE NIGHT is
 always last**, on a red plate. Under it, when it happened at all, one line about the
@@ -1053,6 +1058,12 @@ The bot cannot know which player a person is — names are typed, not tagged —
 per row, and the card is drawn for whichever name is tapped. That also keeps the
 input at one tap, which is what the product is for.
 
+**The screen the tap replaces says what was chosen, not what is happening.** The
+roster is edited away the moment a name is tapped, and whatever replaces it stays in
+the chat forever — so a message announcing work in progress becomes a lie a second
+later, when the picture arrives beneath it and nothing goes back to correct it. It
+names the player whose card follows, which is still true tomorrow.
+
 **A player exists inside a chat.** `players.chat_id` means the same human playing in
 two chats is two players with two careers, and nothing links them. A card therefore
 says *for all time in this chat*, never *for all time*.
@@ -1135,7 +1146,11 @@ writes a placement for every remaining seat rather than only the recorded exits,
 an empty career — a state the bot has no way to produce.
 
 The evening chart needs five evenings to be worth drawing; below that it is three
-points and a straight line, so the section disappears and the sheet shrinks again.
+points and a straight line, so the plot is left out and the sheet shrinks again. The
+section itself stays, under its own name, with the evenings still owed beside it —
+**the label names the chart and the hint says it is not there yet**, which is the
+grammar the chronology's sections already use. Naming the empty section anything else
+would give one thing two names, which the rule below forbids.
 It carries a point per evening and singles out two of them, **and it singles them
 out only when they are the sole holders of their share**: a ring on one of six
 evenings that all went equally badly claims a distinction the data does not have,
@@ -1150,9 +1165,11 @@ card credited *the dealer* — a different action, in both languages. The bot de
 nothing; the fool's neighbour attacks first. This is a documentation rule with
 teeth only because a poster and a screen are reviewed apart: the gallery gate now
 reads the finished pictures against each other and against the live card.
-**Every section of this card is optional, and the sheet's height is the sum of
-whatever survived** — a chat that played one evening gets a short, honest card
-rather than a tall one full of gaps.
+**Every section of this card is optional except the chart's, and the sheet's height is
+the sum of whatever survived** — a chat that played one evening gets a short, honest
+card rather than a tall one full of gaps. The chart's section is the exception because
+it is the only one that promises something: an absent fact says nothing worth saying,
+while an absent chart is a player wondering whether the bot forgot.
 
 ### A session is computed, not a table
 

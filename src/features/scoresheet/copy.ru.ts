@@ -15,7 +15,7 @@ export const copy: Copy = {
 
   statsEmpty: "Пока ничего не записано. Начни партию: /game.",
   awardsTooSoon: (games: string) =>
-    `Для наград ещё рано — нужно ${games}. Хронология уже готова: /stats_chronology`,
+    `Ещё ${games} — и награды появятся. Хронология уже готова: /stats_chronology`,
 
   awardsTitle: "НАГРАДЫ",
   awardsCurseLabel: "ПРОКЛЯТИЕ СТОЛА",
@@ -143,6 +143,7 @@ export const copy: Copy = {
 
   sheetSubtitle: (games: string, players: string) => `${games} · ${players}`,
   sheetTableShows: (tally: string) => `таблица ниже показывает последние ${tally}`,
+  moreGamesForAwards: (games: string) => `Отыграйте ещё ${games} — и у вечера будут награды.`,
 
   commandPersonal: "Карточка одного игрока",
   helpPersonal: "/personal — карточка игрока за всё время, что он играл",
@@ -150,7 +151,7 @@ export const copy: Copy = {
   personalPick: "Чья карточка?",
   personalNobody: "Здесь ещё не доиграли ни одной партии. Начните с /game.",
   personalStale: "Этот экран остался от старой версии бота",
-  personalDrawing: (name: string) => `Рисую карточку: ${name}…`,
+  personalPicked: (name: string) => `Карточка: ${name}`,
 
   personalEyebrow: "КАРТОЧКА ИГРОКА",
   personalSince: (date: string) => `с ${date}`,
@@ -168,6 +169,7 @@ export const copy: Copy = {
   tileTimesExpected: (times: string, expected: string) => `${times} · ожидаемо ${expected}`,
 
   personalChartLabel: "ДОЛЯ СТОЛА ПО ВЕЧЕРАМ",
+  personalChartProgress: (evenings: string) => `по точке за вечер — ещё ${evenings}`,
   personalBestEvening: "лучший вечер",
   personalWorstEvening: "худший вечер",
 

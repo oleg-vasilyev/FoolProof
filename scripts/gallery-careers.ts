@@ -184,7 +184,7 @@ const CAREERS: readonly CareerCase[] = [
   {
     name: "first-night",
     locale: Locale.En,
-    asks: "one evening old — no chart to draw, and only what a career this short may claim",
+    asks: "one evening old — the chart section is the card's last line, promising four more evenings",
     players: SHORT_NAMES.slice(NOBODY, THREE_AT_THE_TABLE),
     nights: ONE_NIGHT,
     gamesEachNight: A_SHORT_NIGHT,
@@ -193,7 +193,7 @@ const CAREERS: readonly CareerCase[] = [
   {
     name: "under-the-chart",
     locale: Locale.Ru,
-    asks: "one evening short of a chart — the facts move up into the space the plot would hold",
+    asks: "one evening short of a chart — the section keeps its name and says the one evening still owed",
     players: SHORT_NAMES.slice(NOBODY, FIVE_AT_THE_TABLE),
     nights: JUST_UNDER_THE_CHART,
     gamesEachNight: A_FULL_NIGHT,

@@ -11,6 +11,7 @@ import {
   PLOT_HEIGHT,
   SECTION_LABEL_DROP,
   SHEET_BOTTOM,
+  TEASER_BOTTOM_GAP,
   TILES_PER_ROW,
   TILES_TOP,
   TILE_BOTTOM_GAP,
@@ -35,7 +36,7 @@ export interface PlacedFact {
 
 export interface PersonalLayout {
   readonly height: number;
-  readonly chartLabel: number | null;
+  readonly chartLabel: number;
   readonly plotTop: number | null;
   readonly factsLabel: number | null;
   readonly facts: readonly PlacedFact[];
@@ -57,10 +58,11 @@ export const personalLayoutOf = (card: CareerCard): PersonalLayout => {
   const afterTiles =
     TILES_TOP + ROWS_BELOW_THE_FIRST * TILE_ROW_HEIGHT + TILE_NOTE_DROP + TILE_BOTTOM_GAP;
 
+  const chartLabel = afterTiles + SECTION_LABEL_DROP;
   const charted = card.nights.length >= ENOUGH_NIGHTS_TO_CHART;
-  const chartLabel = charted ? afterTiles + SECTION_LABEL_DROP : null;
-  const plotTop = chartLabel === null ? null : chartLabel + CHART_TOP_DROP;
-  const afterChart = plotTop === null ? afterTiles : plotTop + PLOT_HEIGHT + CHART_BOTTOM_GAP;
+  const plotTop = charted ? chartLabel + CHART_TOP_DROP : null;
+  const afterChart =
+    plotTop === null ? chartLabel + TEASER_BOTTOM_GAP : plotTop + PLOT_HEIGHT + CHART_BOTTOM_GAP;
 
   const rows = rowFactsIn(card.facts);
   const factsTop = afterChart + FACTS_TOP_DROP;

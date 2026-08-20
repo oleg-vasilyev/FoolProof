@@ -26,6 +26,8 @@ export const TILE_BOTTOM_GAP = 74;
 
 export const CHART_BOTTOM_GAP = 80;
 
+export const TEASER_BOTTOM_GAP = 60;
+
 export const FACTS_TOP_DROP = 100;
 
 export const FACT_HEIGHT = 178;

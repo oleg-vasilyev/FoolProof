@@ -14,7 +14,7 @@ export const copy = {
 
   statsEmpty: "Nothing recorded yet. Start a game with /game.",
   awardsTooSoon: (games: string) =>
-    `Too early for awards — they need ${games}. The chronology is ready though: /stats_chronology`,
+    `Another ${games} and the awards appear. The chronology is ready though: /stats_chronology`,
 
   awardsTitle: "AWARDS",
   awardsCurseLabel: "TABLE CURSE",
@@ -144,6 +144,7 @@ export const copy = {
 
   sheetSubtitle: (games: string, players: string) => `${games} · ${players}`,
   sheetTableShows: (tally: string) => `the table below shows the last ${tally}`,
+  moreGamesForAwards: (games: string) => `Another ${games} tonight and the awards follow.`,
 
   commandPersonal: "One player's card",
   helpPersonal: "/personal — one player's card, across everything they have played",
@@ -151,7 +152,7 @@ export const copy = {
   personalPick: "Whose card?",
   personalNobody: "Nobody has finished a game here yet. Start one with /game.",
   personalStale: "That screen is from an older version of the bot",
-  personalDrawing: (name: string) => `Drawing ${name}'s card…`,
+  personalPicked: (name: string) => `${name}'s card`,
 
   personalEyebrow: "PLAYER CARD",
   personalSince: (date: string) => `since ${date}`,
@@ -169,6 +170,7 @@ export const copy = {
   tileTimesExpected: (times: string, expected: string) => `${times} · expected ${expected}`,
 
   personalChartLabel: "TABLE SHARE BY EVENING",
+  personalChartProgress: (evenings: string) => `one point per evening — ${evenings} to go`,
   personalBestEvening: "best evening",
   personalWorstEvening: "worst evening",
 

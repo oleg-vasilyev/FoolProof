@@ -14,6 +14,8 @@ const careerTilesSpy = vi.fn();
 
 const eveningChartSpy = vi.fn();
 
+const chartTeaserSpy = vi.fn();
+
 const factRowsSpy = vi.fn();
 
 const topFactPlateSpy = vi.fn();
@@ -48,6 +50,10 @@ vi.mock("#scoresheet/render/personal/career-tiles.ts", () => ({
 
 vi.mock("#scoresheet/render/personal/evening-chart.ts", () => ({
   eveningChart: (table: unknown, chart: unknown) => eveningChartSpy(table, chart),
+}));
+
+vi.mock("#scoresheet/render/personal/chart-teaser.ts", () => ({
+  chartTeaser: (table: unknown, nights: unknown) => chartTeaserSpy(table, nights),
 }));
 
 vi.mock("#scoresheet/render/personal/fact-rows.ts", () => ({
@@ -88,6 +94,8 @@ const { renderPersonalCard } = await import("#scoresheet/render/personal/persona
 const NEVER = 0;
 
 const ONCE = 1;
+
+const TWICE = 2;
 
 const ORIGIN = 0;
 
@@ -155,6 +163,8 @@ const GAME_TALLY_MARK = "the-games";
 
 const EVENING_TALLY_MARK = "the-evenings";
 
+const TEASER_HINT_MARK = "the-teaser-hint";
+
 const CARD = {
   displayName: SUBJECT,
   since: SINCE,
@@ -176,7 +186,6 @@ const sheetOf = (overrides: Partial<PersonalLayout> = {}): PersonalLayout =>
   }) as unknown as PersonalLayout;
 
 const BARE_SHEET: Partial<PersonalLayout> = {
-  chartLabel: null,
   plotTop: null,
   factsLabel: null,
   facts: [],
@@ -206,6 +215,7 @@ describe("renderPersonalCard()", () => {
     personalLayoutOfSpy.mockReturnValue(sheetOf());
     careerTilesSpy.mockReturnValue([TILES_MARK]);
     eveningChartSpy.mockReturnValue([CHART_MARK]);
+    chartTeaserSpy.mockReturnValue(TEASER_HINT_MARK);
     factRowsSpy.mockReturnValue([FACTS_MARK]);
     topFactPlateSpy.mockReturnValue([PLATE_MARK]);
     eveningTallySpy.mockReturnValue(EVENING_TALLY_MARK);
@@ -458,13 +468,46 @@ describe("renderPersonalCard()", () => {
       });
     });
 
-    it("should print no chart label when the layout left it out", () => {
-      personalLayoutOfSpy.mockReturnValue(sheetOf({ chartLabel: null }));
+    it("should hint at the chart to come in place of the scale a drawn one carries", () => {
+      personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
 
       renderPersonalCard(copy, CARD, COLUMN);
 
-      expect(textSpy).not.toHaveBeenCalledWith(copy.personalChartLabel, expect.anything());
+      expect(textSpy).toHaveBeenCalledWith(TEASER_HINT_MARK, expect.anything());
       expect(textSpy).not.toHaveBeenCalledWith(copy.sheetShareHint, expect.anything());
+    });
+
+    it("should keep calling the section by the chart's own name with no chart in it", () => {
+      personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
+
+      renderPersonalCard(copy, CARD, COLUMN);
+
+      expect(textSpy).toHaveBeenCalledWith(copy.personalChartLabel, expect.anything());
+      expect(attributesOf(copy.personalChartLabel)["y"]).toBe(CHART_LABEL);
+    });
+
+    it("should ask the teaser about the nights the card actually holds", () => {
+      personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
+
+      renderPersonalCard(copy, CARD, COLUMN);
+
+      expect(chartTeaserSpy).toHaveBeenCalledTimes(ONCE);
+      expect(chartTeaserSpy).toHaveBeenCalledWith(copy, NIGHTS.length);
+    });
+
+    it("should leave the teaser unasked when there is a chart to draw", () => {
+      renderPersonalCard(copy, CARD, COLUMN);
+
+      expect(chartTeaserSpy).toHaveBeenCalledTimes(NEVER);
+      expect(textSpy).toHaveBeenCalledWith(copy.personalChartLabel, expect.anything());
+    });
+
+    it("should stand the teaser on the same baseline the chart's scale would use", () => {
+      personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
+
+      renderPersonalCard(copy, CARD, COLUMN);
+
+      expect(attributesOf(TEASER_HINT_MARK)["y"]).toBe(CHART_LABEL);
     });
 
     it("should plot nothing when the layout left the plot out", () => {
@@ -516,6 +559,9 @@ describe("renderPersonalCard()", () => {
         marked(SUBTITLE),
         RULE_MARK,
         TILES_MARK,
+        RULE_MARK,
+        marked(copy.personalChartLabel),
+        marked(TEASER_HINT_MARK),
         RULE_MARK,
         marked(copy.personalFactsLabel),
       ]);
@@ -578,7 +624,7 @@ describe("renderPersonalCard()", () => {
     });
   });
 
-  describe("a card with nothing but tiles on it", () => {
+  describe("a card with tiles and a promise on it", () => {
     it("should omit the chart, the facts and the plate, and nothing else", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
       factRowsSpy.mockReturnValue([]);
@@ -593,6 +639,9 @@ describe("renderPersonalCard()", () => {
         marked(SUBTITLE),
         RULE_MARK,
         TILES_MARK,
+        RULE_MARK,
+        marked(copy.personalChartLabel),
+        marked(TEASER_HINT_MARK),
       ]);
     });
 
@@ -605,12 +654,12 @@ describe("renderPersonalCard()", () => {
       expect(factRowsSpy).toHaveBeenCalledWith(copy, [], INK);
     });
 
-    it("should rule off the heading and nothing more", () => {
+    it("should rule off the heading and the promised chart, and nothing more", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
 
       renderPersonalCard(copy, CARD, COLUMN);
 
-      expect(lineSpy).toHaveBeenCalledTimes(ONCE);
+      expect(lineSpy).toHaveBeenCalledTimes(TWICE);
     });
   });
 });

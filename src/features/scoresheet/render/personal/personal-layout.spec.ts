@@ -9,6 +9,7 @@ import {
   PLOT_HEIGHT,
   SECTION_LABEL_DROP,
   SHEET_BOTTOM,
+  TEASER_BOTTOM_GAP,
   TILES_TOP,
   TILE_BOTTOM_GAP,
   TILE_NOTE_DROP,
@@ -44,7 +45,7 @@ const HALF = 0.5;
 
 const A_DATE = "2026-07-24";
 
-const EMPTY_SHEET_HEIGHT = 1046;
+const EMPTY_SHEET_HEIGHT = 1180;
 
 const TALLEST_SHEET_HEIGHT = 2540;
 
@@ -113,6 +114,8 @@ const chartedCard = (overrides: Partial<CareerCard> = {}): CareerCard =>
   cardOf({ nights: nightsOf(ENOUGH_NIGHTS_TO_CHART), ...overrides });
 
 const AFTER_TILES = TILES_TOP + TILE_ROW_HEIGHT + TILE_NOTE_DROP + TILE_BOTTOM_GAP;
+
+const AFTER_TEASER = AFTER_TILES + SECTION_LABEL_DROP + TEASER_BOTTOM_GAP;
 
 const TALLEST_FACTS: readonly CareerFact[] = [RIVAL_FACT, ...plainFacts(MOST_ROWS + ONE_FACT)];
 
@@ -196,14 +199,12 @@ describe("personalLayoutOf()", () => {
     it("should draw no chart one night short of enough", () => {
       const sheet = personalLayoutOf(cardOf({ nights: nightsOf(ENOUGH_NIGHTS_TO_CHART - ONE_FACT) }));
 
-      expect(sheet.chartLabel).toBeNull();
       expect(sheet.plotTop).toBeNull();
     });
 
     it("should draw the chart on exactly the night that makes it worth drawing", () => {
       const sheet = personalLayoutOf(cardOf({ nights: nightsOf(ENOUGH_NIGHTS_TO_CHART) }));
 
-      expect(sheet.chartLabel).not.toBeNull();
       expect(sheet.plotTop).not.toBeNull();
     });
 
@@ -216,7 +217,26 @@ describe("personalLayoutOf()", () => {
     it("should draw no chart for a card with no nights at all", () => {
       const sheet = personalLayoutOf(cardOf());
 
-      expect(sheet.chartLabel).toBeNull();
+      expect(sheet.plotTop).toBeNull();
+    });
+
+    it("should keep the section labelled even when there is no chart to draw", () => {
+      const sheet = personalLayoutOf(cardOf());
+
+      expect(sheet.chartLabel).toBe(AFTER_TILES + SECTION_LABEL_DROP);
+    });
+
+    it("should label the section in the same place whether the chart is drawn or not", () => {
+      const charted = personalLayoutOf(chartedCard());
+      const bare = personalLayoutOf(cardOf());
+
+      expect(bare.chartLabel).toBe(charted.chartLabel);
+    });
+
+    it("should leave the teaser its own gap instead of a plot's height", () => {
+      const bare = personalLayoutOf(cardOf({ facts: plainFacts(ONE_FACT) }));
+
+      expect(bare.facts[0]?.top).toBe(AFTER_TEASER + FACTS_TOP_DROP);
     });
 
     it("should make the sheet shorter when the chart is left out", () => {
@@ -237,7 +257,7 @@ describe("personalLayoutOf()", () => {
     it("should hang the plot below its own label", () => {
       const sheet = personalLayoutOf(chartedCard());
 
-      expect(sheet.plotTop).toBe((sheet.chartLabel ?? NOTHING) + CHART_TOP_DROP);
+      expect(sheet.plotTop).toBe(sheet.chartLabel + CHART_TOP_DROP);
     });
   });
 
@@ -269,7 +289,7 @@ describe("personalLayoutOf()", () => {
     it("should label the section as soon as one fact qualifies", () => {
       const sheet = personalLayoutOf(cardOf({ facts: plainFacts(ONE_FACT) }));
 
-      expect(sheet.factsLabel).toBe(AFTER_TILES + SECTION_LABEL_DROP);
+      expect(sheet.factsLabel).toBe(AFTER_TEASER + SECTION_LABEL_DROP);
     });
 
     it("should label the section even when the card's only fact goes on the plate", () => {
@@ -288,10 +308,10 @@ describe("personalLayoutOf()", () => {
   });
 
   describe("stacking the facts", () => {
-    it("should start the first fact a facts drop below the tiles", () => {
+    it("should start the first fact a facts drop below the teaser", () => {
       const sheet = personalLayoutOf(cardOf({ facts: plainFacts(ONE_FACT) }));
 
-      expect(sheet.facts[0]?.top).toBe(AFTER_TILES + FACTS_TOP_DROP);
+      expect(sheet.facts[0]?.top).toBe(AFTER_TEASER + FACTS_TOP_DROP);
     });
 
     it("should start the first fact below the chart the card earned", () => {
@@ -332,10 +352,10 @@ describe("personalLayoutOf()", () => {
       expect(sheet.plate?.fact).toBe(plateFactIn(TALLEST_FACTS));
     });
 
-    it("should hang the plate below the tiles when nothing else was drawn", () => {
+    it("should hang the plate below the teaser when nothing else was drawn", () => {
       const sheet = personalLayoutOf(cardOf({ facts: [RIVAL_FACT] }));
 
-      expect(sheet.plate?.top).toBe(AFTER_TILES + FACTS_TOP_DROP + PLATE_GAP);
+      expect(sheet.plate?.top).toBe(AFTER_TEASER + FACTS_TOP_DROP + PLATE_GAP);
     });
 
     it("should keep the plate clear of the section label when it carries the only fact", () => {
@@ -362,10 +382,10 @@ describe("personalLayoutOf()", () => {
 
   describe("how tall the sheet ends up", () => {
     it("should leave the sheet's own bottom margin under an empty card", () => {
-      expect(personalLayoutOf(cardOf()).height).toBe(AFTER_TILES + SHEET_BOTTOM);
+      expect(personalLayoutOf(cardOf()).height).toBe(AFTER_TEASER + SHEET_BOTTOM);
     });
 
-    it("should measure an empty card at exactly the tiles plus the margin", () => {
+    it("should measure an empty card at exactly the teaser plus the margin", () => {
       expect(personalLayoutOf(cardOf()).height).toBe(EMPTY_SHEET_HEIGHT);
     });
 

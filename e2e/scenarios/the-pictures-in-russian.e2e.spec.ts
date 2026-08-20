@@ -11,6 +11,8 @@ const NOTHING = 0;
 
 const BOTH_PICTURES = 2;
 
+const PICTURES_SO_FAR = 3;
+
 const WIDTH_AT = 16;
 
 const HEIGHT_AT = 20;
@@ -56,7 +58,7 @@ const captionOfLastPhoto = (chat: Chat): string =>
     .at(-1)?.text ?? "";
 
 describeScenario("the pictures a Russian chat gets back", (chat) => {
-  it("should refuse the awards in Russian while the evening is still short", async () => {
+  it("should refuse the awards in Russian and name what the evening still owes", async () => {
     await speakRussian(chat);
 
     await chat.say("/game Олег, Аня, Рома");
@@ -67,8 +69,8 @@ describeScenario("the pictures a Russian chat gets back", (chat) => {
 
     await chat.say("/stats_awards");
 
-    expect(chat.lastText()).toContain("Для наград ещё рано");
-    expect(chat.lastText()).toContain("5 партий");
+    expect(chat.lastText()).toContain("Ещё 4 партии");
+    expect(chat.lastText()).toContain("награды появятся");
   });
 
   it("should draw the chronology as a PNG", async () => {
@@ -79,8 +81,8 @@ describeScenario("the pictures a Russian chat gets back", (chat) => {
     expect(picture?.subarray(NOTHING, MAGIC_LENGTH).toString("hex")).toBe(PNG_MAGIC);
   });
 
-  it("should caption it in Russian, with the forms a count of one takes", () => {
-    expect(captionOfLastPhoto(chat)).toBe("1 партия · 3 игрока");
+  it("should caption it in Russian with the games the awards are still owed", () => {
+    expect(captionOfLastPhoto(chat)).toBe("Отыграйте ещё 4 партии — и у вечера будут награды.");
   });
 
   it("should send both pictures once the evening is long enough", async () => {
@@ -100,13 +102,14 @@ describeScenario("the pictures a Russian chat gets back", (chat) => {
     expect(captionOfLastPhoto(chat)).toBe("");
   });
 
-  it("should caption the chronology of that pair, not the awards", () => {
+  it("should stop captioning the chronology once the awards speak for themselves", () => {
     const captions = chat
       .messages()
       .filter((message) => message.photo !== null)
       .map((message) => message.text);
 
-    expect(captions.at(-BOTH_PICTURES)).toBe("5 партий · 3 игрока");
+    expect(captions).toHaveLength(PICTURES_SO_FAR);
+    expect(captions.at(-BOTH_PICTURES)).toBe("");
   });
 });
 
@@ -137,8 +140,8 @@ describeScenario("the pictures a full table gets back", (chat) => {
     expect(chat.photoBytes()?.subarray(NOTHING, MAGIC_LENGTH).toString("hex")).toBe(PNG_MAGIC);
   });
 
-  it("should say how many sat down, in the form Russian gives ten", () => {
-    expect(captionOfLastPhoto(chat)).toBe("1 партия · 10 игроков");
+  it("should caption a ten-column picture in Russian like any other", () => {
+    expect(captionOfLastPhoto(chat)).toBe("Отыграйте ещё 4 партии — и у вечера будут награды.");
   });
 
   it("should draw it at the poster's own width, whatever the names did to the headings", () => {

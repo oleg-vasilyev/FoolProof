@@ -54,7 +54,7 @@ export const onPersonalTap = async (context: PersonalContext, ctx: CallbackTap):
     return refuse(ctx, copy.personalStale);
   }
 
-  await ctx.editMessageText(copy.personalDrawing(card.displayName));
+  await ctx.editMessageText(copy.personalPicked(card.displayName));
   await ctx.answerCallbackQuery();
 
   const column = history.players.findIndex((player) => player.playerId === card.playerId);

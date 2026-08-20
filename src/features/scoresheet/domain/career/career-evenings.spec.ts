@@ -10,9 +10,14 @@ vi.mock("#scoresheet/domain/scoring.ts", () => ({
   shareAt: (position: number, tableSize: number) => shareAtSpy(position, tableSize),
 }));
 
-const { ENOUGH_TO_JUDGE_A_NIGHT, bestEvening, eveningShares, worstEvening } = await import(
-  "#scoresheet/domain/career/career-evenings.ts"
-);
+const {
+  ENOUGH_NIGHTS_TO_CHART,
+  ENOUGH_TO_JUDGE_A_NIGHT,
+  bestEvening,
+  eveningShares,
+  eveningsShortOfChart,
+  worstEvening,
+} = await import("#scoresheet/domain/career/career-evenings.ts");
 
 const NOTHING = 0;
 
@@ -382,5 +387,30 @@ describe("worstEvening()", () => {
     ];
 
     expect(worstEvening(nights)?.seriesNo).toBe(LATE_NIGHT);
+  });
+});
+
+describe("eveningsShortOfChart()", () => {
+  it("should ask for the whole threshold from a career with no nights", () => {
+    expect(eveningsShortOfChart(NOTHING)).toBe(ENOUGH_NIGHTS_TO_CHART);
+  });
+
+  it("should ask for one more evening on the career one evening short", () => {
+    expect(eveningsShortOfChart(ENOUGH_NIGHTS_TO_CHART - ONCE)).toBe(ONCE);
+  });
+
+  it("should ask for nothing on exactly the evening that earns the chart", () => {
+    expect(eveningsShortOfChart(ENOUGH_NIGHTS_TO_CHART)).toBe(NOTHING);
+  });
+
+  it("should ask for nothing rather than a negative on a long career", () => {
+    expect(eveningsShortOfChart(ENOUGH_NIGHTS_TO_CHART + LATE_NIGHT)).toBe(NOTHING);
+  });
+
+  it("should count down one for one as the evenings pile up", () => {
+    const early = eveningsShortOfChart(ONCE);
+    const later = eveningsShortOfChart(ONCE + ONCE);
+
+    expect(early - later).toBe(ONCE);
   });
 });

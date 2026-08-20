@@ -5,7 +5,7 @@ import { eveningTally, gameTally } from "#scoresheet/render/tally-phrases.ts";
 import { sessionDate } from "#scoresheet/render/session-date.ts";
 import { line, rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
 import { nameToFit, widthOf } from "#scoresheet/render/name-to-fit.ts";
-import { personalLayoutOf } from "#scoresheet/render/personal/personal-layout.ts";
+import { personalLayoutOf, type PersonalLayout } from "#scoresheet/render/personal/personal-layout.ts";
 import {
   HEADING_RULE,
   SECTION_LABEL_DROP,
@@ -13,6 +13,7 @@ import {
   personalFont,
 } from "#scoresheet/render/personal/personal-metrics.ts";
 import { careerTiles } from "#scoresheet/render/personal/career-tiles.ts";
+import { chartTeaser } from "#scoresheet/render/personal/chart-teaser.ts";
 import { eveningChart } from "#scoresheet/render/personal/evening-chart.ts";
 import { factRows } from "#scoresheet/render/personal/fact-rows.ts";
 import { topFactPlate } from "#scoresheet/render/personal/top-fact-plate.ts";
@@ -115,6 +116,36 @@ const sectionLabel = (label: string, hint: string | null, baseline: number): rea
       ]),
 ];
 
+interface ChartSection {
+  readonly copy: Copy;
+  readonly card: CareerCard;
+  readonly sheet: PersonalLayout;
+  readonly ink: string;
+}
+
+const chartSection = (section: ChartSection): readonly string[] => {
+  const { copy, card, sheet, ink } = section;
+
+  if (sheet.plotTop === null) {
+    return sectionLabel(
+      copy.personalChartLabel,
+      chartTeaser(copy, card.nights.length),
+      sheet.chartLabel
+    );
+  }
+
+  return [
+    ...sectionLabel(copy.personalChartLabel, copy.sheetShareHint, sheet.chartLabel),
+    ...eveningChart(copy, {
+      nights: card.nights,
+      top: sheet.plotTop,
+      best: card.best,
+      worst: card.worst,
+      ink,
+    }),
+  ];
+};
+
 export const renderPersonalCard = (copy: Copy, card: CareerCard, column: number): string => {
   const sheet = personalLayoutOf(card);
   const ink = colourFor(column);
@@ -123,18 +154,7 @@ export const renderPersonalCard = (copy: Copy, card: CareerCard, column: number)
     rect({ x: NOTHING, y: NOTHING, width: IMAGE_WIDTH, height: sheet.height, fill: palette.sheet }),
     ...heading(copy, card, ink),
     ...careerTiles(copy, card),
-    ...(sheet.chartLabel === null
-      ? []
-      : sectionLabel(copy.personalChartLabel, copy.sheetShareHint, sheet.chartLabel)),
-    ...(sheet.plotTop === null
-      ? []
-      : eveningChart(copy, {
-          nights: card.nights,
-          top: sheet.plotTop,
-          best: card.best,
-          worst: card.worst,
-          ink,
-        })),
+    ...chartSection({ copy, card, sheet, ink }),
     ...(sheet.factsLabel === null
       ? []
       : sectionLabel(copy.personalFactsLabel, null, sheet.factsLabel)),

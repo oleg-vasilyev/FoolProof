@@ -6,11 +6,12 @@ import type {
 import type { Command } from "#shared/telegram/telegram-contexts.ts";
 import type { LocaleReader } from "#shared/locale/chat-locale.ts";
 import type { Honours } from "#scoresheet/domain/awards/award-catalogue.ts";
-import { EVENING_MINIMUM, honoursFor } from "#scoresheet/domain/awards/awards.ts";
+import { gamesShortOfAwards, honoursFor } from "#scoresheet/domain/awards/awards.ts";
+import { chronologyCaption } from "#scoresheet/render/chronology/chronology-caption.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { copyIn, type Copy } from "#scoresheet/copy.ts";
-import { gameTally, playerTally } from "#scoresheet/render/tally-phrases.ts";
+import { gameTally } from "#scoresheet/render/tally-phrases.ts";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";
 
 
@@ -30,12 +31,7 @@ const sendChronology = async (
 ): Promise<void> => {
   await ctx.replyWithPhoto(
     new InputFile(await rasterize(renderScoresheet(copy, chronology)), SHEET_FILENAME),
-    {
-      caption: copy.sheetSubtitle(
-        gameTally(copy, chronology.games.length),
-        playerTally(copy, chronology.players.length)
-      ),
-    }
+    { caption: chronologyCaption(copy, chronology.games.length) }
   );
 };
 
@@ -86,7 +82,9 @@ export const onAwards = async (context: ScoresheetContext, ctx: Command): Promis
     const honours = honoursFor(chronology);
 
     if (honours === null) {
-      await ctx.reply(copy.awardsTooSoon(gameTally(copy, EVENING_MINIMUM)));
+      await ctx.reply(
+        copy.awardsTooSoon(gameTally(copy, gamesShortOfAwards(chronology.games.length)))
+      );
 
       return;
     }

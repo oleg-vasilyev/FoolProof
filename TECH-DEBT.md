@@ -259,6 +259,31 @@ there is real data to choose between the three shapes rather than argue.
 
 ---
 
+## `WIDEST_ADVANCE` is out by a third, and the widest letter is not the one it names
+
+`card-metrics.ts` fits a name to its space with `WIDEST_ADVANCE = 0.8` em per
+character. Measured against the shipped bold face with resvg, that is not the widest
+anything: latin `W` is 0.967 em, `Ш` is 1.063 and `Щ` is 1.074. The model therefore
+under-measures by about a third at the worst input, and the player card's heading is
+where it shows — a name of 32 `Щ` puts 1218px of ink where 949px is free, so it runs
+into the games-and-evenings counter beside it. Live today, and reachable: a line-up
+takes any name a person types.
+
+The gallery cannot see it because `one-huge-name` pads its 32 characters with `я`,
+which is 0.60 em — a plausible extreme rather than a constructed one, and it passes
+the broken limit exactly as easily as a working one.
+
+The fix is a real choice, not a number to bump. Raising the constant to 1.08 closes
+the hole in one line and makes every ordinary name truncate noticeably earlier,
+because the worst case is then charged to everybody. Measuring the actual string
+against a table of per-character advances costs nothing for ordinary names and is
+exact, but adds a generated table to the repository, which then needs its own gate
+against going stale. **Pick this up the first time a real player's name is cut wrong
+on a card, or when a second renderer needs to fit text** — the second reader is what
+turns the table from over-engineering into the obvious answer.
+
+---
+
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to

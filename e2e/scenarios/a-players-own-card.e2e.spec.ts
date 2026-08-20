@@ -13,7 +13,7 @@ const ONE_PICTURE = 1;
 
 const CONFIRM = "✅ Confirm";
 
-const DRAWN_ANYA = "Drawing Anya's card…";
+const ANYAS_CARD = "Anya's card";
 
 const playAnotherGame = async (chat: Chat, exits: readonly string[]): Promise<void> => {
   await chat.say("/next");
@@ -59,7 +59,7 @@ describeScenario("/personal draws one player's card for all time", (chat) => {
   });
 
   it("should close the screen it opened, leaving no keyboard behind", () => {
-    const screen = chat.messages().find((message) => message.text === DRAWN_ANYA);
+    const screen = chat.messages().find((message) => message.text === ANYAS_CARD);
 
     expect(screen).toBeDefined();
     expect(screen?.buttons).toEqual([]);

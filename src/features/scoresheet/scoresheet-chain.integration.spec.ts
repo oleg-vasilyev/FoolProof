@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { copy } from "#scoresheet/copy.en.ts";
+import { copy as russian } from "#scoresheet/copy.ru.ts";
 import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
@@ -73,6 +74,8 @@ const A_BARE_NUMBER = /^\d+$/;
 const ELLIPSIS = "…";
 
 const ONE_SIZE = 1;
+
+const ONE_GAME = 1;
 
 const FROM_THE_START = 0;
 
@@ -283,6 +286,17 @@ describe("a table too crowded for the names it seated", () => {
     const cut = headings.filter((heading) => heading.text.endsWith(ELLIPSIS));
 
     expect(new Set(cut.map((heading) => heading.text.length)).size).toBe(ONE_SIZE);
+  });
+
+  it("should count that table in the form its own language gives ten", () => {
+    const texts = textsIn(renderScoresheet(russian, seriesIn(CROWDED_CHAT)));
+
+    expect(texts).toContain(
+      russian.sheetSubtitle(
+        `${String(ONE_GAME)} ${russian.sheetGameForms.one}`,
+        `${String(A_CROWDED_TABLE.length)} ${russian.sheetPlayerForms.many}`
+      )
+    );
   });
 });
 

@@ -60,10 +60,11 @@ describeScenario("/stats draws the session as a picture", (chat) => {
     expect(chat.photosSent()).toBe(before + ONE_PICTURE);
   });
 
-  it("should say so when the awards are asked for too early", async () => {
+  it("should say how much more play the awards need when asked too early", async () => {
     await chat.say("/stats_awards");
 
-    expect(chat.lastText()).toContain("Too early for awards");
+    expect(chat.lastText()).toContain("and the awards appear");
+    expect(chat.lastText()).toContain("/stats_chronology");
   });
 
   it("should draw both pictures once the evening is long enough", async () => {

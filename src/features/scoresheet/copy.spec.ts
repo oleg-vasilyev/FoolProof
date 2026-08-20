@@ -18,6 +18,8 @@ const MARKER = "«marker»";
 
 const A_TALLY = "19 games";
 
+const A_NAME = "Вильгельмина";
+
 const reasonsOf = (copy: Copy): readonly (readonly [string, string])[] => {
   const FIFTY_ONE = 51;
 
@@ -142,7 +144,12 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
     });
 
     it("should give every counted noun all three forms", () => {
-      for (const forms of [copy.sheetGameForms, copy.sheetPlayerForms]) {
+      for (const forms of [
+        copy.sheetGameForms,
+        copy.sheetPlayerForms,
+        copy.sheetEveningForms,
+        copy.sheetTimeForms,
+      ]) {
         expect(forms).toEqual(
           expect.objectContaining({
             one: expect.any(String),
@@ -192,6 +199,57 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
       const DRAWN = "28 games";
 
       expect(copy.sheetTableShows(DRAWN).length).toBeGreaterThan(DRAWN.length);
+    });
+  });
+
+  describe("what more play would add", () => {
+    const REMAINDER = "2 games";
+
+    const EVENINGS_LEFT = "2 evenings";
+
+    it("should print the remainder it was handed in the chronology's caption", () => {
+      expect(copy.moreGamesForAwards(REMAINDER)).toContain(REMAINDER);
+    });
+
+    it("should say more in that caption than the remainder alone", () => {
+      expect(copy.moreGamesForAwards(REMAINDER).length).toBeGreaterThan(REMAINDER.length);
+    });
+
+    it("should print the remainder it was handed when refusing the awards", () => {
+      expect(copy.awardsTooSoon(REMAINDER)).toContain(REMAINDER);
+    });
+
+    it("should point the refused player at the chronology they can have", () => {
+      expect(copy.awardsTooSoon(REMAINDER)).toContain("/stats_chronology");
+    });
+
+    it("should print the evenings it was handed in the chart's hint", () => {
+      expect(copy.personalChartProgress(EVENINGS_LEFT)).toContain(EVENINGS_LEFT);
+    });
+
+    it("should say more in that hint than the count alone", () => {
+      expect(copy.personalChartProgress(EVENINGS_LEFT).length).toBeGreaterThan(
+        EVENINGS_LEFT.length
+      );
+    });
+
+    it("should leave naming the chart to the section label it sits beside", () => {
+      expect(copy.personalChartProgress(EVENINGS_LEFT)).not.toContain(copy.personalChartLabel);
+    });
+
+    it("should not decide singular or plural itself, only print what it is handed", () => {
+      expect(copy.moreGamesForAwards("1 game")).toContain("1 game");
+      expect(copy.personalChartProgress("1 evening")).toContain("1 evening");
+    });
+  });
+
+  describe("personalPicked()", () => {
+    it("should print the name it was handed", () => {
+      expect(copy.personalPicked(A_NAME)).toContain(A_NAME);
+    });
+
+    it("should read as a card that exists rather than as work in progress", () => {
+      expect(copy.personalPicked(A_NAME)).not.toContain("…");
     });
   });
 
