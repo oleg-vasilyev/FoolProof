@@ -275,6 +275,19 @@ describe("honoursFor()", () => {
       expect(namesOf()).toEqual([AwardName.HomeAdvantage]);
     });
 
+    it("should drop first blood when the same player's second wind already told it", () => {
+      fires(AwardName.FirstBlood, AwardName.SecondWind);
+
+      expect(namesOf()).toEqual([AwardName.SecondWind]);
+    });
+
+    it("should keep first blood when the second wind belongs to somebody else", () => {
+      ruleSpies[AwardName.FirstBlood].mockReturnValue(awardOf(AwardName.FirstBlood, OLEG));
+      ruleSpies[AwardName.SecondWind].mockReturnValue(awardOf(AwardName.SecondWind, ROMANI));
+
+      expect(namesOf()).toEqual([AwardName.SecondWind, AwardName.FirstBlood]);
+    });
+
     it("should keep the hot seat when it names somebody else", () => {
       ruleSpies[AwardName.HotSeat].mockReturnValue(awardOf(AwardName.HotSeat, ROMANI));
       fires(AwardName.HomeAdvantage);

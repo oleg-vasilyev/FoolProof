@@ -66,7 +66,7 @@ export const copy: Copy = {
   kingPassedReason: (percent: number, games: string) =>
     `${percent}% стола за ${games}. Выше сидел только дурак вечера.`,
   wireToWireReason: (games: string) =>
-    `Впереди на графике после каждой партии, кроме первой, все ${games}.`,
+    `Впереди на графике после каждой партии, кроме первой, за ${games}.`,
   favouriteReason: (firsts: number, games: string) =>
     `Первым вышел в ${firsts} из ${games}. Остальные играли за второе место.`,
   hatTrickReason: (run: number) => `${run} подряд — и каждый раз первым.`,
@@ -96,7 +96,7 @@ export const copy: Copy = {
     `Сыграл ${games}, пропустив ${missed} в середине вечера.`,
   cameoReason: (games: string) => `Одна партия из ${games} — и всё.`,
   secondWindReason: (burnedBy: number, games: string) =>
-    `Дураком к партии ${burnedBy} — и больше ни разу за ${games}.`,
+    `Дураком в партии ${burnedBy} — и больше ни разу за ${games}.`,
   understudyReason: (seconds: number, games: string) =>
     `Вторым вышел ${seconds} раз за ${games}, первым — ни разу.`,
   flatlineReason: (band: number, games: string) =>

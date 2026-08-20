@@ -105,6 +105,7 @@ interface Selection {
 
 const OVERSHADOWED: readonly (readonly [AwardName, AwardName])[] = [
   [AwardName.FirstBlood, AwardName.FoolOfTheNight],
+  [AwardName.FirstBlood, AwardName.SecondWind],
   [AwardName.HotSeat, AwardName.HomeAdvantage],
 ];
 

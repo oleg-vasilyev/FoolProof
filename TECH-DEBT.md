@@ -284,6 +284,27 @@ turns the table from over-engineering into the obvious answer.
 
 ---
 
+## The Russian copy speaks to a man, and the table does not know who it is talking to
+
+Names are typed, not tagged, so the bot cannot know a player's gender — and the
+Russian table is written in the masculine past tense throughout: «Ходил первым»,
+«Пропустил», «Сыграл», «Побывал дураком», «Вёл график», «Вышел первым». Against a
+female name every one of those is wrong, and a cold reading of the awards sheet named
+two of them by hand before anybody counted the rest.
+
+It cannot be fixed one line at a time. Two of nine corrected reads worse than none —
+the remaining seven then look deliberate — and the fix is not a lookup either, because
+gender is not derivable from a typed name. What the language does allow is a voice with
+no past-tense verb in it: a noun phrase, a count, a colon. «Первых ходов — 5, и дураком
+в 2 из них» already reads that way, and it is the sheet's best line.
+
+**Rewrite the Russian reasons into that voice the next time the awards copy is opened
+for anything else** — the cost is one pass over one table, and it is much cheaper
+attached to a phase already editing those lines than as a phase of its own. Until then
+a woman at the table reads a sheet written about a man.
+
+---
+
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to

@@ -96,7 +96,7 @@ export const copy = {
     `Played ${games}, sitting out ${missed} in the middle of the evening.`,
   cameoReason: (games: string) => `One game out of ${games}, and then gone.`,
   secondWindReason: (burnedBy: number, games: string) =>
-    `The fool by game ${burnedBy} and never again across ${games}.`,
+    `The fool in game ${burnedBy} and never again across ${games}.`,
   understudyReason: (seconds: number, games: string) =>
     `Second out ${seconds} times in ${games}, and first out never.`,
   flatlineReason: (band: number, games: string) =>
