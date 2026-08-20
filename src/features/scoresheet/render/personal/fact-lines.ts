@@ -23,13 +23,13 @@ const bodyOf = (copy: Copy, fact: CareerFact): Body => {
     case CareerFactName.TheBlinder:
       return {
         holder: sessionDate(copy, fact.playedOn),
-        reason: copy.blinderReason(fact.firsts, gameTally(copy, fact.games)),
+        reason: copy.blinderReason(timeTally(copy, fact.firsts), gameTally(copy, fact.games)),
       };
 
     case CareerFactName.TheNightmare:
       return {
         holder: sessionDate(copy, fact.playedOn),
-        reason: copy.nightmareReason(fact.burns, gameTally(copy, fact.games)),
+        reason: copy.nightmareReason(timeTally(copy, fact.burns), gameTally(copy, fact.games)),
       };
 
     case CareerFactName.TheCharm:

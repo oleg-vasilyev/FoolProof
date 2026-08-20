@@ -68,19 +68,19 @@ export const copy = {
     `In front on the chart after every game but the first, across ${games}.`,
   favouriteReason: (firsts: number, games: string) =>
     `Out first in ${firsts} of ${games}. The rest played for second.`,
-  hatTrickReason: (run: number) => `${run} games running, out first every single time.`,
+  hatTrickReason: (games: string) => `${games} running, out first every single time.`,
   homeAdvantageReason: (wins: number, opens: number) =>
-    `Opened ${opens} games and went out first in ${wins} of them.`,
+    `Opened ${opens} of the games and went out first in ${wins} of them.`,
   untouchableReason: (games: string) => `${games}, never the fool. Untouched all evening.`,
   teflonReason: (streak: number) =>
     `Was the fool, and still put ${streak} straight games together clean. The longest run of the night.`,
   hotSeatReason: (opens: number) =>
-    `Opened ${opens} games and was left the fool in none of them.`,
+    `Opened ${opens} of the games and was left the fool in none of them.`,
   comebackReason: (sank: number, percent: number) =>
     `Bottom of the chart at halfway on ${sank}%, back up to ${percent}% since.`,
-  ladderReason: (run: number) => `A climb of ${run} games — each one after the first bettered the last.`,
-  sweetRevengeReason: (fools: number, comebacks: number) =>
-    `Left the fool ${fools} times; came back to leave first in ${comebacks} of them.`,
+  ladderReason: (games: string) => `A climb of ${games} — each one after the first bettered the last.`,
+  sweetRevengeReason: (times: string, comebacks: number) =>
+    `Left the fool ${times}; came back to leave first in ${comebacks} of them.`,
   ironSeatReason: (games: string) => `The only one who sat through all ${games}.`,
   truceReason: (draws: number, games: string) => `${draws} of ${games} that nobody lost.`,
   pacifistReason: (draws: string) =>
@@ -97,16 +97,16 @@ export const copy = {
   cameoReason: (games: string) => `One game out of ${games}, and then gone.`,
   secondWindReason: (burnedBy: number, games: string) =>
     `The fool in game ${burnedBy} and never again across ${games}.`,
-  understudyReason: (seconds: number, games: string) =>
-    `Second out ${seconds} times in ${games}, and first out never.`,
+  understudyReason: (times: string, games: string) =>
+    `Second out ${times} in ${games}, and first out never.`,
   flatlineReason: (band: number, games: string) =>
     `Never more than ${band} points off mid-table across ${games}.`,
   invisibleReason: (middles: number, games: string) =>
     `${middles} of ${games} — neither the top nor the bottom.`,
-  groundhogReason: (place: number, run: number) =>
-    `The same place ${run} games running: number ${place}, every time.`,
-  pendulumReason: (run: number) =>
-    `${run} games running, top half then bottom half, turn and turn about.`,
+  groundhogReason: (place: number, games: string) =>
+    `The same place ${games} running: number ${place}, every time.`,
+  pendulumReason: (games: string) =>
+    `${games} running, top half then bottom half, turn and turn about.`,
   rollercoasterReason: (swing: number, games: string) =>
     `${swing} points between the best of it and the worst of it, across ${games}.`,
   allOrNothingReason: (edges: number, games: string) =>
@@ -114,13 +114,13 @@ export const copy = {
   irishGoodbyeReason: (leftAfter: number, games: string) =>
     `Left after game ${leftAfter} of ${games} and was never the fool again.`,
   anchorReason: (games: string) => `${games} in the bottom half of the table, and never the fool.`,
-  slideReason: (run: number) => `A slide of ${run} games — each one after the first fell short of the last.`,
+  slideReason: (games: string) => `A slide of ${games} — each one after the first fell short of the last.`,
   falseDawnReason: (ledAt: number, percent: number) =>
     `Leading the chart at game ${ledAt}; down to ${percent}% since.`,
   openersCurseReason: (opens: number, burns: number) =>
-    `Opened ${opens} games and was left the fool in ${burns} of them.`,
-  encoreReason: (run: number) =>
-    `${run} games running as the fool. An encore nobody asked for.`,
+    `Opened ${opens} of the games and was left the fool in ${burns} of them.`,
+  encoreReason: (games: string) =>
+    `${games} running as the fool. An encore nobody asked for.`,
   firstBloodReason: (games: string) => `Fool of game 1 of ${games}. The evening opened badly.`,
   foolReason: (fools: number, games: string) =>
     `Left the fool in ${fools} of ${games}. Nobody managed worse.`,
@@ -200,10 +200,10 @@ export const copy = {
     foundingMember: "THERE FROM THE START",
     theNewcomer: "THE NEWCOMER",
   },
-  blinderReason: (firsts: number, games: string) =>
-    `Out first ${firsts} times in ${games} — the best night you have had.`,
-  nightmareReason: (burns: number, games: string) =>
-    `The fool ${burns} times in ${games}. Nothing went right.`,
+  blinderReason: (times: string, games: string) =>
+    `Out first ${times} in ${games} — the best night you have had.`,
+  nightmareReason: (times: string, games: string) =>
+    `The fool ${times} in ${games}. Nothing went right.`,
   charmReason: (burns: number, games: string, usual: string) =>
     `Only ${burns} fires in ${games} at their table; ${usual} is your usual.`,
   jinxReason: (burns: number, games: string, usual: string) =>

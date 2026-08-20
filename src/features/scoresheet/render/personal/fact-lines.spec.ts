@@ -100,8 +100,9 @@ const SAMPLES: readonly Sample[] = [
     {
       dates: [BLINDER_DATE],
       gamesWith: [11],
+      timesWith: [7],
       holderShows: dated(BLINDER_DATE),
-      whyShows: ["7", games(11)],
+      whyShows: [times(7), games(11)],
     }
   ),
   sampleOf(
@@ -109,8 +110,9 @@ const SAMPLES: readonly Sample[] = [
     {
       dates: [NIGHTMARE_DATE],
       gamesWith: [12],
+      timesWith: [9],
       holderShows: dated(NIGHTMARE_DATE),
-      whyShows: ["9", games(12)],
+      whyShows: [times(9), games(12)],
     }
   ),
   sampleOf(

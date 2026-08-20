@@ -7,9 +7,12 @@ const gameTallySpy = vi.fn();
 
 const playerTallySpy = vi.fn();
 
+const timeTallySpy = vi.fn();
+
 vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
   playerTally: (table: unknown, players: number) => playerTallySpy(table, players),
+  timeTally: (table: unknown, times: number) => timeTallySpy(table, times),
 }));
 
 const { awardReason, awardTitle, awardWinner } = await import(
@@ -19,6 +22,8 @@ const { awardReason, awardTitle, awardWinner } = await import(
 const tallyOf = (games: number): string => `tally(${String(games)})`;
 
 const headcountOf = (players: number): string => `heads(${String(players)})`;
+
+const timesOf = (times: number): string => `times(${String(times)})`;
 
 const WINNER = 1;
 
@@ -79,6 +84,7 @@ describe("award-lines", () => {
     vi.clearAllMocks();
 
     gameTallySpy.mockImplementation((_table: unknown, games: number) => tallyOf(games));
+    timeTallySpy.mockImplementation((_table: unknown, times: number) => timesOf(times));
     playerTallySpy.mockImplementation((_table: unknown, players: number) => headcountOf(players));
   });
 

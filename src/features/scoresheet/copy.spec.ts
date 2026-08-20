@@ -31,14 +31,14 @@ const reasonsOf = (copy: Copy): readonly (readonly [string, string])[] => {
     ["king", copy.kingReason(FIFTY_ONE, A_TALLY)],
     ["wireToWire", copy.wireToWireReason(A_TALLY)],
     ["theFavourite", copy.favouriteReason(EIGHT, A_TALLY)],
-    ["hatTrick", copy.hatTrickReason(EIGHT)],
+    ["hatTrick", copy.hatTrickReason(A_TALLY)],
     ["homeAdvantage", copy.homeAdvantageReason(EIGHT, TWO)],
     ["untouchable", copy.untouchableReason(A_TALLY)],
     ["teflon", copy.teflonReason(EIGHT)],
     ["hotSeat", copy.hotSeatReason(EIGHT)],
     ["theComeback", copy.comebackReason(TWO, FIFTY_ONE)],
-    ["theLadder", copy.ladderReason(EIGHT)],
-    ["sweetRevenge", copy.sweetRevengeReason(FIFTY_ONE, EIGHT)],
+    ["theLadder", copy.ladderReason(A_TALLY)],
+    ["sweetRevenge", copy.sweetRevengeReason(A_TALLY, EIGHT)],
     ["ironSeat", copy.ironSeatReason(A_TALLY)],
     ["theTruce", copy.truceReason(TWO, A_TALLY)],
     ["thePacifist", copy.pacifistReason(A_TALLY)],
@@ -49,19 +49,19 @@ const reasonsOf = (copy: Copy): readonly (readonly [string, string])[] => {
     ["revolvingDoor", copy.revolvingDoorReason(A_TALLY, A_TALLY)],
     ["theCameo", copy.cameoReason(A_TALLY)],
     ["secondWind", copy.secondWindReason(TWO, A_TALLY)],
-    ["theUnderstudy", copy.understudyReason(EIGHT, A_TALLY)],
+    ["theUnderstudy", copy.understudyReason(A_TALLY, A_TALLY)],
     ["theFlatline", copy.flatlineReason(TWO, A_TALLY)],
     ["theInvisible", copy.invisibleReason(EIGHT, A_TALLY)],
-    ["groundhogDay", copy.groundhogReason(TWO, EIGHT)],
-    ["thePendulum", copy.pendulumReason(EIGHT)],
+    ["groundhogDay", copy.groundhogReason(TWO, A_TALLY)],
+    ["thePendulum", copy.pendulumReason(A_TALLY)],
     ["theRollercoaster", copy.rollercoasterReason(FIFTY_ONE, A_TALLY)],
     ["allOrNothing", copy.allOrNothingReason(EIGHT, A_TALLY)],
     ["theIrishGoodbye", copy.irishGoodbyeReason(EIGHT, A_TALLY)],
     ["theAnchor", copy.anchorReason(A_TALLY)],
-    ["theSlide", copy.slideReason(EIGHT)],
+    ["theSlide", copy.slideReason(A_TALLY)],
     ["falseDawn", copy.falseDawnReason(EIGHT, FIFTY_ONE)],
     ["openersCurse", copy.openersCurseReason(FIFTY_ONE, TWO)],
-    ["encore", copy.encoreReason(TWO)],
+    ["encore", copy.encoreReason(A_TALLY)],
     ["firstBlood", copy.firstBloodReason(A_TALLY)],
     ["foolOfTheNight", copy.foolReason(TWO, A_TALLY)],
     ["curse", copy.curseFact(EIGHT, A_TALLY)],
@@ -282,7 +282,7 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
       const EIGHT = 8;
 
       expect(copy.teflonReason(EIGHT)).toContain(String(EIGHT));
-      expect(copy.encoreReason(TWO)).toContain(String(TWO));
+      expect(copy.encoreReason(A_TALLY)).toContain(A_TALLY);
     });
 
     it("should print the finished tally it was handed rather than a bare number", () => {
@@ -292,13 +292,11 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
       expect(copy.pacifistReason(A_TALLY)).toContain(A_TALLY);
     });
 
-    it("should print both of the numbers an award was given two of", () => {
-      const FIFTY_ONE = 51;
-
+    it("should print both the tally and the bare count an award was given", () => {
       const EIGHT = 8;
 
-      expect(copy.sweetRevengeReason(FIFTY_ONE, EIGHT)).toContain(String(FIFTY_ONE));
-      expect(copy.sweetRevengeReason(FIFTY_ONE, EIGHT)).toContain(String(EIGHT));
+      expect(copy.sweetRevengeReason(A_TALLY, EIGHT)).toContain(A_TALLY);
+      expect(copy.sweetRevengeReason(A_TALLY, EIGHT)).toContain(String(EIGHT));
     });
   });
 });
