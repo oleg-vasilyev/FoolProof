@@ -37,12 +37,14 @@ mechanism.
    red check. **Commit both halves.** The SVG is the reviewable one: a
    colour change is one readable diff line where a PNG is an opaque blob. The
    PNG is the one `README.md` and the site actually show.
-2. **Open every PNG and read it as a reader, not as a diff.** The gate proves
-   the file matches the renderer; it cannot say the renderer started drawing
-   nonsense — the awards card grew from thirteen rules to thirty-eight with
-   every gate green. Ask specifically: does any row repeat another, does every
-   sentence read like its language, does anything overflow, does a number claim
-   something the evening did not do?
+2. **Every regenerated PNG goes to the `poster-reader` agent, not to your own
+   eyes.** The gate proves the file matches the renderer; it cannot say the
+   renderer started drawing nonsense — the awards card grew from thirteen rules to
+   thirty-eight with every gate green. And you cannot read your own copy cold: a
+   released card carried a hint that only parses if you already know what the chart
+   will be, and it was looked at here, on purpose, by the person who wrote it. Send
+   the paths and the lines to read, never what any of it is for; `finish-phase`
+   gate 6 has the four questions the brief carries.
 3. **Check the render against the e2e quiet window.** A poster that grows costs
    rasterizing time, and `e2e/harness/settling.ts` decides the bot has finished
    after `QUIET_MS` of silence — a window the slowest single render must fit

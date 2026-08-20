@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";
 import { rootDir } from "#shared/config/env.ts";
 import { repository } from "#shared/repository/repository-instance.ts";
+import { contactSheet } from "./contact-sheet.ts";
 import { refreshDesignPage } from "./design-page.ts";
 import { GALLERY_DIR, gallery } from "./gallery.ts";
 import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
@@ -48,15 +49,23 @@ const writeMockups = (): Promise<void> => drawInto(MOCKUP_DIR, posters());
 const writeSitePosters = (): Promise<void> =>
   drawInto(SITE_POSTER_DIR, sitePosters());
 
+const CONTACT_SHEET = "contact-sheet.png";
+
 const drawGallery = async (): Promise<void> => {
   const directory = resolve(rootDir, GALLERY_DIR);
+  const drawings = gallery();
 
   mkdirSync(directory, { recursive: true });
 
-  for (const drawing of gallery()) {
+  for (const drawing of drawings) {
     writeFileSync(resolve(directory, `${drawing.file}.png`), await rasterize(drawing.svg));
     console.log(`${GALLERY_DIR}/${drawing.file}.png — ${drawing.asks}`);
   }
+
+  const sheet = contactSheet(`FoolProof — every edge the gallery draws`, drawings);
+
+  writeFileSync(resolve(directory, CONTACT_SHEET), await rasterize(sheet));
+  console.log(`${GALLERY_DIR}/${CONTACT_SHEET} — all ${drawings.length} in one field of view`);
 };
 
 const A_WHOLE_NUMBER = /^-?\d+$/;

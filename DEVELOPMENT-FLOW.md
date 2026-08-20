@@ -120,12 +120,11 @@ sequenceDiagram
         C->>C: Stryker mutates the diff — the tests must notice, 85% threshold
         C->>C: e2e over the diff — the real bot against a fake Telegram
     end
-    C->>C: walk everything outside src/ — deploy scripts, systemd units, CI config: almost nothing there has an automatic gate
     end
 
     rect rgb(240, 249, 255)
     note over C,R: Stage 4. Review by a second AI agent
-    C->>R: the phase's whole diff in one piece
+    C->>R: the phase's whole diff in one piece — including deploy scripts, units and CI, which have no automatic gate at all
     R-->>C: findings, most severe first
     loop for each finding
         alt worth fixing now
@@ -147,10 +146,16 @@ sequenceDiagram
         opt the phase added a poster the gallery has never drawn
             C->>C: copy the cases named at stage 1 into the gallery — npm run docs:check fails on a poster nobody drew
         end
-        C->>C: the poster gallery: open every picture myself, look for overflowing text and broken lines
         C->>K: the refresh-the-pictures skill
         K-->>C: the table of every committed picture, what draws it, and which have no gate but the table
-        C->>C: regenerate the stale ones and open every PNG — mockups, posters, previews, icons
+        C->>C: draw the gallery and regenerate the stale ones — mockups, posters, previews, icons
+        C->>S: the poster-reader agent — the contact sheet, every regenerated PNG, the lines to read; never what any of it is for
+        S-->>C: what each line says to somebody who has never seen the code, then the set read against itself
+        opt the phase had a mockup approved at stage 1
+            C->>S: a second reading, this time with the approved sheet — what shipped differs from what was signed off how?
+            S-->>C: every difference it can see, without ruling on which were meant
+        end
+        C->>C: decide which readings are wrong, and what the line should say instead
         opt the redrawn pictures also live on the design page
             C->>K: the update-the-design-page skill
             K-->>C: pull the page, splice the real drawings in, bump the revision

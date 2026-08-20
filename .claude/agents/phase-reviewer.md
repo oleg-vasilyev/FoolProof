@@ -72,6 +72,13 @@ run `npm run check` and trust it. Spend the pass on what no rule can check:
 - **Layering.** The lint rules catch a bad import; they do not catch a feature
   that grew a responsibility belonging to another layer. Look for purity leaking
   out of any `domain/` or `render/` folder, and for one feature reaching into another.
+- **Everything the diff touches outside `src/`.** Deploy scripts, systemd units, CI
+  workflows, hooks: no lint zone fences them, no test drives them, and the most
+  expensive place to be wrong is the one nothing checks. This used to be a separate
+  walk taken just before handing you the diff, by the person who wrote it — which
+  made it a second reading by the same reader. Ask what happens if a script dies
+  mid-run, whether a re-run is idempotent, whether a destructive command can meet an
+  empty variable, and whether a rollback covers the step that actually fails.
 - **Tests.** Does each new test assert something that would fail if the code
   broke, or only that the code ran? Is every spec a unit — nothing unmocked but
   its subject, its stubs and a data table — or is it an integration spec wearing

@@ -72,6 +72,12 @@ compiler it has no use for.
 70% floor on every metric. A file that dropped is a file whose new branches
 nobody exercised. Find the branch, not a way to reach the number.
 
+**A new export and its spec land together**, in the same edit — not in the same
+phase, in the same edit. A helper added without one costs the whole battery a second
+run to learn what its author already knew, and this gate is the one that notices
+last: coverage falls by a hundredth of a percent, well clear of the floor, and only
+a reader who looks at the number rather than the verdict sees it at all.
+
 ## 3. `npm run test:mutation:changed`
 
 Stryker over the files this phase touched — about a minute. The **full**
@@ -302,10 +308,36 @@ stays shut otherwise, with the commit message carrying the reason
 `node scripts/tools.ts gallery` draws every poster across every edge the product has
 to survive — one game, two players, ten long names, more games than the sheet holds,
 an evening nobody lost, arrivals and departures, a career one evening old, a career
-too long for the sheet, the longest name a player may have — into `reports/gallery/`.
-**Open every picture.** Nothing above this gate can see a poster that has started
-drawing nonsense: the SVG matches the renderer, the tests match the SVG, and all of
-it stays green while a line runs off the card.
+too long for the sheet, the longest name a player may have — into `reports/gallery/`,
+and lays all of them into `contact-sheet.png`. Nothing above this gate can see a
+poster that has started drawing nonsense: the SVG matches the renderer, the tests
+match the SVG, and all of it stays green while a line runs off the card.
+
+**The looking is the `poster-reader` agent's, not yours, and this is the one gate
+you may not perform yourself.** Not because you would be careless — because you
+cannot read your own copy cold. You know what the chart is going to be, so a hint
+that only parses if you know reads perfectly to you. That is not a hypothetical: a
+released card told a player *"по точке за вечер — ещё 3 вечера"*, which names the
+mechanics of a picture that is not on the screen and never says what arrives. It was
+drawn to the gallery and looked at **on purpose, at this gate**, by the author of
+the sentence it replaced. The owner read it cold and asked what it was supposed to
+mean.
+
+Give the agent the contact sheet, the full-size pictures of anything whose text
+changed, every PNG `refresh-the-pictures` regenerated, and the **list of lines to
+read** — and nothing else. Explaining what a line is for destroys the only instrument
+it is; its brief says so and it will report you for it.
+
+**The approved mockup goes in a second call, never the first.** Comparing what
+shipped against what stage 1 signed off is the one comparison nothing else in the
+flow makes, and it has to happen — but the mockup of a chart *is* the answer to
+"what appears here", so an agent holding it can no longer read a hint about that
+chart cold. One reading without it, then a fresh call with it. The order is not
+politeness; the first reading is worthless if the second call's material arrives in
+the same message.
+
+You still own the conclusion. The agent produces readings; deciding that a reading
+is wrong, and what the line should say instead, is yours.
 
 **A poster the gallery never draws is a gate that silently does not apply.**
 `/personal` shipped in two releases without a single gallery case, and this gate ran
@@ -347,11 +379,11 @@ stayed hidden, and the case proved nothing while reading as though it proved the
 thing it was written for. The sentence beside a case is a claim about the picture, so
 open the picture before believing it.
 
-**Then read the pictures against each other, not only each on its own.** A poster can
-be flawless alone and still contradict the one beside it, and no single-picture pass
-can see it. Lay the set out and ask: does the same thing carry the same name on every
-poster and on the live card; does every symbol drawn have something that says what it
-means; does a caption promise something the picture does not show. All three failed at
+**Reading the pictures against each other is the reader's second pass**, and the three
+questions it asks live in `poster-reader.md` rather than here, so there is one wording
+of them. What belongs here is why the pass exists: a poster can be flawless alone and
+still contradict the one beside it, and no single-picture pass can see it. All three
+of the questions failed at
 once here, and none of them was visible in a single image: the live card asked *who
 went first* while the stats card credited *the dealer*, in both languages, for the
 same event; a chart captioned "one point per evening" drew no points at all, only a
@@ -384,13 +416,16 @@ caught it and the fix deleted a copy key rather than adding one. The question to
 before writing any new label: **is this a new thing, or an old thing in a new state?**
 
 The output is **specific claims, not a verdict.** "Looked, fine" is the green light
-with nothing behind it that `write-an-e2e-scenario` warns about — if you cannot name
-what you saw on a picture, you did not look at it. Of each, ask:
+with nothing behind it that `write-an-e2e-scenario` warns about — which is why the
+reader is required to write down what each line said to it before it may report
+anything, and why **those readings go into the commit's `Gallery:` line**. A gate whose
+evidence never leaves the launching agent's context is satisfiable by saying it ran.
 
-- does any row repeat another in different words?
-- does every sentence read like the language it is in, plurals included?
-- does anything run past the edge, or get cut where a reader cannot recover it?
-- is a number claiming something the evening did not actually do?
+Four questions belong in the brief you send, because they are what this project keeps
+getting wrong rather than what a reader would ask unprompted: does any row repeat
+another in different words; does every sentence read like the language it is in,
+plurals included; does anything run past the edge, or get cut where a reader cannot
+recover it; is a number claiming something the evening did not actually do.
 
 **Fix what is plainly wrong; ask about what is taste or wording.** A line overflowing
 the card is a defect and needs no permission. Which of three phrasings replaces it is
@@ -590,9 +625,12 @@ something disjoint. So the policy is not "delegate the mechanical work", it is:
   **result** matters: a report, a list, a file that compiles and passes or does not.
 - **What never leaves your hands.** Copy, commit messages and document prose — the
   voice is the product here, and an agent that has not lived the phase writes flat.
-  Gates that are judgement: the gallery needs eyes, and "looks fine" from an agent is
-  the green light with nothing behind it. And anything resting on why-context this
-  session accumulated — why a threshold is 7 and not 5 — which no brief can carry.
+  And anything resting on why-context this session accumulated — why a threshold is 7
+  and not 5 — which no brief can carry. **The poster gallery is the exception that
+  proves this rule and it runs the other way**: judging a drawing needs eyes that have
+  not lived the phase, so gate 6 is delegated *because* it is judgement, not despite
+  it. What stays yours there is the conclusion — which reading is wrong, and what the
+  line should say instead.
 - **Launch parallel agents in one message**, not one after another, and do not block
   on an agent whose files are disjoint from yours. Their reports are not shown to the
   user, so relay what matters rather than assuming it arrived.

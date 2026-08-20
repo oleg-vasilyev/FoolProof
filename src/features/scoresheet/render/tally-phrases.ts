@@ -11,5 +11,8 @@ export const playerTally = (copy: Copy, players: number): string =>
 export const eveningTally = (copy: Copy, evenings: number): string =>
   counted(copy.locale, evenings, copy.sheetEveningForms);
 
+export const eveningsOwedTally = (copy: Copy, evenings: number): string =>
+  counted(copy.locale, evenings, copy.sheetEveningsOwedForms);
+
 export const timeTally = (copy: Copy, times: number): string =>
   counted(copy.locale, times, copy.sheetTimeForms);

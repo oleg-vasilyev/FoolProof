@@ -1,7 +1,7 @@
 import { eveningsShortOfChart } from "#scoresheet/domain/career/career-evenings.ts";
 import type { Copy } from "#scoresheet/copy.ts";
-import { eveningTally } from "#scoresheet/render/tally-phrases.ts";
+import { eveningsOwedTally } from "#scoresheet/render/tally-phrases.ts";
 
 
 export const chartTeaser = (copy: Copy, nights: number): string =>
-  copy.personalChartProgress(eveningTally(copy, eveningsShortOfChart(nights)));
+  copy.personalChartArrives(eveningsOwedTally(copy, eveningsShortOfChart(nights)));

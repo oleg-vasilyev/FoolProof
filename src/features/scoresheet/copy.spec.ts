@@ -6,6 +6,8 @@ import { copyIn, type Copy } from "#scoresheet/copy.ts";
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 
 
+const NOTHING = 0;
+
 const ONE = 1;
 
 const TWO = 2;
@@ -120,6 +122,8 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
         }
 
         if (typeof value === "object" && value !== null) {
+          expect(Object.keys(value), `${path} holds nothing`).not.toHaveLength(NOTHING);
+
           for (const [key, nested] of Object.entries(value)) {
             walk(nested, `${path}.${key}`);
           }
@@ -224,22 +228,22 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
     });
 
     it("should print the evenings it was handed in the chart's hint", () => {
-      expect(copy.personalChartProgress(EVENINGS_LEFT)).toContain(EVENINGS_LEFT);
+      expect(copy.personalChartArrives(EVENINGS_LEFT)).toContain(EVENINGS_LEFT);
     });
 
     it("should say more in that hint than the count alone", () => {
-      expect(copy.personalChartProgress(EVENINGS_LEFT).length).toBeGreaterThan(
+      expect(copy.personalChartArrives(EVENINGS_LEFT).length).toBeGreaterThan(
         EVENINGS_LEFT.length
       );
     });
 
     it("should leave naming the chart to the section label it sits beside", () => {
-      expect(copy.personalChartProgress(EVENINGS_LEFT)).not.toContain(copy.personalChartLabel);
+      expect(copy.personalChartArrives(EVENINGS_LEFT)).not.toContain(copy.personalChartLabel);
     });
 
     it("should not decide singular or plural itself, only print what it is handed", () => {
       expect(copy.moreGamesForAwards("1 game")).toContain("1 game");
-      expect(copy.personalChartProgress("1 evening")).toContain("1 evening");
+      expect(copy.personalChartArrives("1 evening")).toContain("1 evening");
     });
   });
 

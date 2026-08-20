@@ -19,6 +19,7 @@ beside the code it describes:
 | Changing the e2e harness itself | [`e2e/README.md`](e2e/README.md) |
 | A mockup for anything the bot draws | `poster-designer` agent |
 | A frozen plan, before any code is written for it | `plan-reviewer` agent |
+| Reading a drawing or a line as a player would | `poster-reader` agent |
 | A weekly look at the project and its server | `deep-checkup` agent |
 
 Four documents, one job each:

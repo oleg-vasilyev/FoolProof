@@ -8,7 +8,7 @@ const plural = new PluralRulesStub();
 
 vi.mock("#shared/locale/plural-rules.ts", () => plural.module);
 
-const { eveningTally, gameTally, playerTally, timeTally } = await import(
+const { eveningTally, eveningsOwedTally, gameTally, playerTally, timeTally } = await import(
   "#scoresheet/render/tally-phrases.ts"
 );
 
@@ -109,5 +109,35 @@ describe("timeTally()", () => {
     timeTally(russian, MANY);
 
     expect(plural.countedSpy).toHaveBeenCalledWith(russian.locale, MANY, russian.sheetTimeForms);
+  });
+});
+
+describe("eveningsOwedTally()", () => {
+  beforeEach(() => {
+    plural.countedSpy.mockReturnValue(COUNTED);
+  });
+
+  it("should give back whatever the counter made of it", () => {
+    expect(eveningsOwedTally(copy, MANY)).toBe(COUNTED);
+  });
+
+  it("should count with the forms that carry the word for still owed, not the plain evenings", () => {
+    eveningsOwedTally(copy, MANY);
+
+    expect(plural.countedSpy).toHaveBeenCalledWith(
+      copy.locale,
+      MANY,
+      copy.sheetEveningsOwedForms
+    );
+  });
+
+  it("should count in the language of the copy it was given", () => {
+    eveningsOwedTally(russian, MANY);
+
+    expect(plural.countedSpy).toHaveBeenCalledWith(
+      russian.locale,
+      MANY,
+      russian.sheetEveningsOwedForms
+    );
   });
 });

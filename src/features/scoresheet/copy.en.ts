@@ -158,6 +158,7 @@ export const copy = {
   personalSince: (date: string) => `since ${date}`,
   personalSubtitle: (games: string, evenings: string) => `${games} · ${evenings}`,
   sheetEveningForms: { one: "evening", few: "evenings", many: "evenings" },
+  sheetEveningsOwedForms: { one: "more evening", few: "more evenings", many: "more evenings" },
   sheetTimeForms: { one: "time", few: "times", many: "times" },
 
   tileGames: "GAMES",
@@ -170,7 +171,7 @@ export const copy = {
   tileTimesExpected: (times: string, expected: string) => `${times} · expected ${expected}`,
 
   personalChartLabel: "TABLE SHARE BY EVENING",
-  personalChartProgress: (evenings: string) => `one point per evening — ${evenings} to go`,
+  personalChartArrives: (evenings: string) => `appears after ${evenings}`,
   personalBestEvening: "best evening",
   personalWorstEvening: "worst evening",
 

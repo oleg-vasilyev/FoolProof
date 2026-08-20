@@ -157,6 +157,7 @@ export const copy: Copy = {
   personalSince: (date: string) => `с ${date}`,
   personalSubtitle: (games: string, evenings: string) => `${games} · ${evenings}`,
   sheetEveningForms: { one: "вечер", few: "вечера", many: "вечеров" },
+  sheetEveningsOwedForms: { one: "вечер", few: "вечера", many: "вечеров" },
   sheetTimeForms: { one: "раз", few: "раза", many: "раз" },
 
   tileGames: "ПАРТИЙ",
@@ -169,7 +170,7 @@ export const copy: Copy = {
   tileTimesExpected: (times: string, expected: string) => `${times} · ожидаемо ${expected}`,
 
   personalChartLabel: "ДОЛЯ СТОЛА ПО ВЕЧЕРАМ",
-  personalChartProgress: (evenings: string) => `по точке за вечер — ещё ${evenings}`,
+  personalChartArrives: (evenings: string) => `появится через ${evenings}`,
   personalBestEvening: "лучший вечер",
   personalWorstEvening: "худший вечер",
 

@@ -4,14 +4,14 @@ import { copy } from "#scoresheet/copy.en.ts";
 
 const eveningsShortOfChartSpy = vi.fn();
 
-const eveningTallySpy = vi.fn();
+const eveningsOwedTallySpy = vi.fn();
 
 vi.mock("#scoresheet/domain/career/career-evenings.ts", () => ({
   eveningsShortOfChart: (nights: number) => eveningsShortOfChartSpy(nights),
 }));
 
 vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
-  eveningTally: (table: unknown, evenings: number) => eveningTallySpy(table, evenings),
+  eveningsOwedTally: (table: unknown, evenings: number) => eveningsOwedTallySpy(table, evenings),
 }));
 
 const { chartTeaser } = await import("#scoresheet/render/personal/chart-teaser.ts");
@@ -30,7 +30,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 
   eveningsShortOfChartSpy.mockReturnValue(SHORT_BY);
-  eveningTallySpy.mockReturnValue(TALLY_MARK);
+  eveningsOwedTallySpy.mockReturnValue(TALLY_MARK);
 });
 
 describe("chartTeaser()", () => {
@@ -44,12 +44,12 @@ describe("chartTeaser()", () => {
   it("should count the remainder in words rather than print a bare number", () => {
     chartTeaser(copy, NIGHTS);
 
-    expect(eveningTallySpy).toHaveBeenCalledTimes(ONCE);
-    expect(eveningTallySpy).toHaveBeenCalledWith(copy, SHORT_BY);
+    expect(eveningsOwedTallySpy).toHaveBeenCalledTimes(ONCE);
+    expect(eveningsOwedTallySpy).toHaveBeenCalledWith(copy, SHORT_BY);
   });
 
   it("should hint at the chart with the finished tally in it", () => {
-    expect(chartTeaser(copy, NIGHTS)).toBe(copy.personalChartProgress(TALLY_MARK));
+    expect(chartTeaser(copy, NIGHTS)).toBe(copy.personalChartArrives(TALLY_MARK));
   });
 
   it("should say nothing the section label already says", () => {
@@ -59,7 +59,7 @@ describe("chartTeaser()", () => {
   it("should speak even for a career that earned its chart, leaving the deciding to the layout", () => {
     eveningsShortOfChartSpy.mockReturnValue(NOTHING_SHORT);
 
-    expect(chartTeaser(copy, NIGHTS)).toBe(copy.personalChartProgress(TALLY_MARK));
+    expect(chartTeaser(copy, NIGHTS)).toBe(copy.personalChartArrives(TALLY_MARK));
     expect(eveningsShortOfChartSpy).toHaveBeenCalledTimes(ONCE);
   });
 });
