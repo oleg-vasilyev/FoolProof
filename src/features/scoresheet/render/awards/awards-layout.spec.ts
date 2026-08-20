@@ -207,6 +207,23 @@ describe("awardsLayoutOf()", () => {
 
       expect(sheet.rows[0]?.colour).not.toBe(NEUTRAL_INK);
     });
+
+    it("should colour a shared award neutrally too, though it is not the whole table", () => {
+      const honours = honoursOf([everyoneOf([0, 1])]);
+
+      const sheet = awardsLayoutOf(chronologyOf(A_TABLE_OF_THREE), honours);
+
+      expect(sheet.rows[0]?.wholeTable).toBe(false);
+      expect(sheet.rows[0]?.colour).toBe(NEUTRAL_INK);
+    });
+
+    it("should not hand a shared award the first winner's colour, which the grid gives somebody else", () => {
+      const honours = honoursOf([everyoneOf([0, 1])]);
+
+      awardsLayoutOf(chronologyOf(A_TABLE_OF_THREE), honours);
+
+      expect(colourForSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe("stacking the rows", () => {

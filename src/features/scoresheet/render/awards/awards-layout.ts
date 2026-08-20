@@ -7,6 +7,8 @@ import { PAD } from "#scoresheet/render/card-metrics.ts";
 
 const CROWDED_ABOVE = 5;
 
+const ONE_WINNER = 1;
+
 const FIRST_WINNER = 0;
 
 const BASELINE_RATIO = 0.8;
@@ -196,7 +198,8 @@ const place = (
     award,
     names,
     wholeTable,
-    colour: wholeTable ? palette.inkHint : colourFor(seatOf(players, award)),
+    colour:
+      names.length === ONE_WINNER ? colourFor(seatOf(players, award)) : palette.inkHint,
     rank,
     top,
     height,

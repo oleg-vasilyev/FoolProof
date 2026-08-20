@@ -284,6 +284,25 @@ turns the table from over-engineering into the obvious answer.
 
 ---
 
+## A long name on a crowded evening exists nowhere on its own sheet
+
+The chronology cuts a column heading to fit its column, and the legend under the chart
+is where a reader recovers the whole name. On an evening with eleven or more distinct
+players the legend wraps to three rows, its slots narrow to the same order of width as
+a heading, and both copies of the name are cut — so «Владимир-Вяче…» and
+«Александра-Ко…» appear on the sheet twice and in full nowhere. A cold reading of the
+thirteen-player case found it; the ten-player cases are unaffected, because two legend
+rows leave slots wide enough.
+
+The fix is layout with taste in it — wrap a legend name to a second line, or drop the
+share to give the name the width, or print the roster once at full width somewhere —
+and it is worth choosing with a mockup rather than guessing. **Pick it up when a real
+chat first seats eleven distinct players in one evening**, which has never happened;
+until then the case is in the gallery and the defect is visible on it, which is the
+right place for a limit nobody has reached.
+
+---
+
 ## The Russian copy speaks to a man, and the table does not know who it is talking to
 
 Names are typed, not tagged, so the bot cannot know a player's gender — and the
