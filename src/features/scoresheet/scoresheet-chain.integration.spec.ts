@@ -8,6 +8,10 @@ import { copy as russian } from "#scoresheet/copy.ru.ts";
 import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
+import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
+import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
+import { careerCard } from "#scoresheet/domain/career/career-card.ts";
+import { PLAYER_COLOURS } from "#scoresheet/render/palette.ts";
 import type { Honours } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
 
@@ -86,6 +90,16 @@ const NONE_CUT = 0;
 const THE_FOOL = 1;
 
 const CROWDED_CHAT = -100666;
+
+const COLOUR_CHAT = -100555;
+
+const A_FILL = /fill="([^"]+)"/;
+
+const ONE_COLOUR = 1;
+
+const SEATED_THIRD = 2;
+
+const FIRST_IN_THE_ROSTER = 0;
 
 const A_CROWDED_TABLE = [
   "Александра-Константиновна",
@@ -197,6 +211,15 @@ const seriesIn = (chatId: number): SeriesChronology => {
   return found;
 };
 
+const playerColoursOn = (svg: string, name: string): readonly string[] => [
+  ...new Set(
+    [...svg.matchAll(TEXT_TAG)]
+      .filter((found) => (found[BODY] ?? "").includes(name))
+      .map((found) => A_FILL.exec(found[ATTRIBUTES] ?? "")?.[FIRST_GROUP] ?? "")
+      .filter((fill) => PLAYER_COLOURS.includes(fill))
+  ),
+];
+
 const honoursIn = (chatId: number): Honours => {
   const found = honoursFor(seriesIn(chatId));
 
@@ -300,6 +323,62 @@ describe("a table too crowded for the names it seated", () => {
         `${String(A_CROWDED_TABLE.length)} ${russian.sheetPlayerForms.many}`
       )
     );
+  });
+});
+
+describe("one player, one colour, across an evening's posters", () => {
+  let chronologyInk: readonly string[];
+  let awardsInk: readonly string[];
+  let cardInk: readonly string[];
+
+  beforeAll(() => {
+    Array.from({ length: ENOUGH_EVENING }).forEach(() => {
+      playGame(COLOUR_CHAT, [ROMA, ANYA, OLEG], [OLEG, ANYA], OLEG);
+    });
+
+    const evening = seriesIn(COLOUR_CHAT);
+    const grewDifferently = [...evening.players].reverse();
+    const subject = idFor(COLOUR_CHAT, OLEG);
+    const history = repo.careerHistory(COLOUR_CHAT);
+    const card = history === null ? null : careerCard(history, subject);
+
+    if (card === null) {
+      throw new Error("the evening that was just played left no card to draw");
+    }
+
+    chronologyInk = playerColoursOn(renderScoresheet(copy, evening, A_HANDLE), OLEG);
+    awardsInk = playerColoursOn(
+      renderAwards(copy, evening, honoursIn(COLOUR_CHAT), A_HANDLE),
+      OLEG
+    );
+    cardInk = playerColoursOn(
+      renderPersonalCard(copy, card, colourColumnOf(evening, grewDifferently, subject), A_HANDLE),
+      OLEG
+    );
+  });
+
+  it("should draw the player's name in one colour on the chronology", () => {
+    expect(chronologyInk).toHaveLength(ONE_COLOUR);
+  });
+
+  it("should draw the player's name in one colour on the awards", () => {
+    expect(awardsInk).toHaveLength(ONE_COLOUR);
+  });
+
+  it("should draw the player's name in one colour on their own card", () => {
+    expect(cardInk).toHaveLength(ONE_COLOUR);
+  });
+
+  it("should leave the three posters one colour between them", () => {
+    expect(new Set([...chronologyInk, ...awardsInk, ...cardInk]).size).toBe(ONE_COLOUR);
+  });
+
+  it("should take that colour from where the player sat tonight", () => {
+    expect(cardInk).toEqual([PLAYER_COLOURS[SEATED_THIRD]]);
+  });
+
+  it("should not take it from where the player stands in the chat's roster", () => {
+    expect(cardInk).not.toEqual([PLAYER_COLOURS[FIRST_IN_THE_ROSTER]]);
   });
 });
 

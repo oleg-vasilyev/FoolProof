@@ -1077,6 +1077,28 @@ subset happens to be everybody, the winners line says so in words instead of lis
 them — `everyWinner` in the copy table, set in neutral ink so it cannot be read as the
 first winner's row.
 
+### One colour per player, for one evening
+
+Eight colours, taken in order and repeated past the eighth, so the only question is
+which of them a player gets. All three posters answer it from the **same** list: the
+players of the latest series, in the order they first sat down. The chronology's
+column heading, its chart line, the coloured bar beside a name on the awards sheet
+and every mark on that player's own card therefore agree, and somebody who opens all
+three in one sitting sees one colour throughout.
+
+What this deliberately does not promise is the same colour next Friday. The order is
+the order people arrived in tonight, so it moves when the seating does. Pinning the
+colour to the player instead was refused for two reasons: nothing the bot draws ever
+puts two evenings side by side, so the recognition worth paying for is across the
+posters of one evening rather than across weeks — and a career-wide position would
+let a three-handed table draw all three players in one colour, which a seat index
+cannot do before nine sit down.
+
+A card is drawn for anybody on the roster, including somebody who did not play
+tonight. Having no seat in the evening, they take their colour from their place in
+the chat's roster instead — and nothing they could be compared against is on the
+screen.
+
 ### One player's card, for all time
 
 `/stats` answers *how is tonight going*. `/personal` answers *who am I at this

@@ -4,6 +4,7 @@ import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
+import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
 import { BOT_HANDLE } from "./bot-handle.ts";
 import type {
   CareerGame,
@@ -146,8 +147,8 @@ export type Posters = {
   readonly personal: string;
 };
 
-const subjectColumn = (): number =>
-  sampleCareer().players.findIndex((player) => player.playerId === SAMPLE_SUBJECT);
+const subjectColumn = (evening: SeriesChronology): number =>
+  colourColumnOf(evening, sampleCareer().players, SAMPLE_SUBJECT);
 
 export const posters = (): Posters => {
   const evening = sampleEvening();
@@ -166,6 +167,6 @@ export const posters = (): Posters => {
   return {
     chronology: renderScoresheet(copy, evening, BOT_HANDLE),
     awards: renderAwards(copy, evening, honours, BOT_HANDLE),
-    personal: renderPersonalCard(copy, career, subjectColumn(), BOT_HANDLE),
+    personal: renderPersonalCard(copy, career, subjectColumn(evening), BOT_HANDLE),
   };
 };

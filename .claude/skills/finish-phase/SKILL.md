@@ -478,6 +478,15 @@ wrong** — and check the rule that produced the number, not the sentence that r
 it. Changing the arithmetic to match a sentence is how a correct statistic gets
 broken by a reading of it.
 
+**Checking the readings against the code is a second scope, and it is delegable.** The
+findings arrive as a list, each one independently answerable out of the source, none of
+them touching the files the phase changed — which is the delegation test met three times
+over, and it is still the one that keeps getting done by hand. A phase spent five
+sequential calls confirming that two award sentences described their rules correctly
+while its own retrospective waited, and every one of those calls was a grep somebody
+cold could have run in parallel. Send the list, ask for the rule behind each number and
+a verdict of *sentence wrong*, *number wrong* or *reader wrong*, and keep the deciding.
+
 The output is **specific claims, not a verdict.** "Looked, fine" is the green light
 with nothing behind it that `write-an-e2e-scenario` warns about — which is why the
 reader is required to write down what each line said to it before it may report

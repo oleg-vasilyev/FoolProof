@@ -25,6 +25,8 @@ const decodePersonalCallbackSpy = vi.fn();
 
 const rasterizeSpy = vi.fn();
 
+const colourColumnOfSpy = vi.fn();
+
 const copyInSpy = vi.fn();
 
 vi.mock("#shared/telegram/inline-keyboard.ts", () => keyboard.module);
@@ -35,6 +37,11 @@ vi.mock("#scoresheet/copy.ts", () => ({
 
 vi.mock("#scoresheet/domain/career/career-card.ts", () => ({
   careerCard: (history: unknown, playerId: unknown) => careerCardSpy(history, playerId),
+}));
+
+vi.mock("#scoresheet/render/personal/colour-column.ts", () => ({
+  colourColumnOf: (evening: unknown, roster: unknown, playerId: unknown) =>
+    colourColumnOfSpy(evening, roster, playerId),
 }));
 
 vi.mock("#scoresheet/render/personal/personal-svg.ts", () => ({
@@ -84,6 +91,14 @@ const HISTORY = {
 
 const CARD = { playerId: OLEG, displayName: "Oleg" };
 
+const EVENING = {
+  startedOn: "2026-08-21",
+  players: [{ playerId: ANYA, displayName: "Anya" }, { playerId: OLEG, displayName: "Oleg" }],
+  games: [],
+};
+
+const A_COLUMN = 5;
+
 const TAP_DATA = "pc:7";
 
 describe("personal-handler", () => {
@@ -108,6 +123,8 @@ describe("personal-handler", () => {
     renderPersonalCardSpy.mockReturnValue(CARD_SVG);
     rasterizeSpy.mockResolvedValue(DRAWN_BYTES);
     repo.careerHistorySpy.mockReturnValue(HISTORY);
+    repo.seriesChronologySpy.mockReturnValue(EVENING);
+    colourColumnOfSpy.mockReturnValue(A_COLUMN);
   });
 
   describe("onPersonal()", () => {
@@ -199,6 +216,13 @@ describe("personal-handler", () => {
       expect(ctx.answerCallbackQuerySpy).toHaveBeenCalledWith(copy.personalStale);
     });
 
+    it("should ask the repository nothing about a tap that arrived without a chat", async () => {
+      await onPersonalTap(contextOf(), ctx.tapWithoutChat(TAP_DATA));
+
+      expect(repo.careerHistorySpy).toHaveBeenCalledTimes(NEVER);
+      expect(repo.seriesChronologySpy).toHaveBeenCalledTimes(NEVER);
+    });
+
     it("should answer a tap in the language its own chat chose", async () => {
       locales.readSpy.mockReturnValue(Locale.Ru);
 
@@ -247,18 +271,30 @@ describe("personal-handler", () => {
       );
     });
 
-    it("should draw the card in the tapped player's own colour column", async () => {
+    it("should ask for the evening the other posters of this chat are drawn from", async () => {
       await onPersonalTap(contextOf(), ctx.tap(TAP_DATA));
 
-      expect(renderPersonalCardSpy).toHaveBeenCalledWith(copy, CARD, NEVER, THE_HANDLE);
+      expect(repo.seriesChronologySpy).toHaveBeenCalledWith(CHAT_ID);
     });
 
-    it("should give a player further down the roster their own column", async () => {
+    it("should choose the colour from that evening and the chat's whole roster", async () => {
+      await onPersonalTap(contextOf(), ctx.tap(TAP_DATA));
+
+      expect(colourColumnOfSpy).toHaveBeenCalledWith(EVENING, HISTORY.players, OLEG);
+    });
+
+    it("should choose the colour for the player whose card was built", async () => {
       careerCardSpy.mockReturnValue({ playerId: ANYA, displayName: "Anya" });
 
       await onPersonalTap(contextOf(), ctx.tap("pc:9"));
 
-      expect(renderPersonalCardSpy).toHaveBeenCalledWith(copy, expect.anything(), ONCE, THE_HANDLE);
+      expect(colourColumnOfSpy).toHaveBeenCalledWith(EVENING, HISTORY.players, ANYA);
+    });
+
+    it("should draw the card in the column it was given", async () => {
+      await onPersonalTap(contextOf(), ctx.tap(TAP_DATA));
+
+      expect(renderPersonalCardSpy).toHaveBeenCalledWith(copy, CARD, A_COLUMN, THE_HANDLE);
     });
 
     it("should rasterize what the renderer drew", async () => {

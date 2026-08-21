@@ -181,27 +181,6 @@ stands.
 **Take it with the next phase that redraws a poster**, which will want a
 `poster-designer` mockup anyway — or the first time a real chat seats nine.
 
-## A player's card and the chronology give the same player two colours
-
-`colourFor` takes a column index, and the two posters count their columns off
-different rosters. The chronology numbers the players of the series; the player card
-numbers everybody the chat has ever seated — `history.players.findIndex(…)` in
-`personal-handler.ts`. The two orders coincide only by accident, so the player drawn
-in violet on the chart reads their own card in amber, and neither picture admits the
-two are about one person.
-
-It is the entry above one level up: colour is carrying identity from poster to
-poster while nothing makes it one colour per player. Closing the arithmetic without
-closing this would leave the disagreement exactly where it is.
-
-The fix has a choice in it, which is why it is written down rather than done. The
-card can read its colour off the series roster whenever the player appears there —
-cheap, and the colour then moves when the series roster moves — or colour can be
-pinned to something about a player that does not change, which makes `/merge` a
-recolouring and needs a rule for who keeps their colour.
-
-**Take it with the phase that settles the palette**, since one drawing answers both.
-
 ---
 
 ## The server installs the whole toolbox to run two packages
@@ -410,6 +389,37 @@ None of the three is wrong about its arithmetic; all three make a reader stop.
 
 **Take them with the next phase that opens the awards copy** — the same pass the entry
 above about the Russian voice needs.
+
+## Four sentences name a rule instead of what the picture shows
+
+From a cold reading taken while the colour fix was closed, on sheets that phase never
+touched. The arithmetic behind each was checked and is right; what fails is that a reader
+cannot get from the sentence back to the picture.
+
+- **«Впереди на графике после каждой партии, кроме первой»** — the rule really does skip
+  the opening game, but on the sheet the winner's line is already above everybody after
+  game one, so the exception promises a stumble that never happened.
+- **«то верхняя половина, то нижняя»** at an odd table — the top half is
+  `position <= tableSize / 2`, so third of five counts as the bottom, and nothing on the
+  sheet lets a reader work that out.
+- **«ничья за последнее»** in the grid's key — a fragment with no verb, recoverable only
+  from «ПЕРЕМИРИЕ» on the awards sheet beside it.
+- **«место предсказывает 24%»**, under four tiles of the player card — read as *what the
+  seating alone would give you*, by guess, and «место» collides with the place taken in a
+  game that the grid prints in every cell.
+
+**Take them with the next phase that opens the awards copy**, alongside the entry above
+about a word that cannot carry the meaning.
+
+## The grid's key explains one red digit and the grid draws two
+
+The key shows the fool as a red digit of the biggest table the evening seated, so a
+four-handed game inside a five-handed evening prints a red **4** the key never accounts
+for — while that game counts toward «Дураком в N из M» on the awards sheet. The same cold
+reading found it, and reading the digit took working out that somebody had sat out.
+
+**Take it with the phase that redraws the grid**, which is where a second key entry or a
+mark that does not depend on the table size would go.
 
 ## Four findings from the first gallery reading were never checked against the code
 

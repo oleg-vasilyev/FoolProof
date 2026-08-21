@@ -6,6 +6,7 @@ import type { LocaleReader } from "#shared/locale/chat-locale.ts";
 import { DEFAULT_LOCALE } from "#shared/locale/locales.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { decodePersonalCallback } from "#scoresheet/render/personal/personal-callback-codec.ts";
+import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
 import { renderRosterKeyboard } from "#scoresheet/render/personal/roster-keyboard.ts";
 import { copyIn } from "#scoresheet/copy.ts";
@@ -42,8 +43,13 @@ const refuse = async (ctx: CallbackTap, notice: string): Promise<void> => {
 export const onPersonalTap = async (context: PersonalContext, ctx: CallbackTap): Promise<void> => {
   const chatId = ctx.chat?.id;
   const copy = copyIn(chatId === undefined ? DEFAULT_LOCALE : context.localeIn(chatId));
+
+  if (chatId === undefined) {
+    return refuse(ctx, copy.personalStale);
+  }
+
   const playerId = decodePersonalCallback(ctx.callbackQuery.data);
-  const history = chatId === undefined ? null : context.repo.careerHistory(chatId);
+  const history = context.repo.careerHistory(chatId);
 
   if (history === null || playerId === null) {
     return refuse(ctx, copy.personalStale);
@@ -58,7 +64,7 @@ export const onPersonalTap = async (context: PersonalContext, ctx: CallbackTap):
   await ctx.editMessageText(copy.personalPicked(card.displayName));
   await ctx.answerCallbackQuery();
 
-  const column = history.players.findIndex((player) => player.playerId === card.playerId);
+  const column = colourColumnOf(context.repo.seriesChronology(chatId), history.players, card.playerId);
   const drawn = await rasterize(renderPersonalCard(copy, card, column, handleOf(ctx.me.username)));
 
   await ctx.replyWithPhoto(new InputFile(drawn, CARD_FILENAME));

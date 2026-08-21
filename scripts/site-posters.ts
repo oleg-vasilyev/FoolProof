@@ -5,6 +5,7 @@ import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.t
 import { Locale } from "#shared/locale/locales.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
+import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
 import type { CareerHistory, PlayerColumn, SeriesChronology } from "#shared/repository/repository-contract.ts";
 import { BOT_HANDLE } from "./bot-handle.ts";
 import { SAMPLE_SUBJECT, sampleCareer, sampleEvening } from "./mockups.ts";
@@ -35,14 +36,14 @@ const renamed = <T extends Seated>(subject: T, names: readonly string[]): T => {
   };
 };
 
-const cardIn = (locale: Locale, career: CareerHistory): string => {
+const cardIn = (locale: Locale, evening: SeriesChronology, career: CareerHistory): string => {
   const card = careerCard(career, SAMPLE_SUBJECT);
 
   if (card === null) {
     throw new Error("the sample career has no games — check NAMES and EXIT_ORDERS in mockups.ts");
   }
 
-  const column = career.players.findIndex((player) => player.playerId === SAMPLE_SUBJECT);
+  const column = colourColumnOf(evening, career.players, SAMPLE_SUBJECT);
 
   return renderPersonalCard(copyIn(locale), card, column, BOT_HANDLE);
 };
@@ -70,7 +71,7 @@ const setIn = (
   career: CareerHistory
 ): Readonly<Record<string, string>> => ({
   ...pairIn(locale, evening),
-  [`personal-${locale}`]: cardIn(locale, career),
+  [`personal-${locale}`]: cardIn(locale, evening, career),
 });
 
 export const sitePosters = (): Readonly<Record<string, string>> => ({

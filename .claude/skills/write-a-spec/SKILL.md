@@ -401,3 +401,13 @@ Ask, in this order:
    forty mutants survived a test written to kill exactly them. Count off something
    the mutation cannot move (here the English table, which is the shape master), and
    assert the output is neither `""` nor `"undefined"` before looking inside it.
+
+6. **Does a negative assertion exclude anything the positive one beside it allows?**
+   On a call that happens once, `not.toHaveBeenCalledWith(a, b, WRONG, d)` is already
+   implied by `toHaveBeenCalledWith(a, b, RIGHT, d)`, so it kills no mutant of its own
+   and costs a reader a second pass over an argument list. Worse, it needs a constant
+   for a value nothing else names, and the nearest one is usually wrong: a case written
+   this way passed the call-count `NEVER` where a column index belonged, so it read as
+   "never called with" while meaning "not called with column zero". Keep the negative
+   only where the subject can make the call more than once, and then assert the count
+   as well.

@@ -1252,3 +1252,21 @@ describe("careerHistory()", () => {
     expect(repo.careerHistory(CHAT_ID)?.games).toHaveLength(ONCE);
   });
 });
+
+describe("the roster and the evening read beside each other", () => {
+  it("should order the roster by the whole history while the evening orders by tonight", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
+    ageAllGames(LONGER_THAN_A_DAY);
+    const tonight = [...ids].reverse();
+    playFullGame(tonight, [tonight[0] ?? NONE, tonight[1] ?? NONE], [tonight[2] ?? NONE]);
+
+    expect([
+      repo.careerHistory(CHAT_ID)?.players.map((player) => player.displayName),
+      repo.seriesChronology(CHAT_ID)?.players.map((player) => player.displayName),
+    ]).toEqual([
+      ["Oleg", "Anya", "Roma"],
+      ["Roma", "Anya", "Oleg"],
+    ]);
+  });
+});
