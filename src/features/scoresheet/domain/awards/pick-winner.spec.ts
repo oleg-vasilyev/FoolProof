@@ -175,6 +175,24 @@ describe("standoutBy()", () => {
     expect(winner).toBeNull();
   });
 
+  it("should crown a leader whose gap sits exactly at the tie tolerance", () => {
+    const AT_THE_TOLERANCE = 1e-9;
+
+    const winner = standoutBy([HIGH, LOW], (player) => (player === HIGH ? AT_THE_TOLERANCE : 0));
+
+    expect(winner).toBe(HIGH);
+  });
+
+  it("should still call it a tie when the gap sits just inside the tolerance", () => {
+    const JUST_INSIDE_THE_TOLERANCE = 9e-10;
+
+    const winner = standoutBy([HIGH, LOW], (player) =>
+      player === HIGH ? JUST_INSIDE_THE_TOLERANCE : 0
+    );
+
+    expect(winner).toBeNull();
+  });
+
   it("should still crown a leader who is clear of the field by a real margin", () => {
     const winner = standoutBy([HIGH, LOW, MIDDLE], (player) => (player === HIGH ? TWICE : ONCE));
 

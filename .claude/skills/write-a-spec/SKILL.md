@@ -67,6 +67,25 @@ mutants until it moved to `render/human-units.ts`, where it is a unit with its o
 cases and the copy function takes the finished fragment. A count still belongs behind
 a copy function — the *choice of word* belongs in `render/`.
 
+**And the same trap one step out: an expected value read from the table under test.**
+`toHaveBeenCalledWith(copy.locale, RATE_LIMIT, copy.limitForms)` looks like an
+assertion and is an identity — whatever `limitForms` holds, both sides hold it — so
+emptying that table leaves the case green while `/status` prints a count with no noun
+after it. Four of these sat in one spec, and three matching mutants survived.
+
+The tempting fix is to type the words into the consumer's spec. That is the wrong
+home, and the mutation run says so: the English literals killed the English mutants
+and left the Russian ones alive, because the consumer's spec drives one locale. **The
+claim "this table has words in it" belongs to the table's own `copy.spec.ts`**, which
+already runs `describe.each(LOCALES)` — one line adding the missing tables to its list
+killed all six at once. The consumer's reference assertion is then doing the only job
+it can do, which is proving the subject reached for the right key.
+
+So: when an assertion turns out to be an identity, ask which spec the claim belongs to
+before typing a literal. And note what the surviving list looked like — the copy spec
+named four counted nouns out of seven, and a list that is *nearly* complete reads
+exactly like one that is.
+
 **An existing spec file's habits are not precedent.** `feature-installer.spec.ts`
 had always run `copyIn` real, and a new `describe` added there copied that instead
 of the rule — it exercised the real `localeFrom` and re-proved a fact

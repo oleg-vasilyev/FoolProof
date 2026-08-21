@@ -147,13 +147,15 @@ const refused = (description: string): ApiResult => ({
 const sameKeyboard = (before: ButtonRows, after: ButtonRows): boolean =>
   JSON.stringify(before) === JSON.stringify(after);
 
-// Two limits the real Bot API enforces and this fake used not to, so a bot that
-// grew past either of them kept passing here and would have failed in a real chat.
-// Text is counted in characters, callback data in bytes, which is how Telegram
-// counts them.
+// Three limits the real Bot API enforces and this fake used not to, so a bot that
+// grew past any of them kept passing here and would have failed in a real chat.
+// Message text and photo captions are counted in characters, callback data in
+// bytes, which is how Telegram counts them.
 const LONGEST_TEXT = 4096;
 
 const LONGEST_CALLBACK_DATA = 64;
+
+const LONGEST_CAPTION = 1024;
 
 const overBudget = (buttons: ButtonRows): boolean =>
   buttons.some((row) =>
@@ -167,6 +169,9 @@ const tooBig = (text: string, buttons: ButtonRows): ApiResult | null => {
 
   return overBudget(buttons) ? refused("BUTTON_DATA_INVALID") : null;
 };
+
+const captionTooLong = (caption: string): ApiResult | null =>
+  [...caption].length > LONGEST_CAPTION ? refused("MEDIA_CAPTION_TOO_LONG") : null;
 
 export const createFakeTelegram = (): FakeTelegram => {
   const updates: UpdateQueue = createUpdateQueue();
@@ -273,10 +278,17 @@ export const createFakeTelegram = (): FakeTelegram => {
       case "sendPhoto": {
         effect();
 
+        const caption = String(payload.caption ?? "");
+        const refusal = captionTooLong(caption);
+
+        if (refusal !== null) {
+          return refusal;
+        }
+
         const photo = nextPhotoId++;
         photos.set(photo, file?.bytes ?? Buffer.alloc(NOTHING));
 
-        return good(post(String(payload.caption ?? ""), [], photo));
+        return good(post(caption, [], photo));
       }
 
       case "editMessageText": {

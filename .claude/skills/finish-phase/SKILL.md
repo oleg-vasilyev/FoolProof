@@ -673,7 +673,20 @@ to write, the subject each spec tests, the stubs to use by name, and the
 instruction to load the `write-a-spec` skill first. **Tell each agent to run only
 its own files** — a brief that ends "run the folder" makes the agent report your
 own half-finished edits as its failures, and it will spend a turn investigating
-them before deciding they are not its business. Keep for yourself the parts
+them before deciding they are not its business.
+
+**Carrying everything is not the same as prescribing the fix, and the difference costs
+a rework.** A brief that says *assert the actual words rather than the table reference*
+buys exactly that and nothing more: the agent typed English literals into the
+consumer's spec, which killed the English mutants and left the Russian ones alive,
+because that spec drives one locale. The property wanted was "every counted noun has
+its three forms, in every language", and its home was the copy table's own spec, which
+already loops over both. **State the property that must hold and the evidence that
+would prove it — the mutant that must die, the case that must fail — and let the cold
+agent find the home.** It reads the tree without the answer already in mind, which is
+the whole reason to send it.
+
+Keep for yourself the parts
 where being wrong is expensive — the mechanic a player will feel, a cross-feature
 hazard, anything touching `shared/` or the schema.
 

@@ -69,14 +69,24 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
   });
 
   it("should give every counted noun all three forms", () => {
-    for (const forms of [copy.playerForms, copy.gameForms, copy.warningForms, copy.errorForms]) {
+    const counted = [
+      copy.playerForms,
+      copy.gameForms,
+      copy.warningForms,
+      copy.errorForms,
+      copy.retryForms,
+      copy.limitForms,
+      copy.refusalForms,
+    ];
+
+    for (const forms of counted) {
       expect(forms).toEqual(
-      expect.objectContaining({
-        one: expect.any(String),
-        few: expect.any(String),
-        many: expect.any(String),
-      })
-    );
+        expect.objectContaining({
+          one: expect.any(String),
+          few: expect.any(String),
+          many: expect.any(String),
+        })
+      );
     }
   });
 

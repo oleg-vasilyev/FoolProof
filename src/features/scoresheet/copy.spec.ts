@@ -152,6 +152,7 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
         copy.sheetGameForms,
         copy.sheetPlayerForms,
         copy.sheetEveningForms,
+        copy.sheetEveningsOwedForms,
         copy.sheetTimeForms,
       ]) {
         expect(forms).toEqual(
