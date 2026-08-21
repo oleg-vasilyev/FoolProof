@@ -149,7 +149,7 @@ sequenceDiagram
         C->>K: the refresh-the-pictures skill
         K-->>C: the table of every committed picture, what draws it, and which have no gate but the table
         C->>C: draw the gallery and regenerate the stale ones — mockups, posters, previews, icons
-        C->>S: the poster-reader agent — the contact sheet, every regenerated PNG, the lines to read; never what any of it is for
+        C->>S: the poster-reader agent — the contact sheet, every regenerated PNG, the lines to read, but never what any of it is for
         S-->>C: what each line says to somebody who has never seen the code, then the set read against itself
         opt the phase had a mockup approved at stage 1
             C->>S: a second reading, this time with the approved sheet — what shipped differs from what was signed off how?

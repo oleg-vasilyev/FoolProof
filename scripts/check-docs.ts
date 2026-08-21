@@ -623,6 +623,25 @@ const flowOutOfStep = (): readonly string[] => {
   ];
 };
 
+const A_MERMAID_FENCE = /```mermaid\n([\s\S]*?)```/g;
+
+const A_STATEMENT_SEPARATOR = ";";
+
+const diagramsThatWillNotRender = (): readonly string[] =>
+  [...DOCUMENTS, FLOW_DOCUMENT].flatMap((document) =>
+    [...read(document).matchAll(A_MERMAID_FENCE)].flatMap((fence) =>
+      (fence[FIRST_GROUP] ?? "")
+        .split(A_LINE)
+        .filter((line) => line.includes(A_STATEMENT_SEPARATOR))
+        .map(
+          (line) =>
+            `${document}: a mermaid line carries a ";", which the diagram reads as the end ` +
+            `of a statement rather than as punctuation, so nothing renders and the page shows ` +
+            `a parse error where the drawing should be — ${line.trim()}`
+        )
+    )
+  );
+
 const AGENTS_FOLDER = ".claude/agents";
 
 const A_MARKDOWN_FILE = /\.md$/;
@@ -693,6 +712,7 @@ const complaints = [
   ...formsBakedIntoCopy(),
   ...brokenLinks(),
   ...flowOutOfStep(),
+  ...diagramsThatWillNotRender(),
   ...stagesOutOfStep(),
   ...unreachableHelp(),
   ...featuresMissingFromTheTree(),

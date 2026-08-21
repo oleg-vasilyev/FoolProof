@@ -82,6 +82,21 @@ Two consequences worth spelling out, because both have been got wrong:
    list was first written. What it checks is enumerated once, in `CLAUDE.md`; do not
    re-list it here. Read the complaint rather than guessing which check fired.
 
+## A drawing is prose that can fail to be a drawing
+
+A mermaid fence is the one thing a document holds that either renders or does not,
+with nothing in between — and a broken one shows a parse error where the picture
+was, so the reader gets less than if the fence had never been written. **Never put
+a semicolon in a message**: mermaid reads it as the end of a statement, so the rest
+of the sentence parses as a new one and the whole diagram is lost. `docs:check`
+refuses one now, because the drawing in `DEVELOPMENT-FLOW.md` spent two days as an
+error message while every other check on that file stayed green — they read what it
+names, and none of them asked whether it draws.
+
+When a fence will not render, **ask the platform, not the file**: GitHub prints the
+parse error with a line and a caret, which names the character. Reading the source
+starts with whatever looks most exotic, and the exotic part is usually fine.
+
 ## The script table in `README.md`
 
 `docs:check` compares that table against `package.json`, so the two cannot drift —
