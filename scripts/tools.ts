@@ -8,6 +8,7 @@ import { refreshDesignPage } from "./design-page.ts";
 import { GALLERY_DIR, gallery } from "./gallery.ts";
 import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
 import { SITE_POSTER_DIR, sitePosters } from "./site-posters.ts";
+import { siteImageOf } from "./site-images.ts";
 import { MOCKUP_DIR, posters } from "./mockups.ts";
 
 
@@ -46,8 +47,17 @@ const drawInto = async (
 
 const writeMockups = (): Promise<void> => drawInto(MOCKUP_DIR, posters());
 
-const writeSitePosters = (): Promise<void> =>
-  drawInto(SITE_POSTER_DIR, sitePosters());
+const writeSitePosters = async (): Promise<void> => {
+  const directory = resolve(rootDir, SITE_POSTER_DIR);
+
+  mkdirSync(directory, { recursive: true });
+
+  for (const [name, svg] of Object.entries(sitePosters())) {
+    writeFileSync(resolve(directory, `${name}.svg`), svg, "utf8");
+    writeFileSync(resolve(directory, `${name}.webp`), await siteImageOf(svg));
+    console.log(`${SITE_POSTER_DIR}/${name}.webp`);
+  }
+};
 
 const CONTACT_SHEET = "contact-sheet.png";
 

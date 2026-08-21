@@ -49,6 +49,7 @@
     "grammy": "^1.45.1"
   },
   "devDependencies": {
+    "@jsquash/webp": "^1.5.0",
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/vitest-runner": "^9.6.1",
     "@types/node": "^26.1.2",

@@ -6,7 +6,7 @@ import { startTiming } from "#shared/timing/slowest-render.ts";
 import { FONT_FAMILY } from "#scoresheet/render/card-metrics.ts";
 
 
-const FONT_FILES: readonly string[] = ["NotoSans-Regular.ttf", "NotoSans-Bold.ttf"].map((file) =>
+export const FONT_FILES: readonly string[] = ["NotoSans-Regular.ttf", "NotoSans-Bold.ttf"].map((file) =>
   resolve(rootDir, "assets", "fonts", file)
 );
 

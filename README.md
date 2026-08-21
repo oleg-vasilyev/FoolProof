@@ -556,7 +556,7 @@ Two parts of it are generated rather than written:
 
 | What | Rebuilt by |
 |---|---|
-| `docs/posters/` — the four pictures the pages show | `node scripts/tools.ts site-posters` |
+| `docs/posters/` — the six pictures the pages show, drawn as WebP at the width they are read at | `node scripts/tools.ts site-posters` |
 | `docs/styles.css` — Tailwind, minified and committed | `node scripts/tools.ts site-css` |
 
 **`npm run docs:check` fails on either being stale**, and that is the point: a push

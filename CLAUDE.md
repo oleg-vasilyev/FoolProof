@@ -44,10 +44,10 @@ That rule has needed enforcing twice, so it is now enforced: `npm run docs:check
 tree against the real folders, checks `README.md`'s script table against
 `package.json`, compares `PLAN.md`'s schema and `docs/mockups/` against what the
 code actually produces, holds the poster gallery to the edge cases approved on a
-mockup, and holds **this file to a line budget**. The budget is what makes
-appending cost something — when a new rule pushes it over, move an old paragraph
-into the skill it belongs to instead of raising the number. The `write-a-doc` skill
-routes a fact to its file.
+mockup, weighs and measures every picture the site serves, and holds **this file to a
+line budget**. The budget is what makes appending cost something — when a new rule
+pushes it over, move an old paragraph into the skill it belongs to instead of raising
+the number. The `write-a-doc` skill routes a fact to its file.
 
 ## Code style
 

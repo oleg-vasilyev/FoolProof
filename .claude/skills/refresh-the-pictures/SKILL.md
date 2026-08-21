@@ -1,6 +1,6 @@
 ---
 name: refresh-the-pictures
-description: Audit every committed picture after an implemented visual change and regenerate the stale ones — the /stats mockups, the site posters, the Claude Design page, the OG previews, the favicon and the touch icon. Use after the diff review, when a design change has landed in code, when docs:check reports mockups or posters out of step — it runs in check:push and check:release, not in the phase loop — or whenever a committed PNG might no longer match what the product draws.
+description: Audit every committed picture after an implemented visual change and regenerate the stale ones — the /stats mockups, the site posters, the Claude Design page, the OG previews, the favicon and the touch icon. Use after the diff review, when a design change has landed in code, when docs:check reports mockups or posters out of step — it runs in check:push and check:release, not in the phase loop — or whenever a committed picture might no longer match what the product draws.
 ---
 
 # Refreshing the committed pictures
@@ -16,16 +16,22 @@ redrawing. Skipping a row silently is how an icon ships in last year's colour.
 | Picture | Drawn by | What catches it going stale |
 |---|---|---|
 | `docs/mockups/*.svg` + `.png` | `node scripts/tools.ts mockups` | `docs:check` compares the SVG |
-| `docs/posters/*-{en,ru}.svg` + `.png` | `node scripts/tools.ts site-posters` | `docs:check` compares the SVG |
+| `docs/posters/*-{en,ru}.svg` + `.webp` | `node scripts/tools.ts site-posters` | `docs:check` compares the SVG, and weighs and measures the WebP |
 | `docs/previews/og-cover*.png` | by hand, from the site's own look | nothing — this row |
 | `docs/favicon.png`, `docs/apple-touch-icon.png` | by hand, from the bot's avatar | nothing — this row |
 | the Claude Design page | the `update-the-design-page` skill, end to end | `docs:check` compares `design-page.sync` |
 
-The gate deliberately compares **SVG, never PNG** — rasterizing would drag the
-native resvg binary into a documentation gate. So a resvg upgrade can change
-every shipped PNG while `docs:check` stays green, and the hand-made rows have
+The gate deliberately compares **SVG, never the raster** — rasterizing would drag
+the native resvg binary into a documentation gate. So a resvg upgrade can change
+every shipped picture while `docs:check` stays green, and the hand-made rows have
 no generator at all: for those, the walk through this table is the whole
 mechanism.
+
+One exception, and it exists because nothing else could see it: the pictures the
+**site** serves are also weighed and measured. Every image a page draws must be
+there, must be the shape the page reserves room for, and the page's pictures
+together must stay under a budget. That is bytes and dimensions, not content — a
+poster can still be redrawn wrongly and pass, which is what the reader below is for.
 
 ## The procedure for the generated rows
 
@@ -35,9 +41,11 @@ mechanism.
    for exactly that reason. It still compares the SVGs in CI (`check:push`) and
    before a tag (`check:release`), so a stale mockup that reaches the push is a
    red check. **Commit both halves.** The SVG is the reviewable one: a
-   colour change is one readable diff line where a PNG is an opaque blob. The
-   PNG is the one `README.md` and the site actually show.
-2. **Every regenerated PNG goes to the `poster-reader` agent, not to your own
+   colour change is one readable diff line where a raster is an opaque blob. The
+   raster is the one anybody actually looks at — a PNG in `README.md` and on the
+   design page, a WebP on the site, which is drawn at the width it is read at
+   rather than the width the bot sends.
+2. **Every regenerated picture goes to the `poster-reader` agent, not to your own
    eyes.** The gate proves the file matches the renderer; it cannot say the
    renderer started drawing nonsense — the awards card grew from thirteen rules to
    thirty-eight with every gate green. And you cannot read your own copy cold: a

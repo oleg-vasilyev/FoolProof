@@ -41,6 +41,25 @@ Most style rules are ESLint rules now (`eslint.config.js`), so a lint failure is
 a convention violation, not a nit — read the message before reaching for a
 disable comment, which is itself banned in `src/`.
 
+**A new check is probed against input shaped differently, not only input that is
+wrong.** Breaking today's file proves the rule fires on today's file, which is the
+easy half. A gate added to catch silent failures failed silently in its first hour:
+it read an `<img>` only when `src`, `width` and `height` came first, in that order,
+so a `class` in front of them would have dropped that image out of every check it
+performs — including the one weighing the page — without a word. The probe that
+matters is the one that changes the *shape* of what the rule reads: reorder,
+rename, leave a field out, hand it a format it has never seen. Each of those
+deserves its own complaint, and a rule that cannot parse its subject must say so
+rather than skip it.
+
+**Copying a call from another module means copying what guards it.** The site's
+image writer took resvg's render call out of `rasterizer.ts` and left
+`requireFonts()` behind — and a missing font makes resvg draw the picture with no
+text rather than fail, so six blank posters would have been committed with every
+gate green: the SVG still matched, the shape still matched, and the weight matched
+*better*. If the original refuses at construction, the copy owes the same refusal;
+better still, import the guard and the list it guards rather than retyping them.
+
 **An edit made by a script ends with a lint run, not with a glance.** The editor
 hook lints a file as it is written, so a hand edit tells you at once; a patch applied
 by a throwaway script gets no such feedback, and the mistake it makes is always the

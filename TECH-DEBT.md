@@ -157,6 +157,25 @@ to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
 
 ---
 
+## The server installs the whole toolbox to run two packages
+
+`deploy/foolproof-deploy.sh` runs a plain `npm ci`, which installs devDependencies,
+so every deploy puts Stryker, vitest, eslint, typescript and now a WebP encoder onto
+a production box that imports none of them. `src/` needs exactly two packages —
+`grammy` and `@resvg/resvg-js` — because Node strips types natively and nothing in
+the running bot reaches for a test runner.
+
+`npm ci --omit=dev` is the whole fix and it makes deploys smaller and faster. It was
+not taken when the encoder was added, because that phase ran overnight while the
+owner slept and a deploy script is the one place with no automatic gate: a wrong
+guess there is a bot that does not start, found in the morning.
+
+**Take it the next time anything touches `deploy/`**, when somebody is awake to
+watch the deploy that follows — or the first time an install is slow enough to
+notice.
+
+---
+
 ## Every `docs:check` rule is proven once, by hand, and never again
 
 `scripts/` has no specs and Stryker mutates only `src/**`, so the checks in
