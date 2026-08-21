@@ -41,6 +41,13 @@ Most style rules are ESLint rules now (`eslint.config.js`), so a lint failure is
 a convention violation, not a nit — read the message before reaching for a
 disable comment, which is itself banned in `src/`.
 
+**An edit made by a script ends with a lint run, not with a glance.** The editor
+hook lints a file as it is written, so a hand edit tells you at once; a patch applied
+by a throwaway script gets no such feedback, and the mistake it makes is always the
+same shape — a line inserted without the blank lines around it. Twice that has been
+discovered by the phase battery stopping on its first gate, which is a two-minute
+answer to a two-second question.
+
 **A lock file rewritten here can be wrong somewhere else, and the dry run will not
 say so.** `npm install` on Windows prunes optional packages this platform has no
 use for — the wasm fallbacks a native binding carries — and leaves the package that
@@ -325,7 +332,11 @@ mean.
 
 Give the agent the contact sheet, the full-size pictures of anything whose text
 changed, every PNG `refresh-the-pictures` regenerated, and the **list of lines to
-read** — and nothing else. Explaining what a line is for destroys the only instrument
+read** — and nothing else. **Never a count.** Telling it there are six captions, or
+two extreme cases, hands it the answer to a question you wanted asked: both numbers
+were wrong when tried — four captions, four extremes — and both times the agent had
+to spend its opening paragraph telling the caller so instead of reading. A count is
+the cheapest way to break the instrument without noticing. Explaining what a line is for destroys the only instrument
 it is; its brief says so and it will report you for it.
 
 **The approved mockup goes in a second call, never the first.** Comparing what
@@ -609,6 +620,14 @@ A phase's cost is dominated by two things, and neither of them is thinking:
   deleted the same hour, and the answer that replaced it came from a fresh designer
   who had been told what was rejected and why. The tell is cheap: **if you are
   reading a decision instead of remembering making it, it needs re-showing.**
+
+- **Read the commit messages of the work you are picking up, before contradicting
+  any of it.** A resumed phase inherits code without the reasoning that shaped it,
+  and the reasoning is in the messages. One session was a command away from
+  "repairing" a gallery fixture back to a state a previous session had already tried,
+  caught in review and written up at length — the ceiling that looked unreachable is
+  reachable, because the cap it is measured against governs a game while the picture
+  draws an evening. Reading cost a minute; the correction would have cost the phase.
 
 - **Rewriting the same shape in fifty files by hand.** A signature that gains a
   parameter changes every call site and every mock factory; do it with a **script

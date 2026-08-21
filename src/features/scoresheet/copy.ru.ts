@@ -169,7 +169,7 @@ export const copy: Copy = {
   tileDealt: "ПЕРВЫЙ ХОД",
   tileTimesExpected: (times: string, expected: string) => `${times} · ожидаемо ${expected}`,
   tileFoolNote: (fools: number, decided: number, expected: string) =>
-    `${fools} из ${decided}, где был дурак · ожидаемо ${expected}`,
+    `${fools} из ${decided} · ожидаемо ${expected}`,
 
   personalChartLabel: "ДОЛЯ СТОЛА ПО ВЕЧЕРАМ",
   personalChartArrives: (evenings: string) => `появится через ${evenings}`,

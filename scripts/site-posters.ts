@@ -6,6 +6,7 @@ import { Locale } from "#shared/locale/locales.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
 import type { CareerHistory, PlayerColumn, SeriesChronology } from "#shared/repository/repository-contract.ts";
+import { BOT_HANDLE } from "./bot-handle.ts";
 import { SAMPLE_SUBJECT, sampleCareer, sampleEvening } from "./mockups.ts";
 
 
@@ -43,7 +44,7 @@ const cardIn = (locale: Locale, career: CareerHistory): string => {
 
   const column = career.players.findIndex((player) => player.playerId === SAMPLE_SUBJECT);
 
-  return renderPersonalCard(copyIn(locale), card, column);
+  return renderPersonalCard(copyIn(locale), card, column, BOT_HANDLE);
 };
 
 const pairIn = (
@@ -58,8 +59,8 @@ const pairIn = (
   }
 
   return {
-    [`chronology-${locale}`]: renderScoresheet(copy, evening),
-    [`awards-${locale}`]: renderAwards(copy, evening, honours),
+    [`chronology-${locale}`]: renderScoresheet(copy, evening, BOT_HANDLE),
+    [`awards-${locale}`]: renderAwards(copy, evening, honours, BOT_HANDLE),
   };
 };
 

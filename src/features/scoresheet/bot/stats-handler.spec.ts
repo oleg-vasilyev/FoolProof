@@ -3,8 +3,11 @@ import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { Locale } from "#shared/locale/locales.ts";
 import { copy } from "#scoresheet/copy.en.ts";
-import { CHAT_ID, ContextStub } from "#scoresheet/bot/grammy-context.stub.ts";
+import { BOT_USERNAME, CHAT_ID, ContextStub } from "#scoresheet/bot/grammy-context.stub.ts";
 import { InputFileStub } from "#scoresheet/bot/grammy-input-file.stub.ts";
+
+
+const THE_HANDLE = `@${BOT_USERNAME}`;
 
 
 const inputFile = new InputFileStub();
@@ -26,8 +29,8 @@ const honoursForSpy = vi.fn();
 const copyInSpy = vi.fn();
 
 vi.mock("#scoresheet/render/chronology/chronology-svg.ts", () => ({
-  renderScoresheet: (table: unknown, chronology: unknown) =>
-    renderScoresheetSpy(table, chronology),
+  renderScoresheet: (table: unknown, chronology: unknown, handle: unknown) =>
+    renderScoresheetSpy(table, chronology, handle),
 }));
 
 vi.mock("#scoresheet/copy.ts", () => ({
@@ -35,8 +38,8 @@ vi.mock("#scoresheet/copy.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/awards/awards-svg.ts", () => ({
-  renderAwards: (table: unknown, chronology: unknown, honours: unknown) =>
-    renderAwardsSpy(table, chronology, honours),
+  renderAwards: (table: unknown, chronology: unknown, honours: unknown, handle: unknown) =>
+    renderAwardsSpy(table, chronology, honours, handle),
 }));
 
 vi.mock("#scoresheet/domain/awards/awards.ts", () => ({
@@ -124,7 +127,7 @@ describe("onStats()", () => {
   it("should draw the sheet from exactly what the repository returned", async () => {
     await onStats(context(), ctx.command("/stats"));
 
-    expect(renderScoresheetSpy).toHaveBeenCalledWith(copy, SESSION);
+    expect(renderScoresheetSpy).toHaveBeenCalledWith(copy, SESSION, THE_HANDLE);
   });
 
   it("should rasterize the drawing it was given", async () => {
@@ -227,7 +230,7 @@ describe("onStats()", () => {
 
       await onStats(context(), ctx.command("/stats"));
 
-      expect(renderAwardsSpy).toHaveBeenCalledWith(copy, SESSION, HONOURS);
+      expect(renderAwardsSpy).toHaveBeenCalledWith(copy, SESSION, HONOURS, THE_HANDLE);
     });
 
     it("should leave the awards photo without a caption, since the picture names itself", async () => {
@@ -286,7 +289,7 @@ describe("onChronology()", () => {
   it("should draw the chronology of the session it was given", async () => {
     await onChronology(context(), ctx.command("/stats_chronology"));
 
-    expect(renderScoresheetSpy).toHaveBeenCalledWith(copy, SESSION);
+    expect(renderScoresheetSpy).toHaveBeenCalledWith(copy, SESSION, THE_HANDLE);
   });
 
   it("should say nothing is recorded when the chat has no session yet", async () => {

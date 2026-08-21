@@ -12,6 +12,8 @@ import type { Honours } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
 
 
+const A_HANDLE = "@a_handle";
+
 const DB_FILE = join(tmpdir(), `foolproof-chain-spec-${process.pid}.db`);
 
 process.env.DB_PATH = DB_FILE;
@@ -131,7 +133,8 @@ const headingsIn = (svg: string): readonly Heading[] =>
       return (
         attributes.includes('text-anchor="middle"') &&
         attributes.includes('font-weight="bold"') &&
-        !A_BARE_NUMBER.test(found[BODY] ?? "")
+        !A_BARE_NUMBER.test(found[BODY] ?? "") &&
+        found[BODY] !== A_HANDLE
       );
     })
     .map((found) => ({
@@ -221,7 +224,7 @@ describe("an evening reaching the chronology", () => {
     playGame(CHRONOLOGY_CHAT, EVERYONE, [ANYA, ROMA], ANYA);
     playGame(CHRONOLOGY_CHAT, [OLEG, ANYA], [OLEG], ANYA);
 
-    texts = textsIn(renderScoresheet(copy, seriesIn(CHRONOLOGY_CHAT)));
+    texts = textsIn(renderScoresheet(copy, seriesIn(CHRONOLOGY_CHAT), A_HANDLE));
     legend = legendIn(texts);
   });
 
@@ -261,7 +264,7 @@ describe("a table too crowded for the names it seated", () => {
       A_CROWDED_TABLE[FROM_THE_START] ?? ""
     );
 
-    headings = headingsIn(renderScoresheet(copy, seriesIn(CROWDED_CHAT)));
+    headings = headingsIn(renderScoresheet(copy, seriesIn(CROWDED_CHAT), A_HANDLE));
   });
 
   it("should head every column the table seated", () => {
@@ -289,7 +292,7 @@ describe("a table too crowded for the names it seated", () => {
   });
 
   it("should count that table in the form its own language gives ten", () => {
-    const texts = textsIn(renderScoresheet(russian, seriesIn(CROWDED_CHAT)));
+    const texts = textsIn(renderScoresheet(russian, seriesIn(CROWDED_CHAT), A_HANDLE));
 
     expect(texts).toContain(
       russian.sheetSubtitle(
@@ -330,7 +333,7 @@ describe("an evening reaching the awards", () => {
   });
 
   it("should carry the winners' names onto the picture", () => {
-    const texts = textsIn(renderAwards(copy, seriesIn(AWARDS_CHAT), honoursIn(AWARDS_CHAT)));
+    const texts = textsIn(renderAwards(copy, seriesIn(AWARDS_CHAT), honoursIn(AWARDS_CHAT), A_HANDLE));
 
     expect(texts).toContain(copy.awardTitles.foolOfTheNight);
     expect(texts).toContain(ROMA);

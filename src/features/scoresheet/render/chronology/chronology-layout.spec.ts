@@ -493,18 +493,23 @@ describe("legendRowsOf(), legendColumnsOf() and legendSlotOf()", () => {
 describe("maxGamesFor()", () => {
   const A_FULL_ROW = 5;
 
-  it("should hold the three ceilings the specification names, so the document cannot drift", () => {
+  it("should hold the four ceilings the specification names, so the document cannot drift", () => {
     const ON_ONE_ROW = 34;
 
     const ON_TWO_ROWS = 28;
 
     const ON_THREE_ROWS = 22;
 
+    const ON_FOUR_ROWS = 17;
+
     const ELEVEN = 11;
+
+    const SIXTEEN = 16;
 
     expect(maxGamesFor(A_FULL_ROW)).toBe(ON_ONE_ROW);
     expect(maxGamesFor(A_FULL_ROW + ONE)).toBe(ON_TWO_ROWS);
     expect(maxGamesFor(ELEVEN)).toBe(ON_THREE_ROWS);
+    expect(maxGamesFor(SIXTEEN)).toBe(ON_FOUR_ROWS);
   });
 
   it("should give every table that shares one legend row the same ceiling", () => {

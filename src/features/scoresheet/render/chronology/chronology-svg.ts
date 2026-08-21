@@ -10,6 +10,7 @@ import {
   fontSize,
 } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
+import { posterBaseboard } from "#scoresheet/render/poster-baseboard.ts";
 import { shareChart } from "#scoresheet/render/chronology/share-chart.ts";
 import { shareLegend } from "#scoresheet/render/chronology/share-legend.ts";
 import type { Copy } from "#scoresheet/copy.ts";
@@ -86,7 +87,11 @@ const sectionHead = (section: Section): readonly string[] => [
   }),
 ];
 
-export const renderScoresheet = (copy: Copy, chronology: SeriesChronology): string => {
+export const renderScoresheet = (
+  copy: Copy,
+  chronology: SeriesChronology,
+  handle: string
+): string => {
   const sheet = layoutOf(chronology);
 
   return svgOf(IMAGE_WIDTH, sheet.height, [
@@ -108,5 +113,6 @@ export const renderScoresheet = (copy: Copy, chronology: SeriesChronology): stri
     }),
     ...shareChart(sheet),
     ...shareLegend(copy, sheet),
+    ...posterBaseboard(handle, sheet.height),
   ]);
 };

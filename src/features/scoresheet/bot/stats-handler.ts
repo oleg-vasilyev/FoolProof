@@ -12,6 +12,7 @@ import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.t
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { copyIn, type Copy } from "#scoresheet/copy.ts";
 import { gameTally } from "#scoresheet/render/tally-phrases.ts";
+import { handleOf } from "#scoresheet/render/poster-baseboard.ts";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";
 
 
@@ -30,7 +31,7 @@ const sendChronology = async (
   chronology: SeriesChronology
 ): Promise<void> => {
   await ctx.replyWithPhoto(
-    new InputFile(await rasterize(renderScoresheet(copy, chronology)), SHEET_FILENAME),
+    new InputFile(await rasterize(renderScoresheet(copy, chronology, handleOf(ctx.me.username))), SHEET_FILENAME),
     { caption: chronologyCaption(copy, chronology.games.length) }
   );
 };
@@ -42,7 +43,7 @@ const sendAwards = async (
   honours: Honours
 ): Promise<void> => {
   await ctx.replyWithPhoto(
-    new InputFile(await rasterize(renderAwards(copy, chronology, honours)), AWARDS_FILENAME)
+    new InputFile(await rasterize(renderAwards(copy, chronology, honours, handleOf(ctx.me.username))), AWARDS_FILENAME)
   );
 };
 

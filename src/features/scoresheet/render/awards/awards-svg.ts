@@ -14,6 +14,7 @@ import {
 import { foolPlate } from "#scoresheet/render/awards/fool-plate.ts";
 import { FONT_FAMILY, GRID_RIGHT, IMAGE_WIDTH, PAD } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
+import { posterBaseboard } from "#scoresheet/render/poster-baseboard.ts";
 import type { Copy } from "#scoresheet/copy.ts";
 import { gameTally } from "#scoresheet/render/tally-phrases.ts";
 import { line, rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
@@ -70,7 +71,8 @@ const curseSection = (copy: Copy, sheet: AwardsSheet): readonly string[] =>
 export const renderAwards = (
   copy: Copy,
   chronology: SeriesChronology,
-  honours: Honours
+  honours: Honours,
+  handle: string
 ): string => {
   const sheet = awardsLayoutOf(chronology, honours);
 
@@ -86,5 +88,6 @@ export const renderAwards = (
     ...sheet.rows.flatMap((placed) => awardRow(copy, placed, sheet.density)),
     ...(sheet.fool === null ? [] : foolPlate(copy, sheet.fool, sheet.density)),
     ...curseSection(copy, sheet),
+    ...posterBaseboard(handle, sheet.height),
   ]);
 };

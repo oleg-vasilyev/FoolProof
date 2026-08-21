@@ -4,8 +4,11 @@ import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { InlineKeyboardStub } from "#shared/telegram/inline-keyboard.stub.ts";
 import { DEFAULT_LOCALE, Locale } from "#shared/locale/locales.ts";
 import { copy } from "#scoresheet/copy.en.ts";
-import { CHAT_ID, ContextStub } from "#scoresheet/bot/grammy-context.stub.ts";
+import { BOT_USERNAME, CHAT_ID, ContextStub } from "#scoresheet/bot/grammy-context.stub.ts";
 import { InputFileStub } from "#scoresheet/bot/grammy-input-file.stub.ts";
+
+
+const THE_HANDLE = `@${BOT_USERNAME}`;
 
 
 const inputFile = new InputFileStub();
@@ -35,8 +38,8 @@ vi.mock("#scoresheet/domain/career/career-card.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/personal/personal-svg.ts", () => ({
-  renderPersonalCard: (table: unknown, card: unknown, column: unknown) =>
-    renderPersonalCardSpy(table, card, column),
+  renderPersonalCard: (table: unknown, card: unknown, column: unknown, handle: unknown) =>
+    renderPersonalCardSpy(table, card, column, handle),
 }));
 
 vi.mock("#scoresheet/render/personal/roster-keyboard.ts", () => ({
@@ -247,7 +250,7 @@ describe("personal-handler", () => {
     it("should draw the card in the tapped player's own colour column", async () => {
       await onPersonalTap(contextOf(), ctx.tap(TAP_DATA));
 
-      expect(renderPersonalCardSpy).toHaveBeenCalledWith(copy, CARD, NEVER);
+      expect(renderPersonalCardSpy).toHaveBeenCalledWith(copy, CARD, NEVER, THE_HANDLE);
     });
 
     it("should give a player further down the roster their own column", async () => {
@@ -255,7 +258,7 @@ describe("personal-handler", () => {
 
       await onPersonalTap(contextOf(), ctx.tap("pc:9"));
 
-      expect(renderPersonalCardSpy).toHaveBeenCalledWith(copy, expect.anything(), ONCE);
+      expect(renderPersonalCardSpy).toHaveBeenCalledWith(copy, expect.anything(), ONCE, THE_HANDLE);
     });
 
     it("should rasterize what the renderer drew", async () => {

@@ -5,6 +5,7 @@ import { eveningTally, gameTally } from "#scoresheet/render/tally-phrases.ts";
 import { sessionDate } from "#scoresheet/render/session-date.ts";
 import { line, rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
 import { nameToFit, widthOf } from "#scoresheet/render/name-to-fit.ts";
+import { posterBaseboard } from "#scoresheet/render/poster-baseboard.ts";
 import { personalLayoutOf, type PersonalLayout } from "#scoresheet/render/personal/personal-layout.ts";
 import {
   HEADING_RULE,
@@ -146,7 +147,12 @@ const chartSection = (section: ChartSection): readonly string[] => {
   ];
 };
 
-export const renderPersonalCard = (copy: Copy, card: CareerCard, column: number): string => {
+export const renderPersonalCard = (
+  copy: Copy,
+  card: CareerCard,
+  column: number,
+  handle: string
+): string => {
   const sheet = personalLayoutOf(card);
   const ink = colourFor(column);
 
@@ -160,5 +166,6 @@ export const renderPersonalCard = (copy: Copy, card: CareerCard, column: number)
       : sectionLabel(copy.personalFactsLabel, null, sheet.factsLabel)),
     ...factRows(copy, sheet.facts, ink),
     ...(sheet.plate === null ? [] : topFactPlate(copy, sheet.plate, ink)),
+    ...posterBaseboard(handle, sheet.height),
   ]);
 };

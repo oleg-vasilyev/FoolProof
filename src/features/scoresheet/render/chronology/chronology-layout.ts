@@ -1,6 +1,6 @@
 import { scoreSeries, type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
-import { GRID_RIGHT, IMAGE_MAX_HEIGHT, USUAL_ADVANCE, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { GRID_RIGHT, IMAGE_MAX_HEIGHT, SHEET_BASE, USUAL_ADVANCE, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
 
 
 export const GUTTER = 86;
@@ -70,7 +70,7 @@ export const LEGEND_TALLY_DROP = 256;
 
 const LEGEND_ROW_GAP = 24;
 
-const LEGEND_TAIL = 64;
+const LEGEND_TAIL = SHEET_BASE;
 
 export const LEGEND_ROW_PITCH = LEGEND_TALLY_DROP - LEGEND_RULE_DROP + LEGEND_ROW_GAP;
 

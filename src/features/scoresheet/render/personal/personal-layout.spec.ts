@@ -45,9 +45,9 @@ const HALF = 0.5;
 
 const A_DATE = "2026-07-24";
 
-const EMPTY_SHEET_HEIGHT = 1180;
+const EMPTY_SHEET_HEIGHT = 1200;
 
-const TALLEST_SHEET_HEIGHT = 2540;
+const TALLEST_SHEET_HEIGHT = 2560;
 
 const ABOUT_A_RIVAL: Readonly<Record<CareerFactName, boolean>> = {
   [CareerFactName.TheBlinder]: false,

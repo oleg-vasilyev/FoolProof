@@ -7,6 +7,8 @@ import { svgOf, text } from "#scoresheet/render/svg-tags.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
 
 
+const A_HANDLE = "@a_handle";
+
 const PNG_MAGIC = "89504e47";
 
 const MAGIC_START = 0;
@@ -80,11 +82,11 @@ describe("the rasterizer against the fonts this repository ships", () => {
   });
 
   it("should turn a rendered scoresheet into a PNG", async () => {
-    expect(magicOf(await rasterize(renderScoresheet(copy, AN_EVENING)))).toBe(PNG_MAGIC);
+    expect(magicOf(await rasterize(renderScoresheet(copy, AN_EVENING, A_HANDLE)))).toBe(PNG_MAGIC);
   });
 
   it("should put ink where the sheet asked for words, not hand back a blank page", async () => {
-    const sheet = renderScoresheet(copy, AN_EVENING);
+    const sheet = renderScoresheet(copy, AN_EVENING, A_HANDLE);
 
     const drawn = await rasterize(sheet);
     const wordless = await rasterize(sheet.replaceAll(A_TEXT_ELEMENT, NOTHING_AT_ALL));
@@ -107,7 +109,7 @@ describe("the rasterizer against the fonts this repository ships", () => {
   it("should hand the event loop back while it draws, so one /stats cannot freeze another chat", async () => {
     let tickedWhileDrawing = false;
 
-    const drawing = rasterize(renderScoresheet(copy, AN_EVENING));
+    const drawing = rasterize(renderScoresheet(copy, AN_EVENING, A_HANDLE));
 
     setImmediate(() => {
       tickedWhileDrawing = true;

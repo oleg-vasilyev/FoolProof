@@ -5,6 +5,14 @@ import { copy } from "#scoresheet/copy.en.ts";
 import type { Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 
 
+const A_HANDLE = "@a_handle";
+
+const FIRST = 0;
+
+const BODY = 2;
+
+const LAST = -1;
+
 const A_BIGGEST_TABLE = 7;
 
 const IMAGE_WIDTH = 900;
@@ -32,6 +40,8 @@ const A_TALLY = "12 games";
 const PLAYERS = 5;
 
 const columnNamesSpy = vi.fn();
+
+const posterBaseboardSpy = vi.fn();
 
 const chronologyGridSpy = vi.fn();
 
@@ -105,12 +115,18 @@ vi.mock("#scoresheet/render/chronology/share-legend.ts", () => ({
   shareLegend: (table: unknown, sheet: unknown) => shareLegendSpy(table, sheet),
 }));
 
+vi.mock("#scoresheet/render/poster-baseboard.ts", () => ({
+  posterBaseboard: (handle: unknown, height: unknown) => posterBaseboardSpy(handle, height),
+}));
+
 vi.mock("#scoresheet/render/svg-tags.ts", () => ({
   rect: (attributes: Record<string, unknown>) => rectSpy(attributes),
   line: (attributes: Record<string, unknown>) => lineSpy(attributes),
   text: (value: string, attributes: Record<string, unknown>) => textSpy(value, attributes),
   svgOf: (width: number, height: number, body: readonly string[]) => svgOfSpy(width, height, body),
 }));
+
+const BASEBOARD_MARK = "<baseboard/>";
 
 const { renderScoresheet } = await import("#scoresheet/render/chronology/chronology-svg.ts");
 
@@ -167,6 +183,7 @@ describe("renderScoresheet()", () => {
     layoutOfSpy.mockReturnValue(sheetWith(NONE));
     columnNamesSpy.mockReturnValue(["<names/>"]);
     chronologyGridSpy.mockReturnValue(["<grid/>"]);
+    posterBaseboardSpy.mockReturnValue([BASEBOARD_MARK]);
     cellKeySpy.mockReturnValue(["<key/>"]);
     shareChartSpy.mockReturnValue(["<chart/>"]);
     shareLegendSpy.mockReturnValue(["<legend/>"]);
@@ -180,13 +197,13 @@ describe("renderScoresheet()", () => {
 
   describe("what it delegates", () => {
     it("should lay the sheet out from the chronology it was given", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(layoutOfSpy).toHaveBeenCalledWith(CHRONOLOGY);
     });
 
     it("should hand the same sheet to every part that draws", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
       const sheet = layoutOfSpy.mock.results[0]?.value;
 
       expect(columnNamesSpy).toHaveBeenCalledWith(sheet);
@@ -197,19 +214,33 @@ describe("renderScoresheet()", () => {
     });
 
     it("should return whatever the document builder produced", () => {
-      expect(renderScoresheet(copy, CHRONOLOGY)).toBe("<svg/>");
+      expect(renderScoresheet(copy, CHRONOLOGY, A_HANDLE)).toBe("<svg/>");
     });
   });
 
   describe("the document", () => {
     it("should be as wide as the design and as tall as the layout says", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(svgOfSpy).toHaveBeenCalledWith(IMAGE_WIDTH, SHEET_HEIGHT, expect.any(Array));
     });
 
+    it("should sign the sheet at its own foot with the handle it was given", () => {
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
+
+      expect(posterBaseboardSpy).toHaveBeenCalledWith(A_HANDLE, SHEET_HEIGHT);
+    });
+
+    it("should put the signature last, under everything the evening drew", () => {
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
+
+      const body = svgOfSpy.mock.calls[FIRST]?.[BODY] as readonly string[];
+
+      expect(body.at(LAST)).toBe(BASEBOARD_MARK);
+    });
+
     it("should paint a background over the whole sheet", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(rectSpy).toHaveBeenCalledWith(
         expect.objectContaining({ width: IMAGE_WIDTH, height: SHEET_HEIGHT, fill: "sheet" })
@@ -217,31 +248,31 @@ describe("renderScoresheet()", () => {
     });
 
     it("should put the background behind everything else", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(body()[0]).toBe("<background/>");
     });
 
     it("should draw the grid before the chart", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(body().indexOf("<grid/>")).toBeLessThan(body().indexOf("<chart/>"));
     });
 
     it("should draw the headings before the grid they label", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(body().indexOf("<names/>")).toBeLessThan(body().indexOf("<grid/>"));
     });
 
     it("should include the cell colour key", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(body()).toContain("<key/>");
     });
 
     it("should draw the colour key after the grid it explains", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(body().indexOf("<grid/>")).toBeLessThan(body().indexOf("<key/>"));
     });
@@ -251,7 +282,7 @@ describe("renderScoresheet()", () => {
     const SECTIONS = 2;
 
     it("should open a section over the grid and another over the chart", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(lineSpy).toHaveBeenCalledTimes(SECTIONS);
       expect(printed()).toContain(copy.sheetGridLabel);
@@ -259,7 +290,7 @@ describe("renderScoresheet()", () => {
     });
 
     it("should rule each section across the sheet from margin to margin", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(lineSpy).toHaveBeenCalledWith(
         expect.objectContaining({ x1: PAD, x2: GRID_RIGHT, stroke: "ruling" })
@@ -267,27 +298,27 @@ describe("renderScoresheet()", () => {
     });
 
     it("should keep each divider flat", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
       const divider = dividerFor(copy.sheetShareLabel);
 
       expect(divider.y1).toBe(divider.y2);
     });
 
     it("should open the grid's section above the grid it labels", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(dividerFor(copy.sheetGridLabel).y1).toBeLessThan(GRID_LABEL_BASELINE);
       expect(Number(attributesOfText(copy.sheetGridLabel).y)).toBe(GRID_LABEL_BASELINE);
     });
 
     it("should hang the chart's divider off the grid's own bottom edge, not a recomputed one", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(dividerFor(copy.sheetShareLabel).y1).toBeGreaterThan(GRID_BOTTOM);
     });
 
     it("should sit each divider above the label of the section it opens", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(dividerFor(copy.sheetShareLabel).y1).toBeLessThan(
         Number(attributesOfText(copy.sheetShareLabel).y)
@@ -295,7 +326,7 @@ describe("renderScoresheet()", () => {
     });
 
     it("should print the grid's hint alongside its label", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
       const hint = attributesOfText(copy.sheetGridHint);
 
       expect(hint.x).toBe(GRID_RIGHT);
@@ -304,34 +335,34 @@ describe("renderScoresheet()", () => {
     });
 
     it("should set every hint in the ink kept for a hint", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(attributesOfText(copy.sheetGridHint).fill).toBe("hint");
       expect(attributesOfText(copy.sheetShareHint).fill).toBe("hint");
     });
 
     it("should set a label and its hint at their own two sizes from the type scale", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(attributesOfText(copy.sheetGridLabel)["font-size"]).toBe(SECTION_LABEL_FONT);
       expect(attributesOfText(copy.sheetGridHint)["font-size"]).toBe(HINT_FONT);
     });
 
     it("should open the grid's section before the headings it covers", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(body().indexOf("<divider/>")).toBeLessThan(body().indexOf("<names/>"));
     });
 
     it("should draw the chart's section after the key and before the chart", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(body().indexOf("<key/>")).toBeLessThan(body().lastIndexOf("<divider/>"));
       expect(body().lastIndexOf("<divider/>")).toBeLessThan(body().indexOf("<chart/>"));
     });
 
     it("should draw the legend after the chart it explains", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(body().indexOf("<chart/>")).toBeLessThan(body().indexOf("<legend/>"));
     });
@@ -339,7 +370,7 @@ describe("renderScoresheet()", () => {
 
   describe("the heading", () => {
     it("should ask cardHeading for this sheet's own title", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(cardHeadingSpy).toHaveBeenCalledWith(copy, expect.objectContaining({ title: copy.sheetTitle }));
     });
@@ -348,7 +379,7 @@ describe("renderScoresheet()", () => {
       const DROPPED = 7;
       layoutOfSpy.mockReturnValue(sheetWith(DROPPED));
 
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(cardHeadingSpy).toHaveBeenCalledWith(copy,
         expect.objectContaining({ games: ROUNDS + DROPPED, players: PLAYERS })
@@ -356,7 +387,7 @@ describe("renderScoresheet()", () => {
     });
 
     it("should still head an untrimmed sheet with the games it drew, since they are the same", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(cardHeadingSpy).toHaveBeenCalledWith(copy,
         expect.objectContaining({ games: ROUNDS, players: PLAYERS })
@@ -364,43 +395,43 @@ describe("renderScoresheet()", () => {
     });
 
     it("should carry the session's date through to the heading", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(cardHeadingSpy).toHaveBeenCalledWith(copy, expect.objectContaining({ startedOn: STARTED_ON }));
     });
 
     it("should draw whatever the heading produced", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(body()).toContain("<heading/>");
     });
 
     it("should draw the heading before the grid it sits above", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(body().indexOf("<heading/>")).toBeLessThan(body().indexOf("<grid/>"));
     });
 
     it("should label the chart below", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(printed()).toContain(copy.sheetShareLabel);
     });
 
     it("should put the chart's label above the chart", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(Number(attributesOfText(copy.sheetShareLabel).y)).toBeLessThan(CHART_TOP);
     });
 
     it("should print the score hint alongside the section label", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(printed()).toContain(copy.sheetShareHint);
     });
 
     it("should right-anchor the score hint against the grid's right edge", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
       const hint = attributesOfText(copy.sheetShareHint);
 
       expect(hint.x).toBe(GRID_RIGHT);
@@ -408,7 +439,7 @@ describe("renderScoresheet()", () => {
     });
 
     it("should set the score hint on the same baseline as its section label", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(attributesOfText(copy.sheetShareHint).y).toBe(
         attributesOfText(copy.sheetShareLabel).y
@@ -416,7 +447,7 @@ describe("renderScoresheet()", () => {
     });
 
     it("should set the chart's label against the left margin", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(attributesOfText(copy.sheetShareLabel).x).toBe(PAD);
     });
@@ -424,7 +455,7 @@ describe("renderScoresheet()", () => {
 
   describe("a session too long to draw", () => {
     it("should say nothing when every game fits", () => {
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(printed()).not.toContain(copy.sheetTableShows(A_TALLY));
     });
@@ -433,7 +464,7 @@ describe("renderScoresheet()", () => {
       const DROPPED = 7;
       layoutOfSpy.mockReturnValue(sheetWith(DROPPED));
 
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(printed()).toContain(copy.sheetTableShows(A_TALLY));
     });
@@ -442,19 +473,19 @@ describe("renderScoresheet()", () => {
       const DROPPED = 7;
       layoutOfSpy.mockReturnValue(sheetWith(DROPPED));
 
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(gameTallySpy).toHaveBeenCalledWith(copy, ROUNDS);
     });
 
     it("should add exactly one element to the drawing when it owns up", () => {
       const DROPPED = 7;
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
       const withoutNote = body().length;
 
       layoutOfSpy.mockReturnValue(sheetWith(DROPPED));
       svgOfSpy.mockClear();
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
 
       expect(body().length).toBe(withoutNote + 1);
     });
@@ -463,7 +494,7 @@ describe("renderScoresheet()", () => {
       const DROPPED = 7;
       layoutOfSpy.mockReturnValue(sheetWith(DROPPED));
 
-      renderScoresheet(copy, CHRONOLOGY);
+      renderScoresheet(copy, CHRONOLOGY, A_HANDLE);
       const note = attributesOfText(copy.sheetTableShows(A_TALLY));
 
       expect(note.x).toBe(GRID_RIGHT);

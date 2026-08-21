@@ -170,7 +170,7 @@ export const copy = {
   tileDealt: "THE FIRST MOVE",
   tileTimesExpected: (times: string, expected: string) => `${times} · expected ${expected}`,
   tileFoolNote: (fools: number, decided: number, expected: string) =>
-    `${fools} of the ${decided} that had a fool · expected ${expected}`,
+    `${fools} of ${decided} · expected ${expected}`,
 
   personalChartLabel: "TABLE SHARE BY EVENING",
   personalChartArrives: (evenings: string) => `appears after ${evenings}`,

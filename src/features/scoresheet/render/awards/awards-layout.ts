@@ -2,7 +2,7 @@ import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { PlayerColumn, SeriesChronology } from "#shared/repository/repository-contract.ts";
 import type { Award, Honours, TableCurse } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
-import { PAD } from "#scoresheet/render/card-metrics.ts";
+import { PAD, SHEET_BASE } from "#scoresheet/render/card-metrics.ts";
 
 
 const CROWDED_ABOVE = 5;
@@ -58,7 +58,7 @@ export const CURSE_RULE_LIFT = 32;
 
 export const CURSE_BASELINE_DROP = 34;
 
-export const CARD_BOTTOM = 56;
+export const CARD_BOTTOM = SHEET_BASE;
 
 export interface Density {
   readonly rowPad: number;

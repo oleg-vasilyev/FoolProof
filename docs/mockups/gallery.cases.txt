@@ -8,4 +8,6 @@ one-huge-name — the longest name a player may have, beside two short ones
 over-the-ceiling — more games than the sheet holds — row height at its floor, and the note that says so
 all-drawn — an evening nobody lost — no fool plate, and the draw states everywhere
 coming-and-going — arrivals, departures and a gap in the middle — dashed stretches and absent cells
-everybody-burned — the fool going right round the table — the rotation award and the table curse
+everybody-burned — whoever opened was left the fool, every game — the table curse at its worst, and the awards it draws onto whoever opened first
+widest-handle — the widest handle Telegram allows — a full-width baseboard takes all 33 characters at full size, with nothing scaled to fit
+shortest-handle — the shortest handle Telegram allows — still the sheet's own mark rather than a stray word

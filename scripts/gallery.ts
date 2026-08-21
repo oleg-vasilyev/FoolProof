@@ -4,6 +4,8 @@ import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import type { Finalist, SeriesChronology } from "#shared/repository/repository-contract.ts";
+import { handleOf } from "#scoresheet/render/poster-baseboard.ts";
+import { BOT_HANDLE } from "./bot-handle.ts";
 import { personalCards } from "./gallery-careers.ts";
 
 
@@ -26,6 +28,7 @@ const FIRST_OUT = 0;
 interface Round {
   readonly order: readonly number[];
   readonly drawn: boolean;
+  readonly burned: boolean;
 }
 
 interface Case {
@@ -34,6 +37,7 @@ interface Case {
   readonly asks: string;
   readonly players: readonly string[];
   readonly rounds: readonly Round[];
+  readonly handle?: string;
 }
 
 const rotate = (order: readonly number[], by: number): readonly number[] =>
@@ -42,10 +46,16 @@ const rotate = (order: readonly number[], by: number): readonly number[] =>
 const everyone = (players: number): readonly number[] =>
   Array.from({ length: players }, (_unused, seat) => seat);
 
-const rotatingRounds = (players: number, rounds: number, drawn = false): readonly Round[] =>
+const rotatingRounds = (
+  players: number,
+  rounds: number,
+  drawn = false,
+  burned = false
+): readonly Round[] =>
   Array.from({ length: rounds }, (_unused, round) => ({
     order: rotate(everyone(players), round),
     drawn,
+    burned,
   }));
 
 const seatedRounds = (
@@ -59,15 +69,23 @@ const seatedRounds = (
       round
     ),
     drawn: false,
+    burned: false,
   }));
+
+const positionIn = (round: Round, at: number): number => {
+  if (round.burned) {
+    return at === FIRST_OUT ? round.order.length : at;
+  }
+
+  return round.drawn && at >= round.order.length - SHARED_LAST
+    ? round.order.length - ONE_PLACE
+    : at + FIRST_PLACE;
+};
 
 const placementsOf = (round: Round): readonly Finalist[] =>
   round.order.map((player, at) => ({
     playerId: player + FIRST_ID,
-    position:
-      round.drawn && at >= round.order.length - SHARED_LAST
-        ? round.order.length - ONE_PLACE
-        : at + FIRST_PLACE,
+    position: positionIn(round, at),
   }));
 
 const eveningOf = (shown: Case): SeriesChronology => ({
@@ -97,6 +115,10 @@ const LONG_NAMES = [
   "Святослав",
   "Аня",
 ];
+
+const WIDEST_HANDLE = handleOf("W".repeat(32));
+
+const SHORTEST_HANDLE = handleOf("durak");
 
 const THE_LONGEST_NAME = "Вильгельмина-Аполлинария".padEnd(32, "я");
 
@@ -238,9 +260,25 @@ export const GALLERY: readonly Case[] = [
   {
     name: "everybody-burned",
     locale: Locale.Ru,
-    asks: "the fool going right round the table — the rotation award and the table curse",
+    asks: "whoever opened was left the fool, every game — the table curse at its worst, and the awards it draws onto whoever opened first",
     players: SHORT_NAMES.slice(NOBODY, A_QUALIFYING_EVENING),
-    rounds: rotatingRounds(A_QUALIFYING_EVENING, A_ROTATING_EVENING),
+    rounds: rotatingRounds(A_QUALIFYING_EVENING, A_ROTATING_EVENING, false, true),
+  },
+  {
+    name: "widest-handle",
+    locale: Locale.En,
+    asks: "the widest handle Telegram allows — a full-width baseboard takes all 33 characters at full size, with nothing scaled to fit",
+    players: [THE_LONGEST_NAME, ...SHORT_NAMES.slice(NOBODY, TWO_AT_THE_TABLE)],
+    rounds: rotatingRounds(THREE_AT_THE_TABLE, A_QUALIFYING_EVENING),
+    handle: WIDEST_HANDLE,
+  },
+  {
+    name: "shortest-handle",
+    locale: Locale.Ru,
+    asks: "the shortest handle Telegram allows — still the sheet's own mark rather than a stray word",
+    players: SHORT_NAMES.slice(NOBODY, THREE_AT_THE_TABLE),
+    rounds: rotatingRounds(THREE_AT_THE_TABLE, A_QUALIFYING_EVENING),
+    handle: SHORTEST_HANDLE,
   },
 ];
 
@@ -259,7 +297,7 @@ const drawingsFor = (shown: Case): readonly Drawing[] => {
     {
       file: `${shown.name}-chronology`,
       asks: shown.asks,
-      svg: renderScoresheet(copy, evening),
+      svg: renderScoresheet(copy, evening, shown.handle ?? BOT_HANDLE),
     },
     ...(honours === null
       ? []
@@ -267,7 +305,7 @@ const drawingsFor = (shown: Case): readonly Drawing[] => {
           {
             file: `${shown.name}-awards`,
             asks: shown.asks,
-            svg: renderAwards(copy, evening, honours),
+            svg: renderAwards(copy, evening, honours, shown.handle ?? BOT_HANDLE),
           },
         ]),
   ];

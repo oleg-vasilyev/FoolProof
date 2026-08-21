@@ -6,6 +6,8 @@ export const CHAT_ID = -100777;
 
 export const SENT_MESSAGE_ID = 500;
 
+export const BOT_USERNAME = "FoolProofTestBot";
+
 export class ContextStub {
   public replySpy = vi.fn();
   public replyWithPhotoSpy = vi.fn();
@@ -25,6 +27,7 @@ export class ContextStub {
 
   public tapWithoutChat(data: string): CallbackTap {
     return {
+      me: { username: BOT_USERNAME },
       callbackQuery: { data },
       editMessageText: this.editMessageTextSpy,
       answerCallbackQuery: this.answerCallbackQuerySpy,
@@ -35,6 +38,7 @@ export class ContextStub {
   public command(text: string): Command {
     return {
       chat: { id: CHAT_ID },
+      me: { username: BOT_USERNAME },
       msg: { message_id: SENT_MESSAGE_ID, text },
       reply: this.replySpy,
       replyWithPhoto: this.replyWithPhotoSpy,

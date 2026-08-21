@@ -1,3 +1,6 @@
+import { SHEET_BASE } from "#scoresheet/render/card-metrics.ts";
+
+
 export const HEADING_RULE = 350;
 
 export const TILE_ROW_HEIGHT = 292;
@@ -58,7 +61,7 @@ export const PLATE_NAME_DROP = 128;
 
 export const PLATE_REASON_DROP = 176;
 
-export const SHEET_BOTTOM = 50;
+export const SHEET_BOTTOM = SHEET_BASE;
 
 export const personalFont = {
   tileLabel: 30,

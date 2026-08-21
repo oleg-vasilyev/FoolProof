@@ -9,6 +9,7 @@ import { decodePersonalCallback } from "#scoresheet/render/personal/personal-cal
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
 import { renderRosterKeyboard } from "#scoresheet/render/personal/roster-keyboard.ts";
 import { copyIn } from "#scoresheet/copy.ts";
+import { handleOf } from "#scoresheet/render/poster-baseboard.ts";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";
 
 
@@ -58,7 +59,7 @@ export const onPersonalTap = async (context: PersonalContext, ctx: CallbackTap):
   await ctx.answerCallbackQuery();
 
   const column = history.players.findIndex((player) => player.playerId === card.playerId);
-  const drawn = await rasterize(renderPersonalCard(copy, card, column));
+  const drawn = await rasterize(renderPersonalCard(copy, card, column, handleOf(ctx.me.username)));
 
   await ctx.replyWithPhoto(new InputFile(drawn, CARD_FILENAME));
 };

@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GRID_RIGHT, PAD } from "#scoresheet/render/card-metrics.ts";
+import { GRID_RIGHT, PAD, USUAL_ADVANCE } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
 import {
+  TILES_PER_ROW,
   TILES_TOP,
   TILE_COUNT,
   TILE_NOTE_DROP,
@@ -11,6 +12,7 @@ import {
   personalFont,
 } from "#scoresheet/render/personal/personal-metrics.ts";
 import { copy } from "#scoresheet/copy.en.ts";
+import { copy as russian } from "#scoresheet/copy.ru.ts";
 import type { CareerCard } from "#scoresheet/domain/career/career-card.ts";
 
 
@@ -350,5 +352,52 @@ describe("careerTiles() and the denominator the fool tile is read against", () =
     careerTiles(copy, CARD);
 
     expect(timeTallySpy).not.toHaveBeenCalledWith(copy, FOOLS);
+  });
+});
+
+const BOTH_TABLES = [
+  ["en", copy],
+  ["ru", russian],
+] as const;
+
+describe.each(BOTH_TABLES)("careerTiles() and the room a %s note has", (_named, table) => {
+  const A_LONG_CAREER = 999;
+
+  const EVERY_ONE = 999;
+
+  const THE_WIDEST_PERCENT = "100%";
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    percentLabelSpy.mockReturnValue(THE_WIDEST_PERCENT);
+    timeTallySpy.mockImplementation(
+      (_table: unknown, count: number) => `${String(count)} ${table.sheetTimeForms.many}`
+    );
+    textSpy.mockImplementation((value: string) => `<text:${value}>`);
+  });
+
+  it("should keep every note inside its own column, even at the widest numbers", () => {
+    const columnWidth = (GRID_RIGHT - PAD) / TILES_PER_ROW;
+
+    careerTiles(table, {
+      ...CARD,
+      tally: {
+        ...CARD.tally,
+        games: A_LONG_CAREER,
+        decided: A_LONG_CAREER,
+        fools: EVERY_ONE,
+        firsts: EVERY_ONE,
+        opens: EVERY_ONE,
+      },
+    });
+
+    const notes = textSpy.mock.calls
+      .filter(([, attributes]) => attributes["font-size"] === personalFont.tileNote)
+      .map(([value]) => String(value));
+
+    for (const note of notes) {
+      expect(note.length * personalFont.tileNote * USUAL_ADVANCE, note).toBeLessThan(columnWidth);
+    }
   });
 });

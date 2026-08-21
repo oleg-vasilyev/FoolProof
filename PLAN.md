@@ -778,6 +778,26 @@ that much was won — but the queue behind it is the thing a second table would 
 [TECH-DEBT.md](TECH-DEBT.md) has what stands in the way of the rest, and the trigger
 is the same: a second chat playing.
 
+#### Every poster says where it came from
+
+A picture forwarded into a chat that has never met the bot has to explain itself, so
+all three posters end in a **baseboard**: a band the full width of the sheet, flush
+to the bottom edge, carrying the bot's handle centred in it. The handle is read from
+the running bot rather than written down — `ctx.me.username` at each call site — so a
+second deployment signs itself correctly and a rename cannot leave a stale name on
+every picture. The one place that cannot ask a running bot is `scripts/`, which draws
+the committed pictures, and it holds a named constant instead; those pictures are
+compared byte for byte, so their handle has to be stable.
+
+The band **replaces** each sheet's bottom padding rather than adding to it, which is
+what keeps it free: 20 pixels on the player card, 14 on the awards sheet, 6 on the
+chronology. It is as wide as the sheet, so the longest handle Telegram allows fits at
+full size with nothing scaled and nothing truncated.
+
+It costs the one thing that was already scarce. **The tallest player card now lands on
+exactly 2560** — the whole budget, with no pixel left. Anything added to that card
+after this has to take its room from something already on it.
+
 #### Fitting a long evening
 
 The height budget is fixed at 2560, so the number of games is what has to give.

@@ -2,6 +2,7 @@ import { Locale } from "#shared/locale/locales.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { copyIn } from "#scoresheet/copy.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
+import { BOT_HANDLE } from "./bot-handle.ts";
 import type { CareerGame, CareerHistory, Finalist } from "#shared/repository/repository-contract.ts";
 import type { Drawing } from "./gallery.ts";
 
@@ -273,7 +274,7 @@ const drawingOf = (shown: CareerCase): Drawing => {
   return {
     file: `${shown.name}-personal`,
     asks: shown.asks,
-    svg: renderPersonalCard(copyIn(shown.locale), card, SUBJECT_COLUMN),
+    svg: renderPersonalCard(copyIn(shown.locale), card, SUBJECT_COLUMN, BOT_HANDLE),
   };
 };
 

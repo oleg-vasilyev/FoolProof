@@ -8,6 +8,8 @@ import type { AwardsSheet, Placed } from "#scoresheet/render/awards/awards-layou
 
 const awardsLayoutOfSpy = vi.fn();
 
+const posterBaseboardSpy = vi.fn();
+
 const cardHeadingSpy = vi.fn();
 
 const awardRowSpy = vi.fn();
@@ -23,6 +25,8 @@ const lineSpy = vi.fn();
 const textSpy = vi.fn();
 
 const svgOfSpy = vi.fn();
+
+const A_HANDLE = "@a_handle";
 
 const FONT_FAMILY = "Test Sans";
 
@@ -57,6 +61,10 @@ vi.mock("#scoresheet/render/card-heading.ts", () => ({
 
 vi.mock("#scoresheet/render/awards/award-row.ts", () => ({
   awardRow: (table: unknown, placed: unknown, density: unknown) => awardRowSpy(table, placed, density),
+}));
+
+vi.mock("#scoresheet/render/poster-baseboard.ts", () => ({
+  posterBaseboard: (handle: unknown, height: unknown) => posterBaseboardSpy(handle, height),
 }));
 
 vi.mock("#scoresheet/render/awards/fool-plate.ts", () => ({
@@ -138,6 +146,7 @@ describe("renderAwards()", () => {
     cardHeadingSpy.mockReturnValue(["<heading/>"]);
     awardRowSpy.mockImplementation((_table: unknown, placed: Placed) => [`row-${String(placed.rank)}`]);
     foolPlateSpy.mockReturnValue(["<fool-plate/>"]);
+    posterBaseboardSpy.mockReturnValue(["<baseboard/>"]);
     gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
     rectSpy.mockImplementation(() => "<background/>");
     lineSpy.mockImplementation(() => "<line/>");
@@ -146,14 +155,14 @@ describe("renderAwards()", () => {
   });
 
   it("should lay the sheet out exactly once, from the chronology and honours it was given", () => {
-    renderAwards(copy, CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
 
     expect(awardsLayoutOfSpy).toHaveBeenCalledTimes(ONCE);
     expect(awardsLayoutOfSpy).toHaveBeenCalledWith(CHRONOLOGY, HONOURS);
   });
 
   it("should paint a background sized to the sheet, not the chronology", () => {
-    renderAwards(copy, CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
 
     expect(rectSpy).toHaveBeenCalledWith(
       expect.objectContaining({ width: IMAGE_WIDTH, height: SHEET_HEIGHT, fill: "sheet" })
@@ -161,7 +170,7 @@ describe("renderAwards()", () => {
   });
 
   it("should draw the heading with the awards title, not the chronology sheet's title", () => {
-    renderAwards(copy, CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
 
     expect(cardHeadingSpy).toHaveBeenCalledWith(copy, 
       expect.objectContaining({ title: copy.awardsTitle, startedOn: STARTED_ON, games: GAMES, players: PLAYERS })
@@ -169,14 +178,14 @@ describe("renderAwards()", () => {
   });
 
   it("should draw one row per sheet.rows, in the order they came", () => {
-    renderAwards(copy, CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
 
     expect(awardRowSpy).toHaveBeenCalledTimes(2);
     expect(body().indexOf("row-0")).toBeLessThan(body().indexOf("row-1"));
   });
 
   it("should draw the fool plate after every row", () => {
-    renderAwards(copy, CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
 
     expect(body().indexOf("row-1")).toBeLessThan(body().indexOf("<fool-plate/>"));
   });
@@ -184,7 +193,7 @@ describe("renderAwards()", () => {
   it("should draw no plate at all when the sheet has no fool", () => {
     awardsLayoutOfSpy.mockReturnValue(sheetOf({ fool: null }));
 
-    renderAwards(copy, CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
 
     expect(foolPlateSpy).toHaveBeenCalledTimes(NEVER);
     expect(body()).not.toContain("<fool-plate/>");
@@ -193,7 +202,7 @@ describe("renderAwards()", () => {
   it("should print no curse note when the sheet has no curse", () => {
     awardsLayoutOfSpy.mockReturnValue(sheetOf({ curse: null }));
 
-    renderAwards(copy, CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
 
     expect(textSpy).not.toHaveBeenCalledWith(copy.awardsCurseLabel, expect.anything());
   });
@@ -202,7 +211,7 @@ describe("renderAwards()", () => {
     const CURSE = { burns: 2, games: 8 };
     awardsLayoutOfSpy.mockReturnValue(sheetOf({ curse: { fact: CURSE, top: CURSE_TOP } }));
 
-    renderAwards(copy, CHRONOLOGY, HONOURS);
+    renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
 
     expect(textSpy).toHaveBeenCalledWith(copy.awardsCurseLabel, expect.anything());
     expect(textSpy).toHaveBeenCalledWith(
@@ -219,11 +228,11 @@ describe("renderAwards()", () => {
       awardsLayoutOfSpy.mockReturnValue(
         sheetOf({ curse: { fact: { burns: 2, games: 8 }, top: CURSE_TOP } })
       );
-      renderAwards(copy, CHRONOLOGY, HONOURS);
+      renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
     };
 
     it("should rule off the heading across the card's own width", () => {
-      renderAwards(copy, CHRONOLOGY, HONOURS);
+      renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
 
       expect(lineSpy).toHaveBeenCalledWith(
         expect.objectContaining({ x1: PAD, x2: GRID_RIGHT, y1: ROWS_TOP, y2: ROWS_TOP })
@@ -262,12 +271,20 @@ describe("renderAwards()", () => {
       expect(attributesOf(copy.curseFact(2, "tally(8)"))["font-size"]).toBe(CURSE_FACT_FONT);
     });
 
-    it("should add nothing at all for a card with neither a fool nor a curse", () => {
+    it("should sign the sheet at its own foot, whatever the sheet turned out to hold", () => {
       awardsLayoutOfSpy.mockReturnValue(sheetOf({ fool: null, curse: null, rows: [] }));
 
-      renderAwards(copy, CHRONOLOGY, HONOURS);
+      renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
 
-      expect(body()).toEqual(["<background/>", "<heading/>", "<line/>"]);
+      expect(posterBaseboardSpy).toHaveBeenCalledWith(A_HANDLE, SHEET_HEIGHT);
+    });
+
+    it("should add nothing but its baseboard for a card with neither a fool nor a curse", () => {
+      awardsLayoutOfSpy.mockReturnValue(sheetOf({ fool: null, curse: null, rows: [] }));
+
+      renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
+
+      expect(body()).toEqual(["<background/>", "<heading/>", "<line/>", "<baseboard/>"]);
     });
   });
 });

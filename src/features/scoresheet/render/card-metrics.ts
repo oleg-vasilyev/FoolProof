@@ -1,5 +1,11 @@
 export const IMAGE_WIDTH = 1620;
 
+export const BASEBOARD_BAR = 46;
+
+export const BASEBOARD_GAP = 24;
+
+export const SHEET_BASE = BASEBOARD_GAP + BASEBOARD_BAR;
+
 export const IMAGE_MAX_HEIGHT = 2560;
 
 export const PAD = 60;
