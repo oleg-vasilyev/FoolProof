@@ -25,6 +25,16 @@ The key constraint: input happens on a Friday evening, on a phone, one-handed,
 between games. Any friction in input kills the product. Optimise for the number
 of taps, not for completeness of data.
 
+**The evening this product is for is three to six players and fifteen to twenty-five
+games.** Everything drawn must be at its *best* there; an extreme only has to
+**survive**. That ordering is easy to invert without noticing, because an extreme is
+what a gallery case is built from and what a mockup is judged on — thirteen players
+crowd a legend and a hundred games crush a row height, so they get the attention,
+and the sheet a player actually receives every Friday gets whatever falls out. A
+design that reads well at thirteen players and merely acceptably at four has been
+optimised backwards. So a drawing is judged at the ordinary table first, and a cost
+paid there to buy comfort at an extreme is the wrong trade in this product.
+
 ## Stack
 
 - Node 24+, TypeScript

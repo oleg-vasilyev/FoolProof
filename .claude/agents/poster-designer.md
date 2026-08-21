@@ -115,6 +115,16 @@ drawing holding harder data, compared to the words a player would use — and a
 comparison needs one field of view. Separate images are a comparison made from
 memory, and memory is the check that has already failed here.
 
+**The first panel is the ordinary evening, not an edge.** `PLAN.md` names it: three
+to six players, fifteen to twenty-five games. The design has to be at its *best*
+there, and an extreme only has to survive — an ordering that inverts itself unless
+something forces it, because an edge is what a case list is made of and so an edge is
+what gets the attention. A contact sheet that opens on thirteen players teaches the
+owner to judge the crowd and infer the ordinary, which is backwards: he receives the
+ordinary sheet every Friday and the crowded one never. So lead with it, say whether
+the proposal reads *better* there than today rather than merely surviving, and name
+any width, pitch or spacing the ordinary table is paying to buy comfort at an edge.
+
 Three blocks, in this order.
 
 **1. The drawing at its edges, one panel per named case.** Not three or four
