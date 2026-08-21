@@ -472,9 +472,11 @@ stop an account switch from painting `main` red.
 
 **That is a gate losing teeth, so it is the owner's call, not a cleanup.** Pick it up
 the next time an account switch or a lost login makes this red again — twice is a
-pattern and the second time is the argument. The drawings themselves caught up on
-22 August 2026, in one sitting of the `update-the-design-page` skill from the account
-that owns the page: what had been stale for a day was the login, not the code.
+pattern and the second time is the argument. What is red here is never the code: the drawings and
+the page are one command apart, and the command needs a login rather than a commit.
+That is why the gate says nothing useful about whether a phase is finished — every
+phase that draws anything turns it red until its last step, which is exactly the
+position a check should not put a reader in.
 
 ---
 
@@ -493,6 +495,56 @@ be awkward, with the trigger that would make the split pay for itself.
 | `src/main.ts` | 67 | Two `??` defaults left inline in the diagnostics wiring, still the only place in `src/` with branch coverage at 50% (lines 48–49), and the one surviving mutant in the file. `optionalEnv()` took the other two and the empty-means-missing bug with them; these two remain because the fallback runs only when the key is absent, and `main.spec.ts` imports the module once, with the spy returning a value. | A second spec file reaches both branches — vitest isolates files, so no `vi.resetModules()` is involved. What stops it is the price: 180 lines of setup and fifteen `vi.mock` calls duplicated for two branches. Do it once that header is worth extracting for another reason |
 
 ---
+
+## A rule that fits several players still names one, so somebody goes unnamed
+
+Two real evenings, and one of the six players — Вероника — appears on neither sheet.
+Spreading the rows fixed the case where a player's award was crowded out by rarity; it
+cannot fix this one, because on 21 August **no rule fired for her at all**. She left
+after game 7 of 13, which is exactly THE IRISH GOODBYE, and the rule went to the other
+player who left, because `bestBy` returns one winner.
+
+So the catalogue's coverage of a table is narrower than its thirty-six rules suggest:
+several rules describe a situation two people can be in, and each hands out one row.
+The fix is not a participation award — the card exists to say what one person did that
+nobody else did — but a rule that fits two players could name the runner-up on a card
+with room to spare, the way the truce already names everybody who was in a drawn game.
+
+**Pick it up when a third real evening leaves somebody unnamed**, and check it against
+the evenings on disk rather than against the simulation, which cannot see this: it
+measures how often each rule fires, never how the chosen rows are spread over a table.
+
+## A tally carries its own noun, so half the awards say «партии … партий»
+
+«Дурак первой партии из 19 партий», «Ни одной пропущенной партии из 19 партий», «Уход
+на партии 8 из 19 партий». The tally helper exists so that no copy table decides a word
+form, and it hands back a finished phrase with the noun in it — which reads badly the
+moment the sentence already has that noun in another case.
+
+English does not have the problem, so it went unnoticed for as long as English was the
+only language read closely.
+
+**Take it with the next phase that opens the awards copy**, and the fix is per-line
+rather than mechanical: some of these want the total dropped, some want the sentence
+turned round. Do not add a second tally helper that returns a bare number — that is the
+plural decision coming back through a side door.
+
+## Rarity ranks a vivid fact below an abstract one
+
+On the 31 July evening the spread rule gave Олег his second row, and rarity chose THE
+SLIDE — four games each worse than the last — over SWEET REVENGE, which is being left
+the fool and taking the very next game. The second is the one anybody at that table
+would repeat out loud; the model says it is commoner, and commoner is all the ranking
+knows.
+
+Rarity was the right first answer because it is measurable and it broke the "same nine
+every Friday" problem. What it cannot express is that some facts are stories and others
+are statistics.
+
+**Pick this up when there are enough real evenings to argue with the model** — the
+percentages are simulated, and `RAREST_FIRST` is a hand-written list precisely so that
+reordering it is one edit. A second column, or a hand-placed thumb on the scale for the
+dozen rules that describe a moment rather than a shape, is the shape of the fix.
 
 ## Not debt, deliberately
 

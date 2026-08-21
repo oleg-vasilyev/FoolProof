@@ -65,7 +65,7 @@ export const copy = {
   kingPassedReason: (percent: number, games: string) =>
     `${percent}% of the table finished below them across ${games}. Only the fool of the night sat higher.`,
   wireToWireReason: (games: string) =>
-    `In front on the chart after every game but the first, across ${games}.`,
+    `In front on the chart, game after game, all ${games} of them.`,
   favouriteReason: (firsts: number, games: string) =>
     `Out first in ${firsts} of ${games}. The rest played for second.`,
   hatTrickReason: (games: string) => `${games} running, out first every single time.`,
@@ -73,7 +73,7 @@ export const copy = {
     `Opened ${opens} of the games and went out first in ${wins} of them.`,
   untouchableReason: (games: string) => `${games}, never the fool. Untouched all evening.`,
   teflonReason: (streak: string) =>
-    `Was the fool, and then came ${streak} without another. The longest clean run of the night.`,
+    `Was the fool, and still put ${streak} together clean. The longest run of the night.`,
   hotSeatReason: (opens: number) =>
     `Opened ${opens} of the games and was left the fool in none of them.`,
   comebackReason: (sank: number, percent: number) =>
@@ -125,7 +125,7 @@ export const copy = {
   foolReason: (fools: number, games: string) =>
     `Left the fool in ${fools} of ${games}. Nobody was left it more often.`,
   curseFact: (burns: number, games: string, predicted: number) =>
-    `whoever opened was left the fool in ${burns} of ${games} — the seats predict ${predicted}.`,
+    `the fool had opened in ${burns} of ${games}; the seats predict ${predicted}.`,
 
   sheetEyebrow: "SESSION LOG",
   sheetTitle: "CHRONOLOGY",
@@ -147,7 +147,7 @@ export const copy = {
   moreGamesForAwards: (games: string) => `Another ${games} tonight and the awards follow.`,
 
   commandPersonal: "One player's card",
-  helpPersonal: "/personal — one player's card, across everything they have played",
+  helpPersonal: "/personal — one player's card, across everything played in this chat",
 
   personalPick: "Whose card?",
   personalNobody: "Nobody has finished a game here yet. Start one with /game.",

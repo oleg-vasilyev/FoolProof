@@ -935,9 +935,16 @@ So there are two orders:
 - **KING OF THE TABLE and FOOL OF THE NIGHT are pinned.** They fire on essentially
   every evening that qualifies, they are the two an evening is expected to have, and
   a card missing them reads as broken rather than as unusual.
-- **The seven free slots go to the rarest of whatever fired.** The ranking is
-  `RAREST_FIRST` in `award-catalogue.ts`: one list, every award exactly once, rarest
-  first. A spec asserts it is complete, because the selection indexes into it.
+- **The free slots go to whoever the card has said least about, and rarity breaks
+  the tie.** The ranking is `RAREST_FIRST` in `award-catalogue.ts`: one list, every
+  award exactly once, rarest first. A spec asserts it is complete, because the
+  selection indexes into it. Rarity alone was the rule until two real evenings were
+  read: on the first, one player took four of the nine rows while the only award
+  another player had earned all night was dropped for being common. Awards cluster on
+  whoever had a remarkable evening, so ranking by rarity ranks that person's facts
+  again and again. Each row now goes to the award whose winner holds the fewest rows
+  so far — counting the two pinned ones — and only among equals does the rarer win.
+  Once everybody who fired has a row the rule is rarity again, unchanged.
 - **The card then prints the chosen nine in the catalogue's own order**, which is
   glory to disgrace.
 
@@ -960,15 +967,15 @@ rule finds a winner at all — the number `RAREST_FIRST` is ordered by.
 | Award | Earned by | Threshold | Fires |
 |---|---|---|---|
 | KING OF THE TABLE | the best table share | ≥ 5 games | 100% |
-| WIRE TO WIRE | in front on the chart after every game but the first | evening ≥ 10, ≥ 8 games | 27% |
+| AHEAD ALL NIGHT | in front on the chart after every game but the first | evening ≥ 10, ≥ 8 games | 27% |
 | THE FAVOURITE | going out first more often than not | ≥ 50%, ≥ 8 games | 61% |
 | HAT TRICK | going out first in four games running | run ≥ 4 | 54% |
-| HOME ADVANTAGE | opening a game and going out of it first | ≥ 3 times | 46% |
+| FROM THE OFF | opening a game and going out of it first | ≥ 3 times | 46% |
 | UNTOUCHABLE | never the fool all evening | ≥ 8 games | 62% |
 | TEFLON | the longest clean run, by somebody who was burned at least once | run ≥ 7 | 49% |
 | HOT SEAT | opening games and never being left the fool in one | ≥ 4 opens | 57% |
 | THE COMEBACK | lowest on the chart at halfway, back above mid-table since | evening ≥ 8 | 1.3% |
-| THE LADDER | finishing better than the game before, four running | run ≥ 4 | 7% |
+| THE CLIMB | finishing better than the game before, four running | run ≥ 4 | 7% |
 | SWEET REVENGE | leaving first in the game after being the fool | ≥ 2 of them | 13% |
 | IRON SEAT | the only player who sat through every game | evening ≥ 10 | 23% |
 | THE TRUCE | everybody who was in a drawn game | a draw happened | 58% |
@@ -981,11 +988,11 @@ rule finds a winner at all — the number `RAREST_FIRST` is ordered by.
 | THE CAMEO | playing exactly one game of the evening | evening ≥ 8 | 1.3% |
 | SECOND WIND | the fool early, and never again | in the first 3, ≥ 8 games | 16% |
 | THE UNDERSTUDY | second out again and again, first out never | ≥ 4 seconds, ≥ 5 games | 23% |
-| THE FLATLINE | never leaving the band around mid-table | ≤ 6 points, ≥ 8 games | 0.9% |
+| THE FLATLINE | never leaving the band around mid-table | ≤ 6% of the scale, ≥ 8 games | 0.9% |
 | THE INVISIBLE | most games finished in the middle | ≥ 75%, ≥ 5 games | 56% |
 | GROUNDHOG DAY | taking the exact same place five games running | run ≥ 5 | 50% |
 | THE PENDULUM | swapping halves of the table game after game | run ≥ 6 | 15% |
-| THE ROLLERCOASTER | the widest gap between their best and worst on the chart | ≥ 60 points, evening ≥ 8 | 15% |
+| THE ROLLERCOASTER | the widest gap between their best and worst on the chart | ≥ 60% of the scale, evening ≥ 8 | 15% |
 | ALL OR NOTHING | most games finished at an edge — first out or fool | ≥ 75%, ≥ 5 games | 60% |
 | THE IRISH GOODBYE | leaving before the end, and not as the fool | left early | 59% |
 | THE ANCHOR | every game in the bottom half, and never the fool | ≥ 5 games | 2.4% |
@@ -1017,7 +1024,8 @@ award its place:
 | Dropped | When | Because |
 |---|---|---|
 | FIRST BLOOD | FOOL OF THE NIGHT names the same player | one person, burned twice on one card |
-| HOT SEAT | HOME ADVANTAGE names the same player | winning every game you opened already says you lost none of them |
+| HOT SEAT | FROM THE OFF names the same player | winning every game you opened already says you lost none of them |
+| THE FAVOURITE | KING OF THE TABLE names the same player | sitting highest and going out first most often is one story told twice |
 
 Three rules about how a winner is chosen, each of which changed who won on that
 evening:
@@ -1069,7 +1077,17 @@ winners line degenerated into every name at the table joined by an ampersand —
 at ten players left the card entirely — and, worse, they hand a row of a nine-row card
 to somebody who did nothing in particular. The card exists to say what one person did
 that nobody else did. A fact about the whole table has a home already: the line under
-the fool's plate, where the opener's curse lives.
+the fool's plate, where the table curse lives.
+
+**The table curse is a claim, so it has to beat chance to be printed.** It counts the
+games whose opener was the one left the fool, over the games that had both an opener
+and a fool — draws are out of the count and out of its denominator. That number is not
+interesting on its own: the opener is one of the seats, so if places fell at random the
+count would be the sum of `1 / tableSize` over those same games, which on a
+six-handed evening of thirteen games is about two. It printed "2 of 13" as a curse for
+exactly that reason. The line is now drawn only when the count is **above** what the
+seats predict, and prints the prediction beside it — the same baseline, and the same
+words, the player card's tiles use.
 
 That leaves THE TRUCE and THE PACIFIST, which look similar and are not: their winners
 are whoever was in a drawn game, which is a subset the evening picked out. When that
@@ -1136,10 +1154,13 @@ roughly a sixth. The card names where that number comes from rather than calling
 already said *the seat alone predicts*, and the tiles now say the same thing in two
 words.
 
-The share tile carries no count and both ends of its scale instead. `0%` is the fool of
-every game and `100%` is winning every one, and a card reading `0%` above ninety-nine
+The share tile carries no count and both ends of its scale instead. `0%` is last in
+every game and `100%` is first in every one, and a card reading `0%` above ninety-nine
 games is otherwise a contradiction to anybody who does not already know what the share
-is a share of. The evening chart's own hint says the same about the top end, so the two
+is a share of. The tile is also no longer called a share: the figure is literally the
+proportion of opponents finished above, so it is named that — «ВЫШЕ СОПЕРНИКОВ», "opponents
+beaten" — on the card, on the chronology's chart and in the king of the table's own
+line. A name that has to be explained by the label beneath it is a name that failed. The evening chart's own hint says the same about the top end, so the two
 read as one definition rather than two.
 
 Two denominators are used on purpose, and the card says which is which rather than
@@ -1164,7 +1185,9 @@ evenings are needed before the chart is worth drawing, and the section below the
 used to be a label with a right-aligned hint and empty space under it. Two readers who
 had never seen the code read that as a broken render before they read it as *not yet*.
 The section now keeps its name, says in a sentence when the chart arrives, and draws a
-dashed floor where the plot will sit.
+dashed floor where the plot will sit. The facts section below does the same when nothing
+has fired yet: a heading over nothing reads as a fault, and the two promises make the
+young card look deliberate rather than half-drawn.
 
 Twenty facts sit below the numbers, and a card prints at most four of them: three
 numbered rows and one plate. The point is that two players at the same table get
@@ -1177,8 +1200,13 @@ The facts split by what makes them worth printing, and the split is the design:
 
 - **A descriptive fact is true whatever the sample size.** The chief rival is one:
   among the games where the two were left in the last two places, how often the
-  subject was the one holding it. It needs six such duels and one loss, picks by
-  losses, then duels, then name, and states raw counts. It is not a claim that the
+  subject was the one holding it. It needs six such duels and a **majority** — the
+  rival must have taken more than half of them, or the subject must have — picks by
+  losses, then duels, then name, and states raw counts. The majority is what stops one
+  rival being named twice on one card: eight duels split six-two used to earn the
+  easy-prey row *and* the hard-opponent row, the same eight games read from each end,
+  and a reader cannot hold both. Only one side of a series can be a majority, so only
+  one of the two can fire. It is not a claim that the
   rival is *better* — a duel is a coin flip, and proving a bias in one honestly
   needs about a dozen of them, which would mean the fact this feature was asked for
   almost never appeared.

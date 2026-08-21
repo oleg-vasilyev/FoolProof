@@ -3,6 +3,11 @@ import { resolve } from "node:path";
 import { rasterize } from "#scoresheet/bot/rasterizer.ts";
 import { rootDir } from "#shared/config/env.ts";
 import { repository } from "#shared/repository/repository-instance.ts";
+import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
+import { awardReason, awardTitle, awardWinner } from "#scoresheet/render/awards/award-lines.ts";
+import { gameTally } from "#scoresheet/render/tally-phrases.ts";
+import { copyIn } from "#scoresheet/copy.ts";
+import { createLocaleReader } from "#shared/locale/chat-locale.ts";
 import { contactSheet } from "./contact-sheet.ts";
 import { refreshDesignPage } from "./design-page.ts";
 import { GALLERY_DIR, gallery } from "./gallery.ts";
@@ -21,6 +26,12 @@ const PAGE_TO_READ = 1;
 const FILE_TO_WRITE = 2;
 
 const CHAT_TO_FORGET = 1;
+
+const CHAT_TO_READ = 1;
+
+const EVERY_WINNER = true;
+
+const SOME_WINNERS = false;
 
 const FAILED = 1;
 
@@ -92,6 +103,49 @@ const forgetChat = (args: readonly string[]): void => {
   console.log(`chat ${asked}: forgot ${String(gone.games)} games and ${String(gone.players)} players`);
 };
 
+const readEvening = (args: readonly string[]): void => {
+  const asked = args[CHAT_TO_READ];
+
+  if (asked === undefined || !A_WHOLE_NUMBER.test(asked)) {
+    throw new Error("evening needs the chat id whose newest evening should be read");
+  }
+
+  const chatId = Number(asked);
+  const chronology = repository.seriesChronology(chatId);
+
+  if (chronology === null) {
+    console.log(`chat ${asked}: nothing finished here yet`);
+
+    return;
+  }
+
+  const copy = copyIn(createLocaleReader(repository)(chatId));
+  const honours = honoursFor(chronology);
+  const nameOf = new Map(chronology.players.map((one) => [one.playerId, one.displayName]));
+
+  console.log(`${chronology.startedOn} — ${String(chronology.games.length)} games, ${String(chronology.players.length)} players`);
+
+  if (honours === null) {
+    console.log("too few games for awards");
+
+    return;
+  }
+
+  for (const award of honours.awards) {
+    const names = award.winners.map((one) => nameOf.get(one) ?? String(one));
+    const everybody = names.length === chronology.players.length ? EVERY_WINNER : SOME_WINNERS;
+
+    console.log(`${awardTitle(copy, award)} — ${awardWinner(copy, names, everybody)}`);
+    console.log(`    ${awardReason(copy, award)}`);
+  }
+
+  console.log(
+    honours.curse === null
+      ? "no table curse tonight"
+      : `${copy.awardsCurseLabel}: ${copy.curseFact(honours.curse.burns, gameTally(copy, honours.curse.games), honours.curse.predicted)}`
+  );
+};
+
 const TOOLS: Readonly<Record<string, Tool>> = {
   mockups: {
     does: `draw the sample evening into ${MOCKUP_DIR}/ as SVG and PNG`,
@@ -115,6 +169,11 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     does: `draw every edge of every poster into ${GALLERY_DIR}/ for a human or an agent to look at`,
     usage: "node scripts/tools.ts gallery",
     run: drawGallery,
+  },
+  evening: {
+    does: "print the awards a real chat's newest evening would carry, in that chat's own language",
+    usage: "node scripts/tools.ts evening <chat id>",
+    run: readEvening,
   },
   "forget-chat": {
     does: "delete one chat's games, players and language choice, leaving every other chat alone",

@@ -141,7 +141,7 @@ const roomFor = (selection: Selection): number =>
 
 type Rows = ReadonlyMap<number, number>;
 
-const rowsHeldBy = (rows: Rows, award: Award): Rows =>
+const rowsAfter = (rows: Rows, award: Award): Rows =>
   new Map([
     ...rows,
     ...award.winners.map(
@@ -149,12 +149,14 @@ const rowsHeldBy = (rows: Rows, award: Award): Rows =>
     ),
   ]);
 
-const rowsAlreadyOn = (award: Award, rows: Rows): number =>
+const mostRowsAmongWinnersOf = (award: Award, rows: Rows): number =>
   Math.max(...award.winners.map((winner) => rows.get(winner) ?? NO_ROWS));
 
 const leastSaidAbout = (ranked: readonly Award[], rows: Rows): Award =>
   ranked.reduce((held, challenger) =>
-    rowsAlreadyOn(challenger, rows) < rowsAlreadyOn(held, rows) ? challenger : held
+    mostRowsAmongWinnersOf(challenger, rows) < mostRowsAmongWinnersOf(held, rows)
+      ? challenger
+      : held
   );
 
 const spreadOut = (ranked: readonly Award[], rows: Rows, room: number): readonly Award[] => {
@@ -168,7 +170,7 @@ const spreadOut = (ranked: readonly Award[], rows: Rows, room: number): readonly
     next,
     ...spreadOut(
       ranked.filter((award) => award !== next),
-      rowsHeldBy(rows, next),
+      rowsAfter(rows, next),
       room - ONE_ROW
     ),
   ];
@@ -177,7 +179,7 @@ const spreadOut = (ranked: readonly Award[], rows: Rows, room: number): readonly
 const pinnedRows = (selection: Selection): Rows =>
   [selection.king, selection.fool]
     .filter((award): award is Award => award !== null)
-    .reduce(rowsHeldBy, new Map<number, number>());
+    .reduce(rowsAfter, new Map<number, number>());
 
 export const gamesShortOfAwards = (played: number): number =>
   Math.max(EVENING_MINIMUM - played, NOT_SHORT);

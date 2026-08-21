@@ -627,7 +627,7 @@ const A_MERMAID_FENCE = /```mermaid\n([\s\S]*?)```/g;
 
 const A_STATEMENT_SEPARATOR = ";";
 
-const diagramsThatWillNotRender = (): readonly string[] =>
+const mermaidLinesCarryingASeparator = (): readonly string[] =>
   [...DOCUMENTS, FLOW_DOCUMENT].flatMap((document) =>
     [...read(document).matchAll(A_MERMAID_FENCE)].flatMap((fence) =>
       (fence[FIRST_GROUP] ?? "")
@@ -636,8 +636,9 @@ const diagramsThatWillNotRender = (): readonly string[] =>
         .map(
           (line) =>
             `${document}: a mermaid line carries a ";", which the diagram reads as the end ` +
-            `of a statement rather than as punctuation, so nothing renders and the page shows ` +
-            `a parse error where the drawing should be — ${line.trim()}`
+            `of a statement rather than as punctuation — in a sequence diagram that leaves ` +
+            `half a sentence where an arrow should be, and the page prints a parse error ` +
+            `instead of the drawing — ${line.trim()}`
         )
     )
   );
@@ -712,7 +713,7 @@ const complaints = [
   ...formsBakedIntoCopy(),
   ...brokenLinks(),
   ...flowOutOfStep(),
-  ...diagramsThatWillNotRender(),
+  ...mermaidLinesCarryingASeparator(),
   ...stagesOutOfStep(),
   ...unreachableHelp(),
   ...featuresMissingFromTheTree(),

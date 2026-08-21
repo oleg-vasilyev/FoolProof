@@ -66,7 +66,7 @@ export const copy: Copy = {
   kingPassedReason: (percent: number, games: string) =>
     `${percent}% соперников позади за ${games}. Выше сидел только дурак вечера.`,
   wireToWireReason: (games: string) =>
-    `Впереди на графике после каждой партии, кроме первой, за ${games}.`,
+    `Впереди на графике весь вечер, партия за партией, все ${games}.`,
   favouriteReason: (firsts: number, games: string) =>
     `Первое место в ${firsts} из ${games}. Остальные играли за второе.`,
   hatTrickReason: (games: string) => `${games} подряд — и каждый раз первым.`,
@@ -74,7 +74,7 @@ export const copy: Copy = {
     `Первых ходов — ${opens}, и в ${wins} из них первое место.`,
   untouchableReason: (games: string) => `${games} — и ни разу дураком. Ни единого пятна.`,
   teflonReason: (streak: string) =>
-    `После дурака — ${streak} подряд начисто. Лучшая серия вечера.`,
+    `Дурак в этот вечер был — и всё равно ${streak} подряд начисто. Лучшая серия вечера.`,
   hotSeatReason: (opens: number) => `Первых ходов — ${opens}, и ни одного проигранного.`,
   comebackReason: (sank: number, percent: number) =>
     `К середине — дно графика и ${sank}%, сейчас — ${percent}%.`,
@@ -84,16 +84,16 @@ export const copy: Copy = {
   ironSeatReason: (games: string) => `Ни одной пропущенной партии из ${games}. Никто больше не досидел.`,
   truceReason: (draws: number, games: string) => `${draws} из ${games}, где не проиграл никто.`,
   pacifistReason: (draws: string) =>
-    `Во всех ${draws}, которые кончились вничью. Ни одного проигравшего в одиночку.`,
+    `Ничьих за вечер — ${draws}, и в каждой — за столом. Ни одного проигравшего в одиночку.`,
   nemesisReason: (over: string) =>
-    `Выше одного и того же соперника во всех ${over} на двоих.`,
+    `Выше одного и того же соперника — все ${over} на двоих.`,
   doormanReason: (opens: number, games: string) =>
     `Первых ходов — ${opens} из ${games}. Ход всё возвращался.`,
   neverAskedReason: (games: string) => `${games} — и ни разу не выпало ходить первым.`,
   latecomerReason: (joinedAt: number, percent: number) =>
     `В игре с партии ${joinedAt} — и всё равно ${percent}%.`,
   revolvingDoorReason: (missed: string, games: string) =>
-    `Партий — ${games}, пропущено ${missed} в середине вечера.`,
+    `Сыграно ${games}, пропущено ${missed} в середине вечера.`,
   cameoReason: (games: string) => `Одна партия из ${games} — и всё.`,
   secondWindReason: (burnedBy: number, games: string) =>
     `Дураком в партии ${burnedBy} — и больше ни разу за ${games}.`,
@@ -124,7 +124,7 @@ export const copy: Copy = {
   foolReason: (fools: number, games: string) =>
     `Дураком в ${fools} из ${games}. Чаще всех за вечер.`,
   curseFact: (burns: number, games: string, predicted: number) =>
-    `в ${burns} из ${games} дураком оставался тот, кто ходил первым — место предсказывает ${predicted}.`,
+    `дурак ходил первым в ${burns} из ${games}; место предсказывает ${predicted}.`,
 
   sheetEyebrow: "ЖУРНАЛ ВЕЧЕРА",
   sheetTitle: "ХРОНОЛОГИЯ",
@@ -188,8 +188,8 @@ export const copy: Copy = {
     bigTableCharm: "ЕСТЬ ГДЕ РАЗВЕРНУТЬСЯ",
     bigTableCurse: "ТЕРЯЕТСЯ В ТОЛПЕ",
     openersGift: "ДАР ПЕРВОГО ХОДА",
-    openersCurse: "ПРОКЛЯТИЕ ПЕРВОГО ХОДА",
-    theHomecoming: "ВОЗВРАЩЕНИЕ",
+    openersCurse: "ХОДИШЬ ПЕРВЫМ — ГОРИШЬ",
+    theHomecoming: "СНОВА ЗА СТОЛОМ",
     neverWentFirst: "НИ РАЗУ НЕ ХОДИЛ ПЕРВЫМ",
     theHeadStart: "ВЕЧНО ХОДИТ ПЕРВЫМ",
     theBadPatch: "ЧЁРНАЯ ПОЛОСА",

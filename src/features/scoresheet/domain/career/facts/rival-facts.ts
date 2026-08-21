@@ -12,7 +12,7 @@ const ONE_PLACE = 1;
 
 const ALONE = 1;
 
-const BOTH_SIDES = 2;
+const HALVES = 2;
 
 export const ENOUGH_DUELS = 6;
 
@@ -118,7 +118,7 @@ const lostTo: DuelMerit = (pairing) => pairing.lost;
 const wonAgainst: DuelMerit = (pairing) => pairing.duels - pairing.lost;
 
 const wonTheSeries = (pairing: Pairing, merit: DuelMerit): boolean =>
-  merit(pairing) * BOTH_SIDES > pairing.duels;
+  merit(pairing) > pairing.duels / HALVES;
 
 export const theBogey = (subject: CareerSubject): CareerFact | null => {
   const chief = chiefBy(subject, lostTo);

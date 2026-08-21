@@ -112,13 +112,9 @@ const ONCE = 1;
 
 const TWICE = 2;
 
-const THRICE = 3;
-
 const HALVES = 2;
 
 const A_DASH_PATTERN = /^\d+ \d+$/;
-
-const LAST = -1;
 
 const FIVE_RULES = 5;
 

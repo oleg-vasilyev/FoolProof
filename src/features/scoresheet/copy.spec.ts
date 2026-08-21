@@ -4,6 +4,9 @@ import { copy as english } from "#scoresheet/copy.en.ts";
 import { copy as russian } from "#scoresheet/copy.ru.ts";
 import { copyIn, type Copy } from "#scoresheet/copy.ts";
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
+import { GRID_RIGHT, PAD, USUAL_ADVANCE, WIDEST_ADVANCE } from "#scoresheet/render/card-metrics.ts";
+import { CURSE_FACT_FONT, CURSE_LABEL_FONT, CURSE_TRACKING } from "#scoresheet/render/awards/awards-layout.ts";
+import { widthOf } from "#scoresheet/render/name-to-fit.ts";
 
 
 const NOTHING = 0;
@@ -291,6 +294,23 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
 
       expect(copy.kingReason(FIFTY_ONE, A_TALLY)).toContain(A_TALLY);
       expect(copy.pacifistReason(A_TALLY)).toContain(A_TALLY);
+    });
+
+    it("should leave the curse fact room beside the label it shares a line with", () => {
+      const A_WHOLE_EVENING = 19;
+
+      const A_TENTH_OF_IT = 2;
+
+      const label =
+        widthOf(copy.awardsCurseLabel, CURSE_LABEL_FONT, WIDEST_ADVANCE) +
+        copy.awardsCurseLabel.length * CURSE_TRACKING;
+      const fact = widthOf(
+        copy.curseFact(A_WHOLE_EVENING, A_TALLY, A_TENTH_OF_IT),
+        CURSE_FACT_FONT,
+        USUAL_ADVANCE
+      );
+
+      expect(label + fact).toBeLessThanOrEqual(GRID_RIGHT - PAD);
     });
 
     it("should print both the tally and the bare count an award was given", () => {

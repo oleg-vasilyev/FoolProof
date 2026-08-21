@@ -103,7 +103,7 @@ const OLEG = 3;
 
 const SOME_EVENING = { rounds: NOTHING, players: [], starters: [] };
 
-const CURSE = { burns: ONCE, games: EVENING_MINIMUM };
+const CURSE = { burns: ONCE, games: EVENING_MINIMUM, predicted: NOTHING };
 
 const awardOf = (name: AwardName, winner = OLEG): Award =>
   ({ name, winners: [winner], games: NOTHING, percent: NOTHING }) as unknown as Award;

@@ -12,7 +12,7 @@ import {
 import { bestBy, soleBy } from "#scoresheet/domain/awards/pick-winner.ts";
 
 
-interface Opening {
+interface DecidedOpening {
   readonly starter: number;
   readonly round: number;
   readonly fool: number;
@@ -123,7 +123,7 @@ export const neverAsked = (evening: SessionAppearances): Award | null => {
     : { name: AwardName.NeverAsked, winners: [winner.playerId], games: playedGames(winner) };
 };
 
-const decidedOpenings = (evening: SessionAppearances): readonly Opening[] => {
+const decidedOpenings = (evening: SessionAppearances): readonly DecidedOpening[] => {
   const fools = foolByRound(evening);
 
   return evening.starters.flatMap((starter, round) => {
@@ -133,7 +133,7 @@ const decidedOpenings = (evening: SessionAppearances): readonly Opening[] => {
   });
 };
 
-const seatsPredict = (evening: SessionAppearances, openings: readonly Opening[]): number =>
+const seatsPredict = (evening: SessionAppearances, openings: readonly DecidedOpening[]): number =>
   openings.reduce(
     (chance, opening) => chance + ONE_SEAT / tableSizeIn(evening, opening.round),
     NONE
