@@ -444,29 +444,6 @@ three files anyway.
 
 ---
 
-## The Claude Design page is behind, and a release went out anyway
-
-The page still holds the player card as it was drawn before `9072e2e` renamed two
-figures and cut the top block from six tiles to four. `docs:check` says so on every
-run, and it is right.
-
-What is new is that a tag left with it red. The pre-push hook runs `check:release`
-before a `v*` tag and refused, correctly; the owner asked for that one tag to go out
-past the hook, on a Friday, to show the bot to the people who play on it. So the
-guarantee this gate exists for — that nobody reads the page against a release it does
-not describe — is broken for exactly one version, knowingly, and this entry is the
-record of it. The gate was left alone: no rule was bent to let the tag through, and
-the next tag will be refused the same way.
-
-Nothing available from this machine can close it. The project answers 404 through
-`DesignSync` from the account that is signed in here, and a share link grants a human
-a browser rather than granting the API a write.
-
-**Close it on the first session from the account that owns the page** — the
-`update-the-design-page` skill end to end, which rewrites `design-page.sync` with the
-fingerprint it actually pushed. Until then every release carries this, and the entry
-above says why the gate should have been asking a tag rather than every push.
-
 ## The design-page gate assumes one account owns both the repository and the page
 
 `docs:check` compares `docs/mockups/design-page.sync` against the drawings the code
@@ -480,8 +457,9 @@ not follow, and by the time anybody noticed, this machine had switched from the
 account that owns the page to one that does not: the project answers 404 through
 `DesignSync`, `list_projects` shows only unrelated work, and a share link does not
 help because it grants a human a browser view rather than granting the API a write.
-The owning account then ran out of tokens. So `main` is red on one line, the code is
-fine, and no action available from here can clear it.
+The owning account then ran out of tokens. So `main` went red on one line with the code
+fine, and nothing reachable from the account signed in could clear it — only switching
+back could.
 
 Two things are wrong, and only the second is worth code. The first is that a red
 `main` now means either "the code is broken" or "somebody committed from the wrong
@@ -494,8 +472,9 @@ stop an account switch from painting `main` red.
 
 **That is a gate losing teeth, so it is the owner's call, not a cleanup.** Pick it up
 the next time an account switch or a lost login makes this red again — twice is a
-pattern and the second time is the argument. Until then the page is behind by exactly
-one change: the player card's top block from `9072e2e`.
+pattern and the second time is the argument. The drawings themselves caught up on
+22 August 2026, in one sitting of the `update-the-design-page` skill from the account
+that owns the page: what had been stale for a day was the login, not the code.
 
 ---
 
