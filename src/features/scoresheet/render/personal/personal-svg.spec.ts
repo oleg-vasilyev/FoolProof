@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GRID_RIGHT, IMAGE_WIDTH, USUAL_ADVANCE, PAD, WIDEST_ADVANCE, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { PLAYER_COLOURS, palette } from "#scoresheet/render/palette.ts";
-import { HEADING_RULE, SECTION_LABEL_DROP, TILE_TRACKING, personalFont } from "#scoresheet/render/personal/personal-metrics.ts";
+import {
+  HEADING_RULE,
+  SECTION_LABEL_DROP,
+  TEASER_FLOOR_DROP,
+  TEASER_TEXT_DROP,
+  TILE_TRACKING,
+  personalFont,
+} from "#scoresheet/render/personal/personal-metrics.ts";
 import { CareerFactName, type CareerFact } from "#scoresheet/domain/career/facts/fact-catalogue.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import type { CareerCard } from "#scoresheet/domain/career/career-card.ts";
@@ -104,6 +111,14 @@ const NEVER = 0;
 const ONCE = 1;
 
 const TWICE = 2;
+
+const THRICE = 3;
+
+const HALVES = 2;
+
+const A_DASH_PATTERN = /^\d+ \d+$/;
+
+const LAST = -1;
 
 const ORIGIN = 0;
 
@@ -518,7 +533,7 @@ describe("renderPersonalCard()", () => {
 
       renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
 
-      expect(attributesOf(TEASER_HINT_MARK)["y"]).toBe(CHART_LABEL);
+      expect(attributesOf(TEASER_HINT_MARK)["y"]).toBe(CHART_LABEL + TEASER_TEXT_DROP);
     });
 
     it("should plot nothing when the layout left the plot out", () => {
@@ -573,6 +588,7 @@ describe("renderPersonalCard()", () => {
         RULE_MARK,
         marked(copy.personalChartLabel),
         marked(TEASER_HINT_MARK),
+        RULE_MARK,
         RULE_MARK,
         marked(copy.personalFactsLabel),
         BASEBOARD_MARK,
@@ -661,6 +677,7 @@ describe("renderPersonalCard()", () => {
         RULE_MARK,
         marked(copy.personalChartLabel),
         marked(TEASER_HINT_MARK),
+        RULE_MARK,
         BASEBOARD_MARK,
       ]);
     });
@@ -674,12 +691,35 @@ describe("renderPersonalCard()", () => {
       expect(factRowsSpy).toHaveBeenCalledWith(copy, [], INK);
     });
 
-    it("should rule off the heading and the promised chart, and nothing more", () => {
+    it("should rule off the heading, the promised chart and the floor holding its place", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
 
       renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
 
-      expect(lineSpy).toHaveBeenCalledTimes(TWICE);
+      expect(lineSpy).toHaveBeenCalledTimes(THRICE);
+    });
+
+    it("should hold the chart's place with a dashed floor rather than empty space", () => {
+      personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
+
+      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+
+      const floor = lineSpy.mock.calls.at(LAST)?.[0] as Record<string, unknown>;
+
+      expect(String(floor["stroke-dasharray"])).toMatch(A_DASH_PATTERN);
+      expect(floor["y1"]).toBe(CHART_LABEL + TEASER_FLOOR_DROP);
+      expect(floor["y2"]).toBe(floor["y1"]);
+    });
+
+    it("should centre the sentence over the card rather than hang it off an edge", () => {
+      personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
+
+      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+
+      const sentence = attributesOf(TEASER_HINT_MARK);
+
+      expect(sentence["x"]).toBe(IMAGE_WIDTH / HALVES);
+      expect(sentence["text-anchor"]).toBe("middle");
     });
   });
 });

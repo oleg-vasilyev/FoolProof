@@ -1,8 +1,9 @@
-first-night — one evening old — the chart section is the card's last line, promising four more evenings
-under-the-chart — one evening short of a chart — the section keeps its name and says the one evening still owed
+first-night — one evening old — the chart section holds its place with a floor and a sentence rather than a heading over nothing, and every count is at its smallest
+under-the-chart — one evening short of a chart — the section keeps its name and owes a single evening, in the singular
 a-long-career — the tallest card the sheet can draw — a chart, three facts, and a plate beneath them
 the-longest-names — the longest name a player may have, in the heading and again on the plate
 never-burned — a career of nothing but wins — every fact is good news and no plate turns red
 always-burned — a career of nothing but losses — the worst every fact can say about one player
 an-uneven-career — every evening a different share — the only card that can single out a best and a worst
+the-widest-counts — a career of years at the narrowest table — three-digit counts on every tile, and a ninth of the games drawn, so the fool is read against a smaller whole
 comes-and-goes — a long absence and a return, against tables that change size around it

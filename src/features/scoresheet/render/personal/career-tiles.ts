@@ -1,13 +1,13 @@
 import { FONT_FAMILY, GRID_RIGHT, PAD } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
 import { percentLabel } from "#scoresheet/render/percent-label.ts";
-import { timeTally } from "#scoresheet/render/tally-phrases.ts";
 import { text } from "#scoresheet/render/svg-tags.ts";
 import {
   TILES_PER_ROW,
   TILES_TOP,
   TILE_NOTE_DROP,
   TILE_ROW_HEIGHT,
+  TILE_SECOND_NOTE_DROP,
   TILE_TRACKING,
   TILE_VALUE_DROP,
   personalFont,
@@ -16,50 +16,73 @@ import type { CareerCard } from "#scoresheet/domain/career/career-card.ts";
 import type { Copy } from "#scoresheet/copy.ts";
 
 
+type TileNotes = readonly [string, string];
+
 interface Tile {
   readonly label: string;
   readonly value: string;
-  readonly note: string | null;
+  readonly notes: TileNotes;
   readonly ink: string;
 }
 
+const FIRST_NOTE = 0;
+
+const SECOND_NOTE = 1;
+
 const columnWidth = (): number => (GRID_RIGHT - PAD) / TILES_PER_ROW;
 
-const tilesOf = (copy: Copy, card: CareerCard): readonly Tile[] => [
-  { label: copy.tileGames, value: String(card.tally.games), note: null, ink: palette.ink },
-  { label: copy.tileEvenings, value: String(card.tally.evenings), note: null, ink: palette.ink },
+const countAndChance = (copy: Copy, count: string, chance: number): TileNotes => [
+  count,
+  copy.tileSeatPredicts(percentLabel(chance)),
+];
+
+const tilesOf = (copy: Copy, card: CareerCard, ink: string): readonly Tile[] => [
   {
     label: copy.tileShare,
     value: percentLabel(card.share),
-    note: copy.tileShareNote,
-    ink: palette.ink,
+    notes: [copy.tileShareFloor, copy.tileShareCeiling],
+    ink,
   },
   {
     label: copy.tileFool,
     value: percentLabel(card.tally.foolRate),
-    note: copy.tileFoolNote(
-      card.tally.fools,
-      card.tally.decided,
-      percentLabel(card.tally.expectedFoolRate)
+    notes: countAndChance(
+      copy,
+      copy.tileOutOfDecided(card.tally.fools, card.tally.decided),
+      card.tally.seatChanceInDecided
     ),
     ink: palette.cellFool,
   },
   {
     label: copy.tileFirst,
     value: percentLabel(card.tally.firstRate),
-    note: copy.tileTimesExpected(
-      timeTally(copy, card.tally.firsts),
-      percentLabel(card.tally.expectedFirstRate)
+    notes: countAndChance(
+      copy,
+      copy.tileOutOf(card.tally.firsts, card.tally.games),
+      card.tally.seatChance
     ),
     ink: palette.ink,
   },
   {
-    label: copy.tileDealt,
+    label: copy.tileFirstMove,
     value: percentLabel(card.tally.openRate),
-    note: timeTally(copy, card.tally.opens),
+    notes: countAndChance(
+      copy,
+      copy.tileOutOf(card.tally.opens, card.tally.games),
+      card.tally.seatChance
+    ),
     ink: palette.ink,
   },
 ];
+
+const noteLine = (note: string, left: number, baseline: number): string =>
+  text(note, {
+    x: left,
+    y: baseline,
+    fill: palette.inkFaint,
+    "font-family": FONT_FAMILY,
+    "font-size": personalFont.tileNote,
+  });
 
 const drawTile = (tile: Tile, index: number): readonly string[] => {
   const left = PAD + (index % TILES_PER_ROW) * columnWidth();
@@ -82,19 +105,10 @@ const drawTile = (tile: Tile, index: number): readonly string[] => {
       "font-weight": "bold",
       "font-size": personalFont.tileValue,
     }),
-    ...(tile.note === null
-      ? []
-      : [
-          text(tile.note, {
-            x: left,
-            y: top + TILE_NOTE_DROP,
-            fill: palette.inkFaint,
-            "font-family": FONT_FAMILY,
-            "font-size": personalFont.tileNote,
-          }),
-        ]),
+    noteLine(tile.notes[FIRST_NOTE], left, top + TILE_NOTE_DROP),
+    noteLine(tile.notes[SECOND_NOTE], left, top + TILE_SECOND_NOTE_DROP),
   ];
 };
 
-export const careerTiles = (copy: Copy, card: CareerCard): readonly string[] =>
-  tilesOf(copy, card).flatMap(drawTile);
+export const careerTiles = (copy: Copy, card: CareerCard, ink: string): readonly string[] =>
+  tilesOf(copy, card, ink).flatMap(drawTile);

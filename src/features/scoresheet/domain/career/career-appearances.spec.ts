@@ -162,19 +162,19 @@ describe("careerOf()", () => {
     ]);
   });
 
-  it("should call a game the player dealt an opening", () => {
+  it("should mark the games the player opened", () => {
     sitting(playerAppearing(OLEG, [appearanceOf(SECOND_ROUND, Finish.First)]));
 
     expect(careerOf(TWO_NIGHTS, OLEG)?.appearances[NOTHING]?.opened).toBe(true);
   });
 
-  it("should not call somebody else's deal an opening", () => {
+  it("should not call a game somebody else opened an opening", () => {
     sitting(playerAppearing(OLEG, [appearanceOf(OPENING_ROUND, Finish.First)]));
 
     expect(careerOf(TWO_NIGHTS, OLEG)?.appearances[NOTHING]?.opened).toBe(false);
   });
 
-  it("should not call a game nobody dealt an opening", () => {
+  it("should leave a game nobody opened unmarked", () => {
     sitting(playerAppearing(OLEG, [appearanceOf(OPENING_ROUND, Finish.First)]));
 
     expect(careerOf(historyOf(gameOf(FIRST_NIGHT, OPENING_DAY, null)), OLEG)?.appearances[NOTHING]

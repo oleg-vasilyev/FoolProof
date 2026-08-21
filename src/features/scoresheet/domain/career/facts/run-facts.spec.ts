@@ -113,10 +113,10 @@ const A_TALLY: CareerTally = {
   fools: SOME_BURNS,
   decided: SOME_DECIDED,
   foolRate: A_FOOL_RATE,
-  expectedFoolRate: A_SEAT_IN_FOUR,
+  seatChanceInDecided: A_SEAT_IN_FOUR,
   firsts: SOME_FIRSTS,
   firstRate: A_FIRST_RATE,
-  expectedFirstRate: A_SEAT_IN_FIVE,
+  seatChance: A_SEAT_IN_FIVE,
   opens: SOME_OPENS,
   openRate: AN_OPEN_RATE,
 };

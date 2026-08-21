@@ -69,42 +69,42 @@ beforeEach(() => {
 });
 
 describe("openersCurse()", () => {
-  const DEALT_FIVE = sessionAppearances([ROMANI, ROMANI, ROMANI, ROMANI, ROMANI, OLEG]);
+  const OPENED_FIVE = sessionAppearances([ROMANI, ROMANI, ROMANI, ROMANI, ROMANI, OLEG]);
 
   it("should award nothing when the ranking found nobody", () => {
-    expect(openersCurse(DEALT_FIVE)).toBeNull();
+    expect(openersCurse(OPENED_FIVE)).toBeNull();
   });
 
-  it("should report the deals as well as the deals that burned the dealer", () => {
+  it("should report how many games they opened, and how many of those burned them", () => {
     foolByRoundSpy.mockReturnValue([ROMANI, ROMANI, OLEG, OLEG, OLEG, ROMANI]);
     bestBySpy.mockReturnValue(player);
-    const award = openersCurse(DEALT_FIVE);
+    const award = openersCurse(OPENED_FIVE);
 
     expect(award?.name === AwardName.OpenersCurse ? [award.opens, award.burns] : []).toEqual([FIVE, TWICE]);
   });
 
-  it("should name the dealer the curse fell on", () => {
+  it("should name the opener the curse fell on", () => {
     bestBySpy.mockReturnValue(player);
 
-    expect(openersCurse(DEALT_FIVE)?.winners).toEqual([ROMANI]);
+    expect(openersCurse(OPENED_FIVE)?.winners).toEqual([ROMANI]);
   });
 
   describe("who is eligible", () => {
-    it("should count only the games a player both dealt and lost", () => {
+    it("should count only the games a player both opened and lost", () => {
       foolByRoundSpy.mockReturnValue([ROMANI, ROMANI, OLEG, OLEG, OLEG, ROMANI]);
-      openersCurse(DEALT_FIVE);
+      openersCurse(OPENED_FIVE);
 
       expect(meritGiven()(player)).toBe(TWICE);
     });
 
-    it("should refuse a dealer who was burned only once", () => {
+    it("should refuse an opener who was burned only once", () => {
       foolByRoundSpy.mockReturnValue([ROMANI, OLEG, OLEG, OLEG, OLEG, OLEG]);
-      openersCurse(DEALT_FIVE);
+      openersCurse(OPENED_FIVE);
 
       expect(meritGiven()(player)).toBeNull();
     });
 
-    it("should not count a game somebody else dealt and this player lost", () => {
+    it("should not count a game somebody else opened and this player lost", () => {
       foolByRoundSpy.mockReturnValue([OLEG, OLEG, OLEG, OLEG, OLEG, ROMANI]);
       openersCurse(sessionAppearances([OLEG, OLEG, OLEG, OLEG, OLEG, OLEG]));
 
@@ -114,46 +114,46 @@ describe("openersCurse()", () => {
 });
 
 describe("hotSeat()", () => {
-  const DEALT_FIVE = sessionAppearances([ROMANI, ROMANI, ROMANI, ROMANI, ROMANI, OLEG]);
+  const OPENED_FIVE = sessionAppearances([ROMANI, ROMANI, ROMANI, ROMANI, ROMANI, OLEG]);
 
   it("should award nothing when the ranking found nobody", () => {
-    expect(hotSeat(DEALT_FIVE)).toBeNull();
+    expect(hotSeat(OPENED_FIVE)).toBeNull();
   });
 
-  it("should report the deals that cost them nothing", () => {
+  it("should report the openings that cost them nothing", () => {
     bestBySpy.mockReturnValue(player);
-    const award = hotSeat(DEALT_FIVE);
+    const award = hotSeat(OPENED_FIVE);
 
     expect(award?.name === AwardName.HotSeat ? award.opens : NOTHING).toBe(FIVE);
   });
 
-  it("should name the dealer who got away with it", () => {
+  it("should name the opener who got away with it", () => {
     bestBySpy.mockReturnValue(player);
 
-    expect(hotSeat(DEALT_FIVE)?.winners).toEqual([ROMANI]);
+    expect(hotSeat(OPENED_FIVE)?.winners).toEqual([ROMANI]);
   });
 
-  it("should accept a dealer sitting exactly on the threshold", () => {
+  it("should accept an opener sitting exactly on the threshold", () => {
     hotSeat(sessionAppearances([ROMANI, ROMANI, ROMANI, ROMANI, OLEG]));
 
     expect(meritGiven()(player)).toBe(THRICE + ONCE);
   });
 
   describe("who is eligible", () => {
-    it("should rank a dealer who was never burned by their own deal", () => {
-      hotSeat(DEALT_FIVE);
+    it("should rank an opener who was never burned by their own opening", () => {
+      hotSeat(OPENED_FIVE);
 
       expect(meritGiven()(player)).toBe(FIVE);
     });
 
-    it("should refuse a dealer burned even once", () => {
+    it("should refuse an opener burned even once", () => {
       foolByRoundSpy.mockReturnValue([ROMANI, OLEG, OLEG, OLEG, OLEG, OLEG]);
-      hotSeat(DEALT_FIVE);
+      hotSeat(OPENED_FIVE);
 
       expect(meritGiven()(player)).toBeNull();
     });
 
-    it("should refuse a dealer one deal short", () => {
+    it("should refuse an opener one opening short", () => {
       hotSeat(sessionAppearances([ROMANI, ROMANI, ROMANI, OLEG]));
 
       expect(meritGiven()(player)).toBeNull();
@@ -162,17 +162,17 @@ describe("hotSeat()", () => {
 });
 
 describe("theDoorman()", () => {
-  const DEALT_SIX = sessionAppearances([ROMANI, ROMANI, ROMANI, ROMANI, ROMANI, ROMANI]);
+  const OPENED_SIX = sessionAppearances([ROMANI, ROMANI, ROMANI, ROMANI, ROMANI, ROMANI]);
 
-  it("should not even look for a winner when nobody dealt six", () => {
+  it("should not even look for a winner when nobody opened six games", () => {
     theDoorman(sessionAppearances([ROMANI, ROMANI, ROMANI, ROMANI, ROMANI, OLEG]));
 
     expect(soleBySpy).not.toHaveBeenCalled();
   });
 
-  it("should report the deals and the evening they were dealt in", () => {
+  it("should report the openings and how many games the evening had", () => {
     soleBySpy.mockReturnValue(player);
-    const award = theDoorman(DEALT_SIX);
+    const award = theDoorman(OPENED_SIX);
 
     expect(award?.name === AwardName.TheDoorman ? [award.opens, award.games] : []).toEqual([
       SIX,
@@ -184,14 +184,14 @@ describe("theDoorman()", () => {
     const qualifierGiven = () =>
       soleBySpy.mock.calls[NOTHING]?.[ONCE] as (player: PlayerAppearances) => boolean;
 
-    it("should accept the player who dealt the most", () => {
-      theDoorman(DEALT_SIX);
+    it("should accept the player who opened the most", () => {
+      theDoorman(OPENED_SIX);
 
       expect(qualifierGiven()(player)).toBe(true);
     });
 
-    it("should refuse a player who dealt fewer than the most", () => {
-      theDoorman(DEALT_SIX);
+    it("should refuse a player who opened fewer than the most", () => {
+      theDoorman(OPENED_SIX);
 
       expect(qualifierGiven()({ ...player, playerId: OLEG })).toBe(false);
     });
@@ -199,16 +199,16 @@ describe("theDoorman()", () => {
 });
 
 describe("homeAdvantage()", () => {
-  const DEALT_FIVE = sessionAppearances([ROMANI, ROMANI, ROMANI, ROMANI, ROMANI, OLEG]);
+  const OPENED_FIVE = sessionAppearances([ROMANI, ROMANI, ROMANI, ROMANI, ROMANI, OLEG]);
 
   it("should award nothing when the ranking found nobody", () => {
-    expect(homeAdvantage(DEALT_FIVE)).toBeNull();
+    expect(homeAdvantage(OPENED_FIVE)).toBeNull();
   });
 
-  it("should report the deals won as well as the deals taken", () => {
+  it("should report the games won at home as well as the games opened", () => {
     finishInSpy.mockReturnValue(Finish.First);
     bestBySpy.mockReturnValue(player);
-    const award = homeAdvantage(DEALT_FIVE);
+    const award = homeAdvantage(OPENED_FIVE);
 
     expect(award?.name === AwardName.HomeAdvantage ? [award.wins, award.opens] : []).toEqual([
       FIVE,
@@ -216,41 +216,41 @@ describe("homeAdvantage()", () => {
     ]);
   });
 
-  it("should name the dealer who kept winning their own game", () => {
+  it("should name the opener who kept winning their own game", () => {
     finishInSpy.mockReturnValue(Finish.First);
     bestBySpy.mockReturnValue(player);
 
-    expect(homeAdvantage(DEALT_FIVE)?.winners).toEqual([ROMANI]);
+    expect(homeAdvantage(OPENED_FIVE)?.winners).toEqual([ROMANI]);
   });
 
   describe("who is eligible", () => {
-    it("should count only the games they both dealt and went out of first", () => {
+    it("should count only the games they both opened and finished first in", () => {
       finishInSpy.mockReturnValue(Finish.First);
-      homeAdvantage(DEALT_FIVE);
+      homeAdvantage(OPENED_FIVE);
 
       expect(meritGiven()(player)).toBe(FIVE);
     });
 
-    it("should refuse a dealer who kept dealing and losing", () => {
+    it("should refuse an opener who kept opening and losing", () => {
       finishInSpy.mockReturnValue(Finish.Middle);
-      homeAdvantage(DEALT_FIVE);
+      homeAdvantage(OPENED_FIVE);
 
       expect(meritGiven()(player)).toBeNull();
     });
 
-    it("should refuse two wins from the deal", () => {
+    it("should refuse a player with only two wins from opening", () => {
       finishInSpy.mockReturnValueOnce(Finish.First).mockReturnValueOnce(Finish.First);
-      homeAdvantage(DEALT_FIVE);
+      homeAdvantage(OPENED_FIVE);
 
       expect(meritGiven()(player)).toBeNull();
     });
 
-    it("should accept exactly three wins from the deal", () => {
+    it("should accept a player with exactly three wins from opening", () => {
       finishInSpy
         .mockReturnValueOnce(Finish.First)
         .mockReturnValueOnce(Finish.First)
         .mockReturnValueOnce(Finish.First);
-      homeAdvantage(DEALT_FIVE);
+      homeAdvantage(OPENED_FIVE);
 
       expect(meritGiven()(player)).toBe(THRICE);
     });
@@ -258,40 +258,40 @@ describe("homeAdvantage()", () => {
 });
 
 describe("neverAsked()", () => {
-  const NEVER_DEALT = sessionAppearances([OLEG, OLEG, OLEG, OLEG]);
+  const NEVER_OPENED_ONE = sessionAppearances([OLEG, OLEG, OLEG, OLEG]);
 
   it("should award nothing when the ranking found nobody", () => {
-    expect(neverAsked(NEVER_DEALT)).toBeNull();
+    expect(neverAsked(NEVER_OPENED_ONE)).toBeNull();
   });
 
-  it("should report the games they sat through without ever dealing", () => {
+  it("should report the games they sat through without ever opening", () => {
     bestBySpy.mockReturnValue(player);
-    const award = neverAsked(NEVER_DEALT);
+    const award = neverAsked(NEVER_OPENED_ONE);
 
     expect(award?.name === AwardName.NeverAsked ? award.games : NOTHING).toBe(A_FULL_EVENING);
   });
 
-  it("should name the player nobody ever handed the deal to", () => {
+  it("should name the player nobody ever handed the opening to", () => {
     bestBySpy.mockReturnValue(player);
 
-    expect(neverAsked(NEVER_DEALT)?.winners).toEqual([ROMANI]);
+    expect(neverAsked(NEVER_OPENED_ONE)?.winners).toEqual([ROMANI]);
   });
 
   describe("who is eligible", () => {
-    it("should rank a player who never dealt by the games they sat", () => {
-      neverAsked(NEVER_DEALT);
+    it("should rank a player who never opened by the games they sat", () => {
+      neverAsked(NEVER_OPENED_ONE);
 
       expect(meritGiven()(player)).toBe(A_FULL_EVENING);
     });
 
-    it("should refuse a player who dealt even once", () => {
+    it("should refuse a player who opened even once", () => {
       neverAsked(sessionAppearances([OLEG, OLEG, OLEG, ROMANI]));
 
       expect(meritGiven()(player)).toBeNull();
     });
 
     it("should refuse a player one game short of a full evening", () => {
-      neverAsked(NEVER_DEALT);
+      neverAsked(NEVER_OPENED_ONE);
       playedGamesSpy.mockReturnValue(A_FULL_EVENING - ONCE);
 
       expect(meritGiven()(player)).toBeNull();
@@ -300,13 +300,13 @@ describe("neverAsked()", () => {
 });
 
 describe("tableCurse()", () => {
-  it("should report nothing when no dealer was ever left the fool", () => {
+  it("should report nothing when no opener was ever left the fool", () => {
     foolByRoundSpy.mockReturnValue([OLEG, OLEG]);
 
     expect(tableCurse(sessionAppearances([ROMANI, ROMANI]))).toBeNull();
   });
 
-  it("should count every game whose dealer lost it, whoever they were", () => {
+  it("should count every game whose opener lost it, whoever they were", () => {
     foolByRoundSpy.mockReturnValue([ROMANI, OLEG, ROMANI]);
 
     expect(tableCurse(sessionAppearances([ROMANI, OLEG, OLEG]))).toEqual({
@@ -315,7 +315,7 @@ describe("tableCurse()", () => {
     });
   });
 
-  it("should not count a game nobody dealt as the dealer's fault", () => {
+  it("should not count a game nobody opened as the opener's fault", () => {
     foolByRoundSpy.mockReturnValue([null, null]);
 
     expect(tableCurse(sessionAppearances([null, null]))).toBeNull();

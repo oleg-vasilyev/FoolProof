@@ -1088,20 +1088,51 @@ names the player whose card follows, which is still true tomorrow.
 two chats is two players with two careers, and nothing links them. A card therefore
 says *for all time in this chat*, never *for all time*.
 
-Six numbers are always shown, and two of them carry a baseline, because a raw
-percentage is not comparable between players: whoever mostly played three-handed
-burns roughly a third of the time by the shape of the game, and whoever played
-six-handed roughly a sixth. So next to the observed rate the card prints the rate a
-player would post if places fell at random — the mean of `1 / tableSize` across the
-games they actually sat in.
+**Four rates are shown, and every one of them is a rate.** The card used to open on
+six figures, two of which were the plain counts of games and evenings — which the
+heading already prints, one line higher, in the same breath. Two tiles said what the
+subtitle said, and they were the two with nothing under them, so a regular grid had a
+band of empty space in it for no reason a reader could work out. Deleting them answers
+both.
 
-Two denominators are used on purpose:
+Each of the three counted rates carries **the rate a player would post if places fell
+at random** — the mean of `1 / tableSize` across the games they actually sat in. A raw
+percentage is not comparable between players: whoever mostly played three-handed burns
+roughly a third of the time by the shape of the game, and whoever played six-handed
+roughly a sixth. The card names where that number comes from rather than calling it
+*expected*, because the word claims an authority it has not shown; the fact rows below
+already said *the seat alone predicts*, and the tiles now say the same thing in two
+words.
+
+The share tile carries no count and both ends of its scale instead. `0%` is the fool of
+every game and `100%` is winning every one, and a card reading `0%` above ninety-nine
+games is otherwise a contradiction to anybody who does not already know what the share
+is a share of. The evening chart's own hint says the same about the top end, so the two
+read as one definition rather than two.
+
+Two denominators are used on purpose, and the card says which is which rather than
+leaving the reader to assume:
 
 - **the fool rate is over decided games**, with draws excluded from both the count
   and its baseline, because a drawn game has no fool and leaving it in would flatter
-  everybody at the table;
-- **out-first and dealt are over every game played**, because a draw still has a
-  first player out and still had somebody deal.
+  everybody at the table. The note prints *of the decided* only when a draw actually
+  kept a game out, since on a card with no draws the phrase explains a gap that is not
+  there;
+- **wins and the first move are over every game played**, because a draw still has a
+  first player out and still had somebody open it. Both also share one baseline, and
+  that is arithmetic rather than convenience: the opener of a game is the previous
+  fool's ring-predecessor, so if places fall at random the chance of opening is the
+  chance that the fool sat one seat along — the same `1 / tableSize`. **A confirmed
+  game always has an opener**, because `Confirm` is refused outside the ready phase and
+  a card with no starter is still in phase 1; the column is nullable only because a
+  live card shares the table with finished ones.
+
+**A career too young for a chart gets a floor, not a heading over nothing.** Five
+evenings are needed before the chart is worth drawing, and the section below the tiles
+used to be a label with a right-aligned hint and empty space under it. Two readers who
+had never seen the code read that as a broken render before they read it as *not yet*.
+The section now keeps its name, says in a sentence when the chart arrives, and draws a
+dashed floor where the plot will sit.
 
 Twenty facts sit below the numbers, and a card prints at most four of them: three
 numbered rows and one plate. The point is that two players at the same table get

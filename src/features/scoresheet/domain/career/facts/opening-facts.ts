@@ -67,20 +67,20 @@ export const theHeadStart = (subject: CareerSubject): CareerFact | null => {
   return notablePick([
     {
       fact: { name: CareerFactName.TheHeadStart, games, opens: subject.tally.opens },
-      tail: atLeast(subject.tally.opens, games, subject.tally.expectedFirstRate),
+      tail: atLeast(subject.tally.opens, games, subject.tally.seatChance),
     },
   ]);
 };
 
-export const neverDealt = (subject: CareerSubject): CareerFact | null => {
+export const neverWentFirst = (subject: CareerSubject): CareerFact | null => {
   const games = subject.career.appearances.length;
-  const dealtToSomebody = subject.history.games.filter(
+  const openedBySomebody = subject.history.games.filter(
     (game) => game.starterId !== null
   ).length;
 
   return subject.tally.opens === NOTHING &&
     games >= ENOUGH_GAMES_TO_NOTICE &&
-    dealtToSomebody >= ENOUGH_GAMES_TO_NOTICE
-    ? { name: CareerFactName.NeverDealt, games }
+    openedBySomebody >= ENOUGH_GAMES_TO_NOTICE
+    ? { name: CareerFactName.NeverWentFirst, games }
     : null;
 };

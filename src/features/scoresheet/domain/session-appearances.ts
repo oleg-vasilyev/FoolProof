@@ -60,16 +60,16 @@ const appearancesOf = (
         ]
   );
 
-export interface DealtGame extends Round {
+export interface RecordedGame extends Round {
   readonly starterId: number | null;
 }
 
-export interface DealtSeries {
+export interface RecordedSeries {
   readonly players: readonly Contender[];
-  readonly games: readonly DealtGame[];
+  readonly games: readonly RecordedGame[];
 }
 
-export const sessionAppearances = (chronology: DealtSeries): SessionAppearances => {
+export const sessionAppearances = (chronology: RecordedSeries): SessionAppearances => {
   const tableSizes = chronology.games.map((game) => game.placements.length);
 
   return {

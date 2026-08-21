@@ -12,12 +12,13 @@ import {
   SECTION_LABEL_DROP,
   SHEET_BOTTOM,
   TEASER_BOTTOM_GAP,
+  TEASER_FLOOR_DROP,
   TILES_PER_ROW,
   TILES_TOP,
   TILE_BOTTOM_GAP,
   TILE_COUNT,
-  TILE_NOTE_DROP,
   TILE_ROW_HEIGHT,
+  TILE_SECOND_NOTE_DROP,
 } from "#scoresheet/render/personal/personal-metrics.ts";
 
 
@@ -56,13 +57,15 @@ export const rowFactsIn = (facts: readonly CareerFact[]): readonly CareerFact[] 
 
 export const personalLayoutOf = (card: CareerCard): PersonalLayout => {
   const afterTiles =
-    TILES_TOP + ROWS_BELOW_THE_FIRST * TILE_ROW_HEIGHT + TILE_NOTE_DROP + TILE_BOTTOM_GAP;
+    TILES_TOP + ROWS_BELOW_THE_FIRST * TILE_ROW_HEIGHT + TILE_SECOND_NOTE_DROP + TILE_BOTTOM_GAP;
 
   const chartLabel = afterTiles + SECTION_LABEL_DROP;
   const charted = card.nights.length >= ENOUGH_NIGHTS_TO_CHART;
   const plotTop = charted ? chartLabel + CHART_TOP_DROP : null;
   const afterChart =
-    plotTop === null ? chartLabel + TEASER_BOTTOM_GAP : plotTop + PLOT_HEIGHT + CHART_BOTTOM_GAP;
+    plotTop === null
+      ? chartLabel + TEASER_FLOOR_DROP + TEASER_BOTTOM_GAP
+      : plotTop + PLOT_HEIGHT + CHART_BOTTOM_GAP;
 
   const rows = rowFactsIn(card.facts);
   const factsTop = afterChart + FACTS_TOP_DROP;

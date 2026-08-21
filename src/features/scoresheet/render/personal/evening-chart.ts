@@ -30,6 +30,8 @@ const MIDDLE = 0.5;
 
 const AXIS_EVERY = 4;
 
+const AXIS_LABEL_ROOM = 56;
+
 const GRID_LINES: readonly number[] = [0, 0.25, MIDDLE, 0.75, FULL];
 
 const MIDLINE_DASH = "8 10";
@@ -157,12 +159,26 @@ const lowMark = (copy: Copy, plot: EveningPlot): readonly string[] => {
       ];
 };
 
-const numbered = (plot: EveningPlot, index: number): boolean =>
-  (index + ALONE) % AXIS_EVERY === NOTHING || index === plot.nights.length - ALONE;
+const lastOf = (plot: EveningPlot): number => plot.nights.length - ALONE;
 
-const axisNumbers = (plot: EveningPlot): readonly string[] =>
-  plot.nights.flatMap((night, index) =>
-    numbered(plot, index)
+const axisStep = (plot: EveningPlot): number =>
+  Math.max(AXIS_EVERY, Math.ceil(AXIS_LABEL_ROOM / (xAt(plot, ALONE) - xAt(plot, NOTHING))));
+
+const numbered = (plot: EveningPlot, index: number, step: number): boolean => {
+  if (index === lastOf(plot)) {
+    return true;
+  }
+
+  const clearOfTheLast = xAt(plot, lastOf(plot)) - xAt(plot, index) >= AXIS_LABEL_ROOM;
+
+  return (index + ALONE) % step === NOTHING && clearOfTheLast;
+};
+
+const axisNumbers = (plot: EveningPlot): readonly string[] => {
+  const step = axisStep(plot);
+
+  return plot.nights.flatMap((night, index) =>
+    numbered(plot, index, step)
       ? [
           text(String(index + ALONE), {
             x: xAt(plot, index),
@@ -175,6 +191,7 @@ const axisNumbers = (plot: EveningPlot): readonly string[] =>
         ]
       : []
   );
+};
 
 export const eveningChart = (copy: Copy, plot: EveningPlot): readonly string[] => [
   ...GRID_LINES.flatMap((share) => gridline(plot, share)),

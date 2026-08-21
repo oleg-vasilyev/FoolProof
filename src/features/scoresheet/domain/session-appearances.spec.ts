@@ -85,7 +85,7 @@ describe("sessionAppearances()", () => {
     expect(sessionAppearances(chronologyOf([OLEG, ANYA])).rounds).toBe(TWICE);
   });
 
-  it("should carry who dealt each game, in order", () => {
+  it("should carry who opened each game, in order", () => {
     expect(sessionAppearances(chronologyOf([ANYA, null])).starters).toEqual([ANYA, null]);
   });
 

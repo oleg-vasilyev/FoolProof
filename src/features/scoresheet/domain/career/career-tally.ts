@@ -12,10 +12,10 @@ export interface CareerTally {
   readonly fools: number;
   readonly decided: number;
   readonly foolRate: number;
-  readonly expectedFoolRate: number;
+  readonly seatChanceInDecided: number;
   readonly firsts: number;
   readonly firstRate: number;
-  readonly expectedFirstRate: number;
+  readonly seatChance: number;
   readonly opens: number;
   readonly openRate: number;
 }
@@ -49,10 +49,10 @@ export const careerTally = (appearances: readonly CareerAppearance[]): CareerTal
     fools,
     decided: decided.length,
     foolRate: rateOf(fools, decided.length),
-    expectedFoolRate: seatChanceOver(decided),
+    seatChanceInDecided: seatChanceOver(decided),
     firsts,
     firstRate: rateOf(firsts, appearances.length),
-    expectedFirstRate: seatChanceOver(appearances),
+    seatChance: seatChanceOver(appearances),
     opens,
     openRate: rateOf(opens, appearances.length),
   };

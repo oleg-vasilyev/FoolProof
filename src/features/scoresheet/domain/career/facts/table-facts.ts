@@ -24,9 +24,9 @@ interface AtSize {
 }
 
 const skillOf = (subject: CareerSubject): number =>
-  subject.tally.expectedFoolRate === NOTHING
+  subject.tally.seatChanceInDecided === NOTHING
     ? EVEN_SKILL
-    : subject.tally.foolRate / subject.tally.expectedFoolRate;
+    : subject.tally.foolRate / subject.tally.seatChanceInDecided;
 
 const expectedAt = (seats: number, skill: number): number =>
   Math.min(CERTAIN, (skill * ONE_SEAT) / seats);

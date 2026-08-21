@@ -10,9 +10,10 @@ import {
   SECTION_LABEL_DROP,
   SHEET_BOTTOM,
   TEASER_BOTTOM_GAP,
+  TEASER_FLOOR_DROP,
   TILES_TOP,
   TILE_BOTTOM_GAP,
-  TILE_NOTE_DROP,
+  TILE_SECOND_NOTE_DROP,
   TILE_ROW_HEIGHT,
 } from "#scoresheet/render/personal/personal-metrics.ts";
 import { IMAGE_MAX_HEIGHT } from "#scoresheet/render/card-metrics.ts";
@@ -45,7 +46,7 @@ const HALF = 0.5;
 
 const A_DATE = "2026-07-24";
 
-const EMPTY_SHEET_HEIGHT = 1200;
+const EMPTY_SHEET_HEIGHT = 1336;
 
 const TALLEST_SHEET_HEIGHT = 2560;
 
@@ -61,7 +62,7 @@ const ABOUT_A_RIVAL: Readonly<Record<CareerFactName, boolean>> = {
   [CareerFactName.OpenersGift]: false,
   [CareerFactName.OpenersCurse]: false,
   [CareerFactName.TheHomecoming]: false,
-  [CareerFactName.NeverDealt]: false,
+  [CareerFactName.NeverWentFirst]: false,
   [CareerFactName.TheHeadStart]: false,
   [CareerFactName.TheBadPatch]: false,
   [CareerFactName.TheCleanRun]: false,
@@ -88,7 +89,7 @@ const PLAIN_FACTS: readonly CareerFact[] = [
   factOf(CareerFactName.TheBlinder),
   factOf(CareerFactName.TheNightmare),
   factOf(CareerFactName.TheHomecoming),
-  factOf(CareerFactName.NeverDealt),
+  factOf(CareerFactName.NeverWentFirst),
   factOf(CareerFactName.TheHeadStart),
 ];
 
@@ -113,9 +114,10 @@ const cardOf = (overrides: Partial<CareerCard> = {}): CareerCard =>
 const chartedCard = (overrides: Partial<CareerCard> = {}): CareerCard =>
   cardOf({ nights: nightsOf(ENOUGH_NIGHTS_TO_CHART), ...overrides });
 
-const AFTER_TILES = TILES_TOP + TILE_ROW_HEIGHT + TILE_NOTE_DROP + TILE_BOTTOM_GAP;
+const AFTER_TILES = TILES_TOP + TILE_ROW_HEIGHT + TILE_SECOND_NOTE_DROP + TILE_BOTTOM_GAP;
 
-const AFTER_TEASER = AFTER_TILES + SECTION_LABEL_DROP + TEASER_BOTTOM_GAP;
+const AFTER_TEASER =
+  AFTER_TILES + SECTION_LABEL_DROP + TEASER_FLOOR_DROP + TEASER_BOTTOM_GAP;
 
 const TALLEST_FACTS: readonly CareerFact[] = [RIVAL_FACT, ...plainFacts(MOST_ROWS + ONE_FACT)];
 

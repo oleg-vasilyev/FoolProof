@@ -903,7 +903,7 @@ describe("seriesChronology()", () => {
     expect(repo.seriesChronology(CHAT_ID)?.games).toHaveLength(TWO);
   });
 
-  it("should report who dealt each game", () => {
+  it("should report who opened each game", () => {
     const ids = seedPlayers("Oleg", "Anya", "Roma");
     const gameId = playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
     repo.updateCard(gameId, "RECORDING", ONCE, ids[1] ?? NONE);
@@ -1208,7 +1208,7 @@ describe("careerHistory()", () => {
     ]);
   });
 
-  it("should report who dealt each game", () => {
+  it("should report who opened each game", () => {
     const ids = seedPlayers("Oleg", "Anya", "Roma");
     const gameId = playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
     repo.updateCard(gameId, "RECORDING", ONCE, ids[1] ?? NONE);

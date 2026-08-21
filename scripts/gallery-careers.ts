@@ -41,6 +41,8 @@ const EVERY_OTHER = 2;
 
 const EVERY_FOURTH = 4;
 
+const EVERY_NINTH = 9;
+
 type Fate = (order: readonly number[], game: number, night: number) => readonly number[];
 
 type Away = (playerId: number, night: number) => boolean;
@@ -98,6 +100,8 @@ const everybodyEveryNight: Away = () => false;
 const nothingDrawn: Drawn = () => false;
 
 const everyFourthDrawn: Drawn = (game) => game % EVERY_FOURTH === FIRST;
+
+const everyNinthDrawn: Drawn = (game) => game % EVERY_NINTH === FIRST;
 
 const nightDate = (night: number): string =>
   new Date(
@@ -165,11 +169,15 @@ const JUST_UNDER_THE_CHART = 4;
 
 const A_LONG_CAREER = 12;
 
+const A_CAREER_OF_YEARS = 111;
+
 const A_CLIMBING_CAREER = 7;
 
 const A_SHORT_NIGHT = 3;
 
 const A_FULL_NIGHT = 6;
+
+const A_NIGHT_THAT_RAN_LONG = 9;
 
 const A_LATE_ARRIVAL = 5;
 
@@ -185,7 +193,9 @@ const CAREERS: readonly CareerCase[] = [
   {
     name: "first-night",
     locale: Locale.En,
-    asks: "one evening old — the chart section is the card's last line, promising four more evenings",
+    asks:
+      "one evening old — the chart section holds its place with a floor and a sentence" +
+      " rather than a heading over nothing, and every count is at its smallest",
     players: SHORT_NAMES.slice(NOBODY, THREE_AT_THE_TABLE),
     nights: ONE_NIGHT,
     gamesEachNight: A_SHORT_NIGHT,
@@ -194,7 +204,9 @@ const CAREERS: readonly CareerCase[] = [
   {
     name: "under-the-chart",
     locale: Locale.Ru,
-    asks: "one evening short of a chart — the section keeps its name and says the one evening still owed",
+    asks:
+      "one evening short of a chart — the section keeps its name and owes a single evening," +
+      " in the singular",
     players: SHORT_NAMES.slice(NOBODY, FIVE_AT_THE_TABLE),
     nights: JUST_UNDER_THE_CHART,
     gamesEachNight: A_FULL_NIGHT,
@@ -244,6 +256,18 @@ const CAREERS: readonly CareerCase[] = [
     nights: A_CLIMBING_CAREER,
     gamesEachNight: A_FULL_NIGHT,
     fate: climbingNights,
+  },
+  {
+    name: "the-widest-counts",
+    locale: Locale.Ru,
+    asks:
+      "a career of years at the narrowest table — three-digit counts on every tile," +
+      " and a ninth of the games drawn, so the fool is read against a smaller whole",
+    players: SHORT_NAMES.slice(NOBODY, THREE_AT_THE_TABLE),
+    nights: A_CAREER_OF_YEARS,
+    gamesEachNight: A_NIGHT_THAT_RAN_LONG,
+    fate: burnsEveryGame,
+    drawn: everyNinthDrawn,
   },
   {
     name: "comes-and-goes",

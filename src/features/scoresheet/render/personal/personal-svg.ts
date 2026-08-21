@@ -10,6 +10,10 @@ import { personalLayoutOf, type PersonalLayout } from "#scoresheet/render/person
 import {
   HEADING_RULE,
   SECTION_LABEL_DROP,
+  TEASER_FLOOR_DASH,
+  TEASER_FLOOR_DROP,
+  TEASER_FLOOR_WIDTH,
+  TEASER_TEXT_DROP,
   TILE_TRACKING,
   personalFont,
 } from "#scoresheet/render/personal/personal-metrics.ts";
@@ -25,6 +29,8 @@ import type { Copy } from "#scoresheet/copy.ts";
 const NOTHING = 0;
 
 const RULE_WIDTH = 1;
+
+const HALVES = 2;
 
 const EYEBROW_BASELINE = 146;
 
@@ -124,15 +130,34 @@ interface ChartSection {
   readonly ink: string;
 }
 
+const teaserBody = (copy: Copy, card: CareerCard, baseline: number): readonly string[] => [
+  text(chartTeaser(copy, card.nights.length), {
+    x: IMAGE_WIDTH / HALVES,
+    y: baseline + TEASER_TEXT_DROP,
+    fill: palette.inkMuted,
+    "font-family": FONT_FAMILY,
+    "font-size": personalFont.chartTeaser,
+    "text-anchor": "middle",
+  }),
+  line({
+    x1: PAD,
+    y1: baseline + TEASER_FLOOR_DROP,
+    x2: GRID_RIGHT,
+    y2: baseline + TEASER_FLOOR_DROP,
+    stroke: palette.cellAbsentEdge,
+    "stroke-width": TEASER_FLOOR_WIDTH,
+    "stroke-dasharray": TEASER_FLOOR_DASH,
+  }),
+];
+
 const chartSection = (section: ChartSection): readonly string[] => {
   const { copy, card, sheet, ink } = section;
 
   if (sheet.plotTop === null) {
-    return sectionLabel(
-      copy.personalChartLabel,
-      chartTeaser(copy, card.nights.length),
-      sheet.chartLabel
-    );
+    return [
+      ...sectionLabel(copy.personalChartLabel, null, sheet.chartLabel),
+      ...teaserBody(copy, card, sheet.chartLabel),
+    ];
   }
 
   return [
@@ -159,7 +184,7 @@ export const renderPersonalCard = (
   return svgOf(IMAGE_WIDTH, sheet.height, [
     rect({ x: NOTHING, y: NOTHING, width: IMAGE_WIDTH, height: sheet.height, fill: palette.sheet }),
     ...heading(copy, card, ink),
-    ...careerTiles(copy, card),
+    ...careerTiles(copy, card, ink),
     ...chartSection({ copy, card, sheet, ink }),
     ...(sheet.factsLabel === null
       ? []

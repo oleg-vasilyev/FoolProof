@@ -88,15 +88,15 @@ const A_TALLY: CareerTally = {
   fools: SOME_FOOLS,
   decided: SOME_DECIDED,
   foolRate: USUAL_FOOL_RATE,
-  expectedFoolRate: SEAT_FOOL_RATE,
+  seatChanceInDecided: SEAT_FOOL_RATE,
   firsts: SOME_FIRSTS,
   firstRate: USUAL_FIRST_RATE,
-  expectedFirstRate: SEAT_FIRST_RATE,
+  seatChance: SEAT_FIRST_RATE,
   opens: SOME_OPENS,
   openRate: SOME_OPEN_RATE,
 };
 
-const A_CHOSEN_FACT: CareerFact = { name: CareerFactName.NeverDealt, games: SOME_GAMES };
+const A_CHOSEN_FACT: CareerFact = { name: CareerFactName.NeverWentFirst, games: SOME_GAMES };
 
 const A_LONG_NIGHT: EveningShare = {
   seriesNo: A_NIGHT,

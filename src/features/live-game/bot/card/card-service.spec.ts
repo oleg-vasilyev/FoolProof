@@ -802,7 +802,7 @@ describe("createCardService()", () => {
       applySpy.mockReturnValue({ outcome: Outcome.Rejected });
     });
 
-    it("should leave the starter unset when no player dealt yet", async () => {
+    it("should leave the starter unset when nobody has opened yet", async () => {
       cardWith({ starter_player_id: null });
 
       await cards.tap(copy, payload("back", null), ACTOR_ID);

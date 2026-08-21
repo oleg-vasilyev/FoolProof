@@ -1,6 +1,6 @@
 import { CareerFactName, RAREST_FIRST, type CareerFact } from "#scoresheet/domain/career/facts/fact-catalogue.ts";
 import { theBogey, theCharm, theJinx, thePatsy } from "#scoresheet/domain/career/facts/rival-facts.ts";
-import { neverDealt, openersCurse, openersGift, theHeadStart } from "#scoresheet/domain/career/facts/opening-facts.ts";
+import { neverWentFirst, openersCurse, openersGift, theHeadStart } from "#scoresheet/domain/career/facts/opening-facts.ts";
 import { bigTableCharm, bigTableCurse } from "#scoresheet/domain/career/facts/table-facts.ts";
 import { theBlinder, theNightmare } from "#scoresheet/domain/career/facts/night-facts.ts";
 import { lightningRod, theSurvivor } from "#scoresheet/domain/career/facts/seat-facts.ts";
@@ -28,7 +28,7 @@ const RULES_IN_ORDER: readonly FactRule[] = [
   openersGift,
   openersCurse,
   theHomecoming,
-  neverDealt,
+  neverWentFirst,
   theHeadStart,
   theBadPatch,
   theCleanRun,

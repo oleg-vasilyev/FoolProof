@@ -214,7 +214,7 @@ describe("seating-screen", () => {
       expect(ctx.answerCallbackQuerySpy).toHaveBeenCalledWith(copy.tapBack);
     });
 
-    it("should open the card once the ring is settled, with the deal picked by hand", async () => {
+    it("should open the card once the ring is settled, with the first move picked by hand", async () => {
       applySeatingSpy.mockReturnValue({ outcome: Outcome.Seated, seats: SEATS });
 
       await onSeatingTap(context(), ctx.callbackTap(DATA));

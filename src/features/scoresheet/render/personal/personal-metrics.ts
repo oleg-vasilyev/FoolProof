@@ -9,11 +9,13 @@ export const TILES_TOP = 448;
 
 export const TILE_VALUE_DROP = 128;
 
-export const TILE_NOTE_DROP = 182;
+export const TILE_NOTE_DROP = 170;
 
-export const TILES_PER_ROW = 3;
+export const TILE_SECOND_NOTE_DROP = 208;
 
-export const TILE_COUNT = 6;
+export const TILES_PER_ROW = 2;
+
+export const TILE_COUNT = 4;
 
 export const SECTION_LABEL_DROP = 74;
 
@@ -25,9 +27,17 @@ export const PLOT_HEIGHT = 330;
 
 export const PLOT_AXIS_DROP = 46;
 
-export const TILE_BOTTOM_GAP = 74;
+export const TILE_BOTTOM_GAP = 48;
 
 export const CHART_BOTTOM_GAP = 80;
+
+export const TEASER_TEXT_DROP = 90;
+
+export const TEASER_FLOOR_DROP = 136;
+
+export const TEASER_FLOOR_DASH = "8 10";
+
+export const TEASER_FLOOR_WIDTH = 2;
 
 export const TEASER_BOTTOM_GAP = 60;
 
@@ -68,6 +78,7 @@ export const personalFont = {
   tileValue: 116,
   tileNote: 29,
   sectionLabel: 30,
+  chartTeaser: 32,
   sectionHint: 27,
   axis: 22,
   factIndex: 28,

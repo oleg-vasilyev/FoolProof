@@ -18,7 +18,7 @@ const BAD_NEWS: Readonly<Record<CareerFactName, boolean>> = {
   [CareerFactName.OpenersGift]: false,
   [CareerFactName.OpenersCurse]: true,
   [CareerFactName.TheHomecoming]: false,
-  [CareerFactName.NeverDealt]: false,
+  [CareerFactName.NeverWentFirst]: false,
   [CareerFactName.TheHeadStart]: false,
   [CareerFactName.TheBadPatch]: true,
   [CareerFactName.TheCleanRun]: false,

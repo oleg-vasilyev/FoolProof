@@ -138,6 +138,12 @@ const dots = (): readonly Record<string, unknown>[] => circlesOf(POINT_RADIUS);
 const curveAttributes = (): Record<string, unknown> =>
   (pathSpy.mock.calls[0]?.[0] ?? {}) as Record<string, unknown>;
 
+const A_CAREER_OF_YEARS = 111;
+
+const NARROWEST_GAP = 56;
+
+const LAST = -1;
+
 describe("eveningChart()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -490,6 +496,44 @@ describe("eveningChart()", () => {
       eveningChart(copy, chartOf({ nights: nightsOf(AXIS_EVERY - ONCE) }));
 
       expect(textSpy).not.toHaveBeenCalledWith(String(AXIS_EVERY - TWO_BACK), expect.anything());
+    });
+
+    it("should widen the interval when the evenings crowd their own numbers", () => {
+      eveningChart(copy, chartOf({ nights: nightsOf(A_CAREER_OF_YEARS) }));
+
+      const numbered = textSpy.mock.calls
+        .filter(([value]) => /^\d+$/.test(String(value)))
+        .map(([value]) => Number(value))
+        .sort((first, second) => first - second);
+
+      const gaps = numbered
+        .slice(ONCE)
+        .map((evening, index) => evening - (numbered[index] ?? evening));
+
+      for (const gap of gaps) {
+        expect(gap).toBeGreaterThan(AXIS_EVERY);
+      }
+
+      expect(numbered.at(LAST)).toBe(A_CAREER_OF_YEARS);
+    });
+
+    it("should never set two numbers closer together than one of them is wide", () => {
+      eveningChart(copy, chartOf({ nights: nightsOf(A_CAREER_OF_YEARS) }));
+
+      const drawn = textSpy.mock.calls
+        .filter(([value]) => /^\d+$/.test(String(value)))
+        .map(([, attributes]) => (attributes as Record<string, unknown>).x as number)
+        .sort((first, second) => first - second);
+
+      for (const [index, x] of drawn.entries()) {
+        const before = drawn[index - ONCE];
+
+        if (before !== undefined) {
+          expect(x - before, `numbers ${String(before)} and ${String(x)}`).toBeGreaterThanOrEqual(
+            NARROWEST_GAP
+          );
+        }
+      }
     });
 
     it("should hang a number under the plot on its own evening's column", () => {

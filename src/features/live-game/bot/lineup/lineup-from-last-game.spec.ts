@@ -457,7 +457,7 @@ describe("a line-up taken from the last game", () => {
       expect(rotateToLowestIdSpy).toHaveBeenCalledWith(DISTINCT_SEATS);
     });
 
-    it("should open the rotated seating with the deal picked by hand", async () => {
+    it("should open the rotated seating with the first move picked by hand", async () => {
       parseNamesSpy.mockReturnValue({ ok: true, names: ["Anya"] });
       tableWithoutSpy.mockReturnValue({ ok: true, seats: DISTINCT_SEATS });
 

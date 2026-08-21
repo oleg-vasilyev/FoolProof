@@ -116,7 +116,7 @@ describe("row mappers", () => {
       });
     });
 
-    it("should read the starter as nullable, since nobody may have dealt yet", () => {
+    it("should read the starter as nullable, since nobody may have opened yet", () => {
       toGame(row);
 
       expect(values.nullableNumSpy).toHaveBeenCalledWith(STARTER_ID);
@@ -311,7 +311,7 @@ describe("groupByGame()", () => {
     ]);
   });
 
-  it("should carry who dealt the game", () => {
+  it("should carry who opened the game", () => {
     expect(groupByGame([rowOf(ONE, TWO, ONE, THREE)])[0]?.starterId).toBe(THREE);
   });
 

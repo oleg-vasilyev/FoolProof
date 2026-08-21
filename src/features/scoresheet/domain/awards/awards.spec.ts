@@ -295,7 +295,7 @@ describe("honoursFor()", () => {
       expect(namesOf()).toEqual([AwardName.HomeAdvantage, AwardName.HotSeat]);
     });
 
-    it("should keep the hot seat when nobody won from their own deal", () => {
+    it("should keep the hot seat when nobody won a game they opened", () => {
       fires(AwardName.HotSeat);
 
       expect(namesOf()).toEqual([AwardName.HotSeat]);

@@ -19,9 +19,9 @@ const againstTheSeat = (
             name,
             games: subject.tally.decided,
             burns: subject.tally.fools,
-            expected: subject.tally.expectedFoolRate,
+            expected: subject.tally.seatChanceInDecided,
           },
-          tail: tail(subject.tally.fools, subject.tally.decided, subject.tally.expectedFoolRate),
+          tail: tail(subject.tally.fools, subject.tally.decided, subject.tally.seatChanceInDecided),
         },
       ]);
 

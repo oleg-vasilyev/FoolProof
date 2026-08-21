@@ -31,7 +31,7 @@ const openersCurseSpy = vi.fn();
 
 const theHomecomingSpy = vi.fn();
 
-const neverDealtSpy = vi.fn();
+const neverWentFirstSpy = vi.fn();
 
 const theHeadStartSpy = vi.fn();
 
@@ -70,7 +70,7 @@ vi.mock("#scoresheet/domain/career/facts/opening-facts.ts", () => ({
   openersGift: (subject: unknown) => openersGiftSpy(subject),
   openersCurse: (subject: unknown) => openersCurseSpy(subject),
   theHeadStart: (subject: unknown) => theHeadStartSpy(subject),
-  neverDealt: (subject: unknown) => neverDealtSpy(subject),
+  neverWentFirst: (subject: unknown) => neverWentFirstSpy(subject),
 }));
 
 vi.mock("#scoresheet/domain/career/facts/run-facts.ts", () => ({
@@ -164,10 +164,10 @@ const A_TALLY: CareerTally = {
   fools: SOME_BURNS,
   decided: SOME_DECIDED,
   foolRate: A_FOOL_RATE,
-  expectedFoolRate: A_SEAT_IN_FOUR,
+  seatChanceInDecided: A_SEAT_IN_FOUR,
   firsts: SOME_FIRSTS,
   firstRate: A_FIRST_RATE,
-  expectedFirstRate: A_SEAT_IN_FIVE,
+  seatChance: A_SEAT_IN_FIVE,
   opens: SOME_OPENS,
   openRate: AN_OPEN_RATE,
 };
@@ -268,7 +268,7 @@ const FACTS: Readonly<Record<CareerFactName, CareerFact>> = {
     missed: SOME_MISSED,
     playedOn: A_DAY,
   },
-  [CareerFactName.NeverDealt]: { name: CareerFactName.NeverDealt, games: SOME_GAMES },
+  [CareerFactName.NeverWentFirst]: { name: CareerFactName.NeverWentFirst, games: SOME_GAMES },
   [CareerFactName.TheHeadStart]: {
     name: CareerFactName.TheHeadStart,
     opens: SOME_OPENS,
@@ -326,7 +326,7 @@ const RULES: Readonly<Record<CareerFactName, ReturnType<typeof vi.fn>>> = {
   [CareerFactName.OpenersGift]: openersGiftSpy,
   [CareerFactName.OpenersCurse]: openersCurseSpy,
   [CareerFactName.TheHomecoming]: theHomecomingSpy,
-  [CareerFactName.NeverDealt]: neverDealtSpy,
+  [CareerFactName.NeverWentFirst]: neverWentFirstSpy,
   [CareerFactName.TheHeadStart]: theHeadStartSpy,
   [CareerFactName.TheBadPatch]: theBadPatchSpy,
   [CareerFactName.TheCleanRun]: theCleanRunSpy,

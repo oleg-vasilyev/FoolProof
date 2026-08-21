@@ -10,7 +10,7 @@ export const CareerFactName = {
   OpenersGift: "openersGift",
   OpenersCurse: "openersCurse",
   TheHomecoming: "theHomecoming",
-  NeverDealt: "neverDealt",
+  NeverWentFirst: "neverWentFirst",
   TheHeadStart: "theHeadStart",
   TheBadPatch: "theBadPatch",
   TheCleanRun: "theCleanRun",
@@ -79,7 +79,7 @@ export type CareerFact =
       typeof CareerFactName.TheHomecoming,
       { readonly missed: number; readonly playedOn: string }
     >
-  | Noted<typeof CareerFactName.NeverDealt, { readonly games: number }>
+  | Noted<typeof CareerFactName.NeverWentFirst, { readonly games: number }>
   | Noted<typeof CareerFactName.TheHeadStart, Opening & { readonly games: number }>
   | Noted<typeof CareerFactName.TheBadPatch, Stretch>
   | Noted<typeof CareerFactName.TheCleanRun, Stretch>
@@ -104,7 +104,7 @@ export const RAREST_FIRST: readonly CareerFactName[] = [
   CareerFactName.OpenersGift,
   CareerFactName.OpenersCurse,
   CareerFactName.TheHomecoming,
-  CareerFactName.NeverDealt,
+  CareerFactName.NeverWentFirst,
   CareerFactName.TheHeadStart,
   CareerFactName.TheBadPatch,
   CareerFactName.TheCleanRun,

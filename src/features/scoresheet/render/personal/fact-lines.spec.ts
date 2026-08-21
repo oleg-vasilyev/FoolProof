@@ -167,8 +167,8 @@ const SAMPLES: readonly Sample[] = [
     }
   ),
   sampleOf(
-    { name: CareerFactName.NeverDealt, games: 25 },
-    { gamesWith: [25], holderShows: games(25), whyShows: [copy.neverDealtReason] }
+    { name: CareerFactName.NeverWentFirst, games: 25 },
+    { gamesWith: [25], holderShows: games(25), whyShows: [copy.neverWentFirstReason] }
   ),
   sampleOf(
     { name: CareerFactName.TheHeadStart, opens: 26, games: 27 },

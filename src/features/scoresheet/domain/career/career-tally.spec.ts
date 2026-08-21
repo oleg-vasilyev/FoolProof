@@ -38,7 +38,7 @@ const AT_THREE_AND_FIVE = 0.26666666666;
 
 const TO_TEN_PLACES = 10;
 
-const DEALT = true;
+const OPENED = true;
 
 const SAT = false;
 
@@ -65,10 +65,10 @@ describe("careerTally()", () => {
       fools: NOTHING,
       decided: NOTHING,
       foolRate: NOTHING,
-      expectedFoolRate: NOTHING,
+      seatChanceInDecided: NOTHING,
       firsts: NOTHING,
       firstRate: NOTHING,
-      expectedFirstRate: NOTHING,
+      seatChance: NOTHING,
       opens: NOTHING,
       openRate: NOTHING,
     });
@@ -140,7 +140,7 @@ describe("careerTally()", () => {
       playedAs(Finish.Middle, FOUR_AT_THE_TABLE),
     ];
 
-    expect(careerTally(career).expectedFoolRate).toBe(A_QUARTER);
+    expect(careerTally(career).seatChanceInDecided).toBe(A_QUARTER);
   });
 
   it("should leave a drawn game's table out of the expected fool rate", () => {
@@ -150,7 +150,7 @@ describe("careerTally()", () => {
       playedAs(Finish.Drawn, TWO_AT_THE_TABLE),
     ];
 
-    expect(careerTally(career).expectedFoolRate).toBe(A_QUARTER);
+    expect(careerTally(career).seatChanceInDecided).toBe(A_QUARTER);
   });
 
   it("should count a drawn game's table towards the expected first rate", () => {
@@ -160,7 +160,7 @@ describe("careerTally()", () => {
       playedAs(Finish.Drawn, TWO_AT_THE_TABLE),
     ];
 
-    expect(careerTally(career).expectedFirstRate).toBe(A_THIRD);
+    expect(careerTally(career).seatChance).toBe(A_THIRD);
   });
 
   it("should average the seat chance over tables of different sizes", () => {
@@ -169,12 +169,12 @@ describe("careerTally()", () => {
       playedAs(Finish.Middle, FIVE_AT_THE_TABLE),
     ];
 
-    expect(careerTally(career).expectedFirstRate).toBeCloseTo(AT_THREE_AND_FIVE, TO_TEN_PLACES);
+    expect(careerTally(career).seatChance).toBeCloseTo(AT_THREE_AND_FIVE, TO_TEN_PLACES);
   });
 
-  it("should count the games the player dealt", () => {
+  it("should count the games the player opened", () => {
     const career = [
-      playedAs(Finish.First, FOUR_AT_THE_TABLE, FIRST_NIGHT, DEALT),
+      playedAs(Finish.First, FOUR_AT_THE_TABLE, FIRST_NIGHT, OPENED),
       playedAs(Finish.Middle, FOUR_AT_THE_TABLE, FIRST_NIGHT, SAT),
     ];
 
@@ -183,8 +183,8 @@ describe("careerTally()", () => {
 
   it("should measure the open rate against every game, drawn ones included", () => {
     const career = [
-      playedAs(Finish.First, FOUR_AT_THE_TABLE, FIRST_NIGHT, DEALT),
-      playedAs(Finish.Middle, FOUR_AT_THE_TABLE, FIRST_NIGHT, DEALT),
+      playedAs(Finish.First, FOUR_AT_THE_TABLE, FIRST_NIGHT, OPENED),
+      playedAs(Finish.Middle, FOUR_AT_THE_TABLE, FIRST_NIGHT, OPENED),
       playedAs(Finish.Drawn, FOUR_AT_THE_TABLE, FIRST_NIGHT, SAT),
     ];
 

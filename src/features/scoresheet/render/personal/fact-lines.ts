@@ -75,13 +75,13 @@ const bodyOf = (copy: Copy, fact: CareerFact): Body => {
     case CareerFactName.OpenersGift:
       return {
         holder: timeTally(copy, fact.opens),
-        reason: copy.dealtGiftReason(fact.firsts),
+        reason: copy.firstMoveGiftReason(fact.firsts),
       };
 
     case CareerFactName.OpenersCurse:
       return {
         holder: timeTally(copy, fact.opens),
-        reason: copy.dealtCurseReason(fact.burns),
+        reason: copy.firstMoveCurseReason(fact.burns),
       };
 
     case CareerFactName.TheHomecoming:
@@ -90,10 +90,10 @@ const bodyOf = (copy: Copy, fact: CareerFact): Body => {
         reason: copy.homecomingReason(eveningTally(copy, fact.missed)),
       };
 
-    case CareerFactName.NeverDealt:
+    case CareerFactName.NeverWentFirst:
       return {
-        holder: copy.neverDealtHolder(gameTally(copy, fact.games)),
-        reason: copy.neverDealtReason,
+        holder: copy.neverWentFirstHolder(gameTally(copy, fact.games)),
+        reason: copy.neverWentFirstReason,
       };
 
     case CareerFactName.TheHeadStart:

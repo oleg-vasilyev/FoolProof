@@ -23,7 +23,7 @@ vi.mock("#scoresheet/domain/career/facts/notable-pick.ts", () => ({
 const {
   ENOUGH_GAMES_TO_NOTICE,
   ENOUGH_OPENINGS,
-  neverDealt,
+  neverWentFirst,
   openersCurse,
   openersGift,
   theHeadStart,
@@ -85,10 +85,10 @@ const A_TALLY: CareerTally = {
   fools: SOME_FOOLS,
   decided: SOME_DECIDED,
   foolRate: USUAL_FOOL_RATE,
-  expectedFoolRate: SEAT_FOOL_RATE,
+  seatChanceInDecided: SEAT_FOOL_RATE,
   firsts: SOME_FIRSTS,
   firstRate: USUAL_FIRST_RATE,
-  expectedFirstRate: SEAT_FIRST_RATE,
+  seatChance: SEAT_FIRST_RATE,
   opens: SOME_OPENS,
   openRate: SOME_OPEN_RATE,
 };
@@ -117,7 +117,7 @@ const OPENED_AND_SURVIVED = appearanceOf(Finish.Middle, true);
 
 const OPENED_AND_DRAWN = appearanceOf(Finish.Drawn, true);
 
-const DEALT_TO_SOMEBODY_ELSE = appearanceOf(Finish.Middle, false);
+const OPENED_BY_SOMEBODY_ELSE = appearanceOf(Finish.Middle, false);
 
 const repeated = (
   appearance: CareerAppearance,
@@ -131,10 +131,10 @@ const gameStartedBy = (starterId: number | null): CareerGame => ({
   placements: [],
 });
 
-const gamesDealt = (times: number): readonly CareerGame[] =>
+const gamesOpened = (times: number): readonly CareerGame[] =>
   Array.from({ length: times }, () => gameStartedBy(SOMEBODY_ELSE));
 
-const gamesNobodyDealt = (times: number): readonly CareerGame[] =>
+const gamesNobodyOpened = (times: number): readonly CareerGame[] =>
   Array.from({ length: times }, () => gameStartedBy(null));
 
 const subjectOf = (
@@ -157,7 +157,7 @@ const ENOUGH_DECIDED_OPENINGS = [
   ...repeated(OPENED_AND_BURNED, BURNED_OPENINGS),
   ...repeated(OPENED_AND_WON, WON_OPENINGS),
   ...repeated(OPENED_AND_SURVIVED, ENOUGH_OPENINGS - BURNED_OPENINGS - WON_OPENINGS),
-  ...repeated(DEALT_TO_SOMEBODY_ELSE, ENOUGH_OPENINGS),
+  ...repeated(OPENED_BY_SOMEBODY_ELSE, ENOUGH_OPENINGS),
 ];
 
 const ONE_OPENING_SHORT = [
@@ -167,7 +167,7 @@ const ONE_OPENING_SHORT = [
     OPENED_AND_SURVIVED,
     ENOUGH_OPENINGS - BURNED_OPENINGS - WON_OPENINGS - ONE_SHORT
   ),
-  ...repeated(DEALT_TO_SOMEBODY_ELSE, ENOUGH_OPENINGS),
+  ...repeated(OPENED_BY_SOMEBODY_ELSE, ENOUGH_OPENINGS),
 ];
 
 describe("opening facts", () => {
@@ -281,7 +281,7 @@ describe("opening facts", () => {
   });
 
   describe("theHeadStart()", () => {
-    const ENOUGH_TO_NOTICE = repeated(DEALT_TO_SOMEBODY_ELSE, ENOUGH_GAMES_TO_NOTICE);
+    const ENOUGH_TO_NOTICE = repeated(OPENED_BY_SOMEBODY_ELSE, ENOUGH_GAMES_TO_NOTICE);
 
     it("should offer the openings the tally counted over exactly enough games", () => {
       theHeadStart(subjectOf(ENOUGH_TO_NOTICE));
@@ -298,7 +298,7 @@ describe("opening facts", () => {
       ]);
     });
 
-    it("should weigh those openings against the seat's own share of the deal", () => {
+    it("should weigh those openings against the seat's own share of the openings", () => {
       theHeadStart(subjectOf(ENOUGH_TO_NOTICE));
 
       expect(atLeastSpy).toHaveBeenCalledWith(
@@ -309,7 +309,7 @@ describe("opening facts", () => {
     });
 
     it("should report nothing one game short of enough to notice", () => {
-      const tooFew = repeated(DEALT_TO_SOMEBODY_ELSE, ENOUGH_GAMES_TO_NOTICE - ONE_SHORT);
+      const tooFew = repeated(OPENED_BY_SOMEBODY_ELSE, ENOUGH_GAMES_TO_NOTICE - ONE_SHORT);
 
       expect(theHeadStart(subjectOf(tooFew))).toBeNull();
       expect(notablePickSpy).not.toHaveBeenCalled();
@@ -327,49 +327,49 @@ describe("opening facts", () => {
     });
   });
 
-  describe("neverDealt()", () => {
-    const NEVER_OPENED = repeated(DEALT_TO_SOMEBODY_ELSE, ENOUGH_GAMES_TO_NOTICE);
+  describe("neverWentFirst()", () => {
+    const NEVER_OPENED = repeated(OPENED_BY_SOMEBODY_ELSE, ENOUGH_GAMES_TO_NOTICE);
 
-    const DEALT_ROUND_THE_TABLE = gamesDealt(ENOUGH_GAMES_TO_NOTICE);
+    const OPENED_ROUND_THE_TABLE = gamesOpened(ENOUGH_GAMES_TO_NOTICE);
 
-    const NEVER_DEALT_AT_ALL = { opens: NOTHING };
+    const NEVER_OPENED_AT_ALL = { opens: NOTHING };
 
-    it("should report the fact when a player never dealt over exactly enough games", () => {
+    it("should report the fact when a player never opened over exactly enough games", () => {
       expect(
-        neverDealt(subjectOf(NEVER_OPENED, DEALT_ROUND_THE_TABLE, NEVER_DEALT_AT_ALL))
+        neverWentFirst(subjectOf(NEVER_OPENED, OPENED_ROUND_THE_TABLE, NEVER_OPENED_AT_ALL))
       ).toEqual({
-        name: CareerFactName.NeverDealt,
+        name: CareerFactName.NeverWentFirst,
         games: ENOUGH_GAMES_TO_NOTICE,
       });
     });
 
-    it("should report nothing when the player has dealt at all", () => {
-      expect(neverDealt(subjectOf(NEVER_OPENED, DEALT_ROUND_THE_TABLE))).toBeNull();
+    it("should report nothing when the player has opened at all", () => {
+      expect(neverWentFirst(subjectOf(NEVER_OPENED, OPENED_ROUND_THE_TABLE))).toBeNull();
     });
 
     it("should report nothing one game short of enough to notice", () => {
-      const tooFew = repeated(DEALT_TO_SOMEBODY_ELSE, ENOUGH_GAMES_TO_NOTICE - ONE_SHORT);
+      const tooFew = repeated(OPENED_BY_SOMEBODY_ELSE, ENOUGH_GAMES_TO_NOTICE - ONE_SHORT);
 
-      expect(neverDealt(subjectOf(tooFew, DEALT_ROUND_THE_TABLE, NEVER_DEALT_AT_ALL))).toBeNull();
+      expect(neverWentFirst(subjectOf(tooFew, OPENED_ROUND_THE_TABLE, NEVER_OPENED_AT_ALL))).toBeNull();
     });
 
-    it("should report nothing when one game short was dealt to anybody at all", () => {
-      const rarelyDealt = gamesDealt(ENOUGH_GAMES_TO_NOTICE - ONE_SHORT);
+    it("should report nothing when one game short was opened by anybody at all", () => {
+      const rarelyOpened = gamesOpened(ENOUGH_GAMES_TO_NOTICE - ONE_SHORT);
 
-      expect(neverDealt(subjectOf(NEVER_OPENED, rarelyDealt, NEVER_DEALT_AT_ALL))).toBeNull();
+      expect(neverWentFirst(subjectOf(NEVER_OPENED, rarelyOpened, NEVER_OPENED_AT_ALL))).toBeNull();
     });
 
-    it("should not count a game nobody was recorded dealing", () => {
-      const undealt = [
-        ...gamesDealt(ENOUGH_GAMES_TO_NOTICE - ONE_SHORT),
-        ...gamesNobodyDealt(ENOUGH_GAMES_TO_NOTICE),
+    it("should not count a game nobody was recorded opening", () => {
+      const unopened = [
+        ...gamesOpened(ENOUGH_GAMES_TO_NOTICE - ONE_SHORT),
+        ...gamesNobodyOpened(ENOUGH_GAMES_TO_NOTICE),
       ];
 
-      expect(neverDealt(subjectOf(NEVER_OPENED, undealt, NEVER_DEALT_AT_ALL))).toBeNull();
+      expect(neverWentFirst(subjectOf(NEVER_OPENED, unopened, NEVER_OPENED_AT_ALL))).toBeNull();
     });
 
     it("should read the fact off the record without asking how unlikely it was", () => {
-      neverDealt(subjectOf(NEVER_OPENED, DEALT_ROUND_THE_TABLE, NEVER_DEALT_AT_ALL));
+      neverWentFirst(subjectOf(NEVER_OPENED, OPENED_ROUND_THE_TABLE, NEVER_OPENED_AT_ALL));
 
       expect(atLeastSpy).not.toHaveBeenCalled();
       expect(notablePickSpy).not.toHaveBeenCalled();
