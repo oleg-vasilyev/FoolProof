@@ -434,6 +434,38 @@ three files anyway.
 
 ---
 
+## The design-page gate assumes one account owns both the repository and the page
+
+`docs:check` compares `docs/mockups/design-page.sync` against the drawings the code
+produces, and that is the only thing in the repository that can notice the Claude
+Design page has gone stale — the page lives behind a login, so nothing else can see
+it. The gate is right to exist. What it silently assumes is that whoever can commit
+can also write the page.
+
+On 21 August 2026 that assumption broke. The mockups moved in `9072e2e`, the page did
+not follow, and by the time anybody noticed, this machine had switched from the
+account that owns the page to one that does not: the project answers 404 through
+`DesignSync`, `list_projects` shows only unrelated work, and a share link does not
+help because it grants a human a browser view rather than granting the API a write.
+The owning account then ran out of tokens. So `main` is red on one line, the code is
+fine, and no action available from here can clear it.
+
+Two things are wrong, and only the second is worth code. The first is that a red
+`main` now means either "the code is broken" or "somebody committed from the wrong
+account", and a reader cannot tell which without opening the log. The second is the
+gate's teeth: a stale page must never reach a **tag**, because a release is what
+somebody reads the page against — but it need not block every **push**, because a
+push is a checkpoint and the page can catch up before the tag. Moving this one check
+out of `check:push` and into `check:release` would keep the guarantee that matters and
+stop an account switch from painting `main` red.
+
+**That is a gate losing teeth, so it is the owner's call, not a cleanup.** Pick it up
+the next time an account switch or a lost login makes this red again — twice is a
+pattern and the second time is the argument. Until then the page is behind by exactly
+one change: the player card's top block from `9072e2e`.
+
+---
+
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to
