@@ -55,7 +55,7 @@ const curseNote = (copy: Copy, curse: TableCurse, top: number): readonly string[
     "font-size": CURSE_LABEL_FONT,
     "letter-spacing": CURSE_TRACKING,
   }),
-  text(copy.curseFact(curse.burns, gameTally(copy, curse.games)), {
+  text(copy.curseFact(curse.burns, gameTally(copy, curse.games), curse.predicted), {
     x: GRID_RIGHT,
     y: top + CURSE_BASELINE_DROP,
     fill: palette.inkMuted,

@@ -145,6 +145,43 @@ describe("award-lines", () => {
       expect(awardReason(copy, award)).not.toContain("undefined");
     });
 
+    const A_PART = 3;
+
+    const A_WHOLE = 7;
+
+    const TWO_RAW_NUMBERS: readonly {
+      readonly award: Award;
+      readonly reads: (table: typeof copy) => string;
+    }[] = [
+      {
+        award: { name: AwardName.HomeAdvantage, winners: [WINNER], wins: A_PART, opens: A_WHOLE },
+        reads: (table) => table.homeAdvantageReason(A_PART, A_WHOLE),
+      },
+      {
+        award: { name: AwardName.OpenersCurse, winners: [WINNER], opens: A_WHOLE, burns: A_PART },
+        reads: (table) => table.openersCurseReason(A_WHOLE, A_PART),
+      },
+      {
+        award: { name: AwardName.TheComeback, winners: [WINNER], sank: A_PART, percent: A_WHOLE },
+        reads: (table) => table.comebackReason(A_PART, A_WHOLE),
+      },
+      {
+        award: { name: AwardName.FalseDawn, winners: [WINNER], ledAt: A_PART, percent: A_WHOLE },
+        reads: (table) => table.falseDawnReason(A_PART, A_WHOLE),
+      },
+      {
+        award: { name: AwardName.TheLatecomer, winners: [WINNER], joinedAt: A_PART, percent: A_WHOLE },
+        reads: (table) => table.latecomerReason(A_PART, A_WHOLE),
+      },
+    ];
+
+    it.each(TWO_RAW_NUMBERS)(
+      "should hand $award.name its two numbers in the roles they were earned under",
+      ({ award, reads }) => {
+        expect(awardReason(copy, award)).toBe(reads(copy));
+      }
+    );
+
     it("should give the untouchable a tally of the games, not the raw count", () => {
       const award: Award = {
         name: AwardName.Untouchable,
@@ -158,14 +195,15 @@ describe("award-lines", () => {
       expect(gameTallySpy).toHaveBeenCalledWith(copy, oneOf(AwardName.Untouchable));
     });
 
-    it("should give teflon its raw streak, with no tally involved", () => {
-      awardReason(copy, {
+    it("should count teflon's clean streak in games rather than in bare numbers", () => {
+      const reason = awardReason(copy, {
         name: AwardName.Teflon,
         winners: [WINNER],
         streak: oneOf(AwardName.Teflon),
       });
 
-      expect(gameTallySpy).not.toHaveBeenCalled();
+      expect(reason).toContain(tallyOf(oneOf(AwardName.Teflon)));
+      expect(gameTallySpy).toHaveBeenCalledWith(copy, oneOf(AwardName.Teflon));
     });
 
     it("should give the truce its draws raw and tally only the games", () => {

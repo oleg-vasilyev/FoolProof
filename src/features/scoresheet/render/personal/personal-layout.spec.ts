@@ -46,7 +46,7 @@ const HALF = 0.5;
 
 const A_DATE = "2026-07-24";
 
-const EMPTY_SHEET_HEIGHT = 1336;
+const EMPTY_SHEET_HEIGHT = 1606;
 
 const TALLEST_SHEET_HEIGHT = 2560;
 
@@ -118,6 +118,9 @@ const AFTER_TILES = TILES_TOP + TILE_ROW_HEIGHT + TILE_SECOND_NOTE_DROP + TILE_B
 
 const AFTER_TEASER =
   AFTER_TILES + SECTION_LABEL_DROP + TEASER_FLOOR_DROP + TEASER_BOTTOM_GAP;
+
+const EMPTY_FACTS_FLOOR =
+  AFTER_TEASER + SECTION_LABEL_DROP + TEASER_FLOOR_DROP + TEASER_BOTTOM_GAP;
 
 const TALLEST_FACTS: readonly CareerFact[] = [RIVAL_FACT, ...plainFacts(MOST_ROWS + ONE_FACT)];
 
@@ -270,10 +273,10 @@ describe("personalLayoutOf()", () => {
       expect(sheet.facts).toHaveLength(NOTHING);
     });
 
-    it("should label no facts section when the card has no fact to tell", () => {
+    it("should label the facts section even when the card has no fact to tell", () => {
       const sheet = personalLayoutOf(cardOf());
 
-      expect(sheet.factsLabel).toBeNull();
+      expect(sheet.factsLabel).toBe(AFTER_TEASER + SECTION_LABEL_DROP);
     });
 
     it("should carry the card's own facts, not merely their names", () => {
@@ -384,10 +387,10 @@ describe("personalLayoutOf()", () => {
 
   describe("how tall the sheet ends up", () => {
     it("should leave the sheet's own bottom margin under an empty card", () => {
-      expect(personalLayoutOf(cardOf()).height).toBe(AFTER_TEASER + SHEET_BOTTOM);
+      expect(personalLayoutOf(cardOf()).height).toBe(EMPTY_FACTS_FLOOR + SHEET_BOTTOM);
     });
 
-    it("should measure an empty card at exactly the teaser plus the margin", () => {
+    it("should measure an empty card at exactly the two promises plus the margin", () => {
       expect(personalLayoutOf(cardOf()).height).toBe(EMPTY_SHEET_HEIGHT);
     });
 

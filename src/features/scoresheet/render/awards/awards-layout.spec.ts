@@ -378,7 +378,7 @@ describe("awardsLayoutOf()", () => {
     });
 
     it("should carry the curse's own fact where it placed it", () => {
-      const FACT = { burns: 2, games: 8 };
+      const FACT = { burns: 2, games: 8, predicted: 1 };
       const honours = honoursOf([untouchableOf(0)], FACT);
 
       const sheet = awardsLayoutOf(chronologyOf(1), honours);
@@ -387,7 +387,7 @@ describe("awardsLayoutOf()", () => {
     });
 
     it("should hang the curse below whatever the card ended with", () => {
-      const honours = honoursOf([untouchableOf(0)], { burns: 2, games: 8 });
+      const honours = honoursOf([untouchableOf(0)], { burns: 2, games: 8, predicted: 1 });
 
       const sheet = awardsLayoutOf(chronologyOf(1), honours);
       const lastRow = sheet.rows.at(-1);
@@ -396,7 +396,7 @@ describe("awardsLayoutOf()", () => {
     });
 
     it("should hang the curse below the fool's plate when there is one", () => {
-      const honours = honoursOf([untouchableOf(0), foolOf(1)], { burns: 2, games: 8 });
+      const honours = honoursOf([untouchableOf(0), foolOf(1)], { burns: 2, games: 8, predicted: 1 });
 
       const sheet = awardsLayoutOf(chronologyOf(2), honours);
 
@@ -406,7 +406,7 @@ describe("awardsLayoutOf()", () => {
     });
 
     it("should leave room under the curse for its own line and the card's margin", () => {
-      const honours = honoursOf([untouchableOf(0)], { burns: 2, games: 8 });
+      const honours = honoursOf([untouchableOf(0)], { burns: 2, games: 8, predicted: 1 });
 
       const sheet = awardsLayoutOf(chronologyOf(1), honours);
 
@@ -416,7 +416,7 @@ describe("awardsLayoutOf()", () => {
     it("should make the sheet shorter with no curse than with one", () => {
       const withCurse = awardsLayoutOf(
         chronologyOf(1),
-        honoursOf([untouchableOf(0)], { burns: 2, games: 8 })
+        honoursOf([untouchableOf(0)], { burns: 2, games: 8, predicted: 1 })
       );
       const withoutCurse = awardsLayoutOf(chronologyOf(1), honoursOf([untouchableOf(0)], null));
 
@@ -431,7 +431,7 @@ describe("awardsLayoutOf()", () => {
         ...Array.from({ length: EIGHT }, (_unused, index) => untouchableOf(index)),
         foolOf(EIGHT),
       ];
-      const honours = honoursOf(awards, { burns: 3, games: 9 });
+      const honours = honoursOf(awards, { burns: 3, games: 9, predicted: 2 });
 
       const sheet = awardsLayoutOf(chronologyOf(EIGHT + 1), honours);
 

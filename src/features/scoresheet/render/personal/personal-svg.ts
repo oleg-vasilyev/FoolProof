@@ -130,8 +130,8 @@ interface ChartSection {
   readonly ink: string;
 }
 
-const teaserBody = (copy: Copy, card: CareerCard, baseline: number): readonly string[] => [
-  text(chartTeaser(copy, card.nights.length), {
+const teaserBody = (saying: string, baseline: number): readonly string[] => [
+  text(saying, {
     x: IMAGE_WIDTH / HALVES,
     y: baseline + TEASER_TEXT_DROP,
     fill: palette.inkMuted,
@@ -156,7 +156,7 @@ const chartSection = (section: ChartSection): readonly string[] => {
   if (sheet.plotTop === null) {
     return [
       ...sectionLabel(copy.personalChartLabel, null, sheet.chartLabel),
-      ...teaserBody(copy, card, sheet.chartLabel),
+      ...teaserBody(chartTeaser(copy, card.nights.length), sheet.chartLabel),
     ];
   }
 
@@ -186,9 +186,10 @@ export const renderPersonalCard = (
     ...heading(copy, card, ink),
     ...careerTiles(copy, card, ink),
     ...chartSection({ copy, card, sheet, ink }),
-    ...(sheet.factsLabel === null
-      ? []
-      : sectionLabel(copy.personalFactsLabel, null, sheet.factsLabel)),
+    ...sectionLabel(copy.personalFactsLabel, null, sheet.factsLabel),
+    ...(sheet.facts.length === NOTHING && sheet.plate === null
+      ? teaserBody(copy.personalFactsAwait, sheet.factsLabel)
+      : []),
     ...factRows(copy, sheet.facts, ink),
     ...(sheet.plate === null ? [] : topFactPlate(copy, sheet.plate, ink)),
     ...posterBaseboard(handle, sheet.height),

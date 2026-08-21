@@ -126,6 +126,10 @@ const fires = (...names: readonly AwardName[]): void => {
   }
 };
 
+const firesFor = (name: AwardName, winner: number): void => {
+  ruleSpies[name].mockReturnValue(awardOf(name, winner));
+};
+
 const everyRuleFires = (): void => {
   fires(...Object.values(AwardName));
 };
@@ -228,12 +232,41 @@ describe("honoursFor()", () => {
       ]);
     });
 
+    it("should hand the last row back to rarity once everybody who fired has one", () => {
+      firesFor(AwardName.TheComeback, OLEG);
+      firesFor(AwardName.TheLadder, OLEG);
+      firesFor(AwardName.Encore, ROMANI);
+
+      expect(namesOf()).toEqual([
+        AwardName.TheComeback,
+        AwardName.TheLadder,
+        AwardName.Encore,
+      ]);
+    });
+
+    it("should not let one player hold every row while another holds none", () => {
+      fires(
+        AwardName.TheComeback,
+        AwardName.TheLadder,
+        AwardName.TheCameo,
+        AwardName.TheFlatline,
+        AwardName.TheAnchor,
+        AwardName.TheSlide,
+        AwardName.FalseDawn,
+        AwardName.TheRollercoaster,
+        AwardName.ThePendulum
+      );
+      firesFor(AwardName.Encore, ROMANI);
+
+      expect(namesOf()).toContain(AwardName.Encore);
+    });
+
     it("should drop the commonest of what fired rather than the last one judged", () => {
       fires(
         AwardName.King,
         AwardName.FoolOfTheNight,
         AwardName.Untouchable,
-        AwardName.TheFavourite,
+        AwardName.Encore,
         AwardName.AllOrNothing,
         AwardName.TheIrishGoodbye,
         AwardName.TheTruce,
@@ -243,7 +276,7 @@ describe("honoursFor()", () => {
       );
 
       expect(namesOf()).toContain(AwardName.TheLadder);
-      expect(namesOf()).not.toContain(AwardName.Untouchable);
+      expect(namesOf()).not.toContain(AwardName.Encore);
     });
 
     it("should still print the rarest in the catalogue's order, not in the rarity order", () => {

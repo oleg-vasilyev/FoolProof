@@ -23,15 +23,15 @@ export const copy = {
 
   awardTitles: {
     king: "KING OF THE TABLE",
-    wireToWire: "WIRE TO WIRE",
+    wireToWire: "AHEAD ALL NIGHT",
     theFavourite: "THE FAVOURITE",
     hatTrick: "HAT TRICK",
-    homeAdvantage: "HOME ADVANTAGE",
+    homeAdvantage: "FROM THE OFF",
     untouchable: "UNTOUCHABLE",
     teflon: "TEFLON",
     hotSeat: "HOT SEAT",
     theComeback: "THE COMEBACK",
-    theLadder: "THE LADDER",
+    theLadder: "THE CLIMB",
     sweetRevenge: "SWEET REVENGE",
     ironSeat: "IRON SEAT",
     theTruce: "THE TRUCE",
@@ -61,9 +61,9 @@ export const copy = {
   },
 
   kingReason: (percent: number, games: string) =>
-    `${percent}% table share across ${games}. Nobody sat higher.`,
+    `${percent}% of the table finished below them across ${games}. Nobody sat higher.`,
   kingPassedReason: (percent: number, games: string) =>
-    `${percent}% table share across ${games}. Only the fool of the night sat higher.`,
+    `${percent}% of the table finished below them across ${games}. Only the fool of the night sat higher.`,
   wireToWireReason: (games: string) =>
     `In front on the chart after every game but the first, across ${games}.`,
   favouriteReason: (firsts: number, games: string) =>
@@ -72,8 +72,8 @@ export const copy = {
   homeAdvantageReason: (wins: number, opens: number) =>
     `Opened ${opens} of the games and went out first in ${wins} of them.`,
   untouchableReason: (games: string) => `${games}, never the fool. Untouched all evening.`,
-  teflonReason: (streak: number) =>
-    `Was the fool, and still put ${streak} straight games together clean. The longest run of the night.`,
+  teflonReason: (streak: string) =>
+    `Was the fool, and then came ${streak} without another. The longest clean run of the night.`,
   hotSeatReason: (opens: number) =>
     `Opened ${opens} of the games and was left the fool in none of them.`,
   comebackReason: (sank: number, percent: number) =>
@@ -100,7 +100,7 @@ export const copy = {
   understudyReason: (times: string, games: string) =>
     `Second out ${times} in ${games}, and first out never.`,
   flatlineReason: (band: number, games: string) =>
-    `Never more than ${band} points off mid-table across ${games}.`,
+    `Never more than ${band}% off mid-table across ${games}.`,
   invisibleReason: (middles: number, games: string) =>
     `${middles} of ${games} — neither the top nor the bottom.`,
   groundhogReason: (place: number, games: string) =>
@@ -108,7 +108,7 @@ export const copy = {
   pendulumReason: (games: string) =>
     `${games} running, top half then bottom half, turn and turn about.`,
   rollercoasterReason: (swing: number, games: string) =>
-    `${swing} points between the best of it and the worst of it, across ${games}.`,
+    `Swung ${swing}% across ${games}, from the best of it to the worst and back.`,
   allOrNothingReason: (edges: number, games: string) =>
     `${edges} of ${games} finished first out or fool. The middle is for cowards.`,
   irishGoodbyeReason: (leftAfter: number, games: string) =>
@@ -123,17 +123,17 @@ export const copy = {
     `${games} running as the fool. An encore nobody asked for.`,
   firstBloodReason: (games: string) => `Fool of game 1 of ${games}. The evening opened badly.`,
   foolReason: (fools: number, games: string) =>
-    `Left the fool in ${fools} of ${games}. Nobody managed worse.`,
-  curseFact: (burns: number, games: string) =>
-    `in ${burns} of ${games} whoever opened was left the fool.`,
+    `Left the fool in ${fools} of ${games}. Nobody was left it more often.`,
+  curseFact: (burns: number, games: string, predicted: number) =>
+    `whoever opened was left the fool in ${burns} of ${games} — the seats predict ${predicted}.`,
 
   sheetEyebrow: "SESSION LOG",
   sheetTitle: "CHRONOLOGY",
   sheetGridLabel: "GAME BY GAME",
   sheetGridHint: "columns in seating order · every cell prints the place taken",
-  sheetShareLabel: "TABLE SHARE",
-  sheetShareHint: "50% is mid-table · 100% is winning every game",
-  sheetLegendLabel: "SORTED BY SHARE",
+  sheetShareLabel: "OPPONENTS BEATEN",
+  sheetShareHint: "50% is half the table · 100% is first in every game",
+  sheetLegendLabel: "BEST FIRST",
 
   sheetGameForms: { one: "game", few: "games", many: "games" },
   sheetPlayerForms: { one: "player", few: "players", many: "players" },
@@ -161,23 +161,24 @@ export const copy = {
   sheetEveningsOwedForms: { one: "more evening", few: "more evenings", many: "more evenings" },
   sheetTimeForms: { one: "time", few: "times", many: "times" },
 
-  tileShare: "TABLE SHARE",
-  tileShareFloor: "0% — the fool every game",
-  tileShareCeiling: "100% — winning every game",
+  tileShare: "OPPONENTS BEATEN",
+  tileShareFloor: "0% — last in every game",
+  tileShareCeiling: "100% — first in every game",
   tileFool: "THE FOOL",
-  tileFirst: "WINS",
+  tileFirst: "FIRST PLACE",
   tileFirstMove: "THE FIRST MOVE",
   tileOutOf: (part: number, whole: number) => `${part} of ${whole}`,
   tileOutOfDecided: (part: number, decided: number) =>
     `${part} of the ${decided} that had a fool`,
   tileSeatPredicts: (expected: string) => `seat predicts ${expected}`,
 
-  personalChartLabel: "TABLE SHARE BY EVENING",
+  personalChartLabel: "OPPONENTS BEATEN BY EVENING",
   personalChartArrives: (evenings: string) => `The chart arrives after ${evenings}.`,
   personalBestEvening: "best evening",
   personalWorstEvening: "worst evening",
 
   personalFactsLabel: "WHAT STUCK",
+  personalFactsAwait: "Nothing has stuck yet — it takes more games.",
   factTitles: {
     theBlinder: "THE BLINDER",
     theNightmare: "THE NIGHTMARE",

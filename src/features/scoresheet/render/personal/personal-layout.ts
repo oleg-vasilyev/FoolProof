@@ -39,7 +39,7 @@ export interface PersonalLayout {
   readonly height: number;
   readonly chartLabel: number;
   readonly plotTop: number | null;
-  readonly factsLabel: number | null;
+  readonly factsLabel: number;
   readonly facts: readonly PlacedFact[];
   readonly plate: PlacedFact | null;
 }
@@ -71,8 +71,10 @@ export const personalLayoutOf = (card: CareerCard): PersonalLayout => {
   const factsTop = afterChart + FACTS_TOP_DROP;
   const facts = rows.map((fact, index) => ({ fact, top: factsTop + index * FACT_HEIGHT }));
   const showing = card.facts.length > NOTHING;
-  const factsLabel = showing ? afterChart + SECTION_LABEL_DROP : null;
-  const afterFacts = showing ? factsTop + rows.length * FACT_HEIGHT : afterChart;
+  const factsLabel = afterChart + SECTION_LABEL_DROP;
+  const afterFacts = showing
+    ? factsTop + rows.length * FACT_HEIGHT
+    : factsLabel + TEASER_FLOOR_DROP + TEASER_BOTTOM_GAP;
 
   const plated = plateFactIn(card.facts);
   const plate = plated === null ? null : { fact: plated, top: afterFacts + PLATE_GAP };

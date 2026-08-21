@@ -208,14 +208,14 @@ describe("renderAwards()", () => {
   });
 
   it("should print the curse note when the sheet has a curse", () => {
-    const CURSE = { burns: 2, games: 8 };
+    const CURSE = { burns: 2, games: 8, predicted: 1 };
     awardsLayoutOfSpy.mockReturnValue(sheetOf({ curse: { fact: CURSE, top: CURSE_TOP } }));
 
     renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
 
     expect(textSpy).toHaveBeenCalledWith(copy.awardsCurseLabel, expect.anything());
     expect(textSpy).toHaveBeenCalledWith(
-      copy.curseFact(CURSE.burns, `tally(${String(CURSE.games)})`),
+      copy.curseFact(CURSE.burns, `tally(${String(CURSE.games)})`, CURSE.predicted),
       expect.anything()
     );
   });
@@ -226,7 +226,7 @@ describe("renderAwards()", () => {
 
     const withCurse = (): void => {
       awardsLayoutOfSpy.mockReturnValue(
-        sheetOf({ curse: { fact: { burns: 2, games: 8 }, top: CURSE_TOP } })
+        sheetOf({ curse: { fact: { burns: 2, games: 8, predicted: 1 }, top: CURSE_TOP } })
       );
       renderAwards(copy, CHRONOLOGY, HONOURS, A_HANDLE);
     };
@@ -256,7 +256,7 @@ describe("renderAwards()", () => {
 
     it("should hang the curse fact off the right edge on the label's own baseline", () => {
       withCurse();
-      const fact = copy.curseFact(2, "tally(8)");
+      const fact = copy.curseFact(2, "tally(8)", 1);
 
       expect(attributesOf(fact).x).toBe(GRID_RIGHT);
       expect(attributesOf(fact)["text-anchor"]).toBe("end");
@@ -268,7 +268,7 @@ describe("renderAwards()", () => {
 
       expect(attributesOf(copy.awardsCurseLabel)["font-weight"]).toBe("bold");
       expect(attributesOf(copy.awardsCurseLabel)["font-size"]).toBe(CURSE_LABEL_FONT);
-      expect(attributesOf(copy.curseFact(2, "tally(8)"))["font-size"]).toBe(CURSE_FACT_FONT);
+      expect(attributesOf(copy.curseFact(2, "tally(8)", 1))["font-size"]).toBe(CURSE_FACT_FONT);
     });
 
     it("should sign the sheet at its own foot, whatever the sheet turned out to hold", () => {

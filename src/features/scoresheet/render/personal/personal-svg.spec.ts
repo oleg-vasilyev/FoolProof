@@ -120,6 +120,10 @@ const A_DASH_PATTERN = /^\d+ \d+$/;
 
 const LAST = -1;
 
+const FIVE_RULES = 5;
+
+const CHART_FLOOR = 2;
+
 const ORIGIN = 0;
 
 const FIRST_CALL = 0;
@@ -212,7 +216,6 @@ const sheetOf = (overrides: Partial<PersonalLayout> = {}): PersonalLayout =>
 
 const BARE_SHEET: Partial<PersonalLayout> = {
   plotTop: null,
-  factsLabel: null,
   facts: [],
   plate: null,
 };
@@ -571,7 +574,7 @@ describe("renderPersonalCard()", () => {
       );
     });
 
-    it("should give the facts a rule and a label and nothing more", () => {
+    it("should give the facts a rule, a label and the promise under it", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf({ ...BARE_SHEET, factsLabel: FACTS_LABEL }));
       factRowsSpy.mockReturnValue([]);
 
@@ -591,16 +594,34 @@ describe("renderPersonalCard()", () => {
         RULE_MARK,
         RULE_MARK,
         marked(copy.personalFactsLabel),
+        marked(copy.personalFactsAwait),
+        RULE_MARK,
         BASEBOARD_MARK,
       ]);
     });
 
-    it("should print no facts label when the layout left it out", () => {
-      personalLayoutOfSpy.mockReturnValue(sheetOf({ factsLabel: null }));
+    it("should keep the facts label on a card that has no facts to put under it", () => {
+      personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
 
       renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
 
-      expect(textSpy).not.toHaveBeenCalledWith(copy.personalFactsLabel, expect.anything());
+      expect(textSpy).toHaveBeenCalledWith(copy.personalFactsLabel, expect.anything());
+    });
+
+    it("should say what the empty facts section is waiting for", () => {
+      personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
+
+      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+
+      expect(textSpy).toHaveBeenCalledWith(copy.personalFactsAwait, expect.anything());
+    });
+
+    it("should keep that promise off a card whose only fact went on the plate", () => {
+      personalLayoutOfSpy.mockReturnValue(sheetOf({ facts: [], plate: PLATE }));
+
+      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+
+      expect(textSpy).not.toHaveBeenCalledWith(copy.personalFactsAwait, expect.anything());
     });
 
     it("should hand the fact rows the very facts the layout placed, and not the card", () => {
@@ -678,6 +699,10 @@ describe("renderPersonalCard()", () => {
         marked(copy.personalChartLabel),
         marked(TEASER_HINT_MARK),
         RULE_MARK,
+        RULE_MARK,
+        marked(copy.personalFactsLabel),
+        marked(copy.personalFactsAwait),
+        RULE_MARK,
         BASEBOARD_MARK,
       ]);
     });
@@ -691,12 +716,12 @@ describe("renderPersonalCard()", () => {
       expect(factRowsSpy).toHaveBeenCalledWith(copy, [], INK);
     });
 
-    it("should rule off the heading, the promised chart and the floor holding its place", () => {
+    it("should rule off the heading, both promises and the floor under each", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
 
       renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
 
-      expect(lineSpy).toHaveBeenCalledTimes(THRICE);
+      expect(lineSpy).toHaveBeenCalledTimes(FIVE_RULES);
     });
 
     it("should hold the chart's place with a dashed floor rather than empty space", () => {
@@ -704,7 +729,7 @@ describe("renderPersonalCard()", () => {
 
       renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
 
-      const floor = lineSpy.mock.calls.at(LAST)?.[0] as Record<string, unknown>;
+      const floor = lineSpy.mock.calls[CHART_FLOOR]?.[0] as Record<string, unknown>;
 
       expect(String(floor["stroke-dasharray"])).toMatch(A_DASH_PATTERN);
       expect(floor["y1"]).toBe(CHART_LABEL + TEASER_FLOOR_DROP);

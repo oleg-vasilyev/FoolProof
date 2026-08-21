@@ -131,6 +131,7 @@ export const RAREST_FIRST: readonly AwardName[] = [
 export interface TableCurse {
   readonly burns: number;
   readonly games: number;
+  readonly predicted: number;
 }
 
 export interface Honours {

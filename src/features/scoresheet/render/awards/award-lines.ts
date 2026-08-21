@@ -26,13 +26,13 @@ export const awardReason = (copy: Copy, award: Award): string => {
       return copy.hatTrickReason(gameTally(copy, award.run));
 
     case AwardName.HomeAdvantage:
-      return copy.homeAdvantageReason(award.opens, award.wins);
+      return copy.homeAdvantageReason(award.wins, award.opens);
 
     case AwardName.Untouchable:
       return copy.untouchableReason(gameTally(copy, award.games));
 
     case AwardName.Teflon:
-      return copy.teflonReason(award.streak);
+      return copy.teflonReason(gameTally(copy, award.streak));
 
     case AwardName.HotSeat:
       return copy.hotSeatReason(award.opens);

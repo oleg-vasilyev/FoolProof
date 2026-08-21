@@ -34,7 +34,7 @@ const reasonsOf = (copy: Copy): readonly (readonly [string, string])[] => {
     ["hatTrick", copy.hatTrickReason(A_TALLY)],
     ["homeAdvantage", copy.homeAdvantageReason(EIGHT, TWO)],
     ["untouchable", copy.untouchableReason(A_TALLY)],
-    ["teflon", copy.teflonReason(EIGHT)],
+    ["teflon", copy.teflonReason(A_TALLY)],
     ["hotSeat", copy.hotSeatReason(EIGHT)],
     ["theComeback", copy.comebackReason(TWO, FIFTY_ONE)],
     ["theLadder", copy.ladderReason(A_TALLY)],
@@ -64,7 +64,7 @@ const reasonsOf = (copy: Copy): readonly (readonly [string, string])[] => {
     ["encore", copy.encoreReason(A_TALLY)],
     ["firstBlood", copy.firstBloodReason(A_TALLY)],
     ["foolOfTheNight", copy.foolReason(TWO, A_TALLY)],
-    ["curse", copy.curseFact(EIGHT, A_TALLY)],
+    ["curse", copy.curseFact(EIGHT, A_TALLY, TWO)],
   ];
 };
 
@@ -282,7 +282,7 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
     it("should interpolate the count it was handed rather than a fixed one", () => {
       const EIGHT = 8;
 
-      expect(copy.teflonReason(EIGHT)).toContain(String(EIGHT));
+      expect(copy.hotSeatReason(EIGHT)).toContain(String(EIGHT));
       expect(copy.encoreReason(A_TALLY)).toContain(A_TALLY);
     });
 

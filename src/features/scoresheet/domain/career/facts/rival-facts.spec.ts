@@ -88,7 +88,7 @@ const LOST_TO_ANYA = 4;
 
 const LOST_TO_BORIS = 2;
 
-const TIED_LOSSES = 2;
+const TIED_LOSSES = 4;
 
 const BURNS_ALONGSIDE = 3;
 
@@ -233,6 +233,19 @@ const BORIS_ONE_DUEL_SHORT = [
   ...repeated(OLEG_BURNED_BY_ANYA, TIED_LOSSES),
   ...repeated(ANYA_BURNED_BY_OLEG, ENOUGH_DUELS - TIED_LOSSES),
   ...repeated(OLEG_BURNED_BY_BORIS, ENOUGH_DUELS - ONE_SHORT),
+];
+
+const BORIS_ONE_DUEL_SHORT_OF_WINS = [
+  ...repeated(ANYA_BURNED_BY_OLEG, TIED_LOSSES),
+  ...repeated(OLEG_BURNED_BY_ANYA, ENOUGH_DUELS - TIED_LOSSES),
+  ...repeated(BORIS_BURNED_BY_OLEG, ENOUGH_DUELS - ONE_SHORT),
+];
+
+const BORIS_WON_AGAINST_MORE_OFTEN = [
+  ...repeated(ANYA_BURNED_BY_OLEG, TIED_LOSSES),
+  ...repeated(OLEG_BURNED_BY_ANYA, ENOUGH_DUELS - TIED_LOSSES),
+  ...repeated(BORIS_BURNED_BY_OLEG, TIED_LOSSES),
+  ...repeated(OLEG_BURNED_BY_BORIS, ENOUGH_DUELS + ONE_MORE - TIED_LOSSES),
 ];
 
 const ANYA_ALWAYS_WON = repeated(OLEG_BURNED_BY_ANYA, ENOUGH_DUELS);
@@ -426,11 +439,11 @@ describe("rival facts", () => {
     });
 
     it("should ignore a rival faced one duel short of enough", () => {
-      expect(thePatsy(subjectOf(BORIS_ONE_DUEL_SHORT))).toEqual({
+      expect(thePatsy(subjectOf(BORIS_ONE_DUEL_SHORT_OF_WINS))).toEqual({
         name: CareerFactName.ThePatsy,
         rival: ANYAS_NAME,
         duels: ENOUGH_DUELS,
-        won: ENOUGH_DUELS - TIED_LOSSES,
+        won: TIED_LOSSES,
       });
     });
 
@@ -444,12 +457,26 @@ describe("rival facts", () => {
       expect(thePatsy(subjectOf(ANYA_ALWAYS_WON))).toBeNull();
     });
 
+    it("should not call one rival easy prey and a hard opponent on the same card", () => {
+      const A_COUPLE_BACK = 2;
+
+      const theOnlyRivalThereWas = [
+        ...repeated(ANYA_BURNED_BY_OLEG, ENOUGH_DUELS),
+        ...repeated(OLEG_BURNED_BY_ANYA, A_COUPLE_BACK),
+      ];
+
+      const subject = subjectOf(theOnlyRivalThereWas);
+
+      expect(thePatsy(subject)).toEqual(expect.objectContaining({ rival: ANYAS_NAME }));
+      expect(theBogey(subject)).toBeNull();
+    });
+
     it("should break a tie on wins by the rival faced more often", () => {
-      expect(thePatsy(subjectOf(BORIS_FACED_MORE_OFTEN))).toEqual({
+      expect(thePatsy(subjectOf(BORIS_WON_AGAINST_MORE_OFTEN))).toEqual({
         name: CareerFactName.ThePatsy,
         rival: BORISS_NAME,
         duels: ENOUGH_DUELS + ONE_MORE,
-        won: ENOUGH_DUELS + ONE_MORE - TIED_LOSSES,
+        won: TIED_LOSSES,
       });
     });
   });

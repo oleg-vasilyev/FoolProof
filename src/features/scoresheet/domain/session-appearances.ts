@@ -107,3 +107,8 @@ export const foolByRound = (evening: SessionAppearances): readonly (number | nul
     (_, round) =>
       evening.players.find((player) => finishIn(player, round) === Finish.Fool)?.playerId ?? null
   );
+
+export const tableSizeIn = (evening: SessionAppearances, round: number): number =>
+  evening.players
+    .flatMap((player) => player.appearances)
+    .find((appearance) => appearance.round === round)?.tableSize ?? EMPTY_TABLE;

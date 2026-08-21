@@ -20,10 +20,13 @@ const finishInSpy = vi.fn();
 
 const playedGamesSpy = vi.fn();
 
+const tableSizeInSpy = vi.fn();
+
 vi.mock("#scoresheet/domain/session-appearances.ts", () => ({
   foolByRound: (evening: unknown) => foolByRoundSpy(evening),
   finishIn: (player: unknown, round: unknown) => finishInSpy(player, round),
   playedGames: (player: unknown) => playedGamesSpy(player),
+  tableSizeIn: (evening: unknown, round: unknown) => tableSizeInSpy(evening, round),
 }));
 
 const { homeAdvantage, hotSeat, neverAsked, openersCurse, tableCurse, theDoorman } = await import(
@@ -300,6 +303,16 @@ describe("neverAsked()", () => {
 });
 
 describe("tableCurse()", () => {
+  const A_TABLE_OF_FOUR = 4;
+
+  const A_TABLE_OF_TWO = 2;
+
+  const A_TABLE_OF_EIGHT = 8;
+
+  beforeEach(() => {
+    tableSizeInSpy.mockReturnValue(A_TABLE_OF_FOUR);
+  });
+
   it("should report nothing when no opener was ever left the fool", () => {
     foolByRoundSpy.mockReturnValue([OLEG, OLEG]);
 
@@ -311,8 +324,29 @@ describe("tableCurse()", () => {
 
     expect(tableCurse(sessionAppearances([ROMANI, OLEG, OLEG]))).toEqual({
       burns: TWICE,
-      games: TWICE + ONCE,
+      games: THRICE,
+      predicted: ONCE,
     });
+  });
+
+  it("should stay silent when the openers burned exactly as often as the seats predict", () => {
+    foolByRoundSpy.mockReturnValue([ROMANI, OLEG, ROMANI, ROMANI]);
+
+    expect(tableCurse(sessionAppearances([ROMANI, ROMANI, OLEG, OLEG]))).toBeNull();
+  });
+
+  it("should read the prediction off the table each game was played at", () => {
+    foolByRoundSpy.mockReturnValue([ROMANI, OLEG, ROMANI]);
+    tableSizeInSpy.mockReturnValue(A_TABLE_OF_TWO);
+
+    expect(tableCurse(sessionAppearances([ROMANI, OLEG, OLEG]))).toBeNull();
+  });
+
+  it("should call the same two burns a curse once the table is wide enough", () => {
+    foolByRoundSpy.mockReturnValue([ROMANI, OLEG, ROMANI]);
+    tableSizeInSpy.mockReturnValue(A_TABLE_OF_EIGHT);
+
+    expect(tableCurse(sessionAppearances([ROMANI, OLEG, OLEG]))?.predicted).toBe(NOTHING);
   });
 
   it("should not count a game nobody opened as the opener's fault", () => {
@@ -321,9 +355,11 @@ describe("tableCurse()", () => {
     expect(tableCurse(sessionAppearances([null, null]))).toBeNull();
   });
 
-  it("should report the whole evening as the games it looked at", () => {
-    foolByRoundSpy.mockReturnValue([ROMANI, OLEG, OLEG, ROMANI, OLEG, OLEG]);
+  it("should leave a game that ended in a draw out of the games it looked at", () => {
+    foolByRoundSpy.mockReturnValue([ROMANI, null, ROMANI, null, null, null]);
 
-    expect(tableCurse(sessionAppearances([ROMANI, OLEG, OLEG, OLEG, OLEG, OLEG]))?.games).toBe(SIX);
+    expect(tableCurse(sessionAppearances([ROMANI, OLEG, ROMANI, OLEG, OLEG, OLEG]))?.games).toBe(
+      TWICE
+    );
   });
 });

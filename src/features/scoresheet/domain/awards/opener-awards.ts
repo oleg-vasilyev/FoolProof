@@ -5,11 +5,20 @@ import {
   finishIn,
   foolByRound,
   playedGames,
+  tableSizeIn,
   type SessionAppearances,
   type PlayerAppearances,
 } from "#scoresheet/domain/session-appearances.ts";
 import { bestBy, soleBy } from "#scoresheet/domain/awards/pick-winner.ts";
 
+
+interface Opening {
+  readonly starter: number;
+  readonly round: number;
+  readonly fool: number;
+}
+
+const ONE_SEAT = 1;
 
 const BURNED_ENOUGH = 2;
 
@@ -114,11 +123,28 @@ export const neverAsked = (evening: SessionAppearances): Award | null => {
     : { name: AwardName.NeverAsked, winners: [winner.playerId], games: playedGames(winner) };
 };
 
-export const tableCurse = (evening: SessionAppearances): TableCurse | null => {
+const decidedOpenings = (evening: SessionAppearances): readonly Opening[] => {
   const fools = foolByRound(evening);
-  const burns = evening.starters.filter(
-    (starter, round) => starter !== null && fools[round] === starter
-  ).length;
 
-  return burns === NONE ? null : { burns, games: evening.rounds };
+  return evening.starters.flatMap((starter, round) => {
+    const fool = fools[round] ?? null;
+
+    return starter === null || fool === null ? [] : [{ starter, round, fool }];
+  });
+};
+
+const seatsPredict = (evening: SessionAppearances, openings: readonly Opening[]): number =>
+  openings.reduce(
+    (chance, opening) => chance + ONE_SEAT / tableSizeIn(evening, opening.round),
+    NONE
+  );
+
+export const tableCurse = (evening: SessionAppearances): TableCurse | null => {
+  const openings = decidedOpenings(evening);
+  const burns = openings.filter((opening) => opening.fool === opening.starter).length;
+  const predicted = Math.round(seatsPredict(evening, openings));
+
+  return burns <= predicted
+    ? null
+    : { burns, games: openings.length, predicted };
 };
