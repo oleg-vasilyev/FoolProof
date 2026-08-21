@@ -157,6 +157,31 @@ to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
 
 ---
 
+## Ten seats share eight colours
+
+`PLAYER_COLOURS` holds eight and `colourFor` indexes it modulo eight, while
+`MOST_PLAYERS` is ten. A nine- or ten-handed table therefore gives two players the
+same colour — in the chronology's legend, in its column headings, and on the awards
+sheet, where the coloured bar beside a name is the only thing telling two winners
+apart. The `crowded-table` gallery case is exactly ten and does it twice; a checkup
+confirmed it against the code rather than the picture.
+
+Two more colours would close the arithmetic and not the question: colour is doing
+the whole job of identity on those sheets, and at ten players a palette that stays
+legible on a dark ground is already stretched. The honest fix is a drawing decision
+— a second distinguishing mark, or an admission that the legend is the key and the
+chart is the picture — which is why this is not a two-line patch.
+
+It came out of the first cold read of the whole gallery, along with sixteen others
+that live in `reports/poster-findings.md`. That file is gitignored, so the rest of
+the queue is one laptop away from being lost; this entry is the one finding
+confirmed in the code, and it is here so at least that much survives.
+
+**Take it with the next phase that redraws a poster**, which will want a
+`poster-designer` mockup anyway — or the first time a real chat seats nine.
+
+---
+
 ## The server installs the whole toolbox to run two packages
 
 `deploy/foolproof-deploy.sh` runs a plain `npm ci`, which installs devDependencies,

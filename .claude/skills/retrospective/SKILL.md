@@ -51,7 +51,7 @@ count is asked for, count. An answer with no number in it is a guess.
 ## The flow this gate audits is drawn
 
 [`DEVELOPMENT-FLOW.md`](../../../DEVELOPMENT-FLOW.md) draws the whole loop —
-seven stages from the owner's first message to the tag going live, as a Mermaid
+eight stages from the owner's first message to the checkup that watches it, as a Mermaid
 block GitHub renders in place, linked from the README. It is the map, not the
 authority: every stage's rules live in the skill the drawing names, and a
 disagreement is resolved in the skill's favour, then the drawing is fixed.
