@@ -444,6 +444,29 @@ three files anyway.
 
 ---
 
+## The Claude Design page is behind, and a release went out anyway
+
+The page still holds the player card as it was drawn before `9072e2e` renamed two
+figures and cut the top block from six tiles to four. `docs:check` says so on every
+run, and it is right.
+
+What is new is that a tag left with it red. The pre-push hook runs `check:release`
+before a `v*` tag and refused, correctly; the owner asked for that one tag to go out
+past the hook, on a Friday, to show the bot to the people who play on it. So the
+guarantee this gate exists for — that nobody reads the page against a release it does
+not describe — is broken for exactly one version, knowingly, and this entry is the
+record of it. The gate was left alone: no rule was bent to let the tag through, and
+the next tag will be refused the same way.
+
+Nothing available from this machine can close it. The project answers 404 through
+`DesignSync` from the account that is signed in here, and a share link grants a human
+a browser rather than granting the API a write.
+
+**Close it on the first session from the account that owns the page** — the
+`update-the-design-page` skill end to end, which rewrites `design-page.sync` with the
+fingerprint it actually pushed. Until then every release carries this, and the entry
+above says why the gate should have been asking a tag rather than every push.
+
 ## The design-page gate assumes one account owns both the repository and the page
 
 `docs:check` compares `docs/mockups/design-page.sync` against the drawings the code
