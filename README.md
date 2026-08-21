@@ -387,6 +387,11 @@ add. Ask the bot for `/status` afterwards — the game and player counts there
 should match the caption of the backup you restored from, and that is the check
 that the restore worked rather than merely finished.
 
+This path has been walked and not only written: the operator rehearsed a restore on
+21 August 2026 and it went through without a hitch. A procedure nobody has ever run
+is a guess in the same way an unread backup is, which is the whole reason the
+snapshot is opened and counted rather than merely written.
+
 The gate that actually stands before a release is local: a **pre-push hook**
 (installed by `npm install`, which points git at [`.githooks/`](.githooks/))
 runs the full `check:release` before any `v*` tag leaves the machine — every

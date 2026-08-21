@@ -2,8 +2,9 @@
 
 Work that is finished enough to stop, but not finished. Each entry says what state
 it is in, what it would cost to pick up, and — the part that matters — **what has to
-be true before it is worth doing**. Nothing here is a bug in the bot: those go to
-`PLAN.md` as edge cases, or get fixed.
+be true before it is worth doing**. A defect that only needs doing gets done rather
+than written down; a defect whose fix needs a decision first waits here with the
+decision named. Behaviour the bot means to have goes to `PLAN.md` as an edge case.
 
 Two rules for this file, so it stays useful:
 
@@ -172,13 +173,34 @@ legible on a dark ground is already stretched. The honest fix is a drawing decis
 — a second distinguishing mark, or an admission that the legend is the key and the
 chart is the picture — which is why this is not a two-line patch.
 
-It came out of the first cold read of the whole gallery, along with sixteen others
-that live in `reports/poster-findings.md`. That file is gitignored, so the rest of
-the queue is one laptop away from being lost; this entry is the one finding
-confirmed in the code, and it is here so at least that much survives.
+It came out of the first cold read of the whole gallery, along with sixteen others.
+Twelve of those are fixed; four were never opened and are the entry near the end of
+this file; and this one is the finding that was confirmed in the code and still
+stands.
 
 **Take it with the next phase that redraws a poster**, which will want a
 `poster-designer` mockup anyway — or the first time a real chat seats nine.
+
+## A player's card and the chronology give the same player two colours
+
+`colourFor` takes a column index, and the two posters count their columns off
+different rosters. The chronology numbers the players of the series; the player card
+numbers everybody the chat has ever seated — `history.players.findIndex(…)` in
+`personal-handler.ts`. The two orders coincide only by accident, so the player drawn
+in violet on the chart reads their own card in amber, and neither picture admits the
+two are about one person.
+
+It is the entry above one level up: colour is carrying identity from poster to
+poster while nothing makes it one colour per player. Closing the arithmetic without
+closing this would leave the disagreement exactly where it is.
+
+The fix has a choice in it, which is why it is written down rather than done. The
+card can read its colour off the series roster whenever the player appears there —
+cheap, and the colour then moves when the series roster moves — or colour can be
+pinned to something about a player that does not change, which makes `/merge` a
+recolouring and needs a rule for who keeps their colour.
+
+**Take it with the phase that settles the palette**, since one drawing answers both.
 
 ---
 
@@ -365,6 +387,68 @@ no past-tense verb in it: a noun phrase, a count, a colon. «Первых ход
 for anything else** — the cost is one pass over one table, and it is much cheaper
 attached to a phase already editing those lines than as a phase of its own. Until then
 a woman at the table reads a sheet written about a man.
+
+## The six figures on a player card do not say what they are figures of
+
+A cold reading of the block at the top of `/personal` found five things, and they are
+one thing: the grid prints numbers without printing what they are numbers of.
+
+`ДОЛЯ СТОЛА` / `TABLE SHARE` names no quantity, so a card reading 72 games above 0%
+contradicts itself to anybody who does not already know what the share is a share of.
+The note under it names a reference point — 50% is mid-table — and neither the top end
+nor which side is the good one, while the season sheet's own hint says both, two
+posters away. Two cells in one row then count differently: `72 из 72` beside `0 раз`,
+and the reader has to assume the second borrows the first's denominator. `ожидаемо 20%`
+has no source anywhere on the card and moves between cards, because it is read off a
+table size the card never prints. The sixth figure carries a bare count where both its
+row-mates carry an expectation. Two of the six have no caption at all.
+
+Below the block, on a card too young for a chart, a section heading sits over an empty
+band. Two cold readers, told nothing about each other, said the same thing about it: it
+reads as a broken render first and as *not yet* second, because every other heading on
+that card has a number under it.
+
+None of this is a wording pass. Printing a table size changes what the card is made of,
+and an empty band is answered by a drawing rather than by a sentence.
+
+**Take it with the next phase that opens the player card.**
+
+## Three lines on the sheets use a word that cannot carry the meaning
+
+Left over from the same readings, each confirmed still to be in the copy tables.
+«Ни разу не отошёл от середины стола дальше чем на N пунктов за N партий» and
+«N пунктов между лучшим и худшим за N партий» count points of something the sheet never
+names — they are percentage points of
+table share, and «пункт» on its own reads as well as a score. `HOME ADVANTAGE` /
+«СВОЁ ПОЛЕ» borrows a venue for an award about who moves first, and one table has no
+home and no away. And the grid's hint, "every cell prints the place taken", hands the
+cell a printer's verb where a reader wants what the cell *shows*.
+
+None of the three is wrong about its arithmetic; all three make a reader stop.
+
+**Take them with the next phase that opens the awards copy** — the same pass the entry
+above about the Russian voice needs.
+
+## Four findings from the first gallery reading were never checked against the code
+
+That reading produced seventeen. Twelve are fixed, one is the colour entry above, and
+these four were never opened — they are questions rather than tasks, and checking one
+can delete it:
+
+- a crown drawn with nothing keying it, on the one sheet of twenty-nine that draws a red
+  banner, and that banner never appears in the Russian set at all;
+- the card owner's name cut to nine characters while an opponent's is drawn whole
+  underneath it;
+- one name cut to two different lengths on one sheet, the legend shorter than the column
+  heading that exists to recover it;
+- «Аня» and «Anya» listed as two players in one legend, which is the picture of the
+  problem `/merge` exists for — and may be a gallery fixture rather than a defect.
+
+The middle two overlap the two entries above about fitting a name to its space; whether
+they are one defect seen twice is part of the checking.
+
+**Check them with the phase that fits names to their space**, which opens the same
+three files anyway.
 
 ---
 
