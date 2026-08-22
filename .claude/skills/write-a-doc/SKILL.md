@@ -125,6 +125,20 @@ story it cited, thirty lines below in the same file, says the reviewer caught it
 The review found it in the diff. Nobody would have found it in the released prose,
 because a reason nobody checks reads exactly like a reason that holds.
 
+## A claim about real data needs a gate or a date
+
+`PLAN.md` said of a real evening: "nine fire, the set is entirely different, and
+**every player is named at least once**". Measured against the production database
+months later, one of the five players was named on neither real evening — the
+sentence was false, sat in the document that wins on behaviour, and nothing could
+notice, because no check reads a database.
+
+A document may say what the data did. It may not say what the data **does**, unless
+something re-checks it. So either **date the claim** — "on the evening of 31 July
+2026, every player was named" is a fact about that night and stays true — or make it
+checkable and cite the check. The same rule caught the README's memory figures, and
+it is the same disease: a number that was measured once and reads as a promise.
+
 ## The budget is the point
 
 `CLAUDE.md` has a **line budget**, enforced by `docs:check`. It exists so that adding

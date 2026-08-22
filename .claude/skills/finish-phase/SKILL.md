@@ -115,6 +115,17 @@ included, and a red battery keeps the tag on the machine. Breaks below 85%
 either way.
 Coverage says a line ran; this says a test would have noticed it break.
 
+**Do not start it until the tree is final.** Stryker reads the files once and reports
+at the end, so a run started while a review is still landing measures a tree that no
+longer exists — and there is no partial result to salvage, because the report is
+written last. One phase started the changed-file run in the background, took eight
+review findings during it, and had to kill it at fifteen minutes with nothing to show.
+Backgrounding it is right; backgrounding it *before the last edit* is fifteen minutes
+of a machine that could have been running the e2e suite. Everything else can overlap
+with it — writing documents, redrawing pictures, reading a subagent's report — but the
+**e2e suite cannot**: `QUIET_MS` decides the bot has finished, and a machine busy with
+mutants makes renders slow enough to cross it.
+
 **That full run grows with the code**: 5637 mutants at v1.14.0, of which one
 feature phase added about 2100. It took sixteen minutes until `concurrency`
 stopped being a hard `4` — a quarter of this machine — and became `"75%"`, which
@@ -218,6 +229,28 @@ Rules about *running* it, learned by burning most of a phase's budget on them:
   `sum + null` is `sum + 0` in JavaScript, so "add the value even when it is absent"
   changes nothing observable. Recognising this is cheaper than writing the test that
   cannot exist.
+
+## 3a. Read one real evening, if the phase changed what a poster says
+
+Every other gate judges a layout or a file. None of them asks the only question a
+player asks — *what does tonight's sheet actually say* — and the gallery cannot: its
+cases are built to stress the drawing (widest name, most awards, tallest sheet), so a
+selection rule that quietly hands one player four of nine rows passes every one of them.
+
+```bash
+node scripts/tools.ts evening <chat id>
+```
+
+It prints the awards a real chat's newest evening would carry, in that chat's own
+language, and it reads whatever `DB_PATH` points at. Take the snapshot with
+`VACUUM INTO` from a read-only connection, never by copying the database file: the
+newest games live in the `-wal` sidecar and a copy leaves them behind.
+
+Two real evenings, read this way, produced eight defects in ten minutes — two numbers
+printed in each other's place, awards clustering on one player while another went
+unnamed, a "curse" that was below chance, one rival called both easy prey and a hard
+opponent, and three sentences that said things the picture did not. Every one of them
+had shipped through green gates.
 
 ## 4. `npm run e2e:changed`
 

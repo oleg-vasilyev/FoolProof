@@ -683,7 +683,7 @@ stacked parts:
   bold. A key under the grid shows the three states as miniatures of the cells
   themselves; the ordinary finish needs no entry, because every cell already prints
   its own place.
-- **The table share.** One line per player against game number: the fraction of the
+- **The opponents beaten.** One line per player against game number: the fraction of the
   table they have finished ahead of, averaged over the games they have played so
   far. The axis is a fixed 0–100% with the 50% mid-table line dotted, so a height on
   the chart means the same thing in every picture ever rendered.
@@ -966,7 +966,7 @@ rule finds a winner at all — the number `RAREST_FIRST` is ordered by.
 
 | Award | Earned by | Threshold | Fires |
 |---|---|---|---|
-| KING OF THE TABLE | the best table share | ≥ 5 games | 100% |
+| KING OF THE TABLE | beating the most of the table | ≥ 5 games | 100% |
 | AHEAD ALL NIGHT | in front on the chart after every game but the first | evening ≥ 10, ≥ 8 games | 27% |
 | THE FAVOURITE | going out first more often than not | ≥ 50%, ≥ 8 games | 61% |
 | HAT TRICK | going out first in four games running | run ≥ 4 | 54% |

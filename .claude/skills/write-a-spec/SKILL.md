@@ -106,6 +106,22 @@ assert what the file is actually for:
   that is asserted as a fact about `card-message.ts`, not guessed from spotting `&amp;`
   in the output.
 
+## "It appears in the output" is not an assertion about where it went
+
+A spec asserting that every number an object carries turns up *somewhere* in the
+rendered sentence cannot see two of them swapped. That is not a hypothetical: the
+awards sheet spent a release claiming somebody opened three games and went out first
+in four of them, because the render layer handed the copy table its two counts the
+wrong way round and every one of them was still present in the result. Types agree —
+both are numbers — and Stryker does not mutate argument order, so nothing anywhere
+could go red.
+
+**Whenever a function passes two values of the same type into something positional,
+one case must assert the finished result against that call with the roles spelled
+out**, with values that cannot be confused (`A_PART = 3`, `A_WHOLE = 7`, never
+`1` and `2`). Yes, it restates the source line — that is what a transcription
+check is, and it is the only shape that fails when the transcription is wrong.
+
 **The tell that a spec has drifted is an assertion it has no business making.**
 A keyboard spec checking the 64-byte callback limit; a stats spec checking that
 `&` becomes `&amp;`. Both were really testing another module, and both already

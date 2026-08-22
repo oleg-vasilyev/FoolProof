@@ -130,6 +130,13 @@ const firesFor = (name: AwardName, winner: number): void => {
   ruleSpies[name].mockReturnValue(awardOf(name, winner));
 };
 
+const firesShared = (name: AwardName, one: number, other: number): void => {
+  ruleSpies[name].mockReturnValue({
+    ...awardOf(name, one),
+    winners: [one, other],
+  } as unknown as Award);
+};
+
 const everyRuleFires = (): void => {
   fires(...Object.values(AwardName));
 };
@@ -230,6 +237,26 @@ describe("honoursFor()", () => {
         AwardName.FalseDawn,
         AwardName.FoolOfTheNight,
       ]);
+    });
+
+    it("should drop the favourite when the king of the table is the same player", () => {
+      fires(AwardName.King, AwardName.TheFavourite);
+
+      expect(namesOf()).toEqual([AwardName.King]);
+    });
+
+    it("should keep the favourite when somebody else sat highest", () => {
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.TheFavourite, ROMANI);
+
+      expect(namesOf()).toEqual([AwardName.King, AwardName.TheFavourite]);
+    });
+
+    it("should drop a shared award the king already speaks for, not only a solo one", () => {
+      firesFor(AwardName.King, OLEG);
+      firesShared(AwardName.TheFavourite, OLEG, ROMANI);
+
+      expect(namesOf()).toEqual([AwardName.King]);
     });
 
     it("should hand the last row back to rarity once everybody who fired has one", () => {
