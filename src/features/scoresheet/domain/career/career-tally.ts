@@ -1,4 +1,5 @@
 import { Finish } from "#scoresheet/domain/game-outcomes.ts";
+import { NEUTRAL } from "#scoresheet/domain/scoring.ts";
 import type { CareerAppearance } from "#scoresheet/domain/career/career-appearances.ts";
 
 
@@ -9,6 +10,7 @@ const ONE_SEAT = 1;
 export interface CareerTally {
   readonly games: number;
   readonly evenings: number;
+  readonly shareChance: number;
   readonly fools: number;
   readonly decided: number;
   readonly foolRate: number;
@@ -46,6 +48,7 @@ export const careerTally = (appearances: readonly CareerAppearance[]): CareerTal
   return {
     games: appearances.length,
     evenings: new Set(appearances.map((appearance) => appearance.seriesNo)).size,
+    shareChance: NEUTRAL,
     fools,
     decided: decided.length,
     foolRate: rateOf(fools, decided.length),

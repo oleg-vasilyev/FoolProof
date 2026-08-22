@@ -1,7 +1,7 @@
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Copy } from "#scoresheet/copy.ts";
-import { gameTally, timeTally } from "#scoresheet/render/tally-phrases.ts";
+import { gameTally, gamesAcross, gamesOf, timeTally } from "#scoresheet/render/tally-phrases.ts";
 
 
 export const awardTitle = (copy: Copy, award: Award): string => copy.awardTitles[award.name];
@@ -13,14 +13,14 @@ export const awardReason = (copy: Copy, award: Award): string => {
   switch (award.name) {
     case AwardName.King:
       return award.passed
-        ? copy.kingPassedReason(award.percent, gameTally(copy, award.games))
-        : copy.kingReason(award.percent, gameTally(copy, award.games));
+        ? copy.kingPassedReason(award.percent, gamesAcross(copy, award.games))
+        : copy.kingReason(award.percent, gamesAcross(copy, award.games));
 
     case AwardName.WireToWire:
-      return copy.wireToWireReason(gameTally(copy, award.games));
+      return copy.wireToWireReason(gamesAcross(copy, award.games));
 
     case AwardName.TheFavourite:
-      return copy.favouriteReason(award.firsts, gameTally(copy, award.games));
+      return copy.favouriteReason(award.firsts, gamesOf(copy, award.games));
 
     case AwardName.HatTrick:
       return copy.hatTrickReason(gameTally(copy, award.run));
@@ -32,7 +32,7 @@ export const awardReason = (copy: Copy, award: Award): string => {
       return copy.untouchableReason(gameTally(copy, award.games));
 
     case AwardName.Teflon:
-      return copy.teflonReason(gameTally(copy, award.streak));
+      return copy.teflonReason(gamesAcross(copy, award.streak));
 
     case AwardName.HotSeat:
       return copy.hotSeatReason(award.opens);
@@ -44,13 +44,16 @@ export const awardReason = (copy: Copy, award: Award): string => {
       return copy.ladderReason(gameTally(copy, award.run));
 
     case AwardName.SweetRevenge:
-      return copy.sweetRevengeReason(timeTally(copy, award.fools), award.comebacks);
+      return copy.sweetRevengeReason(
+        timeTally(copy, award.fools),
+        timeTally(copy, award.comebacks)
+      );
 
     case AwardName.IronSeat:
       return copy.ironSeatReason(gameTally(copy, award.games));
 
     case AwardName.TheTruce:
-      return copy.truceReason(award.draws, gameTally(copy, award.games));
+      return copy.truceReason(award.draws, gamesOf(copy, award.games));
 
     case AwardName.ThePacifist:
       return copy.pacifistReason(gameTally(copy, award.draws));
@@ -59,7 +62,7 @@ export const awardReason = (copy: Copy, award: Award): string => {
       return copy.nemesisReason(gameTally(copy, award.over));
 
     case AwardName.TheDoorman:
-      return copy.doormanReason(award.opens, gameTally(copy, award.games));
+      return copy.doormanReason(award.opens, gamesOf(copy, award.games));
 
     case AwardName.NeverAsked:
       return copy.neverAskedReason(gameTally(copy, award.games));
@@ -68,22 +71,22 @@ export const awardReason = (copy: Copy, award: Award): string => {
       return copy.latecomerReason(award.joinedAt, award.percent);
 
     case AwardName.RevolvingDoor:
-      return copy.revolvingDoorReason(gameTally(copy, award.missed), gameTally(copy, award.games));
+      return copy.revolvingDoorReason(award.missed, gameTally(copy, award.games));
 
     case AwardName.TheCameo:
-      return copy.cameoReason(gameTally(copy, award.games));
+      return copy.cameoReason(gamesOf(copy, award.games));
 
     case AwardName.SecondWind:
-      return copy.secondWindReason(award.burnedBy, gameTally(copy, award.games));
+      return copy.secondWindReason(award.burnedBy, gamesAcross(copy, award.games));
 
     case AwardName.TheUnderstudy:
-      return copy.understudyReason(timeTally(copy, award.seconds), gameTally(copy, award.games));
+      return copy.understudyReason(timeTally(copy, award.seconds), gamesAcross(copy, award.games));
 
     case AwardName.TheFlatline:
-      return copy.flatlineReason(award.band, gameTally(copy, award.games));
+      return copy.flatlineReason(award.band, gamesAcross(copy, award.games));
 
     case AwardName.TheInvisible:
-      return copy.invisibleReason(award.middles, gameTally(copy, award.games));
+      return copy.invisibleReason(award.middles, gamesOf(copy, award.games));
 
     case AwardName.GroundhogDay:
       return copy.groundhogReason(award.place, gameTally(copy, award.run));
@@ -92,13 +95,13 @@ export const awardReason = (copy: Copy, award: Award): string => {
       return copy.pendulumReason(gameTally(copy, award.run));
 
     case AwardName.TheRollercoaster:
-      return copy.rollercoasterReason(award.swing, gameTally(copy, award.games));
+      return copy.rollercoasterReason(award.swing, gamesAcross(copy, award.games));
 
     case AwardName.AllOrNothing:
-      return copy.allOrNothingReason(award.edges, gameTally(copy, award.games));
+      return copy.allOrNothingReason(award.edges, gamesOf(copy, award.games));
 
     case AwardName.TheIrishGoodbye:
-      return copy.irishGoodbyeReason(award.leftAfter, gameTally(copy, award.games));
+      return copy.irishGoodbyeReason(award.leftAfter, gamesOf(copy, award.games));
 
     case AwardName.TheAnchor:
       return copy.anchorReason(gameTally(copy, award.games));
@@ -116,9 +119,9 @@ export const awardReason = (copy: Copy, award: Award): string => {
       return copy.encoreReason(gameTally(copy, award.run));
 
     case AwardName.FirstBlood:
-      return copy.firstBloodReason(gameTally(copy, award.games));
+      return copy.firstBloodReason;
 
     case AwardName.FoolOfTheNight:
-      return copy.foolReason(award.fools, gameTally(copy, award.games));
+      return copy.foolReason(award.fools, gamesOf(copy, award.games));
   }
 };

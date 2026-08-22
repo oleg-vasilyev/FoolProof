@@ -1,5 +1,5 @@
 import { CareerFactName, type CareerFact } from "#scoresheet/domain/career/facts/fact-catalogue.ts";
-import { atLeast, atMost } from "#scoresheet/domain/career/facts/binomial-tail.ts";
+import { atLeast, atMost, usualOver } from "#scoresheet/domain/career/facts/binomial-tail.ts";
 import { notablePick } from "#scoresheet/domain/career/facts/notable-pick.ts";
 import type { CareerGame, Finalist } from "#shared/repository/repository-contract.ts";
 import type { CareerSubject } from "#scoresheet/domain/career/facts/career-subject.ts";
@@ -159,7 +159,7 @@ const alongsideField = (
         rival: pairing.rival,
         games: pairing.together,
         burns: pairing.burns,
-        usual: subject.tally.foolRate,
+        usualBurns: usualOver(subject.tally.foolRate, pairing.together),
       },
       tail: tailOf(pairing, subject.tally.foolRate),
     }));

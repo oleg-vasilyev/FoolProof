@@ -14,14 +14,14 @@ export const copy: Copy = {
   database: (file: string, size: string) => `База: ${file} (${size})`,
 
   contents: (players: string, games: string, liveCards: number) =>
-    `Записано: ${players}, ${games}, на столе: ${liveCards}`,
+    `Записано: ${players}, ${games}; на столе ещё ${liveCards}`,
 
   lastGame: (at: string) => `Последняя партия: ${at} UTC`,
 
   noGamesYet: "Последняя партия: пока ни одной",
 
   chats: (all: number, played: number, fresh: number) =>
-    `Чаты: ${all} всего, ${played} играли за неделю, впервые замечено — ${fresh}`,
+    `Чаты: ${all} всего, ${played} играли за неделю, новых — ${fresh}`,
 
   games: (day: number, week: number) => `Партии: ${day} за сутки, ${week} за неделю`,
 

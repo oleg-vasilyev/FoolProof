@@ -82,9 +82,12 @@ const BURNS_IN_A_SHORT_NIGHT = 1;
 
 const FIRSTS_IN_A_SHORT_NIGHT = 2;
 
+const AN_EVEN_SPLIT = 0.5;
+
 const A_TALLY: CareerTally = {
   games: SOME_GAMES,
   evenings: SOME_NIGHTS,
+  shareChance: AN_EVEN_SPLIT,
   fools: SOME_FOOLS,
   decided: SOME_DECIDED,
   foolRate: USUAL_FOOL_RATE,

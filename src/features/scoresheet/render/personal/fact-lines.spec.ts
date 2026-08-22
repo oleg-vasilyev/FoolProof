@@ -5,6 +5,10 @@ import { copy } from "#scoresheet/copy.en.ts";
 
 const gameTallySpy = vi.fn();
 
+const gamesAcrossSpy = vi.fn();
+
+const gamesOfSpy = vi.fn();
+
 const eveningTallySpy = vi.fn();
 
 const timeTallySpy = vi.fn();
@@ -15,6 +19,8 @@ const sessionDateSpy = vi.fn();
 
 vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
+  gamesAcross: (table: unknown, games: number) => gamesAcrossSpy(table, games),
+  gamesOf: (table: unknown, games: number) => gamesOfSpy(table, games),
   eveningTally: (table: unknown, evenings: number) => eveningTallySpy(table, evenings),
   timeTally: (table: unknown, times: number) => timeTallySpy(table, times),
 }));
@@ -33,6 +39,10 @@ const dated = (isoDate: string): string => `date[${isoDate}]`;
 
 const games = (count: number): string => `games[${String(count)}]`;
 
+const across = (count: number): string => `across[${String(count)}]`;
+
+const of = (count: number): string => `of[${String(count)}]`;
+
 const evenings = (count: number): string => `evenings[${String(count)}]`;
 
 const times = (count: number): string => `times[${String(count)}]`;
@@ -43,6 +53,8 @@ interface Sample {
   readonly fact: CareerFact;
   readonly dates: readonly string[];
   readonly gamesWith: readonly number[];
+  readonly acrossWith: readonly number[];
+  readonly ofWith: readonly number[];
   readonly eveningsWith: readonly number[];
   readonly timesWith: readonly number[];
   readonly percentsWith: readonly number[];
@@ -53,6 +65,8 @@ interface Sample {
 const NOTHING_ASKED: Omit<Sample, "fact"> = {
   dates: [],
   gamesWith: [],
+  acrossWith: [],
+  ofWith: [],
   eveningsWith: [],
   timesWith: [],
   percentsWith: [],
@@ -99,38 +113,36 @@ const SAMPLES: readonly Sample[] = [
     { name: CareerFactName.TheBlinder, playedOn: BLINDER_DATE, games: 11, firsts: 7 },
     {
       dates: [BLINDER_DATE],
-      gamesWith: [11],
+      acrossWith: [11],
       timesWith: [7],
       holderShows: dated(BLINDER_DATE),
-      whyShows: [times(7), games(11)],
+      whyShows: [times(7), across(11)],
     }
   ),
   sampleOf(
     { name: CareerFactName.TheNightmare, playedOn: NIGHTMARE_DATE, games: 12, burns: 9 },
     {
       dates: [NIGHTMARE_DATE],
-      gamesWith: [12],
+      acrossWith: [12],
       timesWith: [9],
       holderShows: dated(NIGHTMARE_DATE),
-      whyShows: [times(9), games(12)],
+      whyShows: [times(9), across(12)],
     }
   ),
   sampleOf(
-    { name: CareerFactName.TheCharm, rival: CHARM_RIVAL, games: 13, burns: 5, usual: 0.31 },
+    { name: CareerFactName.TheCharm, rival: CHARM_RIVAL, games: 13, burns: 5, usualBurns: 4 },
     {
-      gamesWith: [13],
-      percentsWith: [0.31],
+      acrossWith: [13],
       holderShows: CHARM_RIVAL,
-      whyShows: ["5", games(13), pct(0.31)],
+      whyShows: ["5", across(13), "4"],
     }
   ),
   sampleOf(
-    { name: CareerFactName.TheJinx, rival: JINX_RIVAL, games: 14, burns: 6, usual: 0.32 },
+    { name: CareerFactName.TheJinx, rival: JINX_RIVAL, games: 14, burns: 6, usualBurns: 7 },
     {
-      gamesWith: [14],
-      percentsWith: [0.32],
+      acrossWith: [14],
       holderShows: JINX_RIVAL,
-      whyShows: ["6", games(14), pct(0.32)],
+      whyShows: ["6", across(14), "7"],
     }
   ),
   sampleOf(
@@ -142,12 +154,12 @@ const SAMPLES: readonly Sample[] = [
     { timesWith: [16], holderShows: BOGEY_RIVAL, whyShows: ["3", times(16)] }
   ),
   sampleOf(
-    { name: CareerFactName.BigTableCharm, seats: 7, games: 17, burns: 4 },
-    { gamesWith: [17], holderShows: copy.atTableOf(7), whyShows: ["4", games(17)] }
+    { name: CareerFactName.BigTableCharm, seats: 7, games: 17, burns: 4, usualBurns: 2 },
+    { acrossWith: [17], holderShows: copy.atTableOf(7), whyShows: ["4", across(17), "2"] }
   ),
   sampleOf(
-    { name: CareerFactName.BigTableCurse, seats: 9, games: 18, burns: 2 },
-    { gamesWith: [18], holderShows: copy.atTableOf(9), whyShows: ["2", games(18)] }
+    { name: CareerFactName.BigTableCurse, seats: 9, games: 18, burns: 2, usualBurns: 7 },
+    { acrossWith: [18], holderShows: copy.atTableOf(9), whyShows: ["2", across(18), "7"] }
   ),
   sampleOf(
     { name: CareerFactName.OpenersGift, opens: 19, firsts: 21 },
@@ -172,7 +184,7 @@ const SAMPLES: readonly Sample[] = [
   ),
   sampleOf(
     { name: CareerFactName.TheHeadStart, opens: 26, games: 27 },
-    { timesWith: [26], gamesWith: [27], holderShows: times(26), whyShows: [games(27)] }
+    { timesWith: [26], ofWith: [27], holderShows: times(26), whyShows: [of(27)] }
   ),
   sampleOf(
     { name: CareerFactName.TheBadPatch, games: 28, from: BAD_PATCH_FROM, until: BAD_PATCH_UNTIL },
@@ -193,23 +205,23 @@ const SAMPLES: readonly Sample[] = [
     }
   ),
   sampleOf(
-    { name: CareerFactName.TheSurvivor, games: 31, burns: 32, expected: 0.33 },
+    { name: CareerFactName.TheSurvivor, games: 31, burns: 32, expected: 0.33, rate: 0.13 },
     {
-      gamesWith: [31],
+      ofWith: [31],
       timesWith: [32],
-      percentsWith: [0.33],
+      percentsWith: [0.33, 0.13],
       holderShows: times(32),
-      whyShows: [games(31), pct(0.33)],
+      whyShows: [of(31), pct(0.33), pct(0.13)],
     }
   ),
   sampleOf(
-    { name: CareerFactName.LightningRod, games: 34, burns: 35, expected: 0.36 },
+    { name: CareerFactName.LightningRod, games: 34, burns: 35, expected: 0.36, rate: 0.86 },
     {
-      gamesWith: [34],
+      ofWith: [34],
       timesWith: [35],
-      percentsWith: [0.36],
+      percentsWith: [0.36, 0.86],
       holderShows: times(35),
-      whyShows: [games(34), pct(0.36)],
+      whyShows: [of(34), pct(0.36), pct(0.86)],
     }
   ),
   sampleOf(
@@ -256,6 +268,8 @@ describe("factLines()", () => {
     vi.clearAllMocks();
 
     gameTallySpy.mockImplementation((_table: unknown, count: number) => games(count));
+    gamesAcrossSpy.mockImplementation((_table: unknown, count: number) => across(count));
+    gamesOfSpy.mockImplementation((_table: unknown, count: number) => of(count));
     eveningTallySpy.mockImplementation((_table: unknown, count: number) => evenings(count));
     timeTallySpy.mockImplementation((_table: unknown, count: number) => times(count));
     percentLabelSpy.mockImplementation((share: number) => pct(share));
@@ -302,6 +316,13 @@ describe("factLines()", () => {
       factLines(copy, sample.fact);
 
       expect(askedOf(gameTallySpy)).toEqual(throughTheTable(sample.gamesWith));
+    });
+
+    it.each(SAMPLES)("should ask for $fact.name's games in the case its frame needs", (sample) => {
+      factLines(copy, sample.fact);
+
+      expect(askedOf(gamesAcrossSpy)).toEqual(throughTheTable(sample.acrossWith));
+      expect(askedOf(gamesOfSpy)).toEqual(throughTheTable(sample.ofWith));
     });
 
     it.each(SAMPLES)("should count $fact.name's evenings through the evening tally", (sample) => {

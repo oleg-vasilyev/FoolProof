@@ -20,6 +20,7 @@ const againstTheSeat = (
             games: subject.tally.decided,
             burns: subject.tally.fools,
             expected: subject.tally.seatChanceInDecided,
+            rate: subject.tally.foolRate,
           },
           tail: tail(subject.tally.fools, subject.tally.decided, subject.tally.seatChanceInDecided),
         },

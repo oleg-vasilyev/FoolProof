@@ -37,13 +37,14 @@ interface Alongside {
   readonly rival: string;
   readonly games: number;
   readonly burns: number;
-  readonly usual: number;
+  readonly usualBurns: number;
 }
 
 interface Crowd {
   readonly seats: number;
   readonly games: number;
   readonly burns: number;
+  readonly usualBurns: number;
 }
 
 interface Stretch {
@@ -56,6 +57,7 @@ interface AgainstTheSeat {
   readonly games: number;
   readonly burns: number;
   readonly expected: number;
+  readonly rate: number;
 }
 
 interface Opening {

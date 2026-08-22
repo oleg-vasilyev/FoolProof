@@ -5,6 +5,12 @@ import type { Copy } from "#scoresheet/copy.ts";
 export const gameTally = (copy: Copy, games: number): string =>
   counted(copy.locale, games, copy.sheetGameForms);
 
+export const gamesOf = (copy: Copy, games: number): string =>
+  counted(copy.locale, games, copy.sheetGameOfForms);
+
+export const gamesAcross = (copy: Copy, games: number): string =>
+  counted(copy.locale, games, copy.sheetGameAcrossForms);
+
 export const playerTally = (copy: Copy, players: number): string =>
   counted(copy.locale, players, copy.sheetPlayerForms);
 

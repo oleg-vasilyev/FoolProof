@@ -50,8 +50,8 @@ export const copy = {
     "/next_without — tap whoever is sitting out, or name them: /next_without Oleg",
   helpCard: [
     "Tap a name to record who went first, then tap players in the order they go out.",
-    "The last one left is the fool and gets marked for you. Draw appears once two players",
-    "are left. Back undoes one step at a time, and nothing is recorded until you tap Confirm.",
+    "The last one left is the fool and gets marked for you. Draw appears once two players are left.",
+    "Back undoes one step at a time, and nothing is recorded until you tap Confirm.",
   ],
 
   header: (gameNumber: number) => `<b>Game ${gameNumber}</b>`,

@@ -15,6 +15,9 @@ export const copy = {
   willHave: (keeper: string, games: string) => `${keeper} will have ${games}.`,
   nowHas: (keeper: string, games: string) => `${keeper} now has ${games}.`,
 
+  betweenNames: ", ",
+  beforeLastName: " and ",
+
   gameForms: { one: "game", few: "games", many: "games" },
 
   nothingToMerge: "Only one name here so far — nothing to merge.",

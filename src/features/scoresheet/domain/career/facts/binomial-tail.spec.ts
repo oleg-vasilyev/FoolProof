@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { atLeast, atMost } from "#scoresheet/domain/career/facts/binomial-tail.ts";
+import { atLeast, atMost, usualOver } from "#scoresheet/domain/career/facts/binomial-tail.ts";
 
 
 const NEVER = 0;
@@ -209,5 +209,37 @@ describe("atMost()", () => {
     expect(Number.isFinite(tail)).toBe(true);
     expect(tail).toBeGreaterThan(NEVER);
     expect(tail).toBeLessThan(VANISHINGLY_SMALL);
+  });
+});
+
+describe("usualOver()", () => {
+  const A_QUARTER = 0.25;
+
+  const TWELVE_GAMES = 12;
+
+  const THREE_BURNS = 3;
+
+  it("should give the count the chance works out to over those trials", () => {
+    expect(usualOver(A_QUARTER, TWELVE_GAMES)).toBe(THREE_BURNS);
+  });
+
+  it("should round an exact half up, rather than down to the friendlier number", () => {
+    const SEVEN_GAMES = 7;
+
+    const ROUNDED_UP = 4;
+
+    expect(usualOver(A_FAIR_COIN, SEVEN_GAMES)).toBe(ROUNDED_UP);
+  });
+
+  it("should hand back a whole number even when the arithmetic is not", () => {
+    expect(Number.isInteger(usualOver(A_LOADED_COIN, TEN_TOSSES))).toBe(true);
+  });
+
+  it("should expect nothing of a chance that never happens", () => {
+    expect(usualOver(NO_CHANCE, TEN_TOSSES)).toBe(NEVER);
+  });
+
+  it("should expect every trial of a certainty", () => {
+    expect(usualOver(A_CERTAINTY, TEN_TOSSES)).toBe(TEN_TOSSES);
   });
 });

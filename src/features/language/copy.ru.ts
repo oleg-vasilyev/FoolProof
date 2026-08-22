@@ -10,7 +10,7 @@ export const copy: Copy = {
 
   header: "<b>Язык</b>",
   ask: "На каком языке боту говорить в этом чате?",
-  chosenBody: (language: string) => `Теперь бот говорит здесь так: ${language}.`,
+  chosenBody: (language: string) => `Язык бота в этом чате теперь — ${language}.`,
 
   languageNames: { en: "English", ru: "Русский" },
 

@@ -9,6 +9,8 @@ import type { CareerTally } from "#scoresheet/domain/career/career-tally.ts";
 
 const atLeastSpy = vi.fn();
 
+const usualOverSpy = vi.fn();
+
 const atMostSpy = vi.fn();
 
 const notablePickSpy = vi.fn();
@@ -16,6 +18,7 @@ const notablePickSpy = vi.fn();
 vi.mock("#scoresheet/domain/career/facts/binomial-tail.ts", () => ({
   atLeast: (wanted: number, trials: number, chance: number) => atLeastSpy(wanted, trials, chance),
   atMost: (wanted: number, trials: number, chance: number) => atMostSpy(wanted, trials, chance),
+  usualOver: (chance: number, trials: number) => usualOverSpy(chance, trials),
 }));
 
 vi.mock("#scoresheet/domain/career/facts/notable-pick.ts", () => ({
@@ -45,6 +48,8 @@ const A_NIGHT = 7;
 const A_DAY = "2026-05-01";
 
 const OLEGS_SHARE = 0.61;
+
+const USUAL_BURNS_AT_A_SIZE = 3;
 
 const A_TAIL = 0.07;
 
@@ -88,9 +93,12 @@ const BURNS_AT_A_BIG_TABLE = 5;
 
 const BURNS_AT_A_SMALL_TABLE = 2;
 
+const AN_EVEN_SPLIT = 0.5;
+
 const A_TALLY: CareerTally = {
   games: SOME_GAMES,
   evenings: SOME_NIGHTS,
+  shareChance: AN_EVEN_SPLIT,
   fools: SOME_FOOLS,
   decided: SOME_DECIDED,
   foolRate: TWICE_THE_SEAT_FOOL_RATE,
@@ -150,8 +158,14 @@ const ONE_GAME_SHORT_AT_A_SMALL_TABLE = [
   ...playedAt(A_SMALL_TABLE, BURNS_AT_A_SMALL_TABLE, ENOUGH_AT_A_SIZE - ONE_SHORT),
 ];
 
-const crowded = (name: CareerFactName, seats: number, burns: number, tail: number): unknown => ({
-  fact: { name, seats, games: ENOUGH_AT_A_SIZE, burns },
+const crowded = (
+  name: CareerFactName,
+  seats: number,
+  burns: number,
+  tail: number,
+  usualBurns: number
+): unknown => ({
+  fact: { name, seats, games: ENOUGH_AT_A_SIZE, burns, usualBurns },
   tail,
 });
 
@@ -159,6 +173,7 @@ describe("table facts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    usualOverSpy.mockReturnValue(USUAL_BURNS_AT_A_SIZE);
     atLeastSpy.mockReturnValue(A_TAIL);
     atMostSpy.mockReturnValue(ANOTHER_TAIL);
     notablePickSpy.mockReturnValue(A_CHOSEN_FACT);
@@ -169,8 +184,20 @@ describe("table facts", () => {
       bigTableCurse(subjectOf(AT_BOTH_SIZES));
 
       expect(notablePickSpy).toHaveBeenCalledWith([
-        crowded(CareerFactName.BigTableCurse, A_BIG_TABLE, BURNS_AT_A_BIG_TABLE, A_TAIL),
-        crowded(CareerFactName.BigTableCurse, A_SMALL_TABLE, BURNS_AT_A_SMALL_TABLE, A_TAIL),
+        crowded(
+          CareerFactName.BigTableCurse,
+          A_BIG_TABLE,
+          BURNS_AT_A_BIG_TABLE,
+          A_TAIL,
+          USUAL_BURNS_AT_A_SIZE
+        ),
+        crowded(
+          CareerFactName.BigTableCurse,
+          A_SMALL_TABLE,
+          BURNS_AT_A_SMALL_TABLE,
+          A_TAIL,
+          USUAL_BURNS_AT_A_SIZE
+        ),
       ]);
     });
 
@@ -178,7 +205,13 @@ describe("table facts", () => {
       bigTableCurse(subjectOf(ONE_GAME_SHORT_AT_A_SMALL_TABLE));
 
       expect(notablePickSpy).toHaveBeenCalledWith([
-        crowded(CareerFactName.BigTableCurse, A_BIG_TABLE, BURNS_AT_A_BIG_TABLE, A_TAIL),
+        crowded(
+          CareerFactName.BigTableCurse,
+          A_BIG_TABLE,
+          BURNS_AT_A_BIG_TABLE,
+          A_TAIL,
+          USUAL_BURNS_AT_A_SIZE
+        ),
       ]);
     });
 
@@ -248,12 +281,19 @@ describe("table facts", () => {
       bigTableCharm(subjectOf(AT_BOTH_SIZES));
 
       expect(notablePickSpy).toHaveBeenCalledWith([
-        crowded(CareerFactName.BigTableCharm, A_BIG_TABLE, BURNS_AT_A_BIG_TABLE, ANOTHER_TAIL),
+        crowded(
+          CareerFactName.BigTableCharm,
+          A_BIG_TABLE,
+          BURNS_AT_A_BIG_TABLE,
+          ANOTHER_TAIL,
+          USUAL_BURNS_AT_A_SIZE
+        ),
         crowded(
           CareerFactName.BigTableCharm,
           A_SMALL_TABLE,
           BURNS_AT_A_SMALL_TABLE,
-          ANOTHER_TAIL
+          ANOTHER_TAIL,
+          USUAL_BURNS_AT_A_SIZE
         ),
       ]);
     });
@@ -262,7 +302,13 @@ describe("table facts", () => {
       bigTableCharm(subjectOf(ONE_GAME_SHORT_AT_A_SMALL_TABLE));
 
       expect(notablePickSpy).toHaveBeenCalledWith([
-        crowded(CareerFactName.BigTableCharm, A_BIG_TABLE, BURNS_AT_A_BIG_TABLE, ANOTHER_TAIL),
+        crowded(
+          CareerFactName.BigTableCharm,
+          A_BIG_TABLE,
+          BURNS_AT_A_BIG_TABLE,
+          ANOTHER_TAIL,
+          USUAL_BURNS_AT_A_SIZE
+        ),
       ]);
     });
 

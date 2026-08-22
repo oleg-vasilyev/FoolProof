@@ -6,6 +6,8 @@ import { careerTally } from "#scoresheet/domain/career/career-tally.ts";
 
 const NOTHING = 0;
 
+const AN_EVEN_SPLIT = 0.5;
+
 const ONCE = 1;
 
 const TWICE = 2;
@@ -62,6 +64,7 @@ describe("careerTally()", () => {
     expect(careerTally([])).toEqual({
       games: NOTHING,
       evenings: NOTHING,
+      shareChance: AN_EVEN_SPLIT,
       fools: NOTHING,
       decided: NOTHING,
       foolRate: NOTHING,

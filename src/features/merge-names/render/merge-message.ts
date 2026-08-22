@@ -9,19 +9,29 @@ import { gameTally } from "#merge-names/render/game-tally.ts";
 import type { Copy } from "#merge-names/copy.ts";
 
 
-const BETWEEN_NAMES = ", ";
-
 const BETWEEN_LINES = "\n";
 
 const NOTHING_PICKED = 0;
 
+const FROM_THE_START = 0;
+
+const ALONE = 1;
+
+const LAST = -1;
+
 const safeNameOf = (candidate: Candidate): string => escapeHtml(candidate.displayName);
 
-export const joinedNames = (candidates: readonly Candidate[]): string =>
-  candidates.map((candidate) => candidate.displayName).join(BETWEEN_NAMES);
+export const joinedNames = (copy: Copy, candidates: readonly Candidate[]): string => {
+  const names = candidates.map((candidate) => candidate.displayName);
+  const last = names.at(LAST);
+
+  return names.length <= ALONE || last === undefined
+    ? names.join(copy.betweenNames)
+    : `${names.slice(FROM_THE_START, LAST).join(copy.betweenNames)}${copy.beforeLastName}${last}`;
+};
 
 const planLine = (copy: Copy, keeper: Candidate, absorbed: readonly Candidate[]): string =>
-  copy.plan(absorbed.map(safeNameOf).join(BETWEEN_NAMES), safeNameOf(keeper));
+  copy.plan(absorbed.map(safeNameOf).join(copy.betweenNames), safeNameOf(keeper));
 
 const bodyFor = (copy: Copy, picked: readonly Candidate[]): readonly string[] => {
   const [keeper, ...absorbed] = picked;

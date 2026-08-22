@@ -16,7 +16,7 @@ import { FONT_FAMILY, GRID_RIGHT, IMAGE_WIDTH, PAD } from "#scoresheet/render/ca
 import { palette } from "#scoresheet/render/palette.ts";
 import { posterBaseboard } from "#scoresheet/render/poster-baseboard.ts";
 import type { Copy } from "#scoresheet/copy.ts";
-import { gameTally } from "#scoresheet/render/tally-phrases.ts";
+import { gamesOf } from "#scoresheet/render/tally-phrases.ts";
 import { line, rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
 
 
@@ -55,7 +55,7 @@ const curseNote = (copy: Copy, curse: TableCurse, top: number): readonly string[
     "font-size": CURSE_LABEL_FONT,
     "letter-spacing": CURSE_TRACKING,
   }),
-  text(copy.curseFact(curse.burns, gameTally(copy, curse.games), curse.predicted), {
+  text(copy.curseFact(curse.burns, gamesOf(copy, curse.games), curse.predicted), {
     x: GRID_RIGHT,
     y: top + CURSE_BASELINE_DROP,
     fill: palette.inkMuted,

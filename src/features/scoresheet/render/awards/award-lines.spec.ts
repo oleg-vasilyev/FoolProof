@@ -5,12 +5,18 @@ import { copy } from "#scoresheet/copy.en.ts";
 
 const gameTallySpy = vi.fn();
 
+const gamesAcrossSpy = vi.fn();
+
+const gamesOfSpy = vi.fn();
+
 const playerTallySpy = vi.fn();
 
 const timeTallySpy = vi.fn();
 
 vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
+  gamesAcross: (table: unknown, games: number) => gamesAcrossSpy(table, games),
+  gamesOf: (table: unknown, games: number) => gamesOfSpy(table, games),
   playerTally: (table: unknown, players: number) => playerTallySpy(table, players),
   timeTally: (table: unknown, times: number) => timeTallySpy(table, times),
 }));
@@ -21,9 +27,15 @@ const { awardReason, awardTitle, awardWinner } = await import(
 
 const tallyOf = (games: number): string => `tally(${String(games)})`;
 
+const acrossOf = (games: number): string => `across(${String(games)})`;
+
+const outOf = (games: number): string => `outOf(${String(games)})`;
+
 const headcountOf = (players: number): string => `heads(${String(players)})`;
 
 const timesOf = (times: number): string => `times(${String(times)})`;
+
+const ONCE = 1;
 
 const WINNER = 1;
 
@@ -72,7 +84,7 @@ const SAMPLES: readonly Award[] = [
   { name: AwardName.FalseDawn, winners: [WINNER], ledAt: oneOf(AwardName.FalseDawn), percent: twoOf(AwardName.FalseDawn) },
   { name: AwardName.OpenersCurse, winners: [WINNER], opens: oneOf(AwardName.OpenersCurse), burns: twoOf(AwardName.OpenersCurse) },
   { name: AwardName.Encore, winners: [WINNER], run: oneOf(AwardName.Encore) },
-  { name: AwardName.FirstBlood, winners: [WINNER], games: oneOf(AwardName.FirstBlood) },
+  { name: AwardName.FirstBlood, winners: [WINNER] },
   { name: AwardName.FoolOfTheNight, winners: [WINNER], fools: oneOf(AwardName.FoolOfTheNight), games: twoOf(AwardName.FoolOfTheNight) },
 ];
 
@@ -84,6 +96,8 @@ describe("award-lines", () => {
     vi.clearAllMocks();
 
     gameTallySpy.mockImplementation((_table: unknown, games: number) => tallyOf(games));
+    gamesAcrossSpy.mockImplementation((_table: unknown, games: number) => acrossOf(games));
+    gamesOfSpy.mockImplementation((_table: unknown, games: number) => outOf(games));
     timeTallySpy.mockImplementation((_table: unknown, times: number) => timesOf(times));
     playerTallySpy.mockImplementation((_table: unknown, players: number) => headcountOf(players));
   });
@@ -202,8 +216,8 @@ describe("award-lines", () => {
         streak: oneOf(AwardName.Teflon),
       });
 
-      expect(reason).toContain(tallyOf(oneOf(AwardName.Teflon)));
-      expect(gameTallySpy).toHaveBeenCalledWith(copy, oneOf(AwardName.Teflon));
+      expect(reason).toContain(acrossOf(oneOf(AwardName.Teflon)));
+      expect(gamesAcrossSpy).toHaveBeenCalledWith(copy, oneOf(AwardName.Teflon));
     });
 
     it("should give the truce its draws raw and tally only the games", () => {
@@ -216,9 +230,9 @@ describe("award-lines", () => {
 
       const reason = awardReason(copy, award);
 
-      expect(reason).toContain(tallyOf(twoOf(AwardName.TheTruce)));
-      expect(reason).not.toContain(tallyOf(oneOf(AwardName.TheTruce)));
-      expect(gameTallySpy).toHaveBeenCalledTimes(1);
+      expect(reason).toContain(outOf(twoOf(AwardName.TheTruce)));
+      expect(reason).not.toContain(outOf(oneOf(AwardName.TheTruce)));
+      expect(gamesOfSpy).toHaveBeenCalledTimes(ONCE);
     });
 
   });

@@ -5,7 +5,13 @@ import { copy as russian } from "#scoresheet/copy.ru.ts";
 import { copyIn, type Copy } from "#scoresheet/copy.ts";
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { GRID_RIGHT, PAD, USUAL_ADVANCE, WIDEST_ADVANCE } from "#scoresheet/render/card-metrics.ts";
-import { CURSE_FACT_FONT, CURSE_LABEL_FONT, CURSE_TRACKING } from "#scoresheet/render/awards/awards-layout.ts";
+import {
+  CURSE_FACT_FONT,
+  CURSE_LABEL_FONT,
+  CURSE_TRACKING,
+  ROOMY,
+  TEXT_LEFT,
+} from "#scoresheet/render/awards/awards-layout.ts";
 import { widthOf } from "#scoresheet/render/name-to-fit.ts";
 
 
@@ -23,53 +29,59 @@ const MARKER = "«marker»";
 
 const A_TALLY = "19 games";
 
+const ANOTHER_TALLY = "4 times";
+
+const A_WIDE_TALLY = "199 партий";
+
 const A_NAME = "Вильгельмина";
 
-const reasonsOf = (copy: Copy): readonly (readonly [string, string])[] => {
+const reasonsOf = (copy: Copy, tally: string): readonly (readonly [string, string])[] => {
   const FIFTY_ONE = 51;
 
   const EIGHT = 8;
 
   return [
-    ["king", copy.kingReason(FIFTY_ONE, A_TALLY)],
-    ["wireToWire", copy.wireToWireReason(A_TALLY)],
-    ["theFavourite", copy.favouriteReason(EIGHT, A_TALLY)],
-    ["hatTrick", copy.hatTrickReason(A_TALLY)],
+    ["king", copy.kingReason(FIFTY_ONE, tally)],
+    ["wireToWire", copy.wireToWireReason(tally)],
+    ["theFavourite", copy.favouriteReason(EIGHT, tally)],
+    ["hatTrick", copy.hatTrickReason(tally)],
     ["homeAdvantage", copy.homeAdvantageReason(EIGHT, TWO)],
-    ["untouchable", copy.untouchableReason(A_TALLY)],
-    ["teflon", copy.teflonReason(A_TALLY)],
+    ["untouchable", copy.untouchableReason(tally)],
+    ["teflon", copy.teflonReason(tally)],
     ["hotSeat", copy.hotSeatReason(EIGHT)],
     ["theComeback", copy.comebackReason(TWO, FIFTY_ONE)],
-    ["theLadder", copy.ladderReason(A_TALLY)],
-    ["sweetRevenge", copy.sweetRevengeReason(A_TALLY, EIGHT)],
-    ["ironSeat", copy.ironSeatReason(A_TALLY)],
-    ["theTruce", copy.truceReason(TWO, A_TALLY)],
-    ["thePacifist", copy.pacifistReason(A_TALLY)],
-    ["theNemesis", copy.nemesisReason(A_TALLY)],
-    ["theDoorman", copy.doormanReason(EIGHT, A_TALLY)],
-    ["neverAsked", copy.neverAskedReason(A_TALLY)],
+    ["theLadder", copy.ladderReason(tally)],
+    ["sweetRevenge", copy.sweetRevengeReason(tally, ANOTHER_TALLY)],
+    ["ironSeat", copy.ironSeatReason(tally)],
+    ["theTruce", copy.truceReason(TWO, tally)],
+    ["thePacifist", copy.pacifistReason(tally)],
+    ["theNemesis", copy.nemesisReason(tally)],
+    ["theDoorman", copy.doormanReason(EIGHT, tally)],
+    ["neverAsked", copy.neverAskedReason(tally)],
     ["theLatecomer", copy.latecomerReason(EIGHT, FIFTY_ONE)],
-    ["revolvingDoor", copy.revolvingDoorReason(A_TALLY, A_TALLY)],
-    ["theCameo", copy.cameoReason(A_TALLY)],
-    ["secondWind", copy.secondWindReason(TWO, A_TALLY)],
-    ["theUnderstudy", copy.understudyReason(A_TALLY, A_TALLY)],
-    ["theFlatline", copy.flatlineReason(TWO, A_TALLY)],
-    ["theInvisible", copy.invisibleReason(EIGHT, A_TALLY)],
-    ["groundhogDay", copy.groundhogReason(TWO, A_TALLY)],
-    ["thePendulum", copy.pendulumReason(A_TALLY)],
-    ["theRollercoaster", copy.rollercoasterReason(FIFTY_ONE, A_TALLY)],
-    ["allOrNothing", copy.allOrNothingReason(EIGHT, A_TALLY)],
-    ["theIrishGoodbye", copy.irishGoodbyeReason(EIGHT, A_TALLY)],
-    ["theAnchor", copy.anchorReason(A_TALLY)],
-    ["theSlide", copy.slideReason(A_TALLY)],
+    ["revolvingDoor", copy.revolvingDoorReason(EIGHT, tally)],
+    ["theCameo", copy.cameoReason(tally)],
+    ["secondWind", copy.secondWindReason(TWO, tally)],
+    ["theUnderstudy", copy.understudyReason(tally, tally)],
+    ["theFlatline", copy.flatlineReason(TWO, tally)],
+    ["theInvisible", copy.invisibleReason(EIGHT, tally)],
+    ["groundhogDay", copy.groundhogReason(TWO, tally)],
+    ["thePendulum", copy.pendulumReason(tally)],
+    ["theRollercoaster", copy.rollercoasterReason(FIFTY_ONE, tally)],
+    ["allOrNothing", copy.allOrNothingReason(EIGHT, tally)],
+    ["theIrishGoodbye", copy.irishGoodbyeReason(EIGHT, tally)],
+    ["theAnchor", copy.anchorReason(tally)],
+    ["theSlide", copy.slideReason(tally)],
     ["falseDawn", copy.falseDawnReason(EIGHT, FIFTY_ONE)],
     ["openersCurse", copy.openersCurseReason(FIFTY_ONE, TWO)],
-    ["encore", copy.encoreReason(A_TALLY)],
-    ["firstBlood", copy.firstBloodReason(A_TALLY)],
-    ["foolOfTheNight", copy.foolReason(TWO, A_TALLY)],
-    ["curse", copy.curseFact(EIGHT, A_TALLY, TWO)],
+    ["encore", copy.encoreReason(tally)],
+    ["firstBlood", copy.firstBloodReason],
+    ["foolOfTheNight", copy.foolReason(TWO, tally)],
+    ["curse", copy.curseFact(EIGHT, tally, TWO)],
   ];
 };
+
+const WITHOUT_A_FIGURE: readonly string[] = ["firstBlood"];
 
 describe("copyIn()", () => {
   it("should hand back the English table for English", () => {
@@ -276,9 +288,21 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
       expect(new Set(Object.values(copy.awardTitles)).size).toBe(AWARDS_IN_THE_CATALOGUE);
     });
 
-    it("should print a number in every justification", () => {
-      for (const [name, reason] of reasonsOf(copy)) {
+    it("should print a number in every justification earned on one", () => {
+      const counted = reasonsOf(copy, A_TALLY).filter(([name]) => !WITHOUT_A_FIGURE.includes(name));
+
+      for (const [name, reason] of counted) {
         expect(reason, name).toMatch(/\d/);
+      }
+    });
+
+    it("should exempt only a justification that prints nothing it was handed", () => {
+      const exempt = reasonsOf(copy, A_TALLY).filter(([name]) => WITHOUT_A_FIGURE.includes(name));
+
+      expect(exempt).toHaveLength(WITHOUT_A_FIGURE.length);
+
+      for (const [name, reason] of exempt) {
+        expect(reason, name).not.toContain(A_TALLY);
       }
     });
 
@@ -294,6 +318,15 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
 
       expect(copy.kingReason(FIFTY_ONE, A_TALLY)).toContain(A_TALLY);
       expect(copy.pacifistReason(A_TALLY)).toContain(A_TALLY);
+    });
+
+    it("should leave every award's justification inside the row it is printed on", () => {
+      const room = GRID_RIGHT - TEXT_LEFT;
+
+      for (const [name, reason] of reasonsOf(copy, A_WIDE_TALLY)) {
+        expect(widthOf(reason, ROOMY.reasonFont, USUAL_ADVANCE), `${name}: ${reason}`)
+          .toBeLessThanOrEqual(room);
+      }
     });
 
     it("should leave the curse fact room beside the label it shares a line with", () => {
@@ -313,11 +346,9 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
       expect(label + fact).toBeLessThanOrEqual(GRID_RIGHT - PAD);
     });
 
-    it("should print both the tally and the bare count an award was given", () => {
-      const EIGHT = 8;
-
-      expect(copy.sweetRevengeReason(A_TALLY, EIGHT)).toContain(A_TALLY);
-      expect(copy.sweetRevengeReason(A_TALLY, EIGHT)).toContain(String(EIGHT));
+    it("should print both the tallies an award was given, not one of them twice", () => {
+      expect(copy.sweetRevengeReason(A_TALLY, ANOTHER_TALLY)).toContain(A_TALLY);
+      expect(copy.sweetRevengeReason(A_TALLY, ANOTHER_TALLY)).toContain(ANOTHER_TALLY);
     });
   });
 });

@@ -107,11 +107,11 @@ describe("humanSize()", () => {
   });
 
   it("should give megabytes once it passes a thousand kilobytes", () => {
-    expect(humanSize(THREE * MB, UNITS)).toBe("3.0 <mb>");
+    expect(humanSize(THREE * MB, UNITS)).toBe("3<point>0 <mb>");
   });
 
   it("should switch to megabytes exactly at the boundary, not a kilobyte later", () => {
-    expect(humanSize(MB, UNITS)).toBe("1.0 <mb>");
+    expect(humanSize(MB, UNITS)).toBe("1<point>0 <mb>");
   });
 
   it("should still be kilobytes one byte below it", () => {
@@ -119,7 +119,11 @@ describe("humanSize()", () => {
   });
 
   it("should keep one decimal in megabytes, so growth is visible", () => {
-    expect(humanSize(MB + MB / TWELVE, UNITS)).toBe("1.1 <mb>");
+    expect(humanSize(MB + MB / TWELVE, UNITS)).toBe("1<point>1 <mb>");
+  });
+
+  it("should punctuate that decimal the way the table asks, as the seconds do", () => {
+    expect(humanSize(MB + MB / TWELVE, UNITS)).not.toContain(".");
   });
 
   it("should call an empty file zero, not something clever", () => {

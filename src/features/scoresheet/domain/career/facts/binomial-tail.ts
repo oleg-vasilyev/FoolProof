@@ -80,6 +80,9 @@ const tailOf = (
   return shareOfTail(trials, chance, counts);
 };
 
+export const usualOver = (chance: number, trials: number): number =>
+  Math.round(chance * trials);
+
 export const atLeast = (wanted: number, trials: number, chance: number): number =>
   tailOf(
     trials,

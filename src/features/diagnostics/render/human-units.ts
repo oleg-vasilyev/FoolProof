@@ -10,9 +10,7 @@ const BYTES_PER_KB = 1024;
 
 const NONE = 0;
 
-const ONE_DECIMAL = 1;
-
-const TENTHS_PER_SECOND = 10;
+const TENTHS_PER_UNIT = 10;
 
 export interface UnitLabels {
   readonly days: string;
@@ -40,19 +38,19 @@ export const humanDuration = (ms: number, units: UnitLabels): string => {
   return `${minutes}${units.minutes}`;
 };
 
-export const humanSeconds = (ms: number, units: UnitLabels): string => {
-  const tenths = Math.round((ms / MS_PER_SECOND) * TENTHS_PER_SECOND);
-  const whole = Math.floor(tenths / TENTHS_PER_SECOND);
+const toOneDecimal = (value: number, decimal: string, unit: string): string => {
+  const tenths = Math.round(value * TENTHS_PER_UNIT);
 
-  return `${whole}${units.decimal}${tenths % TENTHS_PER_SECOND} ${units.seconds}`;
+  return `${Math.floor(tenths / TENTHS_PER_UNIT)}${decimal}${tenths % TENTHS_PER_UNIT} ${unit}`;
 };
+
+export const humanSeconds = (ms: number, units: UnitLabels): string =>
+  toOneDecimal(ms / MS_PER_SECOND, units.decimal, units.seconds);
 
 export const humanSize = (bytes: number, units: UnitLabels): string => {
   const kb = bytes / BYTES_PER_KB;
 
-  if (kb < BYTES_PER_KB) {
-    return `${Math.round(kb)} ${units.kilobytes}`;
-  }
-
-  return `${(kb / BYTES_PER_KB).toFixed(ONE_DECIMAL)} ${units.megabytes}`;
+  return kb < BYTES_PER_KB
+    ? `${Math.round(kb)} ${units.kilobytes}`
+    : toOneDecimal(kb / BYTES_PER_KB, units.decimal, units.megabytes);
 };

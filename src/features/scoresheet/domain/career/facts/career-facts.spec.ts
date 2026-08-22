@@ -158,9 +158,14 @@ const A_DAY = "2026-05-08";
 
 const ANOTHER_DAY = "2026-05-15";
 
+const AN_EVEN_SPLIT = 0.5;
+
+const USUAL_BURNS = 6;
+
 const A_TALLY: CareerTally = {
   games: SOME_GAMES,
   evenings: SOME_EVENINGS,
+  shareChance: AN_EVEN_SPLIT,
   fools: SOME_BURNS,
   decided: SOME_DECIDED,
   foolRate: A_FOOL_RATE,
@@ -199,7 +204,7 @@ const jinxOn = (rival: string): CareerFact => ({
   rival,
   games: SOME_GAMES,
   burns: SOME_BURNS,
-  usual: A_FOOL_RATE,
+  usualBurns: USUAL_BURNS,
 });
 
 const charmOn = (rival: string): CareerFact => ({
@@ -207,7 +212,7 @@ const charmOn = (rival: string): CareerFact => ({
   rival,
   games: MORE_GAMES,
   burns: NO_BURNS,
-  usual: A_FOOL_RATE,
+  usualBurns: USUAL_BURNS,
 });
 
 const bogeyOn = (rival: string): CareerFact => ({
@@ -246,12 +251,14 @@ const FACTS: Readonly<Record<CareerFactName, CareerFact>> = {
     seats: SIX_AT_THE_TABLE,
     games: SOME_GAMES,
     burns: NO_BURNS,
+    usualBurns: USUAL_BURNS,
   },
   [CareerFactName.BigTableCurse]: {
     name: CareerFactName.BigTableCurse,
     seats: FOUR_AT_THE_TABLE,
     games: MORE_GAMES,
     burns: SOME_BURNS,
+    usualBurns: USUAL_BURNS,
   },
   [CareerFactName.OpenersGift]: {
     name: CareerFactName.OpenersGift,
@@ -291,12 +298,14 @@ const FACTS: Readonly<Record<CareerFactName, CareerFact>> = {
     games: SOME_DECIDED,
     burns: NO_BURNS,
     expected: A_SEAT_IN_FOUR,
+    rate: A_FOOL_RATE,
   },
   [CareerFactName.LightningRod]: {
     name: CareerFactName.LightningRod,
     games: SOME_DECIDED,
     burns: SOME_BURNS,
     expected: A_SEAT_IN_FIVE,
+    rate: A_FOOL_RATE,
   },
   [CareerFactName.EverPresent]: {
     name: CareerFactName.EverPresent,

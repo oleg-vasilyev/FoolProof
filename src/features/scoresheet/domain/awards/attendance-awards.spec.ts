@@ -458,9 +458,6 @@ describe("firstBlood()", () => {
     foolByRoundSpy.mockReturnValue([VERONIKA, DIMA]);
     const award = firstBlood(eveningFor([SOMEBODY]));
 
-    expect(award?.name === AwardName.FirstBlood ? [award.winners, award.games] : []).toEqual([
-      [VERONIKA],
-      NINETEEN,
-    ]);
+    expect(award?.name === AwardName.FirstBlood ? award.winners : []).toEqual([VERONIKA]);
   });
 });

@@ -33,7 +33,7 @@ const { careerTiles } = await import("#scoresheet/render/personal/career-tiles.t
 
 const RATED_TILES = 4;
 
-const COUNTED_TILES = 3;
+const PREDICTED_TILES = 4;
 
 const DRAWN_ELEMENTS = 16;
 
@@ -44,6 +44,8 @@ const GAMES = 96;
 const EVENINGS = 11;
 
 const SHARE = 0.55;
+
+const AN_EVEN_SPLIT = 0.5;
 
 const FOOL_RATE = 0.2;
 
@@ -68,6 +70,7 @@ const CARD = {
   tally: {
     games: GAMES,
     evenings: EVENINGS,
+    shareChance: AN_EVEN_SPLIT,
     fools: FOOLS,
     decided: DECIDED,
     foolRate: FOOL_RATE,
@@ -140,25 +143,21 @@ describe("careerTiles()", () => {
       expect(textSpy).toHaveBeenCalledWith(pct(SHARE), expect.anything());
     });
 
-    it("should anchor both ends of the share, since one end alone says nothing", () => {
+    it("should tell the reader which end of the share is the good one", () => {
       careerTiles(copy, CARD, INK);
 
-      expect(textSpy).toHaveBeenCalledWith(copy.tileShareFloor, expect.anything());
-      expect(textSpy).toHaveBeenCalledWith(copy.tileShareCeiling, expect.anything());
+      expect(textSpy).toHaveBeenCalledWith(copy.tileShareScale, expect.anything());
     });
 
     it("should count each of the other three against its own whole", () => {
       careerTiles(copy, CARD, INK);
 
-      expect(textSpy).toHaveBeenCalledWith(
-        copy.tileOutOfDecided(FOOLS, DECIDED),
-        expect.anything()
-      );
+      expect(textSpy).toHaveBeenCalledWith(copy.tileOutOf(FOOLS, DECIDED), expect.anything());
       expect(textSpy).toHaveBeenCalledWith(copy.tileOutOf(FIRSTS, GAMES), expect.anything());
       expect(textSpy).toHaveBeenCalledWith(copy.tileOutOf(OPENS, GAMES), expect.anything());
     });
 
-    it("should give every counted tile the chance its seat alone would earn", () => {
+    it("should give every tile the chance its seat alone would earn, the share included", () => {
       careerTiles(copy, CARD, INK);
 
       expect(textSpy).toHaveBeenCalledWith(
@@ -166,6 +165,7 @@ describe("careerTiles()", () => {
         expect.anything()
       );
       expect(textSpy).toHaveBeenCalledWith(copy.tileSeatPredicts(pct(CHANCE)), expect.anything());
+      expect(textSpy).toHaveBeenCalledWith(copy.tileSeatPredicts(pct(AN_EVEN_SPLIT)), expect.anything());
     });
 
     it("should read the fool against the games that had one, and the rest against every game", () => {
@@ -173,26 +173,23 @@ describe("careerTiles()", () => {
 
       expect(percentLabelSpy).toHaveBeenCalledWith(CHANCE_IN_DECIDED);
       expect(percentLabelSpy).toHaveBeenCalledWith(CHANCE);
-      expect(percentLabelSpy).toHaveBeenCalledTimes(RATED_TILES + COUNTED_TILES);
+      expect(percentLabelSpy).toHaveBeenCalledTimes(RATED_TILES + PREDICTED_TILES);
     });
   });
 
   describe("the denominator the fool tile is read against", () => {
-    it("should say the count is of the decided games when a draw kept one out", () => {
+    it("should count the fool out of the games that had one, not out of every game", () => {
       careerTiles(copy, CARD, INK);
 
-      expect(textSpy).toHaveBeenCalledWith(
-        copy.tileOutOfDecided(FOOLS, DECIDED),
-        expect.anything()
-      );
+      expect(textSpy).toHaveBeenCalledWith(copy.tileOutOf(FOOLS, DECIDED), expect.anything());
+      expect(textSpy).not.toHaveBeenCalledWith(copy.tileOutOf(FOOLS, GAMES), expect.anything());
       expect(DECIDED).not.toBe(GAMES);
     });
 
-    it("should name that denominator even when no draw kept a game out of it", () => {
+    it("should read the same when no draw kept a game out of the count", () => {
       careerTiles(copy, nothingDrawn, INK);
 
-      expect(textSpy).toHaveBeenCalledWith(copy.tileOutOfDecided(FOOLS, GAMES), expect.anything());
-      expect(textSpy).not.toHaveBeenCalledWith(copy.tileOutOf(FOOLS, GAMES), expect.anything());
+      expect(textSpy).toHaveBeenCalledWith(copy.tileOutOf(FOOLS, GAMES), expect.anything());
     });
   });
 
@@ -242,8 +239,10 @@ describe("careerTiles()", () => {
     it("should stack the two notes below the value in the order they were written", () => {
       careerTiles(copy, CARD, INK);
 
-      expect(attributesOf(copy.tileShareFloor).y).toBe(TILES_TOP + TILE_NOTE_DROP);
-      expect(attributesOf(copy.tileShareCeiling).y).toBe(TILES_TOP + TILE_SECOND_NOTE_DROP);
+      expect(attributesOf(copy.tileShareScale).y).toBe(TILES_TOP + TILE_NOTE_DROP);
+      expect(attributesOf(copy.tileSeatPredicts(pct(AN_EVEN_SPLIT))).y).toBe(
+        TILES_TOP + TILE_SECOND_NOTE_DROP
+      );
       expect(TILE_SECOND_NOTE_DROP).toBeGreaterThan(TILE_NOTE_DROP);
     });
 
@@ -304,9 +303,9 @@ describe("careerTiles()", () => {
     it("should set the note faint, small and unbolded", () => {
       careerTiles(copy, CARD, INK);
 
-      expect(attributesOf(copy.tileShareFloor).fill).toBe(palette.inkFaint);
-      expect(attributesOf(copy.tileShareFloor)["font-size"]).toBe(personalFont.tileNote);
-      expect(attributesOf(copy.tileShareFloor)["font-weight"]).toBeUndefined();
+      expect(attributesOf(copy.tileShareScale).fill).toBe(palette.inkFaint);
+      expect(attributesOf(copy.tileShareScale)["font-size"]).toBe(personalFont.tileNote);
+      expect(attributesOf(copy.tileShareScale)["font-weight"]).toBeUndefined();
     });
 
     it("should draw four tiles' worth of lines and hand back every one it drew", () => {

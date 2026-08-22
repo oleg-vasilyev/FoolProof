@@ -531,20 +531,40 @@ with room to spare, the way the truce already names everybody who was in a drawn
 the evenings on disk rather than against the simulation, which cannot see this: it
 measures how often each rule fires, never how the chosen rows are spread over a table.
 
-## A tally carries its own noun, so half the awards say «партии … партий»
+## Sixteen user-visible lines the gallery never draws
 
-«Дурак первой партии из 19 партий», «Ни одной пропущенной партии из 19 партий», «Уход
-на партии 8 из 19 партий». The tally helper exists so that no copy table decides a word
-form, and it hands back a finished phrase with the noun in it — which reads badly the
-moment the sentence already has that noun in another case.
+A cold reader given the full list of award and fact titles came back having found only
+twenty of them on any panel. Sixteen — ГОРЯЧИЙ СТУЛ, ПАЦИФИСТ, ЖЕЛЕЗНЫЙ СТУЛ, С ОПОЗДАНИЕМ,
+ТО ЕСТЬ ТО НЕТ, КАМЕО among the awards, and ВЫХОДИТ СУХИМ, СЧАСТЛИВЫЙ ТАЛИСМАН, ЧЁРНАЯ
+КОШКА, ЛЁГКАЯ ДОБЫЧА, ЕСТЬ ГДЕ РАЗВЕРНУТЬСЯ, ТЕРЯЕТСЯ В ТОЛПЕ, БЕЗ ПЕРВОГО ХОДА, ПЕРВЫЙ
+ХОД НЕ К ДОБРУ, СНОВА ЗА СТОЛОМ, ЧЁРНАЯ ПОЛОСА on the cards — are drawn by no gallery case
+in either language, so the reading gate cannot see them and the width guard is the only
+thing that can.
 
-English does not have the problem, so it went unnoticed for as long as English was the
-only language read closely.
+The gallery's cases were built to stress the **drawing** — the widest name, the most
+awards, the tallest sheet — and a rule that fires on an ordinary evening is not an edge,
+so nothing pulled it in. That is the same blind spot the spread rule had.
 
-**Take it with the next phase that opens the awards copy**, and the fix is per-line
-rather than mechanical: some of these want the total dropped, some want the sentence
-turned round. Do not add a second tally helper that returns a bare number — that is the
-plural decision coming back through a side door.
+**Pick it up when a case can cover several of them at once**, which is the only way this
+is worth the drawing time: one evening constructed so that the quiet awards fire together,
+rather than sixteen fixtures. Until then the width spec covers the mechanical half and
+nobody has read the other.
+
+## An award names a rival it cannot print
+
+ЛИЧНЫЙ КОШМАР is earned against one specific opponent — the rule finds a player who
+finished above the same person in every game the two shared — and the sentence has to
+say «один и тот же соперник», because `awardReason` is handed an `Award` and an `Award`
+carries player **ids**, not names. The awards sheet resolves names one layer up, in
+`awards-svg.ts`, and only for the winners.
+
+A cold reader called it exactly: the player card's НЕУДОБНЫЙ СОПЕРНИК names the rival
+in its holder line and reads twice as well for it.
+
+**Pick it up when a second award needs a name it does not have** — a head-to-head or a
+seat-neighbour rule would be the second. The fix is to resolve names before
+`awardReason` rather than after, which is a change to what the render layer is handed
+and not worth making for one line.
 
 ## Rarity ranks a vivid fact below an abstract one
 

@@ -1,6 +1,6 @@
 ---
 name: finish-phase
-description: Run a development phase in FoolProof from the work being taken on to the release that ends it — the seven gates (lint and types, coverage, mutation, e2e, diff review, the poster gallery, retrospective) and the format of the phase's final commit message. Load it when ANY list of changes to this repository is accepted — closing audit findings, refactoring, cleanup, tooling, a new feature — because such a list is a phase whether or not it adds a feature, and the list somebody hands you never contains the gates. Also when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
+description: Run a development phase in FoolProof from the work being taken on to the release that ends it — the seven gates (lint and types, coverage, mutation, e2e, diff review, the poster gallery, retrospective) plus the two conditional ones (a real evening, and the copy tables read as sentences before the pictures are drawn) and the format of the phase's final commit message. Load it when ANY list of changes to this repository is accepted — closing audit findings, refactoring, cleanup, tooling, a new feature — because such a list is a phase whether or not it adds a feature, and the list somebody hands you never contains the gates. Also when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
 ---
 
 # Finishing a phase
@@ -355,6 +355,42 @@ Ask of every touched file:
 
 And of the feature as a whole: it declares one command per thing it gives the
 player, so can a reader tell from the file names which files serve which?
+
+## 5b. The sentences — whenever a copy table changed
+
+The gallery proves a line **fits**. Nothing before this gate asked whether it is
+something a person would say. Two releases shipped *«Дурак в этот вечер был — и всё
+равно 9 партий подряд начисто»* and *«К середине — дно графика и 28%, сейчас —
+50%»*, both drawn correctly, both read by a poster reader, both word salad; the
+owner found seven of them in ten minutes on a Friday night.
+
+They survive because a copy table is read as **templates**, by the person who wrote
+them, in the language they were composed in. `` `... и всё равно ${streak} подряд
+начисто` `` looks like a sentence with a hole in it. The hole is where the meaning
+was.
+
+So the reading is the **`copy-reader`** agent's, and like the gallery it may not be
+done by whoever wrote the diff. Hand it the feature's `copy.ru.ts` and `copy.en.ts`
+and the folder its call sites are in, and nothing else — the four questions it asks
+live in `copy-reader.md`. It reads **every** line filled in with real values, not
+only the ones a poster happens to draw; the lines nothing draws are where this rot
+survives longest.
+
+Its third question is the one that pays for the gate twice: following a sentence
+back to the rule that earns it has already caught a claim no rule guaranteed and two
+arguments handed over in the wrong order.
+
+**It runs before the pictures, not beside them.** The phase that introduced it ran the
+two in parallel and paid twice: the reader's wording landed after the gallery had been
+drawn, so every poster was redrawn and the design page pushed a second time. The words
+are what the pictures draw — settle them first.
+
+**Freeze the files before briefing a cold agent.** A reader starts by reading; if you
+are still editing its subject, it reports on a tree that no longer exists and you cannot
+tell which of its findings are stale. This has happened twice in one phase — a reviewer
+watched one file change under it mid-pass and said so, and a copy reader had to be sent
+back to re-read a table edited while it worked. Brief an agent on files you will not
+touch until it returns, or wait. The same rule Stryker has, for the same reason.
 
 ## 6. The pictures — only when the phase drew something
 

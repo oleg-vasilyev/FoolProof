@@ -16,7 +16,7 @@ const awardRowSpy = vi.fn();
 
 const foolPlateSpy = vi.fn();
 
-const gameTallySpy = vi.fn();
+const gamesOfSpy = vi.fn();
 
 const rectSpy = vi.fn();
 
@@ -83,7 +83,7 @@ vi.mock("#scoresheet/render/palette.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
-  gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
+  gamesOf: (table: unknown, games: number) => gamesOfSpy(table, games),
 }));
 
 vi.mock("#scoresheet/render/svg-tags.ts", () => ({
@@ -147,7 +147,7 @@ describe("renderAwards()", () => {
     awardRowSpy.mockImplementation((_table: unknown, placed: Placed) => [`row-${String(placed.rank)}`]);
     foolPlateSpy.mockReturnValue(["<fool-plate/>"]);
     posterBaseboardSpy.mockReturnValue(["<baseboard/>"]);
-    gameTallySpy.mockImplementation((_table: unknown, games: number) => `tally(${String(games)})`);
+    gamesOfSpy.mockImplementation((_table: unknown, games: number) => `outOf(${String(games)})`);
     rectSpy.mockImplementation(() => "<background/>");
     lineSpy.mockImplementation(() => "<line/>");
     textSpy.mockImplementation(() => "<text/>");
@@ -215,7 +215,7 @@ describe("renderAwards()", () => {
 
     expect(textSpy).toHaveBeenCalledWith(copy.awardsCurseLabel, expect.anything());
     expect(textSpy).toHaveBeenCalledWith(
-      copy.curseFact(CURSE.burns, `tally(${String(CURSE.games)})`, CURSE.predicted),
+      copy.curseFact(CURSE.burns, `outOf(${String(CURSE.games)})`, CURSE.predicted),
       expect.anything()
     );
   });
@@ -256,7 +256,7 @@ describe("renderAwards()", () => {
 
     it("should hang the curse fact off the right edge on the label's own baseline", () => {
       withCurse();
-      const fact = copy.curseFact(2, "tally(8)", 1);
+      const fact = copy.curseFact(2, "outOf(8)", 1);
 
       expect(attributesOf(fact).x).toBe(GRID_RIGHT);
       expect(attributesOf(fact)["text-anchor"]).toBe("end");
@@ -268,7 +268,7 @@ describe("renderAwards()", () => {
 
       expect(attributesOf(copy.awardsCurseLabel)["font-weight"]).toBe("bold");
       expect(attributesOf(copy.awardsCurseLabel)["font-size"]).toBe(CURSE_LABEL_FONT);
-      expect(attributesOf(copy.curseFact(2, "tally(8)", 1))["font-size"]).toBe(CURSE_FACT_FONT);
+      expect(attributesOf(copy.curseFact(2, "outOf(8)", 1))["font-size"]).toBe(CURSE_FACT_FONT);
     });
 
     it("should sign the sheet at its own foot, whatever the sheet turned out to hold", () => {

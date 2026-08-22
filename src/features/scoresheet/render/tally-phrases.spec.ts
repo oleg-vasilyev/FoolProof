@@ -8,9 +8,8 @@ const plural = new PluralRulesStub();
 
 vi.mock("#shared/locale/plural-rules.ts", () => plural.module);
 
-const { eveningTally, eveningsOwedTally, gameTally, playerTally, timeTally } = await import(
-  "#scoresheet/render/tally-phrases.ts"
-);
+const { eveningTally, eveningsOwedTally, gameTally, gamesAcross, gamesOf, playerTally, timeTally } =
+  await import("#scoresheet/render/tally-phrases.ts");
 
 const COUNTED = "the counted thing";
 
@@ -37,6 +36,48 @@ describe("gameTally()", () => {
     gameTally(russian, MANY);
 
     expect(plural.countedSpy).toHaveBeenCalledWith(russian.locale, MANY, russian.sheetGameForms);
+  });
+});
+
+describe("gamesOf()", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    plural.countedSpy.mockReturnValue(COUNTED);
+  });
+
+  it("should give back whatever the counter made of it", () => {
+    expect(gamesOf(copy, MANY)).toBe(COUNTED);
+  });
+
+  it("should ask for the forms the frame «из …» needs, not the plain ones", () => {
+    gamesOf(russian, MANY);
+
+    expect(plural.countedSpy).toHaveBeenCalledWith(russian.locale, MANY, russian.sheetGameOfForms);
+    expect(russian.sheetGameOfForms).not.toEqual(russian.sheetGameForms);
+  });
+});
+
+describe("gamesAcross()", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    plural.countedSpy.mockReturnValue(COUNTED);
+  });
+
+  it("should give back whatever the counter made of it", () => {
+    expect(gamesAcross(copy, MANY)).toBe(COUNTED);
+  });
+
+  it("should ask for the forms the frame «за …» needs, and not the ones «из …» needs", () => {
+    gamesAcross(russian, MANY);
+
+    expect(plural.countedSpy).toHaveBeenCalledWith(
+      russian.locale,
+      MANY,
+      russian.sheetGameAcrossForms
+    );
+    expect(russian.sheetGameAcrossForms).not.toEqual(russian.sheetGameOfForms);
   });
 });
 

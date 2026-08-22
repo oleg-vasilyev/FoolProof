@@ -92,7 +92,7 @@ const heading = (copy: Copy, card: CareerCard, ink: string): readonly string[] =
   }),
 ];
 
-const sectionLabel = (label: string, hint: string | null, baseline: number): readonly string[] => [
+const sectionLabel = (label: string, baseline: number): readonly string[] => [
   line({
     x1: PAD,
     y1: baseline - SECTION_LABEL_DROP,
@@ -109,18 +109,6 @@ const sectionLabel = (label: string, hint: string | null, baseline: number): rea
     "font-size": personalFont.sectionLabel,
     "letter-spacing": TILE_TRACKING,
   }),
-  ...(hint === null
-    ? []
-    : [
-        text(hint, {
-          x: GRID_RIGHT,
-          y: baseline,
-          fill: palette.inkFaint,
-          "font-family": FONT_FAMILY,
-          "font-size": personalFont.sectionHint,
-          "text-anchor": "end",
-        }),
-      ]),
 ];
 
 interface ChartSection {
@@ -153,22 +141,17 @@ const teaserBody = (saying: string, baseline: number): readonly string[] => [
 const chartSection = (section: ChartSection): readonly string[] => {
   const { copy, card, sheet, ink } = section;
 
-  if (sheet.plotTop === null) {
-    return [
-      ...sectionLabel(copy.personalChartLabel, null, sheet.chartLabel),
-      ...teaserBody(chartTeaser(copy, card.nights.length), sheet.chartLabel),
-    ];
-  }
-
   return [
-    ...sectionLabel(copy.personalChartLabel, copy.sheetShareHint, sheet.chartLabel),
-    ...eveningChart(copy, {
-      nights: card.nights,
-      top: sheet.plotTop,
-      best: card.best,
-      worst: card.worst,
-      ink,
-    }),
+    ...sectionLabel(copy.personalChartLabel, sheet.chartLabel),
+    ...(sheet.plotTop === null
+      ? teaserBody(chartTeaser(copy, card.nights.length), sheet.chartLabel)
+      : eveningChart(copy, {
+          nights: card.nights,
+          top: sheet.plotTop,
+          best: card.best,
+          worst: card.worst,
+          ink,
+        })),
   ];
 };
 
@@ -186,7 +169,7 @@ export const renderPersonalCard = (
     ...heading(copy, card, ink),
     ...careerTiles(copy, card, ink),
     ...chartSection({ copy, card, sheet, ink }),
-    ...sectionLabel(copy.personalFactsLabel, null, sheet.factsLabel),
+    ...sectionLabel(copy.personalFactsLabel, sheet.factsLabel),
     ...(sheet.facts.length === NOTHING && sheet.plate === null
       ? teaserBody(copy.personalFactsAwait, sheet.factsLabel)
       : []),

@@ -79,7 +79,6 @@ export const personalFont = {
   tileNote: 29,
   sectionLabel: 30,
   chartTeaser: 32,
-  sectionHint: 27,
   axis: 22,
   factIndex: 28,
   factTitle: 52,

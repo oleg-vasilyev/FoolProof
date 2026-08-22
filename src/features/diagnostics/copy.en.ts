@@ -13,7 +13,7 @@ export const copy = {
   database: (file: string, size: string) => `Database: ${file} (${size})`,
 
   contents: (players: string, games: string, liveCards: number) =>
-    `Recorded: ${players}, ${games}, ${liveCards} live`,
+    `Recorded: ${players}, ${games}; ${liveCards} still on the table`,
 
   lastGame: (at: string) => `Last game: ${at} UTC`,
 

@@ -21,7 +21,7 @@ describeScenario("picking the language a chat is played in", (chat) => {
   });
 
   it("should replace the screen with a confirmation, and take the buttons away", () => {
-    expect(chat.lastText()).toContain("Теперь бот говорит здесь так: Русский");
+    expect(chat.lastText()).toContain("Язык бота в этом чате теперь — Русский.");
     expect(chat.captions()).toEqual([]);
   });
 

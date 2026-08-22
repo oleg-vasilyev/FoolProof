@@ -40,9 +40,9 @@ sequenceDiagram
     participant C as Claude Code, the AI developer
     participant D as Claude Design, the design system
     participant K as Project skills, .claude/skills
-    participant S as Subagents, one per piece of work
+    participant S as Subagents, parallel hands on one phase
     participant H as Auto-linter, fires on its own
-    participant R as Second AI agent, the reviewer
+    participant R as An independent agent — designer, reader, reviewer
     participant G as GitHub, repository and CI
     participant V as Production server
 
@@ -58,7 +58,7 @@ sequenceDiagram
     C->>U: the size of the phase in one line, tripped debt included
     U-->>C: agreed, or cut it down
     opt the feature affects the app's visuals
-        C->>S: the poster-designer agent — the requirements, in words
+        C->>R: the poster-designer agent — the requirements, in words
         S->>D: read the design system before drawing anything
         D-->>S: every colour, size and rule the existing posters obey
         S->>S: name the cases the drawing must survive before drawing: emptiest, fullest, widest, each optional part gone, a tie
@@ -79,7 +79,7 @@ sequenceDiagram
     end
     C->>C: now, knowing the rules, freeze the interfaces: what each function takes and returns
     opt the phase adds something a player can reach, or changes a contract other code depends on
-        C->>S: the plan-reviewer agent — the owner's own words and the frozen signatures, nothing retold
+        C->>R: the plan-reviewer agent — the owner's own words and the frozen signatures, nothing retold
         S->>S: derive the rest from the repository: the schema, the limits, what already solves this
         S-->>C: what the plan promises, each checked against a file, and what it has not accounted for
         opt a finding changes what the owner already approved
@@ -123,7 +123,7 @@ sequenceDiagram
     end
 
     rect rgb(240, 249, 255)
-    note over C,R: Stage 4. Review by a second AI agent
+    note over C,R: Stage 4. Review by an agent that did not write the diff
     C->>R: the phase's whole diff in one piece — including deploy scripts, units and CI, which have no automatic gate at all
     R-->>C: findings, most severe first
     loop for each finding
@@ -141,7 +141,12 @@ sequenceDiagram
     end
 
     rect rgb(255, 247, 237)
-    note over C,K: Stage 5. Syncing every picture the project holds
+    note over C,R: Stage 5. Reading every sentence, then syncing every picture
+    opt the change touched a copy table, or any prose a player reads
+        C->>R: the copy-reader agent — the two tables and the folder their call sites are in, nothing more
+        R-->>C: every line written out with real values in it, then the ones no person would say — each with a blunt verdict and a better line
+        C->>C: take the wording, and follow the readings that turned out to be a claim no rule earns
+    end
     opt the change touched what the bot or the site draws
         opt the phase added a poster the gallery has never drawn
             C->>C: copy the cases named at stage 1 into the gallery — npm run docs:check fails on a poster nobody drew
@@ -149,11 +154,11 @@ sequenceDiagram
         C->>K: the refresh-the-pictures skill
         K-->>C: the table of every committed picture, what draws it, and which have no gate but the table
         C->>C: draw the gallery and regenerate the stale ones — mockups, posters, previews, icons
-        C->>S: the poster-reader agent — the contact sheet, every regenerated PNG, the lines to read, but never what any of it is for
-        S-->>C: what each line says to somebody who has never seen the code, then the set read against itself
+        C->>R: the poster-reader agent — the contact sheet, every regenerated PNG, the lines to read, but never what any of it is for
+        R-->>C: what each line says to somebody who has never seen the code, then the set read against itself
         opt the phase had a mockup approved at stage 1
-            C->>S: a second reading, this time with the approved sheet — what shipped differs from what was signed off how?
-            S-->>C: every difference it can see, without ruling on which were meant
+            C->>R: a second reading, this time with the approved sheet — what shipped differs from what was signed off how?
+            R-->>C: every difference it can see, without ruling on which were meant
         end
         C->>C: decide which readings are wrong, and what the line should say instead
         opt the redrawn pictures also live on the design page
@@ -210,12 +215,12 @@ sequenceDiagram
     note over U,V: Stage 8. The checkup — occasional, and it is allowed to fix nothing
     opt roughly weekly, and always after a release worth watching
         U->>C: look the whole thing over
-        C->>S: the deep-checkup agent
-        S->>G: clone the released tag cold and run the full battery on it — trust nothing already on this machine
-        S->>V: ask the running bot and its server what is true, rather than what should be
-        V-->>S: the service, the timers, the disk, which tag is actually deployed
-        S->>S: execute the edges instead of reasoning about them, and write evidence beside every claim
-        S-->>C: findings, most severe first — and not one thing repaired
+        C->>R: the deep-checkup agent
+        R->>G: clone the released tag cold and run the full battery on it — trust nothing already on this machine
+        R->>V: ask the running bot and its server what is true, rather than what should be
+        V-->>R: the service, the timers, the disk, which tag is actually deployed
+        R->>R: execute the edges instead of reasoning about them, and write evidence beside every claim
+        R-->>C: findings, most severe first — and not one thing repaired
         loop for each finding
             C->>C: check it myself before believing it — a confident agent is not evidence
             alt worth doing now

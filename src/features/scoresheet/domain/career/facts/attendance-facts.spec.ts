@@ -112,9 +112,12 @@ const NINTH_EVENING = 9;
 
 const ELEVENTH_EVENING = 11;
 
+const AN_EVEN_SPLIT = 0.5;
+
 const A_TALLY: CareerTally = {
   games: SOME_GAMES,
   evenings: SOME_EVENINGS,
+  shareChance: AN_EVEN_SPLIT,
   fools: SOME_BURNS,
   decided: SOME_DECIDED,
   foolRate: A_FOOL_RATE,

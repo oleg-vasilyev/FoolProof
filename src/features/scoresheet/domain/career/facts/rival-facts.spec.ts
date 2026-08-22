@@ -13,6 +13,8 @@ import type { CareerTally } from "#scoresheet/domain/career/career-tally.ts";
 
 const atLeastSpy = vi.fn();
 
+const usualOverSpy = vi.fn();
+
 const atMostSpy = vi.fn();
 
 const notablePickSpy = vi.fn();
@@ -20,6 +22,7 @@ const notablePickSpy = vi.fn();
 vi.mock("#scoresheet/domain/career/facts/binomial-tail.ts", () => ({
   atLeast: (wanted: number, trials: number, chance: number) => atLeastSpy(wanted, trials, chance),
   atMost: (wanted: number, trials: number, chance: number) => atMostSpy(wanted, trials, chance),
+  usualOver: (chance: number, trials: number) => usualOverSpy(chance, trials),
 }));
 
 vi.mock("#scoresheet/domain/career/facts/notable-pick.ts", () => ({
@@ -72,6 +75,8 @@ const SOME_DECIDED = 38;
 
 const USUAL_FOOL_RATE = 0.23;
 
+const USUAL_BURNS_TOGETHER = 3;
+
 const SEAT_FOOL_RATE = 0.25;
 
 const SOME_FIRSTS = 11;
@@ -92,9 +97,12 @@ const TIED_LOSSES = 4;
 
 const BURNS_ALONGSIDE = 3;
 
+const AN_EVEN_SPLIT = 0.5;
+
 const A_TALLY: CareerTally = {
   games: SOME_GAMES,
   evenings: SOME_NIGHTS,
+  shareChance: AN_EVEN_SPLIT,
   fools: SOME_FOOLS,
   decided: SOME_DECIDED,
   foolRate: USUAL_FOOL_RATE,
@@ -268,7 +276,7 @@ const alongside = (name: CareerFactName, rival: string, tail: number): unknown =
     rival,
     games: ENOUGH_TOGETHER,
     burns: BURNS_ALONGSIDE,
-    usual: USUAL_FOOL_RATE,
+    usualBurns: USUAL_BURNS_TOGETHER,
   },
   tail,
 });
@@ -277,6 +285,7 @@ describe("rival facts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    usualOverSpy.mockReturnValue(USUAL_BURNS_TOGETHER);
     atLeastSpy.mockReturnValue(A_TAIL);
     atMostSpy.mockReturnValue(ANOTHER_TAIL);
     notablePickSpy.mockReturnValue(A_CHOSEN_FACT);

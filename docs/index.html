@@ -64,7 +64,7 @@
         { "@type": "Question", "name": "Does it read our chat?",
           "acceptedAnswer": { "@type": "Answer", "text": "No. Left in Telegram's default privacy mode, a bot receives only commands and replies to its own messages. The rest of the conversation never reaches it." } },
         { "@type": "Question", "name": "What does it store?",
-          "acceptedAnswer": { "@type": "Answer", "text": "The names you send it, the results of the games played in that chat, and which language that chat picked. Nothing else." } },
+          "acceptedAnswer": { "@type": "Answer", "text": "The names you send it, the results of the games played in that chat — each tap recorded with the Telegram id of whoever made it — and which language that chat picked. Nothing else." } },
         { "@type": "Question", "name": "Which Durak does it score?",
           "acceptedAnswer": { "@type": "Answer", "text": "Podkidnoy, two to ten players. It records the finishing order and the fool — it does not deal cards or referee the game." } },
         { "@type": "Question", "name": "Do I have to install anything?",
@@ -117,7 +117,7 @@
 
         <p class="hero-rise-2 mt-6 max-w-[68ch] text-[18px] leading-relaxed text-muted">
           Add it to the group chat where your table gathers. Send the line-up once, then
-          one tap for each player as they go out. By the end of the night, the whole
+          tap who went first and tap each player out. By the end of the night, the whole
           evening comes back as two posters — and any player's whole record as a third.
         </p>
 
@@ -174,8 +174,8 @@
           <p class="font-mono text-[13px] text-accent">Step 2</p>
           <h3 class="mt-3 text-[21px] font-bold">Tap who went out</h3>
           <p class="mt-3 text-[16px] leading-relaxed text-muted">
-            One tap per player, in the order they finish, then Confirm. Whoever is left
-            unmarked is the fool. There is nothing to type.
+            First tap who went first, then one tap per player in the order they finish, then
+            Confirm. Whoever is left unmarked is the fool. There is nothing to type.
           </p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
@@ -206,7 +206,7 @@
       <div class="mt-12 grid gap-10 md:grid-cols-2">
         <figure class="reveal">
           <img src="posters/chronology-en.webp" width="1048" height="1518" loading="lazy" decoding="async"
-               alt="The chronology poster: a row for each of twelve games and a column for each of five players, every cell printing that player's finishing position."
+               alt="The chronology poster: a row for each of twelve games and a column for each of five players, every cell printing where that player finished, with a dash for a game they sat out."
                class="w-full rounded-xl border border-line">
           <figcaption class="mt-4 text-[16px] leading-relaxed text-muted">
             <strong class="font-semibold text-ink">The chronology.</strong> A row per game, a
@@ -221,8 +221,8 @@
                class="w-full rounded-xl border border-line">
           <figcaption class="mt-4 text-[16px] leading-relaxed text-muted">
             <strong class="font-semibold text-ink">The awards.</strong> Thirty-six exist and
-            nine fit, so the card keeps the king and the fool and fills the rest with the
-            rarest of what the evening earned — which is what stops every Friday reading the same.
+            nine fit, so the card keeps the king and the fool and shares the rest around the
+            table, rarest first — which is what stops every Friday reading the same.
           </figcaption>
         </figure>
 
@@ -312,8 +312,9 @@
         <div class="reveal py-6">
           <dt class="text-[19px] font-bold">What does it store?</dt>
           <dd class="mt-2 text-[16px] leading-relaxed text-muted">
-            The names you send it, the results of the games played in that chat, and which
-            language that chat picked. Nothing else.
+            The names you send it, the results of the games played in that chat — each tap
+            recorded with the Telegram id of whoever made it — and which language that chat
+            picked. Nothing else.
           </dd>
         </div>
         <div class="reveal py-6">
@@ -347,8 +348,8 @@
         Your table plays on Friday.
       </h2>
       <p class="mx-auto mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-        Let the score keep itself this time. Adding the bot is one tap, and the first
-        line-up is the only thing you will ever type.
+        Let the score keep itself this time. Adding the bot is one tap, and the only thing
+        you will ever type is names — and only when the line-up changes.
       </p>
       <div class="mt-9 flex flex-wrap justify-center gap-3">
         <a href="https://t.me/FoolProofMegaBot?startgroup=true" rel="noopener" class="btn btn-accent">

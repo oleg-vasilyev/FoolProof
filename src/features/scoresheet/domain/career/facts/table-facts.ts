@@ -1,6 +1,6 @@
 import { CareerFactName, type CareerFact } from "#scoresheet/domain/career/facts/fact-catalogue.ts";
 import { Finish } from "#scoresheet/domain/game-outcomes.ts";
-import { atLeast, atMost } from "#scoresheet/domain/career/facts/binomial-tail.ts";
+import { atLeast, atMost, usualOver } from "#scoresheet/domain/career/facts/binomial-tail.ts";
 import { notablePick } from "#scoresheet/domain/career/facts/notable-pick.ts";
 import type { CareerAppearance } from "#scoresheet/domain/career/career-appearances.ts";
 import type { CareerSubject } from "#scoresheet/domain/career/facts/career-subject.ts";
@@ -56,7 +56,13 @@ const atSizeField = (
   const skill = skillOf(subject);
 
   return bySize(subject.career.appearances).map<Rare<CareerFact>>((size) => ({
-    fact: { name, seats: size.seats, games: size.games, burns: size.burns },
+    fact: {
+      name,
+      seats: size.seats,
+      games: size.games,
+      burns: size.burns,
+      usualBurns: usualOver(expectedAt(size.seats, skill), size.games),
+    },
     tail: tailOf(size, expectedAt(size.seats, skill)),
   }));
 };

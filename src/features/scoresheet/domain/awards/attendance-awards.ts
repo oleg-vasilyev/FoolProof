@@ -141,5 +141,5 @@ export const firstBlood = (evening: SessionAppearances): Award | null => {
 
   return opener === null
     ? null
-    : { name: AwardName.FirstBlood, winners: [opener], games: evening.rounds };
+    : { name: AwardName.FirstBlood, winners: [opener] };
 };

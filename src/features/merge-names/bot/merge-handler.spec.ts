@@ -60,7 +60,7 @@ vi.mock("#merge-names/render/merge-message.ts", () => ({
   renderMerged: (table: unknown, keeper: unknown, absorbed: unknown) =>
     renderMergedSpy(table, keeper, absorbed),
   renderCancelled: (table: unknown) => renderCancelledSpy(table),
-  joinedNames: (candidates: unknown) => joinedNamesSpy(candidates),
+  joinedNames: (table: unknown, candidates: unknown) => joinedNamesSpy(table, candidates),
 }));
 
 const { onMerge, onTap } = await import("#merge-names/bot/merge-handler.ts");
@@ -355,7 +355,7 @@ describe("merge-handler", () => {
 
         await onTap(context(), ctx.callbackTap(TAP_DATA));
 
-        expect(joinedNamesSpy).toHaveBeenCalledWith([ANYA, ANNA]);
+        expect(joinedNamesSpy).toHaveBeenCalledWith(copy, [ANYA, ANNA]);
       });
 
       it("should refuse if a game started while the screen was open", async () => {

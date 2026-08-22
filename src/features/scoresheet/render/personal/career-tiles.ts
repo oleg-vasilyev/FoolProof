@@ -40,7 +40,7 @@ const tilesOf = (copy: Copy, card: CareerCard, ink: string): readonly Tile[] => 
   {
     label: copy.tileShare,
     value: percentLabel(card.share),
-    notes: [copy.tileShareFloor, copy.tileShareCeiling],
+    notes: countAndChance(copy, copy.tileShareScale, card.tally.shareChance),
     ink,
   },
   {
@@ -48,7 +48,7 @@ const tilesOf = (copy: Copy, card: CareerCard, ink: string): readonly Tile[] => 
     value: percentLabel(card.tally.foolRate),
     notes: countAndChance(
       copy,
-      copy.tileOutOfDecided(card.tally.fools, card.tally.decided),
+      copy.tileOutOf(card.tally.fools, card.tally.decided),
       card.tally.seatChanceInDecided
     ),
     ink: palette.cellFool,

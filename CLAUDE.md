@@ -21,6 +21,7 @@ beside the code it describes:
 | A phase's whole diff, before its final commit | `phase-reviewer` agent |
 | A frozen plan, before any code is written for it | `plan-reviewer` agent |
 | Reading a drawing or a line as a player would | `poster-reader` agent |
+| A copy table, read as finished sentences in both languages | `copy-reader` agent |
 | A weekly look at the project and its server | `deep-checkup` agent |
 
 Four documents, one job each:
@@ -154,13 +155,10 @@ two pictures; `live-game` declares four commands that between them open a card a
 change the table. When a layer holds files serving more than one of those things,
 each gets a subfolder **named after that thing** — a picture, a screen, an entity
 the commands are about: `render/chronology/`, `render/seating-screen/`,
-`bot/lineup/`. Only what all of them use stays at the layer root. Two ways to get
-this wrong, both paid for here: a bucket (`helpers/`, `common/`, `shared/` inside a
-feature) is the vagueness the file names were cured of, and a **process** name is
-worse than it looks — `bot/opening/` reads fine to whoever just split the folder
-and tells everybody else nothing, because opening is not something the player ends
-up holding. A single-command feature never subdivides; `docs:check` fails a layer
-root above nine files, and the `add-a-feature` skill says why that number.
+`bot/lineup/`. Only what all of them use stays at the layer root. Never a bucket
+(`helpers/`, `common/`) and never a **process**; a single-command feature never
+subdivides. The `add-a-feature` skill has both traps and why `docs:check` fails a
+layer root above nine files.
 
 **A feature folder is named after what the player gets**, not after an internal
 noun. `diagnostics/` is the exception that proves the rule — its reader is whoever
@@ -351,9 +349,9 @@ the edit instead of at the end of the turn.
 refactoring, tooling. A phase is done when the code is *releasable*, not when it works:
 seven gates run before the final commit — lint and types, coverage (70% floor), mutation
 (breaks below 85%), `npm run e2e:changed`, a review of the whole diff, **the poster
-gallery** when the phase drew anything, and a retrospective — and the numbers go in the
-commit message. Neither the review nor the gallery may be done by whoever wrote the diff:
-both are subagents in the table above. **Say how big the phase is before starting it**, in
+gallery** when the phase drew anything, **the copy tables read as finished sentences**
+when it changed one, and a retrospective — and the numbers go in the commit message.
+None of the last three may be done by whoever wrote the diff: all are subagents above. **Say how big the phase is before starting it**, in
 a line, so it can be argued down — that is also how **independent scopes** surface, and
 those are delegated without being asked. The procedure is the **`finish-phase` skill**,
 and the list somebody hands you never contains the gates.

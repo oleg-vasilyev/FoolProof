@@ -36,6 +36,13 @@ nothing. Skip a layer that has nothing in it rather than leaving it empty —
 feature's composition root, the same job `src/main.ts` does one level up, so
 opening the folder shows what the feature *is* before how it works.
 
+Two ways to name that subfolder wrong, both paid for here. A **bucket** — `helpers/`,
+`common/`, a second `shared/` inside a feature — is the vagueness the file names were
+cured of. A **process** name is worse than it looks: `bot/opening/` reads fine to
+whoever has just split the folder and tells everybody else nothing, because opening
+is not something the player ends up holding. Name it after the thing they do hold —
+a picture, a screen, an entity the commands are about.
+
 **`docs:check` fails a layer root above nine files**, which is unambiguous crowding
 rather than a real limit — the fix is always a named subfolder, never a bigger
 number. It is a late alarm on purpose: seven fired on a folder that needed no split,

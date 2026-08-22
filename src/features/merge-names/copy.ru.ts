@@ -14,15 +14,18 @@ export const copy: Copy = {
   keeperChosen: (keeper: string) =>
     `<b>${keeper}</b> остаётся. Теперь нажми те имена, что сливаются в него.`,
   plan: (absorbed: string, keeper: string) => `${absorbed} → <b>${keeper}</b>`,
-  willHave: (keeper: string, games: string) => `${keeper} — будет ${games}.`,
-  nowHas: (keeper: string, games: string) => `${keeper} — теперь ${games}.`,
+  willHave: (keeper: string, games: string) => `У игрока ${keeper} будет ${games}.`,
+  nowHas: (keeper: string, games: string) => `У игрока ${keeper} теперь ${games}.`,
+
+  betweenNames: ", ",
+  beforeLastName: " и ",
 
   gameForms: { one: "партия", few: "партии", many: "партий" },
 
   nothingToMerge: "Здесь пока только одно имя — сводить нечего.",
   gameRunning: "Партия ещё идёт. Сначала подтверди её, потом /merge.",
   playedTogether: (names: string) =>
-    `${names} сидели в одной партии, значит это разные люди. Ничего не слито.`,
+    `${names} сидели в одной партии — значит, это разные люди. Ничего не слито.`,
 
   cancelledBody: "Отменено — ничего не слито.",
 
@@ -40,7 +43,7 @@ export const copy: Copy = {
   tapDropped: (name: string) => `${name} — не трогаем`,
   tapBack: "Шаг назад",
   tapNotAllowed: "Сейчас так нельзя",
-  tapTooMany: "Больше имён за одно сведение не унести",
+  tapTooMany: "Больше имён за раз не слить",
   screenStale: "Экран устарел — отправь /merge заново",
 
   mergedNotice: "Слито",

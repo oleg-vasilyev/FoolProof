@@ -94,6 +94,16 @@ Two consequences worth stating, because both are easy to get wrong:
   forms (`1 партия`, `2 партии`, `5 партий`) where English needs two, so a copy table
   holds the forms and the rule lives outside it. Getting this wrong is invisible in
   English.
+- **And it picks the *case* from the sentence, not from the count.** A finished tally
+  arrives in the nominative, which is right after a dash and wrong after a preposition:
+  `за 21 партия` and `в 8 из 22 партии` are both broken Russian, and both fall inside
+  the fifteen-to-twenty-five games an ordinary evening runs to — the range the design
+  is supposed to be best at, not an edge. So the scoresheet's table holds three sets of
+  forms, nominative, genitive and accusative, and `render/tally-phrases.ts` offers one
+  helper per case; the caller picks by the frame its own sentence uses. English fills
+  all three with the same words, which is the price of the language that needs them.
+  Nothing here may be solved by handing the copy table a bare number instead — that is
+  the plural decision returning through a side door.
 - **A reply-keyboard prompt is matched against every language's text.** `/game` with
   no names asks a question and reads the answer by matching the quoted prompt; a chat
   that switched language between the question and the answer would otherwise lose the
@@ -1183,25 +1193,35 @@ roughly a third of the time by the shape of the game, and whoever played six-han
 roughly a sixth. The card names where that number comes from rather than calling it
 *expected*, because the word claims an authority it has not shown; the fact rows below
 already said *the seat alone predicts*, and the tiles now say the same thing in two
-words.
+words. In Russian those two words are *рассадка предсказывает* and not *место
+предсказывает*, which was the first wording and had to go: one of the tiles it sits
+under is ПЕРВОЕ МЕСТО, where *место* has just meant the place a player finished in, and
+a cold reader parsed the note as a claim about that.
 
-The share tile carries no count and both ends of its scale instead. `0%` is last in
-every game and `100%` is first in every one, and a card reading `0%` above ninety-nine
-games is otherwise a contradiction to anybody who does not already know what the share
-is a share of. The tile is also no longer called a share: the figure is literally the
+The share tile carries no count either. It prints **both** ends of its scale on one
+line and then the same baseline the other three carry. Both ends, because one end alone
+reads as a claim rather than a scale: a card showing `0%` with `100% — первым в каждой
+партии` directly beneath it puts two statements in one block that contradict each other,
+and a reader who does not already know it is a legend has no way to tell. That baseline is always `50%` and needs no data: however many sit at
+the table, a place drawn at random finishes above half the field, so the null for this
+figure is one half exactly. Printing it costs nothing and makes the four tiles read as
+one instrument instead of three plus an exception. The tile is also no longer called a share: the figure is literally the
 proportion of opponents finished above, so it is named that — «ВЫШЕ СОПЕРНИКОВ», "opponents
 beaten" — on the card, on the chronology's chart and in the king of the table's own
-line. A name that has to be explained by the label beneath it is a name that failed. The evening chart's own hint says the same about the top end, so the two
-read as one definition rather than two.
+line. A name that has to be explained by the label beneath it is a name that failed.
+The chart below the tiles carries no scale line of its own: it had one, and it restated
+the tile's own scale in different words a hand's width away, which reads as two
+definitions of one thing rather than as one said twice.
 
 Two denominators are used on purpose, and the card says which is which rather than
 leaving the reader to assume:
 
 - **the fool rate is over decided games**, with draws excluded from both the count
   and its baseline, because a drawn game has no fool and leaving it in would flatter
-  everybody at the table. The note prints *of the decided* only when a draw actually
-  kept a game out, since on a card with no draws the phrase explains a gap that is not
-  there;
+  everybody at the table. The note prints the bare `48 из 72` and does not explain that
+  denominator: the qualifier that used to follow it read to the owner as a claim that
+  some games had no fool at all, and a draw for last is rare enough that the sentence
+  cost more attention than the case it covered;
 - **wins and the first move are over every game played**, because a draw still has a
   first player out and still had somebody open it. Both also share one baseline, and
   that is arithmetic rather than convenience: the opener of a game is the previous

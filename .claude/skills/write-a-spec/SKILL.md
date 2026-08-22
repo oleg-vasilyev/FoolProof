@@ -282,6 +282,23 @@ missing would not have been visible.
 - Separate arrange, act and assert with blank lines.
 - Assert the thing that would break, not the thing that is easy to reach.
 
+## A line drawn at a fixed size owes a spec that measures it
+
+A poster has no reflow: text set at 34px in a column 1360px wide either fits or runs off
+the edge, and nothing in the pipeline notices — the SVG is valid, the PNG renders, the
+gate that weighs the picture sees the same bytes. The only reader that catches it is a
+person looking at the panel where the sentence happened to be longest.
+
+So when copy is printed at a known size into a known width, the spec that owns that copy
+measures it: `widthOf(line, font, USUAL_ADVANCE)` against the room, for **every** line of
+the family rather than the one you just wrote. The curse note had such a guard and never
+clipped; the award reasons did not, and one shipped cut off mid-word — and the guard,
+once written, immediately found nine more lines that had been over the edge for releases.
+
+Use the widest plausible interpolation, not a typical one: a tally is `199 партий`, not
+`3 games`. `USUAL_ADVANCE` over-estimates real prose by roughly a tenth, which is the
+margin you want on a hard clip.
+
 ## Integration specs
 
 **An integration spec covers a seam the unit rule puts out of reach.** Not "several

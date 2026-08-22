@@ -86,7 +86,7 @@ export type Award =
   | Earned<typeof AwardName.FalseDawn, { readonly ledAt: number; readonly percent: number }>
   | Earned<typeof AwardName.OpenersCurse, { readonly opens: number; readonly burns: number }>
   | Earned<typeof AwardName.Encore, { readonly run: number }>
-  | Earned<typeof AwardName.FirstBlood, { readonly games: number }>
+  | Earned<typeof AwardName.FirstBlood, Record<never, never>>
   | Earned<typeof AwardName.FoolOfTheNight, { readonly fools: number; readonly games: number }>;
 
 export const RAREST_FIRST: readonly AwardName[] = [

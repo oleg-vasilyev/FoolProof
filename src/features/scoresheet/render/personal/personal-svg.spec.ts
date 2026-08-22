@@ -459,14 +459,6 @@ describe("renderPersonalCard()", () => {
       expect(attributesOf(copy.personalChartLabel)["font-size"]).toBe(personalFont.sectionLabel);
     });
 
-    it("should hang the section's hint off the right edge on the label's baseline", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
-
-      expect(attributesOf(copy.sheetShareHint).x).toBe(GRID_RIGHT);
-      expect(attributesOf(copy.sheetShareHint).y).toBe(CHART_LABEL);
-      expect(attributesOf(copy.sheetShareHint)["text-anchor"]).toBe("end");
-    });
-
     it("should rule the section off above its own label, flat across the card", () => {
       renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
 
@@ -493,12 +485,22 @@ describe("renderPersonalCard()", () => {
       });
     });
 
-    it("should hint at the chart to come in place of the scale a drawn one carries", () => {
+    it("should hint at the chart to come where a drawn one would stand", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
 
       renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
 
       expect(textSpy).toHaveBeenCalledWith(TEASER_HINT_MARK, expect.anything());
+    });
+
+    it("should never repeat the chronology's scale line, drawn chart or not", () => {
+      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+
+      expect(textSpy).not.toHaveBeenCalledWith(copy.sheetShareHint, expect.anything());
+
+      personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
+      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+
       expect(textSpy).not.toHaveBeenCalledWith(copy.sheetShareHint, expect.anything());
     });
 

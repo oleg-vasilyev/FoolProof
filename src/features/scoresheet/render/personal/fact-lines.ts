@@ -1,5 +1,11 @@
 import { CareerFactName, type CareerFact } from "#scoresheet/domain/career/facts/fact-catalogue.ts";
-import { eveningTally, gameTally, timeTally } from "#scoresheet/render/tally-phrases.ts";
+import {
+  eveningTally,
+  gameTally,
+  gamesAcross,
+  gamesOf,
+  timeTally,
+} from "#scoresheet/render/tally-phrases.ts";
 import { percentLabel } from "#scoresheet/render/percent-label.ts";
 import { sessionDate } from "#scoresheet/render/session-date.ts";
 import type { Copy } from "#scoresheet/copy.ts";
@@ -23,29 +29,24 @@ const bodyOf = (copy: Copy, fact: CareerFact): Body => {
     case CareerFactName.TheBlinder:
       return {
         holder: sessionDate(copy, fact.playedOn),
-        reason: copy.blinderReason(timeTally(copy, fact.firsts), gameTally(copy, fact.games)),
+        reason: copy.blinderReason(timeTally(copy, fact.firsts), gamesAcross(copy, fact.games)),
       };
 
     case CareerFactName.TheNightmare:
       return {
         holder: sessionDate(copy, fact.playedOn),
-        reason: copy.nightmareReason(timeTally(copy, fact.burns), gameTally(copy, fact.games)),
+        reason: copy.nightmareReason(timeTally(copy, fact.burns), gamesAcross(copy, fact.games)),
       };
 
     case CareerFactName.TheCharm:
-      return {
-        holder: fact.rival,
-        reason: copy.charmReason(
-          fact.burns,
-          gameTally(copy, fact.games),
-          percentLabel(fact.usual)
-        ),
-      };
-
     case CareerFactName.TheJinx:
       return {
         holder: fact.rival,
-        reason: copy.jinxReason(fact.burns, gameTally(copy, fact.games), percentLabel(fact.usual)),
+        reason: copy.alongsideReason(
+          fact.burns,
+          gamesAcross(copy, fact.games),
+          fact.usualBurns
+        ),
       };
 
     case CareerFactName.ThePatsy:
@@ -61,15 +62,10 @@ const bodyOf = (copy: Copy, fact: CareerFact): Body => {
       };
 
     case CareerFactName.BigTableCharm:
-      return {
-        holder: copy.atTableOf(fact.seats),
-        reason: copy.tableCharmReason(fact.burns, gameTally(copy, fact.games)),
-      };
-
     case CareerFactName.BigTableCurse:
       return {
         holder: copy.atTableOf(fact.seats),
-        reason: copy.tableCurseReason(fact.burns, gameTally(copy, fact.games)),
+        reason: copy.atSizeReason(fact.burns, gamesAcross(copy, fact.games), fact.usualBurns),
       };
 
     case CareerFactName.OpenersGift:
@@ -99,7 +95,7 @@ const bodyOf = (copy: Copy, fact: CareerFact): Body => {
     case CareerFactName.TheHeadStart:
       return {
         holder: timeTally(copy, fact.opens),
-        reason: copy.headStartReason(gameTally(copy, fact.games)),
+        reason: copy.headStartReason(gamesOf(copy, fact.games)),
       };
 
     case CareerFactName.TheBadPatch:
@@ -115,15 +111,14 @@ const bodyOf = (copy: Copy, fact: CareerFact): Body => {
       };
 
     case CareerFactName.TheSurvivor:
-      return {
-        holder: timeTally(copy, fact.burns),
-        reason: copy.survivorReason(gameTally(copy, fact.games), percentLabel(fact.expected)),
-      };
-
     case CareerFactName.LightningRod:
       return {
         holder: timeTally(copy, fact.burns),
-        reason: copy.lightningRodReason(gameTally(copy, fact.games), percentLabel(fact.expected)),
+        reason: copy.againstTheSeatReason(
+          gamesOf(copy, fact.games),
+          percentLabel(fact.expected),
+          percentLabel(fact.rate)
+        ),
       };
 
     case CareerFactName.EverPresent:

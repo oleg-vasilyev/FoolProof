@@ -164,11 +164,11 @@ describe("merge-message", () => {
 
   describe("joinedNames()", () => {
     it("should list the names as they were picked", () => {
-      expect(joinedNames([ANYA, ANNA])).toBe("Аня, Анна");
+      expect(joinedNames(copy, [ANYA, ANNA])).toBe(`Аня${copy.beforeLastName}Анна`);
     });
 
     it("should leave a name unescaped, because an alert is not HTML", () => {
-      joinedNames([ANYA]);
+      joinedNames(copy, [ANYA]);
 
       expect(escaper.escapeHtmlSpy).not.toHaveBeenCalled();
     });

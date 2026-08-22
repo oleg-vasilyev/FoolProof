@@ -45,6 +45,8 @@ const A_SEAT_IN_FIVE = 0.2;
 
 const A_FOOL_RATE = 0.42;
 
+const AN_EVEN_SPLIT = 0.5;
+
 const A_FIRST_RATE = 0.18;
 
 const AN_OPEN_RATE = 0.31;
@@ -58,6 +60,7 @@ const OLEGS_NAME = "Oleg";
 const tallyOf = (decided: number): CareerTally => ({
   games: decided,
   evenings: SOME_EVENINGS,
+  shareChance: AN_EVEN_SPLIT,
   fools: SOME_BURNS,
   decided,
   foolRate: A_FOOL_RATE,
@@ -79,7 +82,13 @@ const subjectOf = (decided: number): CareerSubject => ({
 const seatedFor = (
   name: typeof CareerFactName.LightningRod | typeof CareerFactName.TheSurvivor,
   decided: number
-): CareerFact => ({ name, games: decided, burns: SOME_BURNS, expected: A_SEAT_IN_FOUR });
+): CareerFact => ({
+  name,
+  games: decided,
+  burns: SOME_BURNS,
+  expected: A_SEAT_IN_FOUR,
+  rate: A_FOOL_RATE,
+});
 
 const THE_ROD = seatedFor(CareerFactName.LightningRod, ENOUGH_DECIDED);
 

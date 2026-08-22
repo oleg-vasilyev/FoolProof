@@ -90,7 +90,7 @@ const merge = async (
 
   if (context.repo.playedTogether(everyone.map((candidate) => candidate.playerId))) {
     await ctx.answerCallbackQuery({
-      text: copy.playedTogether(joinedNames(everyone)),
+      text: copy.playedTogether(joinedNames(copy, everyone)),
       show_alert: true,
     });
 
