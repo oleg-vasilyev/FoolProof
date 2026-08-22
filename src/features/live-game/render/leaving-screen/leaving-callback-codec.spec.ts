@@ -202,6 +202,14 @@ describe("decodeLeavingCallback()", () => {
     });
   });
 
+  it("should read a shortened id back whole when it is not the first seat", () => {
+    expect(decodeLeavingCallback(`w:7.${WIDEST_ID_IN_BASE_62}:2:k:-`)).toEqual({
+      order: [ANYA, WIDEST_ID],
+      leaving: [WIDEST_ID],
+      action: { kind: ActionKind.Confirm },
+    });
+  });
+
   it("should read a shortened id back whole when it is the one being marked", () => {
     expect(decodeLeavingCallback(`w:3.7:0:p:${WIDEST_ID_IN_BASE_62}`)).toEqual({
       order: [OLEG, ANYA],

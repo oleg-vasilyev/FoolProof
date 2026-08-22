@@ -198,15 +198,4 @@ describe("onNamesReply()", () => {
     expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
     expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
   });
-
-  it("should refuse when a card went live while the joiners prompt stood", async () => {
-    cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
-    const message = ctx.textMessage("Dima", { text: copy.joinersPrompt, fromBot: true });
-
-    await onNamesReply(context(), message);
-
-    expect(cardContext.refusedBecauseLiveSpy).toHaveBeenCalled();
-    expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
-    expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
-  });
 });

@@ -208,6 +208,14 @@ The rule exists because inline fakes had already failed twice, both silently:
   `num` returns a `number`. The markers became distinct in-type return values plus
   assertions on which column reached which coercion.
 
+**Open the stub before writing against it.** Its verbs are not the ones you remember
+from somewhere else: a unit's `ContextStub` says `callbackTap`, `chatlessTap`,
+`lastReply` and `lastEdit`, while the e2e harness's `Chat` — a different object, for a
+different world — says `tap`, `tapRaw` and `lastAnswer`. Writing a spec from memory of
+the other one produces a file that compiles and fails on every case with
+`ctx.tap is not a function`, which is two round trips to learn something one `grep` for
+`public ` would have said.
+
 A stub also fakes a **collaborator handed to the subject** — `Logger`,
 `Repository`, `Listeners`. Same file, one class per role: `logger.stub.ts` holds
 `LoggerStub` (the interface) and `LoggingStub` (the module that makes one).

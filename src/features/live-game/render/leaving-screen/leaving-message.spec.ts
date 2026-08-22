@@ -8,7 +8,7 @@ vi.mock("#shared/text/html-escape.ts", () => ({
   escapeHtml: (text: string) => escapeHtmlSpy(text),
 }));
 
-const { renderLeavingCancelled, renderLeavingScreen, renderLeft } = await import(
+const { renderLeavingCancelled, renderLeavingScreen, renderPlaying } = await import(
   "#live-game/render/leaving-screen/leaving-message.ts"
 );
 
@@ -31,17 +31,17 @@ describe("leaving-message", () => {
     });
   });
 
-  describe("renderLeft()", () => {
+  describe("renderPlaying()", () => {
     it("should show who is still playing, in the order they are seated", () => {
-      expect(renderLeft(copy, [OLEG, ANYA])).toBe(
-        `${copy.leavingHeader}\n${copy.leftBody(
+      expect(renderPlaying(copy, [OLEG, ANYA])).toBe(
+        `${copy.leavingHeader}\n${copy.playingBody(
           `${escaped(OLEG.displayName)}${copy.betweenSeats}${escaped(ANYA.displayName)}`
         )}`
       );
     });
 
     it("should route every name through the escaper, since a name is user data", () => {
-      renderLeft(copy, [OLEG, ANYA]);
+      renderPlaying(copy, [OLEG, ANYA]);
 
       expect(escapeHtmlSpy).toHaveBeenCalledWith(OLEG.displayName);
       expect(escapeHtmlSpy).toHaveBeenCalledWith(ANYA.displayName);

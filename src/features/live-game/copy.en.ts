@@ -32,7 +32,7 @@ export const copy = {
 
   leavingHeader: "<b>Who is sitting this one out?</b>",
   leavingAsk: "Tap whoever is not playing, then Play.",
-  leftBody: (ring: string) => `Playing: ${ring}`,
+  playingBody: (ring: string) => `Playing: ${ring}`,
   leavingCancelledBody: "Cancelled — the table is unchanged.",
   leavingStale: "That line-up has moved on — run /next_without again",
 

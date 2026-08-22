@@ -8,10 +8,10 @@ const BETWEEN_LINES = "\n";
 export const renderLeavingScreen = (copy: Copy): string =>
   [copy.leavingHeader, copy.leavingAsk].join(BETWEEN_LINES);
 
-export const renderLeft = (copy: Copy, seats: readonly Seat[]): string =>
+export const renderPlaying = (copy: Copy, seats: readonly Seat[]): string =>
   [
     copy.leavingHeader,
-    copy.leftBody(seats.map((seat) => escapeHtml(seat.displayName)).join(copy.betweenSeats)),
+    copy.playingBody(seats.map((seat) => escapeHtml(seat.displayName)).join(copy.betweenSeats)),
   ].join(BETWEEN_LINES);
 
 export const renderLeavingCancelled = (copy: Copy): string =>

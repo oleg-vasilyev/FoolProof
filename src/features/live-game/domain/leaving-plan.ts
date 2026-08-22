@@ -3,6 +3,8 @@ import { MIN_PLAYERS, type Seat } from "#live-game/domain/card-state.ts";
 import { Problem } from "#live-game/domain/refusals.ts";
 
 
+export type LeavingRefusal = typeof Problem.TooFew | typeof Problem.UnknownNames;
+
 export interface LeavingPlan {
   readonly roster: readonly Seat[];
   readonly leaving: readonly number[];
@@ -22,7 +24,7 @@ export type LeavingTransition =
     }
   | { readonly outcome: typeof Outcome.Seated; readonly seats: readonly Seat[] }
   | { readonly outcome: typeof Outcome.Cancelled }
-  | { readonly outcome: typeof Outcome.Rejected; readonly problem: Problem };
+  | { readonly outcome: typeof Outcome.Rejected; readonly problem: LeavingRefusal };
 
 export const stayingIn = (plan: LeavingPlan): readonly Seat[] =>
   plan.roster.filter((seat) => !plan.leaving.includes(seat.playerId));

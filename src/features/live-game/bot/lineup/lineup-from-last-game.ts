@@ -43,11 +43,11 @@ const joinersAsked = (copy: Copy): Question => ({
   missing: copy.joinersMissing,
 });
 
-const namesProblemText = (copy: Copy, problem: NamesProblem, missing: string): string => {
+const namedBadlyText = (
+  copy: Copy,
+  problem: Exclude<NamesProblem, { problem: typeof Problem.Empty }>
+): string => {
   switch (problem.problem) {
-    case Problem.Empty:
-      return missing;
-
     case Problem.TooLong:
       return copy.nameTooLong(LONGEST_NAME, namePreviews(problem.names));
 
@@ -55,6 +55,9 @@ const namesProblemText = (copy: Copy, problem: NamesProblem, missing: string): s
       return copy.lineupDuplicates(problem.names);
   }
 };
+
+const namesProblemText = (copy: Copy, problem: NamesProblem, missing: string): string =>
+  problem.problem === Problem.Empty ? missing : namedBadlyText(copy, problem);
 
 const tableProblemText = (copy: Copy, change: Exclude<TableChange, { ok: true }>): string => {
   switch (change.problem) {
@@ -114,7 +117,7 @@ const askedOrRefused = async (
   await ctx.reply(namesProblemText(copy, problem, question.missing));
 };
 
-const refusedOrAsked = async (
+const screenOrRefused = async (
   copy: Copy,
   context: CardContext,
   ctx: Command,
@@ -127,7 +130,7 @@ const refusedOrAsked = async (
     return;
   }
 
-  await ctx.reply(namesProblemText(copy, problem, copy.lineupTooFew));
+  await ctx.reply(namedBadlyText(copy, problem));
 };
 
 const seatJoiners = async (
@@ -243,7 +246,7 @@ export const onNextWithout = async (context: CardContext, ctx: Command): Promise
 
   const parsed = parseNames(commandText(ctx));
   if (!parsed.ok) {
-    await refusedOrAsked(copy, context, ctx, parsed, toSeats(last.seats));
+    await screenOrRefused(copy, context, ctx, parsed, toSeats(last.seats));
 
     return;
   }

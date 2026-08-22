@@ -33,7 +33,7 @@ export const copy: Copy = {
 
   leavingHeader: "<b>Кто эту партию пропускает?</b>",
   leavingAsk: "Отметь, кто не играет, и жми «Играем».",
-  leftBody: (ring: string) => `Играют: ${ring}`,
+  playingBody: (ring: string) => `Играют: ${ring}`,
   leavingCancelledBody: "Отменено — состав прежний.",
   leavingStale: "Этот состав уже сменился — набери /next_without заново",
 

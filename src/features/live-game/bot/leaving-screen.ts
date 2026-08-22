@@ -3,13 +3,17 @@ import { Problem } from "#live-game/domain/refusals.ts";
 import type { CallbackTap, Command } from "#shared/telegram/telegram-contexts.ts";
 import type { Seat } from "#live-game/domain/card-state.ts";
 import { rotateToLowestId } from "#live-game/domain/lineup-parsing.ts";
-import { applyLeaving, type LeavingPlan } from "#live-game/domain/leaving-plan.ts";
+import {
+  applyLeaving,
+  type LeavingPlan,
+  type LeavingRefusal,
+} from "#live-game/domain/leaving-plan.ts";
 import { decodeLeavingCallback } from "#live-game/render/leaving-screen/leaving-callback-codec.ts";
 import { renderLeavingKeyboard } from "#live-game/render/leaving-screen/leaving-keyboard.ts";
 import {
   renderLeavingCancelled,
   renderLeavingScreen,
-  renderLeft,
+  renderPlaying,
 } from "#live-game/render/leaving-screen/leaving-message.ts";
 import { toSeats } from "#live-game/bot/lineup/seat-lookup.ts";
 import { toMarkup } from "#shared/telegram/inline-keyboard.ts";
@@ -45,8 +49,15 @@ const stillTheLastGame = (
   return seats.length === order.length && sameTable ? seats : null;
 };
 
-const refusalText = (copy: Copy, problem: Problem): string =>
-  problem === Problem.TooFew ? copy.lineupTooFew : copy.leavingStale;
+const refusalText = (copy: Copy, problem: LeavingRefusal): string => {
+  switch (problem) {
+    case Problem.TooFew:
+      return copy.lineupTooFew;
+
+    case Problem.UnknownNames:
+      return copy.leavingStale;
+  }
+};
 
 const closeScreen = async (copy: Copy, ctx: CallbackTap): Promise<void> => {
   await ctx.editMessageText(renderLeavingCancelled(copy), AS_HTML);
@@ -76,7 +87,7 @@ const openTableWithout = async (
     return;
   }
 
-  await ctx.editMessageText(renderLeft(copy, seats), AS_HTML);
+  await ctx.editMessageText(renderPlaying(copy, seats), AS_HTML);
   await ctx.answerCallbackQuery(copy.leftNotice);
   await context.cards.open(copy, chatId, rotateToLowestId(seats), PICKED_BY_HAND);
 };

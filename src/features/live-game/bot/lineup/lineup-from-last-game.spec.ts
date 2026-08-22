@@ -385,6 +385,16 @@ describe("a line-up taken from the last game", () => {
       expect(parseNamesSpy).toHaveBeenCalledWith(COMMAND_TEXT);
     });
 
+    it("should name a leaver whose name is too long rather than open the screen", async () => {
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.TooLong, names: ["Wilhelmina"] });
+      namePreviewsSpy.mockReturnValue(["Wilhe…"]);
+
+      await onNextWithout(context(), ctx.command("/next_without Wilhelmina"));
+
+      expect(ctx.lastReply().text).toBe(copy.nameTooLong(LONGEST_NAME, ["Wilhe…"]));
+      expect(askLeavingSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
     it("should name a repeated leaver rather than open the screen", async () => {
       parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Duplicates, names: ["Anya"] });
 

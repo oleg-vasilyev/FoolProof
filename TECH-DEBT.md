@@ -480,6 +480,23 @@ position a check should not put a reader in.
 
 ---
 
+## Two screens carry the same scaffolding, word for word
+
+`bot/seating-screen.ts` and `bot/leaving-screen.ts` are the same shape: `AS_HTML`, a
+`screenOptions` that wraps a keyboard in a markup, a `redraw` that edits the message and
+answers the tap, and a final step that refuses when a card went live and otherwise opens
+one. The last of those is the sharpest: the `liveCardInChat` check with its
+`show_alert` is now written twice, and it exists because `cards.open` does not defend
+itself.
+
+Copying it was the right call at two. The screens are not variations on one idea — one
+orders players, the other subtracts them — and the shared parts are four small
+functions, so a common base would have to invent a concept that does not exist yet.
+
+**Pick it up at the third screen, or the first time that alert changes.** Either is
+evidence the scaffolding is a thing rather than a coincidence; until then, extracting it
+would be naming something before knowing what it is.
+
 ## Files that may be worth splitting
 
 None of these is wrong. They are the places where the next change is most likely to

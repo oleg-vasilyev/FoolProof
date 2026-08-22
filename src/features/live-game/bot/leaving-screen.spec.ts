@@ -37,14 +37,14 @@ vi.mock("#live-game/render/leaving-screen/leaving-keyboard.ts", () => ({
   renderLeavingKeyboard: (table: unknown, plan: unknown) => renderLeavingKeyboardSpy(table, plan),
 }));
 
-const renderLeftSpy = vi.fn();
+const renderPlayingSpy = vi.fn();
 
 const renderLeavingCancelledSpy = vi.fn();
 
 const renderLeavingScreenSpy = vi.fn();
 
 vi.mock("#live-game/render/leaving-screen/leaving-message.ts", () => ({
-  renderLeft: (table: unknown, seats: unknown) => renderLeftSpy(table, seats),
+  renderPlaying: (table: unknown, seats: unknown) => renderPlayingSpy(table, seats),
   renderLeavingCancelled: (table: unknown) => renderLeavingCancelledSpy(table),
   renderLeavingScreen: (table: unknown) => renderLeavingScreenSpy(table),
 }));
@@ -139,7 +139,7 @@ describe("leaving-screen", () => {
     toSeatsSpy.mockReturnValue(SEATS);
     rotateToLowestIdSpy.mockReturnValue(ROTATED);
     renderLeavingScreenSpy.mockReturnValue(SCREEN);
-    renderLeftSpy.mockReturnValue(LEFT_TEXT);
+    renderPlayingSpy.mockReturnValue(LEFT_TEXT);
     renderLeavingCancelledSpy.mockReturnValue(CANCELLED_TEXT);
     renderLeavingKeyboardSpy.mockReturnValue(KEYBOARD);
     keyboards.toMarkupSpy.mockReturnValue(MARKUP);
@@ -289,7 +289,7 @@ describe("leaving-screen", () => {
 
       await onLeavingTap(context(), ctx.callbackTap(CONFIRM_DATA));
 
-      expect(renderLeftSpy).toHaveBeenCalledWith(copy, STAYING);
+      expect(renderPlayingSpy).toHaveBeenCalledWith(copy, STAYING);
       expect(ctx.lastEdit().text).toBe(LEFT_TEXT);
       expect(lastAnswer()).toBe(copy.leftNotice);
     });
