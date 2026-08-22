@@ -4,8 +4,6 @@ import { describeScenario } from "../harness/describe-scenario.ts";
 
 const JOINERS_PROMPT = "Who is joining? Send their names.";
 
-const LEAVERS_PROMPT = "Who is sitting out? Send their names.";
-
 describeScenario("somebody arrives, somebody goes home", (chat) => {
   it("should play a first game to have a line-up to change", async () => {
     await chat.say("/game Oleg, Anya, Roma");
@@ -112,14 +110,33 @@ describeScenario("somebody arrives, somebody goes home", (chat) => {
     expect(chat.captions()).toEqual(["Oleg", "Roma", "❌ Cancel"]);
   });
 
-  it("should ask who is sitting out, and take the answer from the reply", async () => {
+  it("should offer the last line-up as buttons when no names were given", async () => {
     await chat.tap("❌ Cancel");
     await chat.say("/next_without");
 
-    expect(chat.lastText()).toBe(LEAVERS_PROMPT);
+    expect(chat.lastText()).toContain("Who is sitting this one out?");
+    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "▶️ Play", "❌ Cancel"]);
+  });
 
-    await chat.replyToPrompt("Anya");
+  it("should mark a tapped player as sitting out, and say so", async () => {
+    await chat.tap("Anya");
 
+    expect(chat.lastAnswer()).toBe("Anya sits this one out");
+    expect(chat.captions()).toEqual(["Oleg", "🚪 Anya", "Roma", "▶️ Play", "❌ Cancel"]);
+  });
+
+  it("should let the same tap put them back in the game", async () => {
+    await chat.tap("🚪 Anya");
+
+    expect(chat.lastAnswer()).toBe("Anya is playing after all");
+    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "▶️ Play", "❌ Cancel"]);
+  });
+
+  it("should open the next card without whoever was left marked", async () => {
+    await chat.tap("Anya");
+    await chat.tap("▶️ Play");
+
+    expect(chat.lastText()).toContain("Who went first?");
     expect(chat.captions()).toEqual(["Oleg", "Roma", "❌ Cancel"]);
   });
 

@@ -78,17 +78,29 @@ vi.mock("#live-game/render/callback-data-codec.ts", () => ({ CARD_TAPS }));
 
 const onSeatingTapSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
 
+const onLeavingTapSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
+
+vi.mock("#live-game/bot/leaving-screen.ts", () => ({
+  onLeavingTap: (context: unknown, ctx: unknown) => onLeavingTapSpy(context, ctx),
+}));
+
 vi.mock("#live-game/bot/seating-screen.ts", () => ({
   onSeatingTap: (context: unknown, ctx: unknown) => onSeatingTapSpy(context, ctx),
 }));
 
 const SEATING_TAPS = /^the-seating-taps$/;
 
+const LEAVING_TAPS = /^the-leaving-taps$/;
+
 vi.mock("#live-game/render/seating-screen/seating-callback-codec.ts", () => ({ SEATING_TAPS }));
+
+vi.mock("#live-game/render/leaving-screen/leaving-callback-codec.ts", () => ({ LEAVING_TAPS }));
 
 const SEATING_LISTENER = 1;
 
-const TWO_SCREENS = 2;
+const LEAVING_LISTENER = 2;
+
+const EVERY_SCREEN = 3;
 
 const { createLiveGameFeature } = await import("#live-game/live-game-feature.ts");
 
@@ -234,7 +246,7 @@ describe("createLiveGameFeature()", () => {
       build().listen?.(listeners);
 
       expect(listeners.onTextSpy).toHaveBeenCalledTimes(ONCE);
-      expect(listeners.onTapSpy).toHaveBeenCalledTimes(TWO_SCREENS);
+      expect(listeners.onTapSpy).toHaveBeenCalledTimes(EVERY_SCREEN);
     });
 
     it("should claim only the taps the card codec encodes", () => {
@@ -261,6 +273,20 @@ describe("createLiveGameFeature()", () => {
       await listeners.tapListener()?.("the-tap" as never);
 
       expect(onTapSpy).toHaveBeenCalledWith(expect.anything(), "the-tap");
+    });
+
+    it("should claim the leaving taps under their own pattern", () => {
+      build().listen?.(listeners);
+
+      expect(listeners.tapPattern(LEAVING_LISTENER)).toBe(LEAVING_TAPS);
+    });
+
+    it("should send a leaving tap to the screen of names, not to the card", async () => {
+      build().listen?.(listeners);
+      await listeners.tapListener(LEAVING_LISTENER)?.("the-leaving-tap" as never);
+
+      expect(onLeavingTapSpy).toHaveBeenCalledWith(expect.anything(), "the-leaving-tap");
+      expect(onTapSpy).not.toHaveBeenCalled();
     });
 
     it("should send a seating tap to the seating screen, not to the card", async () => {

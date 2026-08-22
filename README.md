@@ -29,7 +29,7 @@ Went first: Oleg
 | `/game` | Same, but asks for the names — for when you tapped the command from the menu |
 | `/next` | A new card with the same line-up; the fool's neighbour goes first |
 | `/next_with Zhenya` | The same line-up plus these players; asks for the names if sent without any, then asks where everyone sits |
-| `/next_without Oleg` | The same line-up minus these players; asks the same way |
+| `/next_without Oleg` | The same line-up minus these players; sent bare, it lists the table and you tap whoever is sitting out |
 | `/stats` | How the current session is going: the chronology, then the awards |
 | `/stats_chronology` | The chronology picture on its own |
 | `/stats_awards` | The awards picture on its own; needs five games |

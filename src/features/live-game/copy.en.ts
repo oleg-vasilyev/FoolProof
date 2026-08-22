@@ -18,9 +18,6 @@ export const copy = {
   joinersPrompt: "Who is joining? Send their names.",
   joinersPlaceholder: "Zhenya, Sasha",
   joinersMissing: "Who is joining? For example: /next_with Zhenya, Sasha",
-  leaversPrompt: "Who is sitting out? Send their names.",
-  leaversPlaceholder: "Oleg",
-  leaversMissing: "Who is sitting out? For example: /next_without Oleg",
   alreadyAtTable: (names: readonly string[]) =>
     `Already at the table: ${names.join(", ")}. Name only the players joining.`,
   notAtTable: (names: readonly string[]) =>
@@ -33,10 +30,16 @@ export const copy = {
   seatingCancelledBody: "Cancelled — no game started.",
   seatingStale: "This seating is out of date — start again",
 
+  leavingHeader: "<b>Who is sitting this one out?</b>",
+  leavingAsk: "Tap whoever is not playing, then Play.",
+  leftBody: (ring: string) => `Playing: ${ring}`,
+  leavingCancelledBody: "Cancelled — the table is unchanged.",
+  leavingStale: "That line-up has moved on — run /next_without again",
+
   commandGame: "Open a game — /game Oleg, Anya, Roma",
   commandNext: "Another game, same line-up",
   commandNextWith: "Another game, plus more players — /next_with Zhenya",
-  commandNextWithout: "Another game, minus some players — /next_without Oleg",
+  commandNextWithout: "Another game, minus whoever taps out",
 
   helpGame: "/game Oleg, Anya, Roma — open a game; the list is the seating order around the table",
   helpNext:
@@ -44,7 +47,7 @@ export const copy = {
   helpNextWith:
     "/next_with Zhenya, Sasha — the same line-up plus these; you then tap everyone in seating order, and who goes first is picked by hand",
   helpNextWithout:
-    "/next_without Oleg — the same line-up minus these; who goes first is picked by hand",
+    "/next_without — tap whoever is sitting out, or name them: /next_without Oleg",
   helpCard: [
     "Tap a name to record who went first, then tap players in the order they go out.",
     "The last one left is the fool and gets marked for you. Draw appears once two players",
@@ -63,22 +66,27 @@ export const copy = {
   markFool: "💀",
   markDraw: "🤝",
   markSeat: "🪑",
+  markLeaving: "🚪",
 
   buttonDraw: "🤝 Draw",
   buttonConfirm: "✅ Confirm",
   buttonBack: "↩️ Back",
   buttonCancel: "❌ Cancel",
+  buttonPlay: "▶️ Play",
 
   tapSeated: (name: string, seat: number) => `${name} — seat ${seat}`,
   tapRecorded: (name: string, position: number) => `${name} — ${position}`,
   tapStarter: (name: string) => `${name} went first`,
   tapDraw: "Draw",
+  tapSittingOut: (name: string) => `${name} sits this one out`,
+  tapPlayingAgain: (name: string) => `${name} is playing after all`,
   tapBack: "Undone",
   tapNotAllowed: "Not available right now",
   cardStale: "Card updated — look again",
   cardGone: "This game is already over",
 
   seatedNotice: "Seated",
+  leftNotice: "Table set",
   confirmedNotice: "Recorded",
   cancelledNotice: "Cancelled",
   cancelledBody: "Cancelled — nothing recorded.",

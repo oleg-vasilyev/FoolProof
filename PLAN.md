@@ -161,8 +161,12 @@ opens the input field with that message quoted, and the names arrive in the next
 message. This also survives privacy mode, which hides ordinary group chatter from
 bots but always delivers replies to the bot's own messages.
 
-`/next_with` and `/next_without` do the same, with their own question and their
-own placeholder, because a menu tap is exactly how they will usually be sent.
+`/next_with` does the same, with its own question and its own placeholder, because a
+menu tap is exactly how it will usually be sent. **`/next_without` no longer asks in
+words** — it draws the last line-up as buttons, and the reply path for it is gone
+rather than left unreachable: a prompt and an inline keyboard cannot share a message,
+because a message has one `reply_markup`, and the only sender of that prompt was the
+branch the screen replaced.
 
 The answer is recognised by matching `reply_to_message` against the bot's own id
 and then looking the **exact prompt text** up in a table of the three questions —
@@ -269,9 +273,36 @@ and a silently accepted typo becomes a second player:
 - `/next_without` naming somebody who was not
 - `/next_without` leaving fewer than two players
 
-Tapped from the `/` menu they arrive with no argument, and each answers with its
+Tapped from the `/` menu they arrive with no argument. `/next_with` answers with its
 own `force_reply` question — see [A command with no names asks for
-them](#a-command-with-no-names-asks-for-them).
+them](#a-command-with-no-names-asks-for-them) — and `/next_without` opens a screen.
+
+### Tapping who sits this one out
+
+Removing somebody is the one change where the bot already knows every candidate: they
+are the last game's seats. So `/next_without` with no argument lists them as buttons,
+one a row, and a tap marks a player as sitting out. Tapping the same name again puts
+them back. Play opens the next card with whoever is left; Cancel leaves the table
+alone. Adding somebody cannot work this way and never will — a joiner is a name the
+chat has never seen, so there is no button to draw.
+
+**The screen holds no row in the database**, exactly like `/merge`: what it knows
+travels in `callback_data`. That is what makes a restart a non-event, and it is also
+what makes staleness possible, because nothing stops a whole game being played while
+the screen sits in the chat. So the data carries **the seats it was drawn from**, and
+every tap checks them against the last game before acting. A bitmask alone would not
+do: a later game of the same size would take the marks positionally and remove the
+wrong people in silence, and merging two names changes the ids while leaving the size
+and the order intact — which is exactly the case the ids catch.
+
+**Cancel is answered before that check**, because closing a screen changes nothing at
+the table. It is not a nicety: a stale screen whose Cancel was also refused could
+never be closed, and would sit in the chat for ever with live buttons on it. An e2e
+scenario found that, not a unit.
+
+The live-card check runs twice — when the screen opens and again at Play — because
+`cards.open` does not defend itself and the unique index would raise instead of the
+bot refusing in words. The seating screen and `/merge` both learned this first.
 
 **The refusal happens before any player row is created.** `/next_with Zhenya,
 Oleg` with Oleg already seated must not leave a new `Zhenya` behind — that is

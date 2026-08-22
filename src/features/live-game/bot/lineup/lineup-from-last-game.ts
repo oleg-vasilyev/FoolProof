@@ -9,7 +9,7 @@ import {
   tableWithout,
   type TableChange,
 } from "#live-game/domain/table-change.ts";
-import { LONGEST_NAME, MOST_PLAYERS } from "#live-game/domain/card-state.ts";
+import { LONGEST_NAME, MOST_PLAYERS, type Seat } from "#live-game/domain/card-state.ts";
 import { namePreviews } from "#live-game/render/name-preview.ts";
 import type { Copy } from "#live-game/copy.ts";
 import { PICKED_BY_HAND } from "#live-game/bot/card/card-service.ts";
@@ -22,6 +22,7 @@ import {
 } from "#live-game/bot/card-context.ts";
 import { resolveSeats, toSeats } from "#live-game/bot/lineup/seat-lookup.ts";
 import { askSeating } from "#live-game/bot/seating-screen.ts";
+import { askLeaving } from "#live-game/bot/leaving-screen.ts";
 
 
 type NamesProblem = Exclude<NamesResult, { ok: true }>;
@@ -40,12 +41,6 @@ const joinersAsked = (copy: Copy): Question => ({
   asked: copy.joinersPrompt,
   placeholder: copy.joinersPlaceholder,
   missing: copy.joinersMissing,
-});
-
-const leaversAsked = (copy: Copy): Question => ({
-  asked: copy.leaversPrompt,
-  placeholder: copy.leaversPlaceholder,
-  missing: copy.leaversMissing,
 });
 
 const namesProblemText = (copy: Copy, problem: NamesProblem, missing: string): string => {
@@ -117,6 +112,22 @@ const askedOrRefused = async (
   }
 
   await ctx.reply(namesProblemText(copy, problem, question.missing));
+};
+
+const refusedOrAsked = async (
+  copy: Copy,
+  context: CardContext,
+  ctx: Command,
+  problem: NamesProblem,
+  seats: readonly Seat[]
+): Promise<void> => {
+  if (problem.problem === Problem.Empty) {
+    await askLeaving(copy, ctx, seats);
+
+    return;
+  }
+
+  await ctx.reply(namesProblemText(copy, problem, copy.lineupTooFew));
 };
 
 const seatJoiners = async (
@@ -232,7 +243,7 @@ export const onNextWithout = async (context: CardContext, ctx: Command): Promise
 
   const parsed = parseNames(commandText(ctx));
   if (!parsed.ok) {
-    await askedOrRefused(copy, context, ctx, parsed, leaversAsked(copy));
+    await refusedOrAsked(copy, context, ctx, parsed, toSeats(last.seats));
 
     return;
   }
@@ -251,13 +262,3 @@ export const joinFromNames = async (context: CardContext, ctx: TextMessage): Pro
   await seatJoiners(copy, context, ctx, answer.last, answer.names);
 };
 
-export const leaveFromNames = async (context: CardContext, ctx: TextMessage): Promise<void> => {
-  const copy = copyFor(context, ctx.chat.id);
-  const answer = await answeredNames(copy, context, ctx, leaversAsked(copy));
-
-  if (answer === null) {
-    return;
-  }
-
-  await seatWithout(copy, context, ctx, answer.last, answer.names);
-};

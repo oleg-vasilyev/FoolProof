@@ -65,6 +65,12 @@ vi.mock("#live-game/bot/seating-screen.ts", () => ({
   askSeating: (table: unknown, ctx: unknown, seats: unknown) => askSeatingSpy(table, ctx, seats),
 }));
 
+const askLeavingSpy = vi.fn();
+
+vi.mock("#live-game/bot/leaving-screen.ts", () => ({
+  askLeaving: (table: unknown, ctx: unknown, seats: unknown) => askLeavingSpy(table, ctx, seats),
+}));
+
 const resolveSeatsSpy = vi.fn();
 
 const toSeatsSpy = vi.fn();
@@ -77,7 +83,6 @@ vi.mock("#live-game/bot/lineup/seat-lookup.ts", () => ({
 
 const {
   joinFromNames,
-  leaveFromNames,
   onNext,
   onNextWith,
   onNextWithout,
@@ -380,19 +385,25 @@ describe("a line-up taken from the last game", () => {
       expect(parseNamesSpy).toHaveBeenCalledWith(COMMAND_TEXT);
     });
 
-    it("should ask who is sitting out when no names were given", async () => {
+    it("should name a repeated leaver rather than open the screen", async () => {
+      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Duplicates, names: ["Anya"] });
+
+      await onNextWithout(context(), ctx.command("/next_without Anya, Anya"));
+
+      expect(ctx.lastReply().text).toBe(copy.lineupDuplicates(["Anya"]));
+      expect(askLeavingSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should open the screen of names when no names were given", async () => {
       parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Empty });
+      toSeatsSpy.mockReturnValue(MAPPED_SEATS);
 
       const cmd = ctx.command("/next_without");
 
       await onNextWithout(context(), cmd);
 
-      expect(cardContext.askForNamesSpy).toHaveBeenCalledWith(
-        context(),
-        cmd,
-        copy.leaversPrompt,
-        copy.leaversPlaceholder
-      );
+      expect(askLeavingSpy).toHaveBeenCalledWith(copy, cmd, MAPPED_SEATS);
+      expect(cardContext.askForNamesSpy).toHaveBeenCalledTimes(NEVER);
     });
 
     it("should open nothing when no names were given", async () => {
@@ -528,48 +539,4 @@ describe("a line-up taken from the last game", () => {
     });
   });
 
-  describe("leaveFromNames()", () => {
-    it("should explain when there is nothing to repeat", async () => {
-      repo.lastGameSpy.mockReturnValue(null);
-
-      await leaveFromNames(context(), ctx.textMessage("Anya"));
-
-      expect(ctx.lastReply().text).toBe(copy.noLineupToRepeat);
-    });
-
-    it("should refuse to ask again when the reply names nobody", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Empty });
-
-      await leaveFromNames(context(), ctx.textMessage(""));
-
-      expect(ctx.lastReply().text).toBe(copy.leaversMissing);
-      expect(cardContext.askForNamesSpy).toHaveBeenCalledTimes(NEVER);
-    });
-
-    it("should name a repeated leaver the parser rejected", async () => {
-      parseNamesSpy.mockReturnValue({ ok: false, problem: Problem.Duplicates, names: ["Anya"] });
-
-      await leaveFromNames(context(), ctx.textMessage("Anya, Anya"));
-
-      expect(ctx.lastReply().text).toBe(copy.lineupDuplicates(["Anya"]));
-    });
-
-    it("should reach the same seating a good command would", async () => {
-      parseNamesSpy.mockReturnValue({ ok: true, names: ["Anya"] });
-      tableWithoutSpy.mockReturnValue({ ok: true, seats: DISTINCT_SEATS });
-
-      await leaveFromNames(context(), ctx.textMessage("Anya"));
-
-      expect(cards.openSpy).toHaveBeenCalledWith(copy, CHAT_ID, ROTATED, null);
-    });
-
-    it("should never drop an unanswered prompt", async () => {
-      parseNamesSpy.mockReturnValue({ ok: true, names: ["Anya"] });
-      tableWithoutSpy.mockReturnValue({ ok: true, seats: DISTINCT_SEATS });
-
-      await leaveFromNames(context(), ctx.textMessage("Anya"));
-
-      expect(prompts.dropUnansweredSpy).toHaveBeenCalledTimes(NEVER);
-    });
-  });
 });

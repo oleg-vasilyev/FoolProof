@@ -3,13 +3,12 @@ import { LOCALES } from "#shared/locale/locales.ts";
 import { copyIn } from "#live-game/copy.ts";
 import { copyFor, refusedBecauseLive, type CardContext } from "#live-game/bot/card-context.ts";
 import { openFromNames } from "#live-game/bot/lineup/lineup-from-names.ts";
-import { joinFromNames, leaveFromNames } from "#live-game/bot/lineup/lineup-from-last-game.ts";
+import { joinFromNames } from "#live-game/bot/lineup/lineup-from-last-game.ts";
 
 
 const Answered = {
   Lineup: "lineup",
   Joiners: "joiners",
-  Leavers: "leavers",
 } as const;
 
 type Answered = (typeof Answered)[keyof typeof Answered];
@@ -20,7 +19,6 @@ const promptsIn = (locale: (typeof LOCALES)[number]): readonly (readonly [string
   return [
     [copy.lineupPrompt, Answered.Lineup],
     [copy.joinersPrompt, Answered.Joiners],
-    [copy.leaversPrompt, Answered.Leavers],
   ];
 };
 
@@ -54,10 +52,5 @@ export const onNamesReply = async (context: CardContext, ctx: TextMessage): Prom
 
     case Answered.Joiners:
       await joinFromNames(context, ctx);
-
-      return;
-
-    case Answered.Leavers:
-      await leaveFromNames(context, ctx);
   }
 };
