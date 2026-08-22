@@ -93,6 +93,18 @@ here. Whichever way it is then fixed, ask first what the dependency costs the
 **server**, which runs `npm ci` on every deploy and would have installed a CSS
 compiler it has no use for.
 
+**The dry run is necessary and not sufficient — read the lock's diff too.** It
+resolves against the platform it runs on, so a lock written on Windows can pass it
+here and fail on the Linux runner. Adding `tailwindcss` did exactly that: `npm
+install` rewrote the whole file and dropped `@emnapi/core` and `@emnapi/runtime`,
+two optional peers this platform decides are unnecessary and the runner requires.
+The dry run was green; CI died on `npm ci` with *Missing: @emnapi/core from lock
+file*. So **any line the lock loses is a finding, not noise** — a phase that adds a
+dependency should only ever add lines. When `npm install` removes some anyway, put
+the committed lock back and hand-write the entries: the manifest line and the
+package block, which for a dependency with no dependencies of its own is all there
+is.
+
 ## 2. `npm run test:coverage`
 
 70% floor on every metric. A file that dropped is a file whose new branches
