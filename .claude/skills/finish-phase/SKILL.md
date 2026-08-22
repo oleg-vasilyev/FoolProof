@@ -607,6 +607,26 @@ what you are about to write, and search for the sentence the phase just made fal
 Run `npm run docs:check` once the documents are updated — it is the last step of
 the retrospective stage, and CI's `check:push` holds the same line after the push.
 
+## A tool that refuses is a decision to re-open
+
+`node scripts/tools.ts site-css` stopped running mid-phase, and the fastest fix —
+install the missing package — silently reversed a decision taken ten days earlier and
+argued in `README.md`, in the same paragraph that gave its reason: the server runs
+`npm ci` on every deploy, so a compiler in the manifest is installed onto the machine
+that runs the bot. The argument was one grep on the tool's name away.
+
+So when a generator, a hook or a script refuses, grep the documents for its name
+before changing how it is invoked. Either the obvious fix is the one already
+rejected — and then reversing it is a decision that owes a rewritten paragraph, not a
+silent `npm install` — or nothing is written about it, and one command told you so.
+
+The same failure carried a second lesson: the tool had **never** run from a clean
+tree. It had worked exactly once, off a `node_modules` the commit before it left
+behind. A generated artifact whose gate only checks the artifact can go years without
+anybody discovering that its generator is broken, so **a phase that regenerates
+something is the phase that finds out** — treat the first refusal as evidence about
+the tool, not about your machine.
+
 ## Scaling the ritual to the change
 
 The seven gates are not negotiable. What the phase *produces around them* is, and

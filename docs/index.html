@@ -86,7 +86,7 @@
   <div class="mx-auto flex max-w-6xl items-center gap-4 px-5 py-4 sm:px-8">
     <a href="./" class="flex items-center gap-3" aria-label="FoolProof, home">
       <img src="favicon.png" width="36" height="36" alt="" class="h-9 w-9 rounded-lg">
-      <span class="text-lg font-extrabold tracking-tight">FoolProof</span>
+      <span class="text-lg font-extrabold tracking-tight max-[520px]:hidden">FoolProof</span>
     </a>
 
     <nav aria-label="Primary" class="ml-auto hidden items-center gap-7 text-[15px] text-muted md:flex">
@@ -96,8 +96,28 @@
       <a href="https://github.com/oleg-vasilyev/FoolProof" class="hover:text-ink" rel="noopener">Source</a>
     </nav>
 
+    <details class="lang ml-auto md:ml-0">
+      <summary aria-label="Language: English">
+        <svg class="max-[520px]:hidden" viewBox="0 0 24 24" width="17" height="17"
+             fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M3 12h18"></path>
+          <path d="M12 3c2.5 2.4 3.8 5.4 3.8 9S14.5 18.6 12 21C9.5 18.6 8.2 15.6 8.2 12S9.5 5.4 12 3Z"></path>
+        </svg>
+        <span>EN</span>
+        <svg class="lang-caret" viewBox="0 0 24 24" width="14" height="14"
+             fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="m6 9 6 6 6-6"></path>
+        </svg>
+      </summary>
+      <ul class="lang-menu">
+        <li><a class="lang-option" href="./" hreflang="en" lang="en" aria-current="true">English</a></li>
+        <li><a class="lang-option" href="ru/" hreflang="ru" lang="ru">Русский</a></li>
+      </ul>
+    </details>
+
     <a href="https://t.me/FoolProofMegaBot?startgroup=true" rel="noopener"
-       class="ml-auto rounded-lg bg-accent px-4 py-2 text-[15px] font-semibold text-ground transition-colors hover:bg-accent-soft md:ml-0">
+       class="rounded-lg bg-accent px-4 py-2 text-[15px] font-semibold text-ground transition-colors hover:bg-accent-soft">
       Add to a group
     </a>
   </div>
@@ -369,7 +389,6 @@
       <a href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="hover:text-ink">GitHub</a>
       <a href="https://github.com/oleg-vasilyev/FoolProof/blob/main/LICENSE" rel="license noopener" class="hover:text-ink">MIT licence</a>
       <a href="https://t.me/FoolProofMegaBot" rel="noopener" class="hover:text-ink">The bot</a>
-      <a href="ru/" hreflang="ru" lang="ru" class="hover:text-ink">Русский</a>
     </nav>
   </div>
   <div class="mx-auto max-w-6xl px-5 pb-10 font-mono text-[12px] text-edge sm:px-8">
@@ -398,6 +417,18 @@ setTimeout(() => {
     }
   });
 }, 2000);
+
+const language = document.querySelector(".lang");
+document.addEventListener("click", (event) => {
+  if (language && !language.contains(event.target)) {
+    language.open = false;
+  }
+});
+document.addEventListener("keydown", (event) => {
+  if (language && event.key === "Escape") {
+    language.open = false;
+  }
+});
 
 document.querySelectorAll('a[href*="t.me/"]').forEach((link) => {
   link.addEventListener("click", () => {

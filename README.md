@@ -574,11 +574,17 @@ adding one and forgetting the rebuild is a red gate rather than an unstyled elem
 in production.
 
 The Tailwind input lives in `scripts/site.css` because everything inside `docs/` is
-served, and a source is not for serving. The compiler itself is **not** a dependency
-of this project — `site-css` fetches it with `npx`. It would otherwise be installed
-on the server on every deploy, to build a stylesheet the server has no idea exists.
-Building the CSS at all, rather than letting a script tag do it in the visitor's
-browser, is what keeps the first screen at 44 KB with the posters below it lazy.
+served, and a source is not for serving. The **compiler** is not a dependency of this
+project — `site-css` fetches the CLI with `npx`, because it brings native binaries and
+a wasm fallback that once made `npm ci` refuse the lock file, and the server would
+install all of it on every deploy to build a stylesheet it has no idea exists. The
+**framework** is one, and has to be: the CLI resolves `@import "tailwindcss"` from the
+folder the input sits in, so on a clean clone it finds nothing and the build fails
+outright. That is 821 KB of CSS and JavaScript with no dependencies of its own and
+nothing to compile — the cheap half of the pair, and the half without which the tool
+does not run at all. Building the CSS rather than letting a script tag do it in the
+visitor's browser is what keeps the first screen at 44 KB with the posters below it
+lazy.
 
 A page nobody links to is read by nobody, so two questions are worth asking of it:
 does anyone arrive, and does arriving lead anywhere. Each has its own dashboard, and
