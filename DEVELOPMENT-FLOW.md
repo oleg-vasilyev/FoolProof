@@ -65,6 +65,9 @@ sequenceDiagram
         R->>R: lay them into one contact sheet: every case, the neighbour it will sit next to, and an inventory naming every mark and label in a player's words
         R->>C: the named cases, committed as docs/mockups/[gallery script].cases.txt — docs:check later holds the gallery to them
         R-->>C: the sheet, the SVG behind each panel, and which numbers the drawing assumes exist
+        C->>R: the copy-reader agent — the inventory of every line the drawing puts on the poster, read as sentences
+        R-->>C: the ones no person would say, each with a better line
+        C->>C: fix the wording and have the sheet redrawn — the owner approves text somebody has already read
         C->>U: the contact sheet for approval — everything to compare, in one image
         U-->>C: approved, or changes
     end
@@ -91,20 +94,25 @@ sequenceDiagram
     rect rgb(245, 245, 245)
     note over C,S: Stage 2. Writing the code and the tests
     C->>C: cut the work into pieces: what runs in parallel, what I keep — the shared shape, the copy, the risky core
-    C->>S: briefs to every subagent in one go, each with its own piece and its own skill
-    par in parallel
-        loop one file at a time
-            C->>C: write the core of the feature
-            note over C: saving the file fires the lint hook on it, unasked
-            opt it found something
-                C->>C: fix now, before the next file
-            end
-            C->>C: write the unit tests: everything around the file replaced with stubs
-        end
-    and
+    opt the feature says anything to a player
+        C->>C: write both copy tables first, before a line of the code that reads them
+        C->>R: the copy-reader agent — the finished sentences and the signatures they will be called from
+        R-->>C: every line written out with real values in it, then the ones no person would say — each with a blunt verdict and a better line
+        C->>C: fix the tables now, while nothing is built on them
+    end
+    opt ten files or more, and the artifact they are written against already drawn and looked at
+        C->>S: briefs to every subagent in one go, each with its own piece and its own skill — these run beside the loop below
         S->>S: each writes its piece strictly to the brief
         S-->>C: finished files, proven by their own tests
         C->>C: accept the result, weld the seams between the pieces
+    end
+    loop one file at a time
+        C->>C: write the core of the feature
+        note over C: saving the file fires the lint hook on it, unasked
+        opt it found something
+            C->>C: fix now, before the next file
+        end
+        C->>C: write the unit tests: everything around the file replaced with stubs
     end
     end
 
@@ -139,9 +147,9 @@ sequenceDiagram
 
     rect rgb(255, 247, 237)
     note over C,R: Stage 5. Reading every sentence, then syncing every picture
-    opt the change touched a copy table, or any prose a player reads
-        C->>R: the copy-reader agent — both language tables and the folder their call sites are in, nothing more
-        R-->>C: every line written out with real values in it, then the ones no person would say — each with a blunt verdict and a better line
+    opt a key changed after stage 2 read the tables, or the prose lives outside them
+        C->>R: the copy-reader agent — only what moved since, and the call sites that now exist
+        R-->>C: the same verdicts, on the lines that changed under it
         C->>C: take the better lines as written, and where a sentence claimed more than the rule delivers, fix the code behind it
     end
     opt the change touched what the bot or the site draws
@@ -168,14 +176,16 @@ sequenceDiagram
 
     rect rgb(253, 242, 248)
     note over C,K: Stage 6. Retrospective — fixing the process and the documents
-    C->>K: the retrospective skill
-    K-->>C: five questions about how the work went, each answered with a count
-    C->>C: answer them: what was rebuilt, what ran for nothing — each a number, not an impression
-    C->>K: land a new rule in the skills, so the mistake cannot repeat
-    opt the lesson changes the flow itself, not just a rule inside a skill
-        C->>C: redraw this very diagram, and keep the evidence that forced it for the closing report
+    opt something was rebuilt, or a gate ran twice, or an agent was paid for nothing
+        C->>K: the retrospective skill
+        K-->>C: five questions about how the work went, each answered with a count
+        C->>C: answer them: what was rebuilt, what ran for nothing — each a number, not an impression
+        C->>K: land a new rule in the skills, so the mistake cannot repeat
+        opt the lesson changes the flow itself, not just a rule inside a skill
+            C->>C: redraw this very diagram, and keep the evidence that forced it for the closing report
+        end
+        C->>C: save the takeaway to persistent memory — it outlives this session
     end
-    C->>C: save the takeaway to persistent memory — it outlives this session
     C->>K: the write-a-doc skill
     K-->>C: every fact has one home document, and CLAUDE.md has a line budget
     C->>C: update README, PLAN and whatever else the phase owes
@@ -193,18 +203,22 @@ sequenceDiagram
         C->>C: fix and push again
     else green
         G-->>C: a green check on the commit
-        C->>C: npm version with the release message
-        C->>C: the pre-push hook runs npm run check:release — a red tag cannot leave the machine
-        C->>G: the tag is pushed
-        C->>U: a chat message: the release is cut — the version, and what it changes
+        alt the phase changed what a player or the operator gets
+            C->>C: npm version with the release message
+            C->>C: the pre-push hook runs npm run check:release — a red tag cannot leave the machine
+            C->>G: the tag is pushed
+            C->>U: a chat message: the release is cut — the version, and what it changes
+            G->>G: CI repeats the full battery on a clean clone — the second opinion
+            note right of V: the server does not wait for CI — the local hook is the gate
+            V->>G: asks every five minutes whether a new tag appeared
+            G-->>V: the newest release tag
+            V->>V: installs it — npm ci and a service restart, a failed install rolling back on its own
+        else it changed only the tooling, the documents or this process
+            C->>U: a chat message: it is on main and the next tag carries it — no restart bought nothing
+        end
         opt this diagram was redrawn
             C->>U: the work is done, but the flow was not optimal — what changed here, and the numbers that forced it
         end
-        G->>G: CI repeats the full battery on a clean clone — the second opinion
-        note right of V: the server does not wait for CI — the local hook is the gate
-        V->>G: asks every five minutes whether a new tag appeared
-        G-->>V: the newest release tag
-        V->>V: installs it — npm ci and a service restart, a failed install rolling back on its own
     end
     end
 
@@ -221,7 +235,7 @@ sequenceDiagram
         loop for each finding
             C->>C: check it myself before believing it — a confident agent is not evidence
             alt worth doing now
-                C->>C: it becomes the next phase, and that phase owes all seven gates
+                C->>C: it becomes the next phase, and that phase owes every gate its own diff opens
             else not now
                 C->>C: record it in TECH-DEBT.md with its trigger, or in persistent memory when the lesson outlives the code
             end

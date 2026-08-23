@@ -95,17 +95,24 @@ it survived the redraw that caused it, so the guard is mechanical now: `docs:che
 follows each errand from Claude Code to whoever hands work back, and fails when
 that is not the participant the errand went to.
 
-Both halves are enforced, because both were reasoned about once and would
-otherwise be forgotten by the phase that most needs them. A `PostToolUse` hook
-says the obligation out loud the moment the file is edited, and
-`.githooks/commit-msg` refuses the commit unless the message carries the
-`Flow:` paragraph **and** the commit carries the thing the moved step stands on
-— a skill, `CLAUDE.md`, a command, a hook, the CI. A drawing that changes while
-nothing it draws does has stopped describing this project and started
-describing an intention. `npm run docs:check` guards the same seam from the
-other side: every skill and every `npm run` the drawing names has to exist, every
-agent in `.claude/agents/` has to be sent an errand by name, and every errand has to
-be answered by the participant it was given to.
+Both halves are enforced, because both would otherwise be forgotten by the phase that
+most needs them: a `PostToolUse` hook says the obligation out loud the moment the file
+is edited, `.githooks/commit-msg` refuses a commit whose message lacks the `Flow:`
+paragraph or whose diff moves a step while carrying nothing that step stands on, and
+`npm run docs:check` holds the drawing's cast, its skills, its commands, its lanes and
+its blocks to what the repository actually contains. Every one of those failures
+explains itself when it fires, which is why none of them is explained here.
+
+## Every lesson landed displaces one
+
+The line budgets in `docs:check` supply the pressure; they cannot say what goes. Three
+kinds are safe to drop, and only these: a rule that has since become a lint rule or a
+`docs:check`, because the failure message carries it now and prose beside a check is a
+second copy that will drift; a rule about a situation that can no longer arise, proved
+by a grep rather than remembered; and two rules with one cause, merged into the general
+one with the sharper incident kept as its proof. **Never drop a rule for being quiet.**
+One that prevents a rare, expensive failure is indistinguishable from one that stopped
+mattering, and the difference only shows after it is gone.
 
 ## The output is a diff, not a paragraph
 

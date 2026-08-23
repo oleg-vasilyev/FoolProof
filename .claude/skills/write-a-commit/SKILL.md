@@ -40,9 +40,11 @@ that still shows a regression at a glance:
 ```
 Gates: check:phase green — <N> tests in <M> files, coverage <st>/<br>/<fn>/<ln>,
 mutation <score>% over <the diff | everything>, e2e <N> cases in <M> files.
+Copy: <what was read and when, or why nothing was>.
 Gallery: <one specific claim about what was seen, or why it stayed shut>.
 Review: <N> findings, <their fate in a clause>.
-Retro: <the default that changed, or plainly that none did>.
+Retro: <the default that changed, or that the phase went straight and had nothing to count>.
+Tag: <the version, or that this rides the next one and why>.
 ```
 
 Four rules inside it. Every gate is named even when skipped — a skipped gate
@@ -69,6 +71,10 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
 The model name in the trailer is whichever Claude actually wrote the commit.
 
 ## The release
+
+**Not every phase gets one** — `finish-phase` has the test and the reason. When it
+says no, the phase still ends in the working commit above; there is simply no `npm
+version` after it, and the `Tag:` line says which tag will carry the work instead.
 
 A release starts from a green `main`: after pushing the phase commits, wait for
 the push CI (`gh run watch --exit-status`, about a minute) and fix a red

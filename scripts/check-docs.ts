@@ -26,6 +26,8 @@ const NOTHING = 0;
 
 const FIRST_GROUP = 1;
 
+const SECOND_GROUP = 2;
+
 const ONE_COMMAND = 1;
 
 const ROOMY_ENOUGH = 9;
@@ -127,17 +129,16 @@ const requiredKeysOutOfStep = (): readonly string[] => {
     );
 };
 
-const overBudget = (): readonly string[] => {
-  const lines = read(SESSION_DOCUMENT).split("\n").length;
+const linesIn = (document: string): number => read(document).split(A_LINE).length;
 
-  if (lines <= SESSION_LINE_BUDGET) {
-    return [];
-  }
-
-  return [
-    `${SESSION_DOCUMENT}: ${String(lines)} lines, budget is ${String(SESSION_LINE_BUDGET)} — move a paragraph into a skill rather than raising the number`,
-  ];
-};
+const overBudget = (): readonly string[] =>
+  linesIn(SESSION_DOCUMENT) <= SESSION_LINE_BUDGET
+    ? []
+    : [
+        `${SESSION_DOCUMENT}: ${String(linesIn(SESSION_DOCUMENT))} lines, budget is ` +
+          `${String(SESSION_LINE_BUDGET)} — move a paragraph into a skill rather than ` +
+          `raising the number`,
+      ];
 
 const sourceFilesIn = (folder: string): readonly string[] =>
   readdirSync(folder, { withFileTypes: true })
@@ -540,7 +541,7 @@ const A_MARKDOWN_FILE = /\.md$/;
 
 const A_NAMED_AGENT = /the ([a-z][a-z0-9-]*[a-z0-9]) agent/g;
 
-const A_NAMED_SKILL = /the ([a-z][a-z0-9-]*[a-z0-9]) skill/g;
+const A_NAMED_SKILL = /the `?([a-z][a-z0-9-]*[a-z0-9])`? skill/g;
 
 const A_NAMED_COMMAND = /npm run ([a-z][a-z:-]*[a-z])/g;
 
@@ -556,6 +557,59 @@ const A_NUMBER = /\d+/g;
 const NEXT_MARK = 1;
 
 const skillFile = (skill: string): string => join(SKILLS_FOLDER, skill, "SKILL.md");
+
+const SKILL_BUDGETS: Readonly<Record<string, number>> = {
+  "add-a-feature": 150,
+  "add-repository-method": 80,
+  "finish-phase": 700,
+  "refresh-the-pictures": 240,
+  retrospective: 140,
+  "update-the-design-page": 70,
+  "write-a-commit": 120,
+  "write-a-doc": 160,
+  "write-a-spec": 480,
+  "write-an-e2e-scenario": 140,
+};
+
+const skillsOverBudget = (): readonly string[] => {
+  const installed = readdirSync(SKILLS_FOLDER);
+
+  return [
+    ...Object.keys(SKILL_BUDGETS)
+      .filter((skill) => !installed.includes(skill))
+      .map(
+        (skill) =>
+          `scripts/check-docs.ts: budgets a "${skill}" skill that is not in ` +
+          `${SKILLS_FOLDER} — a row nothing can fail reads exactly like a row that ` +
+          `never complains, so delete it with the skill`
+      ),
+    ...installed.flatMap((skill) => {
+      const budget = SKILL_BUDGETS[skill];
+
+      if (budget === undefined) {
+        return [
+          `${skillFile(skill)}: no line budget — a skill is read whole by the job that ` +
+            `loads it, so every one of them has a number here; add a row at the length ` +
+            `this skill is now`,
+        ];
+      }
+
+      if (!existsSync(skillFile(skill))) {
+        return [`${skillFile(skill)}: a skill folder with no SKILL.md in it`];
+      }
+
+      const lines = linesIn(skillFile(skill));
+
+      return lines <= budget
+        ? []
+        : [
+            `${skillFile(skill)}: ${String(lines)} lines, budget is ${String(budget)} — ` +
+              `move a rule into the skill loaded when it applies, or compress an incident ` +
+              `into the rule it bought, rather than raising the number`,
+          ];
+    }),
+  ];
+};
 
 const skillsByStage = (drawing: string): readonly (readonly [string, number])[] => {
   const marks = [...drawing.matchAll(A_STAGE)];
@@ -643,6 +697,14 @@ const flowOutOfStep = (): readonly string[] => {
         (command) =>
           `${FLOW_DOCUMENT}: draws "npm run ${command}", which package.json does not have`
       ),
+    ...[...installed]
+      .filter((skill) => !namesIn(drawing, A_NAMED_SKILL).includes(skill))
+      .map(
+        (skill) =>
+          `${FLOW_DOCUMENT}: never reaches for the "${skill}" skill — the drawing is the ` +
+          `only description of when a skill applies, so one missing from it is a rule ` +
+          `nobody arrives at`
+      ),
   ];
 };
 
@@ -711,6 +773,100 @@ const flowRepliesLeaveTheLaneTheyWereAskedOf = (): readonly string[] => {
   return drawing
     .split(A_LINE)
     .reduce((errand, line) => afterFlowLine(errand, line, owner), NOTHING_ASKED).complaints;
+};
+
+const A_DECLARED_LANE = /^\s*(?:participant|actor)\s+([A-Za-z][A-Za-z0-9]*)\s+as\s/;
+
+const AN_ARROW = /^\s*([A-Za-z][A-Za-z0-9]*)\s*-{1,2}[>)x]{1,2}\s*[+-]?([A-Za-z][A-Za-z0-9]*)\s*:/;
+
+const A_NOTE = /^\s*note\s+(?:over|right of|left of)\s+([^:]+):/i;
+
+const AN_OPENING_BLOCK = /^\s*(?:rect|opt|alt|loop|par|critical|break)\b/;
+
+const A_CLOSING_BLOCK = /^\s*end\s*$/;
+
+const A_COLOURED_BAND = /^\s*rect\b/;
+
+const A_STAGE_NOTE = /^\s*note over [^:]+: Stage \d+\./;
+
+const lanesUsedIn = (line: string): readonly string[] => {
+  const arrow = AN_ARROW.exec(line);
+
+  if (arrow !== null) {
+    return [arrow[FIRST_GROUP] ?? "", arrow[SECOND_GROUP] ?? ""];
+  }
+
+  const note = A_NOTE.exec(line);
+
+  return note === null ? [] : (note[FIRST_GROUP] ?? "").split(",").map((lane) => lane.trim());
+};
+
+const drawingIn = (document: string): string =>
+  [...read(document).matchAll(A_MERMAID_FENCE)].map((fence) => fence[FIRST_GROUP] ?? "").join("");
+
+const depthsWalking = (lines: readonly string[]): readonly number[] =>
+  lines.reduce<readonly number[]>((depths, line) => {
+    const was = depths[depths.length - ONE_COMMAND] ?? NOTHING;
+
+    if (AN_OPENING_BLOCK.test(line)) {
+      return [...depths, was + ONE_COMMAND];
+    }
+
+    return A_CLOSING_BLOCK.test(line) ? [...depths, was - ONE_COMMAND] : depths;
+  }, []);
+
+const flowWouldNotRender = (): readonly string[] => {
+  const lines = drawingIn(FLOW_DOCUMENT).split(A_LINE);
+  const declared = new Set(
+    lines.flatMap((line) => {
+      const lane = A_DECLARED_LANE.exec(line)?.[FIRST_GROUP];
+
+      return lane === undefined ? [] : [lane];
+    })
+  );
+
+  const opened = lines.filter((line) => AN_OPENING_BLOCK.test(line)).length;
+  const closed = lines.filter((line) => A_CLOSING_BLOCK.test(line)).length;
+
+  const undeclared = lines
+    .flatMap((line) => lanesUsedIn(line).map((lane) => ({ lane, line })))
+    .filter((use) => use.lane.length > NOTHING && !declared.has(use.lane))
+    .map(
+      (use) =>
+        `${FLOW_DOCUMENT}: uses a lane called "${use.lane}" that no participant declares — ` +
+        `mermaid invents one silently and draws it at the right-hand edge, so the page ` +
+        `renders a drawing nobody wrote — ${use.line.trim()}`
+    );
+
+  const walked = depthsWalking(lines);
+  const bands = lines.filter((line) => A_COLOURED_BAND.test(line)).length;
+  const stages = lines.filter((line) => A_STAGE_NOTE.test(line)).length;
+
+  return [
+    ...undeclared,
+    ...(opened === closed
+      ? []
+      : [
+          `${FLOW_DOCUMENT}: ${String(opened)} blocks opened and ${String(closed)} closed — ` +
+            `an unbalanced rect, opt, alt, loop or par prints a parse error where the drawing ` +
+            `should be, and nothing else here reads the diagram as a diagram`,
+        ]),
+    ...(bands === stages
+      ? []
+      : [
+          `${FLOW_DOCUMENT}: ${String(bands)} coloured bands and ${String(stages)} stage ` +
+            `notes — a band closed early and reopened later keeps the "end" count balanced ` +
+            `and still splits one stage across two, so the count of bands is what says the ` +
+            `drawing still has the shape it claims`,
+        ]),
+    ...(walked.some((depth) => depth < NOTHING)
+      ? [
+          `${FLOW_DOCUMENT}: an "end" closes a block that was never opened — the counts can ` +
+            `still balance when one block is closed early and another late, so the drawing ` +
+            `would render a structure nobody wrote`,
+        ]
+      : []),
+  ];
 };
 
 const A_MERMAID_FENCE = /```mermaid\n([\s\S]*?)```/g;
@@ -800,6 +956,7 @@ const complaints = [
   ...brokenLinks(),
   ...flowOutOfStep(),
   ...flowRepliesLeaveTheLaneTheyWereAskedOf(),
+  ...flowWouldNotRender(),
   ...mermaidLinesCarryingASeparator(),
   ...stagesOutOfStep(),
   ...unreachableHelp(),
@@ -816,6 +973,7 @@ const complaints = [
   ...imagesOutOfStep(),
   ...requiredKeysOutOfStep(),
   ...overBudget(),
+  ...skillsOverBudget(),
 ];
 
 for (const complaint of complaints) {

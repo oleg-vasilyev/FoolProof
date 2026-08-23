@@ -1,6 +1,6 @@
 ---
 name: copy-reader
-description: Reads a feature's copy tables the way a player reads a finished sentence — every line, in both languages, with real values filled in. Says which ones are not something a person would say, and which ones mean nothing without the code. Use whenever a phase touches a copy table, and as gate 6b of finish-phase alongside the poster gallery.
+description: Reads a feature's copy tables the way a player reads a finished sentence — every line, in both languages, with real values filled in. Says which ones are not something a person would say, and which ones mean nothing without the code. Use the moment a copy table is written, before anything is built on it; on the inventory of lines a mockup puts on a poster, before the owner is asked to approve it; and at the end of a phase over whatever changed since.
 tools: Read, Grep, Glob, Bash
 model: fable
 ---

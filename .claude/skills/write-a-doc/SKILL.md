@@ -84,18 +84,15 @@ Two consequences worth spelling out, because both have been got wrong:
 
 ## A drawing is prose that can fail to be a drawing
 
-A mermaid fence is the one thing a document holds that either renders or does not,
-with nothing in between — and a broken one shows a parse error where the picture
-was, so the reader gets less than if the fence had never been written. **Never put
-a semicolon in a message**: mermaid reads it as the end of a statement, so the rest
-of the sentence parses as a new one and the whole diagram is lost. `docs:check`
-refuses one now, because the drawing in `DEVELOPMENT-FLOW.md` spent two days as an
-error message while every other check on that file stayed green — they read what it
-names, and none of them asked whether it draws.
+A mermaid fence either renders or it does not, and a broken one shows a parse error
+where the picture was — less than if the fence had never been written. `docs:check`
+now refuses the three failures it can see, each complaint carrying its own reason: a
+semicolon inside a message, a block nobody closed, a lane no participant declares.
 
-When a fence will not render, **ask the platform, not the file**: GitHub prints the
-parse error with a line and a caret, which names the character. Reading the source
-starts with whatever looks most exotic, and the exotic part is usually fine.
+What it cannot see is everything else, so when a fence will not render, **ask the
+platform, not the file**: GitHub prints the parse error with a line and a caret, which
+names the character. Reading the source instead starts with whatever looks most
+exotic, and the exotic part is usually fine.
 
 ## The script table in `README.md`
 
@@ -141,11 +138,14 @@ it is the same disease: a number that was measured once and reads as a promise.
 
 ## The budget is the point
 
-`CLAUDE.md` has a **line budget**, enforced by `docs:check`. It exists so that adding
-to it costs something: when a new rule pushes the file over, the fix is to move an
-old paragraph into the skill where it belongs, not to raise the number. Raising it is
-allowed exactly once per argument that the whole file is needed before every session
-— and that argument has lost twice.
+`CLAUDE.md` **and every skill** carry a line budget, enforced by `docs:check`; a skill
+with no row in the table fails the gate too, so a new one cannot escape by arriving
+after the mechanism. They exist so that adding costs something: when a new rule pushes
+a file over, the fix is to move an old paragraph into the file loaded when it applies,
+not to raise the number — and which paragraph may go at all is the `retrospective`
+skill's, which has the three safe cases. Raising a number is allowed exactly once per
+argument that the whole file is needed every time it is read, and that argument has
+lost twice.
 
 ## What overlap is allowed
 

@@ -152,7 +152,7 @@ script nobody wrote, and a script whose cases no list ever approved. So an edge 
 owner looked at cannot quietly stop being drawn.
 
 Four rules the list inherits, all already paid for; the last three are stated again in
-gate 6 of the `finish-phase` skill, which you cannot load, so keep the two wordings in
+the `refresh-the-pictures` skill, which you cannot load, so keep the two wordings in
 step if you ever change one — and recount them when you do.
 
 **A case you cannot construct is a finding, not a panel you quietly drop** — if the
