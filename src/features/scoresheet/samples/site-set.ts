@@ -7,11 +7,9 @@ import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
 import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
 import type { CareerHistory, PlayerColumn, SeriesChronology } from "#shared/repository/repository-contract.ts";
-import { BOT_HANDLE } from "./bot-handle.ts";
-import { SAMPLE_SUBJECT, sampleCareer, sampleEvening } from "./mockups.ts";
+import { BOT_HANDLE } from "#scoresheet/samples/sample-handle.ts";
+import { SAMPLE_SUBJECT, sampleCareer, sampleEvening } from "#scoresheet/samples/sample-table.ts";
 
-
-export const SITE_POSTER_DIR = "docs/posters";
 
 const LATIN_NAMES = ["Oleg", "Anya", "Roma", "Dima", "Veronika"];
 
@@ -40,7 +38,7 @@ const cardIn = (locale: Locale, evening: SeriesChronology, career: CareerHistory
   const card = careerCard(career, SAMPLE_SUBJECT);
 
   if (card === null) {
-    throw new Error("the sample career has no games — check NAMES and EXIT_ORDERS in mockups.ts");
+    throw new Error("the sample career has no games — check NAMES and EXIT_ORDERS in sample-table.ts");
   }
 
   const column = colourColumnOf(evening, career.players, SAMPLE_SUBJECT);
@@ -56,7 +54,7 @@ const pairIn = (
   const honours = honoursFor(evening);
 
   if (honours === null) {
-    throw new Error("the sample evening earns no awards — lengthen EXIT_ORDERS in mockups.ts");
+    throw new Error("the sample evening earns no awards — lengthen EXIT_ORDERS in sample-table.ts");
   }
 
   return {

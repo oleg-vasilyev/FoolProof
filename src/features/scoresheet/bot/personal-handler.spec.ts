@@ -57,7 +57,7 @@ vi.mock("#scoresheet/render/personal/personal-callback-codec.ts", () => ({
   decodePersonalCallback: (data: unknown) => decodePersonalCallbackSpy(data),
 }));
 
-vi.mock("#scoresheet/bot/rasterizer.ts", () => ({
+vi.mock("#shared/drawing/rasterize.ts", () => ({
   rasterize: (svg: string) => rasterizeSpy(svg),
 }));
 

@@ -1,19 +1,18 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
-import { posters, type Posters } from "./mockups.ts";
+import { drawnByName } from "./feature-drawings.ts";
 
 
 const A_NAMED_SLOT = /(<div class="poster" data-poster="([a-z]+)">)([\s\S]*?)(<\/div>)/g;
 
-const isPosterName = (name: string, drawn: Posters): name is keyof Posters =>
+const isPosterName = (name: string, drawn: Readonly<Record<string, string>>): boolean =>
   Object.hasOwn(drawn, name);
 
 const refuse = (why: string): never => {
   throw new Error(`${why} — the page cannot be spliced, fix it by hand and try again`);
 };
 
-export const withFreshPosters = (page: string): string => {
-  const drawn = posters();
+const withFreshPosters = (page: string, drawn: Readonly<Record<string, string>>): string => {
   const filled = new Set<string>();
 
   const spliced = page.replace(
@@ -44,7 +43,7 @@ export const withFreshPosters = (page: string): string => {
 
 export const DESIGN_PAGE_SYNC = "docs/mockups/design-page.sync";
 
-export const fingerprintOf = (drawn: Posters): string =>
+export const fingerprintOf = (drawn: Readonly<Record<string, string>>): string =>
   createHash("sha256")
     .update(
       Object.entries(drawn)
@@ -54,13 +53,14 @@ export const fingerprintOf = (drawn: Posters): string =>
     )
     .digest("hex");
 
-export const refreshDesignPage = (from: string, to: string): void => {
-  const spliced = withFreshPosters(readFileSync(from, "utf8"));
+export const refreshDesignPage = async (from: string, to: string): Promise<void> => {
+  const drawn = await drawnByName((offered) => offered.mockups());
+  const spliced = withFreshPosters(readFileSync(from, "utf8"), drawn);
 
   writeFileSync(to, spliced, "utf8");
   writeFileSync(
     DESIGN_PAGE_SYNC,
-    `mockups: ${fingerprintOf(posters())}\n`,
+    `mockups: ${fingerprintOf(drawn)}\n`,
     "utf8"
   );
 

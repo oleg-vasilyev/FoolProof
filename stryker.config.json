@@ -24,7 +24,12 @@
     "!src/**/*.stub.ts",
     "!src/**/sqlite-connection.ts",
     "!src/**/repository-instance.ts",
-    "!src/**/repository-contract.ts"
+    "!src/**/repository-contract.ts",
+    "!src/**/sample-table.ts",
+    "!src/**/sample-handle.ts",
+    "!src/**/gallery-edges.ts",
+    "!src/**/career-edges.ts",
+    "!src/**/site-set.ts"
   ],
   "thresholds": {
     "high": 90,

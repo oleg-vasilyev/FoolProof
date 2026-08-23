@@ -61,11 +61,10 @@ no title for.
 **The corollary bites: no logic may live in a data table.** Because `copy.en.ts` is
 deliberately never mocked, a decision taken inside it is asserted against itself and
 is therefore **unkillable** — a spec comparing `report` to `copy.problemTally(…)`
-proves nothing about either. This has already happened: a pluraliser
-(`1 warning` / `2 warnings`) put in `diagnostics/copy.en.ts` left five surviving
-mutants until it moved to `render/human-units.ts`, where it is a unit with its own
-cases and the copy function takes the finished fragment. A count still belongs behind
-a copy function — the *choice of word* belongs in `render/`.
+proves nothing about either. A pluraliser put in `diagnostics/copy.en.ts` left five
+surviving mutants until it moved to `render/human-units.ts`; `docs:check` now fails
+that shape on sight. A count still belongs behind a copy function — the *choice of
+word* belongs in `render/`.
 
 **And the same trap one step out: an expected value read from the table under test.**
 `toHaveBeenCalledWith(copy.locale, RATE_LIMIT, copy.limitForms)` looks like an
@@ -98,23 +97,21 @@ file around them got away with.
 It is not a weaker substitute for the real thing. It is often the only way to
 assert what the file is actually for:
 
-- `feature-installer.ts` exists to register routes in an order that matters. On a mocked
-  `Bot` that is asserted literally — `bot.command` was called before
+- `feature-installer.ts` exists to register routes in an order that matters. On a
+  mocked `Bot` that is asserted literally — `bot.command` was called before
   `bot.on("message:text")` — instead of inferred from whether a `/help` update
   happened to produce a reply.
-- `card-message.ts` must route user data through `escapeHtml`. With the escaper mocked,
-  that is asserted as a fact about `card-message.ts`, not guessed from spotting `&amp;`
-  in the output.
+- `card-message.ts` must route user data through `escapeHtml`. With the escaper
+  mocked, that is a fact about `card-message.ts`, not a guess from spotting `&amp;`.
 
 ## "It appears in the output" is not an assertion about where it went
 
 A spec asserting that every number an object carries turns up *somewhere* in the
-rendered sentence cannot see two of them swapped. That is not a hypothetical: the
-awards sheet spent a release claiming somebody opened three games and went out first
-in four of them, because the render layer handed the copy table its two counts the
-wrong way round and every one of them was still present in the result. Types agree —
-both are numbers — and Stryker does not mutate argument order, so nothing anywhere
-could go red.
+rendered sentence cannot see two of them swapped. The awards sheet spent a release
+claiming somebody opened three games and went out first in four, because `render/`
+handed the copy table its two counts the wrong way round and both were still present
+in the result. Types agree — both are numbers — and Stryker does not mutate argument
+order, so nothing could go red.
 
 **Whenever a function passes two values of the same type into something positional,
 one case must assert the finished result against that call with the roles spelled
@@ -210,11 +207,9 @@ The rule exists because inline fakes had already failed twice, both silently:
 
 **Open the stub before writing against it.** Its verbs are not the ones you remember
 from somewhere else: a unit's `ContextStub` says `callbackTap`, `chatlessTap`,
-`lastReply` and `lastEdit`, while the e2e harness's `Chat` — a different object, for a
-different world — says `tap`, `tapRaw` and `lastAnswer`. Writing a spec from memory of
-the other one produces a file that compiles and fails on every case with
-`ctx.tap is not a function`, which is two round trips to learn something one `grep` for
-`public ` would have said.
+`lastReply` and `lastEdit`, while the e2e harness's `Chat` — a different object, for
+a different world — says `tap`, `tapRaw` and `lastAnswer`. Writing from memory of the
+other one costs two round trips to learn what one `grep` for `public ` would say.
 
 A stub also fakes a **collaborator handed to the subject** — `Logger`,
 `Repository`, `Listeners`. Same file, one class per role: `logger.stub.ts` holds
@@ -270,9 +265,8 @@ That case is the whole point: it turns "somebody forgot to test the new member"
 into a red test instead of a silent gap. Give each sample **values unique to it**
 and add a case asserting the outputs are all distinct — otherwise a `switch` arm
 falling through to its neighbour still produces something plausible and survives.
-Growing the awards from thirteen to thirty-eight is what made this a rule: the
-thirteen hand-written cases would have become thirty-eight, and the four that were
-missing would not have been visible.
+Growing the awards from thirteen to thirty-eight made this a rule: four members
+arrived untested and nothing said so.
 
 ## Shape of the file
 
@@ -320,7 +314,7 @@ Name it `*.integration.spec.ts`, so nobody mistakes it for the default, and put
 it beside the code like every other spec. `npm run test:unit` and
 `npm run test:integration` run them separately; `npm test` runs both.
 
-Six exist. Three cover the contracts:
+Seven exist. Three cover the contracts:
 
 - **`src/feature-installer.integration.spec.ts`** drives a real grammY `Bot`
   through `bot.handleUpdate()`, intercepting the network at
@@ -349,32 +343,40 @@ outside world misbehave:
   `BOT_START_ATTEMPT` and `BOT_PREVIOUS_EXIT` reaching the next child, which is
   what `/status` reports. Nothing else supervises a real process: `e2e/` spawns
   `main.ts` directly, so the restart path production runs on has no other cover.
-- **`scoresheet/bot/rasterizer.integration.spec.ts`** rasterizes real render output
-  with the shipped fonts. A missing font makes resvg draw a **blank page rather
-  than fail**, so the assertion is that the raster differs from the same SVG with
-  its `<text>` stripped — and separately for a Cyrillic word, since half of what
-  this bot writes is Russian. It also pins that `renderAsync` really **hands the
-  event loop back** — a `setImmediate` registered after the call has to run before
-  the promise settles. A mocked version of that asserts its own fake resolving, so
-  the case can only live here.
+- **`scoresheet/bot/poster-rasterizing.integration.spec.ts`** rasterizes real render
+  output with the shipped fonts. A missing font makes resvg draw a **blank page
+  rather than fail**, so the assertion is that the raster differs from the same SVG
+  with its `<text>` stripped — and again for a Cyrillic word, since half of what this
+  bot writes is Russian. It also pins that `renderAsync` really **hands the event
+  loop back**: a `setImmediate` registered after the call runs before the promise
+  settles, which a mocked version could only assert of its own fake.
 
-One covers a chain:
+Two cover a chain:
 
 - **`scoresheet/scoresheet-chain.integration.spec.ts`** plays an evening into a real
   database and reads the percentages back out of the **SVG string** — before
   rasterizing, while the numbers are still text. Every joint from `seriesChronology`
   to the legend is mocked in the units, and a PNG is opaque to e2e, so this is the
   only place the arithmetic of an evening is checked end to end.
+- **`scoresheet/samples/sample-reachability.integration.spec.ts`** holds every state
+  a `samples/` folder draws against the product's own limits — table size, name
+  length, a finish the card could record, a starter who sat down. The real builders
+  run on purpose: mocked, there is no fixture left to judge. **A `samples/` layer
+  owes this spec**, because a case once seated thirteen at a table capped at ten and
+  was drawn for months. Assert properties, never the data: a spec restating a
+  fixture is the compared-against-itself trap again — which is also why
+  `stryker.config.json` mutates nothing in `samples/` but `contact-sheet.ts`. A
+  changed fixture is a different sample, not a broken one, and the only way to kill
+  its mutants is to write the data down twice.
 
 Four things this tier gets wrong, all paid for:
 
 - **An integration spec is still bound by the layering.** The chain spec first
-  arranged its evening with `db.prepare("UPDATE games SET starter_player_id …")` —
-  a second copy of the schema inside a feature folder, writing by a path production
-  never takes. Arrange through the contract (`repo.updateCard(…)`, and a phase
-  crosses it as a plain string), and isolate cases with a **different `chatId`**
-  rather than a `DELETE`. No lint zone catches this: a feature zone bans other
-  features, not SQL.
+  arranged its evening with `db.prepare("UPDATE games SET starter_player_id …")` — a
+  second copy of the schema inside a feature folder, written by a path production
+  never takes. Arrange through the contract, and isolate cases with a **different
+  `chatId`** rather than a `DELETE`. No lint zone catches this: a feature zone bans
+  other features, not SQL.
 - **Select by something the subject deliberately emits.** `"50%"` is a legend entry
   *and* an axis label on the share chart, so an `indexOf` picked the wrong one. The
   fix was to take the percent immediately followed by a player's name.
@@ -393,14 +395,14 @@ One trap worth keeping: `bot.catch` only participates in `bot.start()`.
 
 `vitest run` does not typecheck. A spec can pass every case while asserting
 something the compiler would refuse — most often a property read off a
-discriminated union without narrowing it, which is exactly what a fact or an
-award or a cell is. `expect(theBogey(...)?.duels)` runs happily and fails
-`tsc`, because `duels` lives on one member of twenty.
+discriminated union without narrowing it, which is exactly what a fact or an award
+or a cell is: `expect(theBogey(...)?.duels)` runs happily and fails `tsc`, because
+`duels` lives on one member of twenty.
 
-So **run `npx tsc --noEmit` after editing a spec, not just the spec itself.**
-The phase gate catches it either way; the difference is whether you find out in
-one second or after an eight-minute battery. Comparing the whole returned object
-with `toEqual` avoids the narrowing question altogether and asserts more.
+So **run `npx tsc --noEmit` after editing a spec, not just the spec itself.** The
+phase gate catches it either way; the difference is one second against an
+eight-minute battery. Comparing the whole returned object with `toEqual` avoids the
+narrowing question altogether and asserts more.
 
 ## Reading a survivor the mutation gate left alive
 
@@ -413,11 +415,10 @@ the test before it, and an assertion whose subject is something *missing*. The r
   prevent a bug a player could see.** Above roughly 95% the survivors are mostly
   equivalent mutants and type-narrowing guards, and the threshold is 85. One left
   alive on purpose is worth a sentence in the commit message, not another two rounds.
-- **Read the survivor's own line before believing it is a gap.** Two adjacent
-  ternaries in one reducer differ by one word, and a line number quoted from memory
-  cost a whole extra run: the rule everyone was worried about was already killed, and
-  the survivor beside it was equivalent. Print the mutant's line and its replacement
-  from `reports/mutation/mutation.json`, never the line you remember.
+- **Read the survivor's own line before believing it is a gap.** A line number quoted
+  from memory cost a whole extra run: the rule everyone worried about was already
+  killed and the survivor beside it was equivalent. Print the mutant and its
+  replacement from `reports/mutation/mutation.json`, never the line you remember.
 - **An arithmetic mutant on a nullable accumulator is usually equivalent.** `sum +
   null` is `sum + 0` in JavaScript, so *add the value even when it is absent* changes
   nothing observable. Recognising that is cheaper than writing the test that cannot

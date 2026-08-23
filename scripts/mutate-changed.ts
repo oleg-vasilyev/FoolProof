@@ -1,15 +1,20 @@
 import { execFileSync, spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 
 
 const BASELINE = process.env.MUTATE_AGAINST ?? "origin/main";
 
 const STRYKER = "node_modules/@stryker-mutator/core/bin/stryker.js";
 
+const CONFIG = "stryker.config.json";
+
 const NOTHING = 0;
 
-const MUTABLE = /^src\/.*\.ts$/;
+const A_SOURCE_FILE = /^src\/.*\.ts$/;
 
-const NOT_MUTABLE = /\.(spec|stub)\.ts$|sqlite-connection\.ts$|repository-(instance|contract)\.ts$/;
+const A_TEST_FILE = /\.(spec|stub)\.ts$/;
+
+const AN_EXCLUSION = "!";
 
 const gitLines = (...args: readonly string[]): readonly string[] =>
   execFileSync("git", args, { encoding: "utf8" })
@@ -23,8 +28,15 @@ const changedFiles = (): readonly string[] => [
 ];
 
 const mutableChanges = (): readonly string[] => [
-  ...new Set(changedFiles().filter((file) => MUTABLE.test(file) && !NOT_MUTABLE.test(file))),
+  ...new Set(
+    changedFiles().filter((file) => A_SOURCE_FILE.test(file) && !A_TEST_FILE.test(file))
+  ),
 ];
+
+const exclusions = (): readonly string[] =>
+  (JSON.parse(readFileSync(CONFIG, "utf8")) as { mutate: readonly string[] }).mutate.filter(
+    (pattern) => pattern.startsWith(AN_EXCLUSION)
+  );
 
 const run = (): number => {
   const files = mutableChanges();
@@ -40,9 +52,11 @@ const run = (): number => {
     console.log(`  ${file}`);
   }
 
-  const stryker = spawnSync(process.execPath, [STRYKER, "run", "--mutate", files.join(",")], {
-    stdio: "inherit",
-  });
+  const stryker = spawnSync(
+    process.execPath,
+    [STRYKER, "run", "--mutate", [...files, ...exclusions()].join(",")],
+    { stdio: "inherit" }
+  );
 
   return stryker.status ?? NOTHING;
 };

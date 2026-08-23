@@ -55,7 +55,7 @@ vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
 }));
 
-vi.mock("#scoresheet/bot/rasterizer.ts", () => ({
+vi.mock("#shared/drawing/rasterize.ts", () => ({
   rasterize: (svg: string) => rasterizeSpy(svg),
 }));
 

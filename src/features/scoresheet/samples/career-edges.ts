@@ -2,9 +2,10 @@ import { Locale } from "#shared/locale/locales.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { copyIn } from "#scoresheet/copy.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
-import { BOT_HANDLE } from "./bot-handle.ts";
+import { BOT_HANDLE } from "#scoresheet/samples/sample-handle.ts";
 import type { CareerGame, CareerHistory, Finalist } from "#shared/repository/repository-contract.ts";
-import type { Drawing } from "./gallery.ts";
+import type { Drawing } from "#shared/drawings/drawings-contract.ts";
+import { LONGEST_NAME } from "#shared/table/table-limits.ts";
 
 
 const CAREER_OPENED_ON = "2026-01-09";
@@ -147,7 +148,7 @@ const historyOf = (shown: CareerCase): CareerHistory => ({
 
 const SHORT_NAMES = ["Олег", "Аня", "Рома", "Дима", "Вероника", "Ким"];
 
-const THE_LONGEST_NAME = "Шжюмщ-Ащфыв".padEnd(32, "Ш");
+const THE_LONGEST_NAME = "Шжюмщ-Ащфыв".padEnd(LONGEST_NAME, "Ш");
 
 const A_LONG_BOGEY = "Александра-Константиновна";
 
@@ -301,5 +302,7 @@ const drawingOf = (shown: CareerCase): Drawing => {
     svg: renderPersonalCard(copyIn(shown.locale), card, SUBJECT_COLUMN, BOT_HANDLE),
   };
 };
+
+export const careerHistories = (): readonly CareerHistory[] => CAREERS.map(historyOf);
 
 export const personalCards = (): readonly Drawing[] => CAREERS.map(drawingOf);

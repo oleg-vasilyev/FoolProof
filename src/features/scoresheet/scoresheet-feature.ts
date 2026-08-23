@@ -10,7 +10,7 @@ import {
 } from "#scoresheet/bot/stats-handler.ts";
 import { onPersonal, onPersonalTap } from "#scoresheet/bot/personal-handler.ts";
 import { PERSONAL_TAPS } from "#scoresheet/render/personal/personal-callback-codec.ts";
-import { requireFonts } from "#scoresheet/bot/rasterizer.ts";
+import { requireFonts } from "#shared/fonts/font-files.ts";
 
 
 export interface ScoresheetDeps {

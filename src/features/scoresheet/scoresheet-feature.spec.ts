@@ -14,7 +14,7 @@ const onChronologySpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<
 
 const onAwardsSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
 
-vi.mock("#scoresheet/bot/rasterizer.ts", () => ({
+vi.mock("#shared/fonts/font-files.ts", () => ({
   requireFonts: () => requireFontsSpy(),
 }));
 

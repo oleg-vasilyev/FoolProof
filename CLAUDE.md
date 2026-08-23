@@ -46,11 +46,11 @@ behaviour and this file wins on style.
 
 That rule has needed enforcing twice, so it is enforced: `npm run docs:check` holds
 every document against the repository it describes — links, tables, the schema, the
-pictures, the flow drawing, and **a line budget on this file, on `TECH-DEBT.md` and on
-every skill**. Each complaint carries its own reason, which is why none is repeated
-here. The budget makes appending cost something: a new rule that pushes a file over
-displaces an old paragraph into the file loaded when it applies, and `retrospective`
-says which paragraphs may go. `write-a-doc` routes a fact to its file.
+pictures, the flow drawing, and **a line budget on this file, on `TECH-DEBT.md` and
+on every skill**. Each complaint carries its own reason, which is why none is
+repeated here. The budget makes appending cost something: a rule that pushes a file
+over displaces an older one into the file loaded when it applies. `write-a-doc`
+routes a fact to its home.
 
 ## Code style
 
@@ -70,11 +70,11 @@ Anything a machine can check is a lint rule, not a paragraph — see
   price of that — `repository/repository-contract.ts` reads worse in a path and
   better in a tab, and the tab wins. `index.ts` promises a re-export, so logic
   never goes in one.
-- **A name says what is inside, not what the file is about.** `evening.ts` was
-  specific and still told a reader nothing; it became `session-appearances.ts`,
-  which predicts the `Appearance` type and the per-player helpers actually in it.
-  The test is cold: shown only the basename, guess the exports. A topic passes the
-  first rule and fails this one, so both have to be asked.
+- **A name says what is inside, not what the file is about.** The test is cold:
+  shown only the basename, guess the exports. `evening.ts` was specific and still
+  failed it; `session-appearances.ts` predicts the `Appearance` type and the
+  per-player helpers actually in it. A topic passes the rule above and fails this
+  one, so both have to be asked.
 - **The same thing is called the same thing in every feature.** User copy is
   `copy.en.ts`, the entry point is `<feature>-feature.ts`, a stub for third-party
   code is named after that code (`grammy-api.stub.ts`). Two files named
@@ -96,16 +96,10 @@ Anything a machine can check is a lint rule, not a paragraph — see
   (`ABANDON_AFTER_MS`, `EDIT_DEBOUNCE_MS`); if it genuinely cannot, the explanation
   belongs in `PLAN.md`. Config files (`tsconfig.json`, `eslint.config.js`) are
   exempt — a non-obvious compiler flag has nowhere else to live.
-- **No `console.*` for app logging** — use the scoped logger. `LOG_LEVEL`
+- **No `console.*` for app logging** — take one from
+  `createLogger("scope")` in `#shared/logging/logger.ts`. `LOG_LEVEL`
   (debug|info|warn|error, default `info`) sets the threshold; raw `console.*` is for
   `scripts/` and for the logger itself.
-
-  ```ts
-  import { createLogger } from "#shared/logging/logger.ts";
-
-  const log = createLogger("scope");
-  log.info("...");
-  ```
 
 `strict: true` and **no `any`**. There is no build step: `tsconfig.json` mirrors how
 Node actually runs the code. `erasableSyntaxOnly` and `verbatimModuleSyntax` keep
@@ -130,10 +124,10 @@ chat's language. A module-level `import { copy }` pins the bot to one language.
 
 **A copy function interpolates; it never decides.** Choosing between `1 game` and
 `2 партии` is a `render/` job — the table holds `{ one, few, many }` and
-`shared/locale/plural-rules.ts` picks by the table's own `locale`. The reason is
-mechanical: specs leave copy tables real on purpose, so a decision made inside one is
-compared against itself and no test can catch it breaking — the `write-a-spec` skill
-has the five mutants that proved it.
+`shared/locale/plural-rules.ts` picks by the table's own `locale`. Specs leave copy
+tables real on purpose, so a decision made inside one is compared against itself and
+no test can catch it breaking; `write-a-spec` has the mutants that proved it, and
+`docs:check` now fails the shape on sight.
 
 Player names are user data, not copy. Matching normalises via Unicode NFC and lower
 case, plus `ё` → `е`, and the parser must not assume latin
@@ -143,12 +137,13 @@ case, plus `ё` → `е`, and the parser must not assume latin
 
 **A feature is a folder you can delete.** Removing `features/scoresheet/` must leave
 the rest compiling and passing, and adding a feature must not require editing
-another one. Deleting one was tested by deleting it: the only failures were in
-`main.spec.ts`, which is the one spec *supposed* to know the roster — and now also
-in `scripts/`, where the mockup tools draw the scoresheet's own posters and
-`docs:check` compares them. That second exception is deliberate and bounded: no lint
-zone fences `scripts/`, so it is kept honest here rather than by a rule. The
-procedure for adding one is the `add-a-feature` skill.
+another one. Deleting one was tested by deleting it, twice: the only failures are in
+`main.ts` and `main.spec.ts`, the composition root and the one spec *supposed* to
+know the roster. **Nothing in `scripts/` may name a feature** — the tooling asks
+what features offer through `shared/drawings/drawings-contract.ts` and finds them at
+run time, so a deleted folder simply stops being listed, and `docs:check` reports
+the pictures it left behind instead of failing to compile. The procedure for adding
+one is the `add-a-feature` skill.
 
 **The commands a feature declares are the list of its sub-features.** `scoresheet`
 declares `/stats`, `/stats_chronology` and `/stats_awards`, so it gives the player
@@ -178,10 +173,14 @@ src/
     language/           the /language screen a chat picks its language on
   shared/
     config/             reading the environment, and where the project root is
+    drawing/            turning one SVG string into pixels
+    drawings/           what a feature offers to be drawn, and by which tool
+    fonts/              the faces the posters are drawn in, and the refusal
     lifecycle/          draining the stops, restarting after a crash
     locale/             the language table, the plural rules, the chat's choice
     logging/            the scoped logger
     repository/         the connection, the contract, the SQL
+    table/              how many may sit down, and how long a name may be
     telegram/           context types, the feature contract, api retries and
                         what they cost, the client options pointing a run elsewhere
     text/               HTML escaping
@@ -205,21 +204,28 @@ reach `render` and `domain`, `render` may reach `domain`, `domain` reaches nothi
 
 ```
 features/<name>/
-  <name>-feature.ts  the entry point: builds the parts and declares the commands
-  copy.en.ts         every string this feature shows a user
-  domain/            the pure core — no framework, no I/O, no rendering
-  render/            state in, message text and SVG out; still pure
-  bot/               the impure edge: grammY handlers, the debouncer, rasterizing
+  <name>-feature.ts   the entry point: builds the parts and declares the commands
+  <name>-drawings.ts  what the tools may draw of it, and the tools it offers them
+  copy.en.ts          every string this feature shows a user
+  domain/             the pure core — no framework, no I/O, no rendering
+  render/             state in, message text and SVG out; still pure
+  samples/            the states it is worth drawing at, built for a human to judge
+  bot/                the impure edge: grammY handlers, the debouncer, rasterizing
 ```
+
+`samples/` holds the sample evening and every edge the gallery draws. A sample is a
+**state**, not a picture, so it sits beside `render/` under the same fence and never
+rasterizes, reads a file or talks to Telegram. It is not scaffolding and gets no
+exemption: it carries specs, and `write-a-spec` says what they must assert.
 
 The entry point sits at the feature root, not inside a layer: it is the feature's
 composition root, the same job `src/main.ts` does one level up. There is no
 `integrations/` layer — grammY is the Telegram client and is imported directly.
 
-Purity and independence are **lint rules, not aspirations**: `domain/` and `render/`
-may not import `grammy`, `node:*` or the rasterizer, and one feature may not import
-another. Specs and stubs sit beside their subject, so a feature carries its own
-tests out of the door with it.
+Purity and independence are **lint rules, not aspirations**: `domain/`, `render/`
+and `samples/` may not import `grammy`, `node:*` or the rasterizer, one feature may
+not import another, and `scripts/` may name none of them. Specs and stubs sit beside
+their subject, so a feature carries its own tests out of the door with it.
 
 ### The domain layer is a pure reducer
 
@@ -236,9 +242,11 @@ The `/merge` screen goes further and keeps its selection in `callback_data`, so 
 has no state to go stale at all.
 
 `render/` is the same shape one layer out: state in, message text and inline
-keyboard out, pure. **A drawing is a string; only `bot` may turn it into pixels** —
-`scoresheet/render/` produces SVG text and the native rasterizer lives alone in
-`scoresheet/bot/rasterizer.ts`. `shared/text/html-escape.ts` and
+keyboard out, pure. **A drawing is a string; only the edge may turn it into pixels**
+— `scoresheet/render/` produces SVG text and the native rasterizer lives alone in
+`shared/drawing/rasterize.ts`, beside the fonts it draws with, because the bot and
+the website's build both need it and neither may reach into the other's feature.
+`shared/text/html-escape.ts` and
 `scoresheet/render/svg-tags.ts` are each the only place their kind of markup is
 assembled, so a name cannot reach the output unescaped. Geometry belongs in
 `chronology-layout.ts` and `card-metrics.ts`; nothing else computes a coordinate.
@@ -285,13 +293,12 @@ failure](PLAN.md#what-survives-a-failure).
 
 `shared/lifecycle/crash-exit.ts` installs **both** handlers on purpose: `main.ts`
 ends in a top-level `await bot.start()`, so a rejection there arrives as
-`uncaughtException`, not `unhandledRejection`, and a handler for only the latter
-prints a bare stack with no scope. Both log through the scoped logger and exit
-non-zero, and neither tries to carry on — the state is unknown by definition.
+`uncaughtException`, not `unhandledRejection`. Both log and exit non-zero; neither
+carries on, because the state is unknown by definition.
 
 ## Tests
 
-The `write-a-spec` skill has everything about writing one. Three facts shape the
+The `write-a-spec` skill has everything about writing one. Two facts shape the
 source tree, so they are here:
 
 - Specs sit next to the code as `*.spec.ts`, and **so do the stubs**. A stub for
@@ -300,18 +307,12 @@ source tree, so they are here:
 - **Everything mockable has a stub, and specs use it instead of a hand-written
   fake** — everything in `shared/`, and every feature entry point. The skill has
   the two silent failures that made it a rule.
-- **A spec tests one file, and everything that file imports is mocked.** Third-party
-  code is never exercised in a unit — the one rule with no exceptions, and it is
-  what leaves work for the specs named `*.integration.spec.ts`: a contract with
-  somebody else's code, or a chain of our own whose every joint is mocked away.
-  The skill lists the ones that exist and what earns another.
 
-`e2e/` is a different world with its own rules: writing one is the
-`write-an-e2e-scenario` skill and the harness is [`e2e/README.md`](e2e/README.md).
-It is **a gate now, not a parked experiment** — `npm run e2e:changed` plays the
-scenarios the diff can reach. One obligation reaches back here: **a keyboard whose
-buttons carry `callback_data` gets scenarios**, because whether a tap reaches the
-feature owning it is a fact about real grammY. A URL button routes nothing back.
+`e2e/` is a different world with its own rules — the `write-an-e2e-scenario` skill
+and [`e2e/README.md`](e2e/README.md) — and it is a gate, not an experiment. One
+obligation reaches back here: **a keyboard whose buttons carry `callback_data` gets
+scenarios**, because whether a tap reaches the feature owning it is a fact about
+real grammY. A URL button routes nothing back.
 
 ## Checks
 
@@ -346,17 +347,15 @@ the edit instead of at the end of the turn.
 
 ### Finishing a phase
 
-**Any list of changes to this repository is a phase**, feature or not — closing findings,
-refactoring, tooling. A phase is done when the code is *releasable*, not when it works:
-the gates run before the final commit — lint and types, coverage (70% floor), mutation
-(breaks below 85%), `npm run e2e:changed`, a review of the whole diff, **the copy tables
-read as finished sentences** the moment they are written, **the poster gallery** when the
-phase drew anything, and a retrospective when the phase cost something — and the numbers
-go in the commit message. The review, the sentences and the gallery may not be done by
-whoever wrote the diff — all three are named agents above. **A tag is cut only when a player or the operator gets
-something new**; everything else rides the next one. **Say how big the phase is before
-starting it**, in a line, so it can be argued down. The procedure is the
-**`finish-phase` skill**, and the list somebody hands you never contains the gates.
+**Any list of changes to this repository is a phase**, feature or not — closing
+findings, refactoring, tooling. A phase is done when the code is *releasable*, not
+when it works, and what that costs is the **`finish-phase` skill**'s gates, with
+their numbers in the commit message. Three of them — the diff reviewed, the copy
+read as finished sentences, the gallery looked at — may not be done by whoever wrote
+the diff, which is why each is a named agent above. **A tag is cut only when a
+player or the operator gets something new**; everything else rides the next one.
+**Say how big the phase is before starting it**, in a line, so it can be argued
+down. The list somebody hands you never contains the gates.
 
 ## Configuration
 
@@ -373,7 +372,5 @@ down — no `process.env` in feature code. Two rules follow from one loaded file
 - **A key left empty counts as missing.** `requireEnv` refuses it, `optionalEnv`
   falls back; `.env.example` has the outage that made it a rule.
 
-`loadEnv(source = process.env)` takes its source as an argument. That is not
-configurability — it is the only way to exercise the `undefined` branch its type
-demands, since `process.env` never holds one. What a run costs whoever operates it
-is in [deploy/README.md](deploy/README.md#running-it-on-a-server).
+What a run costs whoever operates it is in
+[deploy/README.md](deploy/README.md#running-it-on-a-server).

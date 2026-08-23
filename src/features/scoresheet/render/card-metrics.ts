@@ -12,7 +12,7 @@ export const PAD = 60;
 
 export const GRID_RIGHT = IMAGE_WIDTH - PAD;
 
-export const FONT_FAMILY = "Noto Sans";
+export { FONT_FAMILY } from "#shared/fonts/font-family.ts";
 
 export const USUAL_ADVANCE = 0.58;
 

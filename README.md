@@ -322,8 +322,9 @@ src/
     scoresheet/         the pictures /stats and /personal send back
     diagnostics/        the /status report about the bot itself
     language/           the /language screen that picks the chat's language
-  shared/               config, lifecycle, locale, logging, repository,
-                        telegram, text, timing — a folder per subject
+  shared/               config, drawing, drawings, fonts, lifecycle, locale,
+                        logging, repository, table, telegram, text, timing —
+                        a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
 docs/                   the website GitHub Pages serves — everything in here is public
 docs/mockups/           the posters this file shows, drawn by scripts/tools.ts,
@@ -332,14 +333,16 @@ deploy/                 the systemd units a server is installed from, the script
                         that put the newest tag live and send the server its
                         configuration, and the runbook for all of it
 .github/workflows/      the checks that run on every push
-scripts/                dev utilities that are not part of the bot
+scripts/                dev utilities that are not part of the bot; scripts/docs/
+                        holds what `docs:check` asks of each thing it checks
 e2e/                    the fake Telegram and the scenarios played against it
 ```
 
-Inside every feature the same three layers — `domain/` pure, `render/` pure,
-`bot/` the impure edge — with imports pointing only downward, and specs and stubs
-sitting next to the file they stand for. ESLint enforces it: a cross-feature import
-and a framework import in `domain/` are both build errors.
+Inside every feature the same layers — `domain/` pure, `render/` pure, `samples/`
+the states worth drawing at, `bot/` the impure edge — with imports pointing only
+downward, and specs and stubs sitting next to the file they stand for. ESLint
+enforces it: a cross-feature import, a framework import in `domain/`, and a script
+that names a feature are all build errors.
 [CLAUDE.md](CLAUDE.md#layers-live-inside-a-feature) has the rest.
 
 ## The other documents

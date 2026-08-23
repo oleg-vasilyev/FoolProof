@@ -11,7 +11,7 @@ import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts"
 import { renderRosterKeyboard } from "#scoresheet/render/personal/roster-keyboard.ts";
 import { copyIn } from "#scoresheet/copy.ts";
 import { handleOf } from "#scoresheet/render/poster-baseboard.ts";
-import { rasterize } from "#scoresheet/bot/rasterizer.ts";
+import { rasterize } from "#shared/drawing/rasterize.ts";
 
 
 const CARD_FILENAME = "player-card.png";

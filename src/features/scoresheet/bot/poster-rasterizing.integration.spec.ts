@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { FONT_FAMILY } from "#scoresheet/render/card-metrics.ts";
 import { copy } from "#scoresheet/copy.en.ts";
-import { rasterize, requireFonts } from "#scoresheet/bot/rasterizer.ts";
+import { rasterize } from "#shared/drawing/rasterize.ts";
+import { requireFonts } from "#shared/fonts/font-files.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import { svgOf, text } from "#scoresheet/render/svg-tags.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";

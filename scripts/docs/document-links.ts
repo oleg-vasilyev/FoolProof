@@ -1,0 +1,113 @@
+import { existsSync } from "node:fs";
+import { dirname, join, normalize } from "node:path";
+import {
+  DOCUMENTS,
+  FIRST_GROUP,
+  SESSION_DOCUMENT,
+  SPEC_DOCUMENT,
+  anchorOf,
+  definedAgents,
+  headingsOf,
+  installedSkills,
+  read,
+} from "./the-documents.ts";
+
+
+const NOTHING = 0;
+
+const LAST = -1;
+
+const A_LINK = /\]\(([^)]+)\)/g;
+
+const A_SPEC_SECTION = /^## (.+)$/gm;
+
+const A_CONTENTS_LINK = /\[[^\]]+\]\(#([a-z0-9-]+)\)/g;
+
+const SPEC_CONTENTS = "What is in here";
+
+const A_WINDOWS_SEPARATOR = "\\";
+
+const anchorsByDocument = (): Record<string, ReadonlySet<string>> =>
+  Object.fromEntries(
+    DOCUMENTS.map((file) => [file, new Set(headingsOf(read(file)).map(anchorOf))])
+  );
+
+export const brokenLinks = (): readonly string[] => {
+  const anchors = anchorsByDocument();
+
+  return DOCUMENTS.flatMap((file) =>
+    [...read(file).matchAll(A_LINK)].flatMap((match) => {
+      const link = match[FIRST_GROUP] ?? "";
+
+      if (link.startsWith("http") || link.startsWith("#")) {
+        return [];
+      }
+
+      const [path = "", anchor] = link.split("#");
+      const target = normalize(join(dirname(file), path)).split(A_WINDOWS_SEPARATOR).join("/");
+
+      if (!existsSync(target)) {
+        return [`${file}: links to ${link}, which does not exist`];
+      }
+
+      const known = anchors[target];
+
+      if (anchor !== undefined && known !== undefined && !known.has(anchor)) {
+        return [`${file}: links to ${link}, but that heading is not in ${target}`];
+      }
+
+      return [];
+    })
+  );
+};
+
+export const specContentsOutOfStep = (): readonly string[] => {
+  const spec = read(SPEC_DOCUMENT);
+  const sections = [...spec.matchAll(A_SPEC_SECTION)]
+    .map((match) => match[FIRST_GROUP] ?? "")
+    .filter((section) => section !== SPEC_CONTENTS);
+  const contents = spec.split(`## ${SPEC_CONTENTS}`).at(LAST)?.split("\n## ").at(NOTHING) ?? "";
+  const listed = new Set(
+    [...contents.matchAll(A_CONTENTS_LINK)].map((link) => link[FIRST_GROUP] ?? "")
+  );
+  const anchors = new Set(sections.map(anchorOf));
+
+  return [
+    ...sections
+      .filter((section) => !listed.has(anchorOf(section)))
+      .map(
+        (section) =>
+          `${SPEC_DOCUMENT}: "${section}" is not in "${SPEC_CONTENTS}" — this file is ` +
+          `read by following a link, so a section the list does not carry is one nobody ` +
+          `arrives at`
+      ),
+    ...[...listed]
+      .filter((anchor) => !anchors.has(anchor))
+      .map(
+        (anchor) =>
+          `${SPEC_DOCUMENT}: "${SPEC_CONTENTS}" points at #${anchor}, which is not a ` +
+          `section here any more — a contents list nobody can follow is worse than none`
+      ),
+  ];
+};
+
+export const unreachableHelp = (): readonly string[] => {
+  const session = read(SESSION_DOCUMENT);
+
+  return [
+    ...installedSkills()
+      .filter((skill) => !session.includes(skill))
+      .map(
+        (skill) =>
+          `${SESSION_DOCUMENT}: names no route to the "${skill}" skill — a skill ` +
+          `nothing points at is one nobody loads`
+      ),
+    ...definedAgents()
+      .filter((agent) => !session.includes(agent))
+      .map(
+        (agent) =>
+          `${SESSION_DOCUMENT}: names no route to the "${agent}" agent — an agent ` +
+          `nothing points at never runs`
+      ),
+  ];
+};

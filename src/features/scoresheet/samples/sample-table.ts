@@ -5,7 +5,7 @@ import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.t
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
 import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
-import { BOT_HANDLE } from "./bot-handle.ts";
+import { BOT_HANDLE } from "#scoresheet/samples/sample-handle.ts";
 import type {
   CareerGame,
   CareerHistory,
@@ -13,8 +13,6 @@ import type {
   SeriesChronology,
 } from "#shared/repository/repository-contract.ts";
 
-
-export const MOCKUP_DIR = "docs/mockups";
 
 const SAMPLE_DATE = "2026-08-06";
 

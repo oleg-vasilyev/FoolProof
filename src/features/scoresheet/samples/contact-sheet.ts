@@ -1,6 +1,7 @@
+import { FONT_FAMILY } from "#shared/fonts/font-family.ts";
 import { palette } from "#scoresheet/render/palette.ts";
 import { rect, svgOf, text } from "#scoresheet/render/svg-tags.ts";
-import type { Drawing } from "./gallery.ts";
+import type { Drawing } from "#shared/drawings/drawings-contract.ts";
 
 
 const COLUMNS = 7;
@@ -8,6 +9,8 @@ const COLUMNS = 7;
 const THUMB_WIDTH = 300;
 
 const GAP = 24;
+
+const HALF_A_MARGIN = 2;
 
 const MARGIN = 40;
 
@@ -24,10 +27,6 @@ const TITLE_BAND = 74;
 const SHEET_MAX_HEIGHT = 4000;
 
 const ROW_START = 0;
-
-const NEWEST_ROW = -1;
-
-const WITHOUT_THE_NEWEST = -1;
 
 const A_WIDTH = /<svg[^>]*\swidth="([\d.]+)"/;
 
@@ -62,13 +61,9 @@ const placed = (drawing: Drawing, x: number, y: number): string =>
     .replace(A_ROOT_TAG, `<svg x="${x}" y="${y}"`);
 
 const rowsOf = (drawings: readonly Drawing[]): readonly (readonly Drawing[])[] =>
-  drawings.reduce<readonly (readonly Drawing[])[]>((rows, drawing, index) => {
-    const open = rows.at(NEWEST_ROW);
-
-    return index % COLUMNS === ROW_START || open === undefined
-      ? [...rows, [drawing]]
-      : [...rows.slice(ROW_START, WITHOUT_THE_NEWEST), [...open, drawing]];
-  }, []);
+  Array.from({ length: Math.ceil(drawings.length / COLUMNS) }, (_unused, row) =>
+    drawings.slice(row * COLUMNS, row * COLUMNS + COLUMNS)
+  );
 
 const cellsIn = (row: readonly Drawing[], top: number): readonly string[] =>
   row.flatMap((drawing, column) => {
@@ -79,36 +74,25 @@ const cellsIn = (row: readonly Drawing[], top: number): readonly string[] =>
         x,
         y: top + LABEL_DROP,
         fill: palette.inkHint,
-        "font-family": "Noto Sans",
+        "font-family": FONT_FAMILY,
         "font-size": LABEL_SIZE,
       }),
       placed(drawing, x, top + LABEL_BAND),
     ];
   });
 
-const topsOf = (rows: readonly (readonly Drawing[])[]): readonly number[] =>
-  rows.reduce<readonly number[]>(
-    (tops, row) => [
-      ...tops,
-      (tops.at(NEWEST_ROW) ?? TITLE_BAND) +
-        (tops.length === ROW_START
-          ? ROW_START
-          : LABEL_BAND + Math.max(...(rows[tops.length - 1] ?? []).map(thumbHeightOf)) + GAP),
-    ],
-    []
-  );
+const rowHeightOf = (row: readonly Drawing[]): number =>
+  LABEL_BAND + Math.max(...row.map(thumbHeightOf));
+
+const topOf = (rows: readonly (readonly Drawing[])[], index: number): number =>
+  rows.slice(ROW_START, index).reduce((top, above) => top + rowHeightOf(above) + GAP, TITLE_BAND);
 
 const sheetWidth = MARGIN * 2 + COLUMNS * THUMB_WIDTH + (COLUMNS - 1) * GAP;
 
 export const contactSheet = (title: string, drawings: readonly Drawing[]): string => {
   const rows = rowsOf(drawings);
-  const tops = topsOf(rows);
-  const lastRow = rows.at(NEWEST_ROW) ?? [];
   const height =
-    (tops.at(NEWEST_ROW) ?? TITLE_BAND) +
-    LABEL_BAND +
-    Math.max(...lastRow.map(thumbHeightOf), ROW_START) +
-    MARGIN;
+    rows.reduce((below, row) => below + rowHeightOf(row) + GAP, TITLE_BAND) - GAP + MARGIN;
 
   if (height > SHEET_MAX_HEIGHT) {
     throw new Error(
@@ -122,12 +106,12 @@ export const contactSheet = (title: string, drawings: readonly Drawing[]): strin
     rect({ x: 0, y: 0, width: sheetWidth, height, fill: palette.plateShade }),
     text(title, {
       x: MARGIN,
-      y: TITLE_SIZE + MARGIN / 2,
+      y: TITLE_SIZE + MARGIN / HALF_A_MARGIN,
       fill: palette.ink,
-      "font-family": "Noto Sans",
+      "font-family": FONT_FAMILY,
       "font-size": TITLE_SIZE,
       "font-weight": "bold",
     }),
-    ...rows.flatMap((row, index) => cellsIn(row, tops[index] ?? TITLE_BAND)),
+    ...rows.flatMap((row, index) => cellsIn(row, topOf(rows, index))),
   ]);
 };

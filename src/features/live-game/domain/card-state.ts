@@ -1,6 +1,8 @@
 import { ActionKind, Outcome, Phase } from "#live-game/domain/card-states.ts";
 
 
+export { LONGEST_NAME, MIN_PLAYERS, MOST_PLAYERS } from "#shared/table/table-limits.ts";
+
 export interface Seat {
   readonly playerId: number;
   readonly displayName: string;
@@ -32,12 +34,6 @@ export interface Placement {
 }
 
 const PLAYERS_SHARING_A_DRAW = 2;
-
-export const MIN_PLAYERS = 2;
-
-export const MOST_PLAYERS = 10;
-
-export const LONGEST_NAME = 32;
 
 export const seatAt = (state: CardState, slot: number): Seat | undefined => state.seats[slot];
 

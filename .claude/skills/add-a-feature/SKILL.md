@@ -17,20 +17,26 @@ Name the folder after **what the player gets**, not after an internal noun:
 the screen that makes two names one player. A folder called `players/` or
 `handlers/` is a bucket, and the next feature will be dumped in it.
 
-## 1. The three layers, and imports point downward only
+## 1. The layers, and imports point downward only
 
 ```
 features/<name>/
-  <name>-feature.ts  the entry point: builds the parts and declares the commands
-  copy.en.ts         every string this feature shows a user
-  domain/            the pure core — no framework, no I/O, no rendering
-  render/            state in, message text and SVG out; still pure
-  bot/               the impure edge: grammY handlers, debouncing, rasterizing
+  <name>-feature.ts   the entry point: builds the parts and declares the commands
+  <name>-drawings.ts  only if it draws: what the tools may draw of it, and the
+                      tools it lends them — #shared/drawings/drawings-contract.ts
+  copy.en.ts          every string this feature shows a user
+  domain/             the pure core — no framework, no I/O, no rendering
+  render/             state in, message text and SVG out; still pure
+  samples/            only if it draws: the states worth drawing at
+  bot/                the impure edge: grammY handlers, debouncing, rasterizing
 ```
 
-`bot` may reach `render` and `domain`; `render` may reach `domain`; `domain` reaches
-nothing. Skip a layer that has nothing in it rather than leaving it empty —
-`diagnostics/` has no `domain/` because it decides nothing.
+`bot` may reach `render` and `domain`; `render` and `samples` may reach `domain`;
+`domain` reaches nothing. **A feature that draws nothing has neither "only if"
+file**, and one that does may still not be named from `scripts/`: the tooling asks
+through the contract and finds the module by its name at run time, which is what
+keeps the folder deletable. Skip a layer with nothing in it rather than leaving it
+empty — `diagnostics/` has no `domain/` because it decides nothing.
 
 **The entry point sits at the feature root, not inside a layer.** It is the
 feature's composition root, the same job `src/main.ts` does one level up, so
@@ -46,9 +52,7 @@ a picture, a screen, an entity the commands are about.
 **`docs:check` fails a layer root above nine files**, which is unambiguous crowding
 rather than a real limit — the fix is always a named subfolder, never a bigger
 number. It is a late alarm on purpose: seven fired on a folder that needed no split,
-so the question is the rule and the count only makes somebody ask it. `CLAUDE.md`
-has the rule the subfolder has to satisfy: name it after a thing the player ends up
-holding, never after a process.
+so the question is the rule and the count only makes somebody ask it.
 
 ## 2. What the feature declares
 
@@ -96,8 +100,8 @@ of the rule is that every import line reads the same way.
 ## 4. Fence it off, and prove the fence
 
 Add the folder name to `FEATURES` in `eslint.config.js`. That generates the zones:
-`domain/` and `render/` may not import a framework or reach upward, and neither may
-reach into another feature or `#app/`.
+`domain/`, `render/` and `samples/` may not import a framework or reach upward, and
+none may reach into another feature or `#app/`.
 
 **A zone is not finished until a deliberate violation has been shown to fail the
 lint.** Write a throwaway file in each new zone that imports something banned, run
@@ -119,9 +123,8 @@ index plus a coloured spine plus a title plus a muted reason, and the headline b
 news is a full-width red plate.
 
 A mockup drawn from reading `palette.ts` and `card-metrics.ts` came back from the
-owner twice — "не очень информативный и выбивается дизайном от остальных" — and the
-fix both times was already sitting in `docs/mockups/awards.png`. Two `Read` calls
-would have skipped both rounds.
+owner twice, and the fix both times was already sitting in `docs/mockups/awards.png`.
+Two `Read` calls would have skipped both rounds.
 
 Then draw the mockup with the real renderer as soon as one exists, and **look at
 the rasterized PNG yourself** before asking anybody else to. The two defects that

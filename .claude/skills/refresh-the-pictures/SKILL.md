@@ -58,7 +58,7 @@ poster can still be redrawn wrongly and pass, which is what the reader below is 
    Measure before `e2e:changed`, so a red suite means the bot, not the harness:
 
    ```
-   node -e "import('./src/features/scoresheet/bot/rasterizer.ts').then(async ({rasterize})=>{const {posters}=await import('./scripts/mockups.ts');for(const [n,s] of Object.entries(posters())){await rasterize(s);const t=performance.now();await rasterize(s);console.log(n,(performance.now()-t).toFixed(0)+'ms');}})"
+   node -e "import('./scripts/feature-drawings.ts').then(async ({everyDrawing})=>{const {rasterize}=await import('./src/shared/drawing/rasterize.ts');for(const d of await everyDrawing(o=>o.mockups())){await rasterize(d.svg);const t=performance.now();await rasterize(d.svg);console.log(d.file,(performance.now()-t).toFixed(0)+'ms');}})"
    ```
 
 ## The hand-made rows
@@ -82,14 +82,13 @@ match the SVG, and all of it stays green while a line runs off the card.
 `/personal` shipped in two releases without a single gallery case, and the gate ran
 green over both — then the first case written for it found a name running off the
 card and through the counter beside it, in the one place the bot prints user data at
-126px. So `docs:check` now fails when a `render/**/*-svg.ts` exists that no
-`scripts/gallery*.ts` imports; a phase that adds a poster owes it cases in the same
-phase.
+126px. So `docs:check` now fails when a poster exists that no `samples/*-edges.ts` draws a
+case through; a phase that adds a poster owes it cases in the same phase.
 
 **The cases are not invented here.** They were named at stage 1, before the mockup was
 drawn, and the owner approved a picture of each one — so this step copies that list
 into the gallery and draws it against the real renderer. The list is a committed file,
-`docs/mockups/<gallery script>.cases.txt`, and `docs:check` fails when the gallery
+`docs/mockups/<edges module>.cases.txt`, and `docs:check` fails when the gallery
 stops drawing something it holds, so **losing a case is mechanical and needs no
 vigilance.** What is still yours is the other direction: a case appearing for the
 first time here was approved by nobody, and it is worth saying so out loud rather than

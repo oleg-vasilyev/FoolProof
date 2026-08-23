@@ -151,12 +151,11 @@ with it — writing documents, redrawing pictures, reading a subagent's report �
 **e2e suite cannot**: `QUIET_MS` decides the bot has finished, and a machine busy with
 mutants makes renders slow enough to cross it.
 
-**That full run grows with the code**: 5637 mutants at v1.14.0, of which one
-feature phase added about 2100. It took sixteen minutes until `concurrency`
-stopped being a hard `4` — a quarter of this machine — and became `"75%"`, which
-is measured rather than guessed: 960s at four workers, 689s at eight, 596s at
-twelve, with the score at 98.28 and exactly ten timeouts in all three, so the
-verdict never moved.
+**That full run grows with the code**: 5637 mutants at v1.14.0, of which one feature
+phase added about 2100. It took sixteen minutes until `concurrency` stopped being a
+hard `4` and became `"75%"`, measured rather than guessed — 960s at four workers,
+596s at twelve, with the score and the timeout count identical, so the verdict never
+moved.
 
 The percentage is not there to speed CI up — Stryker computes
 `max(1, round(cores × 0.75))`, so the four-vCPU runner gets three workers where
@@ -167,7 +166,11 @@ committing.
 
 **`--mutate` takes a glob, and `dir/*.ts` matches the specs too.** Worse, the CLI
 flag **replaces** the config's `!src/**/*.spec.ts` rather than adding to it, so the
-exclusion has to be repeated on the command line every time:
+exclusion has to be repeated on the command line every time. `mutate-changed.ts`
+now reads those patterns out of `stryker.config.json` and appends them itself, so
+the changed-file gate obeys the config — do not give it a second copy of the list.
+An exclusion added to the config is not in force until you have found everything
+else that decides the same thing; this one was silently ignored for a whole run:
 
 ```
 npx stryker run --mutate "src/features/<x>/*.ts,!src/**/*.spec.ts" --reporters clear-text
@@ -189,25 +192,15 @@ tests, never lower the bar. **That work is the `write-a-spec` skill's**, which r
 survivor and routes it to the rule it belongs to; load it rather than reaching for
 the nearest assertion that turns the mutant red.
 
-Run gate 5's review pass **before** this gate when the diff is small: review
-findings edit code, and this is the costliest gate to repeat. An edit made after
-the run re-checks with `--mutate <file>` alone, never a full re-run.
-
-**Size is the wrong test, though — what matters is where the findings will land.**
-A phase that is mostly specs and documents has every review finding aimed straight
-at what mutation and e2e cover, so running them first buys nothing and pays twice.
-One such phase — 671 lines, 74% of them specs — ran the full battery, then took
-five review findings, then ran the whole battery again: twenty-seven minutes of
-Stryker to learn the same thing twice. Ask before launching either: *could a
-reviewer's note change a file this run measures?* If yes, review first.
-
-**Answer that question about the diff the review will leave behind, not the one you
-have.** A phase touching no code at all looks immune — nothing the battery measures
-can change — so it was run alongside the review, and the review's best finding was
-that a list of edge cases travelled between two stages through memory. Closing it
-meant a new rule in `scripts/check-docs.ts`, and the battery ran again. Prose can
-turn into code; that is what a good finding does. So the default is **review first**,
-and running in parallel needs a reason you can say out loud.
+**Run gate 5's review pass before this one. Always.** Review findings edit code, and
+this is the costliest gate to repeat; an edit made after the run re-checks with
+`--mutate <file>` alone, never a full re-run. Size is not the test and neither is
+subject matter — a phase of 671 lines, 74% specs, ran the battery, took five
+findings, and ran it again: twenty-seven minutes of Stryker to learn the same thing
+twice; a phase touching no code at all looked immune until the review's best finding
+became a new rule in `scripts/check-docs.ts`. Judge the diff the review will *leave
+behind*, not the one you have — prose turns into code, and that is what a good
+finding does. Running the two in parallel needs a reason you can say out loud.
 
 **Everything a check writes goes under `reports/`** — coverage, mutation, and
 Stryker's sandbox via `tempDirName`. One gitignored directory, and nothing about
@@ -217,10 +210,11 @@ that answer already; `.gitignore` says the same thing in one line.
 Rules about *running* it, learned by burning most of a phase's budget on them:
 
 - **Never re-run a gate to re-read its output, and never truncate the run that
-  produced it.** Piping a battery through `Select-Object -Last 30` throws away the
-  coverage table and the mutation summary the commit message then needs, and the
-  cheapest way back is running something again — which is the rule this one
-  protects. Send the whole thing to a file (`Tee-Object`) and read the file. Every
+  produced it — grepping the stream is truncating it.** A battery piped through
+  `Select-Object -Last 30`, or through a `grep` whose pattern misses the summary
+  line, throws away the coverage table and the mutation score the commit message
+  then needs, and the cheapest way back is running the thing again — which is the
+  rule this one protects. Send the whole run to a file and grep the file. Every
   run also writes `reports/mutation/mutation.json` and `reports/mutation/index.html`,
   and a backgrounded run keeps its own log — read those. `/merge` was closed with eight
   Stryker invocations where two would have done, three of them the same full run

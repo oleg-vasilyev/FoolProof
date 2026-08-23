@@ -132,7 +132,7 @@ examples picked because they looked instructive. Before drawing anything, write 
 list of cases the picture has to survive, each with a sentence saying what it asks
 of the drawing: the emptiest thing the renderer can be handed, the fullest, the
 widest name, each optional section missing, the case where two values tie.
-`scripts/gallery-careers.ts` is both the shape and the standard — eight named cases,
+`features/scoresheet/samples/career-edges.ts` is both the shape and the standard — eight named cases,
 each carrying its own `asks` line.
 
 That list is not scratch work. It is **the same list the poster gallery draws once
@@ -140,11 +140,11 @@ the renderer exists**, written here because here is where it is worth something:
 drawn later it can only confirm a picture that already exists, while written now it
 states what the picture is obliged to survive. Written once, used twice, and the
 phase was going to pay for it either way — so it is committed, not handed over in a
-message: `docs/mockups/<gallery script>.cases.txt`, one line per case, `name — asks`.
-The name in the middle is the gallery script that will draw them once the renderer
-exists — `gallery-careers.cases.txt` for `scripts/gallery-careers.ts` — because a case
+message: `docs/mockups/<edges module>.cases.txt`, one line per case, `name — asks`.
+The name in the middle is the edges module that will draw them once the renderer
+exists — `career-edges.cases.txt` for `samples/career-edges.ts` — because a case
 is a set of data, and one case can feed more than one poster: every case in
-`scripts/gallery.ts` draws both the chronology and the awards.
+`samples/gallery-edges.ts` draws both the chronology and the awards.
 
 `npm run docs:check` then holds three things together, and each of the three has been
 watched to fail: a case in the list that the script does not draw, a list naming a

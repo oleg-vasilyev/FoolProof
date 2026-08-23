@@ -1,10 +1,9 @@
-import { renderAsync } from "@resvg/resvg-js";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import encodeWebp, { init as initWebp } from "@jsquash/webp/encode.js";
 import { rootDir } from "#shared/config/env.ts";
-import { FONT_FAMILY } from "#scoresheet/render/card-metrics.ts";
-import { FONT_FILES, requireFonts } from "#scoresheet/bot/rasterizer.ts";
+import { rasterizeToWidth } from "#shared/drawing/rasterize.ts";
+import { requireFonts } from "#shared/fonts/font-files.ts";
 
 
 const SITE_IMAGE_WIDTH = 1048;
@@ -34,14 +33,7 @@ export const siteImageOf = async (svg: string): Promise<Buffer> => {
 
   await readyEncoder();
 
-  const drawn = await renderAsync(svg, {
-    font: {
-      fontFiles: [...FONT_FILES],
-      loadSystemFonts: false,
-      defaultFontFamily: FONT_FAMILY,
-    },
-    fitTo: { mode: "width", value: SITE_IMAGE_WIDTH },
-  });
+  const drawn = await rasterizeToWidth(svg, SITE_IMAGE_WIDTH);
 
   const encoded = await encodeWebp(
     { data: new Uint8ClampedArray(drawn.pixels), width: drawn.width, height: drawn.height },

@@ -355,6 +355,13 @@ const featureZones = (self) => [
     ),
   },
   {
+    files: [`src/features/${self}/samples/**/*.ts`],
+    rules: forbid(
+      [...above(self), `#${self}/bot/**`, ...FRAMEWORK],
+      `samples/ builds the states this feature draws at — it may call domain/ and render/, but it is not the edge: a sample never rasterizes, never reads a file and never talks to Telegram. ${independence(self)}`
+    ),
+  },
+  {
     files: [`src/features/${self}/bot/**/*.ts`, `src/features/${self}/*.ts`],
     rules: forbid(above(self), independence(self)),
   },
@@ -366,8 +373,8 @@ export default [
   },
   {
     // scripts/ shares the style rules but not the app rules below: a dev utility
-    // may print to the console, and it may import a feature — the mockup tools draw
-    // the scoresheet's own posters, which is why no feature zone fences scripts/.
+    // may print to the console. It may not import a feature — see the zone at the
+    // bottom of this file.
     files: ["src/**/*.ts", "scripts/**/*.ts"],
     languageOptions: {
       parser: tsParser,
@@ -426,4 +433,16 @@ export default [
     ),
   },
   ...FEATURES.flatMap(featureZones),
+  {
+    // A feature is a folder you can delete, and for a while the tooling made that
+    // false: eight scripts imported the scoresheet by name, so removing the folder
+    // broke the mockup tools, the site build and docs:check itself. The drawings a
+    // feature offers now arrive through #shared/drawings/drawings-contract.ts and
+    // are discovered at runtime, so a deleted feature simply stops being listed.
+    files: ["scripts/**/*.ts"],
+    rules: forbid(
+      [...FEATURES.map((name) => `#${name}/**`), "**/features/**"],
+      "scripts/ may not name a feature — ask for what features offer through #shared/drawings/drawings-contract.ts, so deleting a folder leaves the tooling running."
+    ),
+  },
 ];

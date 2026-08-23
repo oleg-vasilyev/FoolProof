@@ -15,29 +15,21 @@ const renderAsyncSpy = vi.fn();
 
 const asPngSpy = vi.fn();
 
-const existsSyncSpy = vi.fn();
+const FONT_FILES = ["regular.ttf", "bold.ttf"];
 
 vi.mock("@resvg/resvg-js", () => ({
   renderAsync: (svg: string, options: unknown) => renderAsyncSpy(svg, options),
-}));
-
-vi.mock("node:fs", () => ({
-  existsSync: (file: string) => existsSyncSpy(file),
-}));
-
-vi.mock("node:path", () => ({
-  resolve: (...parts: readonly string[]) => parts.join("/"),
 }));
 
 vi.mock("#shared/config/env.ts", () => env.module);
 
 vi.mock("#shared/timing/slowest-render.ts", () => timing.module);
 
-vi.mock("#scoresheet/render/card-metrics.ts", () => ({
-  FONT_FAMILY,
-}));
+vi.mock("#shared/fonts/font-family.ts", () => ({ FONT_FAMILY }));
 
-const { rasterize, requireFonts } = await import("#scoresheet/bot/rasterizer.ts");
+vi.mock("#shared/fonts/font-files.ts", () => ({ FONT_FILES }));
+
+const { rasterize, rasterizeToWidth } = await import("#shared/drawing/rasterize.ts");
 
 const SVG = "<svg/>";
 
@@ -52,7 +44,6 @@ describe("rasterize()", () => {
 
     asPngSpy.mockReturnValue(PNG);
     renderAsyncSpy.mockResolvedValue({ asPng: () => asPngSpy() as Buffer });
-    existsSyncSpy.mockReturnValue(true);
   });
 
   it("should hand the drawing to the rasterizer untouched", async () => {
@@ -78,20 +69,10 @@ describe("rasterize()", () => {
     expect(optionsUsed().font.loadSystemFonts).toBe(false);
   });
 
-  it("should load the fonts shipped with the repository", async () => {
+  it("should load every face the project ships, and nothing else", async () => {
     await rasterize(SVG);
 
-    expect(optionsUsed().font.fontFiles).toEqual([
-      `${env.rootDir}/assets/fonts/NotoSans-Regular.ttf`,
-      `${env.rootDir}/assets/fonts/NotoSans-Bold.ttf`,
-    ]);
-  });
-
-  it("should ship a bold face, since the sheet asks for one", async () => {
-    await rasterize(SVG);
-    const files = optionsUsed().font.fontFiles as readonly string[];
-
-    expect(files.some((file) => file.includes("Bold"))).toBe(true);
+    expect(optionsUsed().font.fontFiles).toEqual(FONT_FILES);
   });
 
   it("should name the same family the drawing asks for", async () => {
@@ -135,46 +116,57 @@ describe("rasterize()", () => {
   });
 });
 
-describe("requireFonts()", () => {
+const ASKED_FOR = 700;
+
+const DREW = 704;
+
+const TALL = 1100;
+
+const PIXELS = Uint8Array.from([1, 2, 3, 4]);
+
+const FIT_TO_A_WIDTH = "width";
+
+describe("rasterizeToWidth()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    existsSyncSpy.mockReturnValue(true);
+    renderAsyncSpy.mockResolvedValue({ pixels: PIXELS, width: DREW, height: TALL });
   });
 
-  it("should pass when every font is in place", () => {
-    expect(() => requireFonts()).not.toThrow();
+  it("should ask for the width it was given rather than the drawing's own", async () => {
+    await rasterizeToWidth(SVG, ASKED_FOR);
+
+    expect(renderAsyncSpy.mock.calls[0]?.[1]).toMatchObject({
+      fitTo: { mode: FIT_TO_A_WIDTH, value: ASKED_FOR },
+    });
   });
 
-  it("should check every font the rasterizer will load", () => {
-    const FACES = 2;
+  it("should draw with the same fonts as everything else, so the two agree", async () => {
+    await rasterizeToWidth(SVG, ASKED_FOR);
 
-    requireFonts();
-
-    expect(existsSyncSpy).toHaveBeenCalledTimes(FACES);
+    expect(optionsUsed().font).toEqual({
+      fontFiles: FONT_FILES,
+      loadSystemFonts: false,
+      defaultFontFamily: FONT_FAMILY,
+    });
   });
 
-  it("should refuse to start when a font is missing", () => {
-    existsSyncSpy.mockReturnValue(false);
+  it("should report the size the rasterizer actually drew, not the one asked for", async () => {
+    const drawn = await rasterizeToWidth(SVG, ASKED_FOR);
 
-    expect(() => requireFonts()).toThrow();
+    expect({ width: drawn.width, height: drawn.height }).toEqual({ width: DREW, height: TALL });
   });
 
-  it("should name the missing file, so the fix is obvious", () => {
-    existsSyncSpy.mockImplementation((file: string) => !file.includes("Bold"));
+  it("should hand back the raw pixels as bytes an encoder can take", async () => {
+    const drawn = await rasterizeToWidth(SVG, ASKED_FOR);
 
-    expect(() => requireFonts()).toThrow(/NotoSans-Bold\.ttf/);
+    expect(Buffer.isBuffer(drawn.pixels)).toBe(true);
+    expect([...drawn.pixels]).toEqual([...PIXELS]);
   });
 
-  it("should list every missing face apart, not run their names together", () => {
-    existsSyncSpy.mockReturnValue(false);
+  it("should not claim to be the slowest render, since no player is waiting for it", async () => {
+    await rasterizeToWidth(SVG, ASKED_FOR);
 
-    expect(() => requireFonts()).toThrow(/NotoSans-Regular\.ttf, .*NotoSans-Bold\.ttf/);
-  });
-
-  it("should not complain about a face that is present", () => {
-    existsSyncSpy.mockImplementation((file: string) => !file.includes("Bold"));
-
-    expect(() => requireFonts()).not.toThrow(/NotoSans-Regular\.ttf/);
+    expect(timing.startTimingSpy).not.toHaveBeenCalled();
   });
 });

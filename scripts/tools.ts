@@ -1,20 +1,13 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { rasterize } from "#scoresheet/bot/rasterizer.ts";
+import { rasterize } from "#shared/drawing/rasterize.ts";
 import { rootDir } from "#shared/config/env.ts";
 import { repository } from "#shared/repository/repository-instance.ts";
-import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
-import { awardReason, awardTitle, awardWinner } from "#scoresheet/render/awards/award-lines.ts";
-import { gameTally } from "#scoresheet/render/tally-phrases.ts";
-import { copyIn } from "#scoresheet/copy.ts";
-import { createLocaleReader } from "#shared/locale/chat-locale.ts";
-import { contactSheet } from "./contact-sheet.ts";
 import { refreshDesignPage } from "./design-page.ts";
-import { GALLERY_DIR, gallery } from "./gallery.ts";
+import { GALLERY_DIR, MOCKUP_DIR, SITE_POSTER_DIR } from "./drawn-into.ts";
+import { drawnByName, everyDrawing, featuresThatDraw } from "./feature-drawings.ts";
 import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
-import { SITE_POSTER_DIR, sitePosters } from "./site-posters.ts";
 import { siteImageOf } from "./site-images.ts";
-import { MOCKUP_DIR, posters } from "./mockups.ts";
 
 
 const AFTER_NODE_AND_SCRIPT = 2;
@@ -26,12 +19,6 @@ const PAGE_TO_READ = 1;
 const FILE_TO_WRITE = 2;
 
 const CHAT_TO_FORGET = 1;
-
-const CHAT_TO_READ = 1;
-
-const EVERY_WINNER = true;
-
-const SOME_WINNERS = false;
 
 const FAILED = 1;
 
@@ -56,25 +43,24 @@ const drawInto = async (
   }
 };
 
-const writeMockups = (): Promise<void> => drawInto(MOCKUP_DIR, posters());
+const writeMockups = async (): Promise<void> =>
+  drawInto(MOCKUP_DIR, await drawnByName((offered) => offered.mockups()));
 
 const writeSitePosters = async (): Promise<void> => {
   const directory = resolve(rootDir, SITE_POSTER_DIR);
 
   mkdirSync(directory, { recursive: true });
 
-  for (const [name, svg] of Object.entries(sitePosters())) {
+  for (const [name, svg] of Object.entries(await drawnByName((offered) => offered.sitePosters()))) {
     writeFileSync(resolve(directory, `${name}.svg`), svg, "utf8");
     writeFileSync(resolve(directory, `${name}.webp`), await siteImageOf(svg));
     console.log(`${SITE_POSTER_DIR}/${name}.webp`);
   }
 };
 
-const CONTACT_SHEET = "contact-sheet.png";
-
 const drawGallery = async (): Promise<void> => {
   const directory = resolve(rootDir, GALLERY_DIR);
-  const drawings = gallery();
+  const drawings = await everyDrawing((offered) => offered.gallery());
 
   mkdirSync(directory, { recursive: true });
 
@@ -83,10 +69,6 @@ const drawGallery = async (): Promise<void> => {
     console.log(`${GALLERY_DIR}/${drawing.file}.png — ${drawing.asks}`);
   }
 
-  const sheet = contactSheet(`FoolProof — every edge the gallery draws`, drawings);
-
-  writeFileSync(resolve(directory, CONTACT_SHEET), await rasterize(sheet));
-  console.log(`${GALLERY_DIR}/${CONTACT_SHEET} — all ${drawings.length} in one field of view`);
 };
 
 const A_WHOLE_NUMBER = /^-?\d+$/;
@@ -101,49 +83,6 @@ const forgetChat = (args: readonly string[]): void => {
   const gone = repository.forgetChat(Number(asked));
 
   console.log(`chat ${asked}: forgot ${String(gone.games)} games and ${String(gone.players)} players`);
-};
-
-const readEvening = (args: readonly string[]): void => {
-  const asked = args[CHAT_TO_READ];
-
-  if (asked === undefined || !A_WHOLE_NUMBER.test(asked)) {
-    throw new Error("evening needs the chat id whose newest evening should be read");
-  }
-
-  const chatId = Number(asked);
-  const chronology = repository.seriesChronology(chatId);
-
-  if (chronology === null) {
-    console.log(`chat ${asked}: nothing finished here yet`);
-
-    return;
-  }
-
-  const copy = copyIn(createLocaleReader(repository)(chatId));
-  const honours = honoursFor(chronology);
-  const nameOf = new Map(chronology.players.map((one) => [one.playerId, one.displayName]));
-
-  console.log(`${chronology.startedOn} — ${String(chronology.games.length)} games, ${String(chronology.players.length)} players`);
-
-  if (honours === null) {
-    console.log("too few games for awards");
-
-    return;
-  }
-
-  for (const award of honours.awards) {
-    const names = award.winners.map((one) => nameOf.get(one) ?? String(one));
-    const everybody = names.length === chronology.players.length ? EVERY_WINNER : SOME_WINNERS;
-
-    console.log(`${awardTitle(copy, award)} — ${awardWinner(copy, names, everybody)}`);
-    console.log(`    ${awardReason(copy, award)}`);
-  }
-
-  console.log(
-    honours.curse === null
-      ? "no table curse tonight"
-      : `${copy.awardsCurseLabel}: ${copy.curseFact(honours.curse.burns, gameTally(copy, honours.curse.games), honours.curse.predicted)}`
-  );
 };
 
 const TOOLS: Readonly<Record<string, Tool>> = {
@@ -170,11 +109,6 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     usage: "node scripts/tools.ts gallery",
     run: drawGallery,
   },
-  evening: {
-    does: "print the awards a real chat's newest evening would carry, in that chat's own language",
-    usage: "node scripts/tools.ts evening <chat id>",
-    run: readEvening,
-  },
   "forget-chat": {
     does: "delete one chat's games, players and language choice, leaving every other chat alone",
     usage: "node scripts/tools.ts forget-chat <chat id>",
@@ -183,7 +117,7 @@ const TOOLS: Readonly<Record<string, Tool>> = {
   "design-page": {
     does: "redraw every mockup on a Claude Design page, leaving its prose alone",
     usage: "node scripts/tools.ts design-page <page.html> <out.html>",
-    run: (args) => {
+    run: async (args) => {
       const from = args[PAGE_TO_READ];
       const to = args[FILE_TO_WRITE];
 
@@ -191,15 +125,54 @@ const TOOLS: Readonly<Record<string, Tool>> = {
         throw new Error("design-page needs the page to read and the file to write");
       }
 
-      refreshDesignPage(from, to);
+      await refreshDesignPage(from, to);
     },
   },
 };
 
+const offeredByFeatures = async (): Promise<readonly (readonly [string, Tool])[]> =>
+  (await featuresThatDraw()).flatMap((offered) =>
+    Object.entries(offered.tools).map(
+      ([name, tool]) =>
+        [
+          name,
+          {
+            does: tool.does,
+            usage: tool.usage,
+            run: (args: readonly string[]) => {
+              for (const line of tool.say(args)) {
+                console.log(line);
+              }
+            },
+          },
+        ] as const
+    )
+  );
+
+const NOTHING_TAKEN = 0;
+
+const takenTwiceIn = (names: readonly string[]): readonly string[] =>
+  names.filter((name, at) => names.indexOf(name) !== at);
+
+const allOf = (offered: readonly (readonly [string, Tool])[]): Readonly<Record<string, Tool>> => {
+  const taken = takenTwiceIn([...Object.keys(TOOLS), ...offered.map(([name]) => name)]);
+
+  if (taken.length > NOTHING_TAKEN) {
+    throw new Error(
+      `two tools are offered under the name ${taken.join(", ")} — whichever loaded last ` +
+        `would silently win, and the one nobody can reach looks exactly like a tool that works`
+    );
+  }
+
+  return { ...TOOLS, ...Object.fromEntries(offered) };
+};
+
+const everyTool = allOf(await offeredByFeatures());
+
 const listItself = (): void => {
   console.log("tools:");
 
-  for (const [name, tool] of Object.entries(TOOLS)) {
+  for (const [name, tool] of Object.entries(everyTool)) {
     console.log(`  ${name} — ${tool.does}`);
     console.log(`      ${tool.usage}`);
   }
@@ -207,7 +180,7 @@ const listItself = (): void => {
 
 const args = process.argv.slice(AFTER_NODE_AND_SCRIPT);
 const asked = args[TOOL_NAME];
-const tool = asked === undefined ? undefined : TOOLS[asked];
+const tool = asked === undefined ? undefined : everyTool[asked];
 
 if (asked === undefined) {
   listItself();

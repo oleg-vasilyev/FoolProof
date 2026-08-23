@@ -1,15 +1,15 @@
 import { Locale } from "#shared/locale/locales.ts";
+import type { Drawing } from "#shared/drawings/drawings-contract.ts";
+import { LONGEST_NAME } from "#shared/table/table-limits.ts";
 import { copyIn } from "#scoresheet/copy.ts";
 import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import type { Finalist, SeriesChronology } from "#shared/repository/repository-contract.ts";
 import { handleOf } from "#scoresheet/render/poster-baseboard.ts";
-import { BOT_HANDLE } from "./bot-handle.ts";
-import { personalCards } from "./gallery-careers.ts";
+import { BOT_HANDLE } from "#scoresheet/samples/sample-handle.ts";
+import { personalCards } from "#scoresheet/samples/career-edges.ts";
 
-
-export const GALLERY_DIR = "reports/gallery";
 
 const GALLERY_DATE = "2026-08-11";
 
@@ -120,7 +120,7 @@ const WIDEST_HANDLE = handleOf("W".repeat(32));
 
 const SHORTEST_HANDLE = handleOf("durak");
 
-const THE_LONGEST_NAME = "Вильгельмина-Аполлинария".padEnd(32, "я");
+const THE_LONGEST_NAME = "Вильгельмина-Аполлинария".padEnd(LONGEST_NAME, "я");
 
 const A_SINGLE_GAME = 1;
 
@@ -168,7 +168,7 @@ const EARLY_LEAVER = 4;
 
 const WANDERER = 5;
 
-export const GALLERY: readonly Case[] = [
+const GALLERY: readonly Case[] = [
   {
     name: "one-game",
     locale: Locale.En,
@@ -282,11 +282,6 @@ export const GALLERY: readonly Case[] = [
   },
 ];
 
-export interface Drawing {
-  readonly file: string;
-  readonly asks: string;
-  readonly svg: string;
-}
 
 const drawingsFor = (shown: Case): readonly Drawing[] => {
   const copy = copyIn(shown.locale);
@@ -310,6 +305,8 @@ const drawingsFor = (shown: Case): readonly Drawing[] => {
         ]),
   ];
 };
+
+export const galleryEvenings = (): readonly SeriesChronology[] => GALLERY.map(eveningOf);
 
 export const gallery = (): readonly Drawing[] => [
   ...GALLERY.flatMap(drawingsFor),

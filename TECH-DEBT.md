@@ -100,10 +100,9 @@ would cost more than that at every call site.
 
 `merge-names/render/game-tally.ts` and `scoresheet/render/session-tally.ts` both turn
 a number into `1 game` / `12 games`. The duplication is forced from two directions: a
-feature may not import another, and choosing between the singular and the plural is
-exactly the decision `copy.en.ts` is forbidden to make, so it cannot live in the copy
-table either. The scoresheet's copy also needed `1 player` / `3 players`, which is
-why its version is named after the session rather than the game.
+feature may not import another, and choosing between singular and plural is exactly
+the decision `copy.en.ts` is forbidden to make. The scoresheet's copy also needed
+`1 player` / `3 players`, which is why its version is named after the session.
 
 **Move it to `shared/text/` when a third feature needs to count something.** Four
 lines twice is cheaper than a shared module with two callers.
@@ -128,11 +127,10 @@ first time the fake is caught disagreeing with a real signature.
 
 `should register a handler for SIGTERM` and `should run the same shutdown on SIGTERM`
 pass under `npm test` and are reported failed in every Stryker run, on any `--mutate`
-target — including files that have nothing to do with signals. Stryker carries on
-because both cover zero mutants, so the score is honest and the gate is not lying;
-what is lost is two cases' worth of killing power over `main.ts`, and a pair of red
-lines in every mutation run that a reader learns to skip past. The cause is in how
-the runner's environment handles a process-level `SIGTERM` listener, not in the
+target — including files with nothing to do with signals. Stryker carries on because
+both cover zero mutants, so the score is honest; what is lost is two cases' worth of
+killing power over `main.ts` and a pair of red lines a reader learns to skip. The
+cause is the runner's handling of a process-level `SIGTERM` listener, not the
 assertions.
 
 **Chase it when a mutant in `main.ts`'s signal wiring survives**, or when the noise
@@ -146,11 +144,11 @@ gives the loop back. The encode after it does not: `asPng()` is synchronous and
 costs in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else) still stops
 everything while it runs.
 
-Closing it means running the whole rasterizer in a `node:worker_threads` worker:
-either one spawned per poster, which costs its own startup and undoes some of the
-saving, or a pool, which is a lifecycle to own — starting it, keeping it warm,
-draining it on shutdown alongside the stops `main.ts` already composes. That is a
-real amount of machinery for a bot whose busiest hour is one Friday evening.
+Closing it means running `shared/drawing/rasterize.ts` in a `node:worker_threads`
+worker: one per poster, which costs its own startup and undoes some of the saving,
+or a pool, which is a lifecycle to own — starting it, keeping it warm, draining it
+alongside the stops `main.ts` already composes. Real machinery for a bot whose
+busiest hour is one Friday evening.
 
 **Pick it up when more than a handful of chats use the bot at once**, or the first
 time a tap on a live card visibly waits behind somebody else's `/stats`. The number
@@ -202,29 +200,27 @@ notice.
 
 ---
 
-## Every `docs:check` rule is proven once, by hand, and never again
+## Half of `docs:check` is proven once, by hand, and never again
 
-`scripts/` has no specs and Stryker mutates only `src/**`, so the checks in
-`scripts/check-docs.ts` are held up by lint and the type checker alone. Neither can
-see the thing that actually goes wrong with them: a rule that runs, reports nothing,
-and would report nothing whatever the repository looked like. That has already
-shipped here — a poster rule whose regexp lost a backslash on the way through a
-generated patch matched every path and passed forever, and the same escaping bug
-was caught again while writing the approved-cases rule, one substring check away
-from shipping twice.
+The failure these rules have is peculiar to them: a rule that runs, reports nothing,
+and would report nothing whatever the repository looked like. It has shipped three
+times — a poster rule whose regexp lost a backslash matched every path forever; the
+same escaping bug caught again one substring from shipping; and the copy-table rule
+blind to a counted word after the non-breaking space a poster line uses, which no
+probe found because the space was invisible in the source.
 
-The standing answer is the probe: break each branch on purpose, watch the complaint,
-put the repository back. It works, it caught both, and it is a thing a person
-remembers to do rather than a thing that happens. A rule added in a hurry is a rule
-with no proof, and it looks exactly like the others.
+Half the answer is now mechanical: splitting `check-docs.ts` into `scripts/docs/`
+put every rule that *reasons* — a trigger, a mermaid lane, a PNG header, a baked
+word form — behind a pure function taking its subject as an argument, and writing
+one of those specs is what found the third bug. The stubbed filesystem this entry
+feared was not needed. The other half still reads the repository — links, budgets,
+the schema, the committed pictures — and there the standing answer is the probe:
+break it on purpose, watch the complaint, put it back, which a person remembers
+rather than something that happens.
 
-Nothing here is cheap. Specs for `scripts/` would be the first in the folder and
-would need the whole filesystem stubbed; running each rule against a fixture
-repository means building one.
-
-**Give `check-docs.ts` a spec the first time a rule is found to have been passing
-vacuously in the field** — that is the second occurrence of a failure that has now
-happened once, and it is the evidence that a probe at authoring time is not enough.
+**Build the fixture repository the first time a filesystem rule is found to have
+been passing vacuously in the field.** Until then the probe is cheaper than the
+fixture, and the rules that could be tested without one already are.
 
 ---
 
@@ -238,10 +234,8 @@ happens afterwards, by hand, over the MCP. So a phase that sees the gate red and
 reruns the tool goes green without the page ever receiving anything, and `git add -A`
 takes the marker along. The `update-the-design-page` skill orders the two — commit
 the marker only after the byte-identical read-back — and that ordering is prose,
-which is the kind of thing this gate exists because prose failed at.
-
-Nothing cheap closes it: the page lives behind a login, so no check that runs in CI
-can ask what the page currently holds.
+which is the kind of thing this gate exists because prose failed at. Nothing cheap
+closes it: the page lives behind a login, so no CI check can ask what it holds.
 
 **Move the marker's write to the end of the push when the MCP can be driven from a
 script** — or the first time the gate is cleared by a rerun that pushed nothing,
@@ -564,6 +558,26 @@ are statistics.
 percentages are simulated, and `RAREST_FIRST` is a hand-written list precisely so that
 reordering it is one edit. A second column, or a hand-placed thumb on the scale for the
 dozen rules that describe a moment rather than a shape, is the shape of the fix.
+
+## Two names in the drawings layer are one example short of being decided
+
+`samples/` holds the states a feature is worth drawing at — a state, not a picture —
+and `samples/contact-sheet.ts` is the exception that computes coordinates and
+assembles SVG. It is also the one file there Stryker still mutates, because it is
+logic rather than data, and that exception is the tell. It cannot simply move to
+`render/`, where `CLAUDE.md` puts coordinates: `postersOutOfTheGallery` would then
+demand gallery cases for it, and a contact sheet is what the gallery *is*. The
+honest home is `shared/drawing/`, but the sheet reaches for the scoresheet's
+`palette.ts` and `svg-tags.ts`, so that move takes the SVG assembler with it.
+
+`shared/drawings/drawings-contract.ts` has the mirror problem: three of the four
+things it declares are pictures, and the fourth, `tools`, prints text and draws
+nothing — so its name describes three quarters of it.
+
+**Decide both the first time a second feature draws anything.** Then `svg-tags.ts`
+has two callers and moves for its own reasons with the sheet following it, and a
+second dev tool says whether the contract is *drawings plus a passenger* or *what a
+feature lends the tool box*. With one example each, either answer is a coin toss.
 
 ## Not debt, deliberately
 

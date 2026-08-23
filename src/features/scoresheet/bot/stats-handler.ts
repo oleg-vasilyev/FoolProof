@@ -13,7 +13,7 @@ import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { copyIn, type Copy } from "#scoresheet/copy.ts";
 import { gameTally } from "#scoresheet/render/tally-phrases.ts";
 import { handleOf } from "#scoresheet/render/poster-baseboard.ts";
-import { rasterize } from "#scoresheet/bot/rasterizer.ts";
+import { rasterize } from "#shared/drawing/rasterize.ts";
 
 
 const SHEET_FILENAME = "chronology.png";
