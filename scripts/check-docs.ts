@@ -534,6 +534,12 @@ const FLOW_DOCUMENT = "DEVELOPMENT-FLOW.md";
 
 const SKILLS_FOLDER = ".claude/skills";
 
+const AGENTS_FOLDER = ".claude/agents";
+
+const A_MARKDOWN_FILE = /\.md$/;
+
+const A_NAMED_AGENT = /the ([a-z][a-z0-9-]*[a-z0-9]) agent/g;
+
 const A_NAMED_SKILL = /the ([a-z][a-z0-9-]*[a-z0-9]) skill/g;
 
 const A_NAMED_COMMAND = /npm run ([a-z][a-z:-]*[a-z])/g;
@@ -604,9 +610,26 @@ const stagesOutOfStep = (): readonly string[] => {
 const flowOutOfStep = (): readonly string[] => {
   const drawing = read(FLOW_DOCUMENT);
   const installed = new Set(readdirSync(SKILLS_FOLDER));
+  const defined = readdirSync(AGENTS_FOLDER).map((file) => file.replace(A_MARKDOWN_FILE, ""));
+  const sentAn = new Set(namesIn(drawing, A_NAMED_AGENT));
   const scripts = new Set(Object.keys(JSON.parse(read("package.json")).scripts));
 
   return [
+    ...[...sentAn]
+      .filter((agent) => !defined.includes(agent))
+      .map(
+        (agent) =>
+          `${FLOW_DOCUMENT}: sends an errand to the "${agent}" agent, ` +
+          `which is not in ${AGENTS_FOLDER}`
+      ),
+    ...defined
+      .filter((agent) => !sentAn.has(agent))
+      .map(
+        (agent) =>
+          `${AGENTS_FOLDER}/${agent}.md: an agent the drawing never sends an errand to — ` +
+          `the map is how anybody learns this agent exists, and one absent from it is one ` +
+          `nobody will think to run`
+      ),
     ...namesIn(drawing, A_NAMED_SKILL)
       .filter((skill) => !installed.has(skill))
       .map(
@@ -621,6 +644,73 @@ const flowOutOfStep = (): readonly string[] => {
           `${FLOW_DOCUMENT}: draws "npm run ${command}", which package.json does not have`
       ),
   ];
+};
+
+const A_REQUEST_FROM_CLAUDE = /^\s*C->>([A-Za-z][A-Za-z0-9]*):/;
+
+const A_HANDBACK_TO_CLAUDE = /^\s*([A-Za-z][A-Za-z0-9]*)-?->>C:/;
+
+const AN_ACTOR = /^\s*actor ([A-Za-z][A-Za-z0-9]*) as /m;
+
+const CLAUDES_LANE = "participant C as ";
+
+const NOBODY = "";
+
+const CLAUDE = "C";
+
+interface Errand {
+  readonly asked: string;
+  readonly complaints: readonly string[];
+}
+
+const NOTHING_ASKED: Errand = { asked: NOBODY, complaints: [] };
+
+const afterFlowLine = (errand: Errand, line: string, owner: string): Errand => {
+  const asked = A_REQUEST_FROM_CLAUDE.exec(line)?.[FIRST_GROUP];
+
+  if (asked !== undefined) {
+    return asked === CLAUDE ? errand : { ...errand, asked };
+  }
+
+  const answering = A_HANDBACK_TO_CLAUDE.exec(line)?.[FIRST_GROUP];
+
+  if (
+    answering === undefined ||
+    answering === owner ||
+    errand.asked === NOBODY ||
+    answering === errand.asked
+  ) {
+    return errand;
+  }
+
+  return {
+    asked: NOBODY,
+    complaints: [
+      ...errand.complaints,
+      `${FLOW_DOCUMENT}: the errand went to ${errand.asked} and ${answering} answered it — a ` +
+        `reader follows a lane down the page, so a scene that changes lanes halfway shows a ` +
+        `participant handing back work it was never given. Both scenes that did this were made ` +
+        `by generalising a participant and moving only the arrows that named it — ${line.trim()}`,
+    ],
+  };
+};
+
+const flowRepliesLeaveTheLaneTheyWereAskedOf = (): readonly string[] => {
+  const drawing = read(FLOW_DOCUMENT);
+
+  if (!drawing.includes(CLAUDES_LANE)) {
+    return [
+      `${FLOW_DOCUMENT}: this check follows the errands leaving "${CLAUDES_LANE}", which the ` +
+        `drawing no longer declares — a check matching nothing reads exactly like one with ` +
+        `nothing to report, so teach it the new id rather than leaving it quiet`,
+    ];
+  }
+
+  const owner = AN_ACTOR.exec(drawing)?.[FIRST_GROUP] ?? NOBODY;
+
+  return drawing
+    .split(A_LINE)
+    .reduce((errand, line) => afterFlowLine(errand, line, owner), NOTHING_ASKED).complaints;
 };
 
 const A_MERMAID_FENCE = /```mermaid\n([\s\S]*?)```/g;
@@ -642,10 +732,6 @@ const mermaidLinesCarryingASeparator = (): readonly string[] =>
         )
     )
   );
-
-const AGENTS_FOLDER = ".claude/agents";
-
-const A_MARKDOWN_FILE = /\.md$/;
 
 const unreachableHelp = (): readonly string[] => {
   const session = read(SESSION_DOCUMENT);
@@ -713,6 +799,7 @@ const complaints = [
   ...formsBakedIntoCopy(),
   ...brokenLinks(),
   ...flowOutOfStep(),
+  ...flowRepliesLeaveTheLaneTheyWereAskedOf(),
   ...mermaidLinesCarryingASeparator(),
   ...stagesOutOfStep(),
   ...unreachableHelp(),

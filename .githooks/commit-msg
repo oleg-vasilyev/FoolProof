@@ -46,7 +46,9 @@ if [ "$process_changed" -eq 0 ]; then
   exit 0
 fi
 
-if echo "$staged" | grep -qE '^(\.claude/|CLAUDE\.md$|package\.json$|\.githooks/|\.github/)'; then
+# scripts/ is on this list because a gate is a backer too: the errand-lane check in
+# check-docs.ts is the only thing standing behind the drawing's agent lanes.
+if echo "$staged" | grep -qE '^(\.claude/|CLAUDE\.md$|package\.json$|\.githooks/|\.github/|scripts/)'; then
   exit 0
 fi
 

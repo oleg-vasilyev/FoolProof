@@ -75,6 +75,26 @@ not optimal, here is what moved and here are the numbers that forced it. The
 five questions above are where those numbers come from; a redraw argued from an
 impression rather than a count is the one that should not have been made.
 
+**A correction is not a redraw.** The rules above are written for a step that
+*moved*, and they demand the thing it now stands on. A drawing can also be simply
+wrong — saying something that was never true of this project — and then nothing
+behind it changed, because the drawing was the only thing out of step. Fixing that
+owes the `Flow:` paragraph like any other edit — naming what was wrong and how long
+it had been — and owes the closing message, but it owes no accompanying rule,
+because no rule was ever what it described.
+
+**Generalising a participant moves every arrow in its scenes, not the ones that
+name it.** That is how the only such error so far was made, and it was made here:
+one phase widened the reviewer's lane into an agent lane serving six agents, moved
+the two arrows that said *the poster-designer agent* and *the plan-reviewer agent*,
+and left the work and the reply behind in the subagent lane. The drawing then showed
+a request going to one participant and the answer coming back from another, and it
+shipped that way — caught by the owner the next day, reading his own map. A lane
+changing mid-scene is invisible while reading a single line, which is exactly why
+it survived the redraw that caused it, so the guard is mechanical now: `docs:check`
+follows each errand from Claude Code to whoever hands work back, and fails when
+that is not the participant the errand went to.
+
 Both halves are enforced, because both were reasoned about once and would
 otherwise be forgotten by the phase that most needs them. A `PostToolUse` hook
 says the obligation out loud the moment the file is edited, and
@@ -83,7 +103,9 @@ says the obligation out loud the moment the file is edited, and
 — a skill, `CLAUDE.md`, a command, a hook, the CI. A drawing that changes while
 nothing it draws does has stopped describing this project and started
 describing an intention. `npm run docs:check` guards the same seam from the
-other side: every skill and every `npm run` the drawing names has to exist.
+other side: every skill and every `npm run` the drawing names has to exist, every
+agent in `.claude/agents/` has to be sent an errand by name, and every errand has to
+be answered by the participant it was given to.
 
 ## The output is a diff, not a paragraph
 

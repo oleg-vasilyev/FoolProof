@@ -38,11 +38,10 @@ sequenceDiagram
     autonumber
     actor U as Product owner
     participant C as Claude Code, the AI developer
-    participant D as Claude Design, the design system
+    participant D as Claude Design, the design page
     participant K as Project skills, .claude/skills
-    participant S as Subagents, parallel hands on one phase
-    participant H as Auto-linter, fires on its own
-    participant R as An independent agent — designer, reader, reviewer
+    participant S as Subagents, hands I brief myself for one piece of this phase
+    participant R as Named agents, .claude/agents
     participant G as GitHub, repository and CI
     participant V as Production server
 
@@ -59,13 +58,13 @@ sequenceDiagram
     U-->>C: agreed, or cut it down
     opt the feature affects the app's visuals
         C->>R: the poster-designer agent — the requirements, in words
-        S->>D: read the design system before drawing anything
-        D-->>S: every colour, size and rule the existing posters obey
-        S->>S: name the cases the drawing must survive before drawing: emptiest, fullest, widest, each optional part gone, a tie
-        S->>S: draw every named case, rasterize with the real fonts, look at each PNG, redraw
-        S->>S: lay them into one contact sheet: every case, the neighbour it will sit next to, and an inventory naming every mark and label in a player's words
-        S->>C: commit the named cases as docs/mockups/[gallery script].cases.txt — docs:check later holds the gallery to them
-        S-->>C: the sheet, the SVG behind each panel, and which numbers the drawing assumes exist
+        R->>D: read the design system before drawing anything
+        D-->>R: every colour, size and rule the existing posters obey
+        R->>R: name the cases the drawing must survive before drawing: emptiest, fullest, widest, each optional part gone, a tie
+        R->>R: draw every named case, rasterize with the real fonts, look at each PNG, and redraw whatever fails the look
+        R->>R: lay them into one contact sheet: every case, the neighbour it will sit next to, and an inventory naming every mark and label in a player's words
+        R->>C: the named cases, committed as docs/mockups/[gallery script].cases.txt — docs:check later holds the gallery to them
+        R-->>C: the sheet, the SVG behind each panel, and which numbers the drawing assumes exist
         C->>U: the contact sheet for approval — everything to compare, in one image
         U-->>C: approved, or changes
     end
@@ -80,8 +79,8 @@ sequenceDiagram
     C->>C: now, knowing the rules, freeze the interfaces: what each function takes and returns
     opt the phase adds something a player can reach, or changes a contract other code depends on
         C->>R: the plan-reviewer agent — the owner's own words and the frozen signatures, nothing retold
-        S->>S: derive the rest from the repository: the schema, the limits, what already solves this
-        S-->>C: what the plan promises, each checked against a file, and what it has not accounted for
+        R->>R: derive the rest from the repository: the schema, the limits, what already solves this
+        R-->>C: what the plan promises, each checked against a file, and what it has not accounted for
         opt a finding changes what the owner already approved
             C->>U: the finding, while nothing is written yet
             U-->>C: decided
@@ -90,15 +89,14 @@ sequenceDiagram
     end
 
     rect rgb(245, 245, 245)
-    note over C,H: Stage 2. Writing the code and the tests
+    note over C,S: Stage 2. Writing the code and the tests
     C->>C: cut the work into pieces: what runs in parallel, what I keep — the shared shape, the copy, the risky core
     C->>S: briefs to every subagent in one go, each with its own piece and its own skill
     par in parallel
         loop one file at a time
             C->>C: write the core of the feature
-            note right of H: saving a file fires this check by itself
-            H--)C: style findings for exactly that file
-            opt findings exist
+            note over C: saving the file fires the lint hook on it, unasked
+            opt it found something
                 C->>C: fix now, before the next file
             end
             C->>C: write the unit tests: everything around the file replaced with stubs
@@ -111,20 +109,19 @@ sequenceDiagram
     end
 
     rect rgb(240, 253, 244)
-    note over C,H: Stage 3. Quality gates
+    note over C,K: Stage 3. Quality gates
     C->>K: the finish-phase skill
     K-->>C: the order of the gates and their thresholds
-    loop while any gate is red — fix, then re-run only the one that fell
-        C->>C: npm run check:phase — one command, every gate in a row, the tests run once
-        C->>C: lint and types, the suite under coverage with a 70% floor
-        C->>C: Stryker mutates the diff — the tests must notice, 85% threshold
-        C->>C: e2e over the diff — the real bot against a fake Telegram
+    C->>C: npm run check:phase — one command, every gate in a row, the tests run once
+    note over C: lint and types · the suite under coverage, 70% floor · Stryker on the diff, 85% of the mutants must die · e2e over the diff, the real bot against a fake Telegram
+    loop while any gate is red
+        C->>C: fix it, then re-run that gate alone — never the whole chain
     end
     end
 
     rect rgb(240, 249, 255)
     note over C,R: Stage 4. Review by an agent that did not write the diff
-    C->>R: the phase's whole diff in one piece — including deploy scripts, units and CI, which have no automatic gate at all
+    C->>R: the phase-reviewer agent — the whole diff in one piece, deploy scripts, service units and CI included, which no automatic gate covers at all
     R-->>C: findings, most severe first
     loop for each finding
         alt worth fixing now
@@ -133,7 +130,7 @@ sequenceDiagram
             C->>C: record it in TECH-DEBT.md with the trigger that would make it worth doing
         end
     end
-    opt the feature gained an inline keyboard, or a bug got past the units
+    opt the feature gained an inline keyboard, or a bug got past the unit tests
         C->>K: the write-an-e2e-scenario skill
         K-->>C: when a scenario is owed, and how to drive a whole evening against a fake Telegram
         C->>C: write the scenario and play it — the real bot on a real database
@@ -143,9 +140,9 @@ sequenceDiagram
     rect rgb(255, 247, 237)
     note over C,R: Stage 5. Reading every sentence, then syncing every picture
     opt the change touched a copy table, or any prose a player reads
-        C->>R: the copy-reader agent — the two tables and the folder their call sites are in, nothing more
+        C->>R: the copy-reader agent — both language tables and the folder their call sites are in, nothing more
         R-->>C: every line written out with real values in it, then the ones no person would say — each with a blunt verdict and a better line
-        C->>C: take the wording, and follow the readings that turned out to be a claim no rule earns
+        C->>C: take the better lines as written, and where a sentence claimed more than the rule delivers, fix the code behind it
     end
     opt the change touched what the bot or the site draws
         opt the phase added a poster the gallery has never drawn
@@ -157,10 +154,10 @@ sequenceDiagram
         C->>R: the poster-reader agent — the contact sheet, every regenerated PNG, the lines to read, but never what any of it is for
         R-->>C: what each line says to somebody who has never seen the code, then the set read against itself
         opt the phase had a mockup approved at stage 1
-            C->>R: a second reading, this time with the approved sheet — what shipped differs from what was signed off how?
+            C->>R: a second reading, this time with the approved sheet — how does what shipped differ from what was signed off?
             R-->>C: every difference it can see, without ruling on which were meant
         end
-        C->>C: decide which readings are wrong, and what the line should say instead
+        C->>C: for each reading that surprised, decide whether the reading or the line is wrong — and what the line should say instead
         opt the redrawn pictures also live on the design page
             C->>K: the update-the-design-page skill
             K-->>C: pull the page, splice the real drawings in, bump the revision
@@ -173,7 +170,7 @@ sequenceDiagram
     note over C,K: Stage 6. Retrospective — fixing the process and the documents
     C->>K: the retrospective skill
     K-->>C: five questions about how the work went, each answered with a count
-    C->>C: count in numbers: what was rebuilt, what ran for nothing
+    C->>C: answer them: what was rebuilt, what ran for nothing — each a number, not an impression
     C->>K: land a new rule in the skills, so the mistake cannot repeat
     opt the lesson changes the flow itself, not just a rule inside a skill
         C->>C: redraw this very diagram, and keep the evidence that forced it for the closing report
@@ -190,7 +187,7 @@ sequenceDiagram
     C->>K: the write-a-commit skill
     K-->>C: the title says what the bot does differently, the body says why the old shape was wrong, plus the Gates paragraph
     C->>G: commit and push to main
-    G->>G: CI on push — npm run check:push: lint, types, the e2e harness's own tests, documents — the site ships straight from main, the app's tests wait for the tag
+    G->>G: CI on push runs npm run check:push — lint, types, the e2e harness's own tests and the docs check. The site ships straight from main, so the app's full suite waits for the tag
     alt push check red
         G-->>C: the failure report
         C->>C: fix and push again
@@ -219,14 +216,14 @@ sequenceDiagram
         R->>G: clone the released tag cold and run the full battery on it — trust nothing already on this machine
         R->>V: ask the running bot and its server what is true, rather than what should be
         V-->>R: the service, the timers, the disk, which tag is actually deployed
-        R->>R: execute the edges instead of reasoning about them, and write evidence beside every claim
+        R->>R: run the edge cases instead of reasoning about them, and write evidence beside every claim
         R-->>C: findings, most severe first — and not one thing repaired
         loop for each finding
             C->>C: check it myself before believing it — a confident agent is not evidence
             alt worth doing now
                 C->>C: it becomes the next phase, and that phase owes all seven gates
             else not now
-                C->>C: TECH-DEBT.md with the trigger, or persistent memory when the lesson outlives the code
+                C->>C: record it in TECH-DEBT.md with its trigger, or in persistent memory when the lesson outlives the code
             end
         end
         C->>U: what was found, what I verified, and the one thing I would do first
