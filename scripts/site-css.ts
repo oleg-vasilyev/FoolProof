@@ -6,9 +6,9 @@ import { rootDir } from "#shared/config/env.ts";
 
 const TAILWIND_MANIFEST = "node_modules/tailwindcss/package.json";
 
-export const SITE_CSS_SOURCE = "scripts/site.css";
+export const SITE_CSS_SOURCE = "docs/styles.source.css";
 
-export const SITE_CSS = "docs/styles.css";
+export const SITE_CSS = "docs/styles.computed.css";
 
 export const SITE_PAGES = ["docs/index.html", "docs/ru/index.html"];
 

@@ -27,7 +27,7 @@ Route by what *kind* of fact it is, not by which document you happen to be editi
 | What the bot must do — a state, a refusal, a limit, a schema decision, a measured number | `PLAN.md` | it would survive a rewrite in another language |
 | How code here must be written | `CLAUDE.md` | a violation is possible in a file nobody is currently thinking about |
 | A procedure with an obvious trigger — adding X, closing Y | a **skill** | you would know to ask for it by name |
-| Rules for a folder that could be deleted as a unit | a `README.md` **inside that folder** | it leaves with the folder |
+| Rules for a folder that could be deleted as a unit — `e2e/`, `deploy/` | a `README.md` **inside that folder** | it leaves with the folder |
 | Something deliberately unfinished, plus the trigger to pick it up | `TECH-DEBT.md` | it names a trigger, not a wish |
 | Why a non-obvious line of configuration exists | a comment **in that config file** | config files are exempt from the no-comments rule |
 | The story that explains a rule | one sentence beside the rule; the long version in the skill or `PLAN.md` | it is told once |
@@ -77,10 +77,9 @@ Two consequences worth spelling out, because both have been got wrong:
 3. **Write it once, in the home the table names.** If you find yourself explaining
    the same thing in a second file "briefly", stop: that is the duplication being
    born. A link is shorter and cannot drift.
-4. **Run `npm run docs:check`.** It is the gate that catches most of what this file
-   asks for, and it grows — the schema and the poster mockups joined it after this
-   list was first written. What it checks is enumerated once, in `CLAUDE.md`; do not
-   re-list it here. Read the complaint rather than guessing which check fired.
+4. **Run `npm run docs:check`.** It catches most of what this file asks for, and it
+   grows. No file lists the checks themselves: every complaint carries its own reason,
+   so read the complaint rather than guess which check fired.
 
 ## A drawing is prose that can fail to be a drawing
 

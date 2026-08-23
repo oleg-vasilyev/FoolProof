@@ -50,15 +50,21 @@ a convention violation, not a nit — read the message before reaching for a
 disable comment, which is itself banned in `src/`.
 
 **A new check is probed against input shaped differently, not only input that is
-wrong.** Breaking today's file proves the rule fires on today's file, which is the
-easy half. A gate added to catch silent failures failed silently in its first hour:
-it read an `<img>` only when `src`, `width` and `height` came first, in that order,
-so a `class` in front of them would have dropped that image out of every check it
-performs — including the one weighing the page — without a word. The probe that
-matters is the one that changes the *shape* of what the rule reads: reorder,
-rename, leave a field out, hand it a format it has never seen. Each of those
-deserves its own complaint, and a rule that cannot parse its subject must say so
-rather than skip it.
+wrong.** Breaking today's file proves the rule fires on today's file, which is the easy
+half. A gate meant to catch silent failures failed silently in its first hour: it read
+an `<img>` only when `src`, `width` and `height` came in that order, so a `class` in
+front of them dropped the image out of every check, weighing included, without a word.
+The probe that matters changes the *shape* of what the rule reads: reorder, rename,
+leave a field out, hand it a format it has never seen. A rule that cannot parse its
+subject must say so rather than skip it.
+
+**A new check's first output is not a measurement.** Calibrate it against cases whose
+answer you already know before quoting a number from it. One written here to ask whether
+every `TECH-DEBT.md` entry names a trigger reported thirteen entries missing one, and the
+number went to the owner as a finding; the file was in fact clean, and the check had
+simply never been shown a trigger phrased *if*, *the next time* or *with the next phase
+that*. A check that cries wolf teaches its reader to skip it, so widening its vocabulary
+is the fix and never rewording the subject to suit it.
 
 **Copying a call from another module means copying what guards it.** The site's
 image writer took resvg's render call out of `rasterizer.ts` and left
@@ -68,12 +74,11 @@ gate green: the SVG still matched, the shape still matched, and the weight match
 *better*. If the original refuses at construction, the copy owes the same refusal;
 better still, import the guard and the list it guards rather than retyping them.
 
-**An edit made by a script ends with a lint run, not with a glance.** The editor
-hook lints a file as it is written, so a hand edit tells you at once; a patch applied
-by a throwaway script gets no such feedback, and the mistake it makes is always the
-same shape — a line inserted without the blank lines around it. Twice that has been
-discovered by the phase battery stopping on its first gate, which is a two-minute
-answer to a two-second question.
+**An edit made by a script ends with a lint run, not with a glance.** The editor hook
+lints a file as it is written; a patch applied by a throwaway script gets no such
+feedback, and its mistake is always the same shape — a line inserted without the blank
+lines around it, or a deletion leaving two. Twice the phase battery has stopped on its
+first gate over one, which is a two-minute answer to a two-second question.
 
 **A lock file rewritten here can be wrong somewhere else, and the dry run will not
 say so.** `npm install` on Windows prunes optional packages this platform has no

@@ -1,7 +1,7 @@
 @import "tailwindcss" source(none);
 
-@source "../docs/index.html";
-@source "../docs/ru/index.html";
+@source "./index.html";
+@source "./ru/index.html";
 
 @theme {
   --color-ground: #0b0a09;

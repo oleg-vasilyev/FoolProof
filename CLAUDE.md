@@ -24,10 +24,13 @@ beside the code it describes:
 | A copy table, read as finished sentences in both languages | `copy-reader` agent |
 | A weekly look at the project and its server | `deep-checkup` agent |
 
-Four documents, one job each:
+Five documents, one job each:
 
 - **`README.md`** — what the bot is and how to run it. For someone arriving at the
   repository.
+- **`deploy/README.md`** — the operator's half: provisioning, the units, the deploy
+  timer, the backup, and what to do when the bot is unwell. It sits beside the units
+  it describes so it leaves with them.
 - **`PLAN.md`** — what the bot does and why: state machine, data model, invariants,
   edge cases, and the design dead ends already paid for.
 - **`CLAUDE.md`** — this file. Style, layering, testing, gates.
@@ -41,15 +44,13 @@ the schema. If no, it belongs here. **A fact lives where its reason lives; the o
 file gets a pointer, never a retelling.** When the two disagree, `PLAN.md` wins on
 behaviour and this file wins on style.
 
-That rule has needed enforcing twice, so it is now enforced: `npm run docs:check`
-(part of `npm run check`) resolves every cross-document link and anchor, checks this
-tree against the real folders, checks `README.md`'s script table against
-`package.json`, compares `PLAN.md`'s schema and `docs/mockups/` against what the
-code actually produces, holds the poster gallery to the edge cases approved on a
-mockup, weighs and measures every picture the site serves, and holds **this file to a
-line budget**. The budget is what makes appending cost something — when a new rule
-pushes it over, move an old paragraph into the skill it belongs to instead of raising
-the number. The `write-a-doc` skill routes a fact to its file.
+That rule has needed enforcing twice, so it is enforced: `npm run docs:check` holds
+every document against the repository it describes — links, tables, the schema, the
+pictures, the flow drawing, and **a line budget on this file, on `TECH-DEBT.md` and on
+every skill**. Each complaint carries its own reason, which is why none is repeated
+here. The budget makes appending cost something: a new rule that pushes a file over
+displaces an old paragraph into the file loaded when it applies, and `retrospective`
+says which paragraphs may go. `write-a-doc` routes a fact to its file.
 
 ## Code style
 
@@ -375,4 +376,4 @@ down — no `process.env` in feature code. Two rules follow from one loaded file
 `loadEnv(source = process.env)` takes its source as an argument. That is not
 configurability — it is the only way to exercise the `undefined` branch its type
 demands, since `process.env` never holds one. What a run costs whoever operates it
-is in [README.md](README.md#running-it-on-a-server).
+is in [deploy/README.md](deploy/README.md#running-it-on-a-server).

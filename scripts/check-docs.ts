@@ -12,11 +12,24 @@ const DOCUMENTS = [
   "CLAUDE.md",
   "TECH-DEBT.md",
   "e2e/README.md",
+  "deploy/README.md",
 ];
 
 const SESSION_DOCUMENT = "CLAUDE.md";
 
 const SESSION_LINE_BUDGET = 380;
+
+const DEBT_DOCUMENT = "TECH-DEBT.md";
+
+const DEBT_LINE_BUDGET = 620;
+
+const SPEC_DOCUMENT = "PLAN.md";
+
+const SPEC_CONTENTS = "What is in here";
+
+const A_SPEC_SECTION = /^## (.+)$/gm;
+
+const A_CONTENTS_LINK = /\[[^\]]+\]\(#([a-z0-9-]+)\)/g;
 
 const TREE_DOCUMENT = "README.md";
 
@@ -31,6 +44,8 @@ const SECOND_GROUP = 2;
 const ONE_COMMAND = 1;
 
 const ROOMY_ENOUGH = 9;
+
+const LAST = -1;
 
 const read = (file: string): string => readFileSync(file, "utf8").replaceAll("\r\n", "\n");
 
@@ -131,14 +146,54 @@ const requiredKeysOutOfStep = (): readonly string[] => {
 
 const linesIn = (document: string): number => read(document).split(A_LINE).length;
 
-const overBudget = (): readonly string[] =>
-  linesIn(SESSION_DOCUMENT) <= SESSION_LINE_BUDGET
+const specContentsOutOfStep = (): readonly string[] => {
+  const spec = read(SPEC_DOCUMENT);
+  const sections = [...spec.matchAll(A_SPEC_SECTION)]
+    .map((match) => match[FIRST_GROUP] ?? "")
+    .filter((section) => section !== SPEC_CONTENTS);
+  const contents = spec.split(`## ${SPEC_CONTENTS}`).at(LAST)?.split("\n## ").at(NOTHING) ?? "";
+  const listed = new Set(
+    [...contents.matchAll(A_CONTENTS_LINK)].map((link) => link[FIRST_GROUP] ?? "")
+  );
+  const anchors = new Set(sections.map(anchorOf));
+
+  return [
+    ...sections
+      .filter((section) => !listed.has(anchorOf(section)))
+      .map(
+        (section) =>
+          `${SPEC_DOCUMENT}: "${section}" is not in "${SPEC_CONTENTS}" — this file is ` +
+          `read by following a link, so a section the list does not carry is one nobody ` +
+          `arrives at`
+      ),
+    ...[...listed]
+      .filter((anchor) => !anchors.has(anchor))
+      .map(
+        (anchor) =>
+          `${SPEC_DOCUMENT}: "${SPEC_CONTENTS}" points at #${anchor}, which is not a ` +
+          `section here any more — a contents list nobody can follow is worse than none`
+      ),
+  ];
+};
+
+const overBudget = (): readonly string[] => [
+  ...(linesIn(SESSION_DOCUMENT) <= SESSION_LINE_BUDGET
     ? []
     : [
         `${SESSION_DOCUMENT}: ${String(linesIn(SESSION_DOCUMENT))} lines, budget is ` +
           `${String(SESSION_LINE_BUDGET)} — move a paragraph into a skill rather than ` +
           `raising the number`,
-      ];
+      ]),
+  ...(linesIn(DEBT_DOCUMENT) <= DEBT_LINE_BUDGET
+    ? []
+    : [
+        `${DEBT_DOCUMENT}: ${String(linesIn(DEBT_DOCUMENT))} lines, budget is ` +
+          `${String(DEBT_LINE_BUDGET)} — this file is re-read at the start of every ` +
+          `phase, so an entry costs every phase that will never pick it up. Close one ` +
+          `whose trigger has fired, or say the same thing in fewer lines, rather than ` +
+          `raising the number`,
+      ]),
+];
 
 const sourceFilesIn = (folder: string): readonly string[] =>
   readdirSync(folder, { withFileTypes: true })
@@ -869,6 +924,67 @@ const flowWouldNotRender = (): readonly string[] => {
   ];
 };
 
+const NOT_A_DEBT = "Not debt, deliberately";
+
+const A_TITLE_AND_ITS_BODY = 2;
+
+const AFTER_THE_PREAMBLE = 1;
+
+const AN_ENTRY = /^## (.+)$/gm;
+
+const A_CONDITION =
+  "when|once|if|until|as soon as|the day|the next time|the first time|the next phase|the phase that";
+
+const A_STATED_CONDITION = new RegExp(`\\b(?:${A_CONDITION})\\b`, "i");
+
+const SOMETHING_IN_BOLD = "**";
+
+const A_TRIGGER_COLUMN = /\|[^|\n]*\bwhen\b[^|\n]*\|/i;
+
+const BETWEEN_PARAGRAPHS = "\n\n";
+
+const lastParagraphOf = (body: string): string => {
+  const paragraphs = body
+    .split(BETWEEN_PARAGRAPHS)
+    .map((paragraph) => paragraph.replaceAll("---", "").trim())
+    .filter((paragraph) => paragraph.length > NOTHING);
+
+  return paragraphs.at(LAST) ?? "";
+};
+
+const namesATrigger = (body: string): boolean => {
+  const closing = lastParagraphOf(body);
+
+  return (
+    (closing.includes(SOMETHING_IN_BOLD) && A_STATED_CONDITION.test(closing)) ||
+    A_TRIGGER_COLUMN.test(closing)
+  );
+};
+
+const entriesOf = (document: string): readonly { title: string; body: string }[] => {
+  const pieces = read(document).split(AN_ENTRY).slice(AFTER_THE_PREAMBLE);
+
+  return pieces.flatMap((piece, index) =>
+    index % A_TITLE_AND_ITS_BODY === NOTHING
+      ? [{ title: piece, body: pieces[index + AFTER_THE_PREAMBLE] ?? "" }]
+      : []
+  );
+};
+
+const debtWithoutATrigger = (): readonly string[] =>
+  entriesOf(DEBT_DOCUMENT)
+    .filter((entry) => entry.title !== NOT_A_DEBT)
+    .filter((entry) => !namesATrigger(entry.body))
+    .map(
+      (entry) =>
+        `${DEBT_DOCUMENT}: "${entry.title}" ends without a trigger — this file's own first ` +
+        `rule is that an entry naming no condition is a wish that will still be here in a ` +
+        `year, so close it with a bold sentence saying what has to be true before the work ` +
+        `is worth doing, or delete the entry. If the trigger is there and phrased in a way ` +
+        `this check does not know, widen A_CONDITION rather than rewording the entry — a ` +
+        `check that cries wolf is one nobody reads`
+    );
+
 const A_MERMAID_FENCE = /```mermaid\n([\s\S]*?)```/g;
 
 const A_STATEMENT_SEPARATOR = ";";
@@ -954,6 +1070,8 @@ const formsBakedIntoCopy = (): readonly string[] => copyTablesIn().flatMap(baked
 const complaints = [
   ...formsBakedIntoCopy(),
   ...brokenLinks(),
+  ...debtWithoutATrigger(),
+  ...specContentsOutOfStep(),
   ...flowOutOfStep(),
   ...flowRepliesLeaveTheLaneTheyWereAskedOf(),
   ...flowWouldNotRender(),

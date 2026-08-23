@@ -349,67 +349,49 @@ for anything else** — the cost is one pass over one table, and it is much chea
 attached to a phase already editing those lines than as a phase of its own. Until then
 a woman at the table reads a sheet written about a man.
 
-## The six figures on a player card do not say what they are figures of
+## The player card never says which table its expectation is read off
 
-A cold reading of the block at the top of `/personal` found five things, and they are
-one thing: the grid prints numbers without printing what they are numbers of.
-
-`ДОЛЯ СТОЛА` / `TABLE SHARE` names no quantity, so a card reading 72 games above 0%
-contradicts itself to anybody who does not already know what the share is a share of.
-The note under it names a reference point — 50% is mid-table — and neither the top end
-nor which side is the good one, while the season sheet's own hint says both, two
-posters away. Two cells in one row then count differently: `72 из 72` beside `0 раз`,
-and the reader has to assume the second borrows the first's denominator. `ожидаемо 20%`
-has no source anywhere on the card and moves between cards, because it is read off a
-table size the card never prints. The sixth figure carries a bare count where both its
-row-mates carry an expectation. Two of the six have no caption at all.
-
-Below the block, on a card too young for a chart, a section heading sits over an empty
-band. Two cold readers, told nothing about each other, said the same thing about it: it
-reads as a broken render first and as *not yet* second, because every other heading on
-that card has a number under it.
-
-None of this is a wording pass. Printing a table size changes what the card is made of,
-and an empty band is answered by a drawing rather than by a sentence.
+Every tile on `/personal` prints «рассадка предсказывает 20%», averaged from
+`1/tableSize` in `career-tally.ts`. The card never prints the table size, so the same
+caption shows a different number on two players' cards with nothing on either to
+explain why. Naming it costs a line the card does not have; the fix is a drawing
+decision, not a caption.
 
 **Take it with the next phase that opens the player card.**
 
-## Three lines on the sheets use a word that cannot carry the meaning
+## One scale, two vocabularies, one poster apart
 
-Left over from the same readings, each confirmed still to be in the copy tables.
-«Ни разу не отошёл от середины стола дальше чем на N пунктов за N партий» and
-«N пунктов между лучшим и худшим за N партий» count points of something the sheet never
-names — they are percentage points of
-table share, and «пункт» on its own reads as well as a score. `HOME ADVANTAGE` /
-«СВОЁ ПОЛЕ» borrows a venue for an award about who moves first, and one table has no
-home and no away. And the grid's hint, "every cell prints the place taken", hands the
-cell a printer's verb where a reader wants what the cell *shows*.
+The player card's tile says «0% — последнее место, 100% — первое»; the season sheet's
+hint says «50% — половина стола · 100% — первое место в каждой партии». Neither is
+wrong and both describe the same quantity, but a player who reads both is taught the
+scale twice in two vocabularies that do not overlap: one names the ends, the other
+names the middle. A cold reader found it only by holding the two side by side, which
+is the one thing a single-picture reading cannot do.
 
-None of the three is wrong about its arithmetic; all three make a reader stop.
+**Take it with the next phase that opens the scoresheet copy** — the decision is which
+of the two teaches the scale, not which sentence to edit.
 
-**Take them with the next phase that opens the awards copy** — the same pass the entry
-above about the Russian voice needs.
+## The grid's hint hands the cell a printer's verb, in English
 
-## Four sentences name a rule instead of what the picture shows
+`copy.en.ts`'s `sheetGridHint` reads "every cell prints the place taken", where a
+reader wants what the cell *shows*. The Russian has no verb at all — «в клетке занятое
+место» — so this was only ever about the one language.
 
-From a cold reading taken while the colour fix was closed, on sheets that phase never
-touched. The arithmetic behind each was checked and is right; what fails is that a reader
-cannot get from the sentence back to the picture.
+**Take it with the next phase that opens the awards copy.**
 
-- **«Впереди на графике после каждой партии, кроме первой»** — the rule really does skip
-  the opening game, but on the sheet the winner's line is already above everybody after
-  game one, so the exception promises a stumble that never happened.
+## Two sentences name a rule instead of what the picture shows
+
+The arithmetic behind each is right; what fails is that a reader cannot get from the
+sentence back to the picture.
+
 - **«то верхняя половина, то нижняя»** at an odd table — the top half is
-  `position <= tableSize / 2`, so third of five counts as the bottom, and nothing on the
-  sheet lets a reader work that out.
-- **«ничья за последнее»** in the grid's key — a fragment with no verb, recoverable only
-  from «ПЕРЕМИРИЕ» on the awards sheet beside it.
-- **«место предсказывает 24%»**, under four tiles of the player card — read as *what the
-  seating alone would give you*, by guess, and «место» collides with the place taken in a
-  game that the grid prints in every cell.
+  `position <= tableSize / 2`, so third of five counts as the bottom, and nothing on
+  the sheet lets a reader work that out.
+- **«ничья за последнее место»** in the grid's key — still a fragment with no verb,
+  recoverable only from «ПЕРЕМИРИЕ» on the awards sheet beside it. The English "drew
+  for last" has its verb.
 
-**Take them with the next phase that opens the awards copy**, alongside the entry above
-about a word that cannot carry the meaning.
+**Take them with the next phase that opens the awards copy.**
 
 ## The grid's key explains one red digit and the grid draws two
 

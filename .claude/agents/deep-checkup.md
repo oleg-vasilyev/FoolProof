@@ -75,8 +75,8 @@ Strict order, each step pass/fail with a log, all in the fresh clone:
 ## Phase 3 — documents and rules on trial
 
 Extract every checkable claim from `README.md`, `PLAN.md`, `CLAUDE.md`,
-`TECH-DEBT.md`, `DEVELOPMENT-FLOW.md`, `e2e/README.md` and every skill in
-`.claude/skills/` into a claims table: command X does Y, the schema is Z, gate
+`TECH-DEBT.md`, `DEVELOPMENT-FLOW.md`, `e2e/README.md`, `deploy/README.md` and every
+skill in `.claude/skills/` into a claims table: command X does Y, the schema is Z, gate
 W refuses V. Judge each against phases 0–2: `accurate` / `stale` / `wrong` /
 `unverifiable`. Note that `npm run docs:check` already enforces a slice of this
 mechanically — do not re-litigate what it proves; audit what it cannot see.
@@ -113,6 +113,16 @@ routing table, and the stage in `DEVELOPMENT-FLOW.md` that names it — and ask:
 Report these as findings like any other, with the file and the wording. A whole
 audit missed this class once — including this one, whose first run judged the
 documents accurate while every description above was stale.
+
+**One section of `PLAN.md` is read line by line, all the way, and a different one
+each time.** The spec is 1600 lines and no gate reads most of it: `docs:check`
+compares the schema block and the contents list and nothing else, so a paragraph that
+stopped being true can sit there for a year looking exactly like one that is. Take the
+section after the one the previous checkup took — its report says which, and the order
+is the file's own contents list, which `docs:check` holds against the headings, so
+there is no second copy of it here to go stale. Check every claim in that section
+against the code that would have to implement it. `Data model` is long enough for two
+turns; say in the report which half was read.
 
 ## Phase 3½ — Claude Code memory and configuration outside the repo
 

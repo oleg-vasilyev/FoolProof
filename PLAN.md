@@ -15,6 +15,29 @@ awkward to change next. A thing is only in that file if it has a trigger saying
 when it becomes worth doing — otherwise it belongs here as an edge case, or it
 belongs in a commit.
 
+## What is in here
+
+Long enough that it is read by following a link rather than from the top.
+`docs:check` holds this list and the sections against each other, so neither can
+quietly lose the other.
+
+| Section | What it settles |
+|---|---|
+| [Purpose](#purpose) | What the bot is for, and the one constraint the whole product is shaped by |
+| [Stack](#stack) | Node, grammY, SQLite, and why there is no build step |
+| [Language](#language) | Two locales, how a chat picks one, and what Russian grammar costs |
+| [Commands](#commands) | Every command a player can send, and what each one must do |
+| [Card state machine](#card-state-machine) | The phases a live card moves through, and the transitions between them |
+| [Telegram keyboard rules](#telegram-keyboard-rules) | What the Bot API allows a keyboard to be, and how the card fits inside it |
+| [Technical requirements for callbacks](#technical-requirements-for-callbacks) | The 64-byte limit and what has to fit in it |
+| [Merging two names into one](#merging-two-names-into-one) | The `/merge` screen, what it refuses, and why there is no undo |
+| [Data model](#data-model) | The schema, then what every picture is computed from — the chronology, the awards, the player card |
+| [Invariants](#invariants) | The handful of things that must never stop being true |
+| [What survives a failure](#what-survives-a-failure) | Restarts, crashes, deploys, backups, and what `/status` reports |
+| [Edge cases](#edge-cases) | The states the bot has to survive rather than prevent |
+| [Out of scope for the first version](#out-of-scope-for-the-first-version) | Deliberately not built |
+| [On AI analytics, once we get to it](#on-ai-analytics-once-we-get-to-it) | The one idea parked with a reason |
+
 ## Purpose
 
 The bot lives in a group chat of friends. It records games of Podkidnoy Durak:
