@@ -141,35 +141,36 @@ before believing it.
 
 ## Briefing the reader
 
-Give the agent the contact sheet, the full-size pictures of anything whose text
-changed, every PNG this skill regenerated, and the **list of lines to read** — and
-nothing else.
+**What the brief must carry, and what it may never carry, live in
+`poster-reader.md`'s own `What the brief must carry` section** — read it before
+assembling one. It is written there rather than here because the agent is the party
+that suffers a bad brief, and because a contract kept in the caller's file is a
+contract only the caller reads.
 
-**Never a count.** Telling it there are six captions, or two extreme cases, hands it
-the answer to a question you wanted asked: both numbers were wrong when tried — four
-captions, four extremes — and both times the agent had to spend its opening paragraph
-telling the caller so instead of reading. A count is the cheapest way to break the
-instrument without noticing. Explaining what a line is *for* destroys the only
-instrument it is; its brief says so and it will report you for it.
+Two things about the errand belong here, because they are the caller's to arrange:
 
-**The approved mockup goes in a second call, never the first.** Comparing what shipped
-against what stage 1 signed off is the one comparison nothing else in the flow makes,
-and it has to happen — but the mockup of a chart *is* the answer to "what appears
-here", so an agent holding it can no longer read a hint about that chart cold. One
-reading without it, then a fresh call with it. The order is not politeness; the first
-reading is worthless if the second call's material arrives in the same message.
+**Two calls, not one.** Comparing what shipped against what stage 1 signed off is the
+one comparison nothing else in the flow makes, and it has to happen — but the approved
+mockup of a chart *is* the answer to "what appears here", so a reader holding it can no
+longer read a hint about that chart cold. One reading without it, then a fresh call
+with it. The order is not politeness; the first reading is worthless if the second
+call's material arrives in the same message.
 
-Four questions belong in the brief, because they are what this project keeps getting
-wrong rather than what a reader would ask unprompted: does any row repeat another in
-different words; does every sentence read like the language it is in, plurals
-included; does anything run past the edge, or get cut where a reader cannot recover
-it; is a number claiming something the evening did not actually do.
+**Regenerate before briefing.** The reader is handed pictures, not a promise about
+them, and a stale PNG produces findings against a drawing that no longer exists.
 
-**Reading the pictures against each other is the reader's second pass**, and the three
+**A model that refuses or dies mid-run is yours to re-run, not the agent's** — that
+rule and the rest of what to do when a subagent fails live in `finish-phase`'s
+*What to delegate* section, and this step reaches them from here because it also
+runs on its own trigger, without that skill ever being loaded. What may not be
+substituted is the property the reader was chosen for: a context that did not draw
+the picture.
+
+**Reading the pictures against each other is the reader's second pass**, and the
 questions it asks live in `poster-reader.md` rather than here, so there is one wording
 of them. What belongs here is why the pass exists: a poster can be flawless alone and
-still contradict the one beside it, and no single-picture pass can see it. All three
-questions failed at once here, and none of them was visible in a single image — the
+still contradict the one beside it, and no single-picture pass can see it. Three failures
+landed at once here, and none of them was visible in a single image — the
 live card asked *who went first* while the stats card credited *the dealer*, in both
 languages, for the same event; a chart captioned "one point per evening" drew no
 points at all, only a line and two unlabelled marks; and the one poster that explained
@@ -177,7 +178,7 @@ its own percentage scale was not the one a player reads their own number off. Tw
 the three were reported by the owner, from the finished pictures, after the gate had
 passed.
 
-All three were comparisons, and comparisons are made twice now: the contact sheet at
+All three were comparisons between pictures, and comparisons are made twice now: the contact sheet at
 stage 1 puts the new drawing beside its neighbour before a renderer exists, and this
 step reads the finished set again. The earlier pass is the cheaper one and does not
 replace this one — it judges a mockup, and only this one sees what the code drew.

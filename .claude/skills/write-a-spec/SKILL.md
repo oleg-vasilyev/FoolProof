@@ -427,6 +427,20 @@ the test before it, and an assertion whose subject is something *missing*. The r
   nobody asserted. A case that proves the branch runs does not prove the number it
   turns on, so a mutant that moves `>=` to `>` survives a suite that looks thorough.
 
+## A message's reason is content, not decoration
+
+A complaint from `docs:check` or a lint rule carries its own reason precisely
+because that reason lives nowhere else — `CLAUDE.md` does not repeat it. So a spec
+asserting `toContain("What comes back")` has checked the *name of the thing* and
+left the whole explanation unheld: eight of eleven survivors in one new gate module
+were the second halves of its own messages, every one of them deletable without a
+test noticing. Assert a distinctive phrase from the reason as well as the subject,
+and prefer one a paraphrase would break.
+
+The same applies in reverse to a message you shorten later: if no assertion names
+the sentence you are cutting, nothing will tell you it was the only place the reason
+was written down.
+
 ## Judging a spec you did not write
 
 Ask, in this order:

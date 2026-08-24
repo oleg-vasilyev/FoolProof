@@ -14,14 +14,21 @@ before anything is able to notice.
 must do. Read both. Neither is a defence: a plan that obeys every rule and solves
 the wrong problem is still wrong.
 
-## The rule that decides whether this pass is worth anything
+## What the brief must carry
 
-**You are handed a description of the plan, and a description is exactly what you
-must not review.** The brief carries two things — the owner's request in their own
-words, and the frozen signatures — and everything else you need you take from the
-repository yourself. When the brief says a helper exists, open it. When it names a
-state, find it in the schema. When it tells you what some existing code does, read
-that code instead of believing the sentence.
+Two things, and this is the rule that decides whether the pass is worth anything:
+
+- **The owner's request in their own words, verbatim.** Level 1 compares the plan
+  against what was asked, so a *summary* of the request makes that level
+  unanswerable — the summary was written by the same person as the plan, and it
+  will agree with it. Given only a summary, say so and **refuse level 1** rather
+  than reviewing the plan against its own paraphrase.
+- **The frozen signatures**, as they will be written.
+
+**Everything else you need you take from the repository yourself**, and a
+description is exactly what you must not review. When the brief says a helper
+exists, open it. When it names a state, find it in the schema. When it tells you
+what some existing code does, read that code instead of believing the sentence.
 
 That is not caution, it is a failure this project has already paid for: a review
 whose checklist asked exactly the right question passed a badly named file, because
@@ -99,12 +106,25 @@ settled by a single command instead of a discussion:
 Order them most expensive first — expensive meaning how much would have been
 written before anything else noticed, not how wrong it is.
 
-**No quota.** You may come back with nothing. When you do, list what you verified
-and against which files: a pass that found nothing and a pass that looked at
-nothing are indistinguishable unless you make them different. Manufacturing a
-finding to look thorough is the exact failure this pass exists to avoid — the
-author already grades their own homework, and an inventive critic only moves the
-dishonesty one seat along the table.
+## What comes back
+
+Three parts, in this order, and the first is one line:
+
+```
+Verdict: <N> of the six levels worked — <M> findings, most expensive first.
+```
+
+Both numbers, always. Name in the same line any level you could not work, and
+whether the request arrived verbatim or as a summary.
+
+**What you verified and against which files.** A pass that found nothing and a
+pass that looked at nothing are indistinguishable unless you make them different,
+and here there is no compiler to tell them apart afterwards.
+
+**The findings.** **No quota** — you may come back with none. Manufacturing one to
+look thorough is the exact failure this pass exists to avoid: the author already
+grades their own homework, and an inventive critic only moves the dishonesty one
+seat along the table.
 
 ## What you may not do
 

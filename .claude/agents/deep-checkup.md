@@ -30,6 +30,31 @@ is to find what a green pipeline cannot see.
    (`~/.ssh/id_*`, `~/.oci/*.pem`). Every command against the server is
    read-only: no restarts, no writes, no deploys.
 
+## What the brief must carry
+
+You are called manually, so the brief is short by nature. Four things decide what
+the run can actually establish:
+
+- **Today's date**, which names the evidence directory every verdict cites.
+- **Whether the production server is reachable from this machine**, and by which
+  key. The connection details are in README's server section; whether they work
+  right now is not something the repository can tell you.
+- **A time budget.** The cut list at the bottom of this file is meaningless without
+  one, and a run that discovers its limit at phase 8 has spent the budget on the
+  cheap phases.
+- **Where the previous report is**, if there is one, so a finding can be recorded
+  as *still open* rather than as new.
+
+None of these is a reason to stop, and none may be guessed in the project's favour:
+
+- **No server access** does not shrink the audit — every claim about the running
+  bot, the units, the timers and the deploy becomes a finding marked `UNVERIFIED`
+  under the worst assumption. A checkup that silently drops phases 2 and 7 reports
+  a healthy repository and says nothing about the thing users touch.
+- **No time budget** means the full run, and the cut list stays shut.
+- **No previous report** means every finding is new, said once at the top rather
+  than implied.
+
 ## Phase 0 — isolation and snapshot
 
 Fresh `git clone` of the repo into a temp directory; record the commit hash the
@@ -244,15 +269,6 @@ remove blockers in a day, and structural work in weeks, with dependencies
 named. Propose — as a diff in the report, applied by nobody — the CLAUDE.md
 and memory corrections the findings justify.
 
-Evidence files go to disk as you go — that write is allowed and is what every
-verdict cites. **The report itself is your final message, in full**, because
-the harness refuses a subagent's attempt to write a report file and the first
-run of this checkup lost its `REPORT.md` to exactly that. Do not spend a turn
-retrying it. Give the caller the whole thing — the three verdicts, the findings
-register, the remediation buckets and the cost — and they save it beside the
-evidence as `REPORT.md`. What becomes a `TECH-DEBT.md` entry, a fix or a
-deleted memory is their call, not yours.
-
 ## What the checkup itself cost
 
 The audit is the most expensive thing anyone runs here, and it recurs, so it
@@ -275,6 +291,28 @@ Both numbers exist to be acted on, not admired: they are what the next checkup
 is planned from. A phase that ran for an hour and found nothing three runs in a
 row belongs on the cut list below, and say so in the report rather than leaving
 the next reader to rediscover it.
+
+## What comes back
+
+**The report is your final message, in full.** The harness refuses a subagent's
+attempt to write a report file, and the first run of this checkup lost its
+`REPORT.md` to exactly that — do not spend a turn retrying it. Evidence files go to
+disk as you go, that write is allowed, and every verdict cites one.
+
+One line first:
+
+```
+Verdict: <N> findings (<blockers>/<high>/<medium>/<low>), <M> UNVERIFIED,
+<the phases run, and any skipped by name>, evidence in <path>.
+```
+
+The skipped phases are what a caller cannot reconstruct: a checkup that cut four
+of them and one that ran every phase read identically without that clause.
+
+Then the whole thing, in the order phase 10 builds it — the three verdicts, the
+findings register, the remediation buckets, the proposed diff and the cost. The
+caller saves it beside the evidence as `REPORT.md`. What becomes a `TECH-DEBT.md`
+entry, a fix or a deleted memory is their call, not yours.
 
 ## Calibrating this agent — plant a fault and see whether it is found
 

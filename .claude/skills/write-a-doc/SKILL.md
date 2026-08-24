@@ -135,6 +135,21 @@ something re-checks it. So either **date the claim** — "on the evening of 31 J
 checkable and cite the check. The same rule caught the README's memory figures, and
 it is the same disease: a number that was measured once and reads as a promise.
 
+## A move is only a move if you can say where each sentence landed
+
+Taking prose out of one file and into another is the commonest edit this skill
+asks for, and it has one failure that looks identical to success: a sentence
+judged redundant *from memory*, deleted, and never written anywhere. Four
+questions were lifted out of a skill on the grounds that three of them already
+existed elsewhere; one did, one existed only in a form that no longer applied,
+and one existed nowhere at all — and the same phase had just added a rule
+forbidding the file it came from to carry it again.
+
+So before deleting, grep the destination for a distinctive phrase from **each**
+sentence, not for the topic. A topic is always found; a claim often is not. Then
+say in the commit which sentences moved and which were dropped on purpose —
+the second list is the one a reviewer can check.
+
 ## The budget is the point
 
 `CLAUDE.md` **and every skill** carry a line budget, enforced by `docs:check`; a skill

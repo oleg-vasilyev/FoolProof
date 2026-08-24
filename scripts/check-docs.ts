@@ -3,6 +3,8 @@ import {
   flowWouldNotRender,
   mermaidLinesCarryingASeparator,
 } from "./docs/a-mermaid-diagram.ts";
+import { agentsWithoutAContract } from "./docs/the-agent-contracts.ts";
+import { frontmatterThatWillNotParse } from "./docs/the-frontmatter.ts";
 import { brokenLinks, specContentsOutOfStep, unreachableHelp } from "./docs/document-links.ts";
 import { overBudget, skillsOverBudget } from "./docs/reading-budgets.ts";
 import { envTemplateOutOfStep, requiredKeysOutOfStep } from "./docs/the-env-keys.ts";
@@ -45,6 +47,8 @@ const complaints = [
   ...unreachableHelp(),
   ...overBudget(),
   ...skillsOverBudget(),
+  ...agentsWithoutAContract(),
+  ...frontmatterThatWillNotParse(),
   ...debtWithoutATrigger(),
   ...flowOutOfStep(),
   ...flowRepliesLeaveTheLaneTheyWereAskedOf(),

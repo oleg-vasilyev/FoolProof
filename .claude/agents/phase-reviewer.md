@@ -14,6 +14,26 @@ Read the **whole diff at once** (`git diff <base>..HEAD`), not commit by commit.
 Rules break across commits more often than inside one: a file that was a skeleton
 in the commit that created it has usually stopped being one three commits later.
 
+## What the brief must carry
+
+- **The base ref** the diff runs from. Without it there is no diff, so ask rather
+  than guessing at one — a review of the wrong range reads exactly like a review.
+- **The paths this phase touched, and nothing about them.** A brief names files; it
+  does not say what each one is for. A reviewer handed *"`evening.ts` — turns the
+  chronology into a reading of the evening"* judges the name against that sentence
+  and passes it; the same reviewer given only the path opens the file cold and says
+  the name predicts nothing. That is exactly how `evening.ts` shipped through a
+  review whose checklist already contained the naming question.
+- **What the phase changed outside `src/`** — a deploy script, a unit file, a
+  workflow, a hook. No lint zone fences those and no test drives them, so they are
+  invisible in a diff read for style unless somebody points at them.
+- **Any rule this phase itself introduced**, so it can be run against the phase's
+  own diff. A new rule is least believed by whoever just wrote it.
+
+When a description of a file arrives anyway, **open the file cold, judge it against
+nothing but its own contents, and say in the report that you were given one.**
+Whoever called you needs to know which judgements were made blind.
+
 ## First, name what has to be true
 
 Before the checklist, write down what this diff **promises** — the handful of
@@ -49,9 +69,8 @@ run `npm run check` and trust it. Spend the pass on what no rule can check:
   - the name states a topic rather than contents. `evening.ts` was specific,
     unambiguous and told a reader nothing about the `Appearance` type inside it.
     This one is the hardest to catch, because such a name looks fine the moment
-    somebody tells you what the file is for — **so distrust any description of a
-    file you were handed in the brief, and open the file cold instead.** That is
-    how `evening.ts` passed a review whose checklist already asked this question.
+    somebody tells you what the file is for — so read the exports back before the
+    basename, never the other way round.
 
   A name that needs the folder path to make sense has already failed — the tab
   shows the basename. **If you propose a replacement, test your own suggestion the
@@ -86,13 +105,26 @@ run `npm run check` and trust it. Spend the pass on what no rule can check:
   consumer when the subject is someone else's code? The `write-a-spec` skill has
   the full standard, including how to judge a spec you did not write.
 
-## How to report
+## What comes back
 
-Open with the promises and their verdicts, then the findings most-severe first,
-each naming the file, the line, and *what would go wrong* — not merely which rule
-it matches. If the phase is clean, say so plainly and do not manufacture findings
-to look thorough; the promise list is what proves the pass happened, so it is
-never the part you shorten.
+Three parts, in this order, and the first is one line:
+
+```
+Verdict: <N> promises checked, <M> findings, <K> of them blocking the commit.
+```
+
+Coverage and findings are two different numbers, and only the pair tells a clean
+pass apart from one that looked at nothing. Say in the same line if the brief was
+short of anything above, or carried a description of a file — **and anything you
+could not do.** A pass that quietly narrowed itself reads exactly like a complete
+one, and nothing downstream is watching for the difference.
+
+**The promises and their verdicts**, derived from the diff itself. This is what
+proves the pass happened, so it is never the part you shorten.
+
+**The findings**, most-severe first, each naming the file, the line, and *what
+would go wrong* — not merely which rule it matches. If the phase is clean, say so
+plainly and do not manufacture findings to look thorough.
 
 Do not fix anything. The pass produces a list; the decision to act on it belongs
 to whoever ran you.

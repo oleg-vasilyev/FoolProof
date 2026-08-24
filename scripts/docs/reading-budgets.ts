@@ -14,15 +14,15 @@ const SESSION_LINE_BUDGET = 380;
 const DEBT_LINE_BUDGET = 620;
 
 const SKILL_BUDGETS: Readonly<Record<string, number>> = {
-  "add-a-feature": 150,
+  "add-a-feature": 170,
   "add-repository-method": 80,
   "finish-phase": 700,
   "refresh-the-pictures": 240,
-  retrospective: 140,
+  retrospective: 165,
   "update-the-design-page": 70,
   "write-a-commit": 120,
-  "write-a-doc": 160,
-  "write-a-spec": 480,
+  "write-a-doc": 175,
+  "write-a-spec": 495,
   "write-an-e2e-scenario": 140,
 };
 

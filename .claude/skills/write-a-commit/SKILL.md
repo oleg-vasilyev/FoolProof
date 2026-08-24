@@ -43,7 +43,8 @@ mutation <score>% over <the diff | everything>, e2e <N> cases in <M> files.
 Copy: <what was read and when, or why nothing was>.
 Gallery: <one specific claim about what was seen, or why it stayed shut>.
 Review: <N> findings, <their fate in a clause>.
-Retro: <the default that changed, or that the phase went straight and had nothing to count>.
+Retro: <the counted answers that were not none> → <the file each default landed in>,
+or that the phase went straight and had nothing to count.
 Tag: <the version, or that this rides the next one and why>.
 ```
 
@@ -58,6 +59,12 @@ proof is a phase that skipped it: the same paragraph, lacking a retro line but
 carrying a gallery one, produced a written verdict on the gallery — "not opened, no
 renderer changed" — and total silence about the retrospective. The template asked
 about one and not the other, and that alone decided which happened.
+
+**And it carries counts because the same failure works one level down.** The
+retrospective asks five questions; a single slot took one verdict, so four of them
+could go unanswered and the line still read as finished. It compresses the block
+`retrospective` produces — it may not report a verdict that block never reached, and
+a phase whose answers were all `none` says that rather than staying quiet.
 Coverage is four numbers in statements/branches/functions/lines order. A
 mutation survivor left alive on purpose gets its own sentence after the
 paragraph, naming the mutant and why its death is not worth buying.

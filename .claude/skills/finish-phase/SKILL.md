@@ -1,6 +1,6 @@
 ---
 name: finish-phase
-description: Run a development phase in FoolProof from the work being taken on to the commit or the tag that ends it — the gates (lint and types, coverage, mutation, e2e, diff review, and the conditional ones: a real evening, the poster gallery, the copy tables read as sentences when they are written, a retrospective when the phase cost something) and the format of the phase's final commit message. Load it when ANY list of changes to this repository is accepted — closing audit findings, refactoring, cleanup, tooling, a new feature — because such a list is a phase whether or not it adds a feature, and the list somebody hands you never contains the gates. Also when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable.
+description: "Run a development phase in FoolProof from the work being taken on to the commit or the tag that ends it — the gates (lint and types, coverage, mutation, e2e, diff review, and the conditional ones: a real evening, the poster gallery, the copy tables read as sentences when they are written, a retrospective when the phase cost something) and the format of the phase's final commit message. Load it when ANY list of changes to this repository is accepted — closing audit findings, refactoring, cleanup, tooling, a new feature — because such a list is a phase whether or not it adds a feature, and the list somebody hands you never contains the gates. Also when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable."
 ---
 
 # Finishing a phase
@@ -337,12 +337,9 @@ comparison; it did not know a `return`, so `phaseOf` kept handing back
 over cleanly every time. The grep is one command and it is the only thing that
 looks at the code the rule was written to protect rather than at the diff.
 
-**The brief names paths, never purposes.** Say which files to read; do not say what
-each one is for. A reviewer handed "`evening.ts` — turns the chronology into a
-reading of the evening" judges the name against that sentence and passes it; the
-same reviewer given only the path opens the file cold and says the name predicts
-nothing. That is exactly how a file called `evening.ts` shipped through a review
-whose checklist already contained the naming question.
+**What the brief must carry is `phase-reviewer.md`'s own section, not this one** —
+the base ref, the paths, what changed outside `src/`, any rule the phase invented,
+and nothing about what a file is *for*. Read it before writing one.
 
 Ask of every touched file:
 
@@ -372,20 +369,19 @@ them, in the language they were composed in. `` `... и всё равно ${stre
 начисто` `` looks like a sentence with a hole in it. The hole is where the meaning was.
 
 So the reading is the **`copy-reader`** agent's, and it may not be done by whoever
-wrote the table. Hand it `copy.ru.ts`, `copy.en.ts` and the folder its call sites are
-in, and nothing else — the four questions it asks live in `copy-reader.md`. It reads
-**every** line filled in with real values, not only the ones a poster happens to draw;
-the lines nothing draws are where this rot survives longest.
+wrote the table. What the brief must carry is that agent's own section, and so are
+the four questions it asks. It reads **every** line filled in with real values, not
+only the ones a poster happens to draw; the lines nothing draws are where this rot
+survives longest.
 
 **A drawing carries sentences too, and they are read before the owner sees them.**
 The mockup's labels and captions are written by the designer and, until this was
 added, read by nobody until the owner opened the contact sheet — which asks him to
 approve wording as though he were the gate, which is the failure that produced this
 agent in the first place. So the sheet goes to the reader before it goes to him, with
-the designer's own inventory of every line on it. Scope the errand: there is no copy
-table and no call site yet, so only *is this something a person would say* and *does
-it mean anything* can be asked, and the brief has to say it is judging labels on a
-drawing or every placeholder comes back as meaningless. Findings are fixed and the
+the designer's own inventory of every line on it. Say in the brief that the subject is labels
+on a drawing — the agent's own contract says what that narrows the pass to, and
+what happens to every placeholder on the sheet when nobody says it. Findings are fixed and the
 sheet redrawn before it is shown — approval of wording that then changes is not
 approval.
 
@@ -674,12 +670,22 @@ judgement:
   way and was reported to the owner as still thinking, thirteen minutes late. Follow
   a launch with a non-blocking status check, and tell an agent that produces files to
   create its output folder first, so progress is visible on disk instead of inferred.
-- **Stalled twice means finished.** Take what landed, do the rest yourself, and repair
-  whatever it left half-edited; one phase lost twenty minutes and still hand-wrote
-  five of twelve files.
-- **Check whether it landed before redoing its work.** One was reported here as having
-  written nothing — true at that moment, false ten minutes later, and its seven spec
-  files were nearly rewritten by hand.
+- **Stalled twice means finished — but read the tree before redoing anything.** Take
+  what landed, do the rest yourself, repair what it left half-edited; one phase lost
+  twenty minutes and still hand-wrote five of twelve files, and another nearly
+  rewrote seven specs the agent had in fact delivered ten minutes earlier.
+- **Say what its report must carry, because a hand-briefed agent has no file to hold
+  it.** The six named agents each declare a `What comes back`; this one is defined by
+  the brief alone, and what a caller cannot reconstruct is **which files it actually
+  wrote**, which it was given and did not, why, and anything it touched that the
+  brief never named. Ask for that list in those words.
+- **An agent that cannot do something says so instead of doing something adjacent.**
+  Nothing propagates upward here: a report is text, a narrowed pass reads exactly
+  like a completed one, and no gate is watching. Put it in the brief in those words.
+- **A model that refuses or dies mid-run is the caller's problem, not the agent's.**
+  Re-run the errand on another model and say in the phase's record which one — what
+  may not be substituted is the property the agent was chosen for, which for every
+  reading pass here is a context that did not write the thing.
 - **What never leaves your hands:** copy, commit messages and document prose, because
   the voice is the product here, and anything resting on why-context this session
   accumulated — why a threshold is 7 and not 5 — which no brief can carry. The poster

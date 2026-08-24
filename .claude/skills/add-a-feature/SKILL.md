@@ -147,3 +147,20 @@ survived into review — an axis with a single label, and a sheet 36px past
 - A new feature that adds a repository method or a screen with states is a
   contract-changing phase: it owes a `PLAN.md` section. The `finish-phase` skill has
   the table and the gates.
+
+## Judging a folder you did not add
+
+The feature's defining property is mechanical, so test it rather than reading for
+it. Ask in this order — the first is worth the other five:
+
+1. **Delete the folder and run `npx tsc --noEmit`.** Anything that stops compiling
+   outside `src/main.ts` and `src/main.spec.ts` is the finding, and its path names
+   the coupling. Restore afterwards; the probe is the point, not the deletion.
+2. Does the folder name say what the player gets, or an internal noun?
+3. Does `commands` list one entry per thing the feature gives the player, so
+   `/help` and the `/` menu cannot drift from what is installed?
+4. Was a deliberate violation shown to **fail** the lint for each new zone? A zone
+   that never fires looks exactly like one with nothing to report.
+5. Can the pattern passed to `onTap` match another screen's `callback_data`?
+6. Does anything in `scripts/` now name this feature? It may not — the tooling asks
+   what features offer and finds them at run time.

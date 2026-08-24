@@ -114,25 +114,47 @@ one with the sharper incident kept as its proof. **Never drop a rule for being q
 One that prevents a rare, expensive failure is indistinguishable from one that stopped
 mattering, and the difference only shows after it is gone.
 
-## The output is a diff, not a paragraph
+**A skill's budget may rise, and only by what a genuinely new section costs.** The
+pressure is not a fixed length — it is that appending has to be argued for. New
+subject matter the skill had no answer to before earns its lines; prose restating
+something already in the file earns none, and is why the dial exists. Raising it in
+the same commit that fills it is allowed, and the commit says which of the two it
+was. `CLAUDE.md` is the exception with its own rule, in `write-a-doc`: it is read
+before every session, so its budget moves only by displacement.
 
-Every lesson that would apply to a future phase becomes a **durable change** — a
-rule in `finish-phase`, `write-a-spec` or `add-a-feature`, a line in `CLAUDE.md`,
-a memory file — and you name the file you changed. CLAUDE.md is under a line
-budget checked by `npm run docs:check`, so adding to it means moving something out
-of it.
+## What comes back
+
+The output is a **diff**, never a paragraph. But five questions collapsing into one
+prose answer is how four of them go missing without anybody noticing, so the answer
+has a fixed shape — one line per question, every one present, and each carrying its
+number:
+
+```
+Rework:     <what was rebuilt> — <the moment it could have been settled>
+Gate runs:  <gate>×<n>, <how many re-read a report already on disk>
+Subagents:  <n> for <what they produced> — paid / did not, per kind of work
+Sequencing: <what was written against a moving subject, or blocked on nothing>
+Reading:    <what was read again that was already in context>
+Landed:     <file> — <the default it now changes>
+```
+
+`none` is a complete answer to any of the first five, and writing it is the point:
+a question answered *none* and a question never asked look identical in prose and
+different here. `Landed:` repeats per rule and is the only line that may not be
+`none` while any other line carries a count — a phase that found something and
+changed nothing has not finished the gate.
 
 **A verdict that changes no default is not a conclusion.** "The subagents were
 fine" is an observation; "stop delegating spec files while the context is still
-roomy" is a change. If an answer above came out negative, the rule that follows
-from it must say what you will do differently, in a form the next phase reads
-before it repeats the mistake.
-
-A lesson left as prose in the conversation is gone at the next compaction, so it
-does not count. Drop any lesson that does not generalise beyond this session
-rather than recording it: two real changes are worth more than a list of nine.
+roomy" is a change. A lesson left as prose in the conversation is gone at the next
+compaction, so it does not count. Drop any lesson that does not generalise beyond
+this session rather than recording it: two real changes beat a list of nine.
 
 **Say the honest number even when it is unflattering.** The rules in
 `finish-phase` about re-running Stryker exist because a phase burned eight
 invocations where two would have done, and that only became a rule because
 somebody counted the eight.
+
+The commit's `Retro:` line is this block compressed to one sentence, and
+`write-a-commit` says how — what it may not do is carry a verdict this block never
+reached.
