@@ -59,8 +59,8 @@ export const entriesIn = (document: string): readonly Entry[] => {
   );
 };
 
-export const debtWithoutATrigger = (): readonly string[] =>
-  entriesIn(read(DEBT_DOCUMENT))
+export const debtComplaints = (document: string): readonly string[] =>
+  entriesIn(document)
     .filter((entry) => entry.title !== NOT_A_DEBT)
     .filter((entry) => !namesATrigger(entry.body))
     .map(
@@ -72,3 +72,5 @@ export const debtWithoutATrigger = (): readonly string[] =>
         `this check does not know, widen A_CONDITION rather than rewording the entry — a ` +
         `check that cries wolf is one nobody reads`
     );
+
+export const debtWithoutATrigger = (): readonly string[] => debtComplaints(read(DEBT_DOCUMENT));

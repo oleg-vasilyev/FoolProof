@@ -10,10 +10,12 @@ const AN_INTERPOLATION_BEFORE_A_WORD = /\$\{[^}]+\}[\u0020\u00A0\u202F]+([\p{L}]
 
 const A_COPY_TABLE = /^copy\.[a-z]{2}\.ts$/;
 
+export const isACopyTable = (name: string): boolean => A_COPY_TABLE.test(name);
+
 const copyTablesIn = (): readonly string[] =>
   featureFolders().flatMap((feature) =>
     readdirSync(join(FEATURE_FOLDERS, feature))
-      .filter((name) => A_COPY_TABLE.test(name))
+      .filter(isACopyTable)
       .map((name) => join(FEATURE_FOLDERS, feature, name))
   );
 

@@ -579,6 +579,24 @@ has two callers and moves for its own reasons with the sheet following it, and a
 second dev tool says whether the contract is *drawings plus a passenger* or *what a
 feature lends the tool box*. With one example each, either answer is a coin toss.
 
+## Three corners of the tooling the mutation gate still cannot see
+
+`scripts/docs/` and `scripts/hooks/` are mutated at 80% now — 83.79% over the whole
+folder — and three things that reason sit outside both families:
+`design-page.ts`, whose `refuse()` branches have no spec; `e2e-changed.ts`, which
+decides which scenarios a diff can reach; and `mutate-changed.ts`, which decides
+which family a changed file belongs to. The last is sharpest — it is the only thing
+routing files to the two runs, and neither run scores it.
+
+Two modules also pass only on the average — `the-env-keys.ts` at 78.02% and
+`reading-budgets.ts` at 77.78% — which is the shape this repository has been caught
+by before. Both are short by their readers, and those are reachable: mocking
+`node:fs` lifted `the-source-tree.ts` from 60.98% to 92.68% for one spec header and
+six cases.
+
+**Worth doing with the next phase that touches the mutation gate or `scripts/`,**
+because both jobs open the same files.
+
 ## Not debt, deliberately
 
 Listed so nobody "fixes" them:

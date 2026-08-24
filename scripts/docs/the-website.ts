@@ -42,25 +42,22 @@ const SHORTEST_HEADER = 30;
 
 const A_LOSSY_WEBP = "VP8 ";
 
-const classesUsedIn = (html: string): ReadonlySet<string> =>
+export const classesUsedIn = (html: string): ReadonlySet<string> =>
   new Set(
     [...html.matchAll(A_CLASS_ATTRIBUTE)]
       .flatMap((match) => (match[FIRST_GROUP] ?? "").split(BETWEEN_CLASSES))
       .filter((token) => token.length > NOTHING)
   );
 
-const selectorFor = (token: string): string =>
+export const selectorFor = (token: string): string =>
   `.${token.replaceAll(ESCAPED_IN_A_SELECTOR, (character) => `\\${character}`)}`;
 
-export const siteCssOutOfStep = (): readonly string[] => {
-  if (!existsSync(SITE_CSS)) {
-    return [`${SITE_CSS}: never built — run "node scripts/tools.ts site-css"`];
-  }
-
-  const css = read(SITE_CSS);
-
-  return SITE_PAGES.flatMap((page) =>
-    [...classesUsedIn(read(page))]
+export const cssComplaints = (
+  css: string,
+  pages: readonly (readonly [string, string])[]
+): readonly string[] =>
+  pages.flatMap(([page, html]) =>
+    [...classesUsedIn(html)]
       .filter((token) => !css.includes(selectorFor(token)))
       .map(
         (token) =>
@@ -68,7 +65,14 @@ export const siteCssOutOfStep = (): readonly string[] => {
           `run "node scripts/tools.ts site-css"`
       )
   );
-};
+
+export const siteCssOutOfStep = (): readonly string[] =>
+  existsSync(SITE_CSS)
+    ? cssComplaints(
+        read(SITE_CSS),
+        SITE_PAGES.map((page) => [page, read(page)] as const)
+      )
+    : [`${SITE_CSS}: never built — run "node scripts/tools.ts site-css"`];
 
 export const sizeOfDrawing = (bytes: Buffer): readonly [number, number] | null => {
   if (bytes.length < SHORTEST_HEADER) {
@@ -89,7 +93,9 @@ export const sizeOfDrawing = (bytes: Buffer): readonly [number, number] | null =
   return null;
 };
 
-const imageOnA = (page: string, folder: string, tag: string): readonly [string[], number] => {
+export type DrawingLookup = (source: string) => Buffer | null;
+
+const imageOnA = (page: string, tag: string, bytesOf: DrawingLookup): readonly [string[], number] => {
   const source = AN_ATTRIBUTE("src").exec(tag)?.[FIRST_GROUP];
   const width = AN_ATTRIBUTE("width").exec(tag)?.[FIRST_GROUP];
   const height = AN_ATTRIBUTE("height").exec(tag)?.[FIRST_GROUP];
@@ -105,13 +111,12 @@ const imageOnA = (page: string, folder: string, tag: string): readonly [string[]
     ];
   }
 
-  const file = join(folder, source);
+  const bytes = bytesOf(source);
 
-  if (!existsSync(file)) {
+  if (bytes === null) {
     return [[`${page}: draws ${source}, which is not there — the page would show a gap`], NOTHING];
   }
 
-  const bytes = readFileSync(file);
   const size = sizeOfDrawing(bytes);
 
   if (size === null) {
@@ -140,21 +145,34 @@ const imageOnA = (page: string, folder: string, tag: string): readonly [string[]
   ];
 };
 
-export const imagesOutOfStep = (): readonly string[] =>
-  SITE_PAGES.flatMap((page) => {
-    const folder = dirname(page);
-    const weighed = (read(page).match(A_DRAWN_IMAGE) ?? []).map((tag) =>
-      imageOnA(page, folder, tag)
-    );
-    const complaints = weighed.flatMap(([said]) => said);
-    const served = weighed.reduce((weight, [, bytes]) => weight + bytes, NOTHING);
+export const imageComplaints = (
+  page: string,
+  html: string,
+  bytesOf: DrawingLookup
+): readonly string[] => {
+  const weighed = (html.match(A_DRAWN_IMAGE) ?? []).map((tag) => imageOnA(page, tag, bytesOf));
+  const complaints = weighed.flatMap(([said]) => said);
+  const served = weighed.reduce((weight, [, bytes]) => weight + bytes, NOTHING);
 
-    return served <= A_PAGE_BUDGET
-      ? complaints
-      : [
-          ...complaints,
-          `${page}: serves ${String(Math.round(served / KILOBYTE))}KB of pictures, past the ` +
-            `${String(A_PAGE_BUDGET / KILOBYTE)}KB a landing page may spend — draw them ` +
-            `smaller or in a leaner format rather than raising this`,
-        ];
-  });
+  return served <= A_PAGE_BUDGET
+    ? complaints
+    : [
+        ...complaints,
+        `${page}: serves ${String(Math.round(served / KILOBYTE))}KB of pictures, past the ` +
+          `${String(A_PAGE_BUDGET / KILOBYTE)}KB a landing page may spend — draw them ` +
+          `smaller or in a leaner format rather than raising this`,
+      ];
+};
+
+const bytesBeside = (page: string): DrawingLookup => {
+  const folder = dirname(page);
+
+  return (source) => {
+    const file = join(folder, source);
+
+    return existsSync(file) ? readFileSync(file) : null;
+  };
+};
+
+export const imagesOutOfStep = (): readonly string[] =>
+  SITE_PAGES.flatMap((page) => imageComplaints(page, read(page), bytesBeside(page)));

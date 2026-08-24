@@ -413,7 +413,8 @@ the test before it, and an assertion whose subject is something *missing*. The r
 
 - **One round of survivor-killing per phase, and only for mutants whose death would
   prevent a bug a player could see.** Above roughly 95% the survivors are mostly
-  equivalent mutants and type-narrowing guards, and the threshold is 85. One left
+  equivalent mutants and type-narrowing guards; the threshold is 85 in `src/` and 80
+  for the tooling, and `finish-phase` says why they differ. One left
   alive on purpose is worth a sentence in the commit message, not another two rounds.
 - **Read the survivor's own line before believing it is a gap.** A line number quoted
   from memory cost a whole extra run: the rule everyone worried about was already

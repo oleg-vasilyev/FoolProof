@@ -136,9 +136,17 @@ Stryker over the files this phase touched — about a minute. The **full**
 file the phase never opened was already killed in the phase that wrote it, and
 re-proving it costs ten minutes of every phase. The pre-push hook enforces the
 before-a-tag half — pushing a `v*` tag runs `check:release`, full mutation
-included, and a red battery keeps the tag on the machine. Breaks below 85%
-either way.
+included, and a red battery keeps the tag on the machine.
 Coverage says a line ran; this says a test would have noticed it break.
+
+**Two families, two runs, two bars, and both must pass.** The bot breaks below 85%
+(`stryker.config.json`); the tooling under `scripts/docs/` and `scripts/hooks/`
+breaks below 80% (`stryker.scripts.json`). The bars differ because the failures do:
+a survivor in `src/` is a bot that misbehaves in front of a player, a survivor in a
+gate is a shape of input the gate will not notice. They are separate runs rather
+than one, because a single score would let 1400 tooling mutants hide inside 5600
+good ones — which is the aggregate-hides-a-family trap this project has paid for
+before. `mutate-changed.ts` routes a changed file to its own family.
 
 **Do not start it until the tree is final.** Stryker reads the files once and reports
 at the end, so a run started while a review is still landing measures a tree that no
@@ -663,6 +671,16 @@ judgement:
 - **Freeze the paths an agent was given.** A phase moved `render/*` into subfolders
   while an agent was writing specs against those very paths, and the agent spent its
   last turn on stale mocks.
+- **Before parallelising, name the exclusive resource they share.** Disjoint files
+  are not enough: agents share one working tree, and any tool that copies it, writes
+  a fixed temp directory or a fixed report file can only be run by one of them at a
+  time. Three writers were told to run Stryker, whose sandbox lives *inside* the
+  repository — so one run copied another's half-written sandbox and died, and the
+  brief needed two corrections mid-flight. Ask what each agent runs, and where that
+  writes; anything exclusive stays with you and runs after they finish. The same hour
+  produced the general form of the mistake twice more, a config flag and a threshold
+  flag both invented rather than read: **a tool's behaviour you did not observe is a
+  guess**, and `--help` costs a second.
 - **Launch parallel agents in one message**, and do not block on one whose files are
   disjoint from yours. Their reports are not shown to the owner — relay what matters.
 - **"Launched" is not "running".** A launch can return success and leave nothing

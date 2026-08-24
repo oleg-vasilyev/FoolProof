@@ -1,13 +1,12 @@
 import { existsSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
+import { anchorOf, headingsOf } from "./a-markdown-document.ts";
 import {
   DOCUMENTS,
   FIRST_GROUP,
   SESSION_DOCUMENT,
   SPEC_DOCUMENT,
-  anchorOf,
   definedAgents,
-  headingsOf,
   installedSkills,
   read,
 } from "./the-documents.ts";
@@ -32,41 +31,46 @@ const anchorsByDocument = (): Record<string, ReadonlySet<string>> =>
     DOCUMENTS.map((file) => [file, new Set(headingsOf(read(file)).map(anchorOf))])
   );
 
-export const brokenLinks = (): readonly string[] => {
-  const anchors = anchorsByDocument();
+export const linkComplaints = (
+  file: string,
+  text: string,
+  anchorsByPath: Readonly<Record<string, ReadonlySet<string>>>,
+  exists: (target: string) => boolean
+): readonly string[] =>
+  [...text.matchAll(A_LINK)].flatMap((match) => {
+    const link = match[FIRST_GROUP] ?? "";
 
-  return DOCUMENTS.flatMap((file) =>
-    [...read(file).matchAll(A_LINK)].flatMap((match) => {
-      const link = match[FIRST_GROUP] ?? "";
-
-      if (link.startsWith("http") || link.startsWith("#")) {
-        return [];
-      }
-
-      const [path = "", anchor] = link.split("#");
-      const target = normalize(join(dirname(file), path)).split(A_WINDOWS_SEPARATOR).join("/");
-
-      if (!existsSync(target)) {
-        return [`${file}: links to ${link}, which does not exist`];
-      }
-
-      const known = anchors[target];
-
-      if (anchor !== undefined && known !== undefined && !known.has(anchor)) {
-        return [`${file}: links to ${link}, but that heading is not in ${target}`];
-      }
-
+    if (link.startsWith("http") || link.startsWith("#")) {
       return [];
-    })
-  );
+    }
+
+    const [path = "", anchor] = link.split("#");
+    const target = normalize(join(dirname(file), path)).split(A_WINDOWS_SEPARATOR).join("/");
+
+    if (!exists(target)) {
+      return [`${file}: links to ${link}, which does not exist`];
+    }
+
+    const known = anchorsByPath[target];
+
+    if (anchor !== undefined && known !== undefined && !known.has(anchor)) {
+      return [`${file}: links to ${link}, but that heading is not in ${target}`];
+    }
+
+    return [];
+  });
+
+export const brokenLinks = (): readonly string[] => {
+  const anchorsByPath = anchorsByDocument();
+
+  return DOCUMENTS.flatMap((file) => linkComplaints(file, read(file), anchorsByPath, existsSync));
 };
 
-export const specContentsOutOfStep = (): readonly string[] => {
-  const spec = read(SPEC_DOCUMENT);
-  const sections = [...spec.matchAll(A_SPEC_SECTION)]
+export const specContentsComplaints = (text: string): readonly string[] => {
+  const sections = [...text.matchAll(A_SPEC_SECTION)]
     .map((match) => match[FIRST_GROUP] ?? "")
     .filter((section) => section !== SPEC_CONTENTS);
-  const contents = spec.split(`## ${SPEC_CONTENTS}`).at(LAST)?.split("\n## ").at(NOTHING) ?? "";
+  const contents = text.split(`## ${SPEC_CONTENTS}`).at(LAST)?.split("\n## ").at(NOTHING) ?? "";
   const listed = new Set(
     [...contents.matchAll(A_CONTENTS_LINK)].map((link) => link[FIRST_GROUP] ?? "")
   );
@@ -91,23 +95,29 @@ export const specContentsOutOfStep = (): readonly string[] => {
   ];
 };
 
-export const unreachableHelp = (): readonly string[] => {
-  const session = read(SESSION_DOCUMENT);
+export const specContentsOutOfStep = (): readonly string[] =>
+  specContentsComplaints(read(SPEC_DOCUMENT));
 
-  return [
-    ...installedSkills()
-      .filter((skill) => !session.includes(skill))
-      .map(
-        (skill) =>
-          `${SESSION_DOCUMENT}: names no route to the "${skill}" skill — a skill ` +
-          `nothing points at is one nobody loads`
-      ),
-    ...definedAgents()
-      .filter((agent) => !session.includes(agent))
-      .map(
-        (agent) =>
-          `${SESSION_DOCUMENT}: names no route to the "${agent}" agent — an agent ` +
-          `nothing points at never runs`
-      ),
-  ];
-};
+export const unreachableHelpComplaints = (
+  session: string,
+  skills: readonly string[],
+  agents: readonly string[]
+): readonly string[] => [
+  ...skills
+    .filter((skill) => !session.includes(skill))
+    .map(
+      (skill) =>
+        `${SESSION_DOCUMENT}: names no route to the "${skill}" skill — a skill ` +
+        `nothing points at is one nobody loads`
+    ),
+  ...agents
+    .filter((agent) => !session.includes(agent))
+    .map(
+      (agent) =>
+        `${SESSION_DOCUMENT}: names no route to the "${agent}" agent — an agent ` +
+        `nothing points at never runs`
+    ),
+];
+
+export const unreachableHelp = (): readonly string[] =>
+  unreachableHelpComplaints(read(SESSION_DOCUMENT), installedSkills(), definedAgents());

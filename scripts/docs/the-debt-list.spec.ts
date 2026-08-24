@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { entriesIn, lastParagraphOf, namesATrigger } from "./the-debt-list.ts";
+import { debtComplaints, entriesIn, lastParagraphOf, namesATrigger } from "./the-debt-list.ts";
 
 
 const ONE_ENTRY = 1;
 
+const NO_ENTRIES = 0;
+
 const FIRST = 0;
+
+const A_DOCUMENT = "TECH-DEBT.md";
 
 describe("entriesIn", () => {
   it("should split a debt list into its entries, dropping the preamble above the first", () => {
@@ -75,6 +79,44 @@ describe("namesATrigger", () => {
     expect(namesATrigger("the reason\n\n**This is a whenever-you-like sort of cleanup.**")).toBe(
       false
     );
+  });
+});
+
+describe("debtComplaints", () => {
+  it("should name the entry that ends without a trigger, quoting its title and the reason", () => {
+    const list = "# Debt\n\npreamble\n\n## Wished for\n\nreason\n\nand nothing else\n";
+
+    const said = debtComplaints(list);
+
+    expect(said).toHaveLength(ONE_ENTRY);
+    expect(said[FIRST]).toContain(`${A_DOCUMENT}: "Wished for" ends without a trigger`);
+    expect(said[FIRST]).toContain("wish that will still be here in a year");
+    expect(said[FIRST]).toContain("widen A_CONDITION rather than rewording the entry");
+  });
+
+  it("should say nothing when every entry closes on a trigger", () => {
+    const list = "# Debt\n\npreamble\n\n## Owed\n\nreason\n\n**Once it happens twice.**\n";
+
+    expect(debtComplaints(list)).toHaveLength(NO_ENTRIES);
+  });
+
+  it("should leave the entry marked as not debt, deliberately, even though it names no trigger", () => {
+    const list = "# Debt\n\npreamble\n\n## Not debt, deliberately\n\njust a note with no trigger at all\n";
+
+    expect(debtComplaints(list)).toHaveLength(NO_ENTRIES);
+  });
+
+  it("should not spare an entry whose title only resembles the exempt one", () => {
+    const list = "# Debt\n\npreamble\n\n## Not debt, deliberately, mostly\n\nno trigger here\n";
+
+    const said = debtComplaints(list);
+
+    expect(said).toHaveLength(ONE_ENTRY);
+    expect(said[FIRST]).toContain('"Not debt, deliberately, mostly" ends without a trigger');
+  });
+
+  it("should say nothing about a document with no entries at all", () => {
+    expect(debtComplaints("# Debt\n\nNothing owed.\n")).toHaveLength(NO_ENTRIES);
   });
 });
 

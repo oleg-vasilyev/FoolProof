@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countedWordsIn, formsBakedInto } from "./the-copy-tables.ts";
+import { countedWordsIn, formsBakedInto, isACopyTable } from "./the-copy-tables.ts";
 
 
 const A_TABLE = "src/features/scoresheet/copy.ru.ts";
@@ -7,6 +7,8 @@ const A_TABLE = "src/features/scoresheet/copy.ru.ts";
 const NONE = 0;
 
 const FIRST = 0;
+
+const ONE_COMPLAINT = 1;
 
 const A_COUNTED_WORD = '  gameForms: { one: "партия", few: "партии", many: "партий" },';
 
@@ -47,5 +49,60 @@ describe("formsBakedInto", () => {
     const table = `${A_COUNTED_WORD}\n  played: (games: number) => \`\${String(games)} партии\`,`;
 
     expect(formsBakedInto(A_TABLE, table)).toHaveLength(FIRST + 1);
+  });
+});
+
+describe("isACopyTable", () => {
+  it("should know a copy table by its two-letter language", () => {
+    expect(isACopyTable("copy.en.ts")).toBe(true);
+    expect(isACopyTable("copy.ru.ts")).toBe(true);
+  });
+
+  it("should not take the module that switches between them for a table", () => {
+    expect(isACopyTable("copy.ts")).toBe(false);
+  });
+
+  it("should refuse a one-letter language, which no locale here uses", () => {
+    expect(isACopyTable("copy.e.ts")).toBe(false);
+  });
+
+  it("should refuse a name that only ends in one, so a sibling is not swept in", () => {
+    expect(isACopyTable("old-copy.en.ts")).toBe(false);
+  });
+
+  it("should refuse a name that carries something after the extension", () => {
+    expect(isACopyTable("copy.en.ts.bak")).toBe(false);
+  });
+
+  it("should refuse a language written in capitals, which no file here is", () => {
+    expect(isACopyTable("copy.EN.ts")).toBe(false);
+  });
+
+  it("should refuse a spec sitting beside the table", () => {
+    expect(isACopyTable("copy.en.spec.ts")).toBe(false);
+  });
+});
+
+describe("what a baked form complaint says", () => {
+  it("should read a word however much space follows the interpolation", () => {
+    const table = 'gameForms: { one: "партия", few: "партии", many: "партий" },\nsay: `${n}  партии`,';
+
+    expect(formsBakedInto(A_TABLE, table)).toHaveLength(ONE_COMPLAINT);
+  });
+
+  it("should not read a form declared halfway through a line as a declaration", () => {
+    const table = 'x: gameForms: { one: "партия", few: "партии", many: "партий" },\nsay: `${n} партии`,';
+
+    expect(formsBakedInto(A_TABLE, table)).toEqual([]);
+  });
+
+  it("should say why deciding a word form inside the table cannot be caught by a spec", () => {
+    const table = 'gameForms: { one: "партия", few: "партии", many: "партий" },\nsay: `${n} партии`,';
+    const said = formsBakedInto(A_TABLE, table)[FIRST] ?? "";
+
+    expect(said).toContain("decides a word form instead of printing one");
+    expect(said).toContain("caller passes a finished tally");
+    expect(said).toContain("compared against");
+    expect(said).toContain("itself by every spec that reads this table");
   });
 });

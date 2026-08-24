@@ -28,17 +28,17 @@ const schemaStatementsIn = (sql: string): ReadonlyMap<string, string> =>
       })
   );
 
-const documentedSchema = (): string =>
-  THE_DOCUMENTED_BLOCK.exec(read(SPEC_DOCUMENT))?.[FIRST_GROUP] ?? "";
+const documentedSql = (document: string): string =>
+  THE_DOCUMENTED_BLOCK.exec(document)?.[FIRST_GROUP] ?? "";
 
-const createdSchema = (): string =>
-  [...read(SCHEMA_SOURCE).matchAll(AN_EXECUTED_BLOCK)]
+const createdSql = (source: string): string =>
+  [...source.matchAll(AN_EXECUTED_BLOCK)]
     .map((match) => match[FIRST_GROUP] ?? "")
     .join(BETWEEN_STATEMENTS);
 
-export const schemaOutOfStep = (): readonly string[] => {
-  const documented = schemaStatementsIn(documentedSchema());
-  const created = schemaStatementsIn(createdSchema());
+export const schemaOutOfStepComplaints = (document: string, source: string): readonly string[] => {
+  const documented = schemaStatementsIn(documentedSql(document));
+  const created = schemaStatementsIn(createdSql(source));
   const names = new Set([...documented.keys(), ...created.keys()]);
 
   return [...names].flatMap((name) => {
@@ -62,3 +62,6 @@ export const schemaOutOfStep = (): readonly string[] => {
     return [];
   });
 };
+
+export const schemaOutOfStep = (): readonly string[] =>
+  schemaOutOfStepComplaints(read(SPEC_DOCUMENT), read(SCHEMA_SOURCE));

@@ -38,12 +38,12 @@ const keysReadBySource = (source: string): ReadonlySet<string> =>
 const keysTheAppRefusesWithout = (source: string): ReadonlySet<string> =>
   new Set([...source.matchAll(A_REQUIRED_KEY)].map((found) => found[FIRST_GROUP] ?? ""));
 
-export const requiredKeysOutOfStep = (): readonly string[] => {
+export const requiredKeyComplaints = (deployScript: string, entryPoint: string): readonly string[] => {
   const guarded = new Set(
-    (THE_GUARDED_KEYS.exec(read(DEPLOY_SCRIPT))?.[FIRST_GROUP] ?? "").split(BETWEEN_KEYS)
+    (THE_GUARDED_KEYS.exec(deployScript)?.[FIRST_GROUP] ?? "").split(BETWEEN_KEYS)
   );
 
-  return [...read(ENTRY_POINT).matchAll(A_REQUIRED_KEY)]
+  return [...entryPoint.matchAll(A_REQUIRED_KEY)]
     .map((match) => match[FIRST_GROUP] ?? "")
     .filter((key) => !guarded.has(key))
     .map(
@@ -51,6 +51,9 @@ export const requiredKeysOutOfStep = (): readonly string[] => {
         `${DEPLOY_SCRIPT}: would ship a config with no ${key}, which ${ENTRY_POINT} refuses to start without`
     );
 };
+
+export const requiredKeysOutOfStep = (): readonly string[] =>
+  requiredKeyComplaints(read(DEPLOY_SCRIPT), read(ENTRY_POINT));
 
 export const envTemplateComplaints = (template: string, source: string): readonly string[] => {
   const asked = keysReadBySource(source);

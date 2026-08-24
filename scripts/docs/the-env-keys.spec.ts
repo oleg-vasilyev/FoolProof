@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { envTemplateComplaints } from "./the-env-keys.ts";
+import { envTemplateComplaints, requiredKeyComplaints } from "./the-env-keys.ts";
 
 
 const NOTHING = 0;
 
 const ONE = 1;
+
+const TWO = 2;
 
 const FIRST = 0;
 
@@ -84,5 +86,79 @@ describe("envTemplateComplaints", () => {
     expect(envTemplateComplaints(A_FULL_TEMPLATE, source)[FIRST]).toContain(
       "says nothing about NOT_REALLY"
     );
+  });
+
+  it("should read a key straight after the comma, with no space before the quote", () => {
+    const source = `${A_FULL_SOURCE}\nconst tight = optionalEnv(env,"TIGHT_KEY");`;
+
+    expect(envTemplateComplaints(A_FULL_TEMPLATE, source)[FIRST]).toContain(
+      "says nothing about TIGHT_KEY"
+    );
+  });
+
+  it("should only count a fillable key at the true start of its line, not one a prefix runs into", () => {
+    const template = `${A_FULL_TEMPLATE}\nseeNEW_KEY=again`;
+
+    expect(envTemplateComplaints(template, A_FULL_SOURCE)).toHaveLength(NOTHING);
+  });
+});
+
+describe("requiredKeyComplaints", () => {
+  const A_GUARDING_SCRIPT = 'REQUIRED_KEYS="BOT_TOKEN DB_PATH"\n';
+
+  const A_REQUIRING_SOURCE = [
+    'const bot = new Bot(requireEnv(env, "BOT_TOKEN"));',
+    'const file = requireEnv(env, "DB_PATH");',
+  ].join("\n");
+
+  it("should say nothing when the deploy script guards every key the entry point requires", () => {
+    expect(requiredKeyComplaints(A_GUARDING_SCRIPT, A_REQUIRING_SOURCE)).toHaveLength(NOTHING);
+  });
+
+  it("should name a required key the deploy script never guards, and say the entry point refuses without it", () => {
+    const source = `${A_REQUIRING_SOURCE}\nconst root = requireEnv(env, "BOT_API_ROOT");`;
+
+    const said = requiredKeyComplaints(A_GUARDING_SCRIPT, source);
+
+    expect(said).toHaveLength(ONE);
+    expect(said[FIRST]).toContain("would ship a config with no BOT_API_ROOT");
+    expect(said[FIRST]).toContain("src/main.ts refuses to start without");
+  });
+
+  it("should read a required key with no space between the comma and the quote", () => {
+    const source = 'const x = requireEnv(env,"NO_SPACE_KEY");';
+
+    const said = requiredKeyComplaints(A_GUARDING_SCRIPT, source);
+
+    expect(said).toHaveLength(ONE);
+    expect(said[FIRST]).toContain("would ship a config with no NO_SPACE_KEY");
+  });
+
+  it("should report every required key when the deploy script guards nothing at all", () => {
+    const said = requiredKeyComplaints("# no REQUIRED_KEYS line here\n", A_REQUIRING_SOURCE);
+
+    expect(said).toHaveLength(TWO);
+    expect(said.some((line) => line.includes("no BOT_TOKEN"))).toBe(true);
+    expect(said.some((line) => line.includes("no DB_PATH"))).toBe(true);
+  });
+
+  it("should not let a guarded key cover a required key that only starts with it", () => {
+    const deployScript = 'REQUIRED_KEYS="BOT_TOKEN"\n';
+    const source = 'const x = requireEnv(env, "BOT_TOKEN_TWO");';
+
+    const said = requiredKeyComplaints(deployScript, source);
+
+    expect(said).toHaveLength(ONE);
+    expect(said[FIRST]).toContain("would ship a config with no BOT_TOKEN_TWO");
+  });
+
+  it("should require REQUIRED_KEYS to sit at the true start of its line, not merely appear on one", () => {
+    const deployScript = '#REQUIRED_KEYS="BOT_TOKEN"\n';
+    const source = 'const bot = new Bot(requireEnv(env, "BOT_TOKEN"));';
+
+    const said = requiredKeyComplaints(deployScript, source);
+
+    expect(said).toHaveLength(ONE);
+    expect(said[FIRST]).toContain("would ship a config with no BOT_TOKEN");
   });
 });

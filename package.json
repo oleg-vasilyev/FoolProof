@@ -33,7 +33,7 @@
     "test:integration": "vitest run integration.spec",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:mutation": "stryker run",
+    "test:mutation": "stryker run && stryker run stryker.scripts.json",
     "test:mutation:changed": "node scripts/mutate-changed.ts",
     "e2e": "vitest run --config e2e/vitest.e2e.config.ts",
     "e2e:changed": "node scripts/e2e-changed.ts",

@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { namesIn, withoutFencedBlocks } from "./a-markdown-document.ts";
 import {
   AGENTS_FOLDER,
   A_LINE,
@@ -7,10 +8,8 @@ import {
   SKILLS_FOLDER,
   definedAgents,
   installedSkills,
-  namesIn,
   read,
   skillFile,
-  withoutFencedBlocks,
 } from "./the-documents.ts";
 import { packageScripts } from "./the-repository.ts";
 
@@ -43,22 +42,25 @@ const CLAUDE = "C";
 
 const NEXT_MARK = 1;
 
-export const flowOutOfStep = (): readonly string[] => {
-  const drawing = read(FLOW_DOCUMENT);
-  const installed = new Set(installedSkills());
-  const defined = definedAgents();
+export interface FlowTargets {
+  readonly agents: readonly string[];
+  readonly skills: ReadonlySet<string>;
+  readonly scripts: ReadonlySet<string>;
+}
+
+export const flowComplaints = (drawing: string, targets: FlowTargets): readonly string[] => {
   const sentAn = new Set(namesIn(drawing, A_NAMED_AGENT));
-  const scripts = packageScripts();
+  const reachedFor = namesIn(drawing, A_NAMED_SKILL);
 
   return [
     ...[...sentAn]
-      .filter((agent) => !defined.includes(agent))
+      .filter((agent) => !targets.agents.includes(agent))
       .map(
         (agent) =>
           `${FLOW_DOCUMENT}: sends an errand to the "${agent}" agent, ` +
           `which is not in ${AGENTS_FOLDER}`
       ),
-    ...defined
+    ...targets.agents
       .filter((agent) => !sentAn.has(agent))
       .map(
         (agent) =>
@@ -66,21 +68,21 @@ export const flowOutOfStep = (): readonly string[] => {
           `the map is how anybody learns this agent exists, and one absent from it is one ` +
           `nobody will think to run`
       ),
-    ...namesIn(drawing, A_NAMED_SKILL)
-      .filter((skill) => !installed.has(skill))
+    ...reachedFor
+      .filter((skill) => !targets.skills.has(skill))
       .map(
         (skill) =>
           `${FLOW_DOCUMENT}: draws a step reaching for the "${skill}" skill, ` +
           `which is not in ${SKILLS_FOLDER}`
       ),
     ...namesIn(drawing, A_NAMED_COMMAND)
-      .filter((command) => !scripts.has(command))
+      .filter((command) => !targets.scripts.has(command))
       .map(
         (command) =>
           `${FLOW_DOCUMENT}: draws "npm run ${command}", which package.json does not have`
       ),
-    ...[...installed]
-      .filter((skill) => !namesIn(drawing, A_NAMED_SKILL).includes(skill))
+    ...[...targets.skills]
+      .filter((skill) => !reachedFor.includes(skill))
       .map(
         (skill) =>
           `${FLOW_DOCUMENT}: never reaches for the "${skill}" skill — the drawing is the ` +
@@ -90,7 +92,7 @@ export const flowOutOfStep = (): readonly string[] => {
   ];
 };
 
-const skillsByStage = (drawing: string): readonly (readonly [string, number])[] => {
+export const skillsByStage = (drawing: string): readonly (readonly [string, number])[] => {
   const marks = [...drawing.matchAll(A_STAGE)];
 
   return marks.flatMap((mark, index) => {
@@ -103,33 +105,30 @@ const skillsByStage = (drawing: string): readonly (readonly [string, number])[] 
   });
 };
 
-const stagesClaimedBy = (skill: string): readonly number[] => {
-  if (!existsSync(skillFile(skill))) {
-    return [];
-  }
-
-  const declared = A_DECLARED_STAGE.exec(withoutFencedBlocks(read(skillFile(skill))));
+export const stagesDeclaredIn = (skill: string): readonly number[] => {
+  const declared = A_DECLARED_STAGE.exec(withoutFencedBlocks(skill));
 
   return (declared?.[FIRST_GROUP]?.match(A_NUMBER) ?? []).map(Number);
 };
 
-export const stagesOutOfStep = (): readonly string[] => {
-  const reached = skillsByStage(read(FLOW_DOCUMENT));
-
+export const stageComplaints = (
+  reached: readonly (readonly [string, number])[],
+  claimed: ReadonlyMap<string, readonly number[]>
+): readonly string[] => {
   const reaches = (skill: string, stage: number): boolean =>
     reached.some(([named, drawn]) => named === skill && drawn === stage);
 
   return [
     ...reached
-      .filter(([skill, stage]) => !stagesClaimedBy(skill).includes(stage))
+      .filter(([skill, stage]) => !(claimed.get(skill) ?? []).includes(stage))
       .map(
         ([skill, stage]) =>
           `${skillFile(skill)}: ${FLOW_DOCUMENT} reaches for this skill in stage ` +
           `${String(stage)}, and the skill claims no such stage — say "> **Stage ` +
           `${String(stage)}**" under its title`
       ),
-    ...installedSkills().flatMap((skill) =>
-      stagesClaimedBy(skill)
+    ...[...claimed].flatMap(([skill, stages]) =>
+      stages
         .filter((stage) => !reaches(skill, stage))
         .map(
           (stage) =>
@@ -177,9 +176,7 @@ export const afterFlowLine = (errand: Errand, line: string, owner: string): Erra
   };
 };
 
-export const flowRepliesLeaveTheLaneTheyWereAskedOf = (): readonly string[] => {
-  const drawing = read(FLOW_DOCUMENT);
-
+export const replyComplaints = (drawing: string): readonly string[] => {
   if (!drawing.includes(CLAUDES_LANE)) {
     return [
       `${FLOW_DOCUMENT}: this check follows the errands leaving "${CLAUDES_LANE}", which the ` +
@@ -194,3 +191,24 @@ export const flowRepliesLeaveTheLaneTheyWereAskedOf = (): readonly string[] => {
     .split(A_LINE)
     .reduce((errand, line) => afterFlowLine(errand, line, owner), NOTHING_ASKED).complaints;
 };
+
+const stagesEachSkillClaims = (): ReadonlyMap<string, readonly number[]> =>
+  new Map(
+    installedSkills().map((skill) => [
+      skill,
+      existsSync(skillFile(skill)) ? stagesDeclaredIn(read(skillFile(skill))) : [],
+    ])
+  );
+
+export const flowOutOfStep = (): readonly string[] =>
+  flowComplaints(read(FLOW_DOCUMENT), {
+    agents: definedAgents(),
+    skills: new Set(installedSkills()),
+    scripts: packageScripts(),
+  });
+
+export const stagesOutOfStep = (): readonly string[] =>
+  stageComplaints(skillsByStage(read(FLOW_DOCUMENT)), stagesEachSkillClaims());
+
+export const flowRepliesLeaveTheLaneTheyWereAskedOf = (): readonly string[] =>
+  replyComplaints(read(FLOW_DOCUMENT));

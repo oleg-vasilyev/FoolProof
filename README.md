@@ -168,7 +168,7 @@ runs the bot, the gates, their parts, then the two test families.
 | `npm run test:watch` | Vitest left running while you edit |
 | `npm run test:coverage` | Vitest with coverage; fails below 70% on any metric |
 | `npm run test:mutation:changed` | Stryker over the files that differ from `origin/main`, about a minute |
-| `npm run test:mutation` | Stryker over everything, about five minutes; both fail below 85% |
+| `npm run test:mutation` | Stryker over everything, about five minutes; two runs, the bot at 85% and the tooling at 80% |
 | `npm run e2e` | Whole scenarios against the real bot and a fake Telegram |
 | `npm run e2e:changed` | Only the scenarios the diff against `origin/main` can reach |
 | `npm run e2e:watch` | The same run, slowed down, in one browser tab |
