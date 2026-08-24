@@ -30,6 +30,16 @@
             "statusMessage": "Applying ESLint fixes…"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/refuse-a-turn-ending-on-a-promise.mjs",
+            "timeout": 15,
+            "statusMessage": "Checking the turn actually finished…"
+          }
+        ]
       }
     ]
   }
