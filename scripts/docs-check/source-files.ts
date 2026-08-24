@@ -1,6 +1,6 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { read } from "./the-documents.ts";
+import { read } from "./document-files.ts";
 
 
 export const FEATURE_FOLDERS = "src/features";

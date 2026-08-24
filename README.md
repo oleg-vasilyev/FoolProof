@@ -333,8 +333,9 @@ deploy/                 the systemd units a server is installed from, the script
                         that put the newest tag live and send the server its
                         configuration, and the runbook for all of it
 .github/workflows/      the checks that run on every push
-scripts/                dev utilities that are not part of the bot; scripts/docs/
-                        holds what `docs:check` asks of each thing it checks
+scripts/                dev utilities that are not part of the bot; docs-check/
+                        holds what `docs:check` asks — `documents/` what is read
+                        out of the documents, `source/` what they are held against
 e2e/                    the fake Telegram and the scenarios played against it
 ```
 

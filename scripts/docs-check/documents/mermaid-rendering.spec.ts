@@ -5,7 +5,7 @@ import {
   lanesUsedIn,
   renderComplaints,
   separatorComplaints,
-} from "./a-mermaid-diagram.ts";
+} from "./mermaid-rendering.ts";
 
 
 const ONE_DEEP = 1;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { envTemplateComplaints, requiredKeyComplaints } from "./the-env-keys.ts";
+import { envTemplateComplaints, requiredKeyComplaints } from "./env-keys.ts";
 
 
 const NOTHING = 0;

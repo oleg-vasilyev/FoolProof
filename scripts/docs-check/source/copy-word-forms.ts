@@ -1,7 +1,8 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
-import { A_LINE, FIRST_GROUP, read } from "./the-documents.ts";
-import { FEATURE_FOLDERS, featureFolders } from "./the-repository.ts";
+import { read } from "../document-files.ts";
+import { A_LINE, FIRST_GROUP } from "../markdown-text.ts";
+import { FEATURE_FOLDERS, featureFolders } from "../source-files.ts";
 
 
 const A_COUNTED_FORM = /^\s*\w*Forms: \{ one: "([^"]+)", few: "([^"]+)", many: "([^"]+)" \},$/gm;

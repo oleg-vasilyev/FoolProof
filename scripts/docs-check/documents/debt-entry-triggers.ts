@@ -1,4 +1,4 @@
-import { DEBT_DOCUMENT, read } from "./the-documents.ts";
+import { DEBT_DOCUMENT, read } from "../document-files.ts";
 
 
 const NOTHING = 0;

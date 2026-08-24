@@ -3,7 +3,7 @@ import {
   linkComplaints,
   specContentsComplaints,
   unreachableHelpComplaints,
-} from "./document-links.ts";
+} from "./document-references.ts";
 
 
 const NO_COMPLAINTS = 0;

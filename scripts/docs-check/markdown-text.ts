@@ -1,5 +1,8 @@
-import { FIRST_GROUP } from "./the-documents.ts";
+export const FIRST_GROUP = 1;
 
+export const SECOND_GROUP = 2;
+
+export const A_LINE = /\r?\n/;
 
 const A_HEADING = /^#+ .+$/gm;
 

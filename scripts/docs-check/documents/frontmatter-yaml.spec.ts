@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { frontmatterComplaints, frontmatterOf, unparseableKeys } from "./the-frontmatter.ts";
+import { frontmatterComplaints, frontmatterOf, unparseableKeys } from "./frontmatter-yaml.ts";
 
 
 const NOTHING = 0;

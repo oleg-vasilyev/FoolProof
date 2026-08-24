@@ -1,4 +1,5 @@
-import { FIRST_GROUP, SPEC_DOCUMENT, read } from "./the-documents.ts";
+import { SPEC_DOCUMENT, read } from "../document-files.ts";
+import { FIRST_GROUP } from "../markdown-text.ts";
 
 
 const SCHEMA_SOURCE = "src/shared/repository/sqlite-connection.ts";

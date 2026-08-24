@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { schemaOutOfStepComplaints } from "./the-running-schema.ts";
+import { schemaOutOfStepComplaints } from "./running-schema.ts";
 
 
 const FIRST = 0;

@@ -6,7 +6,7 @@ import {
   installedSkills,
   linesIn,
   skillFile,
-} from "./the-documents.ts";
+} from "../document-files.ts";
 
 
 const NOTHING = 0;
@@ -79,7 +79,7 @@ export const skillBudgetComplaints = (
     .filter((skill) => !installed.includes(skill))
     .map(
       (skill) =>
-        `scripts/docs/reading-budgets.ts: budgets a "${skill}" skill that is not in ` +
+        `scripts/docs-check/documents/reading-budgets.ts: budgets a "${skill}" skill that is not in ` +
         `${SKILLS_FOLDER} — a row nothing can fail reads exactly like a row that ` +
         `never complains, so delete it with the skill`
     ),

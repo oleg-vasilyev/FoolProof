@@ -6,7 +6,7 @@ import {
   skillsByStage,
   stageComplaints,
   stagesDeclaredIn,
-} from "./the-flow-drawing.ts";
+} from "./flow-drawing.ts";
 
 
 const THE_OWNER = "U";

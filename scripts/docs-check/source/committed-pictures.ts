@@ -1,15 +1,16 @@
 import { existsSync, readdirSync } from "node:fs";
 import { basename, join, normalize } from "node:path";
-import { DESIGN_PAGE_SYNC, fingerprintOf } from "../design-page.ts";
-import { MOCKUP_DIR, SITE_POSTER_DIR } from "../drawn-into.ts";
-import { A_LINE, FIRST_GROUP, read } from "./the-documents.ts";
+import { DESIGN_PAGE_SYNC, fingerprintOf } from "../../design-page.ts";
+import { MOCKUP_DIR, SITE_POSTER_DIR } from "../../drawn-into.ts";
+import { read } from "../document-files.ts";
+import { A_LINE, FIRST_GROUP } from "../markdown-text.ts";
 import {
   FEATURE_FOLDERS,
   SAMPLES_FOLDER,
   everyPoster,
   featureFolders,
   foldersNamed,
-} from "./the-repository.ts";
+} from "../source-files.ts";
 
 
 const A_GALLERY_SOURCE = /^([a-z][a-z0-9-]*-edges)\.ts$/;

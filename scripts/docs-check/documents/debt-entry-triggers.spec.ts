@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { debtComplaints, entriesIn, lastParagraphOf, namesATrigger } from "./the-debt-list.ts";
+import { debtComplaints, entriesIn, lastParagraphOf, namesATrigger } from "./debt-entry-triggers.ts";
 
 
 const ONE_ENTRY = 1;

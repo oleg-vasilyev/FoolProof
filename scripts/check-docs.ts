@@ -2,34 +2,34 @@ import { drawnByName } from "./feature-drawings.ts";
 import {
   flowWouldNotRender,
   mermaidLinesCarryingASeparator,
-} from "./docs/a-mermaid-diagram.ts";
-import { agentsWithoutAContract } from "./docs/the-agent-contracts.ts";
-import { frontmatterThatWillNotParse } from "./docs/the-frontmatter.ts";
-import { brokenLinks, specContentsOutOfStep, unreachableHelp } from "./docs/document-links.ts";
-import { overBudget, skillsOverBudget } from "./docs/reading-budgets.ts";
-import { envTemplateOutOfStep, requiredKeysOutOfStep } from "./docs/the-env-keys.ts";
+} from "./docs-check/documents/mermaid-rendering.ts";
+import { agentsWithoutAContract } from "./docs-check/documents/agent-contracts.ts";
+import { frontmatterThatWillNotParse } from "./docs-check/documents/frontmatter-yaml.ts";
+import { brokenLinks, specContentsOutOfStep, unreachableHelp } from "./docs-check/documents/document-references.ts";
+import { overBudget, skillsOverBudget } from "./docs-check/documents/reading-budgets.ts";
+import { envTemplateOutOfStep, requiredKeysOutOfStep } from "./docs-check/source/env-keys.ts";
 import {
   casesOutOfStep,
   designPageOutOfStep,
   mockupsOutOfStep,
   postersOutOfTheGallery,
   sitePostersOutOfStep,
-} from "./docs/the-committed-pictures.ts";
-import { formsBakedIntoCopy } from "./docs/the-copy-tables.ts";
-import { debtWithoutATrigger } from "./docs/the-debt-list.ts";
-import { DOCUMENTS } from "./docs/the-documents.ts";
+} from "./docs-check/source/committed-pictures.ts";
+import { formsBakedIntoCopy } from "./docs-check/source/copy-word-forms.ts";
+import { debtWithoutATrigger } from "./docs-check/documents/debt-entry-triggers.ts";
+import { DOCUMENTS } from "./docs-check/document-files.ts";
 import {
   flowOutOfStep,
   flowRepliesLeaveTheLaneTheyWereAskedOf,
   stagesOutOfStep,
-} from "./docs/the-flow-drawing.ts";
-import { schemaOutOfStep } from "./docs/the-running-schema.ts";
+} from "./docs-check/documents/flow-drawing.ts";
+import { schemaOutOfStep } from "./docs-check/source/running-schema.ts";
 import {
   crowdedLayers,
   foldersMissingFromTheTree,
   scriptsOutOfStep,
-} from "./docs/the-source-tree.ts";
-import { imagesOutOfStep, siteCssOutOfStep } from "./docs/the-website.ts";
+} from "./docs-check/source/source-tree.ts";
+import { imagesOutOfStep, siteCssOutOfStep } from "./docs-check/source/site-pages.ts";
 
 
 const NOTHING = 0;

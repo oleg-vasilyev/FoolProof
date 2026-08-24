@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { agentFile, contractComplaints } from "./the-agent-contracts.ts";
+import { agentFile, contractComplaints } from "./agent-contracts.ts";
 
 
 const NOTHING = 0;

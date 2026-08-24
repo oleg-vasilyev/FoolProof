@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countedWordsIn, formsBakedInto, isACopyTable } from "./the-copy-tables.ts";
+import { countedWordsIn, formsBakedInto, isACopyTable } from "./copy-word-forms.ts";
 
 
 const A_TABLE = "src/features/scoresheet/copy.ru.ts";

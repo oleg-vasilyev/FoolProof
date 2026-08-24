@@ -223,7 +223,7 @@ same escaping bug caught again one substring from shipping; and the copy-table r
 blind to a counted word after the non-breaking space a poster line uses, which no
 probe found because the space was invisible in the source.
 
-Half the answer is now mechanical: splitting `check-docs.ts` into `scripts/docs/`
+Half the answer is now mechanical: splitting `check-docs.ts` into `scripts/docs-check/`
 put every rule that *reasons* — a trigger, a mermaid lane, a PNG header, a baked
 word form — behind a pure function taking its subject as an argument, and writing
 one of those specs is what found the third bug. The stubbed filesystem this entry
@@ -486,6 +486,10 @@ be awkward, with the trigger that would make the split pay for itself.
 | `e2e/fake-telegram/fake-telegram.ts` | 418 | One `switch` over nine Bot API methods, mixing protocol shapes with the chat log. A `bot-api-methods.ts` was planned and folded in to save a file; that was probably the wrong trade. | A tenth method is needed, or a change has to reach into the protocol shapes *and* the chat log to be made. The count of refusals was the trigger here and it was the wrong one: it had already fired before it was written, it fired twice more without anybody wanting the split, and refusals turn out to sit above the switch in four-line helpers that mix nothing |
 | `e2e/harness/scenario-chat.ts` | 273 | Module-level singletons plus a 25-member `Chat` interface that scenarios use as a language. The interface grows every time a scenario wants a new question answered. | The interface passes ~30 members — then split the driving verbs from the queries |
 | `e2e/hub/hub-server.ts` | 259 | Proxy, cache, page serving and port probing in one file. | Anything is added to the hub |
+| `scripts/docs-check/source/committed-pictures.ts` | 275 | Two subjects sharing only the word *committed*: whether the drawings on disk match what the renderers draw now, and whether the gallery's approved case lists match the samples. | Either subject grows a third kind of artifact |
+| `scripts/docs-check/source/site-pages.ts` | 178 | CSS coverage, image geometry and a page weight budget — three questions that meet only in the site they are asked about. | The site gains a kind of page, or the weight budget needs reasoning of its own |
+| `scripts/docs-check/source/source-tree.ts` | 136 | Holds `scriptsOutOfStep`, whose subject is `package.json` and not the tree, and a crowded-layer rule that names no document at all. | Anything else starts asking `package.json` a question — then the script table is its own file |
+| `scripts/docs-check/documents/document-references.ts` | 123 | Three kinds of reference — a link with an anchor, an entry in the spec's contents, a skill or agent `/help` names — read by three separate parsers. | A fourth kind of reference arrives |
 | `src/main.ts` | 67 | Two `??` defaults left inline in the diagnostics wiring, still the only place in `src/` with branch coverage at 50% (lines 48–49), and the one surviving mutant in the file. `optionalEnv()` took the other two and the empty-means-missing bug with them; these two remain because the fallback runs only when the key is absent, and `main.spec.ts` imports the module once, with the spy returning a value. | A second spec file reaches both branches — vitest isolates files, so no `vi.resetModules()` is involved. What stops it is the price: 180 lines of setup and fifteen `vi.mock` calls duplicated for two branches. Do it once that header is worth extracting for another reason |
 
 ---
@@ -581,21 +585,19 @@ feature lends the tool box*. With one example each, either answer is a coin toss
 
 ## Three corners of the tooling the mutation gate still cannot see
 
-`scripts/docs/` and `scripts/hooks/` are mutated at 80% now — 83.79% over the whole
-folder — and three things that reason sit outside both families:
+`scripts/docs-check/` and `scripts/hooks/` are mutated at 80% now — 83.79% over the
+whole folder — and three things that reason sit outside both families:
 `design-page.ts`, whose `refuse()` branches have no spec; `e2e-changed.ts`, which
-decides which scenarios a diff can reach; and `mutate-changed.ts`, which decides
-which family a changed file belongs to. The last is sharpest — it is the only thing
-routing files to the two runs, and neither run scores it.
+decides which scenarios a diff can reach; and `mutate-changed.ts`, which routes a
+changed file to one of the two runs and is scored by neither.
 
-Two modules also pass only on the average — `the-env-keys.ts` at 78.02% and
-`reading-budgets.ts` at 77.78% — which is the shape this repository has been caught
-by before. Both are short by their readers, and those are reachable: mocking
-`node:fs` lifted `the-source-tree.ts` from 60.98% to 92.68% for one spec header and
-six cases.
+Two modules also pass only on the average — `source/env-keys.ts` at 78.02% and
+`documents/reading-budgets.ts` at 77.78%. Both are short by their readers, and those
+are reachable: mocking `node:fs` lifted `source-tree.ts` from 60.98% to 92.68% for
+one spec header and six cases.
 
-**Worth doing with the next phase that touches the mutation gate or `scripts/`,**
-because both jobs open the same files.
+**Worth doing with the next phase that changes what one of these files decides, or
+that opens the mutation gate** — "touches `scripts/`" fired on one that only moved them.
 
 ## Not debt, deliberately
 

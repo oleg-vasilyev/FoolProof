@@ -5,7 +5,7 @@ import {
   headingsOf,
   namesIn,
   withoutFencedBlocks,
-} from "./a-markdown-document.ts";
+} from "./markdown-text.ts";
 
 
 const NOTHING = 0;

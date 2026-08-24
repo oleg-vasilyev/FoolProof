@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DESIGN_PAGE_SYNC } from "../design-page.ts";
+import { DESIGN_PAGE_SYNC } from "../../design-page.ts";
 
 
 const readdirSyncSpy = vi.fn();
@@ -20,13 +20,11 @@ vi.mock("node:fs", () => ({
   existsSync: (file: string) => existsSyncSpy(file),
 }));
 
-vi.mock("./the-documents.ts", () => ({
-  FIRST_GROUP: 1,
-  A_LINE: /\r?\n/,
+vi.mock("../document-files.ts", () => ({
   read: (file: string) => readSpy(file),
 }));
 
-vi.mock("./the-repository.ts", () => ({
+vi.mock("../source-files.ts", () => ({
   FEATURE_FOLDERS: "src/features",
   SAMPLES_FOLDER: "samples",
   everyPoster: () => everyPosterSpy(),
@@ -45,7 +43,7 @@ const {
   postersOutOfTheGalleryComplaints,
   sitePostersOutOfStep,
   sitePostersOutOfStepComplaints,
-} = await import("./the-committed-pictures.ts");
+} = await import("./committed-pictures.ts");
 
 
 const FIRST = 0;

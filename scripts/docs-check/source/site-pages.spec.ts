@@ -5,7 +5,7 @@ import {
   imageComplaints,
   selectorFor,
   sizeOfDrawing,
-} from "./the-website.ts";
+} from "./site-pages.ts";
 
 
 const A_HEADER = 64;

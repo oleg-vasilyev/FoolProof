@@ -1,7 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { SITE_CSS, SITE_PAGES } from "../site-css.ts";
-import { FIRST_GROUP, read } from "./the-documents.ts";
+import { SITE_CSS, SITE_PAGES } from "../../site-css.ts";
+import { read } from "../document-files.ts";
+import { FIRST_GROUP } from "../markdown-text.ts";
 
 
 const NOTHING = 0;

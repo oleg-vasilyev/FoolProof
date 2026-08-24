@@ -1,11 +1,9 @@
 import {
-  A_LINE,
   DOCUMENTS,
-  FIRST_GROUP,
   FLOW_DOCUMENT,
-  SECOND_GROUP,
   read,
-} from "./the-documents.ts";
+} from "../document-files.ts";
+import { A_LINE, FIRST_GROUP, SECOND_GROUP } from "../markdown-text.ts";
 
 
 const NOTHING = 0;

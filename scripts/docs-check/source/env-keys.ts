@@ -1,6 +1,7 @@
 import { basename, dirname } from "node:path";
-import { FIRST_GROUP, SECOND_GROUP, read } from "./the-documents.ts";
-import { filesIn, sourceFilesIn } from "./the-repository.ts";
+import { read } from "../document-files.ts";
+import { FIRST_GROUP, SECOND_GROUP } from "../markdown-text.ts";
+import { filesIn, sourceFilesIn } from "../source-files.ts";
 
 
 const ENTRY_POINT = "src/main.ts";

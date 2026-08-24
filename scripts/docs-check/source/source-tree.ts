@@ -1,13 +1,13 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
-import { backtickedWordsOf } from "./a-markdown-document.ts";
-import { SESSION_DOCUMENT, TREE_DOCUMENT, read } from "./the-documents.ts";
+import { backtickedWordsOf } from "../markdown-text.ts";
+import { SESSION_DOCUMENT, TREE_DOCUMENT, read } from "../document-files.ts";
 import {
   FEATURE_FOLDERS,
   featureFolders,
   packageScripts,
   sourceFilesIn,
-} from "./the-repository.ts";
+} from "../source-files.ts";
 
 
 const NOTHING = 0;

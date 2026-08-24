@@ -1,5 +1,6 @@
-import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { readdirSync, readFileSync } from "node:fs";
+import { A_LINE } from "./markdown-text.ts";
 
 
 export const DOCUMENTS = [
@@ -24,12 +25,6 @@ export const FLOW_DOCUMENT = "DEVELOPMENT-FLOW.md";
 export const SKILLS_FOLDER = ".claude/skills";
 
 export const AGENTS_FOLDER = ".claude/agents";
-
-export const FIRST_GROUP = 1;
-
-export const SECOND_GROUP = 2;
-
-export const A_LINE = /\r?\n/;
 
 const A_MARKDOWN_FILE = /\.md$/;
 

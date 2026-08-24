@@ -18,17 +18,17 @@ vi.mock("node:fs", () => ({
   readdirSync: (folder: string, options: unknown) => readdirSyncSpy(folder, options),
 }));
 
-vi.mock("./a-markdown-document.ts", () => ({
+vi.mock("../markdown-text.ts", () => ({
   backtickedWordsOf: (text: string) => backtickedWordsOfSpy(text),
 }));
 
-vi.mock("./the-documents.ts", () => ({
+vi.mock("../document-files.ts", () => ({
   SESSION_DOCUMENT: "CLAUDE.md",
   TREE_DOCUMENT: "README.md",
   read: (file: string) => readSpy(file),
 }));
 
-vi.mock("./the-repository.ts", () => ({
+vi.mock("../source-files.ts", () => ({
   FEATURE_FOLDERS: "src/features",
   featureFolders: () => featureFoldersSpy(),
   sourceFilesIn: (folder: string) => sourceFilesInSpy(folder),
@@ -44,7 +44,7 @@ const {
   isAFeatureEntryPoint,
   scriptsOutOfStep,
   scriptsOutOfStepComplaints,
-} = await import("./the-source-tree.ts");
+} = await import("./source-tree.ts");
 
 
 const FIRST = 0;

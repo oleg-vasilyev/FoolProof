@@ -14,12 +14,12 @@
   "concurrency": "75%",
   "timeoutMS": 20000,
   "mutate": [
-    "scripts/docs/**/*.ts",
+    "scripts/docs-check/**/*.ts",
     "scripts/hooks/**/*.ts",
     "!scripts/**/*.spec.ts",
     "!scripts/**/*.stub.ts",
-    "!scripts/docs/the-repository.ts",
-    "!scripts/docs/the-documents.ts"
+    "!scripts/docs-check/source-files.ts",
+    "!scripts/docs-check/document-files.ts"
   ],
   "thresholds": {
     "high": 90,

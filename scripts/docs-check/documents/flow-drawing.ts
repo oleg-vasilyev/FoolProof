@@ -1,17 +1,15 @@
 import { existsSync } from "node:fs";
-import { namesIn, withoutFencedBlocks } from "./a-markdown-document.ts";
+import { A_LINE, FIRST_GROUP, namesIn, withoutFencedBlocks } from "../markdown-text.ts";
 import {
   AGENTS_FOLDER,
-  A_LINE,
-  FIRST_GROUP,
   FLOW_DOCUMENT,
   SKILLS_FOLDER,
   definedAgents,
   installedSkills,
   read,
   skillFile,
-} from "./the-documents.ts";
-import { packageScripts } from "./the-repository.ts";
+} from "../document-files.ts";
+import { packageScripts } from "../source-files.ts";
 
 
 const NOTHING = 0;

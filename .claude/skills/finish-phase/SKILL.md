@@ -45,6 +45,11 @@ they rot. Making `rasterize()` asynchronous left a one-liner in
 every poster, in the step whose whole job is catching a render that grew. Green
 gates, a lie in a document.
 
+**A renamed file is the same fault, and its grep is owed before the review
+launches.** A phase that moved 29 files left the old folder name in this skill and
+in a `TECH-DEBT.md` entry; both surfaced after the reviewer was already out, which
+is how the hold-still rule below gets broken by something that felt like tidying.
+
 Most style rules are ESLint rules now (`eslint.config.js`), so a lint failure is
 a convention violation, not a nit — read the message before reaching for a
 disable comment, which is itself banned in `src/`.
@@ -140,7 +145,7 @@ included, and a red battery keeps the tag on the machine.
 Coverage says a line ran; this says a test would have noticed it break.
 
 **Two families, two runs, two bars, and both must pass.** The bot breaks below 85%
-(`stryker.config.json`); the tooling under `scripts/docs/` and `scripts/hooks/`
+(`stryker.config.json`); the tooling under `scripts/docs-check/` and `scripts/hooks/`
 breaks below 80% (`stryker.scripts.json`). The bars differ because the failures do:
 a survivor in `src/` is a bot that misbehaves in front of a player, a survivor in a
 gate is a shape of input the gate will not notice. They are separate runs rather

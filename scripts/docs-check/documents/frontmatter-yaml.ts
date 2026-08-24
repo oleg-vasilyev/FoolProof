@@ -1,5 +1,6 @@
-import { definedAgents, installedSkills, read, skillFile } from "./the-documents.ts";
-import { agentFile } from "./the-agent-contracts.ts";
+import { definedAgents, installedSkills, read, skillFile } from "../document-files.ts";
+import { FIRST_GROUP, SECOND_GROUP } from "../markdown-text.ts";
+import { agentFile } from "./agent-contracts.ts";
 
 
 const NOTHING = 0;
@@ -7,10 +8,6 @@ const NOTHING = 0;
 const NOWHERE = -1;
 
 const AFTER_THE_FENCE = 1;
-
-const FIRST_GROUP = 1;
-
-const SECOND_GROUP = 2;
 
 const A_FENCE = "---";
 

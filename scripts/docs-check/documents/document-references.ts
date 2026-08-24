@@ -1,15 +1,14 @@
 import { existsSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
-import { anchorOf, headingsOf } from "./a-markdown-document.ts";
+import { FIRST_GROUP, anchorOf, headingsOf } from "../markdown-text.ts";
 import {
   DOCUMENTS,
-  FIRST_GROUP,
   SESSION_DOCUMENT,
   SPEC_DOCUMENT,
   definedAgents,
   installedSkills,
   read,
-} from "./the-documents.ts";
+} from "../document-files.ts";
 
 
 const NOTHING = 0;

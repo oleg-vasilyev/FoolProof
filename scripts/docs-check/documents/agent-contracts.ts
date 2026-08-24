@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { AGENTS_FOLDER, definedAgents, read } from "./the-documents.ts";
+import { AGENTS_FOLDER, definedAgents, read } from "../document-files.ts";
 
 
 const NOWHERE = -1;
