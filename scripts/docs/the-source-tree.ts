@@ -1,6 +1,6 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
-import { TREE_DOCUMENT, backtickedWordsOf, read } from "./the-documents.ts";
+import { SESSION_DOCUMENT, TREE_DOCUMENT, backtickedWordsOf, read } from "./the-documents.ts";
 import {
   FEATURE_FOLDERS,
   featureFolders,
@@ -17,13 +17,33 @@ const A_FEATURE_ENTRY_POINT = /-feature\.ts$/;
 
 const A_DECLARED_COMMAND = /command: "/g;
 
-export const featuresMissingFromTheTree = (): readonly string[] => {
-  const tree = read(TREE_DOCUMENT);
+const SHARED_FOLDERS = "src/shared";
 
-  return featureFolders()
-    .filter((feature) => !tree.includes(`${feature}/`))
-    .map((feature) => `${TREE_DOCUMENT}: does not mention ${FEATURE_FOLDERS}/${feature}/`);
-};
+const DRAWS_THE_TREE = [TREE_DOCUMENT, SESSION_DOCUMENT];
+
+const sharedFolders = (): readonly string[] =>
+  readdirSync(SHARED_FOLDERS, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name);
+
+export const foldersMissingFromTheTree = (): readonly string[] =>
+  DRAWS_THE_TREE.flatMap((document) => {
+    const tree = read(document);
+
+    return [
+      ...featureFolders()
+        .filter((feature) => !tree.includes(`${feature}/`))
+        .map((feature) => `${document}: does not mention ${FEATURE_FOLDERS}/${feature}/`),
+      ...sharedFolders()
+        .filter((folder) => !tree.includes(`${folder}/`))
+        .map(
+          (folder) =>
+            `${document}: does not mention ${SHARED_FOLDERS}/${folder}/ — the tree is the ` +
+            `only place a reader learns what is down there, and a folder missing from it ` +
+            `is one the next person invents a second time`
+        ),
+    ];
+  });
 
 export const scriptsOutOfStep = (): readonly string[] => {
   const documented = backtickedWordsOf(read(TREE_DOCUMENT));

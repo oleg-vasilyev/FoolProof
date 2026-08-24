@@ -9,11 +9,10 @@ The dividing question is whether a fact would survive a rewrite in another
 language. The Bot API's limits, the transitions and the schema would — so they
 are here. Naming, layering and test conventions would not — so they are not.
 
-What is deliberately unfinished lives in **`TECH-DEBT.md`**: the end-to-end
-harness, which is parked rather than abandoned, and the files most likely to be
-awkward to change next. A thing is only in that file if it has a trigger saying
-when it becomes worth doing — otherwise it belongs here as an edge case, or it
-belongs in a commit.
+What is deliberately unfinished lives in **`TECH-DEBT.md`**: the files most likely
+to be awkward to change next, and the limits nobody has hit yet. A thing is only
+in that file if it has a trigger saying when it becomes worth doing — otherwise it
+belongs here as an edge case, or it belongs in a commit.
 
 ## What is in here
 
@@ -42,7 +41,7 @@ quietly lose the other.
 
 The bot lives in a group chat of friends. It records games of Podkidnoy Durak:
 who went first, in what order players went out, who was left the fool. It reports
-statistics for the session and for arbitrary periods.
+statistics for the evening, and a card for one player's whole career in that chat.
 
 The key constraint: input happens on a Friday evening, on a phone, one-handed,
 between games. Any friction in input kills the product. Optimise for the number

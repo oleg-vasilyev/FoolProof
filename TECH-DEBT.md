@@ -26,11 +26,9 @@ development dependency and never runs on the server, which is why this is a
 tidiness problem rather than a security one.
 
 **Stryker 10.0.0 was checked on 19 Aug 2026 and carries the same
-`typed-rest-client ~2.3.0`.** So a major bump does not close this, and there is no
-reason to take one for this alone.
-
-An override is a claim that a package works against a version its own author never
-tested. The mutation run is what keeps that claim honest, and it passes.
+`typed-rest-client ~2.3.0`**, so a major bump does not close this. An override is a
+claim that a package works against a version its own author never tested; the
+mutation run keeps that claim honest, and it passes.
 
 **Delete the block when Stryker ships a release that bumps `typed-rest-client`
 itself** — `npm audit` going quiet without it is the check.
@@ -50,9 +48,31 @@ not done yet, because it needs `/status` to read a path that is not the database
 — the first time that feature would touch the filesystem for a reason other than
 the one it was built for.
 
+A checkup on 24 August found the timer has never actually fired on schedule: the
+only snapshot that exists was taken by hand on 13 August, and the first scheduled
+run is 1 September. So the monthly path is not merely unwatched — it is untested,
+and the first thing it will prove is whether it works at all.
+
 **Pick it up when the timer goes back to daily**, which is the same trigger as a
 second table starting to play — or sooner, the first time the answer to "when did
 this last run" is wanted while something is actually broken.
+
+---
+
+## The deploy is idempotent against HEAD, and HEAD is not what is running
+
+`foolproof-deploy.sh` decides there is nothing to do by comparing the newest tag
+against `git rev-parse HEAD`, and its `ERR` trap keeps that true through a
+*failure* by putting the previous commit back. What the trap cannot cover is being
+killed outright: the checkout happens before `npm ci` and the restart, so a SIGKILL
+in that window — an OOM kill on a 1 GB VM during an install is the realistic way in —
+leaves HEAD at the new tag with the old code running, and every later run finds
+nothing to do and exits 0. The bot silently never gets the release. The fix is a
+stamp file written *after* the restart, compared instead of HEAD.
+
+**Take it the next time anything touches `deploy/`**, alongside the `--omit=dev`
+change above: same script, same need for somebody awake to watch the deploy that
+follows.
 
 ---
 
@@ -63,10 +83,10 @@ cannot deliver `SIGINT` to its child. So the path a real `Ctrl+C` takes — the 
 that flushes the pending debounced edit before the process ends — is exercised by
 units and by hand, never by a scenario.
 
-Closing it honestly would mean a shutdown channel in `src/` that exists only for
-the harness, and this project does not put test hooks in the app: `BOT_API_ROOT` is
-in `src/` because a self-hosted Bot API server is a real Telegram feature, not
-because e2e wanted a seam.
+Closing it honestly would mean a shutdown channel in `src/` existing only for the
+harness, and this project does not put test hooks in the app: `BOT_API_ROOT` is in
+`src/` because a self-hosted Bot API server is a real Telegram feature, not because
+e2e wanted a seam.
 
 **Pick it up if a lost edit on shutdown ever reaches a real Friday** — that is the
 evidence that the gap costs more than the seam would.
@@ -81,14 +101,11 @@ holder" for the evening's awards. Three more reduces of the same shape live in
 best and the worst night, `rival-facts.ts` ranks pairings by a merit with two
 tie-breaks, and `rarest-of.ts` keeps the lowest binomial tail with none at all.
 
-This is the second phase in a row to move the count rather than settle it. The last
-one deleted the inline-keyboard entry for hitting exactly this trigger and created
-the next one; this one deleted `career-rival.ts`'s copy and added two. The trigger
-as written — "collapse them when a fourth ranking appears" — has now fired and been
-stepped over, which means it was the wrong trigger: a count does not say whether
-the shapes actually want to be one function, and these four genuinely differ in
-what they rank on (a merit, a merit plus direction, a merit plus tie-breaks, a bare
-minimum).
+Two phases in a row moved the count rather than settling it. The trigger as written
+— "collapse them when a fourth ranking appears" — fired and was stepped over, which
+means it was the wrong trigger: a count does not say whether the shapes want to be
+one function, and these four genuinely differ in what they rank on (a merit, a merit
+plus direction, a merit plus tie-breaks, a bare minimum).
 
 So the trigger is replaced by the one that would actually pay: **collapse them the
 first time two of the four disagree about a tie-break and the difference turns out
@@ -169,12 +186,9 @@ Two more colours would close the arithmetic and not the question: colour is doin
 the whole job of identity on those sheets, and at ten players a palette that stays
 legible on a dark ground is already stretched. The honest fix is a drawing decision
 — a second distinguishing mark, or an admission that the legend is the key and the
-chart is the picture — which is why this is not a two-line patch.
-
-It came out of the first cold read of the whole gallery, along with sixteen others.
-Twelve of those are fixed; four were never opened and are the entry near the end of
-this file; and this one is the finding that was confirmed in the code and still
-stands.
+chart is the picture — which is why this is not a two-line patch. It came out of the
+first cold read of the whole gallery and is the one finding from it confirmed in the
+code and still standing.
 
 **Take it with the next phase that redraws a poster**, which will want a
 `poster-designer` mockup anyway — or the first time a real chat seats nine.
@@ -189,10 +203,10 @@ a production box that imports none of them. `src/` needs exactly two packages �
 `grammy` and `@resvg/resvg-js` — because Node strips types natively and nothing in
 the running bot reaches for a test runner.
 
-`npm ci --omit=dev` is the whole fix and it makes deploys smaller and faster. It was
-not taken when the encoder was added, because that phase ran overnight while the
-owner slept and a deploy script is the one place with no automatic gate: a wrong
-guess there is a bot that does not start, found in the morning.
+`npm ci --omit=dev` is the whole fix and makes deploys smaller and faster. It was not
+taken when the encoder was added: that phase ran overnight while the owner slept, and
+a deploy script is the one place with no automatic gate — a wrong guess there is a bot
+that does not start, found in the morning.
 
 **Take it the next time anything touches `deploy/`**, when somebody is awake to
 watch the deploy that follows — or the first time an install is slow enough to
@@ -232,10 +246,10 @@ that fingerprint and the mockups disagree — which is what stopped the page fal
 two releases behind again. But the splice writes the marker locally and the push
 happens afterwards, by hand, over the MCP. So a phase that sees the gate red and
 reruns the tool goes green without the page ever receiving anything, and `git add -A`
-takes the marker along. The `update-the-design-page` skill orders the two — commit
-the marker only after the byte-identical read-back — and that ordering is prose,
-which is the kind of thing this gate exists because prose failed at. Nothing cheap
-closes it: the page lives behind a login, so no CI check can ask what it holds.
+takes the marker along. The `update-the-design-page` skill orders the two — commit the
+marker only after the byte-identical read-back — and that ordering is prose, which is
+what this gate exists because prose failed at. Nothing cheap closes it: the page lives
+behind a login, so no CI check can ask what it holds.
 
 **Move the marker's write to the end of the push when the MCP can be driven from a
 script** — or the first time the gate is cleared by a rerun that pushed nothing,
@@ -246,12 +260,11 @@ which is the failure this entry exists to make recognisable.
 ## The `/personal` roster keyboard is the only one with no ceiling
 
 `roster-keyboard.ts` draws one row per player the chat has ever seated, and nothing
-caps the list. Every other keyboard in the bot is bounded by the table — at most ten
-seats — but this one grows with the chat's whole history, and it is a *reply markup*,
-which the Bot API limits by payload size rather than by a documented row count. Nine
-players today, so nothing is close; what the real limit is has never been measured,
-only assumed, and the failure mode would be `/personal` refusing to send its screen
-at all rather than degrading.
+caps the list. Every other keyboard is bounded by the table — at most ten seats — but
+this one grows with the chat's whole history, and it is a *reply markup*, which the
+Bot API limits by payload size rather than by a documented row count. Nine players
+today, so nothing is close; the real limit has never been measured, and the failure
+mode is `/personal` refusing to send its screen at all rather than degrading.
 
 **Measure the real ceiling and paginate when a chat passes twenty players** — or
 sooner, the first time a `sendMessage` carrying this markup is refused. The measuring
@@ -264,15 +277,14 @@ is the work: a scenario that builds the markup for fifty names and asks a real
 
 `everPresent` and `foundingMember` are structural rather than earned: whoever has
 been at every evening since the first gets both, on every card they ever draw, and
-they outrank most of the measured facts once a career is long. The gallery's
-`a-long-career` and `always-burned` cases show it — two of the three rows are the
-same two facts, and only the top row and the plate differ. For the regulars, who are
-exactly the people asking for the card most often, that is less variety than the
-twenty rules suggest.
+they outrank most measured facts once a career is long. The gallery's `a-long-career`
+and `always-burned` cases show it — two of the three rows are the same two facts. For
+the regulars, who ask for the card most often, that is less variety than the twenty
+rules suggest.
 
-The fix is not obvious enough to guess at: it could be overshadowing (a founder who
-never missed one needs only one of the two lines), a decay by career length, or a
-rule that a card may carry at most one attendance fact.
+The fix is not obvious enough to guess at: overshadowing (a founder who never missed
+one needs only one line), a decay by career length, or a cap of one attendance fact
+per card.
 
 **Pick one when a chat has run twenty evenings** — that is when a regular's card has
 had the same two rows on it long enough to be worth complaining about, and when
@@ -295,13 +307,12 @@ which is 0.60 em — a plausible extreme rather than a constructed one, and it p
 the broken limit exactly as easily as a working one.
 
 The fix is a real choice, not a number to bump. Raising the constant to 1.08 closes
-the hole in one line and makes every ordinary name truncate noticeably earlier,
-because the worst case is then charged to everybody. Measuring the actual string
-against a table of per-character advances costs nothing for ordinary names and is
-exact, but adds a generated table to the repository, which then needs its own gate
-against going stale. **Pick this up the first time a real player's name is cut wrong
-on a card, or when a second renderer needs to fit text** — the second reader is what
-turns the table from over-engineering into the obvious answer.
+the hole in one line and charges the worst case to every ordinary name, which then
+truncates noticeably earlier. Measuring the actual string against a table of
+per-character advances is exact and free for ordinary names, but adds a generated
+table needing its own staleness gate. **Pick this up the first time a real player's
+name is cut wrong on a card, or when a second renderer needs to fit text** — the
+second reader turns the table from over-engineering into the obvious answer.
 
 ---
 
@@ -311,16 +322,15 @@ The chronology cuts a column heading to fit its column, and the legend under the
 is where a reader recovers the whole name. On an evening with eleven or more distinct
 players the legend wraps to three rows, its slots narrow to the same order of width as
 a heading, and both copies of the name are cut — so «Владимир-Вяче…» and
-«Александра-Ко…» appear on the sheet twice and in full nowhere. A cold reading of the
-thirteen-player case found it; the ten-player cases are unaffected, because two legend
-rows leave slots wide enough.
+«Александра-Ко…» appear on the sheet twice and in full nowhere. The ten-player cases
+are unaffected: two legend rows leave slots wide enough.
 
-The fix is layout with taste in it — wrap a legend name to a second line, or drop the
+The fix is layout with taste in it — wrap a legend name to a second line, drop the
 share to give the name the width, or print the roster once at full width somewhere —
-and it is worth choosing with a mockup rather than guessing. **Pick it up when a real
-chat first seats eleven distinct players in one evening**, which has never happened;
-until then the case is in the gallery and the defect is visible on it, which is the
-right place for a limit nobody has reached.
+and it wants a mockup rather than a guess. **Pick it up when a real chat first seats
+eleven distinct players in one evening**, which has never happened; until then the
+case is in the gallery and the defect is visible on it, which is the right place for
+a limit nobody has reached.
 
 ---
 
@@ -332,11 +342,11 @@ Russian table is written in the masculine past tense throughout: «Ходил п
 female name every one of those is wrong, and a cold reading of the awards sheet named
 two of them by hand before anybody counted the rest.
 
-It cannot be fixed one line at a time. Two of nine corrected reads worse than none —
-the remaining seven then look deliberate — and the fix is not a lookup either, because
-gender is not derivable from a typed name. What the language does allow is a voice with
-no past-tense verb in it: a noun phrase, a count, a colon. «Первых ходов — 5, и дураком
-в 2 из них» already reads that way, and it is the sheet's best line.
+It cannot be fixed one line at a time: two of nine corrected reads worse than none,
+since the remaining seven then look deliberate, and a lookup cannot help because
+gender is not derivable from a typed name. What the language does allow is a voice
+with no past-tense verb in it — a noun phrase, a count, a colon. «Первых ходов — 5, и
+дураком в 2 из них» already reads that way, and it is the sheet's best line.
 
 **Rewrite the Russian reasons into that voice the next time the awards copy is opened
 for anything else** — the cost is one pass over one table, and it is much cheaper
@@ -358,9 +368,8 @@ decision, not a caption.
 The player card's tile says «0% — последнее место, 100% — первое»; the season sheet's
 hint says «50% — половина стола · 100% — первое место в каждой партии». Neither is
 wrong and both describe the same quantity, but a player who reads both is taught the
-scale twice in two vocabularies that do not overlap: one names the ends, the other
-names the middle. A cold reader found it only by holding the two side by side, which
-is the one thing a single-picture reading cannot do.
+scale twice in vocabularies that do not overlap: one names the ends, the other the
+middle. A cold reader found it only by holding the two side by side.
 
 **Take it with the next phase that opens the scoresheet copy** — the decision is which
 of the two teaches the scale, not which sentence to edit.
@@ -391,8 +400,8 @@ sentence back to the picture.
 
 The key shows the fool as a red digit of the biggest table the evening seated, so a
 four-handed game inside a five-handed evening prints a red **4** the key never accounts
-for — while that game counts toward «Дураком в N из M» on the awards sheet. The same cold
-reading found it, and reading the digit took working out that somebody had sat out.
+for — while that game counts toward «Дураком в N из M» on the awards sheet. Reading the
+digit takes working out that somebody sat out.
 
 **Take it with the phase that redraws the grid**, which is where a second key entry or a
 mark that does not depend on the table size would go.
@@ -403,16 +412,15 @@ That reading produced seventeen. Twelve are fixed, one is the colour entry above
 these four were never opened — they are questions rather than tasks, and checking one
 can delete it:
 
-- a crown drawn with nothing keying it, on the one sheet of twenty-nine that draws a red
+- a crown drawn with nothing keying it, on the one sheet of twenty-nine with a red
   banner, and that banner never appears in the Russian set at all;
-- the card owner's name cut to nine characters while an opponent's is drawn whole
-  underneath it;
-- one name cut to two different lengths on one sheet, the legend shorter than the column
-  heading that exists to recover it;
-- «Аня» and «Anya» listed as two players in one legend, which is the picture of the
-  problem `/merge` exists for — and may be a gallery fixture rather than a defect.
+- the card owner's name cut to nine characters while an opponent's is drawn whole;
+- one name cut to two different lengths on one sheet, the legend shorter than the
+  column heading that exists to recover it;
+- «Аня» and «Anya» listed as two players in one legend — the picture of the problem
+  `/merge` exists for, and maybe a gallery fixture rather than a defect.
 
-The middle two overlap the two entries above about fitting a name to its space; whether
+The middle two overlap the entries above about fitting a name to its space; whether
 they are one defect seen twice is part of the checking.
 
 **Check them with the phase that fits names to their space**, which opens the same
@@ -429,30 +437,24 @@ it. The gate is right to exist. What it silently assumes is that whoever can com
 can also write the page.
 
 On 21 August 2026 that assumption broke. The mockups moved in `9072e2e`, the page did
-not follow, and by the time anybody noticed, this machine had switched from the
-account that owns the page to one that does not: the project answers 404 through
-`DesignSync`, `list_projects` shows only unrelated work, and a share link does not
-help because it grants a human a browser view rather than granting the API a write.
-The owning account then ran out of tokens. So `main` went red on one line with the code
-fine, and nothing reachable from the account signed in could clear it — only switching
-back could.
+not follow, and this machine had meanwhile switched to an account that does not own
+it: `DesignSync` answers 404, and a share link grants a human a browser view rather
+than granting the API a write. So `main` went red on one line with the code fine, and
+only switching accounts back could clear it.
 
 Two things are wrong, and only the second is worth code. The first is that a red
 `main` now means either "the code is broken" or "somebody committed from the wrong
-account", and a reader cannot tell which without opening the log. The second is the
-gate's teeth: a stale page must never reach a **tag**, because a release is what
-somebody reads the page against — but it need not block every **push**, because a
-push is a checkpoint and the page can catch up before the tag. Moving this one check
-out of `check:push` and into `check:release` would keep the guarantee that matters and
-stop an account switch from painting `main` red.
+account". The second is the gate's teeth: a stale page must never reach a **tag**,
+because a release is what somebody reads the page against — but it need not block
+every **push**, because a push is a checkpoint and the page can catch up before the
+tag. Moving this check from `check:push` to `check:release` keeps the guarantee that
+matters and stops an account switch painting `main` red.
 
 **That is a gate losing teeth, so it is the owner's call, not a cleanup.** Pick it up
 the next time an account switch or a lost login makes this red again — twice is a
-pattern and the second time is the argument. What is red here is never the code: the drawings and
-the page are one command apart, and the command needs a login rather than a commit.
-That is why the gate says nothing useful about whether a phase is finished — every
-phase that draws anything turns it red until its last step, which is exactly the
-position a check should not put a reader in.
+pattern. What is red here is never the code, which is why the gate says nothing
+useful about whether a phase is finished: every phase that draws anything turns it
+red until its last step.
 
 ---
 
@@ -467,11 +469,10 @@ itself.
 
 Copying it was the right call at two. The screens are not variations on one idea — one
 orders players, the other subtracts them — and the shared parts are four small
-functions, so a common base would have to invent a concept that does not exist yet.
+functions, so a common base would invent a concept that does not exist yet.
 
 **Pick it up at the third screen, or the first time that alert changes.** Either is
-evidence the scaffolding is a thing rather than a coincidence; until then, extracting it
-would be naming something before knowing what it is.
+evidence the scaffolding is a thing rather than a coincidence.
 
 ## Files that may be worth splitting
 
@@ -498,10 +499,10 @@ after game 7 of 13, which is exactly THE IRISH GOODBYE, and the rule went to the
 player who left, because `bestBy` returns one winner.
 
 So the catalogue's coverage of a table is narrower than its thirty-six rules suggest:
-several rules describe a situation two people can be in, and each hands out one row.
-The fix is not a participation award — the card exists to say what one person did that
-nobody else did — but a rule that fits two players could name the runner-up on a card
-with room to spare, the way the truce already names everybody who was in a drawn game.
+several describe a situation two people can be in, and each hands out one row. The fix
+is not a participation award — the card says what one person did that nobody else did —
+but a rule fitting two players could name the runner-up where there is room, the way
+the truce already names everybody in a drawn game.
 
 **Pick it up when a third real evening leaves somebody unnamed**, and check it against
 the evenings on disk rather than against the simulation, which cannot see this: it
@@ -509,17 +510,16 @@ measures how often each rule fires, never how the chosen rows are spread over a 
 
 ## Sixteen user-visible lines the gallery never draws
 
-A cold reader given the full list of award and fact titles came back having found only
-twenty of them on any panel. Sixteen — ГОРЯЧИЙ СТУЛ, ПАЦИФИСТ, ЖЕЛЕЗНЫЙ СТУЛ, С ОПОЗДАНИЕМ,
-ТО ЕСТЬ ТО НЕТ, КАМЕО among the awards, and ВЫХОДИТ СУХИМ, СЧАСТЛИВЫЙ ТАЛИСМАН, ЧЁРНАЯ
+A cold reader given the full list of award and fact titles found only twenty of them on
+any panel. Sixteen — six awards (ГОРЯЧИЙ СТУЛ, ПАЦИФИСТ, ЖЕЛЕЗНЫЙ СТУЛ, С ОПОЗДАНИЕМ,
+ТО ЕСТЬ ТО НЕТ, КАМЕО) and ten card facts (ВЫХОДИТ СУХИМ, СЧАСТЛИВЫЙ ТАЛИСМАН, ЧЁРНАЯ
 КОШКА, ЛЁГКАЯ ДОБЫЧА, ЕСТЬ ГДЕ РАЗВЕРНУТЬСЯ, ТЕРЯЕТСЯ В ТОЛПЕ, БЕЗ ПЕРВОГО ХОДА, ПЕРВЫЙ
-ХОД НЕ К ДОБРУ, СНОВА ЗА СТОЛОМ, ЧЁРНАЯ ПОЛОСА on the cards — are drawn by no gallery case
-in either language, so the reading gate cannot see them and the width guard is the only
-thing that can.
+ХОД НЕ К ДОБРУ, СНОВА ЗА СТОЛОМ, ЧЁРНАЯ ПОЛОСА) — are drawn by no gallery case in either
+language, so the reading gate cannot see them and the width guard is all that can.
 
 The gallery's cases were built to stress the **drawing** — the widest name, the most
 awards, the tallest sheet — and a rule that fires on an ordinary evening is not an edge,
-so nothing pulled it in. That is the same blind spot the spread rule had.
+so nothing pulled it in. The same blind spot the spread rule had.
 
 **Pick it up when a case can cover several of them at once**, which is the only way this
 is worth the drawing time: one evening constructed so that the quiet awards fire together,
@@ -538,9 +538,9 @@ A cold reader called it exactly: the player card's НЕУДОБНЫЙ СОПЕР
 in its holder line and reads twice as well for it.
 
 **Pick it up when a second award needs a name it does not have** — a head-to-head or a
-seat-neighbour rule would be the second. The fix is to resolve names before
-`awardReason` rather than after, which is a change to what the render layer is handed
-and not worth making for one line.
+seat-neighbour rule would be the second. The fix is resolving names before
+`awardReason` rather than after: a change to what the render layer is handed, and not
+worth making for one line.
 
 ## Rarity ranks a vivid fact below an abstract one
 
@@ -550,9 +550,9 @@ the fool and taking the very next game. The second is the one anybody at that ta
 would repeat out loud; the model says it is commoner, and commoner is all the ranking
 knows.
 
-Rarity was the right first answer because it is measurable and it broke the "same nine
-every Friday" problem. What it cannot express is that some facts are stories and others
-are statistics.
+Rarity was the right first answer: measurable, and it broke the "same nine every
+Friday" problem. What it cannot express is that some facts are stories and others are
+statistics.
 
 **Pick this up when there are enough real evenings to argue with the model** — the
 percentages are simulated, and `RAREST_FIRST` is a hand-written list precisely so that

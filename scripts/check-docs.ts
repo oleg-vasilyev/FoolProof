@@ -5,7 +5,7 @@ import {
 } from "./docs/a-mermaid-diagram.ts";
 import { brokenLinks, specContentsOutOfStep, unreachableHelp } from "./docs/document-links.ts";
 import { overBudget, skillsOverBudget } from "./docs/reading-budgets.ts";
-import { requiredKeysOutOfStep } from "./docs/required-env-keys.ts";
+import { envTemplateOutOfStep, requiredKeysOutOfStep } from "./docs/the-env-keys.ts";
 import {
   casesOutOfStep,
   designPageOutOfStep,
@@ -24,7 +24,7 @@ import {
 import { schemaOutOfStep } from "./docs/the-running-schema.ts";
 import {
   crowdedLayers,
-  featuresMissingFromTheTree,
+  foldersMissingFromTheTree,
   scriptsOutOfStep,
 } from "./docs/the-source-tree.ts";
 import { imagesOutOfStep, siteCssOutOfStep } from "./docs/the-website.ts";
@@ -51,11 +51,12 @@ const complaints = [
   ...flowWouldNotRender(),
   ...mermaidLinesCarryingASeparator(),
   ...stagesOutOfStep(),
-  ...featuresMissingFromTheTree(),
+  ...foldersMissingFromTheTree(),
   ...scriptsOutOfStep(),
   ...crowdedLayers(),
   ...schemaOutOfStep(),
   ...requiredKeysOutOfStep(),
+  ...envTemplateOutOfStep(),
   ...postersOutOfTheGallery(),
   ...casesOutOfStep(),
   ...mockupsOutOfStep(theMockups),

@@ -18,6 +18,8 @@ const AN_APPROVED_CASE_LIST = /^([a-z][a-z0-9-]*-edges)\.cases\.txt$/;
 
 const A_CASE_NAME = /^([a-z][a-z0-9-]*) — \S/;
 
+const A_DRAWN_CASE = /name: "([^"]+)"/g;
+
 const A_TYPESCRIPT_FILE = /\.ts$/;
 
 const A_SYNCED_FINGERPRINT = /^mockups: ([0-9a-f]{64})$/m;
@@ -138,15 +140,27 @@ const casesMissingFrom = (list: string): readonly string[] => {
   }
 
   const drawn = read(source);
+  const approved = casesApprovedIn(list);
 
-  return casesApprovedIn(list)
-    .filter((approved) => !drawn.includes(`name: "${approved}"`))
-    .map(
-      (approved) =>
-        `${MOCKUP_DIR}/${list}: "${approved}" was approved on a contact sheet and ` +
-        `${source} draws no case by that name — an edge the owner looked at is now ` +
-        `drawn by nobody`
-    );
+  return [
+    ...approved
+      .filter((one) => !drawn.includes(`name: "${one}"`))
+      .map(
+        (one) =>
+          `${MOCKUP_DIR}/${list}: "${one}" was approved on a contact sheet and ` +
+          `${source} draws no case by that name — an edge the owner looked at is now ` +
+          `drawn by nobody`
+      ),
+    ...[...drawn.matchAll(A_DRAWN_CASE)]
+      .map((found) => found[FIRST_GROUP] ?? "")
+      .filter((one) => !approved.includes(one))
+      .map(
+        (one) =>
+          `${source}: draws a case called "${one}" that ${MOCKUP_DIR}/${list} does not ` +
+          `hold — the gallery is read against the owner's own list, so an edge appearing ` +
+          `only in the code is one nobody agreed was worth drawing`
+      ),
+  ];
 };
 
 export const casesOutOfStep = (): readonly string[] => {

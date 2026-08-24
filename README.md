@@ -322,8 +322,8 @@ src/
     scoresheet/         the pictures /stats and /personal send back
     diagnostics/        the /status report about the bot itself
     language/           the /language screen that picks the chat's language
-  shared/               config, drawing, drawings, fonts, lifecycle, locale,
-                        logging, repository, table, telegram, text, timing —
+  shared/               config/, drawing/, drawings/, fonts/, lifecycle/, locale/,
+                        logging/, repository/, table/, telegram/, text/, timing/ —
                         a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
 docs/                   the website GitHub Pages serves — everything in here is public
