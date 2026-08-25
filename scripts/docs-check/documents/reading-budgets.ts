@@ -109,8 +109,9 @@ export const skillBudgetComplaints = (
       ? []
       : [
           `${skillFile(skill)}: ${String(facts.lines)} lines, budget is ${String(budget)} — ` +
-            `move a rule into the skill loaded when it applies, or compress an incident ` +
-            `into the rule it bought, rather than raising the number`,
+            `cut what only one of its triggers needs into a page beside it and link to ` +
+            `that, move a rule into the skill loaded when it applies, or compress an ` +
+            `incident into the rule it bought, rather than raising the number`,
         ];
   }),
 ];

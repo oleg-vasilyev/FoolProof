@@ -195,6 +195,7 @@ describe("every budget complaint carries the reason it exists for", () => {
     const over = skillBudgetComplaints(["build-it"], { "build-it": AT_BUDGET }, facts(OVER_BUDGET));
     const said = over.join("\n");
 
+    expect(said).toContain("cut what only one of its triggers needs into a page beside it");
     expect(said).toContain("move a rule into the skill loaded when it applies");
     expect(said).toContain("compress an incident");
     expect(said).toContain("rather than raising the number");

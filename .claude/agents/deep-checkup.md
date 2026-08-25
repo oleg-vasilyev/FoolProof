@@ -116,7 +116,7 @@ summary.** That line is not documentation about the file — it is what decides
 whether the file is ever opened, so a wrong one is worse than wrong prose: the
 corrected body is never read because nothing loads it. `docs:check` now proves
 each skill and agent is *named* somewhere in `CLAUDE.md`, which is reachability
-only; whether it fires at the right **moment** is yours. For each of the twelve,
+only; whether it fires at the right **moment** is yours. For every skill and agent,
 lay three things side by side — the `description:`, the row in `CLAUDE.md`'s
 routing table, and the stage in `DEVELOPMENT-FLOW.md` that names it — and ask:
 
@@ -138,6 +138,34 @@ routing table, and the stage in `DEVELOPMENT-FLOW.md` that names it — and ask:
 Report these as findings like any other, with the file and the wording. A whole
 audit missed this class once — including this one, whose first run judged the
 documents accurate while every description above was stale.
+
+**Sweep one skill or agent for rules that should already have been deleted.** The
+retrospective's sixth question asks what each phase made obsolete, so a rule that dies
+today is caught — but only today's. Every rule written before that question existed
+has never been asked, and nothing else will ever ask: a phase reads a skill to obey
+it, not to audit it. That backlog is this checkup's, and it is far too large for one
+visit, so take **one skill or agent per checkup**, in the order `CLAUDE.md`'s routing
+table lists them, continuing after the one the previous report names. That order is
+held by nothing — `docs:check` proves each file is named in `CLAUDE.md`, not where —
+so when the named one has been deleted or moved, take the nearest row after where it
+stood, and let a file added mid-cycle wait for the next lap. Rule by rule:
+
+- **Is a machine already enforcing it?** A lint rule, a `docs:check` complaint or a
+  gate that fires on the same fault makes the paragraph a second copy — and a reader
+  obeying the prose is obeying something that now fails on its own.
+- **Does its subject still exist?** `docs:check` catches a dead *path*. A dead
+  command, folder, threshold or shape is invisible to it.
+- **Has a later rule absorbed it?** Not contradiction — the breadth audit above owns
+  that — but a rule a later one now says better, so the older costs a reader and
+  teaches nothing. The phases that wrote the two were months apart, which is why no
+  per-phase gate ever compared them.
+- **Did the mistake it guards against become impossible?** Not the subject going —
+  that is the question above — but the subject surviving while the fault cannot be
+  made any more: a warning about hand-rolling something the repository now ships
+  ready-made, a workaround for a limit that was lifted.
+
+Each is a finding naming the rule, its file and line, and which of the four it failed
+— a *proposed* deletion, never a deletion, because this audit fixes nothing.
 
 **One section of `PLAN.md` is read line by line, all the way, and a different one
 each time.** The spec is 1600 lines and no gate reads most of it: `docs:check`
@@ -309,6 +337,11 @@ Verdict: <N> findings (<blockers>/<high>/<medium>/<low>), <M> UNVERIFIED,
 The skipped phases are what a caller cannot reconstruct: a checkup that cut four
 of them and one that ran every phase read identically without that clause.
 
+**Name the file you swept and the `PLAN.md` section you read, in the body.** Both
+rotate, and each one's next visit starts from what this report says it finished. A
+report that leaves either unnamed restarts the rotation at the top, so the same skill
+is audited forever and the rest never once.
+
 Then the whole thing, in the order phase 10 builds it — the three verdicts, the
 findings register, the remediation buckets, the proposed diff and the cost. The
 caller saves it beside the evidence as `REPORT.md`. What becomes a `TECH-DEBT.md`
@@ -325,12 +358,14 @@ for it.
 
 **Plant only where nothing else looks.** A fault in `src/` is caught by the tests
 this agent already runs, so it proves nothing. The menu is the places with no
-automatic gate, one per phase this brief claims:
+automatic gate, one for each thing this brief claims to look at:
 
 | Phase | A fault worth planting |
 |---|---|
 | 2 | the unit file on disk edited away from the repo's copy |
 | 3 | a `PLAN.md` sentence made false — a limit, a refusal, a measured number |
+| 3 | a rule in the file due for sweeping, left naming a command that was renamed |
+| 3 | a skill's `description:` edited to trigger on the wrong moment |
 | 3½ | a memory file naming a flag or a file the code no longer has |
 | 5 | a spec whose assertion cannot fail, added to a file with a good score |
 | 7 | a guard dropped from `deploy/configure-server.sh` |

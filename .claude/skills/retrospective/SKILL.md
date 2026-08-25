@@ -51,12 +51,12 @@ count is asked for, count. An answer with no number in it is a guess.
    unnecessary? Name it and delete it, or say plainly that none went. The two tests
    below cover the last two; *untrue* is the one only a reader ever catches.
 
-## Nothing else ever asks what should come out
+## Nothing else asks what a phase should take out
 
-The first five questions all add, and so does every gate before them. Every rule in
-these skills was written by a phase that had just been bitten, and none carries an
-expiry — so the line budgets force a removal only at the ceiling, and the paragraph
-that leaves is whichever sat nearest the number rather than whichever was finished.
+The first five questions all add, and so does every gate before them. Every rule here
+was written by a phase that had just been bitten, and none carries an expiry, so the
+budgets force a removal at the ceiling rather than when a rule is finished. This
+question catches only what *this* phase killed; the older backlog is `deep-checkup`'s.
 
 Two tests answer question six, and both are facts rather than taste:
 

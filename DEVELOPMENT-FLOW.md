@@ -253,6 +253,7 @@ sequenceDiagram
         R->>V: ask the running bot and its server what is true, rather than what should be
         V-->>R: the service, the timers, the disk, which tag is actually deployed
         R->>R: run the edge cases instead of reasoning about them, and write evidence beside every claim
+        R->>R: sweep one skill or agent for rules that should already be gone, and read one section of PLAN.md line by line — both rotate, and the report names where they stopped
         R-->>C: findings, most severe first — and not one thing repaired
         loop for each finding
             C->>C: check it myself before believing it — a confident agent is not evidence
