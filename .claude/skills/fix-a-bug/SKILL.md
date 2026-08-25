@@ -66,29 +66,38 @@ the rest, and it applies here unchanged.
 
 **Measure before the third hypothesis.** Two guesses is thinking; a third means the
 search has no ground under it, and the way out is an experiment rather than a better
-guess. `finish-phase` carries the one that settled Stryker's worker count, with the
-two timings that made the argument unnecessary.
+guess. Stryker's worker count was argued twice and settled by one run at each
+setting, in [running the mutation
+gate](../finish-phase/running-the-mutation-gate.md).
 
 **A number out of an instrument nobody has proven is not a measurement.** The first
 output of a new check, a new script, a new query is a claim about the instrument
-before it is a claim about the code — `finish-phase` has the one that reported
-thirteen findings against a file that was clean. Calibrate against cases whose
-answer you already know, then quote it.
+before it is a claim about the code. One written here to ask whether every
+`TECH-DEBT.md` entry names a trigger reported thirteen entries missing one, and the
+number went to the owner as a finding; the file was in fact clean, and the check had
+never been shown a trigger phrased *if*, *the next time* or *with the next phase
+that*. Calibrate against cases whose answer you already know before quoting it, and
+when it does cry wolf, widen its vocabulary rather than rewording its subject to
+suit it.
 
 **A gate that stays green proves nothing about a fault it cannot see.** When the
 theory is that some check should have caught this, break the thing deliberately and
 watch it go red — the probe goes in through an edit, and the proof is the output,
-not the intention. Probe the **shape** and not only the value: reorder, rename,
-leave a field out. The way a rule goes blind is almost never a wrong value, it is a
-subject arriving in a form the rule was never shown, and `finish-phase` has the one
-that dropped every image out of every check without a word.
+not the intention. Breaking today's file only proves the rule fires on today's file,
+which is the easy half; the probe that matters changes the **shape** of what the rule
+reads — reorder, rename, leave a field out, hand it a format it has never seen. A
+rule written to catch silent failures failed silently in its first hour: it read an
+`<img>` only when `src`, `width` and `height` came in that order, so a `class` in
+front of them dropped the image out of every check, weighing included, without a
+word. A rule that cannot parse its subject must say so rather than skip it.
 
 **Read the evidence that already exists before producing more.** Every check here
 writes under `reports/`, and re-running one to re-read its own output is the
-canonical waste in this project — `finish-phase` carries that rule and the trap
-underneath it, where the reporter flag silently leaves a stale report on disk. A
-long run's console output is only ever a tail, so a number wanted from the middle of
-one is saved while it runs, not recovered by running it again.
+canonical waste in this project — the rule and the trap underneath it, where a
+reporter flag silently leaves the previous run's report on disk, are in [running the
+mutation gate](../finish-phase/running-the-mutation-gate.md). A long run's console
+output is only ever a tail, so a number wanted from the middle of one is saved while
+it runs, not recovered by running it again.
 
 ## The sweep: one occurrence is a report, not a count
 
@@ -97,8 +106,8 @@ a typo. The same lost backslash has reached this repository twice — once insid
 `docs:check` rule whose path split then could not do its job and reported nothing
 forever, and once more caught a substring from shipping. `TECH-DEBT.md`, under *Half
 of `docs:check` is proven once*, has both and a third of the same shape. Copying a
-render call to a second module left its font guard behind, and `finish-phase` has
-what that would have committed.
+render call to a second module left its font guard behind, and `CLAUDE.md` has what
+that would have committed, beside the rule about refusing at construction.
 
 So the last step of understanding a fault is **grep for its shape, not for its
 symptom** — the wrong call, the missing guard, the assumption — across `src/`,
@@ -107,7 +116,9 @@ symptom** — the wrong call, the missing guard, the assumption — across `src/
 - **`\b` is ASCII-only.** A word boundary does not match around Cyrillic, so a search
   for a Russian word bounded that way finds nothing and reports it as nothing.
 - **A name that changed has callers no compiler sees.** Skills and documents hold
-  commands that are run by hand; nothing fails when they rot.
+  commands that are run by hand. `docs:check` now fails a document naming a path this
+  repository does not have, so that half is mechanical; a changed *name* still rots
+  in silence.
 
 What the sweep finds goes into the phase's size before any of it is fixed.
 

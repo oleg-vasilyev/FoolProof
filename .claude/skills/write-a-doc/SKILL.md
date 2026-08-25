@@ -53,10 +53,10 @@ Two consequences worth spelling out, because both have been got wrong:
    that sentence is part of the change, not cleanup for later. `/merge` shipped while
    three places still said merging was manual, and one of them was an invariant. The
    nearer miss is easier: a `TECH-DEBT.md` entry saying the queue lived on one laptop
-   survived the commit that moved the queue into that same file, three screens below
-   it, and the counts in the two entries then disagreed. **A count is the tell** — a
-   sentence that says how many of something there are is a claim about every other
-   entry, so adding one means adding them up.
+   survived the commit that moved it into that same file, three screens below, and the
+   two counts then disagreed. **A count is the tell** — a sentence saying how many of
+   something there are is a claim about every other entry, so adding one means adding
+   them up, and a pointer inherits it: one said *two exist* where its page said seven.
 
    **Narrowing a rule is the hard case, and it needs the opposite search: grep for
    the rule's *old* wording, not its new one.** The new phrasing exists only where

@@ -15,7 +15,7 @@ a compaction the user can see coming.
 Answer from evidence in this session, not from how you generally work. Where a
 count is asked for, count. An answer with no number in it is a guess.
 
-## The five questions
+## The six questions
 
 1. **Rework.** What was built and then rebuilt? For each, name the moment the
    direction could have been settled earlier: a signature crossing a layer, an
@@ -47,6 +47,30 @@ count is asked for, count. An answer with no number in it is a guess.
    alongside?
 5. **Reading.** What did you read, re-read or print that you already had in
    context?
+6. **Obsolescence.** Which rule did this phase make untrue, unreachable or
+   unnecessary? Name it and delete it, or say plainly that none went. The two tests
+   below cover the last two; *untrue* is the one only a reader ever catches.
+
+## Nothing else ever asks what should come out
+
+The first five questions all add, and so does every gate before them. Every rule in
+these skills was written by a phase that had just been bitten, and none carries an
+expiry — so the line budgets force a removal only at the ceiling, and the paragraph
+that leaves is whichever sat nearest the number rather than whichever was finished.
+
+Two tests answer question six, and both are facts rather than taste:
+
+- **A rule a machine now checks must leave the prose.** `CLAUDE.md` already says
+  anything checkable is a lint rule and not a paragraph, and nothing enforces it — so
+  a new gate and the sentence that used to ask for it sit side by side. A phase that
+  adds a gate deletes that sentence in the same commit.
+- **A rule whose subject is gone is already dead.** `docs:check` fails a document
+  naming a file this repository does not have, so the ones citing a path surface by
+  themselves. One naming a folder, a command or a threshold that no longer exists is
+  yours to notice, and a phase that renamed anything is likeliest to be holding one.
+
+**Removing a rule is a diff, reported like one.** The `Retro:` line names the rule
+that went and why — deleted quietly, it reads like one nobody ever wrote.
 
 ## The flow this gate audits is drawn
 
@@ -72,7 +96,7 @@ changing the drawing quietly edits the process the owner reads as his own, and
 he would find it by diff, months later, with the reasoning gone. So: make the
 change, then **say it in the closing message** — the work is done, the flow was
 not optimal, here is what moved and here are the numbers that forced it. The
-five questions above are where those numbers come from; a redraw argued from an
+six questions above are where those numbers come from; a redraw argued from an
 impression rather than a count is the one that should not have been made.
 
 **A correction is not a redraw.** The rules above are written for a step that
@@ -124,8 +148,8 @@ before every session, so its budget moves only by displacement.
 
 ## What comes back
 
-The output is a **diff**, never a paragraph. But five questions collapsing into one
-prose answer is how four of them go missing without anybody noticing, so the answer
+The output is a **diff**, never a paragraph. But six questions collapsing into one
+prose answer is how five of them go missing without anybody noticing, so the answer
 has a fixed shape — one line per question, every one present, and each carrying its
 number:
 

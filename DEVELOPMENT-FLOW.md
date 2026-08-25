@@ -197,7 +197,7 @@ sequenceDiagram
     note over C,K: Stage 6. Retrospective — fixing the process and the documents
     opt something was rebuilt, a gate ran twice, an agent was paid for nothing, or a bug reached a player
         C->>K: the retrospective skill
-        K-->>C: five questions about how the work went, each answered with a count
+        K-->>C: six questions about how the work went, each answered with a count, the last asking what should now come out
         C->>C: answer them: what was rebuilt, what ran for nothing — each a number, not an impression
         opt the phase fixed something that had already shipped
             C->>C: name the gate that should have caught it, and what it would take for that gate to see it

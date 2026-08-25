@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { join } from "node:path";
 import {
   DEBT_DOCUMENT,
   SESSION_DOCUMENT,
@@ -6,6 +7,7 @@ import {
   installedSkills,
   linesIn,
   skillFile,
+  skillPages,
 } from "../document-files.ts";
 
 
@@ -15,17 +17,19 @@ const SESSION_LINE_BUDGET = 380;
 
 const DEBT_LINE_BUDGET = 640;
 
+const PAGE_LINE_BUDGET = 120;
+
 const SKILL_BUDGETS: Readonly<Record<string, number>> = {
   "add-a-feature": 170,
   "add-repository-method": 80,
-  "finish-phase": 725,
-  "fix-a-bug": 145,
+  "finish-phase": 460,
+  "fix-a-bug": 160,
   "refresh-the-pictures": 240,
-  retrospective: 165,
+  retrospective: 185,
   "update-the-design-page": 70,
   "write-a-commit": 120,
   "write-a-doc": 175,
-  "write-a-spec": 495,
+  "write-a-spec": 395,
   "write-an-e2e-scenario": 140,
 };
 
@@ -117,3 +121,24 @@ export const skillsOverBudget = (): readonly string[] =>
 
     return { exists, lines: exists ? linesIn(skillFile(skill)) : NOTHING };
   });
+
+export const pageBudgetComplaints = (
+  pages: readonly string[],
+  linesOf: (page: string) => number
+): readonly string[] =>
+  pages
+    .filter((page) => linesOf(page) > PAGE_LINE_BUDGET)
+    .map(
+      (page) =>
+        `${page}: ${String(linesOf(page))} lines, budget is ${String(PAGE_LINE_BUDGET)} — ` +
+        `a page is read whole the moment something opens it, so it obeys the rule its ` +
+        `skill obeys; split it by the reason a reader arrives, or shorten it`
+    );
+
+export const pagesOverBudget = (): readonly string[] =>
+  pageBudgetComplaints(
+    installedSkills().flatMap((skill) =>
+      skillPages(skill).map((page) => join(SKILLS_FOLDER, skill, page))
+    ),
+    linesIn
+  );

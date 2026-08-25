@@ -9,6 +9,8 @@ const skillFileSpy = vi.fn((skill: string) => `FILE-OF-${skill}`);
 
 const existsSyncSpy = vi.fn();
 
+const skillPagesSpy = vi.fn();
+
 vi.mock("../document-files.ts", () => ({
   SESSION_DOCUMENT: "THE-SESSION-DOCUMENT",
   DEBT_DOCUMENT: "THE-DEBT-DOCUMENT",
@@ -16,15 +18,21 @@ vi.mock("../document-files.ts", () => ({
   installedSkills: () => installedSkillsSpy(),
   linesIn: (file: string) => linesInSpy(file),
   skillFile: (skill: string) => skillFileSpy(skill),
+  skillPages: (skill: string) => skillPagesSpy(skill),
 }));
 
 vi.mock("node:fs", () => ({
   existsSync: (path: string) => existsSyncSpy(path),
 }));
 
-const { lineBudgetComplaints, skillBudgetComplaints, overBudget, skillsOverBudget } = await import(
-  "./reading-budgets.ts"
-);
+const {
+  lineBudgetComplaints,
+  skillBudgetComplaints,
+  overBudget,
+  skillsOverBudget,
+  pageBudgetComplaints,
+  pagesOverBudget,
+} = await import("./reading-budgets.ts");
 
 const NO_COMPLAINTS = 0;
 
@@ -53,6 +61,10 @@ const A_BUDGETED_SKILL = "finish-phase";
 const A_SKILL_FILE = `FILE-OF-${A_BUDGETED_SKILL}`;
 
 const FAR_OVER_ANY_BUDGET = 9999;
+
+const PAGE_BUDGET = 120;
+
+const ONCE = 1;
 
 const ALWAYS_EXISTS = (): { readonly exists: boolean; readonly lines: number } => ({
   exists: true,
@@ -277,5 +289,74 @@ describe("skillsOverBudget", () => {
 
     expect(said).toContain("a skill folder with no SKILL.md in it");
     expect(linesInSpy).not.toHaveBeenCalled();
+  });
+
+  it("should judge the skill file alone, because a page is not loaded with it", () => {
+    linesInSpy.mockReturnValue(UNDER_BUDGET);
+    skillPagesSpy.mockReturnValue(["a-page.md", "another-page.md"]);
+
+    const said = skillsOverBudget().join("\n");
+
+    expect(said).not.toContain("lines, budget is");
+    expect(linesInSpy).toHaveBeenCalledTimes(ONCE);
+  });
+});
+
+describe("pageBudgetComplaints", () => {
+  it("should say nothing about a page exactly at the page budget", () => {
+    expect(pageBudgetComplaints(["a-page.md"], () => PAGE_BUDGET)).toEqual([]);
+  });
+
+  it("should name a page one line over it, and say what a page is", () => {
+    const said = pageBudgetComplaints(["a-page.md"], () => PAGE_BUDGET + ONE_LINE);
+
+    expect(said).toHaveLength(ONE_COMPLAINT);
+    expect(said[FIRST]).toContain("a-page.md");
+    expect(said[FIRST]).toContain(
+      `${String(PAGE_BUDGET + ONE_LINE)} lines, budget is ${String(PAGE_BUDGET)}`
+    );
+    expect(said[FIRST]).toContain("read whole the moment something opens it");
+    expect(said[FIRST]).toContain("split it by the reason a reader arrives");
+  });
+
+  it("should judge every page handed to it, not only the first", () => {
+    const said = pageBudgetComplaints(["short.md", "long.md"], (page) =>
+      page === "long.md" ? FAR_OVER_ANY_BUDGET : UNDER_BUDGET
+    );
+
+    expect(said).toHaveLength(ONE_COMPLAINT);
+    expect(said[FIRST]).toContain("long.md");
+  });
+
+  it("should say nothing when a repository has no pages at all", () => {
+    expect(pageBudgetComplaints([], () => FAR_OVER_ANY_BUDGET)).toHaveLength(NO_COMPLAINTS);
+  });
+});
+
+describe("pagesOverBudget", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    installedSkillsSpy.mockReturnValue([A_BUDGETED_SKILL]);
+    skillPagesSpy.mockReturnValue(["a-page.md"]);
+    linesInSpy.mockReturnValue(UNDER_BUDGET);
+  });
+
+  it("should measure a page by a path that names the skill it belongs to", () => {
+    pagesOverBudget();
+
+    expect(linesInSpy).toHaveBeenCalledWith(expect.stringContaining(A_BUDGETED_SKILL));
+    expect(linesInSpy).toHaveBeenCalledWith(expect.stringContaining("a-page.md"));
+  });
+
+  it("should complain once a page outgrows the ceiling", () => {
+    linesInSpy.mockReturnValue(FAR_OVER_ANY_BUDGET);
+
+    expect(pagesOverBudget()).toHaveLength(ONE_COMPLAINT);
+  });
+
+  it("should ask every installed skill for its pages", () => {
+    pagesOverBudget();
+
+    expect(skillPagesSpy).toHaveBeenCalledWith(A_BUDGETED_SKILL);
   });
 });

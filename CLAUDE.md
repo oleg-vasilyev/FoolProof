@@ -47,8 +47,8 @@ behaviour and this file wins on style.
 
 That rule has needed enforcing twice, so it is enforced: `npm run docs:check` holds
 every document against the repository it describes — links, tables, the schema, the
-pictures, the flow drawing, and **a line budget on this file, on `TECH-DEBT.md` and
-on every skill**. Each complaint carries its own reason, which is why none is
+pictures, the flow drawing, every path a document names, and **a line budget on this
+file, on `TECH-DEBT.md`, on every skill and on each page beside one**. Each complaint carries its own reason, which is why none is
 repeated here. The budget makes appending cost something: a rule that pushes a file
 over displaces an older one into the file loaded when it applies. `write-a-doc`
 routes a fact to its home.
@@ -258,7 +258,9 @@ does not parse HTML in captions, so escaping there renders `&amp;` literally.
 
 **A feature that cannot work refuses at construction, not on first use.** The
 scoresheet calls `requireFonts()` as it is built, because a missing font makes resvg
-draw the picture with no text on it rather than fail.
+draw the picture with no text on it rather than fail. **A copy of such a call owes
+the same refusal** — the site's image writer took the render without the guard, and
+six blank posters passed every gate, the weight matching better. Import the guard.
 
 ### Two things live in one place on purpose
 

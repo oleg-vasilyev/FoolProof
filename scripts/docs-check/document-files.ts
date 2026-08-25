@@ -35,6 +35,11 @@ export const linesIn = (document: string): number => read(document).split(A_LINE
 
 export const skillFile = (skill: string): string => join(SKILLS_FOLDER, skill, "SKILL.md");
 
+export const skillPages = (skill: string): readonly string[] =>
+  readdirSync(join(SKILLS_FOLDER, skill)).filter(
+    (entry) => A_MARKDOWN_FILE.test(entry) && entry !== "SKILL.md"
+  );
+
 export const installedSkills = (): readonly string[] => readdirSync(SKILLS_FOLDER);
 
 export const definedAgents = (): readonly string[] =>

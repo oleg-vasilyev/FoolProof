@@ -6,7 +6,8 @@ import {
 import { agentsWithoutAContract } from "./docs-check/documents/agent-contracts.ts";
 import { frontmatterThatWillNotParse } from "./docs-check/documents/frontmatter-yaml.ts";
 import { brokenLinks, specContentsOutOfStep, unreachableHelp } from "./docs-check/documents/document-references.ts";
-import { overBudget, skillsOverBudget } from "./docs-check/documents/reading-budgets.ts";
+import { overBudget, pagesOverBudget, skillsOverBudget } from "./docs-check/documents/reading-budgets.ts";
+import { citationsWithNoFile, pagesNobodyOpens } from "./docs-check/documents/file-citations.ts";
 import { envTemplateOutOfStep, requiredKeysOutOfStep } from "./docs-check/source/env-keys.ts";
 import {
   casesOutOfStep,
@@ -47,6 +48,9 @@ const complaints = [
   ...unreachableHelp(),
   ...overBudget(),
   ...skillsOverBudget(),
+  ...pagesOverBudget(),
+  ...pagesNobodyOpens(),
+  ...citationsWithNoFile(),
   ...agentsWithoutAContract(),
   ...frontmatterThatWillNotParse(),
   ...debtWithoutATrigger(),

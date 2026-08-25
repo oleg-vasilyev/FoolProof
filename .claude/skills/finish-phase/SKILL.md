@@ -45,83 +45,25 @@ they rot. Making `rasterize()` asynchronous left a one-liner in
 every poster, in the step whose whole job is catching a render that grew. Green
 gates, a lie in a document.
 
-**A renamed file is the same fault, and its grep is owed before the review
-launches.** A phase that moved 29 files left the old folder name in this skill and
-in a `TECH-DEBT.md` entry; both surfaced after the reviewer was already out, which
-is how the hold-still rule below gets broken by something that felt like tidying.
+**A renamed file is the same fault, and half of it is now mechanical**: `docs:check`
+fails a document naming a path under a folder it tracks and cannot find, which is what a phase
+that moved 29 files needed and did not get. The grep is still owed for everything
+that is not a path — a command, a folder, a threshold, a shape — and it is owed
+before the review launches rather than after, which is how the hold-still rule below
+gets broken by something that felt like tidying.
 
 Most style rules are ESLint rules now (`eslint.config.js`), so a lint failure is
 a convention violation, not a nit — read the message before reaching for a
 disable comment, which is itself banned in `src/`.
 
-**A new check is probed against input shaped differently, not only input that is
-wrong.** Breaking today's file proves the rule fires on today's file, which is the easy
-half. A gate meant to catch silent failures failed silently in its first hour: it read
-an `<img>` only when `src`, `width` and `height` came in that order, so a `class` in
-front of them dropped the image out of every check, weighing included, without a word.
-The probe that matters changes the *shape* of what the rule reads: reorder, rename,
-leave a field out, hand it a format it has never seen. A rule that cannot parse its
-subject must say so rather than skip it.
+**A phase that wrote a check owes it a probe and a calibration** before quoting
+anything it prints — break its subject in a shape it has never been shown, and treat
+its first output as a claim about the instrument. Both rules, and the two gates here
+that went blind proving them, are the `fix-a-bug` skill's, under *Proving a cause*.
 
-**A new check's first output is not a measurement.** Calibrate it against cases whose
-answer you already know before quoting a number from it. One written here to ask whether
-every `TECH-DEBT.md` entry names a trigger reported thirteen entries missing one, and the
-number went to the owner as a finding; the file was in fact clean, and the check had
-simply never been shown a trigger phrased *if*, *the next time* or *with the next phase
-that*. A check that cries wolf teaches its reader to skip it, so widening its vocabulary
-is the fix and never rewording the subject to suit it.
-
-**Copying a call from another module means copying what guards it.** The site's
-image writer took resvg's render call out of `rasterizer.ts` and left
-`requireFonts()` behind — and a missing font makes resvg draw the picture with no
-text rather than fail, so six blank posters would have been committed with every
-gate green: the SVG still matched, the shape still matched, and the weight matched
-*better*. If the original refuses at construction, the copy owes the same refusal;
-better still, import the guard and the list it guards rather than retyping them.
-
-**An edit made by a script ends with a lint run, not with a glance.** The editor hook
-lints a file as it is written; a patch applied by a throwaway script gets no such
-feedback, and its mistake is always the same shape — a line inserted without the blank
-lines around it, or a deletion leaving two. Twice the phase battery has stopped on its
-first gate over one, which is a two-minute answer to a two-second question.
-
-**A lock file rewritten here can be wrong somewhere else, and the dry run will not
-say so.** `npm install` on Windows prunes optional packages this platform has no
-use for — the wasm fallbacks a native binding carries — and leaves the package that
-*depends* on them behind, which Linux then refuses to install. Both times this has
-happened, every local gate was green and GitHub Actions failed on `npm ci` before
-running a test. So after any change to `package-lock.json`, **diff it for removals**
-and put back what was dropped:
-
-```bash
-git diff -- package-lock.json | grep -E "^-\s+\"node_modules/"
-```
-
-A removal that no dependency change explains is the bug. Restore those entries from
-the last lock CI accepted rather than regenerating — `npm install --package-lock-only`
-prunes them again, because it resolves for this machine too.
-
-**A phase that touched `package.json` runs `npm ci --dry-run` before committing.**
-`npm run check` uses the `node_modules/` already on this machine, so it cannot see
-that the lock file it produced is unsatisfiable somewhere else. Adding
-`@tailwindcss/cli` on Windows wrote a lock whose wasm fallback conflicted with the
-one vitest brings; every local gate stayed green and GitHub Actions failed on
-`npm ci` before running a single test. The dry run reproduces that in one second,
-here. Whichever way it is then fixed, ask first what the dependency costs the
-**server**, which runs `npm ci` on every deploy and would have installed a CSS
-compiler it has no use for.
-
-**The dry run is necessary and not sufficient — read the lock's diff too.** It
-resolves against the platform it runs on, so a lock written on Windows can pass it
-here and fail on the Linux runner. Adding `tailwindcss` did exactly that: `npm
-install` rewrote the whole file and dropped `@emnapi/core` and `@emnapi/runtime`,
-two optional peers this platform decides are unnecessary and the runner requires.
-The dry run was green; CI died on `npm ci` with *Missing: @emnapi/core from lock
-file*. So **any line the lock loses is a finding, not noise** — a phase that adds a
-dependency should only ever add lines. When `npm install` removes some anyway, put
-the committed lock back and hand-write the entries: the manifest line and the
-package block, which for a dependency with no dependencies of its own is all there
-is.
+**A phase that touched `package.json` has a gate `npm run check` cannot see.** It
+resolves against this machine, so a lock file written here can be unsatisfiable on
+the runner: [changing a dependency](changing-a-dependency.md).
 
 ## 2. `npm run test:coverage`
 
@@ -164,41 +106,13 @@ with it — writing documents, redrawing pictures, reading a subagent's report �
 **e2e suite cannot**: `QUIET_MS` decides the bot has finished, and a machine busy with
 mutants makes renders slow enough to cross it.
 
-**That full run grows with the code**: 5637 mutants at v1.14.0, of which one feature
-phase added about 2100. It took sixteen minutes until `concurrency` stopped being a
-hard `4` and became `"75%"`, measured rather than guessed — 960s at four workers,
-596s at twelve, with the score and the timeout count identical, so the verdict never
-moved.
-
-The percentage is not there to speed CI up — Stryker computes
-`max(1, round(cores × 0.75))`, so the four-vCPU runner gets three workers where
-the old constant gave it four. It is there so a number tuned on a sixteen-core
-machine cannot oversubscribe a small one. Tune for the machine you measured on,
-express it as a share, and check what it computes to on four cores before
-committing.
-
-**`--mutate` takes a glob, and `dir/*.ts` matches the specs too.** Worse, the CLI
-flag **replaces** the config's `!src/**/*.spec.ts` rather than adding to it, so the
-exclusion has to be repeated on the command line every time. `mutate-changed.ts`
-now reads those patterns out of `stryker.config.json` and appends them itself, so
-the changed-file gate obeys the config — do not give it a second copy of the list.
-An exclusion added to the config is not in force until you have found everything
-else that decides the same thing; this one was silently ignored for a whole run:
-
-```
-npx stryker run --mutate "src/features/<x>/*.ts,!src/**/*.spec.ts" --reporters clear-text
-```
-
-Stryker will otherwise mutate `cell-face.spec.ts`, where almost every mutant
-survives because nothing tests the tests — one phase read a 55% total off a run
-whose per-source files were all above 82%, and a later one read 49% off a folder
-that was actually at 100%. A total far below the per-file numbers means the glob,
-not the specs.
-
-**Paste that line into a subagent's brief rather than describing it.** This rule
-was already written here when two briefs went out carrying the naive command; both
-agents caught it themselves, but a brief that hands over the wrong command is
-asking for an afternoon of strengthening tests that were never weak.
+Everything about *running* it sits in [running the mutation
+gate](running-the-mutation-gate.md) — the glob that quietly mutates the specs and
+prints a score half what it should be, the reporter flag that leaves the previous
+run's survivors on disk, what worker count was measured and why it is a share, and
+which second run is right after code moved. Open it when the gate is red, when a
+file was split or renamed, or before pasting a command into a brief. None of it
+changes what the gate decides; all of it changes whether the number you read is real.
 
 A file that dropped is a file whose new tests assert too little — strengthen the
 tests, never lower the bar. **That work is the `write-a-spec` skill's**, which reads a
@@ -219,32 +133,6 @@ finding does. Running the two in parallel needs a reason you can say out loud.
 Stryker's sandbox via `tempDirName`. One gitignored directory, and nothing about
 testing appears next to the source. A new check that wants somewhere to write has
 that answer already; `.gitignore` says the same thing in one line.
-
-Rules about *running* it, learned by burning most of a phase's budget on them:
-
-- **Never re-run a gate to re-read its output, and never truncate the run that
-  produced it — grepping the stream is truncating it.** A battery piped through
-  `Select-Object -Last 30`, or through a `grep` whose pattern misses the summary
-  line, throws away the coverage table and the mutation score the commit message
-  then needs, and the cheapest way back is running the thing again — which is the
-  rule this one protects. Send the whole run to a file and grep the file. Every
-  run also writes `reports/mutation/mutation.json` and `reports/mutation/index.html`,
-  and a backgrounded run keeps its own log — read those. `/merge` was closed with eight
-  Stryker invocations where two would have done, three of them the same full run
-  repeated to look at three slices of one table.
-- **Moving code moves its mutants — re-run the gate after a split or a rename.**
-  Assertions do not always survive being ported: splitting one render file into two
-  silently dropped four that had been killing mutants, including the early return
-  that made a conditional legend conditional. The score is the only thing that
-  notices, so a refactor after the mutation run is a refactor before another one.
-  That is the second round the rule above forbids, and it is the one case where
-  taking it is right.
-- **`--reporters` replaces the configured set, it does not add to it.** Passing
-  `--reporters clear-text` drops the `json` one, so `reports/mutation/mutation.json`
-  still holds the *previous* run's survivors — and the rule above sends you straight
-  to that stale file. This has already produced a confident reading of seven
-  survivors from a run that mutated three files and found two. Override the
-  reporters or read the report, never both.
 
 ## 3a. Read one real evening, if the phase changed what a poster says
 
@@ -371,59 +259,21 @@ player, so can a reader tell from the file names which files serve which?
 
 ## 5b. The sentences — read when the table is written, re-read only if it moved
 
-The gallery proves a line **fits**. Nothing else asks whether it is something a person
-would say. Two releases shipped *«Дурак в этот вечер был — и всё равно 9 партий подряд
-начисто»* and *«К середине — дно графика и 28%, сейчас — 50%»*, both drawn correctly,
-both read by a poster reader, both word salad; the owner found seven of them in ten
-minutes on a Friday night.
+The gallery proves a line **fits**. Nothing else asks whether it is something a
+person would say, and two releases shipped word salad that was drawn correctly and
+approved by everyone who saw it. So the reading is the **`copy-reader`** agent's, it
+may not be done by whoever wrote the table, and it happens in stage 2 **the moment
+the table is written** — a finding there edits one file, and the same finding at the
+end of the phase edits a table, the code behind a sentence, the specs asserting it
+and every poster drawing it.
 
-They survive because a copy table is read as **templates**, by the person who wrote
-them, in the language they were composed in. `` `... и всё равно ${streak} подряд
-начисто` `` looks like a sentence with a hole in it. The hole is where the meaning was.
+At the end of the phase it runs a second time **only over what moved since**. A phase
+that changed no copy after stage 2 owes nothing here and says so in the commit.
 
-So the reading is the **`copy-reader`** agent's, and it may not be done by whoever
-wrote the table. What the brief must carry is that agent's own section, and so are
-the four questions it asks. It reads **every** line filled in with real values, not
-only the ones a poster happens to draw; the lines nothing draws are where this rot
-survives longest.
-
-**A drawing carries sentences too, and they are read before the owner sees them.**
-The mockup's labels and captions are written by the designer and, until this was
-added, read by nobody until the owner opened the contact sheet — which asks him to
-approve wording as though he were the gate, which is the failure that produced this
-agent in the first place. So the sheet goes to the reader before it goes to him, with
-the designer's own inventory of every line on it. Say in the brief that the subject is labels
-on a drawing — the agent's own contract says what that narrows the pass to, and
-what happens to every placeholder on the sheet when nobody says it. Findings are fixed and the
-sheet redrawn before it is shown — approval of wording that then changes is not
-approval.
-
-**The reading of the tables happens in stage 2, the moment they are written** — before render
-code, specs or pictures are built on them. That is the whole economy of this gate: a
-finding here edits one file, and the same finding at the end of the phase edits a
-table, the code behind a sentence, the specs asserting it, and every poster drawing
-it. The phase that introduced the gate ran it beside the pictures and paid twice, so
-it moved ahead of them; the phase that measured it moved it again, all the way to the
-artifact it reads.
-
-At the end of the phase it runs a second time **only over what moved since** — keys
-edited after the first reading, and prose that lives outside a copy table, like the
-site's pages. A phase that changed no copy after stage 2 owes nothing here and says so
-in the commit.
-
-Its third question is the one that pays for the gate twice: following a sentence back
-to the rule that earns it has already caught a claim no rule guaranteed and two
-arguments handed over in the wrong order. That question needs call sites, so at stage 2
-it is asked against the frozen signatures, and any of it left unanswerable waits for
-the second pass.
-
-**Freeze the files before briefing a cold agent.** A reader starts by reading; if you
-are still editing its subject, it reports on a tree that no longer exists and you
-cannot tell which of its findings are stale. This has happened twice in one phase — a
-reviewer watched one file change under it mid-pass and said so, and a copy reader had
-to be sent back to re-read a table edited while it worked. Brief an agent on files you
-will not touch until it returns, or wait. The same rule Stryker has, for the same
-reason.
+What the reader's brief owes it, why it reads **every** line filled with real values
+rather than only the ones a poster draws, what a drawing's own labels owe before the
+owner is shown them, and the question that pays for this gate twice are in [reading
+the sentences](reading-the-sentences.md).
 
 ## 6. The pictures — only when the phase drew something
 
@@ -468,7 +318,7 @@ the list is finished.
 
 Gate 5 judges the diff; this one judges what producing it cost — rework, gates run
 twice, subagents briefed too thinly to be useful. Load the **`retrospective`** skill
-and answer its five questions with counts, then land each lesson as a rule somewhere
+and answer its six questions with counts, then land each lesson as a rule somewhere
 durable. It runs before the final commit, while the transcript that is its evidence
 still exists.
 
@@ -583,138 +433,25 @@ moment to load this skill, not the moment to commit.**
 
 ## Where the budget actually goes
 
-A phase's cost is dominated by rework, not by thinking. Every line below was paid for
-here at least once:
+A phase's cost is dominated by rework, not by thinking, and the same few mistakes
+have produced most of it here: a signature that crossed a layer before it was frozen,
+a new path that silently dropped what the old one also did, a design settled in a
+session that has since ended, a bulk rewrite that reported success over a file it
+never touched. Read [where a phase's budget actually
+goes](where-the-budget-goes.md) while planning one, and again after one cost more
+than it should have.
 
-- **Freeze every signature that crosses a layer before the first `Write`.** `/merge`
-  flipped `mergePlayers` between `number` and `void` after the SQL, the stub and the
-  integration spec were written, and paid for three files twice.
-- **Waiting on gates that did not need running.** See gate 3.
-- **A new path that bypasses an old one inherits its obligations.** List what the old
-  path did *besides* the obvious thing — a cleanup, a sweep, a refusal — and say for
-  each whether the new one still does it. Noticing a side effect and filing it as
-  minor is not that check: the seating screen dropped the sweep that made a mistyped
-  name disappear, and the phase then wrote a `PLAN.md` paragraph claiming it had not.
-- **Decide where a rule lives before writing it, not after.** If one rule already
-  earned a `domain/` module, its siblings belong beside it: a phase left the line-up
-  arithmetic inline ten lines from `starter-rule.ts`, and the review's move cost two
-  specs a second writing. In reverse, a `domain/` predicate that gates a button is
-  unfinished until the `render/` side reads it — until then the rule is unreachable
-  and nothing fails.
-- **Anything the owner will look at gets rendered and shown before a spec is written
-  against it**, and a choice between two defensible shapes is asked rather than
-  picked. Five rounds went on a chart's legend because two guesses were cheaper to
-  make than one question, and each guess cost a render, a spec pass and a screenshot.
-- **A design settled in a session that has ended is not settled.** Frozen signatures,
-  an approved mockup and a decisions note survive a restart; the owner's agreement
-  does not, because what he agreed to was a picture he can no longer see. A resumed
-  phase shows the drawing again before writing a line against it — one that did not
-  wrote the module its notes had frozen, and deleted it the same hour. The tell is
-  cheap: if you are *reading* a decision instead of remembering making it, re-show it.
-- **Read the commit messages of the work you pick up, before contradicting any of
-  it.** One session was a command away from "repairing" a gallery fixture back to a
-  state a previous session had already tried, caught in review and written up at
-  length. Reading cost a minute; the correction would have cost the phase.
-- **A bulk rewrite is a script written to a file and run with `node`** — never a
-  heredoc, which died twice on shell quoting before the first one landed. Anchor on
-  the call as it appears, not on the name: replacing `awardRow(` blindly also rewrote
-  `describe("awardRow()")`. **And it reports every replacement it did not make, then
-  exits non-zero** — `String.replace` returns the string unchanged when the needle is
-  absent, so one script here announced "cases rewritten" over a file it had not
-  touched, CRLF against LF-shaped needles, and the lie held until the suite failed
-  with the old case names still in it.
+## What to delegate
 
-## What to delegate, and what it costs
+**The review, the readings and the checkup are delegated always** — their whole value
+is that the reader did not write the thing, and you cannot review your own work by
+reading it again. **Writing is delegated only above ten files**, and only once the
+artifact those files are written against has been generated and looked at. Whatever
+is expensive to be wrong about stays in your hands at any size.
 
-Measured rather than assumed: one phase spent 493k tokens across six agents and saved
-none. A cold agent re-reads the subject, the skill and the spec that are already in
-your context, so delegation never buys tokens. It buys two things — room in your own
-window, and wall-clock while you work on something disjoint.
-
-**The review, the readings and the checkup are delegated always.** Their whole value
-is that the reader did not write the thing: 89k tokens caught three things about to
-ship, including a false sentence written earlier in the same phase by the same person
-who then re-read it and approved it. Four phases in one night went four for four on
-real bugs rather than style — a systemd unit that would have restarted the bot every
-ten seconds forever when `.env.production` was missing, a measuring command in a skill
-left broken by a signature change, a test that by construction could not fail, a false
-`PLAN.md` claim about cross-chat queries, and a deploy that would have rolled
-production back onto an older tag. You cannot review your own work by reading it again.
-
-**Writing is delegated only above ten files, and only once the artifact those files
-are written against has been generated and looked at.** That narrows an earlier rule
-here — *an independent scope is delegated on sight* — and the narrowing is the
-owner's, decided against this skill's own ledger after three phases in a row paid the
-same rework. Below the threshold, doing it yourself is cheaper than briefing.
-
-**The threshold does not open what was always closed.** Whatever is expensive to be
-wrong about stays in your hands at any size — the mechanic a player will feel, a
-cross-feature hazard, anything touching `shared/` or the schema. A twelve-file batch
-across `shared/` is not delegable because it is twelve files; it is the case the count
-was never about.
-
-When a batch does go out, on `model: "sonnet"` because settled transcription is not
-judgement:
-
-- **The brief carries everything** — the exact files to write, the subject each spec
-  tests, the stubs to use by name, the skill to load first — and tells the agent to
-  run **only its own files**, or it spends a turn investigating your half-finished
-  edits and deciding they are not its business.
-- **State the property and the evidence, not the fix.** *Assert the actual words
-  rather than the table reference* bought exactly that: English literals in a spec
-  that drives one locale, killing the English mutants and leaving the Russian ones
-  alive. The property wanted was "every counted noun has its three forms, in every
-  language", and its home was the copy table's own spec, which already loops over
-  both. Name the mutant that must die and let the cold agent find the home — it reads
-  the tree without the answer already in mind, which is the whole reason to send it.
-- **Never against a subject that is not settled, and a subject that draws something
-  is not settled until you have looked at what it draws.** The `/personal` phase
-  spawned four spec agents and first opened the rendered poster eleven minutes later;
-  both corrections it then had to send were visible in the first PNG. For a subject
-  that draws nothing: name the observation that would change your mind, and make it
-  before briefing anybody. If you cannot name one, the design is settled.
-- **Freeze the paths an agent was given.** A phase moved `render/*` into subfolders
-  while an agent was writing specs against those very paths, and the agent spent its
-  last turn on stale mocks.
-- **Before parallelising, name the exclusive resource they share.** Disjoint files
-  are not enough: agents share one working tree, and any tool that copies it, writes
-  a fixed temp directory or a fixed report file can only be run by one of them at a
-  time. Three writers were told to run Stryker, whose sandbox lives *inside* the
-  repository — so one run copied another's half-written sandbox and died, and the
-  brief needed two corrections mid-flight. Ask what each agent runs, and where that
-  writes; anything exclusive stays with you and runs after they finish. The same hour
-  produced the general form of the mistake twice more, a config flag and a threshold
-  flag both invented rather than read: **a tool's behaviour you did not observe is a
-  guess**, and `--help` costs a second.
-- **Launch parallel agents in one message**, and do not block on one whose files are
-  disjoint from yours. Their reports are not shown to the owner — relay what matters.
-- **"Launched" is not "running".** A launch can return success and leave nothing
-  behind: no task, an empty output file, no folder on disk. One designer failed that
-  way and was reported to the owner as still thinking, thirteen minutes late. Follow
-  a launch with a non-blocking status check, and tell an agent that produces files to
-  create its output folder first, so progress is visible on disk instead of inferred.
-- **Stalled twice means finished — but read the tree before redoing anything.** Take
-  what landed, do the rest yourself, repair what it left half-edited; one phase lost
-  twenty minutes and still hand-wrote five of twelve files, and another nearly
-  rewrote seven specs the agent had in fact delivered ten minutes earlier.
-- **Say what its report must carry, because a hand-briefed agent has no file to hold
-  it.** The six named agents each declare a `What comes back`; this one is defined by
-  the brief alone, and what a caller cannot reconstruct is **which files it actually
-  wrote**, which it was given and did not, why, and anything it touched that the
-  brief never named. Ask for that list in those words.
-- **An agent that cannot do something says so instead of doing something adjacent.**
-  Nothing propagates upward here: a report is text, a narrowed pass reads exactly
-  like a completed one, and no gate is watching. Put it in the brief in those words.
-- **A model that refuses or dies mid-run is the caller's problem, not the agent's.**
-  Re-run the errand on another model and say in the phase's record which one — what
-  may not be substituted is the property the agent was chosen for, which for every
-  reading pass here is a context that did not write the thing.
-- **What never leaves your hands:** copy, commit messages and document prose, because
-  the voice is the product here, and anything resting on why-context this session
-  accumulated — why a threshold is 7 and not 5 — which no brief can carry. The poster
-  gallery is the exception that runs the other way: judging a drawing needs eyes that
-  have not lived the phase, so it is delegated *because* it is judgement. What stays
-  yours there is the conclusion — which reading is wrong, and what the line should say.
+What a brief owes an agent, what delegation does and does not buy — measured, not
+assumed — and what never leaves your hands are in [delegating
+work](delegating-work.md).
 
 ## The final commit message
 

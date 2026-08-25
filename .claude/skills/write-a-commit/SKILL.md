@@ -61,7 +61,7 @@ renderer changed" — and total silence about the retrospective. The template as
 about one and not the other, and that alone decided which happened.
 
 **And it carries counts because the same failure works one level down.** The
-retrospective asks five questions; a single slot took one verdict, so four of them
+retrospective asks six questions; a single slot took one verdict, so five of them
 could go unanswered and the line still read as finished. It compresses the block
 `retrospective` produces — it may not report a verdict that block never reached, and
 a phase whose answers were all `none` says that rather than staying quiet.

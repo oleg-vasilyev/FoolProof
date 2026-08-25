@@ -115,11 +115,11 @@ would cost more than that at every call site.
 
 ## Counting games is spelled out twice
 
-`merge-names/render/game-tally.ts` and `scoresheet/render/session-tally.ts` both turn
-a number into `1 game` / `12 games`. The duplication is forced from two directions: a
-feature may not import another, and choosing between singular and plural is exactly
-the decision `copy.en.ts` is forbidden to make. The scoresheet's copy also needed
-`1 player` / `3 players`, which is why its version is named after the session.
+`merge-names/render/game-tally.ts` and `scoresheet/render/tally-phrases.ts` both
+export a `gameTally` turning a number into `1 game` / `12 games`. The duplication is
+forced from two directions: a feature may not import another, and choosing between
+singular and plural is exactly what `copy.en.ts` is forbidden to decide. The
+scoresheet's side has grown to seven such phrases, hence the name.
 
 **Move it to `shared/text/` when a third feature needs to count something.** Four
 lines twice is cheaper than a shared module with two callers.
