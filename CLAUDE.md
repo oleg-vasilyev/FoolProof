@@ -7,6 +7,7 @@ beside the code it describes:
 | Doing this | Read |
 |---|---|
 | Adding a command, a screen, a feature folder | `add-a-feature` skill |
+| Something the bot already does wrong | `fix-a-bug` skill |
 | Adding a query | `add-repository-method` skill |
 | Writing or changing any spec | `write-a-spec` skill |
 | Taking on a list of changes, and closing it | `finish-phase` skill |

@@ -17,7 +17,7 @@ not when writing a scenario.
 
 Usually not. A scenario is the slowest test this project has, and `npm run
 e2e:changed` will play it on every phase that touches its feature — so it is a
-standing cost, not a one-off. Two things earn one:
+standing cost, not a one-off. Three things earn one:
 
 - **A keyboard whose buttons carry `callback_data`.** Whether a tap reaches the
   feature that owns it is a fact about real grammY that no unit can reach, and it was

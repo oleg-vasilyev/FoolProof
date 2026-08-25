@@ -591,10 +591,10 @@ whole folder — and three things that reason sit outside both families:
 decides which scenarios a diff can reach; and `mutate-changed.ts`, which routes a
 changed file to one of the two runs and is scored by neither.
 
-Two modules also pass only on the average — `source/env-keys.ts` at 78.02% and
-`documents/reading-budgets.ts` at 77.78%. Both are short by their readers, and those
-are reachable: mocking `node:fs` lifted `source-tree.ts` from 60.98% to 92.68% for
-one spec header and six cases.
+One module also passes only on the average — `source/env-keys.ts` at 78.02%, short
+by its readers. Those are reachable: mocking `node:fs` lifted `source-tree.ts` from
+60.98% to 92.68%, and took `reading-budgets.ts` 77.78% to 100% the moment a diff
+left it alone with nowhere to hide.
 
 **Worth doing with the next phase that changes what one of these files decides, or
 that opens the mutation gate** — "touches `scripts/`" fired on one that only moved them.

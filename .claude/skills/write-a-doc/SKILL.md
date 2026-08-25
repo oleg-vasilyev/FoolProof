@@ -11,7 +11,8 @@ The five documents have been de-duplicated **twice**. Both times the cause was t
 same: a phase had twenty facts to record, the dividing question is applied to one
 fact at a time, and when a fact seems to fit two files the safe-feeling move is to
 write it in both. It is not safe. It creates two things that must be changed
-together, and one of them will not be.
+together, and one of them will not be. Nor does that take months — one rule written
+into a skill and into the flow an hour apart came out with a different noun in each.
 
 So the rule is mechanical, not tasteful: **one fact, one home, and every other file
 links to it with an anchor.** A summary of what another document says in full is

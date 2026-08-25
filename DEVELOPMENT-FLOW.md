@@ -47,14 +47,23 @@ sequenceDiagram
 
     rect rgb(254, 249, 231)
     note over U,K: Stage 1. Framing the task and the mockup
-    U->>C: the feature, in the owner's own words
+    alt the bot already does something wrong
+        U->>C: what it did, and what it should have done instead
+        C->>K: the fix-a-bug skill
+        K-->>C: reproduce before reading the code, and prove the cause rather than guessing a third time
+        C->>C: reproduce it on the platform it happened on, with the smallest input that still shows it
+        C->>C: write the failing test at the layer that can see the fault, and watch it fail — the reproduction, made permanent
+        C->>C: sweep for the same shape elsewhere — one occurrence is a report, not a count
+    else the bot does not do this at all yet
+        U->>C: the feature, in the owner's own words
+    end
     C->>C: study the project: CLAUDE.md is already in context, its links lead to PLAN.md and TECH-DEBT.md
     C->>C: check the tech debt: a task that trips a deferred item's trigger takes it into scope
     opt the description leaves questions
         C->>U: every question at once, before any work
         U-->>C: answers
     end
-    C->>U: the size of the phase in one line, tripped debt included
+    C->>U: the size of the phase in one line, tripped debt and the sweep included
     U-->>C: agreed, or cut it down
     opt the feature affects the app's visuals
         C->>R: the poster-designer agent — the requirements, in words
@@ -114,6 +123,12 @@ sequenceDiagram
         end
         C->>C: write the unit tests: everything around the file replaced with stubs
     end
+    opt a fault turns up that this phase did not come for
+        C->>K: the fix-a-bug skill
+        K-->>C: decide it here rather than carrying it back, and the line is the files this diff already changes
+        C->>C: a fault inside them is fixed and absorbed, one outside them goes to TECH-DEBT.md with its trigger
+        C->>C: either way say which in the closing message, because a silent widening and a silent deferral read the same
+    end
     end
 
     rect rgb(240, 253, 244)
@@ -123,6 +138,10 @@ sequenceDiagram
     C->>C: npm run check:phase — one command, every gate in a row, the tests run once
     note over C: lint and types · the suite under coverage, 70% floor · Stryker on the diff, 85% of the mutants must die · e2e over the diff, the real bot against a fake Telegram
     loop while any gate is red
+        opt the failure is not obvious from the message it printed
+            C->>K: the fix-a-bug skill
+            K-->>C: measure before the third hypothesis, and read the report already on disk instead of running the gate again
+        end
         C->>C: fix it, then re-run that gate alone — never the whole chain
     end
     end
@@ -176,10 +195,13 @@ sequenceDiagram
 
     rect rgb(253, 242, 248)
     note over C,K: Stage 6. Retrospective — fixing the process and the documents
-    opt something was rebuilt, or a gate ran twice, or an agent was paid for nothing
+    opt something was rebuilt, a gate ran twice, an agent was paid for nothing, or a bug reached a player
         C->>K: the retrospective skill
         K-->>C: five questions about how the work went, each answered with a count
         C->>C: answer them: what was rebuilt, what ran for nothing — each a number, not an impression
+        opt the phase fixed something that had already shipped
+            C->>C: name the gate that should have caught it, and what it would take for that gate to see it
+        end
         C->>K: land a new rule in the skills, so the mistake cannot repeat
         opt the lesson changes the flow itself, not just a rule inside a skill
             C->>C: redraw this very diagram, and keep the evidence that forced it for the closing report

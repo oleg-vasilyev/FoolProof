@@ -19,6 +19,7 @@ const SKILL_BUDGETS: Readonly<Record<string, number>> = {
   "add-a-feature": 170,
   "add-repository-method": 80,
   "finish-phase": 725,
+  "fix-a-bug": 145,
   "refresh-the-pictures": 240,
   retrospective: 165,
   "update-the-design-page": 70,
