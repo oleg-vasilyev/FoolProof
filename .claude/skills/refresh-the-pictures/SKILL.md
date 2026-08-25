@@ -88,11 +88,11 @@ case through; a phase that adds a poster owes it cases in the same phase.
 **The cases are not invented here.** They were named at stage 1, before the mockup was
 drawn, and the owner approved a picture of each one — so this step copies that list
 into the gallery and draws it against the real renderer. The list is a committed file,
-`docs/mockups/<edges module>.cases.txt`, and `docs:check` fails when the gallery
-stops drawing something it holds, so **losing a case is mechanical and needs no
-vigilance.** What is still yours is the other direction: a case appearing for the
-first time here was approved by nobody, and it is worth saying so out loud rather than
-quietly adding it.
+`docs/mockups/<edges module>.cases.txt`, and `docs:check` fails **both** directions —
+a held case the gallery stopped drawing, and a drawn case the list does not hold — so
+keeping the two in step needs no vigilance. What is still yours is that the gate
+polices consistency and not approval: writing the new edge into the list yourself
+makes it consistent and leaves it unapproved, so say out loud that you did.
 
 The three rules below are stated again in the `poster-designer` brief, deliberately —
 a subagent cannot load a skill, and a list of edges written without them is the very
@@ -161,7 +161,7 @@ them, and a stale PNG produces findings against a drawing that no longer exists.
 
 **A model that refuses or dies mid-run is yours to re-run, not the agent's** — that
 rule and the rest of what to do when a subagent fails live in `finish-phase`'s
-*What to delegate* section, and this step reaches them from here because it also
+[delegating-work.md](../finish-phase/delegating-work.md), and this step reaches it because it also
 runs on its own trigger, without that skill ever being loaded. What may not be
 substituted is the property the reader was chosen for: a context that did not draw
 the picture.

@@ -18,8 +18,8 @@ Skipping one is what breaks the layer.
 
 Add the method to the `Repository` interface, and any row type it returns.
 
-The name is a domain phrase, not a SQL one: `liveCardInChat`, `lastLineup`,
-`seriesStats`. A caller should not be able to guess the table from the name.
+The name is a domain phrase, not a SQL one: `liveCardInChat`, `rosterInChat`,
+`seriesChronology`. A caller should not be able to guess the table from the name.
 
 ## 2. `src/shared/repository/sqlite-repository.ts`
 

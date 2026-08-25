@@ -2,8 +2,7 @@
 
 > Not a gate. Read while planning a phase, and again after one cost more than it should have — every line was paid for here at least once. [Finishing a phase](SKILL.md) is the gates themselves.
 
-A phase's cost is dominated by rework, not by thinking. Every line below was paid for
-here at least once:
+A phase's cost is dominated by rework, not by thinking:
 
 - **Freeze every signature that crosses a layer before the first `Write`.** `/merge`
   flipped `mergePlayers` between `number` and `void` after the SQL, the stub and the

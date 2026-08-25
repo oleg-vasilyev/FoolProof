@@ -86,8 +86,8 @@ Two consequences worth spelling out, because both have been got wrong:
 
 A mermaid fence either renders or it does not, and a broken one shows a parse error
 where the picture was — less than if the fence had never been written. `docs:check`
-now refuses the three failures it can see, each complaint carrying its own reason: a
-semicolon inside a message, a block nobody closed, a lane no participant declares.
+refuses every failure it can see, and each complaint carries its own reason — so the
+complaints are the list, and keeping a second one here is what let this sentence rot.
 
 What it cannot see is everything else, so when a fence will not render, **ask the
 platform, not the file**: GitHub prints the parse error with a line and a caret, which
@@ -96,9 +96,9 @@ exotic, and the exotic part is usually fine.
 
 ## The script table in `README.md`
 
-`docs:check` compares that table against `package.json`, so the two cannot drift —
-but three things about it are judgement, and they arrived here from `CLAUDE.md`
-when a new rule pushed that file over its budget:
+`docs:check` fails a `package.json` script this table omits — the other direction, a
+row naming a script that has gone, is yours. Three things about it are judgement, and
+they arrived here from `CLAUDE.md` when a new rule pushed that file over its budget:
 
 - **Never put comment keys (`"// …": "…"`) in `package.json`.** The script name has
   to say what it does; a comment beside it is an admission that it does not.
@@ -154,13 +154,13 @@ the second list is the one a reviewer can check.
 ## The budget is the point
 
 `CLAUDE.md` **and every skill** carry a line budget, enforced by `docs:check`; a skill
-with no row in the table fails the gate too, so a new one cannot escape by arriving
-after the mechanism. They exist so that adding costs something: when a new rule pushes
-a file over, the fix is to move an old paragraph into the file loaded when it applies,
-not to raise the number — and which paragraph may go at all is the `retrospective`
-skill's, which has the three safe cases. Raising a number is allowed exactly once per
-argument that the whole file is needed every time it is read, and that argument has
-lost twice.
+with no row in the table fails the gate too. They exist so that adding costs
+something, and the two differ in what it buys. **`CLAUDE.md`'s number never rises** —
+it is read before every session, so a new rule displaces an older one into the file
+loaded when it applies, and the argument that the whole file is always needed has lost
+twice. **A skill's may rise, by what a genuinely new section costs and nothing else**:
+new subject matter earns lines, prose restating what is already there earns none.
+Which paragraph may go is the `retrospective` skill's, which has the three safe cases.
 
 ## What overlap is allowed
 

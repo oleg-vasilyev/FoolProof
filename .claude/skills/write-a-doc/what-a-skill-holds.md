@@ -76,6 +76,11 @@ one was wrong in the direction that made the story better. Run the count yoursel
 before repeating it, and that goes double for a number an audit produced about its
 own work.
 
+**Running it yourself is not enough either.** The fourth was mine: a `grep` for
+`import(` counted `typeof import("…")` as well — a *type*, not an import — and put 129
+files into a document where 102 do it. A count is only as narrow as the pattern behind
+it, so before quoting what a pattern found, say what it excludes and check that it does.
+
 ## Two things that worked
 
 - **Point at a neighbour rather than describing a shape.** *Build by imitating a

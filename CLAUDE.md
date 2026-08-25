@@ -337,8 +337,8 @@ core equivalent defined inline there:
 | A state is read from its own table, specs included | `project/named-states` |
 | Braces on every `if`, `const` over `let` | `curly`, `prefer-const`, `no-var` |
 | No `console.*` outside the logger (and `scripts/`) | `no-console` |
-| Imports point only downward, features stay independent | `no-restricted-imports`, one zone per feature layer |
-| An alias ban (`#live-game/**`) actually fires | the same rule, compiled to a `regex` pattern |
+| Imports point downward, features stay independent, `e2e/` stays outside | `no-restricted-imports`, one zone per layer |
+| An alias ban (`#live-game/**`) fires, and survives `await import(…)` | a `regex` pattern, and the same bans as `no-restricted-syntax` |
 
 The zones are the valuable ones, and **a zone is not finished until a deliberate
 violation has been shown to fail the lint**: one that never fires looks exactly like

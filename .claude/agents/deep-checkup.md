@@ -37,8 +37,8 @@ the run can actually establish:
 
 - **Today's date**, which names the evidence directory every verdict cites.
 - **Whether the production server is reachable from this machine**, and by which
-  key. The connection details are in README's server section; whether they work
-  right now is not something the repository can tell you.
+  key. **The repository does not hold them** — no host, no `ssh` line, no key path,
+  deliberately — so they come with the brief or the phase is reported unreachable.
 - **A time budget.** The cut list at the bottom of this file is meaningless without
   one, and a run that discovers its limit at phase 8 has spent the budget on the
   cheap phases.
@@ -61,8 +61,8 @@ Fresh `git clone` of the repo into a temp directory; record the commit hash the
 whole audit runs against. Snapshot the facts: Node version, lock file hash, and
 every environment key the code actually reads (grep `requireEnv`/`optionalEnv`
 in `src/`) — this list, not `.env.example`, is the reference all documents are
-judged against later. If SSH to the production server works (connection details
-are in README's server section), take a read-only snapshot: `systemctl status`
+judged against later. If SSH to the production server works — the brief carries what
+it takes, since the repository does not — take a read-only snapshot: `systemctl status`
 for both units, the tag the clone sits on (`git -C ~/FoolProof describe --tags`),
 `node -v`, `ls -l .env.production` (mode only), key names via a grep that
 prints nothing after `=`. This becomes the drift baseline for phase 7.
@@ -153,6 +153,12 @@ stood, and let a file added mid-cycle wait for the next lap. Rule by rule:
 - **Is a machine already enforcing it?** A lint rule, a `docs:check` complaint or a
   gate that fires on the same fault makes the paragraph a second copy — and a reader
   obeying the prose is obeying something that now fails on its own.
+- **Could one, and does none?** The same question backwards, and the more valuable of
+  the two: `CLAUDE.md` says a mechanically checkable rule is a lint rule rather than a
+  paragraph, and nothing checks that. *Only `sqlite-repository.ts` may import the
+  connection* is the standing example — true today, held by prose and by review, and
+  reachable from any feature without a lint rule saying otherwise. Report it as a
+  proposed zone, with what would have to be exempted; do not write one.
 - **Does its subject still exist?** `docs:check` catches a dead *path*. A dead
   command, folder, threshold or shape is invisible to it.
 - **Has a later rule absorbed it?** Not contradiction — the breadth audit above owns
@@ -244,9 +250,10 @@ Read every file in `deploy/` and `.githooks/` line by line asking: what happens
 if it dies mid-run; is a re-run idempotent; `set -euo pipefail` or swallowed
 errors (known trap: `set -e` without `-E` never calls an ERR trap inside a
 function — it has already bitten here); destructive operations with variables
-that could be empty; does the rollback actually cover the step that fails
-(known asymmetry: the deploy's `trap restore ERR` is cleared before
-`systemctl restart`). Verify the recovery story: if the server died today,
+that could be empty; does the rollback actually cover the step that fails — here it
+does, the deploy's restart and its settle both running under `trap restore ERR`, which
+is cleared only after them, so check that this is still true rather than that it is
+still broken. Verify the recovery story: if the server died today,
 does `configure-server.sh` plus README rebuild it from zero — walk it
 mentally against the phase-0 server snapshot and mark every step that only
 works on the machine as it happens to be. Check drift: what the scripts

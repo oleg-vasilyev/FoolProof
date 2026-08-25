@@ -33,9 +33,9 @@ number that was measured rather than guessed. Write it the way the README is
 written: plain claims, each carrying its reason.
 
 **A phase-final commit ends with the Gates paragraph**, in one fixed shape, so
-two phases can be compared without re-parsing prose. The history holds this
-paragraph in three different layouts; this one wins because it is the tersest
-that still shows a regression at a glance:
+two phases can be compared without re-parsing prose. The history holds dozens of
+wordings of its opening line alone; this one wins because it is the tersest that
+still shows a regression at a glance:
 
 ```
 Gates: check:phase green — <N> tests in <M> files, coverage <st>/<br>/<fn>/<ln>,

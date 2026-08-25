@@ -111,7 +111,10 @@ never fired, both silently:
 - a later flat-config block **replaces** an earlier one for a file matched by both,
   so purity and independence have to be one pattern list per zone;
 - minimatch reads a leading `#` as a **comment**, so `#live-game/**` matches
-  nothing — alias bans are compiled to `regex` patterns instead.
+  nothing — alias bans are compiled to `regex` patterns instead;
+- `no-restricted-imports` reads only a **static** `import`, so the 102 files loading
+  their subject with `await import("…")` — almost every spec — passed every zone. The
+  bans compile into `no-restricted-syntax` too; a static-only probe proves half a zone.
 
 ## 5. If the feature draws anything, open the drawings first
 

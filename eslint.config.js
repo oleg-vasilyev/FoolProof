@@ -301,6 +301,49 @@ const project = {
 // zone silently passes everything. Imports here are Node subpath aliases, so
 // every ban starting with `#` is converted to a `regex` pattern instead. Both
 // traps were found by running deliberate violations — never assume a zone fires.
+//
+// Third trap, found the same way: `no-restricted-imports` reads only a static
+// `import` declaration. It cannot see `await import("…")`, and every spec here
+// loads its subject that way because `vi.mock` is hoisted above the imports — so
+// the zones were blind to the one import form 102 of these files use. The same
+// bans are therefore compiled a second time into `no-restricted-syntax`, which
+// walks the syntax tree and does see it — as `ImportExpression` for the runtime
+// form and `TSImportType` for `typeof import("…")`, which is a different node and
+// was blind for the same reason. What stays invisible to all of them is a computed
+// specifier, which is why `scripts/feature-drawings.ts` may build one from a
+// template literal to find features at run time.
+const A_REGEX_CHARACTER = /[.+?^${}()|[\]\\]/g;
+
+const A_FORWARD_SLASH = /\//g;
+
+const A_TRAILING_GLOB = /\/\*\*$/;
+
+const PAST_THE_LEADING_GLOB = 3;
+
+const WITHOUT_THE_TRAILING_GLOB = -3;
+
+const WITHOUT_THE_TRAILING_STAR = -1;
+
+const quoted = (text) => text.replace(A_REGEX_CHARACTER, "\\$&");
+
+// A ban is written as a glob; this is the same ban as a regular expression over
+// the specifier itself, so that one list can drive both rules.
+const asAPattern = (ban) => {
+  if (ban.startsWith("**/")) {
+    return quoted(`/${ban.slice(PAST_THE_LEADING_GLOB).replace(A_TRAILING_GLOB, "")}/`);
+  }
+
+  if (ban.endsWith("/**")) {
+    return `^${quoted(ban.slice(0, WITHOUT_THE_TRAILING_GLOB))}/`;
+  }
+
+  if (ban.endsWith("*")) {
+    return `^${quoted(ban.slice(0, WITHOUT_THE_TRAILING_STAR))}`;
+  }
+
+  return `^${quoted(ban)}$`;
+};
+
 const forbid = (bans, message) => {
   const globs = bans.filter((ban) => !ban.startsWith("#"));
   const aliases = bans.filter((ban) => ban.startsWith("#"));
@@ -314,6 +357,17 @@ const forbid = (bans, message) => {
           ...aliases.map((alias) => ({ regex: `^${alias.replace("**", "")}`, message })),
         ],
       },
+    ],
+    "no-restricted-syntax": [
+      "error",
+      ...bans.flatMap((ban) => {
+        const pattern = asAPattern(ban).replace(A_FORWARD_SLASH, "\\/");
+
+        return [
+          { selector: `ImportExpression > Literal[value=/${pattern}/]`, message },
+          { selector: `TSImportType > Literal[value=/${pattern}/]`, message },
+        ];
+      }),
     ],
   };
 };
@@ -433,6 +487,23 @@ export default [
     ),
   },
   ...FEATURES.flatMap(featureZones),
+  {
+    // e2e/ plays an evening against a real src/main.ts process, so it is a
+    // consumer of the app and never part of it: imports are relative, and the
+    // `#` aliases stay on the app's side of the line. A scenario that imported
+    // copy.en.ts would compare the copy table against itself and assert nothing.
+    // No other block matches these files, so this one carries their parser too.
+    files: ["e2e/**/*.ts"],
+    languageOptions: {
+      parser: tsParser,
+      ecmaVersion: "latest",
+      sourceType: "module",
+    },
+    rules: forbid(
+      ["#app/**", "#shared/**", ...FEATURES.map((name) => `#${name}/**`), "**/src/**"],
+      "e2e/ is not the app — import by relative path, never through a # alias and never from src/: a scenario that imports the copy table asserts a constant against itself."
+    ),
+  },
   {
     // A feature is a folder you can delete, and for a while the tooling made that
     // false: eight scripts imported the scoresheet by name, so removing the folder

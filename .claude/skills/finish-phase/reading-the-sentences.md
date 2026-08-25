@@ -2,8 +2,7 @@
 
 > Gate 5b of [finishing a phase](SKILL.md), open only when this phase wrote or moved a line a person will read. The gallery proves a line fits; nothing else asks whether it is something a person would say.
 
-The gallery proves a line **fits**. Nothing else asks whether it is something a person
-would say. Two releases shipped *«Дурак в этот вечер был — и всё равно 9 партий подряд
+Two releases shipped *«Дурак в этот вечер был — и всё равно 9 партий подряд
 начисто»* and *«К середине — дно графика и 28%, сейчас — 50%»*, both drawn correctly,
 both read by a poster reader, both word salad; the owner found seven of them in ten
 minutes on a Friday night.

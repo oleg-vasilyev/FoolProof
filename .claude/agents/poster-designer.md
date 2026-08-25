@@ -79,8 +79,8 @@ promising a figure nothing computes is worse than no mockup.
 
 - **Only colours from `palette.ts` and `PLAYER_COLOURS`.** Inventing a colour is
   the fastest way to look foreign. A player's own colour comes from their column.
-- **Width is `IMAGE_WIDTH` (1620) and `PAD` (60) either side.** Height is yours to
-  choose but must stay at or under `IMAGE_MAX_HEIGHT` (2560) — Telegram's limit,
+- **Width is `IMAGE_WIDTH`, with `PAD` either side.** Height is yours to
+  choose but must stay at or under `IMAGE_MAX_HEIGHT` — Telegram's limit,
   which every existing sheet respects. Check the arithmetic; a sheet 36px over is
   a real defect that has shipped past a review here before.
 - **Type comes from `fontSize` in `card-metrics.ts`** where a role already exists
@@ -153,8 +153,8 @@ examples picked because they looked instructive. Before drawing anything, write 
 list of cases the picture has to survive, each with a sentence saying what it asks
 of the drawing: the emptiest thing the renderer can be handed, the fullest, the
 widest name, each optional section missing, the case where two values tie.
-`features/scoresheet/samples/career-edges.ts` is both the shape and the standard — eight named cases,
-each carrying its own `asks` line.
+`features/scoresheet/samples/career-edges.ts` is both the shape and the standard —
+open it and count what is there, each case carrying its own `asks` line.
 
 That list is not scratch work. It is **the same list the poster gallery draws once
 the renderer exists**, written here because here is where it is worth something:
@@ -172,9 +172,10 @@ watched to fail: a case in the list that the script does not draw, a list naming
 script nobody wrote, and a script whose cases no list ever approved. So an edge the
 owner looked at cannot quietly stop being drawn.
 
-Four rules the list inherits, all already paid for; the last three are stated again in
-the `refresh-the-pictures` skill, which you cannot load, so keep the two wordings in
-step if you ever change one — and recount them when you do.
+Four rules the list inherits, all already paid for. The last three are stated again in
+`.claude/skills/refresh-the-pictures/SKILL.md`, which you have no Skill tool for but
+can simply read — open it before changing one of them, because nothing holds the two
+wordings in step, and recount them when you do.
 
 **A case you cannot construct is a finding, not a panel you quietly drop** — if the
 widest name will not fit, say that instead of drawing a narrower one.

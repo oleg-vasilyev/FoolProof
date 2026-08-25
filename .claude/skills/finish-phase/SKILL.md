@@ -189,8 +189,10 @@ rendered poster one gate later.
 a tree that moves under it produces findings against code that no longer exists and
 a report that has to be re-checked line by line before it can be trusted. One phase
 ran the reviewer while its own mutation fixes were still landing; the report opened
-by saying so, and every finding then needed confirming twice. Land the fixes, get
-`npm run check` green, *then* review.
+by saying so, and every finding then needed confirming twice. **A defect you already
+know about is landed before the launch, never deferred until the report is back** — a
+reading of a tree you knew was wrong is a reading you have to take twice. Land the
+fixes, get `npm run check` green, *then* review.
 
 **Spend the waiting on read-only work** — a control run, a report, the
 retrospective's counting. This rule has now been broken three times, and never by a
@@ -242,20 +244,14 @@ looks at the code the rule was written to protect rather than at the diff.
 the base ref, the paths, what changed outside `src/`, any rule the phase invented,
 and nothing about what a file is *for*. Read it before writing one.
 
-Ask of every touched file:
+Its checklist is richer than any kept here — skeleton, `switch` over a union, a
+string outside `copy.en.ts`, where a stub sits, the basename read back against the
+exports — so ask only the two things it does not:
 
-- Does it still read as a skeleton — the idea before the detail?
-- Is every closed union dispatched with `switch`, not a chain of `if`?
-- Is there a user-facing string outside the owning feature's `copy.en.ts`?
-- Does every stub sit beside its subject, or beside its only consumer when the
-  subject is someone else's code?
-- Shown only the basename, could you guess the exports? A name that states the
-  file's topic rather than its contents passes every other test and fails this one.
 - Does any state's name — a phase, an outcome, a kind — appear as a bare string
   literal outside the module that declares it?
-
-And of the feature as a whole: it declares one command per thing it gives the
-player, so can a reader tell from the file names which files serve which?
+- The feature declares one command per thing it gives the player, so can a reader
+  tell from the file names which files serve which?
 
 ## 5b. The sentences — read when the table is written, re-read only if it moved
 
@@ -386,9 +382,9 @@ holds the mutation score up and it is the cheapest part to write. What bends is
 prose about a change that has nothing new to say.
 
 The plan review is the one row that happens **before** any of this, at the end of
-stage 1 once the interfaces are frozen. **This is the definition of what earns it,
-and the only one** — the drawing, the routing table in `CLAUDE.md` and the agent's
-own `description:` point here rather than restating it:
+stage 1 once the interfaces are frozen. **This is the authority on what earns it** —
+but a drawing's guard and an agent's `description:` have to stand alone, so the flow
+and `plan-reviewer` each carry a short form, and narrowing it edits all three:
 
 > A phase earns the plan review when it **adds something a player can reach that
 > did not exist** — a command, a screen, a notice, a state — or **changes a
