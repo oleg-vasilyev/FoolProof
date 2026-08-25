@@ -211,6 +211,11 @@ sequenceDiagram
     C->>K: the write-a-doc skill
     K-->>C: every fact has one home document, and CLAUDE.md has a line budget
     C->>C: update README, PLAN and whatever else the phase owes
+    opt a skill outgrew its budget, somebody proposed rewriting one, or a rule inside one may no longer be enforced
+        C->>R: the skill-auditor agent — which skill, and whether a rewrite is wanted at all
+        R-->>C: a row per rule — enforced by a machine, stated in another file, or the only place a remedy is written down
+        C->>C: adopt a rewrite only when that inventory shows it loses no remedy, and check each cut against the file it names
+    end
     C->>C: npm run docs:check — links resolve, the tables match the code, the budget holds
     end
 

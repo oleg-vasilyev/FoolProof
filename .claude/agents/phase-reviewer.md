@@ -104,6 +104,13 @@ run `npm run check` and trust it. Spend the pass on what no rule can check:
   a unit's name? Does every stub sit beside its subject, or beside its only
   consumer when the subject is someone else's code? The `write-a-spec` skill has
   the full standard, including how to judge a spec you did not write.
+- **A skill the diff touched.** The standard is
+  `.claude/skills/write-a-doc/what-a-skill-holds.md` — read it and judge against it
+  rather than against your own taste, and check its enforcement claims rather than
+  granting them. Judge **both directions**, because a review naturally looks at only
+  one: every rule the diff added to a skill, and every rule it took out. The cut is
+  the half nobody thinks to question, and that page says which cuts are free and
+  which are the expensive kind.
 
 ## What comes back
 

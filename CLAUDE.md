@@ -23,6 +23,7 @@ beside the code it describes:
 | A frozen plan, before any code is written for it | `plan-reviewer` agent |
 | Reading a drawing or a line as a player would | `poster-reader` agent |
 | A copy table, read as finished sentences in both languages | `copy-reader` agent |
+| A skill over budget, a rewrite of one proposed, a rule perhaps no longer enforced | `skill-auditor` agent |
 | A weekly look at the project and its server | `deep-checkup` agent |
 
 Five documents, one job each:
@@ -48,10 +49,9 @@ behaviour and this file wins on style.
 That rule has needed enforcing twice, so it is enforced: `npm run docs:check` holds
 every document against the repository it describes — links, tables, the schema, the
 pictures, the flow drawing, every path a document names, and **a line budget on this
-file, on `TECH-DEBT.md`, on every skill and on each page beside one**. Each complaint carries its own reason, which is why none is
-repeated here. The budget makes appending cost something: a rule that pushes a file
-over displaces an older one into the file loaded when it applies. `write-a-doc`
-routes a fact to its home.
+file, on `TECH-DEBT.md`, on every skill and on each page beside one**. The budget
+makes appending cost something: a rule that pushes a file over displaces an older one
+into the file loaded when it applies, and `write-a-doc` routes a fact to its home.
 
 ## Code style
 

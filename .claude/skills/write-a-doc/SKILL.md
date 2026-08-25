@@ -27,7 +27,7 @@ Route by what *kind* of fact it is, not by which document you happen to be editi
 | What a person types, sees, or has to do to run the bot | `README.md` | somebody who will never read the code needs it |
 | What the bot must do — a state, a refusal, a limit, a schema decision, a measured number | `PLAN.md` | it would survive a rewrite in another language |
 | How code here must be written | `CLAUDE.md` | a violation is possible in a file nobody is currently thinking about |
-| A procedure with an obvious trigger — adding X, closing Y | a **skill**, or a page beside one when a single trigger needs it | you would know to ask for it by name |
+| A procedure with an obvious trigger — adding X, closing Y | a **skill** ([what one holds](what-a-skill-holds.md)), or a page beside one when a single trigger needs it | you would know to ask for it by name |
 | Rules for a folder that could be deleted as a unit — `e2e/`, `deploy/` | a `README.md` **inside that folder** | it leaves with the folder |
 | Something deliberately unfinished, plus the trigger to pick it up | `TECH-DEBT.md` | it names a trigger, not a wish |
 | Why a non-obvious line of configuration exists | a comment **in that config file** | config files are exempt from the no-comments rule |

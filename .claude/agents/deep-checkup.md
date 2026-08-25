@@ -167,6 +167,14 @@ stood, and let a file added mid-cycle wait for the next lap. Rule by rule:
 Each is a finding naming the rule, its file and line, and which of the four it failed
 — a *proposed* deletion, never a deletion, because this audit fixes nothing.
 
+**One test outranks all four**, and it is in
+[what a skill holds](../skills/write-a-doc/what-a-skill-holds.md) — read it before
+proposing a single deletion, because a rule all four questions condemn can still be
+the only thing standing between a reader and a trap. **An enforcement claim is
+opened, not believed**: where question one says a machine holds a line, read which
+files that machine actually applies to. A skill needing more than this pass can give
+is itself a finding, naming the `skill-auditor` agent and what warranted it.
+
 **One section of `PLAN.md` is read line by line, all the way, and a different one
 each time.** The spec is 1600 lines and no gate reads most of it: `docs:check`
 compares the schema block and the contents list and nothing else, so a paragraph that
