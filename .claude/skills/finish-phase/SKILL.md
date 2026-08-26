@@ -404,7 +404,11 @@ the system working, but only after five files and their specs existed and were
 green. That is the cost being moved earlier, not a gate being replaced.
 
 The judgement call is honest sizing, so name the size **before** starting, in one
-line, and let the user shrink it.
+line, and let the user shrink it. **Read `TECH-DEBT.md` against the task first** — its
+entries name triggers, and a task that trips one takes that entry into scope, so a
+size quoted without checking is a size that grows later for a reason already written
+down. That reading belongs with framing, before any work is classified as a fault or
+as something new, because it is owed by every task either way.
 
 **A finding that says UNVERIFIED is a question, not a task.** An audit reports what
 it could not establish as well as what it found, and that word is the whole content
