@@ -33,9 +33,8 @@ both run `docs:check`.
 
 ## 1. Lint and types
 
-Zero errors, no exceptions. (`npm run check` is the standalone everything
-command; the phase loop runs lint and types via `check:phase`, without
-`docs:check` — see above.)
+Zero errors, no exceptions. (`npm run check` is the standalone everything command; the
+phase loop reaches lint and types through `check:phase`, without `docs:check`.)
 
 **A changed signature has callers no gate can see.** `grep` the whole repository
 for the changed name, not just `src/` — `.claude/skills/` and `README.md` hold
@@ -446,12 +445,13 @@ than it should have.
 **The review, the readings and the checkup are delegated always** — their whole value
 is that the reader did not write the thing, and you cannot review your own work by
 reading it again. **Writing is delegated only above ten files**, and only once the
-artifact those files are written against has been generated and looked at. Whatever
-is expensive to be wrong about stays in your hands at any size.
+artifact those files are written against has been generated and looked at. **A question
+the repository can answer is delegated at any size** — no brief-versus-code arithmetic
+applies to reading. Whatever is expensive to be wrong about stays in your hands at any
+size.
 
-What a brief owes an agent, what delegation does and does not buy — measured, not
-assumed — and what never leaves your hands are in [delegating
-work](delegating-work.md).
+What a brief owes, what delegation does and does not buy — measured, not assumed — and
+what never leaves your hands: [delegating work](delegating-work.md).
 
 ## The final commit message
 

@@ -23,7 +23,22 @@ here — *an independent scope is delegated on sight* — and the narrowing is t
 owner's, decided against this skill's own ledger after three phases in a row paid the
 same rework. Below the threshold, doing it yourself is cheaper than briefing.
 
-**The threshold does not open what was always closed.** Whatever is expensive to be
+**A question is delegated at any size, and the threshold does not apply to it.** That
+number weighs writing a brief against writing the code yourself; a read-only errand has
+no such arithmetic, because the alternative is reading the files in your own window and
+then carrying them for the rest of the phase. One brief sent cold to read the agent
+files against each other cost 149k tokens in a single call and returned three defects
+nothing else was looking for — a pointer to server details no README holds, a *known
+asymmetry* in the deploy that had been fixed two commits earlier, and a gallery count
+one short. Three conditions, every time: the question stands apart from what you are
+doing, it is answerable by opening files rather than by holding this session's
+reasoning, and you can say what the answer must contain — fail the last and you get an
+essay. **The moment is not fixed.** A gate's waiting is where it is easiest to notice,
+since the review reliably leaves five minutes with nothing to edit, but framing is
+where it is worth most: an assumption checked before anything is built costs nothing
+to act on.
+
+**Neither threshold opens what was always closed.** Whatever is expensive to be
 wrong about stays in your hands at any size — the mechanic a player will feel, a
 cross-feature hazard, anything touching `shared/` or the schema. A twelve-file batch
 across `shared/` is not delegable because it is twelve files; it is the case the count

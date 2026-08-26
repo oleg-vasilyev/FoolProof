@@ -40,7 +40,7 @@ sequenceDiagram
     participant C as Claude Code, the AI developer
     participant D as Claude Design, the design page
     participant K as Project skills, .claude/skills
-    participant S as Subagents, hands I brief myself for one piece of this phase
+    participant S as Subagents I brief by hand — a batch of files to write, or one question to answer
     participant R as Named agents, .claude/agents
     participant G as GitHub, repository and CI
     participant V as Production server
@@ -150,6 +150,10 @@ sequenceDiagram
 
     rect rgb(240, 249, 255)
     note over C,R: Stage 4. Review by an agent that did not write the diff
+    opt a question stands on its own and the repository can answer it
+        C->>S: one brief, one question — what to open rather than assume, and what the answer must carry — this runs beside the review below
+        S-->>C: the answer, and whatever it could not establish said as that rather than left out
+    end
     C->>R: the phase-reviewer agent — the whole diff in one piece, deploy scripts, service units and CI included, which no automatic gate covers at all
     R-->>C: findings, most severe first
     loop for each finding
