@@ -74,14 +74,12 @@ that went and why — deleted quietly, it reads like one nobody ever wrote.
 
 ## The flow this gate audits is drawn
 
-[`DEVELOPMENT-FLOW.md`](../../../DEVELOPMENT-FLOW.md) draws the whole loop —
-eight stages from the owner's first message to the checkup that watches it, as a Mermaid
-block GitHub renders in place, linked from the README. It is the map, not the
-authority: every stage's rules live in the skill the drawing names, and a
-disagreement is resolved in the skill's favour, then the drawing is fixed.
-**A lesson below that changes a default also redraws the step it touches, in
-the same commit** — a flow chart still showing the old habit is the same bug
-as a stale document.
+[`DEVELOPMENT-FLOW.md`](../../../DEVELOPMENT-FLOW.md) draws the whole loop, from the
+owner's first message to the checkup that watches it. It is the map, not the
+authority: every stage's rules live in the skill the drawing names, and a disagreement
+is resolved in the skill's favour, then the drawing is fixed. **A lesson below that
+changes a default also redraws the step it touches, in the same commit** — a flow
+chart still showing the old habit is the same bug as a stale document.
 
 The drawing is deliberately broad, so most lessons never reach it: a new rule
 inside a skill lands under a step that already describes it. That makes the
@@ -119,13 +117,11 @@ it survived the redraw that caused it, so the guard is mechanical now: `docs:che
 follows each errand from Claude Code to whoever hands work back, and fails when
 that is not the participant the errand went to.
 
-Both halves are enforced, because both would otherwise be forgotten by the phase that
-most needs them: a `PostToolUse` hook says the obligation out loud the moment the file
-is edited, `.githooks/commit-msg` refuses a commit whose message lacks the `Flow:`
-paragraph or whose diff moves a step while carrying nothing that step stands on, and
-`npm run docs:check` holds the drawing's cast, its skills, its commands, its lanes and
-its blocks to what the repository actually contains. Every one of those failures
-explains itself when it fires, which is why none of them is explained here.
+Both halves are enforced, because the phase that most needs them would forget them: a
+`PostToolUse` hook says the obligation aloud as the file is edited, `.githooks/commit-msg`
+refuses a message lacking the `Flow:` paragraph or a diff that moves a step while
+carrying nothing it stands on, and `npm run docs:check` holds the drawing to what the
+repository contains. Each explains itself when it fires, so none is explained here.
 
 ## Every lesson landed displaces one
 
@@ -182,3 +178,7 @@ somebody counted the eight.
 The commit's `Retro:` line is this block compressed to one sentence, and
 `write-a-commit` says how — what it may not do is carry a verdict this block never
 reached.
+
+**Then write the phase log**, straight phases included — a pile fed only by the ones
+that went badly divides into nonsense. Its fields and its one hard rule about
+unmeasured numbers are [in the logbook](../../../logbook/README.md).

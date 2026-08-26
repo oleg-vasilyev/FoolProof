@@ -15,6 +15,13 @@ is to find what a green pipeline cannot see.
 1. **Believe nothing on say-so.** Not the documents, not the rules, not file
    names, not commit messages. The only sources of truth are executed behaviour
    and the bytes of the code. Documents are defendants here, not witnesses.
+   One exception, narrow on purpose: when what is on trial is **how the work was
+   done**, some of it has no other witness, because the sessions are gone. A phase
+   log's `Rework:`, `Loops:` and token counts are testimony. Everything in it that
+   `git` can produce — how many phases a day held, what each message reports about
+   its gates, which model a trailer names — is **not**, and principle 1 applies to it
+   in full: the first log written here got two such numbers wrong in the flattering
+   direction, which is why they are checked rather than read.
 2. **Every verdict carries reproducible evidence**: the command, its output, the
    file path. Write evidence to `reports/checkup/<YYYY-MM-DD>/evidence/` as you
    go, number the files, and let the report cite only them.
@@ -225,6 +232,42 @@ skip it"), architecture facts the code has since contradicted, decisions the
 code has since reversed, and secrets that soaked into notes. Deleting a harmful
 memory is the cheapest, highest-leverage fix this audit can propose.
 
+## Phase 3¾ — a week of phase logs, read as one pile
+
+Every phase writes one to `logbook/phases/`, at its retrospective while the transcript
+still exists; the folder's own README says what the fields mean and what `not measured`
+means. Read **all of them together**, and read the previous report in
+`logbook/checkups/` beside them. This is the only phase whose finding cannot exist in
+any single source: each log is one phase's honest account, and a habit is what you get
+when ten of them agree without any of them noticing.
+
+What to count, rather than to notice:
+
+- **Who found each defect.** `Found by:` is the field this phase exists for. A week
+  where the owner found most of them is not a compliment to the owner — it names the
+  gate that would have to change, and *be more careful* is not that gate.
+- **A gate skipped more than once for the same reason.** Each skip is defensible
+  alone; a run of them is a rule that has quietly stopped applying, and the skill
+  saying it is not a size judgement has already lost the argument without being read.
+- **Cost against kind.** Divide `Ran:` by `Kind:`. One kind of work that always costs
+  more than it was sized at is a sizing rule that is wrong, not a run of bad luck.
+- **The same rework twice.** One phase's rework is an accident. The same shape in
+  three is a missing rule, and the log is the only place the third one is visible.
+- **What broke.** Crashes, usage limits, an errand that died mid-run — a recurring one
+  is a working practice to change, not weather.
+
+Ignore `not measured` rather than guessing around it, and say how many fields you had
+to ignore: a pile of logs whose numbers are mostly absent is itself the finding, and
+the fix is the retrospective, not this phase.
+
+**Empty the folder of what you used — but at phase 10, as you write the report, not
+here.** Delete every log you folded in, naming each one in the report that folds it.
+That is the single write you make outside `reports/`, and it is not a fix to the
+project: it is this errand clearing its own input so the next checkup reads a week
+rather than a year. Doing it here instead would let a run that dies before phase 10
+eat the input and leave no output. A log you could not use stays where it is, with
+the reason you could not.
+
 ## Phase 4 — generation-pattern hunt in the code
 
 Beyond the linters (which run in CI and are not re-audited): silent fallbacks
@@ -366,7 +409,8 @@ One line first:
 
 ```
 Verdict: <N> findings (<blockers>/<high>/<medium>/<low>), <M> UNVERIFIED,
-<the phases run, and any skipped by name>, evidence in <path>.
+<the phases run, and any skipped by name>, <n> phase logs folded in and deleted,
+evidence in <path>.
 ```
 
 The skipped phases are what a caller cannot reconstruct: a checkup that cut four
@@ -378,9 +422,13 @@ report that leaves either unnamed restarts the rotation at the top, so the same 
 is audited forever and the rest never once.
 
 Then the whole thing, in the order phase 10 builds it — the three verdicts, the
-findings register, the remediation buckets, the proposed diff and the cost. The
-caller saves it beside the evidence as `REPORT.md`. What becomes a `TECH-DEBT.md`
-entry, a fix or a deleted memory is their call, not yours.
+findings register, the remediation buckets, the proposed diff and the cost. **Carry a
+table of the measurements**, a row per number this run took, worded as the last
+report worded it: a trend is what two checkups written the same way make between them,
+and numbers scattered through prose compare to nothing. The caller saves the report to
+`logbook/checkups/<YYYY-MM-DD>.md`, which is kept for good, while the evidence stays in
+`reports/`, which is not — the logbook's README says why the line falls there. What
+becomes a `TECH-DEBT.md` entry, a fix or a deleted memory is their call, not yours.
 
 ## Calibrating this agent — plant a fault and see whether it is found
 

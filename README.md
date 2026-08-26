@@ -337,6 +337,8 @@ scripts/                dev utilities that are not part of the bot; docs-check/
                         holds what `docs:check` asks — `documents/` what is read
                         out of the documents, `source/` what they are held against
 e2e/                    the fake Telegram and the scenarios played against it
+logbook/                no code — a dated log per phase and a report per checkup,
+                        kept so that a habit spanning several of them is visible
 ```
 
 Inside every feature the same layers — `domain/` pure, `render/` pure, `samples/`

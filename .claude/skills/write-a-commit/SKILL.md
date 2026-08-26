@@ -48,8 +48,8 @@ or that the phase went straight and had nothing to count.
 Tag: <the version, or that this rides the next one and why>.
 ```
 
-Four rules inside it. Every gate is named even when skipped — a skipped gate
-carries its reason (`gallery not opened: no SVG changed`), never silence.
+Every gate is named even when skipped, carrying its reason (`gallery not opened: no
+SVG changed`) rather than silence.
 
 **The `Retro:` line is here because this paragraph is the only thing that asks.**
 Gates 1 to 5 are pulled in by the work: nothing ships without compiling, passing
