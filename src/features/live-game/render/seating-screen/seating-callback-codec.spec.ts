@@ -49,6 +49,16 @@ describe("encodeSeatingCallback()", () => {
     ).toBe("s:3.7:0:b:-");
   });
 
+  it("should give Play a code of its own, so it cannot be read as a seat being taken", () => {
+    expect(
+      encodeSeatingCallback({
+        order: [OLEG, ANYA],
+        placed: TWO_PLACED,
+        action: { kind: ActionKind.Confirm },
+      })
+    ).toBe("s:3.7:2:k:-");
+  });
+
   it("should shorten an id rather than spell it out, so a full table still fits", () => {
     expect(
       encodeSeatingCallback({
@@ -117,6 +127,14 @@ describe("decodeSeatingCallback()", () => {
 
   it("should refuse data belonging to the live card", () => {
     expect(decodeSeatingCallback("12:p:0:3")).toBeNull();
+  });
+
+  it("should read Play back as the confirmation it is", () => {
+    expect(decodeSeatingCallback("s:3.7:2:k:-")).toEqual({
+      order: [OLEG, ANYA],
+      placed: TWO_PLACED,
+      action: { kind: ActionKind.Confirm },
+    });
   });
 
   it("should refuse an action code it does not know", () => {

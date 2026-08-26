@@ -112,18 +112,35 @@ describe("renderLeavingKeyboard()", () => {
     ]).toEqual([DATA, OTHER_DATA]);
   });
 
-  it("should offer both Play and Cancel while nobody is marked", () => {
+  it("should offer Cancel beside Play while nobody is marked, since there is no mark to undo", () => {
     expect(controlRow(NOBODY).map((button) => button.text)).toEqual([
-      copy.buttonPlay,
       copy.buttonCancel,
+      copy.buttonPlay,
     ]);
   });
 
-  it("should offer both Play and Cancel once the whole table is marked", () => {
-    expect(controlRow(EVERYBODY).map((button) => button.text)).toEqual([
+  it("should put Back where Cancel was once a mark exists, never both at once", () => {
+    expect(controlRow([ANYA.playerId]).map((button) => button.text)).toEqual([
+      copy.buttonBack,
       copy.buttonPlay,
-      copy.buttonCancel,
     ]);
+  });
+
+  it("should still offer Back and Play once the whole table is marked", () => {
+    expect(controlRow(EVERYBODY).map((button) => button.text)).toEqual([
+      copy.buttonBack,
+      copy.buttonPlay,
+    ]);
+  });
+
+  it("should send the roster and the marks back with Back, so the screen survives the tap", () => {
+    controlRow([ANYA.playerId]);
+
+    expect(encodeLeavingCallbackSpy).toHaveBeenCalledWith({
+      order: ORDER,
+      leaving: [ANYA.playerId],
+      action: { kind: ActionKind.Back },
+    });
   });
 
   it("should send the roster and the marks back with Play, so the tap can act on them", () => {
@@ -136,12 +153,12 @@ describe("renderLeavingKeyboard()", () => {
     });
   });
 
-  it("should send the roster and the marks back with Cancel", () => {
-    controlRow([ANYA.playerId]);
+  it("should send the roster back with Cancel", () => {
+    controlRow(NOBODY);
 
     expect(encodeLeavingCallbackSpy).toHaveBeenCalledWith({
       order: ORDER,
-      leaving: [ANYA.playerId],
+      leaving: NOBODY,
       action: { kind: ActionKind.Cancel },
     });
   });

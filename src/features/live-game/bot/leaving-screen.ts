@@ -56,12 +56,15 @@ const refusalText = (copy: Copy, problem: LeavingRefusal): string => {
 
     case Problem.UnknownNames:
       return copy.leavingStale;
+
+    case Problem.NothingYet:
+      return copy.tapNotAllowed;
   }
 };
 
-const closeScreen = async (copy: Copy, ctx: CallbackTap): Promise<void> => {
+const closeScreen = async (copy: Copy, ctx: CallbackTap, notice: string): Promise<void> => {
   await ctx.editMessageText(renderLeavingCancelled(copy), AS_HTML);
-  await ctx.answerCallbackQuery(copy.cancelledNotice);
+  await ctx.answerCallbackQuery(notice);
 };
 
 const redraw = async (
@@ -114,14 +117,16 @@ export const onLeavingTap = async (context: CardContext, ctx: CallbackTap): Prom
   }
 
   if (payload.action.kind === ActionKind.Cancel) {
-    await closeScreen(copy, ctx);
+    await closeScreen(copy, ctx, copy.cancelledNotice);
 
     return;
   }
 
   const roster = stillTheLastGame(context, chatId, payload.order);
   if (roster === null) {
-    await ctx.answerCallbackQuery(copy.leavingStale);
+    await (payload.action.kind === ActionKind.Back
+      ? closeScreen(copy, ctx, copy.leavingStale)
+      : ctx.answerCallbackQuery(copy.leavingStale));
 
     return;
   }
@@ -141,13 +146,18 @@ export const onLeavingTap = async (context: CardContext, ctx: CallbackTap): Prom
 
       return;
 
+    case Outcome.SteppedBack:
+      await redraw(copy, ctx, transition.plan, copy.tapBack);
+
+      return;
+
     case Outcome.Seated:
       await openTableWithout(copy, context, ctx, chatId, transition.seats);
 
       return;
 
     case Outcome.Cancelled:
-      await closeScreen(copy, ctx);
+      await closeScreen(copy, ctx, copy.cancelledNotice);
 
       return;
 

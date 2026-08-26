@@ -195,6 +195,14 @@ describe("leaving-screen", () => {
       expect(applyLeavingSpy).toHaveBeenCalledTimes(NEVER);
     });
 
+    it("should leave a stale screen standing for any tap that is not Back", async () => {
+      repo.lastGameSpy.mockReturnValue(null);
+
+      await onLeavingTap(context(), ctx.callbackTap(DATA));
+
+      expect(ctx.editMessageTextSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
     it("should refuse when another game was played while the screen stood", async () => {
       toSeatsSpy.mockReturnValue([SEATS[0], SEATS[1]]);
 
@@ -327,6 +335,44 @@ describe("leaving-screen", () => {
       expect(ctx.lastEdit().text).toBe(CANCELLED_TEXT);
       expect(lastAnswer()).toBe(copy.cancelledNotice);
       expect(applyLeavingSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should close a stale screen on Back, which is the only button a marked one has", async () => {
+      decodeLeavingCallbackSpy.mockReturnValue({
+        order: ORDER,
+        leaving: [ANYA.id],
+        action: { kind: ActionKind.Back },
+      });
+      repo.lastGameSpy.mockReturnValue(null);
+
+      await onLeavingTap(context(), ctx.callbackTap(DATA));
+
+      expect(ctx.lastEdit().text).toBe(CANCELLED_TEXT);
+      expect(lastAnswer()).toBe(copy.leavingStale);
+      expect(applyLeavingSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should redraw the screen with the mark taken back, and say so", async () => {
+      const plan = { roster: SEATS, leaving: [] };
+
+      applyLeavingSpy.mockReturnValue({ outcome: Outcome.SteppedBack, plan });
+
+      await onLeavingTap(context(), ctx.callbackTap(DATA));
+
+      expect(ctx.lastEdit().text).toBe(SCREEN);
+      expect(renderLeavingKeyboardSpy).toHaveBeenCalledWith(copy, plan);
+      expect(lastAnswer()).toBe(copy.tapBack);
+    });
+
+    it("should answer a step back with nothing to undo as a tap that cannot be made", async () => {
+      applyLeavingSpy.mockReturnValue({
+        outcome: Outcome.Rejected,
+        problem: Problem.NothingYet,
+      });
+
+      await onLeavingTap(context(), ctx.callbackTap(DATA));
+
+      expect(lastAnswer()).toBe(copy.tapNotAllowed);
     });
 
     it("should name the table as too small when that is what was refused", async () => {

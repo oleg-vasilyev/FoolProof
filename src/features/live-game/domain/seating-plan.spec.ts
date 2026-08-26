@@ -2,6 +2,7 @@ import { ActionKind, Outcome } from "#live-game/domain/card-states.ts";
 import { describe, expect, it } from "vitest";
 import {
   applySeating,
+  everyoneSeated,
   seatNumberOf,
   type SeatingPlan,
 } from "#live-game/domain/seating-plan.ts";
@@ -23,9 +24,13 @@ const ONE_SEATED = 1;
 
 const TWO_SEATED = 2;
 
-const WHOLE_TABLE_SEATED = 4;
+const THREE_SEATED = 3;
 
 const FIRST_SLOT = 0;
+
+const LAST_SLOT = 3;
+
+const LAST_SEAT = 4;
 
 const SECOND_SLOT = 1;
 
@@ -69,13 +74,27 @@ describe("seating-plan", () => {
       });
     });
 
-    it("should seat everyone once only one player is left, because that seat is forced", () => {
+    it("should fill the last forced seat without opening a card, so the screen can be confirmed", () => {
       const transition = applySeating(planOf([ANYA, KIM, OLEG, ROMA], TWO_SEATED), {
         kind: ActionKind.Pick,
         playerId: OLEG.playerId,
       });
 
-      expect(transition).toEqual({ outcome: Outcome.Seated, seats: [ANYA, KIM, OLEG, ROMA] });
+      expect(transition).toEqual({
+        outcome: Outcome.Updated,
+        plan: { roster: [ANYA, KIM, OLEG, ROMA], placed: THREE_SEATED },
+        seated: OLEG,
+        seat: THIRD_SEAT,
+      });
+    });
+
+    it("should reject a pick once the last seat is forced, so the order cannot change under Play", () => {
+      const transition = applySeating(planOf([ANYA, KIM, OLEG, ROMA], THREE_SEATED), {
+        kind: ActionKind.Pick,
+        playerId: ROMA.playerId,
+      });
+
+      expect(transition).toEqual({ outcome: Outcome.Rejected });
     });
 
     it("should reject a player who is already seated", () => {
@@ -126,6 +145,46 @@ describe("seating-plan", () => {
     });
   });
 
+  describe("applySeating, confirming", () => {
+    it("should seat the roster in the order it now stands", () => {
+      const transition = applySeating(planOf([ANYA, KIM, OLEG, ROMA], THREE_SEATED), {
+        kind: ActionKind.Confirm,
+      });
+
+      expect(transition).toEqual({ outcome: Outcome.Seated, seats: [ANYA, KIM, OLEG, ROMA] });
+    });
+
+    it("should refuse to seat a table with a seat still to be chosen", () => {
+      const transition = applySeating(planOf([ANYA, KIM, OLEG, ROMA], TWO_SEATED), {
+        kind: ActionKind.Confirm,
+      });
+
+      expect(transition).toEqual({ outcome: Outcome.Rejected });
+    });
+
+    it("should refuse to seat a table nobody has been placed at", () => {
+      const transition = applySeating(planOf([OLEG, ANYA, ROMA, KIM], NOBODY_SEATED), {
+        kind: ActionKind.Confirm,
+      });
+
+      expect(transition).toEqual({ outcome: Outcome.Rejected });
+    });
+  });
+
+  describe("everyoneSeated", () => {
+    it("should call the table seated one tap before the last, because that seat is forced", () => {
+      expect(everyoneSeated(planOf([ANYA, KIM, OLEG, ROMA], THREE_SEATED))).toBe(true);
+    });
+
+    it("should not call it seated while two players are still unplaced", () => {
+      expect(everyoneSeated(planOf([ANYA, KIM, OLEG, ROMA], TWO_SEATED))).toBe(false);
+    });
+
+    it("should not call an untouched screen seated", () => {
+      expect(everyoneSeated(planOf([OLEG, ANYA, ROMA, KIM], NOBODY_SEATED))).toBe(false);
+    });
+  });
+
   describe("applySeating, cancelling", () => {
     it("should cancel however many seats are taken", () => {
       const transition = applySeating(planOf([ANYA, KIM, OLEG, ROMA], TWO_SEATED), {
@@ -148,10 +207,8 @@ describe("seating-plan", () => {
       expect(seatNumberOf(planOf([ANYA, KIM, OLEG, ROMA], TWO_SEATED), THIRD_SLOT)).toBeNull();
     });
 
-    it("should number every slot once the whole roster is placed", () => {
-      expect(seatNumberOf(planOf([ANYA, KIM, OLEG, ROMA], WHOLE_TABLE_SEATED), THIRD_SLOT)).toBe(
-        THIRD_SEAT
-      );
+    it("should number the forced last seat too, so Play is not offered over a blank row", () => {
+      expect(seatNumberOf(planOf([ANYA, KIM, OLEG, ROMA], THREE_SEATED), LAST_SLOT)).toBe(LAST_SEAT);
     });
   });
 });

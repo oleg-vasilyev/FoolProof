@@ -79,6 +79,7 @@ describeScenario("a long evening, with the table changing under it", (chat) => {
     await chat.tap("Oleg");
     await chat.tap("Anya");
     await chat.tap("Roma");
+    await chat.tap("▶️ Play");
 
     expect(chat.cardText()).toContain("Who went first?");
 

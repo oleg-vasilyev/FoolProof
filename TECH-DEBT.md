@@ -420,11 +420,9 @@ can delete it:
 - «Аня» and «Anya» listed as two players in one legend — the picture of the problem
   `/merge` exists for, and maybe a gallery fixture rather than a defect.
 
-The middle two overlap the entries above about fitting a name to its space; whether
-they are one defect seen twice is part of the checking.
-
-**Check them with the phase that fits names to their space**, which opens the same
-three files anyway.
+The middle two may be one defect seen twice — the entries above about fitting a name
+to its space cover the same ground. **Check them with the phase that fits names to
+their space**, which opens the same three files anyway.
 
 ---
 
@@ -603,6 +601,12 @@ left it alone with nowhere to hide.
 **Worth doing with the next phase that changes what one of these files decides, or
 that opens the mutation gate** — "touches `scripts/`" fired on one that only moved them.
 
+## The leaving screen still reads the wire format it stopped writing
+
+`leaving-callback-codec.ts` writes `W:` and reads `w:` too, so a screen already in a
+chat keeps a working `❌ Cancel` across the deploy that changed the shape. **Drop the
+old branch the next time this codec is opened** — such screens go stale within a day.
+
 ## Not debt, deliberately
 
 Listed so nobody "fixes" them:
@@ -613,27 +617,23 @@ Listed so nobody "fixes" them:
 - **The same product constraint opens `README.md` and `PLAN.md`.** A visitor must
   not have to open the spec to learn why the bot is a keyboard. It is the one
   overlap `docs:check` and the `write-a-doc` skill deliberately allow.
-- **`percent-label.ts` puts the `%` outside `copy.en.ts`.** It is a numeric format, the
-  way `svg-tags.ts` rounds a coordinate, not a sentence anyone would translate — and
-  the copy rule exists so a second locale is a small change, which a percent sign is
-  not. Two review passes have now had to decide this independently, which is why it
-  is written down.
-- **`chronology-layout.ts` puts the truncation `…` outside the copy table**, for the
-  same reason as the `%`: it marks that a name was cut to fit its column, and no
-  language spells that differently.
+- **`percent-label.ts` puts the `%` outside `copy.en.ts`, and `chronology-layout.ts`
+  the truncation `…`.** Both mark something about a number or a column rather than
+  saying anything, the way `svg-tags.ts` rounds a coordinate, and no language spells
+  either differently; the copy rule exists so a second locale is a small change, which
+  a percent sign is not. Two review passes decided the `%` independently.
 - **`merge-callback-codec.spec.ts` imports `MOST_NAMES_AT_ONCE` from the domain**
-  instead of mocking it, which every other spec would. The case it serves — that a
-  full selection still fits in 64 bytes — is meaningless against a mocked cap: it
-  would assert the spec's own number. The real coupling is that the codec's byte
-  budget bounds the domain's cap, and this is the one place both are visible. It
-  already earned its keep by failing at eight names.
+  instead of mocking it. Its case — that a full selection still fits in 64 bytes —
+  would assert the spec's own number against a mocked cap. The codec's byte budget
+  really does bound the domain's cap, this is the one place both are visible, and it
+  earned its keep by failing at eight names.
 - **No tap is gated by who tapped it.** An inline button acts for whoever presses
   it — Telegram's model, and the right one for a single table of friends, where
   every action is reversible or one tap to redo. The one authorization in the
   product is `/status` answering only `OPERATOR_TG_ID`.
 - **`logger.ts` and `sqlite-connection.ts` read the environment at module scope.**
   A logger is created wherever code runs and the connection opens at import, so
-  neither can be handed values the way feature code is — which is what "read in
-  one place, pass values down" actually polices. There is no visible cost left now
-  that `/status` has stopped reporting the log level: `LOG_LEVEL` has one reader
-  again. Pick this up if a second module ever needs the same value.
+  neither can be handed values the way feature code is — which is what "read in one
+  place, pass values down" actually polices. `LOG_LEVEL` has one reader again now
+  `/status` has stopped reporting it, so nothing visible is owed. Pick this up if a
+  second module ever needs the same value.

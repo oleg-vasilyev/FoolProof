@@ -15,6 +15,10 @@ const ALMOST_FULL = named(MOST_PLAYERS - 1);
 
 const CANCEL = "❌ Cancel";
 
+const BACK = "↩️ Back";
+
+const LAST = -1;
+
 describeScenario("a table nobody could sit at", (chat) => {
   it("should refuse a line-up one player past the cap", async () => {
     await chat.say(`/game ${ONE_TOO_MANY.join(", ")}`);
@@ -82,7 +86,9 @@ describeScenario("a table nobody could sit at", (chat) => {
     await chat.tap("Kim");
 
     expect(chat.captions()[0]).toBe("🪑 1 Kim");
+    expect(chat.captions().at(LAST)).toBe(BACK);
 
+    await chat.tap(BACK);
     await chat.tap(CANCEL);
 
     expect(chat.captions()).toEqual([]);

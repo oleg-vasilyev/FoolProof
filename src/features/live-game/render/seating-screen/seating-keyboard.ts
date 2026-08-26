@@ -1,5 +1,5 @@
 import { ActionKind } from "#live-game/domain/card-states.ts";
-import { seatNumberOf, type SeatingPlan } from "#live-game/domain/seating-plan.ts";
+import { everyoneSeated, seatNumberOf, type SeatingPlan } from "#live-game/domain/seating-plan.ts";
 import { encodeSeatingCallback } from "#live-game/render/seating-screen/seating-callback-codec.ts";
 import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#live-game/copy.ts";
@@ -18,21 +18,42 @@ const controlRow = (
   plan: SeatingPlan,
   order: readonly number[]
 ): readonly InlineButton[] => {
-  const cancel: InlineButton = {
-    text: copy.buttonCancel,
-    callback_data: encodeSeatingCallback({ order, placed: plan.placed, action: { kind: ActionKind.Cancel } }),
+  if (plan.placed === NONE_PLACED) {
+    return [
+      {
+        text: copy.buttonCancel,
+        callback_data: encodeSeatingCallback({
+          order,
+          placed: plan.placed,
+          action: { kind: ActionKind.Cancel },
+        }),
+      },
+    ];
+  }
+
+  const back: InlineButton = {
+    text: copy.buttonBack,
+    callback_data: encodeSeatingCallback({
+      order,
+      placed: plan.placed,
+      action: { kind: ActionKind.Back },
+    }),
   };
 
-  if (plan.placed === NONE_PLACED) {
-    return [cancel];
+  if (!everyoneSeated(plan)) {
+    return [back];
   }
 
   return [
+    back,
     {
-      text: copy.buttonBack,
-      callback_data: encodeSeatingCallback({ order, placed: plan.placed, action: { kind: ActionKind.Back } }),
+      text: copy.buttonPlay,
+      callback_data: encodeSeatingCallback({
+        order,
+        placed: plan.placed,
+        action: { kind: ActionKind.Confirm },
+      }),
     },
-    cancel,
   ];
 };
 

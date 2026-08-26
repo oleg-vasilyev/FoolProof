@@ -314,23 +314,49 @@ them](#a-command-with-no-names-asks-for-them) — and `/next_without` opens a sc
 Removing somebody is the one change where the bot already knows every candidate: they
 are the last game's seats. So `/next_without` with no argument lists them as buttons,
 one a row, and a tap marks a player as sitting out. Tapping the same name again puts
-them back. Play opens the next card with whoever is left; Cancel leaves the table
-alone. Adding somebody cannot work this way and never will — a joiner is a name the
-chat has never seen, so there is no button to draw.
+them back. Play opens the next card with whoever is left. Adding somebody cannot work
+this way and never will — a joiner is a name the chat has never seen, so there is no
+button to draw.
+
+**The other footer button is Cancel until there is a mark to undo, and Back after
+that** — never both, because two buttons that close the same screen make the player
+read which is which. Back takes off the mark made most recently, which is what the
+marks travelling **in the order they were made** is for. It is `/merge`'s rule, taken
+whole, and it inherits `/merge`'s one approximation: marking Anya, then Kim, then
+un-marking Anya leaves Kim as the last mark, so Back takes Kim off rather than
+restoring Anya. A true undo would have to carry every tap, and the budget below has
+room for the marks, not for the history.
 
 **The screen holds no row in the database**, exactly like `/merge`: what it knows
 travels in `callback_data`. That is what makes a restart a non-event, and it is also
 what makes staleness possible, because nothing stops a whole game being played while
 the screen sits in the chat. So the data carries **the seats it was drawn from**, and
-every tap checks them against the last game before acting. A bitmask alone would not
-do: a later game of the same size would take the marks positionally and remove the
-wrong people in silence, and merging two names changes the ids while leaving the size
-and the order intact — which is exactly the case the ids catch.
+every tap checks them against the last game before acting. The marks alone would not
+do: a later game of the same size would take them positionally and remove the wrong
+people in silence, and merging two names changes the ids while leaving the size and
+the order intact — which is exactly the case the ids catch.
+
+The marks used to be a bitmask, which says who but not in what order, so Back had
+nothing to pop. Ordering them costs a base-62 digit per mark, and at ten seats that
+is eight bytes more than the budget had spare — so the ids on this screen dropped
+their separators and are written at one fixed width instead, which buys nine. **A
+button drawn before that change still decodes**, by an upper-case screen letter on
+the new shape and the old lower-case one on the old: the wire format is the one thing
+in this bot that outlives a deploy, sitting in a chat with live buttons on it, and a
+screen whose Cancel silently routes nowhere is the failure the paragraph below exists
+to prevent.
 
 **Cancel is answered before that check**, because closing a screen changes nothing at
 the table. It is not a nicety: a stale screen whose Cancel was also refused could
 never be closed, and would sit in the chat for ever with live buttons on it. An e2e
 scenario found that, not a unit.
+
+**Back on a stale screen closes it too**, and for the same reason rather than a
+different one: once a mark exists Cancel is no longer drawn, so Back is the only
+button left that could close the screen, and refusing it as out of date restores
+exactly the trap above. The phase that gave this screen a Back reopened that trap and
+a review caught it — the scenario guarding the rule read Cancel off the *unmarked*
+screen, the one state where Cancel still exists, so it passed over the hole.
 
 The live-card check runs twice — when the screen opens and again at Play — because
 `cards.open` does not defend itself and the unique index would raise instead of the
@@ -346,8 +372,17 @@ than resolved ids.
 Once `/next_with` knows who is joining it shows a screen of its own: everyone at
 the new table, one per row, tapped in the order they sit. Each tap moves that name
 above the unplaced ones and marks it with its seat number. The second-to-last tap
-finishes the screen, because the final seat has nowhere else to go — a table of
-five costs four taps, not five plus a confirmation.
+numbers the final seat too, because it has nowhere else to go — a table of five
+costs four taps rather than five.
+
+It does not open the card. **Play does**, and until it is tapped the order can still
+be walked back: the footer is Cancel while the screen is untouched, Back alone while
+seats are still being chosen, and Back beside Play once every seat has a number. The
+screen used to open the card on that second-to-last tap, saving the confirmation, and
+the saving was the wrong trade — a wrong order noticed one tap later cost the whole
+screen and a cancelled card to fix, and no other screen in this bot commits without
+being told to. What is kept from that decision is only the arithmetic: the last seat
+is still filled rather than tapped.
 
 It is deliberately not the card. The card is about one game; this is about who sits
 where, it precedes the game, and a player who cannot tell the two screens apart will
@@ -361,7 +396,10 @@ their rows exist before it is drawn. Cancel therefore sweeps the chat's unplayed
 players the way cancelling a card does, and a mistyped `/next_with Kmi` leaves
 nothing behind. Walking away without cancelling does leave `Kmi` in the roster until
 some later cancelled card sweeps it — the card has an idle sweep covering that case
-and this screen has nothing to sweep, which is the one place it is weaker.
+and this screen has nothing to sweep, which is the one place it is weaker. Cancel
+sitting behind however many Backs it takes to empty the screen makes walking away the
+likelier of the two, and that is the price of the footer never showing two ways out
+at once.
 
 The order chosen so far lives in `callback_data`, the same way
 [the `/merge` screen](#merge-has-no-state) keeps its selection, which is what makes
@@ -369,8 +407,8 @@ the screen immune to a restart. Player ids are written in base 62 so that a tabl
 ten with six-digit ids still fits the Bot API's 64 bytes; the codec's spec asserts
 that budget rather than trusting it.
 
-Two things can have changed by the time the last seat is taken, and both are checked
-then rather than assumed: a player named on the screen may have been merged away —
+Two things can have changed by the time Play is tapped, and both are checked there
+rather than assumed: a player named on the screen may have been merged away —
 the screen refuses as out of date — and a game may have been started in the meantime,
 which refuses the same way any second card does. When the ring does settle it is
 re-normalised — see [Seating is normalised](#seating-is-normalised) — the screen is

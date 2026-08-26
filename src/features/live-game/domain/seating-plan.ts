@@ -10,6 +10,7 @@ export interface SeatingPlan {
 export type SeatingAction =
   | { readonly kind: typeof ActionKind.Pick; readonly playerId: number }
   | { readonly kind: typeof ActionKind.Back }
+  | { readonly kind: typeof ActionKind.Confirm }
   | { readonly kind: typeof ActionKind.Cancel };
 
 export type SeatingTransition =
@@ -32,10 +33,17 @@ const LAST_IS_FORCED = 1;
 
 const seatNumber = (slot: number): number => slot + ONE_SEAT;
 
+export const everyoneSeated = (plan: SeatingPlan): boolean =>
+  plan.placed >= plan.roster.length - LAST_IS_FORCED;
+
 export const seatNumberOf = (plan: SeatingPlan, slot: number): number | null =>
-  slot < plan.placed ? seatNumber(slot) : null;
+  slot < plan.placed || everyoneSeated(plan) ? seatNumber(slot) : null;
 
 const seatedNext = (plan: SeatingPlan, playerId: number): SeatingTransition => {
+  if (everyoneSeated(plan)) {
+    return { outcome: Outcome.Rejected };
+  }
+
   const unplaced = plan.roster.slice(plan.placed);
   const among = unplaced.findIndex((seat) => seat.playerId === playerId);
   const picked = unplaced[among];
@@ -49,16 +57,12 @@ const seatedNext = (plan: SeatingPlan, playerId: number): SeatingTransition => {
     picked,
     ...unplaced.filter((_, slot) => slot !== among),
   ];
-  const placed = plan.placed + ONE_SEAT;
-
-  return placed >= roster.length - LAST_IS_FORCED
-    ? { outcome: Outcome.Seated, seats: roster }
-    : {
-        outcome: Outcome.Updated,
-        plan: { roster, placed },
-        seated: picked,
-        seat: seatNumber(plan.placed),
-      };
+  return {
+    outcome: Outcome.Updated,
+    plan: { roster, placed: plan.placed + ONE_SEAT },
+    seated: picked,
+    seat: seatNumber(plan.placed),
+  };
 };
 
 const steppedBack = (plan: SeatingPlan): SeatingTransition =>
@@ -73,6 +77,11 @@ export const applySeating = (plan: SeatingPlan, action: SeatingAction): SeatingT
 
     case ActionKind.Back:
       return steppedBack(plan);
+
+    case ActionKind.Confirm:
+      return everyoneSeated(plan)
+        ? { outcome: Outcome.Seated, seats: plan.roster }
+        : { outcome: Outcome.Rejected };
 
     case ActionKind.Pick:
       return seatedNext(plan, action.playerId);

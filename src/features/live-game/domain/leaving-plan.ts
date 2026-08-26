@@ -3,7 +3,10 @@ import { MIN_PLAYERS, type Seat } from "#live-game/domain/card-state.ts";
 import { Problem } from "#live-game/domain/refusals.ts";
 
 
-export type LeavingRefusal = typeof Problem.TooFew | typeof Problem.UnknownNames;
+export type LeavingRefusal =
+  | typeof Problem.TooFew
+  | typeof Problem.UnknownNames
+  | typeof Problem.NothingYet;
 
 export interface LeavingPlan {
   readonly roster: readonly Seat[];
@@ -12,6 +15,7 @@ export interface LeavingPlan {
 
 export type LeavingAction =
   | { readonly kind: typeof ActionKind.Pick; readonly playerId: number }
+  | { readonly kind: typeof ActionKind.Back }
   | { readonly kind: typeof ActionKind.Confirm }
   | { readonly kind: typeof ActionKind.Cancel };
 
@@ -22,9 +26,16 @@ export type LeavingTransition =
       readonly toggled: Seat;
       readonly sittingOut: boolean;
     }
+  | { readonly outcome: typeof Outcome.SteppedBack; readonly plan: LeavingPlan }
   | { readonly outcome: typeof Outcome.Seated; readonly seats: readonly Seat[] }
   | { readonly outcome: typeof Outcome.Cancelled }
   | { readonly outcome: typeof Outcome.Rejected; readonly problem: LeavingRefusal };
+
+const NOTHING_MARKED = 0;
+
+const LAST_MARKED = -1;
+
+const FIRST = 0;
 
 export const stayingIn = (plan: LeavingPlan): readonly Seat[] =>
   plan.roster.filter((seat) => !plan.leaving.includes(seat.playerId));
@@ -52,10 +63,21 @@ const confirmed = (plan: LeavingPlan): LeavingTransition => {
     : { outcome: Outcome.Seated, seats };
 };
 
+const steppedBack = (plan: LeavingPlan): LeavingTransition =>
+  plan.leaving.length === NOTHING_MARKED
+    ? { outcome: Outcome.Rejected, problem: Problem.NothingYet }
+    : {
+        outcome: Outcome.SteppedBack,
+        plan: { ...plan, leaving: plan.leaving.slice(FIRST, LAST_MARKED) },
+      };
+
 export const applyLeaving = (plan: LeavingPlan, action: LeavingAction): LeavingTransition => {
   switch (action.kind) {
     case ActionKind.Cancel:
       return { outcome: Outcome.Cancelled };
+
+    case ActionKind.Back:
+      return steppedBack(plan);
 
     case ActionKind.Confirm:
       return confirmed(plan);

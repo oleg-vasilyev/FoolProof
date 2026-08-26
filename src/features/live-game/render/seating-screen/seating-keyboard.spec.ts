@@ -5,10 +5,13 @@ import { copy } from "#live-game/copy.en.ts";
 
 const seatNumberOfSpy = vi.fn();
 
+const everyoneSeatedSpy = vi.fn();
+
 const encodeSeatingCallbackSpy = vi.fn();
 
 vi.mock("#live-game/domain/seating-plan.ts", () => ({
   seatNumberOf: (plan: unknown, slot: number) => seatNumberOfSpy(plan, slot),
+  everyoneSeated: (plan: unknown) => everyoneSeatedSpy(plan),
 }));
 
 vi.mock("#live-game/render/seating-screen/seating-callback-codec.ts", () => ({
@@ -31,6 +34,8 @@ const ORDER = [OLEG.playerId, ANYA.playerId, ROMA.playerId];
 const NONE_PLACED = 0;
 
 const ONE_PLACED = 1;
+
+const TWO_PLACED = 2;
 
 const FIRST_SEAT = 1;
 
@@ -60,6 +65,7 @@ describe("renderSeatingKeyboard()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     seatNumberOfSpy.mockReturnValue(null);
+    everyoneSeatedSpy.mockReturnValue(false);
     encodeSeatingCallbackSpy.mockReturnValue(DATA);
   });
 
@@ -115,11 +121,35 @@ describe("renderSeatingKeyboard()", () => {
     expect(controlRow(NONE_PLACED).map((button) => button.text)).toEqual([copy.buttonCancel]);
   });
 
-  it("should offer Back once a seat is taken", () => {
-    expect(controlRow(ONE_PLACED).map((button) => button.text)).toEqual([
+  it("should offer Back alone once a seat is taken, so nothing beside it repeats Cancel", () => {
+    expect(controlRow(ONE_PLACED).map((button) => button.text)).toEqual([copy.buttonBack]);
+  });
+
+  it("should offer Play beside Back once every seat is settled", () => {
+    everyoneSeatedSpy.mockReturnValue(true);
+
+    expect(controlRow(TWO_PLACED).map((button) => button.text)).toEqual([
       copy.buttonBack,
-      copy.buttonCancel,
+      copy.buttonPlay,
     ]);
+  });
+
+  it("should send the roster back with Play, so the card opens on the order shown", () => {
+    everyoneSeatedSpy.mockReturnValue(true);
+
+    controlRow(TWO_PLACED);
+
+    expect(encodeSeatingCallbackSpy).toHaveBeenCalledWith({
+      order: ORDER,
+      placed: TWO_PLACED,
+      action: { kind: ActionKind.Confirm },
+    });
+  });
+
+  it("should ask the plan whether every seat is settled rather than counting them here", () => {
+    controlRow(ONE_PLACED);
+
+    expect(everyoneSeatedSpy).toHaveBeenCalledWith({ roster: ROSTER, placed: ONE_PLACED });
   });
 
   it("should send the roster back with Back too, so the screen survives the tap", () => {

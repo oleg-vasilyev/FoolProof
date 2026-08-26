@@ -98,7 +98,7 @@ Reading: `chat.captions()`, `chat.cardText()`, `chat.lastText()`, `chat.lastAnsw
 (the callback toast), `chat.messages()`, `chat.photoBytes()`, `chat.promptId()`,
 `chat.commands()`.
 
-## Two rules with teeth
+## Three rules with teeth
 
 - **Assert the text before the captions when a screen boundary is involved.** A new
   screen inserted before an old one usually lists the same names, so a scenario
@@ -106,6 +106,14 @@ Reading: `chat.captions()`, `chat.cardText()`, `chat.lastText()`, `chat.lastAnsw
   guarding nothing, at exactly the moment there is something new to guard. This has
   happened: the seating screen slipped in front of the card and every assertion in
   `changing-the-table` stayed green.
+- **Keep a button's data from the state the invariant is about, not the state the
+  flow reaches first.** A scenario that saves a tap for later reads it off whichever
+  screen is standing at the time, and that is usually the emptiest one. The
+  stale-screen scenario kept Cancel from an *unmarked* leaving screen; a later phase
+  made Cancel disappear the moment a mark exists, so "a stale screen can always be
+  closed" broke in every marked state while the scenario stayed green over the one
+  state where it could not break. When a screen's footer changes with its state, take
+  the capture in the state that is hardest to get out of.
 - **End the way an evening ends.** Nothing may be left carrying a keyboard — a card
   ends on Confirm or Cancel, a `/merge` screen the same. `describeScenario` fails a
   scenario that leaves one open and names the message, because the chat log outlives

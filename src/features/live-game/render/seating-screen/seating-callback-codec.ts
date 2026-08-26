@@ -12,6 +12,7 @@ const BETWEEN_IDS = ".";
 const ACTION_CODES = {
   pick: "p",
   back: "b",
+  confirm: "k",
   cancel: "x",
 } as const;
 

@@ -133,6 +133,44 @@ describe("leaving-plan", () => {
     });
   });
 
+  describe("applyLeaving(), stepping back", () => {
+    it("should unmark the player marked most recently, not the first one picked", () => {
+      const transition = applyLeaving(planOf([OLEG, ANYA, ROMA, KIM], [ANYA.playerId, KIM.playerId]), {
+        kind: ActionKind.Back,
+      });
+
+      expect(transition).toEqual({
+        outcome: Outcome.SteppedBack,
+        plan: { roster: [OLEG, ANYA, ROMA, KIM], leaving: [ANYA.playerId] },
+      });
+    });
+
+    it("should leave nobody marked after the only mark is taken back", () => {
+      const transition = applyLeaving(planOf([OLEG, ANYA, ROMA], [ANYA.playerId]), {
+        kind: ActionKind.Back,
+      });
+
+      expect(transition).toEqual({
+        outcome: Outcome.SteppedBack,
+        plan: { roster: [OLEG, ANYA, ROMA], leaving: [] },
+      });
+    });
+
+    it("should refuse to step back with nothing marked, which only a forged tap can ask", () => {
+      const transition = applyLeaving(planOf([OLEG, ANYA, ROMA], []), { kind: ActionKind.Back });
+
+      expect(transition).toEqual({ outcome: Outcome.Rejected, problem: Problem.NothingYet });
+    });
+
+    it("should not mutate the marks it was given", () => {
+      const leaving = [ANYA.playerId, KIM.playerId];
+
+      applyLeaving(planOf([OLEG, ANYA, ROMA, KIM], leaving), { kind: ActionKind.Back });
+
+      expect(leaving).toEqual([ANYA.playerId, KIM.playerId]);
+    });
+  });
+
   describe("applyLeaving(), confirming", () => {
     it("should seat exactly the players who were not marked, in the roster's own order", () => {
       const transition = applyLeaving(planOf([OLEG, ANYA, ROMA, KIM, DIMA], [ANYA.playerId]), {
