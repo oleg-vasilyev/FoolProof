@@ -33,10 +33,12 @@ asymmetry* in the deploy that had been fixed two commits earlier, and a gallery 
 one short. Three conditions, every time: the question stands apart from what you are
 doing, it is answerable by opening files rather than by holding this session's
 reasoning, and you can say what the answer must contain — fail the last and you get an
-essay. **The moment is not fixed.** A gate's waiting is where it is easiest to notice,
-since the review reliably leaves five minutes with nothing to edit, but framing is
-where it is worth most: an assumption checked before anything is built costs nothing
-to act on.
+essay. **The moment is not fixed, but one of them is owed.** A gate's waiting is where
+it is easiest to notice, since the review reliably leaves five minutes with nothing to
+edit. Framing is where it belongs: an assumption checked before anything is built costs
+nothing to act on, and it comes **before the questions that go to the owner** — a
+question the repository can settle should never reach them, and the ones left after it
+are the ones only they can answer.
 
 **Neither threshold opens what was always closed.** Whatever is expensive to be
 wrong about stays in your hands at any size — the mechanic a player will feel, a

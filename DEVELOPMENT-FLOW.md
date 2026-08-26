@@ -57,7 +57,11 @@ sequenceDiagram
         C->>C: reproduce it on the platform it happened on, with the smallest input that still shows it
         C->>C: grep the code for the same shape elsewhere — the report names one place, a habit leaves several
     end
-    opt the description leaves questions
+    opt something is assumed that the repository can settle on its own
+        C->>S: one brief, one question — what to open rather than assume, and what the answer must carry
+        S-->>C: the answer, and whatever it could not establish said as that rather than left out
+    end
+    opt questions are left that only the owner can answer
         C->>U: every question at once, before any work
         U-->>C: answers
     end
@@ -150,10 +154,6 @@ sequenceDiagram
 
     rect rgb(240, 249, 255)
     note over C,R: Stage 4. Review by an agent that did not write the diff
-    opt a question stands on its own and the repository can answer it
-        C->>S: one brief, one question — what to open rather than assume, and what the answer must carry — this runs beside the review below
-        S-->>C: the answer, and whatever it could not establish said as that rather than left out
-    end
     C->>R: the phase-reviewer agent — the whole diff in one piece, deploy scripts, service units and CI included, which no automatic gate covers at all
     R-->>C: findings, most severe first
     loop for each finding
