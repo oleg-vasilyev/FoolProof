@@ -603,10 +603,6 @@ that opens the mutation gate** — "touches `scripts/`" fired on one that only m
 
 Listed so nobody "fixes" them:
 
-- **`e2e/` uses relative imports.** The `#`-aliases are the app's; the harness is
-  not the app, and a relative import there is a reminder of that.
-- **`e2e/` imports nothing from `src/`** — not even `copy.en.ts`. A harness that
-  imported the copy table would assert a constant against itself.
 - **The chat page renders the bot's HTML raw.** That is what Telegram does with
   `parse_mode: "HTML"`, and it is what makes a missing escape visible as markup.
 - **`diagnostics/` has no `domain/`.** There is nothing to decide there.

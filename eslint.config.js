@@ -6,8 +6,8 @@ import tsParser from "@typescript-eslint/parser";
 // can be checked mechanically belongs here; CLAUDE.md keeps only the rules that
 // need judgement.
 
-// Two rules with no core equivalent. They are small enough to live inline
-// rather than as a published plugin.
+// The rules with no core equivalent, small enough to live inline rather than as
+// a published plugin. Counted here once and wrong ever since, so no longer counted.
 const project = {
   rules: {
     // "No comments in src/" — naming carries the intent, and an explanation that
@@ -282,6 +282,61 @@ const project = {
         };
       },
     },
+    // "Only sqlite-repository.ts opens the database." This is the rule the whole
+    // repository layer rests on — a file that imports the connection can only be
+    // tested against a real SQLite — and until now nothing but prose and a reviewer
+    // held it, so any feature could open the connection and keep the lint green.
+    // It is its own rule rather than another entry in the zones' ban lists because
+    // the door has to be left open for two kinds of file, and exempting them by file
+    // glob would need blocks that overlap the zones — and a later block replaces an
+    // earlier one for the same rule name, which is the trap the zones already carry
+    // twice. A rule with its own name collides with nothing and states its own
+    // exemptions: the one repository file, by its full path rather than its
+    // basename, and any integration spec, which drives a real database on purpose.
+    // It matches the connection by basename, so a sibling's `./sqlite-connection.ts`
+    // is caught too — that spelling is the natural one for exactly the two files
+    // this rule exists to keep out. A computed specifier is invisible to it, as it
+    // is to the zones below.
+    "one-door-to-the-database": {
+      meta: {
+        type: "problem",
+        schema: [],
+        messages: {
+          opened:
+            "Only sqlite-repository.ts opens the database — depend on the Repository " +
+            "interface and call a named domain method instead.",
+        },
+      },
+      create(context) {
+        const THE_CONNECTION = /(^|\/)sqlite-connection\.ts$/;
+
+        const THE_ONE_DOOR = /\/src\/shared\/repository\/sqlite-repository\.ts$/;
+
+        const AN_INTEGRATION_SPEC = /\.integration\.spec\.ts$/;
+
+        const A_WINDOWS_SEPARATOR = /\\/g;
+
+        const opener = context.filename.replace(A_WINDOWS_SEPARATOR, "/");
+
+        if (THE_ONE_DOOR.test(opener) || AN_INTEGRATION_SPEC.test(opener)) {
+          return {};
+        }
+
+        const opensIt = (node) => {
+          if (typeof node.value === "string" && THE_CONNECTION.test(node.value)) {
+            context.report({ node, messageId: "opened" });
+          }
+        };
+
+        return {
+          "ImportDeclaration > Literal": opensIt,
+          "ImportExpression > Literal": opensIt,
+          "TSImportType > Literal": opensIt,
+          "ExportNamedDeclaration > Literal": opensIt,
+          "ExportAllDeclaration > Literal": opensIt,
+        };
+      },
+    },
   },
 };
 
@@ -465,10 +520,13 @@ export default [
   },
   {
     // States are named everywhere, specs included: a fixture that spells a state
-    // is the same magic knowledge as a case clause that does.
+    // is the same magic knowledge as a case clause that does. The database door is
+    // in the same block for the same reason — a spec that opens the connection is
+    // the leak, not an exception to it, and both rules name their own exemptions.
     files: ["src/**/*.ts"],
     rules: {
       "project/named-states": "error",
+      "project/one-door-to-the-database": "error",
     },
   },
   {

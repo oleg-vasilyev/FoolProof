@@ -272,12 +272,11 @@ six blank posters passed every gate, the weight matching better. Import the guar
   a refusal from Telegram **resolves** as `{ ok: false, error_code }`.
 - **Data access.** Features never touch the database; they depend on
   `shared/repository/repository-contract.ts` and call named domain methods.
-  `sqlite-repository.ts` is the only file allowed to contain SQL or import the
-  connection; the coercions (`column-values.ts`) and the row mappers
-  (`row-records.ts`) stay out of it, because a file that imports the connection can
-  only be tested against a real SQLite — and that split is what took the layer's
-  mutation score from 90.48% to 98.51%. Adding a query has a procedure: the
-  `add-repository-method` skill.
+  `sqlite-repository.ts` is the only file allowed to contain SQL; the coercions
+  (`column-values.ts`) and the row mappers (`row-records.ts`) stay out of it, because
+  a file that imports the connection can only be tested against a real SQLite — and
+  that split took the layer's mutation score from 90.48% to 98.51%. Adding a query
+  has a procedure: the `add-repository-method` skill.
 
 ```ts
 import { repository } from "#shared/repository/repository-instance.ts";
@@ -325,7 +324,7 @@ the `write-a-doc` skill, which is where a script is added from.
 ### What enforces what
 
 A rule that can be checked mechanically is a lint rule, not a paragraph — prose is
-for judgement. `eslint.config.js` holds the checkable ones, including four with no
+for judgement. `eslint.config.js` holds the checkable ones, including several with no
 core equivalent defined inline there:
 
 | Rule | Enforced by |
@@ -335,6 +334,7 @@ core equivalent defined inline there:
 | Two blank lines after the last import | `project/blank-lines-after-imports` (autofixed) |
 | A number must be named by a `const` | `project/named-numbers` |
 | A state is read from its own table, specs included | `project/named-states` |
+| Only `sqlite-repository.ts` opens the database | `project/one-door-to-the-database` |
 | Braces on every `if`, `const` over `let` | `curly`, `prefer-const`, `no-var` |
 | No `console.*` outside the logger (and `scripts/`) | `no-console` |
 | Imports point downward, features stay independent, `e2e/` stays outside | `no-restricted-imports`, one zone per layer |

@@ -111,6 +111,26 @@ encourage harm; is any file so long the model reading it will not comply.
 Verdict per document: keep / fix / delete. A stale document is worse than none
 — it is fed to every future session and multiplies its own error.
 
+**Then sweep the same files for counts nothing checks.** A number written into prose
+is a claim that goes stale on its own, silently, and always in the direction that
+flatters whoever wrote it. One session turned up wrong count after wrong count: an
+enforcement table promising four rules with no core equivalent where there were six, a
+skill claiming the gate paragraph exists in three layouts where the history holds
+dozens, a designer's brief naming eight gallery cases where nine are drawn, and two of
+this project's own measurements quoted from a report rather than re-run. Not one of
+them changed what a reader should do, and every one cost an afternoon to notice.
+
+So the standing preference: **where a count does not change what anyone does, say the
+thing without the number** — *several*, *every failure it can see*, *open it and count*
+— and where it does change something, date the measurement or name the check that
+holds it. Two kinds are exempt because a machine already fails on them: a line budget,
+and anything `docs:check` reads.
+
+**Report every one in a single list, and fix none.** They are cheap to correct
+together and expensive to correct one at a time, and a checkup that edits as it walks
+hands back a report nobody can re-check. File and line each, the number and what it
+actually is, and a verdict of *drop the number* / *date it* / *it earns its place*.
+
 **Then audit every skill and agent `description:` as a trigger rather than as a
 summary.** That line is not documentation about the file — it is what decides
 whether the file is ever opened, so a wrong one is worse than wrong prose: the
@@ -155,10 +175,10 @@ stood, and let a file added mid-cycle wait for the next lap. Rule by rule:
   obeying the prose is obeying something that now fails on its own.
 - **Could one, and does none?** The same question backwards, and the more valuable of
   the two: `CLAUDE.md` says a mechanically checkable rule is a lint rule rather than a
-  paragraph, and nothing checks that. *Only `sqlite-repository.ts` may import the
-  connection* is the standing example — true today, held by prose and by review, and
-  reachable from any feature without a lint rule saying otherwise. Report it as a
-  proposed zone, with what would have to be exempted; do not write one.
+  paragraph, and nothing checks that. The first sweep to ask it found *only
+  `sqlite-repository.ts` may import the connection* held by prose and a reviewer, and
+  that is now `project/one-door-to-the-database`. So the answer is a proposed rule and
+  what it would have to exempt — never one you write yourself.
 - **Does its subject still exist?** `docs:check` catches a dead *path*. A dead
   command, folder, threshold or shape is invisible to it.
 - **Has a later rule absorbed it?** Not contradiction — the breadth audit above owns
