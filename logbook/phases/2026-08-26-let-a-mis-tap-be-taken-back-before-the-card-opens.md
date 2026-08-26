@@ -3,8 +3,8 @@
 ```
 Asked:      /next_without and /next_with break the expectations every other screen sets — give both the merge footer, and stop creating the game before anybody said to
 Kind:       feature
-Ran:        3h31m from the previous commit to this one, which also holds an unrelated measurement · Opus 5, both reviewers on Fable · 164,139 subagent tokens
-Path:       Framing the task and the mockup → check the tech debt → every question at once → the size of the phase in one line → the plan-reviewer agent → Writing the code and the tests → Quality gates → Review by an agent that did not write the diff → fix the code and re-run only the affected gate → the write-an-e2e-scenario skill → Quality gates → Retrospective → Release to production
+Ran:        1h08m, the owner's opening message to the final commit · Opus 5, both reviewers on Fable · 164,139 subagent tokens
+Path:       Framing the task and the mockup → the finish-phase skill → check the tech debt → every question at once → the size of the phase in one line → the plan-reviewer agent → Writing the code and the tests → Quality gates → Review by an agent that did not write the diff → fix the code and re-run only the affected gate → the write-an-e2e-scenario skill → Quality gates → Retrospective → Release to production
 Skipped:    Reading every sentence, then syncing every picture · The checkup · the poster-designer agent · write both copy tables first · briefs to every subagent in one go · write the failing test at the layer that can still see the fault
 Off-map:    breaking the fix on purpose to prove the new scenario fails without it — the drawing has no step for probing a gate this phase wrote
 Delegated:  2 errands — the plan reviewer returned 4 findings, one of which moved the wire format off both codecs onto one before a file existed; the diff reviewer returned 4, one blocking
@@ -14,6 +14,7 @@ Broke:      none
 Gates:      check, coverage, mutation over the diff, e2e over the diff, docs:check, the diff review, the plan review, the retrospective · copy not read: no copy table changed · gallery not opened: nothing drawn
 Found by:   the owner — the phase itself; the plan review — 3 (the wire format killing every screen already in a chat, a PLAN paragraph in a third section, two e2e files missing from the list); the review — 4 (a marked stale screen with no way out, a forged shape decoding instead of refusing, two exports nobody imports, a name covering half of what it returns); a gate — 4 (mutation: three redundant guards and one regex case lost in a spec rewrite); me — 2 (a codec action and a handler branch with no spec, found reading git status before launching the reviewer)
 Landed:     .claude/skills/write-an-e2e-scenario/SKILL.md — a button's data is captured in the state the invariant is about, not the first state the flow reaches
+Landed:     the a-list-of-changes-is-a-phase memory — recognising a phase is not opening finish-phase; the two things framing owes are in CLAUDE.md and in stage 1 of the drawing already
 ```
 
 The phase's own defect and the gate that should have caught it are the same story. The
@@ -36,7 +37,17 @@ And the mutation gate moved 95.42 → 96.59 not by adding tests but by **deletin
 guards it proved were already covered**; the missing test was one of four causes, and
 the least common.
 
-`Ran:` is honest but blunt: the span is commit to commit, and this one contains an hour
-of unrelated measurement work done before the owner opened the phase. There is no
-timestamp on the message that started it, so the narrower number is not available rather
-than unrecorded.
+The walk starts one stage early on purpose: `the finish-phase skill` is drawn in stage 3
+and was opened during stage 1, which the owner stopped. It was not carelessness — a
+memory said to open it the moment a list of changes is accepted. Recognising a phase and
+opening that file are different acts, and the two things framing actually owes are
+already to hand: the size line is a rule in `CLAUDE.md`, and `check the tech debt` is
+drawn in stage 1 itself. The memory now says so. The first version of this log left the
+step out entirely, which is the one failure `Path:` exists to prevent — a wrong turn and
+a turn nobody mentions read identically.
+
+`Ran:` is the phase, not the gap between commits. The transcript timestamps the message
+that opened it; the previous commit is an hour earlier and holds unrelated work, so
+commit-to-commit would have reported 3h31m for 1h08m of phase. `logbook/README.md` still
+prescribes the commit as the start — right whenever a phase begins where the last one
+ended, wrong here, and the sharper source was one file away.

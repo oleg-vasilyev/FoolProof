@@ -116,9 +116,13 @@ What is actually knowable:
 - **Subagent tokens and durations** are reported when an errand returns. Sum them.
 - **Your own tokens are not available to you.** Say so; do not infer them from how
   long the session felt.
-- **Wall clock** needs both ends at full precision: `git log -1 --format=%cI` for the
-  start and `date -Iseconds` for the end. `date +%F` is a date with no time in it and
-  cannot produce a duration — the first version of this page recommended it anyway.
+- **Wall clock** needs both ends at full precision, and the start is the **owner's
+  opening message**, which the session transcript timestamps. `git log -1 --format=%cI`
+  is only a stand-in for it, right when the phase began where the last one ended and
+  wrong otherwise: one phase reported 3h31m that way for 1h08m of work, the difference
+  being an unrelated errand between the two commits. The end is the final commit's own
+  `%cI`. `date +%F` is a date with no time in it and cannot produce a duration — the
+  first version of this page recommended it anyway.
 
 `Found by:` is the field the checkup was built for and the easiest to fill in the
 project's favour. A defect the owner pointed at is `the owner`, even when a gate would
