@@ -47,15 +47,14 @@ sequenceDiagram
 
     rect rgb(254, 249, 231)
     note over U,K: Stage 1. Framing the task and the mockup
-    alt the bot already does something wrong
-        U->>C: what it did, and what it should have done instead
+    U->>C: what should be different, in the owner's own words
+    C->>C: read it for the kind of work it is: something the bot does wrong, or something it does not do at all yet
+    opt the bot already does this, and does it wrong
         C->>K: the fix-a-bug skill
         K-->>C: reproduce before reading the code, and prove the cause rather than guessing a third time
         C->>C: reproduce it on the platform it happened on, with the smallest input that still shows it
         C->>C: write the failing test at the layer that can see the fault, and watch it fail — the reproduction, made permanent
         C->>C: sweep for the same shape elsewhere — one occurrence is a report, not a count
-    else the bot does not do this at all yet
-        U->>C: the feature, in the owner's own words
     end
     C->>C: study the project: CLAUDE.md is already in context, its links lead to PLAN.md and TECH-DEBT.md
     C->>C: check the tech debt: a task that trips a deferred item's trigger takes it into scope

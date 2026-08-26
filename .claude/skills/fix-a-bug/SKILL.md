@@ -7,6 +7,10 @@ description: Fix something FoolProof already does wrong — reproducing it befor
 
 > **Stages 1, 2 and 3** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
 
+**Nobody hands you this skill.** The owner says what should be different, not which
+kind of work it is — and most of the ways in here never reach an owner at all. Reading
+a request as a fault rather than as something not built yet is yours, before this opens.
+
 Every other skill here is written for work that is **new**: it starts from what
 somebody wants and ends at a gate. A fault starts from the other end — the thing
 already exists, already passed every gate, and shipped anyway. So the expensive
