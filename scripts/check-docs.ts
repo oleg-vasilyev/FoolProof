@@ -24,6 +24,7 @@ import {
   flowRepliesLeaveTheLaneTheyWereAskedOf,
   stagesOutOfStep,
 } from "./docs-check/documents/flow-drawing.ts";
+import { phaseLogsOffTheMap } from "./docs-check/documents/phase-log-paths.ts";
 import { schemaOutOfStep } from "./docs-check/source/running-schema.ts";
 import {
   crowdedLayers,
@@ -59,6 +60,7 @@ const complaints = [
   ...flowWouldNotRender(),
   ...mermaidLinesCarryingASeparator(),
   ...stagesOutOfStep(),
+  ...phaseLogsOffTheMap(),
   ...foldersMissingFromTheTree(),
   ...scriptsOutOfStep(),
   ...crowdedLayers(),

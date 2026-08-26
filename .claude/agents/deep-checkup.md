@@ -255,6 +255,15 @@ What to count, rather than to notice:
   three is a missing rule, and the log is the only place the third one is visible.
 - **What broke.** Crashes, usage limits, an errand that died mid-run — a recurring one
   is a working practice to change, not weather.
+- **The line of `DEVELOPMENT-FLOW.md` every walk goes round.** `Path:` and `Skipped:`
+  cite the drawing by name, so lay a week of them side by side and count each line's
+  skips. One is a judgement; five running is a line the drawing claims and the work
+  does not have — which is a step to delete or a gate to build, and the report says
+  which it thinks. Divide the same tally by `Kind:` before concluding: a step every
+  documents phase goes round and every feature phase walks is correctly drawn and
+  wrongly unconditional, and that is a third answer neither of the first two reaches.
+  Read `Off-map:` in the same pass — two logs describing the same unmapped work is a
+  step the drawing is missing, and it is the only evidence such a gap ever produces.
 
 Ignore `not measured` rather than guessing around it, and say how many fields you had
 to ignore: a pile of logs whose numbers are mostly absent is itself the finding, and

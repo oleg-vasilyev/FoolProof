@@ -180,5 +180,5 @@ The commit's `Retro:` line is this block compressed to one sentence, and
 reached.
 
 **Then write the phase log**, straight phases included — a pile fed only by the ones
-that went badly divides into nonsense. Its fields and its one hard rule about
-unmeasured numbers are [in the logbook](../../../logbook/README.md).
+that went badly divides into nonsense. Its fields, the walk it cites the drawing by
+and its rule against unmeasured numbers are [in the logbook](../../../logbook/README.md).

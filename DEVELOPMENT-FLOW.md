@@ -215,6 +215,7 @@ sequenceDiagram
         C->>C: save the takeaway to persistent memory — it outlives this session
     end
     C->>C: write the phase log to logbook/phases/ — every phase, straight ones included, or the pile only ever shows the bad ones
+    C->>C: name in it the lines of this drawing the phase walked and the ones it went round — a whole stage or a single step, each cited by the opening words it is drawn with, never by a number
     C->>K: the write-a-doc skill
     K-->>C: every fact has one home document, and CLAUDE.md has a line budget
     C->>C: update README, PLAN and whatever else the phase owes

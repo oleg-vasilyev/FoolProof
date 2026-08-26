@@ -563,25 +563,29 @@ percentages are simulated, and `RAREST_FIRST` is a hand-written list precisely s
 reordering it is one edit. A second column, or a hand-placed thumb on the scale for the
 dozen rules that describe a moment rather than a shape, is the shape of the fix.
 
-## Two names in the drawings layer are one example short of being decided
+## Three names are one example short of being decided
 
 `samples/` holds the states a feature is worth drawing at — a state, not a picture —
-and `samples/contact-sheet.ts` is the exception that computes coordinates and
-assembles SVG. It is also the one file there Stryker still mutates, because it is
-logic rather than data, and that exception is the tell. It cannot simply move to
-`render/`, where `CLAUDE.md` puts coordinates: `postersOutOfTheGallery` would then
-demand gallery cases for it, and a contact sheet is what the gallery *is*. The
-honest home is `shared/drawing/`, but the sheet reaches for the scoresheet's
-`palette.ts` and `svg-tags.ts`, so that move takes the SVG assembler with it.
+and `samples/contact-sheet.ts` is the exception: it computes coordinates, assembles
+SVG, and is the one file there Stryker still mutates, which is the tell. It cannot
+move to `render/`, where `CLAUDE.md` puts coordinates, because
+`postersOutOfTheGallery` would demand gallery cases for it and a contact sheet is what
+the gallery *is*. The honest home is `shared/drawing/`, and the move takes the
+scoresheet's `svg-tags.ts` with it.
 
 `shared/drawings/drawings-contract.ts` has the mirror problem: three of the four
 things it declares are pictures, and the fourth, `tools`, prints text and draws
 nothing — so its name describes three quarters of it.
 
-**Decide both the first time a second feature draws anything.** Then `svg-tags.ts`
-has two callers and moves for its own reasons with the sheet following it, and a
-second dev tool says whether the contract is *drawings plus a passenger* or *what a
-feature lends the tool box*. With one example each, either answer is a coin toss.
+`scripts/docs-check/documents/phase-log-paths.ts` is the third: `theLogBlockIn`,
+`afterLogLine` and `fieldsIn` parse phase-log *fields* under a *paths* name.
+
+**Decide each the first time a second example arrives** — a second feature that draws
+anything, a second dev tool, a second check reading a phase-log field. Then
+`svg-tags.ts` has two callers and moves with the sheet following it, the contract says
+whether it is *drawings plus a passenger* or *what a feature lends the tool box*, and
+the field parser takes a name that predicts it. With one example each, every answer is
+a coin toss.
 
 ## Three corners of the tooling the mutation gate still cannot see
 
