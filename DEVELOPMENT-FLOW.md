@@ -53,8 +53,7 @@ sequenceDiagram
         C->>K: the fix-a-bug skill
         K-->>C: reproduce before reading the code, and prove the cause rather than guessing a third time
         C->>C: reproduce it on the platform it happened on, with the smallest input that still shows it
-        C->>C: write the failing test at the layer that can see the fault, and watch it fail — the reproduction, made permanent
-        C->>C: sweep for the same shape elsewhere — one occurrence is a report, not a count
+        C->>C: grep the code for the same shape elsewhere — the report names one place, a habit leaves several
     end
     C->>C: study the project: CLAUDE.md is already in context, its links lead to PLAN.md and TECH-DEBT.md
     C->>C: check the tech debt: a task that trips a deferred item's trigger takes it into scope
@@ -113,6 +112,10 @@ sequenceDiagram
         S->>S: each writes its piece strictly to the brief
         S-->>C: finished files, proven by their own tests
         C->>C: accept the result, weld the seams between the pieces
+    end
+    opt the phase came for a fault
+        C->>C: write the failing test at the layer that can still see the fault, and watch it go red before any fix
+        note over C: a test written after the fix asserts what the code does, not what the bug was
     end
     loop one file at a time
         C->>C: write the core of the feature

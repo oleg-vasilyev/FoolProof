@@ -17,8 +17,8 @@ already exists, already passed every gate, and shipped anyway. So the expensive
 question is never *how do I fix it*. It is **what is actually true**, and every rule
 below buys an answer to that before any code is touched.
 
-The output of this skill is a diff like any other. It joins the ordinary flow at
-stage 2 and pays every gate `finish-phase` asks for; nothing here replaces one.
+The output is a diff like any other, and it replaces no gate. Reproducing and sweeping
+frame the phase; the failing test is the first thing **built**, so this joins at stage 2.
 
 ## Reproduce before you read the code
 
