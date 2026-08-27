@@ -6,13 +6,13 @@ Asked:      "кнопки «назад» и «играть» на всех ск�
             and green, and every keyboard consistent
 Kind:       fault
 Ran:        ~50 min · opus 5, three fable errands · 178,662 subagent tokens
-Path:       framing → study the project → check the tech debt → freeze the interfaces →
-            the plan-reviewer agent → writing the code and the tests → quality gates →
-            the phase-reviewer agent → the copy-reader agent → retrospective →
-            write the phase log → release
-Skipped:    the poster-designer agent (nothing is drawn) · refresh-the-pictures and the
-            poster-reader agent (no SVG, no geometry, no poster copy) · the deep-checkup
-            agent (asked for, but it runs after this release as its own errand)
+Path:       read it for the kind of work it is → check the tech debt → now, knowing the
+            rules, freeze the interfaces → the plan-reviewer agent → cut the work into
+            pieces → the finish-phase skill → the phase-reviewer agent → the copy-reader
+            agent — only what moved since → the retrospective skill → write the phase
+            log → the write-a-commit skill
+Skipped:    the poster-designer agent · the refresh-the-pictures skill · the
+            poster-reader agent · the deep-checkup agent
 Off-map:    none
 Delegated:  3 errands — plan-reviewer returned 7 findings, three of which changed the
             diff before a file existed; phase-reviewer returned 4, two landing as edits
@@ -28,8 +28,11 @@ Loops:      the changed-file mutation set ran twice, 2m11s each — the second w
             what the full run had already printed
 Broke:      none
 Gates:      lint · types · coverage · mutation over the diff · full e2e · diff review ·
-            copy reading · retrospective. Skipped: the gallery, no drawing changed; a
-            real evening, no poster copy changed
+            copy reading · retrospective. Skipped: the gallery and the poster reading,
+            because nothing this phase touched is drawn — no SVG, no geometry, no copy
+            that lands on a poster; a real evening, for the same reason; the mockup,
+            because there was nothing new to draw; the checkup, which the owner asked
+            for and which runs after this release as an errand of its own
 Found by:   a green Play the domain would refuse — the plan review; two e2e scenarios
             the change breaks and I had not listed — the plan review; a stale button
             block in PLAN.md — me, reading; cancelAvailable naming the wrong fact and
