@@ -7,8 +7,17 @@ import { copyIn } from "#merge-names/copy.ts";
 
 const MARKER = "«marker»";
 
+const FIRST_OF_A_PAIR = "a";
+
+const SECOND_OF_A_PAIR = "b";
+
+const halfOf = (index: number, half: string): string => `${MARKER}${String(index)}${half}`;
+
 const argumentsFor = (arity: number): readonly (readonly string[])[] =>
-  Array.from({ length: arity }, (_unused, index) => [`${MARKER}${String(index)}`]);
+  Array.from({ length: arity }, (_unused, index) => [
+    halfOf(index, FIRST_OF_A_PAIR),
+    halfOf(index, SECOND_OF_A_PAIR),
+  ]);
 
 describe("copyIn()", () => {
   it("should hand back the English table for English", () => {
@@ -62,8 +71,16 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
 
       for (const [index] of given.entries()) {
         expect(written, `${key} dropped argument ${String(index)}`).toContain(
-          `${MARKER}${String(index)}`
+          halfOf(index, FIRST_OF_A_PAIR)
         );
+        expect(written, `${key} dropped argument ${String(index)}`).toContain(
+          halfOf(index, SECOND_OF_A_PAIR)
+        );
+
+        expect(
+          written,
+          `${key} ran the two halves of argument ${String(index)} together`
+        ).not.toContain(`${halfOf(index, FIRST_OF_A_PAIR)}${halfOf(index, SECOND_OF_A_PAIR)}`);
       }
     }
   });

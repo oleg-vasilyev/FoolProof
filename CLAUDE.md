@@ -323,9 +323,8 @@ the `write-a-doc` skill, which is where a script is added from.
 
 ### What enforces what
 
-A rule that can be checked mechanically is a lint rule, not a paragraph — prose is
-for judgement. `eslint.config.js` holds the checkable ones, including several with no
-core equivalent defined inline there:
+A rule that can be checked mechanically is a lint rule, not a paragraph — prose is for
+judgement. `eslint.config.js` holds the checkable ones, several with no core equivalent:
 
 | Rule | Enforced by |
 |---|---|
@@ -335,6 +334,7 @@ core equivalent defined inline there:
 | A number must be named by a `const` | `project/named-numbers` |
 | A state is read from its own table, specs included | `project/named-states` |
 | Only `sqlite-repository.ts` opens the database | `project/one-door-to-the-database` |
+| A screen's way off and way on are drawn in one place | `project/one-control-row` |
 | Braces on every `if`, `const` over `let` | `curly`, `prefer-const`, `no-var` |
 | No `console.*` outside the logger (and `scripts/`) | `no-console` |
 | Imports point downward, features stay independent, `e2e/` stays outside | `no-restricted-imports`, one zone per layer |

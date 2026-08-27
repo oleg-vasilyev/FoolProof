@@ -72,7 +72,7 @@ export const copy: Copy = {
   buttonConfirm: "✅ Записать",
   buttonBack: "↩️ Назад",
   buttonCancel: "❌ Отмена",
-  buttonPlay: "▶️ Играем",
+  buttonPlay: "✅ Играем",
 
   tapSeated: (name: string, seat: number) => `${name} — место ${seat}`,
   tapRecorded: (name: string, position: number) => `${name} — ${position}`,

@@ -1,13 +1,24 @@
 import { ActionKind } from "#live-game/domain/card-states.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { copy } from "#live-game/copy.en.ts";
+import { ControlRowStub } from "#shared/telegram/control-row.stub.ts";
 
+
+const enoughToPlaySpy = vi.fn();
 
 const encodeLeavingCallbackSpy = vi.fn();
+
+const controls = new ControlRowStub();
+
+vi.mock("#live-game/domain/leaving-plan.ts", () => ({
+  enoughToPlay: (plan: unknown) => enoughToPlaySpy(plan),
+}));
 
 vi.mock("#live-game/render/leaving-screen/leaving-callback-codec.ts", () => ({
   encodeLeavingCallback: (payload: unknown) => encodeLeavingCallbackSpy(payload),
 }));
+
+vi.mock("#shared/telegram/control-row.ts", () => controls.module);
 
 const { renderLeavingKeyboard } = await import(
   "#live-game/render/leaving-screen/leaving-keyboard.ts"
@@ -34,27 +45,44 @@ const SECOND_ROW = 1;
 
 const FIRST_BUTTON = 0;
 
+const FIRST_CALL = 0;
+
+const ONLY_ARGUMENT = 0;
+
 const SECOND_SLOT = 1;
 
 const LAST_ROW = -1;
 
 const A_CONTROL_ROW = 1;
 
-const DATA = "encoded";
+const NOTHING_TO_UNDO = false;
 
-const OTHER_DATA = "encoded elsewhere";
+const SOMETHING_TO_UNDO = true;
+
+const THE_CONTROLS = [{ text: "the control row", callback_data: "controls" }];
+
+const encodedAs = (payload: {
+  readonly leaving: readonly number[];
+  readonly action: { kind: string };
+}): string => `leaving(${payload.leaving.join("+")},${payload.action.kind})`;
 
 const rowsOf = (leaving: readonly number[]) =>
   renderLeavingKeyboard(copy, { roster: ROSTER, leaving });
 
 const seatRows = (leaving: readonly number[]) => rowsOf(leaving).slice(FIRST_ROW, LAST_ROW);
 
-const controlRow = (leaving: readonly number[]) => rowsOf(leaving).slice(LAST_ROW)[FIRST_ROW] ?? [];
+const handedOver = (leaving: readonly number[]) => {
+  rowsOf(leaving);
+
+  return controls.controlRowSpy.mock.calls[FIRST_CALL]?.[ONLY_ARGUMENT];
+};
 
 describe("renderLeavingKeyboard()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    encodeLeavingCallbackSpy.mockReturnValue(DATA);
+    enoughToPlaySpy.mockReturnValue(true);
+    encodeLeavingCallbackSpy.mockImplementation(encodedAs);
+    controls.controlRowSpy.mockReturnValue(THE_CONTROLS);
   });
 
   it("should give every player a row of their own, in roster order", () => {
@@ -101,69 +129,61 @@ describe("renderLeavingKeyboard()", () => {
     });
   });
 
-  it("should carry each encoded payload onto the button that asked for it", () => {
-    encodeLeavingCallbackSpy.mockReturnValueOnce(DATA).mockReturnValueOnce(OTHER_DATA);
-
-    const rows = rowsOf(NOBODY);
-
-    expect([
-      rows[FIRST_ROW]?.[FIRST_BUTTON]?.callback_data,
-      rows[SECOND_ROW]?.[FIRST_BUTTON]?.callback_data,
-    ]).toEqual([DATA, OTHER_DATA]);
+  it("should carry the encoded payload onto the button that asked for it", () => {
+    expect(rowsOf(NOBODY)[FIRST_ROW]?.[FIRST_BUTTON]?.callback_data).toBe(
+      encodedAs({ leaving: NOBODY, action: { kind: ActionKind.Pick } })
+    );
   });
 
-  it("should offer Cancel beside Play while nobody is marked, since there is no mark to undo", () => {
-    expect(controlRow(NOBODY).map((button) => button.text)).toEqual([
-      copy.buttonCancel,
-      copy.buttonPlay,
-    ]);
+  it("should say there is nothing to undo while nobody is marked", () => {
+    expect(handedOver(NOBODY)?.anythingToUndo).toBe(NOTHING_TO_UNDO);
   });
 
-  it("should put Back where Cancel was once a mark exists, never both at once", () => {
-    expect(controlRow([ANYA.playerId]).map((button) => button.text)).toEqual([
-      copy.buttonBack,
-      copy.buttonPlay,
-    ]);
+  it("should say there is something to undo once a mark exists", () => {
+    expect(handedOver([ANYA.playerId])?.anythingToUndo).toBe(SOMETHING_TO_UNDO);
   });
 
-  it("should still offer Back and Play once the whole table is marked", () => {
-    expect(controlRow(EVERYBODY).map((button) => button.text)).toEqual([
-      copy.buttonBack,
-      copy.buttonPlay,
-    ]);
-  });
-
-  it("should send the roster and the marks back with Back, so the screen survives the tap", () => {
-    controlRow([ANYA.playerId]);
-
-    expect(encodeLeavingCallbackSpy).toHaveBeenCalledWith({
-      order: ORDER,
-      leaving: [ANYA.playerId],
-      action: { kind: ActionKind.Back },
+  it("should offer Play as the way on while a table is left to play it", () => {
+    expect(handedOver([ANYA.playerId])?.commit).toEqual({
+      text: copy.buttonPlay,
+      callback_data: encodedAs({
+        leaving: [ANYA.playerId],
+        action: { kind: ActionKind.Confirm },
+      }),
     });
   });
 
-  it("should send the roster and the marks back with Play, so the tap can act on them", () => {
-    controlRow([ANYA.playerId]);
+  it("should withhold it once too many are marked to make a game", () => {
+    enoughToPlaySpy.mockReturnValue(false);
 
-    expect(encodeLeavingCallbackSpy).toHaveBeenCalledWith({
-      order: ORDER,
-      leaving: [ANYA.playerId],
-      action: { kind: ActionKind.Confirm },
+    expect(handedOver(EVERYBODY)?.commit).toBeNull();
+  });
+
+  it("should ask the plan whether a game is left rather than counting the marks here", () => {
+    handedOver(EVERYBODY);
+
+    expect(enoughToPlaySpy).toHaveBeenCalledWith({ roster: ROSTER, leaving: EVERYBODY });
+  });
+
+  it("should hand over a Back that carries the marks, so the screen survives the tap", () => {
+    expect(handedOver([ANYA.playerId])?.back).toEqual({
+      text: copy.buttonBack,
+      callback_data: encodedAs({ leaving: [ANYA.playerId], action: { kind: ActionKind.Back } }),
     });
   });
 
-  it("should send the roster back with Cancel", () => {
-    controlRow(NOBODY);
-
-    expect(encodeLeavingCallbackSpy).toHaveBeenCalledWith({
-      order: ORDER,
-      leaving: NOBODY,
-      action: { kind: ActionKind.Cancel },
+  it("should hand over a Cancel that carries the marks too", () => {
+    expect(handedOver(NOBODY)?.cancel).toEqual({
+      text: copy.buttonCancel,
+      callback_data: encodedAs({ leaving: NOBODY, action: { kind: ActionKind.Cancel } }),
     });
   });
 
   it("should put the controls in the last row, below every player", () => {
     expect(rowsOf(NOBODY)).toHaveLength(ROSTER.length + A_CONTROL_ROW);
+  });
+
+  it("should draw the row the shared builder returned, rather than one of its own", () => {
+    expect(rowsOf(NOBODY).at(LAST_ROW)).toEqual(THE_CONTROLS);
   });
 });

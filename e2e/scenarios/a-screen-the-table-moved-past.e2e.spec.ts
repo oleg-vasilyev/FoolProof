@@ -31,7 +31,7 @@ describeScenario("a screen left open while the table moved on", (chat) => {
     expect(chat.lastText()).toContain("Who is sitting this one out?");
 
     screenId = chat.messages().at(LAST)?.messageId ?? NOTHING;
-    playData = chat.dataFor("▶️ Play") ?? "";
+    playData = chat.dataFor("✅ Play") ?? "";
     cancelData = chat.dataFor("❌ Cancel") ?? "";
 
     expect(playData).not.toBe("");

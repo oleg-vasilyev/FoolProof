@@ -1,6 +1,7 @@
 import { ActionKind } from "#live-game/domain/card-states.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { copy } from "#live-game/copy.en.ts";
+import { ControlRowStub } from "#shared/telegram/control-row.stub.ts";
 
 
 const seatNumberOfSpy = vi.fn();
@@ -8,6 +9,8 @@ const seatNumberOfSpy = vi.fn();
 const everyoneSeatedSpy = vi.fn();
 
 const encodeSeatingCallbackSpy = vi.fn();
+
+const controls = new ControlRowStub();
 
 vi.mock("#live-game/domain/seating-plan.ts", () => ({
   seatNumberOf: (plan: unknown, slot: number) => seatNumberOfSpy(plan, slot),
@@ -17,6 +20,8 @@ vi.mock("#live-game/domain/seating-plan.ts", () => ({
 vi.mock("#live-game/render/seating-screen/seating-callback-codec.ts", () => ({
   encodeSeatingCallback: (payload: unknown) => encodeSeatingCallbackSpy(payload),
 }));
+
+vi.mock("#shared/telegram/control-row.ts", () => controls.module);
 
 const { renderSeatingKeyboard } = await import("#live-game/render/seating-screen/seating-keyboard.ts");
 
@@ -53,20 +58,36 @@ const LAST_ROW = -1;
 
 const A_CONTROL_ROW = 1;
 
-const DATA = "encoded";
+const FIRST_CALL = 0;
+
+const ONLY_ARGUMENT = 0;
+
+const NOTHING_TO_UNDO = false;
+
+const SOMETHING_TO_UNDO = true;
+
+const THE_CONTROLS = [{ text: "the control row", callback_data: "controls" }];
+
+const encodedAs = (payload: { readonly placed: number; readonly action: { kind: string } }): string =>
+  `seating(${String(payload.placed)},${payload.action.kind})`;
 
 const rowsOf = (placed: number) => renderSeatingKeyboard(copy, { roster: ROSTER, placed });
 
 const seatRows = (placed: number) => rowsOf(placed).slice(FIRST_ROW, LAST_ROW);
 
-const controlRow = (placed: number) => rowsOf(placed).slice(LAST_ROW)[FIRST_ROW] ?? [];
+const handedOver = (placed: number) => {
+  rowsOf(placed);
+
+  return controls.controlRowSpy.mock.calls[FIRST_CALL]?.[ONLY_ARGUMENT];
+};
 
 describe("renderSeatingKeyboard()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     seatNumberOfSpy.mockReturnValue(null);
     everyoneSeatedSpy.mockReturnValue(false);
-    encodeSeatingCallbackSpy.mockReturnValue(DATA);
+    encodeSeatingCallbackSpy.mockImplementation(encodedAs);
+    controls.controlRowSpy.mockReturnValue(THE_CONTROLS);
   });
 
   it("should give every player a row of their own, in roster order", () => {
@@ -114,65 +135,57 @@ describe("renderSeatingKeyboard()", () => {
   });
 
   it("should carry the encoded data onto the button", () => {
-    expect(rowsOf(NONE_PLACED)[FIRST_ROW]?.[FIRST_BUTTON]?.callback_data).toBe(DATA);
+    expect(rowsOf(NONE_PLACED)[FIRST_ROW]?.[FIRST_BUTTON]?.callback_data).toBe(
+      encodedAs({ placed: NONE_PLACED, action: { kind: ActionKind.Pick } })
+    );
   });
 
-  it("should offer only Cancel while nobody is seated, since there is nothing to undo", () => {
-    expect(controlRow(NONE_PLACED).map((button) => button.text)).toEqual([copy.buttonCancel]);
+  it("should say there is nothing to undo while nobody is seated", () => {
+    expect(handedOver(NONE_PLACED)?.anythingToUndo).toBe(NOTHING_TO_UNDO);
   });
 
-  it("should offer Back alone once a seat is taken, so nothing beside it repeats Cancel", () => {
-    expect(controlRow(ONE_PLACED).map((button) => button.text)).toEqual([copy.buttonBack]);
+  it("should say there is something to undo once a seat is taken", () => {
+    expect(handedOver(ONE_PLACED)?.anythingToUndo).toBe(SOMETHING_TO_UNDO);
   });
 
-  it("should offer Play beside Back once every seat is settled", () => {
+  it("should withhold the way on while a seat is still unnumbered", () => {
+    expect(handedOver(ONE_PLACED)?.commit).toBeNull();
+  });
+
+  it("should offer Play as the way on once every seat is settled", () => {
     everyoneSeatedSpy.mockReturnValue(true);
 
-    expect(controlRow(TWO_PLACED).map((button) => button.text)).toEqual([
-      copy.buttonBack,
-      copy.buttonPlay,
-    ]);
-  });
-
-  it("should send the roster back with Play, so the card opens on the order shown", () => {
-    everyoneSeatedSpy.mockReturnValue(true);
-
-    controlRow(TWO_PLACED);
-
-    expect(encodeSeatingCallbackSpy).toHaveBeenCalledWith({
-      order: ORDER,
-      placed: TWO_PLACED,
-      action: { kind: ActionKind.Confirm },
+    expect(handedOver(TWO_PLACED)?.commit).toEqual({
+      text: copy.buttonPlay,
+      callback_data: encodedAs({ placed: TWO_PLACED, action: { kind: ActionKind.Confirm } }),
     });
   });
 
   it("should ask the plan whether every seat is settled rather than counting them here", () => {
-    controlRow(ONE_PLACED);
+    handedOver(ONE_PLACED);
 
     expect(everyoneSeatedSpy).toHaveBeenCalledWith({ roster: ROSTER, placed: ONE_PLACED });
   });
 
-  it("should send the roster back with Back too, so the screen survives the tap", () => {
-    controlRow(ONE_PLACED);
-
-    expect(encodeSeatingCallbackSpy).toHaveBeenCalledWith({
-      order: ORDER,
-      placed: ONE_PLACED,
-      action: { kind: ActionKind.Back },
+  it("should hand over a Back that carries the roster, so the screen survives the tap", () => {
+    expect(handedOver(ONE_PLACED)?.back).toEqual({
+      text: copy.buttonBack,
+      callback_data: encodedAs({ placed: ONE_PLACED, action: { kind: ActionKind.Back } }),
     });
   });
 
-  it("should send the roster back with Cancel", () => {
-    controlRow(NONE_PLACED);
-
-    expect(encodeSeatingCallbackSpy).toHaveBeenCalledWith({
-      order: ORDER,
-      placed: NONE_PLACED,
-      action: { kind: ActionKind.Cancel },
+  it("should hand over a Cancel that carries the roster too", () => {
+    expect(handedOver(NONE_PLACED)?.cancel).toEqual({
+      text: copy.buttonCancel,
+      callback_data: encodedAs({ placed: NONE_PLACED, action: { kind: ActionKind.Cancel } }),
     });
   });
 
   it("should put the controls in the last row, below every player", () => {
     expect(rowsOf(NONE_PLACED)).toHaveLength(ROSTER.length + A_CONTROL_ROW);
+  });
+
+  it("should draw the row the shared builder returned, rather than one of its own", () => {
+    expect(rowsOf(NONE_PLACED).at(LAST_ROW)).toEqual(THE_CONTROLS);
   });
 });

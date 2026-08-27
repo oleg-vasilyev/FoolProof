@@ -318,10 +318,13 @@ them back. Play opens the next card with whoever is left. Adding somebody cannot
 this way and never will — a joiner is a name the chat has never seen, so there is no
 button to draw.
 
-**The other footer button is Cancel until there is a mark to undo, and Back after
-that** — never both, because two buttons that close the same screen make the player
-read which is which. Back takes off the mark made most recently, which is what the
-marks travelling **in the order they were made** is for. It is `/merge`'s rule, taken
+The footer is [the control row](#the-control-row) every screen here draws: Play on
+the right, and on the left Cancel until there is a mark to undo, then Back. **Play is
+withheld once too few players would be left to make a game** — the rule is
+`enoughToPlay()`, the same minimum `Confirm` used to refuse with a toast, so the
+button is simply not there rather than there and refusable. Back takes off the mark
+made most recently, which is what the marks travelling **in the order they were made**
+is for. It is `/merge`'s rule, taken
 whole, and it inherits `/merge`'s one approximation: marking Anya, then Kim, then
 un-marking Anya leaves Kim as the last mark, so Back takes Kim off rather than
 restoring Anya. A true undo would have to carry every tap, and the budget below has
@@ -376,8 +379,9 @@ numbers the final seat too, because it has nowhere else to go — a table of fiv
 costs four taps rather than five.
 
 It does not open the card. **Play does**, and until it is tapped the order can still
-be walked back: the footer is Cancel while the screen is untouched, Back alone while
-seats are still being chosen, and Back beside Play once every seat has a number. The
+be walked back: the footer is [the control row](#the-control-row) — Cancel while the
+screen is untouched, Back alone while seats are still being chosen, and Back beside
+Play once every seat has a number. The
 screen used to open the card on that second-to-last tap, saving the confirmation, and
 the saving was the wrong trade — a wrong order noticed one tap later cost the whole
 screen and a cancelled card to fix, and no other screen in this bot commits without
@@ -386,8 +390,10 @@ is still filled rather than tapped.
 
 It is deliberately not the card. The card is about one game; this is about who sits
 where, it precedes the game, and a player who cannot tell the two screens apart will
-record a game that never happened. Hence a heading of its own and 🪑 rather than the
-card's ✅.
+record a game that never happened. Hence a heading of its own, and 🪑 on the rows
+rather than the card's ✅. The footers do share a green tick, and deliberately: it
+marks the way on, and a player who has learned that on one screen has learned it on
+both. What tells the screens apart is the heading and the row marks, not the footer.
 
 **No game is written down while the screen is open.** No game row exists, so `/game`
 is not blocked and there is nothing for the idle sweep to abandon. The joiners are
@@ -463,13 +469,23 @@ the text. There is no separate rollback command.
 ### When buttons appear
 
 - **Draw** — exactly when two unmarked players remain, that is after `n − 2` taps.
-  In a two-player game it is available immediately, before a single tap
+  In a two-player game it is available immediately, before a single tap. It sits on
+  a row of its own, above the control row: it says how the game ended, not how to
+  leave the screen, so it is family with the names rather than with Back and Cancel
 - **Confirm** — once every position is determined. It replaces Draw; the two never
   coexist
 - **Back** — always in phase 2, absent in phase 1
-- **Cancel** — while nothing is recorded: all of phase 1, and phase 2 until the
-  first exit or a Draw. A card that opened with the deal already filled in would
-  otherwise cost a Back before it could be thrown away
+- **Cancel** — phase 1 only. Phase 2 always has a Back, and [the control
+  row](#the-control-row) never draws both. A `/next` card opens *in* phase 2 with the
+  deal already filled in, so throwing one away costs a Back first — one tap more than
+  it used to cost, and the price of Cancel never moving. While both were drawn,
+  Cancel sat in the rightmost slot, which is where every other screen puts the way
+  on, and it arrived there from the leftmost slot the moment the deal was picked
+- A Cancel that is **tapped** is still honoured through phase 2 while nothing is
+  recorded, which is wider than where the button is now drawn. That is deliberate and
+  is what `cancelHonoured()` names: a card drawn before this rule may still be sitting
+  in a chat with a Cancel on it, and refusing it would leave that message with no way
+  to close it
 
 ### Tapping "Draw"
 
@@ -504,10 +520,9 @@ and do not accept a design that assumes them:
 Anya          ← still in the game
 💀 Anya       ← the fool, set automatically
 🤝 Anya       ← shared last place after a draw
-🤝 Draw
-✔️ Confirm
-↩️ Back
-✖️ Cancel
+🤝 Draw       ← a row of its own, above the control row
+↩️ Back  ✅ Confirm    ← the control row: the way off on the left, the way on right
+❌ Cancel                ← phase 1, where there is nothing to step back from
 ```
 
 Exactly three emoji carry meaning on player buttons — done, fool, draw. Medals for
@@ -566,6 +581,34 @@ entirely: Telegram does not parse HTML there, so escaping them would show
 Strictly matches the seating and **never changes** over the course of a game or a
 session. Muscle memory matters more than tidiness — a person reaches for the place
 where the name was last time.
+
+### The control row
+
+The same muscle memory decides the footer, so every screen a player builds up over
+several taps ends in the same two slots: **the way off the screen on the left, the
+way on on the right.**
+
+- **The way off** is `❌ Cancel` while there is nothing to undo and `↩️ Back` after
+  that — **never both**, because two buttons that close the same screen make the
+  player read which is which, and because a button that moves between taps is a
+  button that gets mis-tapped.
+- **The way on** is drawn only when the screen can actually be committed, and always
+  opens with `✅` — the one mark this emoji set renders unambiguously green.
+  `✅ Confirm` records a game, `✅ Play` opens one. A way on that would be refused is
+  not drawn: withholding it is how a screen says no, rather than a toast after the tap.
+- **Nothing else sits in either slot.** Draw is an outcome rather than a way off the
+  screen, so it takes a row of its own above the controls, and the card's control row
+  stays two slots wide even at a two-player table.
+
+A screen that commits on a **single** tap has no control row and needs none:
+`/language` and the `/personal` roster are lists where any tap is the whole answer,
+so there is nothing to cancel and nothing to confirm.
+
+`shared/telegram/control-row.ts` is the only place a control row is assembled, and
+`project/one-control-row` fails a keyboard that writes one of the four captions
+anywhere else. That rule matches names, so what it cannot see is a way off a screen
+under some other caption, one built in a file not named `*-keyboard.ts`, or a local
+function that happens to be called `controlRow` — those stay a reviewer's job.
 
 ---
 

@@ -1,53 +1,43 @@
 import { ActionKind } from "#live-game/domain/card-states.ts";
-import type { LeavingPlan } from "#live-game/domain/leaving-plan.ts";
+import {
+  enoughToPlay,
+  type LeavingAction,
+  type LeavingPlan,
+} from "#live-game/domain/leaving-plan.ts";
 import { encodeLeavingCallback } from "#live-game/render/leaving-screen/leaving-callback-codec.ts";
+import { controlRow } from "#shared/telegram/control-row.ts";
 import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#live-game/copy.ts";
 
 
+const NOTHING_MARKED = 0;
+
 const captionFor = (copy: Copy, plan: LeavingPlan, playerId: number, name: string): string =>
   plan.leaving.includes(playerId) ? `${copy.markLeaving} ${name}` : name;
 
-const NOTHING_MARKED = 0;
+const buttonFor = (
+  plan: LeavingPlan,
+  order: readonly number[],
+  text: string,
+  action: LeavingAction
+): InlineButton => ({
+  text,
+  callback_data: encodeLeavingCallback({ order, leaving: plan.leaving, action }),
+});
 
-const backOrCancel = (
+const controlsFor = (
   copy: Copy,
   plan: LeavingPlan,
   order: readonly number[]
-): InlineButton =>
-  plan.leaving.length === NOTHING_MARKED
-    ? {
-        text: copy.buttonCancel,
-        callback_data: encodeLeavingCallback({
-          order,
-          leaving: plan.leaving,
-          action: { kind: ActionKind.Cancel },
-        }),
-      }
-    : {
-        text: copy.buttonBack,
-        callback_data: encodeLeavingCallback({
-          order,
-          leaving: plan.leaving,
-          action: { kind: ActionKind.Back },
-        }),
-      };
-
-const controlRow = (
-  copy: Copy,
-  plan: LeavingPlan,
-  order: readonly number[]
-): readonly InlineButton[] => [
-  backOrCancel(copy, plan, order),
-  {
-    text: copy.buttonPlay,
-    callback_data: encodeLeavingCallback({
-      order,
-      leaving: plan.leaving,
-      action: { kind: ActionKind.Confirm },
-    }),
-  },
-];
+): readonly InlineButton[] =>
+  controlRow({
+    cancel: buttonFor(plan, order, copy.buttonCancel, { kind: ActionKind.Cancel }),
+    back: buttonFor(plan, order, copy.buttonBack, { kind: ActionKind.Back }),
+    commit: enoughToPlay(plan)
+      ? buttonFor(plan, order, copy.buttonPlay, { kind: ActionKind.Confirm })
+      : null,
+    anythingToUndo: plan.leaving.length > NOTHING_MARKED,
+  });
 
 export const renderLeavingKeyboard = (copy: Copy, plan: LeavingPlan): InlineKeyboardRows => {
   const order = plan.roster.map((seat) => seat.playerId);
@@ -63,5 +53,5 @@ export const renderLeavingKeyboard = (copy: Copy, plan: LeavingPlan): InlineKeyb
     },
   ]);
 
-  return [...seatRows, controlRow(copy, plan, order)];
+  return [...seatRows, controlsFor(copy, plan, order)];
 };

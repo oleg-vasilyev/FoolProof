@@ -76,7 +76,7 @@ export const finalPlacements = (state: CardState): readonly Placement[] => {
 export const starterPlayerId = (state: CardState): number | null =>
   state.starterSlot === null ? null : (seatAt(state, state.starterSlot)?.playerId ?? null);
 
-export const cancelAvailable = (state: CardState): boolean =>
+export const cancelHonoured = (state: CardState): boolean =>
   state.exits.length === 0 && !state.drawAccepted;
 
 const isSlot = (state: CardState, slot: number): boolean =>
@@ -118,7 +118,7 @@ export const apply = (state: CardState, action: Action): Transition => {
 
   switch (action.kind) {
     case ActionKind.Cancel:
-      return cancelAvailable(state) ? { outcome: Outcome.Cancelled } : { outcome: Outcome.Rejected };
+      return cancelHonoured(state) ? { outcome: Outcome.Cancelled } : { outcome: Outcome.Rejected };
 
     case ActionKind.Confirm:
       return phase === Phase.Ready ? { outcome: Outcome.Confirmed, state } : { outcome: Outcome.Rejected };

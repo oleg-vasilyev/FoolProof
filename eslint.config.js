@@ -337,6 +337,73 @@ const project = {
         };
       },
     },
+    // "One control row." What such a row is, and why its two slots never vary,
+    // is PLAN.md's "The control row" — including the three shapes this rule
+    // cannot see, which stay a reviewer's job. Here is only the enforcement. It
+    // polices the four captions such a row is made of, and demands more than an
+    // import: each caption has to be written *inside* a controlRow(…) call, so
+    // a keyboard that uses the builder and then hand-builds a second way out
+    // beside it is caught too. That second row is the shape the probe used,
+    // since a missing import is already a lint error here and would have proved
+    // nothing.
+    "one-control-row": {
+      meta: {
+        type: "problem",
+        schema: [],
+        messages: {
+          loose:
+            "A way off a screen and a way on are drawn by shared/telegram/control-row.ts, " +
+            "so Cancel keeps the same side and the same red on every screen, and Confirm " +
+            "the same side and the same green.",
+        },
+      },
+      create(context) {
+        const A_KEYBOARD = /-keyboard\.ts$/;
+
+        const A_WINDOWS_SEPARATOR = /\\/g;
+
+        const THE_BUILDER = "controlRow";
+
+        const A_CONTROL_CAPTION = new Set([
+          "buttonCancel",
+          "buttonBack",
+          "buttonConfirm",
+          "buttonPlay",
+        ]);
+
+        const drawn = context.filename.replace(A_WINDOWS_SEPARATOR, "/");
+
+        if (!A_KEYBOARD.test(drawn)) {
+          return {};
+        }
+
+        const insideTheBuilder = (node) => {
+          for (let current = node.parent; current; current = current.parent) {
+            if (
+              current.type === "CallExpression" &&
+              current.callee.type === "Identifier" &&
+              current.callee.name === THE_BUILDER
+            ) {
+              return true;
+            }
+          }
+
+          return false;
+        };
+
+        return {
+          MemberExpression(node) {
+            if (node.property.type !== "Identifier") {
+              return;
+            }
+
+            if (A_CONTROL_CAPTION.has(node.property.name) && !insideTheBuilder(node)) {
+              context.report({ node, messageId: "loose" });
+            }
+          },
+        };
+      },
+    },
   },
 };
 
@@ -527,6 +594,7 @@ export default [
     rules: {
       "project/named-states": "error",
       "project/one-door-to-the-database": "error",
+      "project/one-control-row": "error",
     },
   },
   {

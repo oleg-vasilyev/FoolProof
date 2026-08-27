@@ -90,6 +90,15 @@ here, and it cost five files. `phase-reviewer` asks this same question of a fini
 diff, so anything you learn about *how* reachability is proved from the schema
 belongs in both briefs or in neither.
 
+**And its converse: is each button drawn exactly when its tap would be honoured?**
+Take every button the plan draws, name the domain function that decides its action,
+and set the two expressions side by side — they are one fact written twice, so a
+difference is a defect before it is code. This level found a green Play drawn while
+`confirmed()` would have refused it for leaving too few at the table. A difference
+that is *deliberate* — a tap honoured more widely than the button is drawn, so a
+screen already sitting in a chat can still be closed — is a finding too, and it is
+answered by a sentence in `PLAN.md` rather than by a change.
+
 **6. Is the plan bigger than the problem?** An abstraction with one implementation,
 a parameter nothing ever varies, a layer that only forwards. Free to add while
 nothing is written, permanent afterwards.

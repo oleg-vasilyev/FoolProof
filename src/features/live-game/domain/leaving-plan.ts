@@ -55,13 +55,13 @@ const marked = (plan: LeavingPlan, playerId: number): LeavingTransition => {
   return { outcome: Outcome.Updated, plan: { ...plan, leaving }, toggled: seat, sittingOut };
 };
 
-const confirmed = (plan: LeavingPlan): LeavingTransition => {
-  const seats = stayingIn(plan);
+export const enoughToPlay = (plan: LeavingPlan): boolean =>
+  stayingIn(plan).length >= MIN_PLAYERS;
 
-  return seats.length < MIN_PLAYERS
-    ? { outcome: Outcome.Rejected, problem: Problem.TooFew }
-    : { outcome: Outcome.Seated, seats };
-};
+const confirmed = (plan: LeavingPlan): LeavingTransition =>
+  enoughToPlay(plan)
+    ? { outcome: Outcome.Seated, seats: stayingIn(plan) }
+    : { outcome: Outcome.Rejected, problem: Problem.TooFew };
 
 const steppedBack = (plan: LeavingPlan): LeavingTransition =>
   plan.leaving.length === NOTHING_MARKED

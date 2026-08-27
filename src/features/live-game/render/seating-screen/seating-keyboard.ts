@@ -1,6 +1,12 @@
 import { ActionKind } from "#live-game/domain/card-states.ts";
-import { everyoneSeated, seatNumberOf, type SeatingPlan } from "#live-game/domain/seating-plan.ts";
+import {
+  everyoneSeated,
+  seatNumberOf,
+  type SeatingAction,
+  type SeatingPlan,
+} from "#live-game/domain/seating-plan.ts";
 import { encodeSeatingCallback } from "#live-game/render/seating-screen/seating-callback-codec.ts";
+import { controlRow } from "#shared/telegram/control-row.ts";
 import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#live-game/copy.ts";
 
@@ -13,49 +19,29 @@ const captionFor = (copy: Copy, plan: SeatingPlan, slot: number, name: string): 
   return seat === null ? name : `${copy.markSeat} ${seat} ${name}`;
 };
 
-const controlRow = (
+const buttonFor = (
+  plan: SeatingPlan,
+  order: readonly number[],
+  text: string,
+  action: SeatingAction
+): InlineButton => ({
+  text,
+  callback_data: encodeSeatingCallback({ order, placed: plan.placed, action }),
+});
+
+const controlsFor = (
   copy: Copy,
   plan: SeatingPlan,
   order: readonly number[]
-): readonly InlineButton[] => {
-  if (plan.placed === NONE_PLACED) {
-    return [
-      {
-        text: copy.buttonCancel,
-        callback_data: encodeSeatingCallback({
-          order,
-          placed: plan.placed,
-          action: { kind: ActionKind.Cancel },
-        }),
-      },
-    ];
-  }
-
-  const back: InlineButton = {
-    text: copy.buttonBack,
-    callback_data: encodeSeatingCallback({
-      order,
-      placed: plan.placed,
-      action: { kind: ActionKind.Back },
-    }),
-  };
-
-  if (!everyoneSeated(plan)) {
-    return [back];
-  }
-
-  return [
-    back,
-    {
-      text: copy.buttonPlay,
-      callback_data: encodeSeatingCallback({
-        order,
-        placed: plan.placed,
-        action: { kind: ActionKind.Confirm },
-      }),
-    },
-  ];
-};
+): readonly InlineButton[] =>
+  controlRow({
+    cancel: buttonFor(plan, order, copy.buttonCancel, { kind: ActionKind.Cancel }),
+    back: buttonFor(plan, order, copy.buttonBack, { kind: ActionKind.Back }),
+    commit: everyoneSeated(plan)
+      ? buttonFor(plan, order, copy.buttonPlay, { kind: ActionKind.Confirm })
+      : null,
+    anythingToUndo: plan.placed > NONE_PLACED,
+  });
 
 export const renderSeatingKeyboard = (copy: Copy, plan: SeatingPlan): InlineKeyboardRows => {
   const order = plan.roster.map((seat) => seat.playerId);
@@ -71,5 +57,5 @@ export const renderSeatingKeyboard = (copy: Copy, plan: SeatingPlan): InlineKeyb
     },
   ]);
 
-  return [...seatRows, controlRow(copy, plan, order)];
+  return [...seatRows, controlsFor(copy, plan, order)];
 };

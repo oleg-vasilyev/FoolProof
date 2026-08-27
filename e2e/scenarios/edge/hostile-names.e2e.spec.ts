@@ -14,6 +14,8 @@ const OVERLONG = "L".repeat(33);
 
 const AT_THE_CAP = "L".repeat(32);
 
+const BACK = "↩️ Back";
+
 describeScenario("a name the bot was never meant to be given", (chat) => {
   it("should keep a name that reads like SQL as a name, not as SQL", async () => {
     await chat.say(`/game Roma, ${INJECTION}`);
@@ -54,6 +56,7 @@ describeScenario("a name the bot was never meant to be given", (chat) => {
   });
 
   it("should refuse a name too long for a button, without echoing the whole thing", async () => {
+    await chat.tap(BACK);
     await chat.tap("❌ Cancel");
     await chat.say(`/game Roma, ${OVERLONG}`);
 

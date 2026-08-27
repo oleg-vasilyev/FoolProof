@@ -2,10 +2,12 @@ import { ActionKind, Role } from "#merge-names/domain/merge-states.ts";
 import {
   MIN_TO_MERGE,
   roleOf,
+  type Action,
   type Candidate,
   type Selection,
 } from "#merge-names/domain/merge-selection.ts";
 import { encodeMergeCallback } from "#merge-names/render/merge-callback-codec.ts";
+import { controlRow } from "#shared/telegram/control-row.ts";
 import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#merge-names/copy.ts";
 
@@ -32,33 +34,21 @@ const captionFor = (copy: Copy, candidate: Candidate, role: Role): string => {
   return mark === null ? caption : `${mark} ${caption}`;
 };
 
-const controlRow = (copy: Copy, selection: Selection): readonly InlineButton[] => {
-  if (selection.length === NOTHING_PICKED) {
-    return [
-      {
-        text: copy.buttonCancel,
-        callback_data: encodeMergeCallback({ selection, action: { kind: ActionKind.Cancel } }),
-      },
-    ];
-  }
+const buttonFor = (selection: Selection, text: string, action: Action): InlineButton => ({
+  text,
+  callback_data: encodeMergeCallback({ selection, action }),
+});
 
-  const back: InlineButton = {
-    text: copy.buttonBack,
-    callback_data: encodeMergeCallback({ selection, action: { kind: ActionKind.Back } }),
-  };
-
-  if (selection.length < MIN_TO_MERGE) {
-    return [back];
-  }
-
-  return [
-    back,
-    {
-      text: copy.buttonConfirm,
-      callback_data: encodeMergeCallback({ selection, action: { kind: ActionKind.Confirm } }),
-    },
-  ];
-};
+const controlsFor = (copy: Copy, selection: Selection): readonly InlineButton[] =>
+  controlRow({
+    cancel: buttonFor(selection, copy.buttonCancel, { kind: ActionKind.Cancel }),
+    back: buttonFor(selection, copy.buttonBack, { kind: ActionKind.Back }),
+    commit:
+      selection.length >= MIN_TO_MERGE
+        ? buttonFor(selection, copy.buttonConfirm, { kind: ActionKind.Confirm })
+        : null,
+    anythingToUndo: selection.length > NOTHING_PICKED,
+  });
 
 export const renderMergeKeyboard = (
   copy: Copy,
@@ -74,5 +64,5 @@ export const renderMergeKeyboard = (
       }),
     },
   ]),
-  controlRow(copy, selection),
+  controlsFor(copy, selection),
 ];

@@ -57,12 +57,12 @@ describeScenario("somebody arrives, somebody goes home", (chat) => {
       "🪑 3 Oleg",
       "🪑 4 Roma",
       "↩️ Back",
-      "▶️ Play",
+      "✅ Play",
     ]);
   });
 
   it("should open the card on Play, with the first move still to pick", async () => {
-    await chat.tap("▶️ Play");
+    await chat.tap("✅ Play");
 
     expect(chat.cardText()).toContain("Who went first?");
     expect(chat.captions()).toEqual(["Oleg", "Roma", "Anya", "Kim", "❌ Cancel"]);
@@ -122,20 +122,30 @@ describeScenario("somebody arrives, somebody goes home", (chat) => {
     await chat.say("/next_without");
 
     expect(chat.lastText()).toContain("Who is sitting this one out?");
-    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "❌ Cancel", "▶️ Play"]);
+    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "❌ Cancel", "✅ Play"]);
   });
 
   it("should mark a tapped player as sitting out, and offer to undo it", async () => {
     await chat.tap("Anya");
 
     expect(chat.lastAnswer()).toBe("Anya sits this one out");
-    expect(chat.captions()).toEqual(["Oleg", "🚪 Anya", "Roma", "↩️ Back", "▶️ Play"]);
+    expect(chat.captions()).toEqual(["Oleg", "🚪 Anya", "Roma", "↩️ Back", "✅ Play"]);
+  });
+
+  it("should take Play away once too few are left to play, and give it back", async () => {
+    await chat.tap("Roma");
+
+    expect(chat.captions()).toEqual(["Oleg", "🚪 Anya", "🚪 Roma", "↩️ Back"]);
+
+    await chat.tap("🚪 Roma");
+
+    expect(chat.captions()).toEqual(["Oleg", "🚪 Anya", "Roma", "↩️ Back", "✅ Play"]);
   });
 
   it("should take the last mark back, and offer Cancel again once none is left", async () => {
     await chat.tap("↩️ Back");
 
-    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "❌ Cancel", "▶️ Play"]);
+    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "❌ Cancel", "✅ Play"]);
   });
 
   it("should let the same tap put them back in the game", async () => {
@@ -143,12 +153,12 @@ describeScenario("somebody arrives, somebody goes home", (chat) => {
     await chat.tap("🚪 Anya");
 
     expect(chat.lastAnswer()).toBe("Anya is playing after all");
-    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "❌ Cancel", "▶️ Play"]);
+    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "❌ Cancel", "✅ Play"]);
   });
 
   it("should open the next card without whoever was left marked", async () => {
     await chat.tap("Anya");
-    await chat.tap("▶️ Play");
+    await chat.tap("✅ Play");
 
     expect(chat.lastText()).toContain("Who went first?");
     expect(chat.captions()).toEqual(["Oleg", "Roma", "❌ Cancel"]);

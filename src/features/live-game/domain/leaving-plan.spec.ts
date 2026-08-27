@@ -12,7 +12,9 @@ vi.mock("#live-game/domain/card-state.ts", () => ({
   MIN_PLAYERS: MOCKED_MIN_PLAYERS,
 }));
 
-const { applyLeaving, stayingIn } = await import("#live-game/domain/leaving-plan.ts");
+const { applyLeaving, enoughToPlay, stayingIn } = await import(
+  "#live-game/domain/leaving-plan.ts"
+);
 
 const OLEG = { playerId: 3, displayName: "Oleg" };
 
@@ -168,6 +170,32 @@ describe("leaving-plan", () => {
       applyLeaving(planOf([OLEG, ANYA, ROMA, KIM], leaving), { kind: ActionKind.Back });
 
       expect(leaving).toEqual([ANYA.playerId, KIM.playerId]);
+    });
+  });
+
+  describe("enoughToPlay()", () => {
+    it("should say yes while the whole roster is playing", () => {
+      expect(enoughToPlay(planOf([OLEG, ANYA, ROMA], []))).toBe(true);
+    });
+
+    it("should say yes at exactly the minimum the domain allows", () => {
+      const plan = planOf([OLEG, ANYA, ROMA, KIM], [KIM.playerId]);
+
+      expect(stayingIn(plan)).toHaveLength(MOCKED_MIN_PLAYERS);
+      expect(enoughToPlay(plan)).toBe(true);
+    });
+
+    it("should say no one player short of it, which is where Play stops being drawn", () => {
+      const plan = planOf([OLEG, ANYA, ROMA, KIM], [ROMA.playerId, KIM.playerId]);
+
+      expect(stayingIn(plan)).toHaveLength(ONE_SHORT_OF_MINIMUM);
+      expect(enoughToPlay(plan)).toBe(false);
+    });
+
+    it("should say no once every player is marked", () => {
+      const plan = planOf([OLEG, ANYA, ROMA], [OLEG.playerId, ANYA.playerId, ROMA.playerId]);
+
+      expect(enoughToPlay(plan)).toBe(false);
     });
   });
 

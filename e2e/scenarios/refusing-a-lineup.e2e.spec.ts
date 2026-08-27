@@ -101,12 +101,19 @@ describeScenario("/next repeats the line-up", (chat) => {
     await chat.say("/next");
 
     expect(chat.cardText()).toContain("Game 2");
-    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "↩️ Back", "❌ Cancel"]);
+    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "↩️ Back"]);
   });
 
   it("should have dealt to the player sitting before the fool", () => {
     expect(chat.cardText()).toContain("Went first: <b>Roma</b>");
     expect(chat.cardText()).not.toContain("Who went first?");
+  });
+
+  it("should hand back the deal on Back, and Cancel with it", async () => {
+    await chat.tap("↩️ Back");
+
+    expect(chat.cardText()).toContain("Who went first?");
+    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "❌ Cancel"]);
   });
 
   it("should leave the chat with nothing still open", async () => {

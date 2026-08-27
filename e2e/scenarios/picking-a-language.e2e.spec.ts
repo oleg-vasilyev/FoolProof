@@ -49,7 +49,13 @@ describeScenario("picking the language a chat is played in", (chat) => {
     expect(chat.lastAnswer()).toBe("Олег ходит первым");
   });
 
+  it("should put Назад where Отмена was, since the first move is now known", () => {
+    expect(chat.captions()).toContain("↩️ Назад");
+    expect(chat.captions()).not.toContain("❌ Отмена");
+  });
+
   it("should say so in Russian when the card is cancelled", async () => {
+    await chat.tap("↩️ Назад");
     await chat.tap("❌ Отмена");
 
     expect(chat.lastAnswer()).toBe("Отменено");

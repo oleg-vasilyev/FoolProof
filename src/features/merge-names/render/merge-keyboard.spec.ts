@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ActionKind, Role } from "#merge-names/domain/merge-states.ts";
 import type { Candidate } from "#merge-names/domain/merge-selection.ts";
 import { copy } from "#merge-names/copy.en.ts";
+import { ControlRowStub } from "#shared/telegram/control-row.stub.ts";
 
 
 const MIN_TO_MERGE = 2;
@@ -9,6 +10,8 @@ const MIN_TO_MERGE = 2;
 const roleOfSpy = vi.fn();
 
 const encodeMergeCallbackSpy = vi.fn();
+
+const controls = new ControlRowStub();
 
 vi.mock("#merge-names/domain/merge-selection.ts", () => ({
   MIN_TO_MERGE,
@@ -18,6 +21,8 @@ vi.mock("#merge-names/domain/merge-selection.ts", () => ({
 vi.mock("#merge-names/render/merge-callback-codec.ts", () => ({
   encodeMergeCallback: (payload: unknown) => encodeMergeCallbackSpy(payload),
 }));
+
+vi.mock("#shared/telegram/control-row.ts", () => controls.module);
 
 const { renderMergeKeyboard } = await import("#merge-names/render/merge-keyboard.ts");
 
@@ -33,7 +38,17 @@ const ENCODED = "the-callback-data";
 
 const ONE_ROW = 1;
 
-const TWO_BUTTONS = 2;
+const FIRST_CALL = 0;
+
+const ONLY_ARGUMENT = 0;
+
+const LAST_ROW = -1;
+
+const NOTHING_TO_UNDO = false;
+
+const SOMETHING_TO_UNDO = true;
+
+const THE_CONTROLS = [{ text: "the control row", callback_data: "controls" }];
 
 const candidate = (playerId: number, displayName: string, games: number): Candidate => ({
   playerId,
@@ -55,10 +70,10 @@ const captions = (selection: readonly number[]): readonly string[] =>
     .flat()
     .map((button) => button.text);
 
-const controlRow = (selection: readonly number[]) => {
-  const rows = renderMergeKeyboard(copy, ROSTER, selection);
+const handedOver = (selection: readonly number[]) => {
+  renderMergeKeyboard(copy, ROSTER, selection);
 
-  return rows[rows.length - ONE_ROW] ?? [];
+  return controls.controlRowSpy.mock.calls[FIRST_CALL]?.[ONLY_ARGUMENT];
 };
 
 describe("renderMergeKeyboard(copy, )", () => {
@@ -67,6 +82,7 @@ describe("renderMergeKeyboard(copy, )", () => {
 
     everyRole("free");
     encodeMergeCallbackSpy.mockReturnValue(ENCODED);
+    controls.controlRowSpy.mockReturnValue(THE_CONTROLS);
   });
 
   describe("the names", () => {
@@ -117,27 +133,38 @@ describe("renderMergeKeyboard(copy, )", () => {
   });
 
   describe("the controls", () => {
-    it("should offer cancel while nothing is picked", () => {
-      expect(controlRow([]).map((button) => button.text)).toEqual([copy.buttonCancel]);
+    it("should say there is nothing to undo while no name is picked", () => {
+      expect(handedOver([])?.anythingToUndo).toBe(NOTHING_TO_UNDO);
     });
 
-    it("should offer back instead once a name is picked", () => {
-      expect(controlRow([ANYA_ID]).map((button) => button.text)).toEqual([copy.buttonBack]);
+    it("should say there is something to undo once a name is picked", () => {
+      expect(handedOver([ANYA_ID])?.anythingToUndo).toBe(SOMETHING_TO_UNDO);
     });
 
-    it("should withhold confirm until there is a merge to make", () => {
-      expect(controlRow([ANYA_ID])).toHaveLength(ONE_ROW);
+    it("should withhold the way on until there is a merge to make", () => {
+      expect(handedOver([ANYA_ID])?.commit).toBeNull();
     });
 
-    it("should offer confirm once two names are picked", () => {
-      expect(controlRow([ANYA_ID, ANNA_ID]).map((button) => button.text)).toEqual([
-        copy.buttonBack,
-        copy.buttonConfirm,
-      ]);
+    it("should offer Confirm as the way on once two names are picked", () => {
+      expect(handedOver([ANYA_ID, ANNA_ID])?.commit).toEqual({
+        text: copy.buttonConfirm,
+        callback_data: ENCODED,
+      });
     });
 
-    it("should keep both controls on one row", () => {
-      expect(controlRow([ANYA_ID, ANNA_ID])).toHaveLength(TWO_BUTTONS);
+    it("should hand over a Cancel carrying an action with no name", () => {
+      expect(handedOver([])?.cancel).toEqual({ text: copy.buttonCancel, callback_data: ENCODED });
+    });
+
+    it("should hand over a Back carrying the same caption the table names", () => {
+      expect(handedOver([ANYA_ID])?.back).toEqual({
+        text: copy.buttonBack,
+        callback_data: ENCODED,
+      });
+    });
+
+    it("should draw the row the shared builder returned, rather than one of its own", () => {
+      expect(renderMergeKeyboard(copy, ROSTER, []).at(LAST_ROW)).toEqual(THE_CONTROLS);
     });
 
     it("should send cancel to the codec as an action with no name", () => {

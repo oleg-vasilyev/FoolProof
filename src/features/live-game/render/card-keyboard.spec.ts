@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { copy } from "#live-game/copy.en.ts";
-import { ActionKind } from "#live-game/domain/card-states.ts";
+import { ActionKind, Phase } from "#live-game/domain/card-states.ts";
 import type { CardState } from "#live-game/domain/card-state.ts";
 import type { CallbackPayload } from "#live-game/render/callback-data-codec.ts";
+import { ControlRowStub } from "#shared/telegram/control-row.stub.ts";
 
 
 const nameAtSpy = vi.fn();
@@ -17,9 +18,9 @@ const isReadySpy = vi.fn();
 
 const drawAvailableSpy = vi.fn();
 
-const cancelAvailableSpy = vi.fn();
-
 const encodeCallbackSpy = vi.fn();
+
+const controls = new ControlRowStub();
 
 vi.mock("#live-game/domain/card-state.ts", () => ({
   nameAt: (state: unknown, slot: number) => nameAtSpy(state, slot),
@@ -28,12 +29,13 @@ vi.mock("#live-game/domain/card-state.ts", () => ({
   phaseOf: (state: unknown) => phaseOfSpy(state),
   isReady: (state: unknown) => isReadySpy(state),
   drawAvailable: (state: unknown) => drawAvailableSpy(state),
-  cancelAvailable: (state: unknown) => cancelAvailableSpy(state),
 }));
 
 vi.mock("#live-game/render/callback-data-codec.ts", () => ({
   encodeCallback: (payload: CallbackPayload) => encodeCallbackSpy(payload),
 }));
+
+vi.mock("#shared/telegram/control-row.ts", () => controls.module);
 
 const { renderKeyboard } = await import("#live-game/render/card-keyboard.ts");
 
@@ -48,6 +50,20 @@ const ANYA = 1;
 const ROMA = 2;
 
 const FIRST_PLACE = 1;
+
+const LAST_ROW = -1;
+
+const ABOVE_THE_CONTROLS = -2;
+
+const FIRST_CALL = 0;
+
+const ONLY_ARGUMENT = 0;
+
+const NOTHING_TO_UNDO = false;
+
+const SOMETHING_TO_UNDO = true;
+
+const THE_CONTROLS = [{ text: "the control row", callback_data: "controls" }];
 
 const THREE_SEATS = [
   { playerId: 10, displayName: "Oleg" },
@@ -68,11 +84,11 @@ const captionsOf = (state: CardState): readonly string[] =>
     .slice(0, THREE_SEATS.length)
     .map((row) => row[0]?.text ?? "");
 
-const controlCaptions = (state: CardState): readonly string[] =>
-  (render(state)[THREE_SEATS.length] ?? []).map((button) => button.text);
+const handedOver = (state: CardState) => {
+  render(state);
 
-const controlButton = (state: CardState, index: number): string =>
-  (render(state)[THREE_SEATS.length] ?? [])[index]?.callback_data ?? "";
+  return controls.controlRowSpy.mock.calls[FIRST_CALL]?.[ONLY_ARGUMENT];
+};
 
 describe("renderKeyboard()", () => {
   beforeEach(() => {
@@ -82,10 +98,10 @@ describe("renderKeyboard()", () => {
     encodeCallbackSpy.mockImplementation(encodedAs);
     finalPlacementsSpy.mockReturnValue([]);
     remainingSlotsSpy.mockReturnValue([]);
-    phaseOfSpy.mockReturnValue("RECORDING");
+    phaseOfSpy.mockReturnValue(Phase.Recording);
     isReadySpy.mockReturnValue(false);
     drawAvailableSpy.mockReturnValue(false);
-    cancelAvailableSpy.mockReturnValue(false);
+    controls.controlRowSpy.mockReturnValue(THE_CONTROLS);
   });
 
   describe("player rows", () => {
@@ -142,91 +158,109 @@ describe("renderKeyboard()", () => {
     });
   });
 
-  describe("the control row", () => {
-    it("should offer only Cancel while the starter is unknown", () => {
-      phaseOfSpy.mockReturnValue("PICK_STARTER");
-
-      expect(controlCaptions(stateWith({ starterSlot: null }))).toEqual(["❌ Cancel"]);
-    });
-
-    it("should never offer Back before the starter is picked", () => {
-      phaseOfSpy.mockReturnValue("PICK_STARTER");
-
-      expect(controlCaptions(stateWith({ starterSlot: null }))).not.toContain("↩️ Back");
-    });
-
-    it("should offer only Back while exits are being recorded", () => {
-      expect(controlCaptions(stateWith({ exits: [OLEG] }))).toEqual(["↩️ Back"]);
-    });
-
-    it("should never offer Cancel once recording has started", () => {
-      expect(controlCaptions(stateWith({ exits: [OLEG] }))).not.toContain("❌ Cancel");
-    });
-
-    it("should keep Cancel beside Back while nothing has been recorded yet", () => {
-      cancelAvailableSpy.mockReturnValue(true);
-
-      expect(controlCaptions(stateWith({}))).toEqual(["↩️ Back", "❌ Cancel"]);
-    });
-
-    it("should keep Cancel last when Draw is offered too", () => {
-      cancelAvailableSpy.mockReturnValue(true);
+  describe("the draw row", () => {
+    it("should give Draw a row of its own once two players remain", () => {
       drawAvailableSpy.mockReturnValue(true);
 
-      expect(controlCaptions(stateWith({}))).toEqual(["↩️ Back", "🤝 Draw", "❌ Cancel"]);
-    });
-
-    it("should ignore the cancel rule entirely once every place is known", () => {
-      phaseOfSpy.mockReturnValue("READY");
-      cancelAvailableSpy.mockReturnValue(true);
-
-      expect(controlCaptions(stateWith({}))).not.toContain("❌ Cancel");
-    });
-
-    it("should offer Draw beside Back once two players remain", () => {
-      drawAvailableSpy.mockReturnValue(true);
-
-      expect(controlCaptions(stateWith({ exits: [OLEG] }))).toEqual(["↩️ Back", "🤝 Draw"]);
-    });
-
-    it("should replace Draw with Confirm once every place is known", () => {
-      phaseOfSpy.mockReturnValue("READY");
-      drawAvailableSpy.mockReturnValue(true);
-
-      expect(controlCaptions(stateWith({ exits: [OLEG, ANYA] }))).toEqual([
-        "↩️ Back",
-        "✅ Confirm",
+      expect(render(stateWith({})).at(ABOVE_THE_CONTROLS)).toEqual([
+        { text: copy.buttonDraw, callback_data: expect.any(String) },
       ]);
     });
 
-    it("should send Cancel as its own action", () => {
-      phaseOfSpy.mockReturnValue("PICK_STARTER");
+    it("should keep that row out of the controls, so no way off the screen moves", () => {
+      drawAvailableSpy.mockReturnValue(true);
 
-      expect(controlButton(stateWith({ starterSlot: null }), 0)).toBe(
-        encodedAs({ gameId: GAME_ID, action: ActionKind.Cancel, slot: null, version: VERSION })
-      );
+      expect(render(stateWith({})).at(LAST_ROW)).toEqual(THE_CONTROLS);
     });
 
-    it("should send Back as its own action", () => {
-      expect(controlButton(stateWith({}), 0)).toBe(
-        encodedAs({ gameId: GAME_ID, action: ActionKind.Back, slot: null, version: VERSION })
-      );
-    });
-
-    it("should send Confirm as its own action", () => {
-      phaseOfSpy.mockReturnValue("READY");
-
-      expect(controlButton(stateWith({}), 1)).toBe(
-        encodedAs({ gameId: GAME_ID, action: ActionKind.Confirm, slot: null, version: VERSION })
-      );
+    it("should draw no such row while more than two players remain", () => {
+      expect(render(stateWith({})).map((row) => row[0]?.text)).not.toContain(copy.buttonDraw);
     });
 
     it("should send Draw as its own action", () => {
       drawAvailableSpy.mockReturnValue(true);
 
-      expect(controlButton(stateWith({}), 1)).toBe(
+      expect(render(stateWith({})).at(ABOVE_THE_CONTROLS)?.[0]?.callback_data).toBe(
         encodedAs({ gameId: GAME_ID, action: ActionKind.Draw, slot: null, version: VERSION })
       );
+    });
+  });
+
+  describe("the control row", () => {
+    it("should put whatever the shared builder returns in the last row", () => {
+      expect(render(stateWith({})).at(LAST_ROW)).toEqual(THE_CONTROLS);
+    });
+
+    it("should hand it a Cancel carrying the cancel action", () => {
+      expect(handedOver(stateWith({}))?.cancel).toEqual({
+        text: copy.buttonCancel,
+        callback_data: encodedAs({
+          gameId: GAME_ID,
+          action: ActionKind.Cancel,
+          slot: null,
+          version: VERSION,
+        }),
+      });
+    });
+
+    it("should hand it a Back carrying the back action", () => {
+      expect(handedOver(stateWith({}))?.back).toEqual({
+        text: copy.buttonBack,
+        callback_data: encodedAs({
+          gameId: GAME_ID,
+          action: ActionKind.Back,
+          slot: null,
+          version: VERSION,
+        }),
+      });
+    });
+
+    it("should say there is nothing to undo while the starter is unknown", () => {
+      phaseOfSpy.mockReturnValue(Phase.PickStarter);
+
+      expect(handedOver(stateWith({ starterSlot: null }))?.anythingToUndo).toBe(NOTHING_TO_UNDO);
+    });
+
+    it("should say there is something to undo once the starter is known", () => {
+      expect(handedOver(stateWith({}))?.anythingToUndo).toBe(SOMETHING_TO_UNDO);
+    });
+
+    it("should say the same once every place is known, so Back survives Confirm", () => {
+      phaseOfSpy.mockReturnValue(Phase.Ready);
+
+      expect(handedOver(stateWith({}))?.anythingToUndo).toBe(SOMETHING_TO_UNDO);
+    });
+
+    it("should offer no way on while places are still being recorded", () => {
+      expect(handedOver(stateWith({}))?.commit).toBeNull();
+    });
+
+    it("should offer none before the starter is picked either", () => {
+      phaseOfSpy.mockReturnValue(Phase.PickStarter);
+
+      expect(handedOver(stateWith({ starterSlot: null }))?.commit).toBeNull();
+    });
+
+    it("should offer Confirm as the way on once every place is known", () => {
+      phaseOfSpy.mockReturnValue(Phase.Ready);
+
+      expect(handedOver(stateWith({}))?.commit).toEqual({
+        text: copy.buttonConfirm,
+        callback_data: encodedAs({
+          gameId: GAME_ID,
+          action: ActionKind.Confirm,
+          slot: null,
+          version: VERSION,
+        }),
+      });
+    });
+
+    it("should ask the phase rather than reading the exits itself", () => {
+      const state = stateWith({});
+
+      render(state);
+
+      expect(phaseOfSpy).toHaveBeenCalledWith(state);
     });
   });
 });

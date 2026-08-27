@@ -19,9 +19,9 @@ describeScenario("a whole game, from /game to Confirm", (chat) => {
     expect(chat.cardText()).not.toContain("Who went first?");
   });
 
-  it("should add Back while keeping the card throwable", () => {
+  it("should put Back where Cancel was, so one button ever closes the card", () => {
     expect(chat.captions()).toContain("↩️ Back");
-    expect(chat.captions()).toContain("❌ Cancel");
+    expect(chat.captions()).not.toContain("❌ Cancel");
   });
 
   it("should answer a tap with the position it recorded", async () => {

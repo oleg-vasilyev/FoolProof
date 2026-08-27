@@ -1,7 +1,5 @@
-import { Phase } from "#live-game/domain/card-states.ts";
-import { ActionKind } from "#live-game/domain/card-states.ts";
+import { ActionKind, Phase } from "#live-game/domain/card-states.ts";
 import {
-  cancelAvailable,
   drawAvailable,
   finalPlacements,
   isReady,
@@ -11,9 +9,15 @@ import {
   type CardState,
 } from "#live-game/domain/card-state.ts";
 import { encodeCallback } from "#live-game/render/callback-data-codec.ts";
+import { controlRow } from "#shared/telegram/control-row.ts";
 import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#live-game/copy.ts";
 
+
+interface CardTap {
+  readonly gameId: number;
+  readonly version: number;
+}
 
 const captionFor = (
   copy: Copy,
@@ -36,43 +40,24 @@ const captionFor = (
   return `${sharedFinish ? copy.markDraw : copy.markFool} ${name}`;
 };
 
-const controlRow = (
-  copy: Copy,
-  state: CardState,
-  gameId: number,
-  version: number
-): readonly InlineButton[] => {
+const buttonFor = (tap: CardTap, text: string, action: ActionKind): InlineButton => ({
+  text,
+  callback_data: encodeCallback({ gameId: tap.gameId, action, slot: null, version: tap.version }),
+});
+
+const drawRows = (copy: Copy, state: CardState, tap: CardTap): InlineKeyboardRows =>
+  drawAvailable(state) ? [[buttonFor(tap, copy.buttonDraw, ActionKind.Draw)]] : [];
+
+const controlsFor = (copy: Copy, state: CardState, tap: CardTap): readonly InlineButton[] => {
   const phase = phaseOf(state);
 
-  const cancel: InlineButton = {
-    text: copy.buttonCancel,
-    callback_data: encodeCallback({ gameId, action: ActionKind.Cancel, slot: null, version }),
-  };
-
-  const back: InlineButton = {
-    text: copy.buttonBack,
-    callback_data: encodeCallback({ gameId, action: ActionKind.Back, slot: null, version }),
-  };
-
-  switch (phase) {
-    case Phase.PickStarter:
-      return [cancel];
-
-    case Phase.Ready:
-      return [
-        back,
-        { text: copy.buttonConfirm, callback_data: encodeCallback({ gameId, action: ActionKind.Confirm, slot: null, version }) },
-      ];
-
-    case Phase.Recording:
-      return [
-        back,
-        ...(drawAvailable(state)
-          ? [{ text: copy.buttonDraw, callback_data: encodeCallback({ gameId, action: ActionKind.Draw, slot: null, version }) }]
-          : []),
-        ...(cancelAvailable(state) ? [cancel] : []),
-      ];
-  }
+  return controlRow({
+    cancel: buttonFor(tap, copy.buttonCancel, ActionKind.Cancel),
+    back: buttonFor(tap, copy.buttonBack, ActionKind.Back),
+    commit:
+      phase === Phase.Ready ? buttonFor(tap, copy.buttonConfirm, ActionKind.Confirm) : null,
+    anythingToUndo: phase !== Phase.PickStarter,
+  });
 };
 
 export const renderKeyboard = (
@@ -81,6 +66,7 @@ export const renderKeyboard = (
   gameId: number,
   version: number
 ): InlineKeyboardRows => {
+  const tap = { gameId, version };
   const positions = new Map(finalPlacements(state).map(({ slot, position }) => [slot, position]));
   const sharedFinish = isReady(state) && remainingSlots(state).length > 1;
 
@@ -91,5 +77,5 @@ export const renderKeyboard = (
     },
   ]);
 
-  return [...playerRows, controlRow(copy, state, gameId, version)];
+  return [...playerRows, ...drawRows(copy, state, tap), controlsFor(copy, state, tap)];
 };

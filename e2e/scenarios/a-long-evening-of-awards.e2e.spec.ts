@@ -7,6 +7,8 @@ const CONFIRM = "✅ Confirm";
 
 const CANCEL = "❌ Cancel";
 
+const BACK = "↩️ Back";
+
 const PNG_MAGIC = "89504e47";
 
 const MAGIC_LENGTH = 4;
@@ -79,7 +81,7 @@ describeScenario("a long evening, with the table changing under it", (chat) => {
     await chat.tap("Oleg");
     await chat.tap("Anya");
     await chat.tap("Roma");
-    await chat.tap("▶️ Play");
+    await chat.tap("✅ Play");
 
     expect(chat.cardText()).toContain("Who went first?");
 
@@ -111,6 +113,7 @@ describeScenario("a long evening, with the table changing under it", (chat) => {
 
   it("should leave nothing open behind it", async () => {
     await chat.say("/next");
+    await chat.tap(BACK);
     await chat.tap(CANCEL);
 
     expect(chat.captions()).toEqual([]);
