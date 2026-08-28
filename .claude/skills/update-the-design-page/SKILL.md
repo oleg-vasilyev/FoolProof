@@ -1,11 +1,20 @@
 ---
 name: update-the-design-page
 description: Bring the Durak Stats Poster System page in Claude Design back in step with what the code actually draws. Stage 5, after the pictures have been redrawn — use after the design changed mid-phase, after a new chart was drawn on the page, or after refresh-the-pictures redrew the mockups. Covers pulling the page, splicing the real drawings in, and pushing it back byte-checked.
+context: fork
+agent: general-purpose
+background: false
 ---
 
 # Updating the design page
 
 > **Stage 5** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
+
+**Do this now, in a subagent that remembers no conversation.** What moved is
+`$ARGUMENTS`; when that is empty, read it off `git diff` over `docs/mockups/`. Hand
+back only the revision the page now carries, step 4's byte verdict, and each sentence
+step 3 changed with what it said before. If something decisive is in neither this
+file, `$ARGUMENTS` nor the disk, stop and say so rather than guess at the page.
 
 The page is the design's home and the renderer is the drawing's home; whichever
 moved, the page must end up showing what the code actually draws. A page

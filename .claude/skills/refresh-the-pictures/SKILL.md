@@ -7,6 +7,13 @@ description: Everything the picture gate needs once it opens — the checklist o
 
 > **Stage 5** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
 
+**This skill does not carry `context: fork`, and the reason is a rule rather than a
+preference.** Its triage half is read by the caller *after* the drawing is done — gate
+6 leaves the conclusion with whoever opened the gate — and `e2e/harness/settling.ts`
+and the `deep-checkup` brief both send a reader here for one measuring command. A skill
+consulted as reference may not fork, because invoking it would then run a whole gate
+where one paragraph was wanted. `TECH-DEBT.md` carries what would have to move first.
+
 Every picture in the repository is a copy of something the code or the design
 can change without it. Three families are gated, the rest have nothing but this
 table — so the skill *is* the checklist: after any implemented visual change,
@@ -95,7 +102,7 @@ polices consistency and not approval: writing the new edge into the list yoursel
 makes it consistent and leaves it unapproved, so say out loud that you did.
 
 The three rules below are stated again in the `poster-designer` brief, deliberately —
-a subagent cannot load a skill, and a list of edges written without them is the very
+that agent's `tools:` list has no Skill tool, and a list of edges written without them is the very
 failure they describe. That brief carries a fourth this step does not need, since the
 list is written there: a case that cannot be constructed is a finding, not a panel
 quietly dropped. Two wordings, nothing checking them against each other — change one
@@ -232,6 +239,6 @@ right edge, and two more crowned a comeback that never fell below mid-table.
 
 ## What this skill hands off
 
-If the mockups or the posters were redrawn, the page in Claude Design is now
-behind the code — that is a separate job with its own trap list: load the
-**`update-the-design-page`** skill.
+If the mockups or the posters were redrawn, the page in Claude Design is now behind
+the code — a separate job with its own trap list, and a `context: fork` skill — so
+invoke **`update-the-design-page`**, naming which drawings moved, and read its answer.

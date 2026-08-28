@@ -25,10 +25,9 @@ an override or a standing advisory that costs attention at every audit. It is a
 development dependency and never runs on the server, which is why this is a
 tidiness problem rather than a security one.
 
-**Stryker 10.0.0 was checked on 19 Aug 2026 and carries the same
-`typed-rest-client ~2.3.0`**, so a major bump does not close this. An override is a
-claim that a package works against a version its own author never tested; the
-mutation run keeps that claim honest, and it passes.
+**Stryker 10.0.0 carries the same `typed-rest-client ~2.3.0`**, so a major bump does
+not close this, and 2.3.1 still pins `qs 6.15.1` exactly. An override claims a package
+works against a version its author never tested; the mutation run keeps that honest.
 
 **Delete the block when Stryker ships a release that bumps `typed-rest-client`
 itself** — `npm audit` going quiet without it is the check.
@@ -42,16 +41,14 @@ and noticing an absence on a monthly rhythm is not something a person does.
 Nothing polls the timer's state, and `/status` reports the database it is using
 without saying when it was last copied.
 
-The honest fix is one line in the diagnostics report: the age of the newest file
-in the backup directory, red past forty days. It is small, and it is deliberately
-not done yet, because it needs `/status` to read a path that is not the database
-— the first time that feature would touch the filesystem for a reason other than
-the one it was built for.
+The honest fix is one line in the diagnostics report: the age of the newest file in the
+backup directory, red past forty days. It is deliberately not done yet, because it needs
+`/status` to read a path that is not the database — the first time that feature would
+touch the filesystem for a reason other than the one it was built for.
 
-A checkup on 24 August found the timer has never actually fired on schedule: the
-only snapshot that exists was taken by hand on 13 August, and the first scheduled
-run is 1 September. So the monthly path is not merely unwatched — it is untested,
-and the first thing it will prove is whether it works at all.
+A checkup found the timer has never actually fired on schedule: the only snapshot is a
+hand-made one from 13 August and the first scheduled run is 1 September, so the monthly
+path is untested rather than merely unwatched.
 
 **Pick it up when the timer goes back to daily**, which is the same trigger as a
 second table starting to play — or sooner, the first time the answer to "when did
@@ -84,9 +81,8 @@ that flushes the pending debounced edit before the process ends — is exercised
 units and by hand, never by a scenario.
 
 Closing it honestly would mean a shutdown channel in `src/` existing only for the
-harness, and this project does not put test hooks in the app: `BOT_API_ROOT` is in
-`src/` because a self-hosted Bot API server is a real Telegram feature, not because
-e2e wanted a seam.
+harness, and this project puts no test hooks in the app: `BOT_API_ROOT` is there because
+a self-hosted Bot API server is a real Telegram feature, not because e2e wanted a seam.
 
 **Pick it up if a lost edit on shutdown ever reaches a real Friday** — that is the
 evidence that the gap costs more than the seam would.
@@ -101,17 +97,11 @@ holder" for the evening's awards. Three more reduces of the same shape live in
 best and the worst night, `rival-facts.ts` ranks pairings by a merit with two
 tie-breaks, and `rarest-of.ts` keeps the lowest binomial tail with none at all.
 
-Two phases in a row moved the count rather than settling it. The trigger as written
-— "collapse them when a fourth ranking appears" — fired and was stepped over, which
-means it was the wrong trigger: a count does not say whether the shapes want to be
-one function, and these four genuinely differ in what they rank on (a merit, a merit
-plus direction, a merit plus tie-breaks, a bare minimum).
-
-So the trigger is replaced by the one that would actually pay: **collapse them the
-first time two of the four disagree about a tie-break and the difference turns out
-to be a bug rather than a decision.** Until then the duplication costs four small
-reduces; the shared `Merit` carrying a direction, a tie-break list and an ordering
-would cost more than that at every call site.
+Two phases moved the count rather than settling it, so the count was the wrong trigger:
+these four genuinely differ in what they rank on. **Collapse them the first time two of
+them disagree about a tie-break and the difference turns out to be a bug rather than a
+decision.** Until then the duplication costs four small reduces, and a shared `Merit`
+carrying a direction, a tie-break list and an ordering would cost more at every call site.
 
 ## Counting games is spelled out twice
 
@@ -606,6 +596,15 @@ that opens the mutation gate** — "touches `scripts/`" fired on one that only m
 `leaving-callback-codec.ts` writes `W:` and reads `w:` too, so a screen already in a
 chat keeps a working `❌ Cancel` across the deploy that changed the shape. **Drop the
 old branch the next time this codec is opened** — such screens go stale within a day.
+
+## The picture gate cannot fork until its triage half moves out
+
+`refresh-the-pictures` may not wear `context: fork` while three readers want its text
+rather than its task; the skill's own opening names them. **Fork it once that triage
+sits on a page beside `finish-phase`, the measuring one-liner is written where it is
+needed rather than pointed at, and one real picture phase has proven the handoff** — a
+fork that cannot reach the `poster-reader` would read pictures its own run drew, and
+that returns looking exactly like success.
 
 ## Not debt, deliberately
 

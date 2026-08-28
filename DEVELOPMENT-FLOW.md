@@ -192,9 +192,9 @@ sequenceDiagram
         end
         C->>C: for each reading that surprised, decide whether the reading or the line is wrong — and what the line should say instead
         opt the redrawn pictures also live on the design page
-            C->>K: the update-the-design-page skill
-            K-->>C: pull the page, splice the real drawings in, bump the revision
-            C->>D: the implemented reality, pushed back to the design page
+            C->>K: the update-the-design-page skill (a fork — it runs as its own subagent, so it pulls the page, splices the real drawings in and bumps the revision itself)
+            K->>D: the implemented reality, pushed back to the design page
+            K-->>C: the revision the page now carries, the byte check that must pass before design-page.sync is committed, and every sentence it rewrote
         end
     end
     end
@@ -202,9 +202,11 @@ sequenceDiagram
     rect rgb(253, 242, 248)
     note over C,K: Stage 6. Retrospective — fixing the process and the documents
     opt something was rebuilt, a gate ran twice, an agent was paid for nothing, or a bug reached a player
-        C->>K: the retrospective skill
-        K-->>C: six questions about how the work went, each answered with a count, the last asking what should now come out
-        C->>C: answer them: what was rebuilt, what ran for nothing — each a number, not an impression
+        C->>S: the retrospective, run in a fork of this very conversation — its evidence is the transcript, which no cold agent can see and a fork inherits whole
+        S->>K: the retrospective skill
+        K-->>S: six questions about how the work went, each answered with a count, the last asking what should now come out
+        S-->>C: the six answers, each carrying its number rather than an impression, and the rules it proposes — but it writes no file, because a reviewer may still be reading
+        C->>C: land each rule yourself, in the file whose readers it is for
         opt the phase fixed something that had already shipped
             C->>C: name the gate that should have caught it, and what it would take for that gate to see it
         end

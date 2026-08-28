@@ -56,9 +56,9 @@ a convention violation, not a nit — read the message before reaching for a
 disable comment, which is itself banned in `src/`.
 
 **A phase that wrote a check owes it a probe and a calibration** before quoting
-anything it prints — break its subject in a shape it has never been shown, and treat
-its first output as a claim about the instrument. Both rules, and the two gates here
-that went blind proving them, are the `fix-a-bug` skill's, under *Proving a cause*.
+anything it prints — break its subject in a shape it has never been shown, and treat its
+first output as a claim about the instrument. Both rules, and the two gates that went
+blind proving them, are the `fix-a-bug` skill's, under *Proving a cause*.
 
 **A refusal is evidence about the new thing, not an obstacle in front of it.** Two
 shapes, one root, and one phase hit both: a budget refused a paragraph, so two older
@@ -204,9 +204,15 @@ reading of a tree you knew was wrong is a reading you have to take twice. Land t
 fixes, get `npm run check` green, *then* review.
 
 **Spend the waiting on read-only work** — a control run, a report, the
-retrospective's counting. This rule has now been broken three times, and never by a
-decision: every time it was one small fix that seemed free because the agent was
-out. If the diff is worth reviewing, it is worth holding still for five minutes.
+retrospective's counting. It has been broken repeatedly and never by a decision:
+usually one small fix that seemed free because the agent was out. If the diff is worth
+reviewing, it is worth holding still for five minutes.
+
+**The other half of holding still is not yours.** A review launched while the owner is
+still refining something in the diff is killed by their next message rather than by
+your edit — one phase killed two reviews inside four minutes, both over the same
+drawing, and paid for two runs that reported nothing. Whatever is still being discussed
+with the owner, the review waits on the discussion and not on the code.
 
 The three breaks had one shape, so the fix is a question asked **before** launching,
 not more resolve afterwards: **what does this phase change outside `src/`?** Deploy
@@ -288,10 +294,10 @@ can change a drawing. It opens when the diff touched anything a picture is made 
 stays shut otherwise, with the commit message carrying the reason
 (`write-a-commit` has the shape).
 
-**Load the `refresh-the-pictures` skill and follow it.** What the gallery draws, how
-a case is built so that it presses a real edge, how the reader is briefed, and what
-to do with what comes back all live there — every line of it needed only while this
-gate is open, which is the whole argument for it living there and not here.
+**Load the `refresh-the-pictures` skill and follow it.** What the gallery draws, how a
+case is built so that it presses a real edge, how the reader is briefed, and what to do
+with what comes back all live there — every line of it needed only while this gate is
+open, which is the whole argument for it living there and not here.
 
 Three things decide whether this is a gate at all, so they are known before it opens:
 
@@ -322,10 +328,10 @@ the list is finished.
 ## 7. A retrospective — when the phase actually cost something
 
 Gate 5 judges the diff; this one judges what producing it cost — rework, gates run
-twice, subagents briefed too thinly to be useful. Load the **`retrospective`** skill
-and answer its six questions with counts, then land each lesson as a rule somewhere
-durable. It runs before the final commit, while the transcript that is its evidence
-still exists.
+twice, subagents briefed too thinly to be useful. **Run the `retrospective` skill in a
+fork of this conversation** — its evidence is the transcript, so a cold agent is blind
+to it and a fork inherits it whole — then land each lesson as a rule somewhere durable
+yourself, rather than letting the fork write while a reviewer may still be reading.
 
 **It opens when there is something to count**: something was rebuilt, a gate ran
 twice, an agent was paid for a report nobody used, or a decision was guessed that was

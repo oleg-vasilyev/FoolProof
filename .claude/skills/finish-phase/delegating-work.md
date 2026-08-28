@@ -11,11 +11,9 @@ window, and wall-clock while you work on something disjoint.
 is that the reader did not write the thing: 89k tokens caught three things about to
 ship, including a false sentence written earlier in the same phase by the same person
 who then re-read it and approved it. Four phases in one night went four for four on
-real bugs rather than style — a systemd unit that would have restarted the bot every
-ten seconds forever when `.env.production` was missing, a measuring command in a skill
-left broken by a signature change, a test that by construction could not fail, a false
-`PLAN.md` claim about cross-chat queries, and a deploy that would have rolled
-production back onto an older tag. You cannot review your own work by reading it again.
+real bugs rather than style, the sharpest a systemd unit that would have restarted the
+bot every ten seconds forever when `.env.production` was missing. You cannot review
+your own work by reading it again.
 
 **Writing is delegated only above ten files, and only once the artifact those files
 are written against has been generated and looked at.** That narrows an earlier rule
@@ -28,23 +26,21 @@ number weighs writing a brief against writing the code yourself; a read-only err
 no such arithmetic, because the alternative is reading the files in your own window and
 then carrying them for the rest of the phase. One brief sent cold to read the agent
 files against each other cost 149k tokens in a single call and returned three defects
-nothing else was looking for — a pointer to server details no README holds, a *known
-asymmetry* in the deploy that had been fixed two commits earlier, and a gallery count
-one short. Three conditions, every time: the question stands apart from what you are
-doing, it is answerable by opening files rather than by holding this session's
-reasoning, and you can say what the answer must contain — fail the last and you get an
-essay. **The moment is not fixed, but one of them is owed.** A gate's waiting is where
+nothing else was looking for, the sharpest a *known asymmetry* in the deploy that had
+been fixed two commits earlier. Three conditions, every time: the question stands apart
+from what you are doing, it is answerable by opening files rather than by holding this
+session's reasoning, and you can say what the answer must contain — fail the last and
+you get an essay. **The moment is not fixed, but one is owed.** A gate's waiting is where
 it is easiest to notice, since the review reliably leaves five minutes with nothing to
 edit. Framing is where it belongs: an assumption checked before anything is built costs
 nothing to act on, and it comes **before the questions that go to the owner** — a
 question the repository can settle should never reach them, and the ones left after it
 are the ones only they can answer.
 
-**Neither threshold opens what was always closed.** Whatever is expensive to be
-wrong about stays in your hands at any size — the mechanic a player will feel, a
-cross-feature hazard, anything touching `shared/` or the schema. A twelve-file batch
-across `shared/` is not delegable because it is twelve files; it is the case the count
-was never about.
+**Neither threshold opens what was always closed.** Whatever is expensive to be wrong
+about stays in your hands at any size — the mechanic a player will feel, a cross-feature
+hazard, anything touching `shared/` or the schema. A twelve-file batch across `shared/`
+is not delegable for being twelve files; it is the case the count was never about.
 
 When a batch does go out, on `model: "sonnet"` because settled transcription is not
 judgement:
@@ -108,3 +104,16 @@ judgement:
   gallery is the exception that runs the other way: judging a drawing needs eyes that
   have not lived the phase, so it is delegated *because* it is judgement. What stays
   yours there is the conclusion — which reading is wrong, and what the line should say.
+
+## A fork is a third kind, and it is priced by the conversation
+
+A **fork** inherits the whole conversation instead of starting cold, so it is priced by
+the *conversation* rather than the task — a one-line answer needing no tools measured
+391762 tokens here — and buys your own window back, nothing else. **Never fork a gate
+whose value is coldness**: forking the reviewer or either reader is re-reading your own
+work under a second name. **The retrospective is the one gate a fork is strictly better
+at**, its evidence being the transcript no cold agent sees.
+
+`context: fork` is a *different* mechanism: an isolated subagent driven by the skill
+body, with no conversation. It reads as *always delegated* and writes on every
+invocation whatever the count, so only a skill never consulted as reference may wear it.
