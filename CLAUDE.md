@@ -2,29 +2,14 @@
 
 This file is loaded before every session, so it holds only what has to be known
 *before* the first edit. Anything needed for one specific job lives in a skill or
-beside the code it describes:
+beside the code it describes.
 
-| Doing this | Read |
-|---|---|
-| Adding a command, a screen, a feature folder | `add-a-feature` skill |
-| Something the bot already does wrong | `fix-a-bug` skill |
-| Adding a query | `add-repository-method` skill |
-| Writing or changing any spec | `write-a-spec` skill |
-| Taking on a list of changes, and closing it | `finish-phase` skill |
-| Judging how the work itself went | `retrospective` skill |
-| Writing a commit message, cutting a release | `write-a-commit` skill |
-| Writing or changing any document | `write-a-doc` skill |
-| Writing or changing an e2e scenario | `write-an-e2e-scenario` skill |
-| The phase drew something, or a picture may have gone stale | `refresh-the-pictures` skill |
-| The Claude Design page fell behind the code | `update-the-design-page` skill |
-| Changing the e2e harness itself | [`e2e/README.md`](e2e/README.md) |
-| A mockup for anything the bot draws | `poster-designer` agent |
-| A phase's whole diff, before its final commit | `phase-reviewer` agent |
-| A frozen plan, before any code is written for it | `plan-reviewer` agent |
-| Reading a drawing or a line as a player would | `poster-reader` agent |
-| A copy table, read as finished sentences in both languages | `copy-reader` agent |
-| A skill over budget, a rewrite of one proposed, a rule perhaps no longer enforced | `skill-auditor` agent |
-| A weekly look at the project and its server | `deep-checkup` agent |
+**This file used to route each job to its skill in a table, and does not any more.**
+A skill is loaded at the right moment because its own `description:` says which one
+that is — not because a second, hand-kept copy of the answer lives here. That copy
+drifted for weeks and cost a phase its sequencing. The roster and the order the jobs
+come in are [`DEVELOPMENT-FLOW.md`](DEVELOPMENT-FLOW.md), which draws every skill and
+agent at its stage and is gated in both directions.
 
 Five documents, one job each:
 
@@ -303,18 +288,15 @@ carries on, because the state is unknown by definition.
 The `write-a-spec` skill has everything about writing one. Two facts shape the
 source tree, so they are here:
 
-- Specs sit next to the code as `*.spec.ts`, and **so do the stubs**. A stub for
-  something we did not write (grammY's `Api`, a `Context`) sits next to its only
-  consumer instead.
+- Specs sit next to the code as `*.spec.ts`, and **so do the stubs** — one for code
+  we did not write (grammY's `Api`, a `Context`) sits beside its only consumer.
 - **Everything mockable has a stub, and specs use it instead of a hand-written
-  fake** — everything in `shared/`, and every feature entry point. The skill has
-  the two silent failures that made it a rule.
+  fake** — all of `shared/`, and every feature entry point.
 
 `e2e/` is a different world with its own rules — the `write-an-e2e-scenario` skill
-and [`e2e/README.md`](e2e/README.md) — and it is a gate, not an experiment. One
-obligation reaches back here: **a keyboard whose buttons carry `callback_data` gets
-scenarios**, because whether a tap reaches the feature owning it is a fact about
-real grammY. A URL button routes nothing back.
+and [`e2e/README.md`](e2e/README.md) — and a gate, not an experiment. One obligation
+reaches back here: **a keyboard whose buttons carry `callback_data` gets scenarios**,
+because whether a tap reaches the feature owning it is a fact about real grammY.
 
 ## Checks
 
@@ -340,10 +322,9 @@ judgement. `eslint.config.js` holds the checkable ones, several with no core equ
 | Imports point downward, features stay independent, `e2e/` stays outside | `no-restricted-imports`, one zone per layer |
 | An alias ban (`#live-game/**`) fires, and survives `await import(…)` | a `regex` pattern, and the same bans as `no-restricted-syntax` |
 
-The zones are the valuable ones, and **a zone is not finished until a deliberate
-violation has been shown to fail the lint**: one that never fires looks exactly like
-one with nothing to report, and this project has shipped two that never fired. The
-`add-a-feature` skill has both traps and how to prove a new zone.
+The zones are the valuable ones, and a new one is not finished until a deliberate
+violation has been shown to fail the lint — the ones that never fired, and how to
+prove a new zone, are the `add-a-feature` skill's.
 
 A `PostToolUse` hook lints each file as it is written, so a violation surfaces at
 the edit instead of at the end of the turn.
@@ -353,12 +334,11 @@ the edit instead of at the end of the turn.
 **Any list of changes to this repository is a phase**, feature or not — closing
 findings, refactoring, tooling. A phase is done when the code is *releasable*, not
 when it works, and what that costs is the **`finish-phase` skill**'s gates, with
-their numbers in the commit message. Three of them — the diff reviewed, the copy
-read as finished sentences, the gallery looked at — may not be done by whoever wrote
-the diff, which is why each is a named agent above. **A tag is cut only when a
+their numbers in the commit message; three of them may not be run by whoever wrote
+the diff, which is why the flow drawing hands each to an agent of its own. **A tag is cut only when a
 player or the operator gets something new**; everything else rides the next one.
-**Say how big the phase is before starting it**, in a line, so it can be argued
-down. The list somebody hands you never contains the gates.
+**Say how big the phase is before starting it**, in a line, so it can be argued down;
+the list somebody hands you never contains the gates.
 
 ## Configuration
 

@@ -1,8 +1,9 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { A_LINE, FIRST_GROUP, SECOND_GROUP } from "../markdown-text.ts";
+import { A_LINE, FIRST_GROUP } from "../markdown-text.ts";
 import { FLOW_DOCUMENT, read } from "../document-files.ts";
+import { estimateComplaints, fieldsIn } from "./phase-log-fields.ts";
 
 
 const NOTHING = 0;
@@ -18,10 +19,6 @@ const A_MARKDOWN_FILE = /\.md$/;
 const A_STAGE_TITLE = /^\s*note over [^:]+: Stage \d+\.\s*(.+?)\s*$/;
 
 const A_STEP = /^\s*[A-Za-z][A-Za-z0-9]*-?->>[A-Za-z][A-Za-z0-9]*:\s*(.+?)\s*$/;
-
-const A_FENCE = /^\s*```/;
-
-const A_FIELD = /^([A-Z][A-Za-z-]*):[ \t]*(.*)$/;
 
 const BETWEEN_STAGES = /\s*→\s*/;
 
@@ -44,6 +41,8 @@ const OFF_MAP = "Off-map";
 const THE_OWED_FIELDS = [WALKED, SKIPPED, OFF_MAP];
 
 export const PHASE_LOGS_FOLDER = "logbook/phases";
+
+const THE_PUBLISHED_TRUNK = "origin/main...HEAD";
 
 export interface Marker {
   readonly kind: "stage" | "step";
@@ -69,54 +68,6 @@ export const markersIn = (drawing: string): readonly Marker[] =>
 
 export const stageTitlesIn = (markers: readonly Marker[]): readonly string[] =>
   markers.filter((marker) => marker.kind === A_STAGE).map((marker) => marker.text);
-
-interface Fields {
-  readonly standing: string;
-  readonly said: ReadonlyMap<string, string>;
-}
-
-const NOTHING_READ: Fields = { standing: NOWHERE, said: new Map() };
-
-export const afterLogLine = (fields: Fields, line: string): Fields => {
-  const started = A_FIELD.exec(line);
-
-  if (started) {
-    const field = started[FIRST_GROUP] ?? NOWHERE;
-
-    return {
-      standing: field,
-      said: new Map(fields.said).set(field, started[SECOND_GROUP]?.trim() ?? NOWHERE),
-    };
-  }
-
-  const carried = fields.said.get(fields.standing);
-
-  if (carried === undefined || line.trim() === NOWHERE) {
-    return fields;
-  }
-
-  return {
-    ...fields,
-    said: new Map(fields.said).set(fields.standing, `${carried} ${line.trim()}`.trim()),
-  };
-};
-
-export const theLogBlockIn = (log: string): readonly string[] => {
-  const lines = log.split(A_LINE);
-  const opens = lines.findIndex((line) => A_FENCE.test(line));
-
-  if (opens === NOT_FOUND) {
-    return [];
-  }
-
-  const body = lines.slice(opens + ONE);
-  const closes = body.findIndex((line) => A_FENCE.test(line));
-
-  return closes === NOT_FOUND ? body : body.slice(FIRST, closes);
-};
-
-export const fieldsIn = (log: string): ReadonlyMap<string, string> =>
-  theLogBlockIn(log).reduce(afterLogLine, NOTHING_READ).said;
 
 export const citationsIn = (value: string, separator: RegExp): readonly string[] =>
   value.trim() === NOTHING_TO_SAY || value.trim() === NOWHERE
@@ -186,15 +137,19 @@ export const pathComplaints = (
   }
 
   const fields = fieldsIn(log);
+  const estimated = estimateComplaints(file, fields);
   const missing = THE_OWED_FIELDS.filter((field) => !fields.has(field));
 
   if (missing.length > NOTHING) {
-    return missing.map(
-      (field) =>
-        `${file}: no "${field}:" line — the walk through ${FLOW_DOCUMENT} is what shows a ` +
-        `phase that went round a stage rather than through it, and a field left out reads ` +
-        `exactly like a stage nobody skipped`
-    );
+    return [
+      ...estimated,
+      ...missing.map(
+        (field) =>
+          `${file}: no "${field}:" line — the walk through ${FLOW_DOCUMENT} is what shows a ` +
+          `phase that went round a stage rather than through it, and a field left out reads ` +
+          `exactly like a stage nobody skipped`
+      ),
+    ];
   }
 
   const walked = citationsIn(fields.get(WALKED) ?? NOWHERE, BETWEEN_STAGES);
@@ -215,6 +170,7 @@ export const pathComplaints = (
   );
 
   return [
+    ...estimated,
     ...walked.flatMap((citation) =>
       complaintAbout(file, WALKED, citation, markersMatching(citation, markers))
     ),
@@ -282,6 +238,7 @@ export const phaseLogsOffTheMap = (): readonly string[] =>
         stillBeingWritten([
           ...gitSays("diff", "--name-only", "HEAD", "--", PHASE_LOGS_FOLDER),
           ...gitSays("ls-files", "--others", "--exclude-standard", "--", PHASE_LOGS_FOLDER),
+          ...gitSays("diff", "--name-only", THE_PUBLISHED_TRUNK, "--", PHASE_LOGS_FOLDER),
         ])
       )
     : [];

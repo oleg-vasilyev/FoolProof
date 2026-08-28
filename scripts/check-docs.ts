@@ -5,7 +5,7 @@ import {
 } from "./docs-check/documents/mermaid-rendering.ts";
 import { agentsWithoutAContract } from "./docs-check/documents/agent-contracts.ts";
 import { frontmatterThatWillNotParse } from "./docs-check/documents/frontmatter-yaml.ts";
-import { brokenLinks, specContentsOutOfStep, unreachableHelp } from "./docs-check/documents/document-references.ts";
+import { brokenLinks, specContentsOutOfStep } from "./docs-check/documents/document-references.ts";
 import { overBudget, pagesOverBudget, skillsOverBudget } from "./docs-check/documents/reading-budgets.ts";
 import { citationsWithNoFile, pagesNobodyOpens } from "./docs-check/documents/file-citations.ts";
 import { envTemplateOutOfStep, requiredKeysOutOfStep } from "./docs-check/source/env-keys.ts";
@@ -20,6 +20,7 @@ import { formsBakedIntoCopy } from "./docs-check/source/copy-word-forms.ts";
 import { debtWithoutATrigger } from "./docs-check/documents/debt-entry-triggers.ts";
 import { DOCUMENTS } from "./docs-check/document-files.ts";
 import {
+  descriptionsOffTheirStage,
   flowOutOfStep,
   flowRepliesLeaveTheLaneTheyWereAskedOf,
   stagesOutOfStep,
@@ -46,7 +47,6 @@ const complaints = [
   ...formsBakedIntoCopy(),
   ...brokenLinks(),
   ...specContentsOutOfStep(),
-  ...unreachableHelp(),
   ...overBudget(),
   ...skillsOverBudget(),
   ...pagesOverBudget(),
@@ -60,6 +60,7 @@ const complaints = [
   ...flowWouldNotRender(),
   ...mermaidLinesCarryingASeparator(),
   ...stagesOutOfStep(),
+  ...descriptionsOffTheirStage(),
   ...phaseLogsOffTheMap(),
   ...foldersMissingFromTheTree(),
   ...scriptsOutOfStep(),

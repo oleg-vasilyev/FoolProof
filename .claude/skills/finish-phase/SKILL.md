@@ -1,6 +1,6 @@
 ---
 name: finish-phase
-description: "Run a development phase in FoolProof from the work being taken on to the commit or the tag that ends it — the gates (lint and types, coverage, mutation, e2e, diff review, and the conditional ones: a real evening, the poster gallery, the copy tables read as sentences when they are written, a retrospective when the phase cost something) and the format of the phase's final commit message. Load it when ANY list of changes to this repository is accepted — closing audit findings, refactoring, cleanup, tooling, a new feature — because such a list is a phase whether or not it adds a feature, and the list somebody hands you never contains the gates. Also when a phase is being wrapped up, a release is being cut, or the user asks whether the code is releasable."
+description: "Take a FoolProof phase from written code to the commit or the tag that ends it — the gates (lint and types, coverage, mutation, e2e, diff review, and the conditional ones: a real evening, the poster gallery, the copy tables read as sentences when they are written, a retrospective when the phase cost something) and the format of the phase's final commit message. This is stage 3 and the stages after it, so load it when the code is written and the gates are due — a phase being wrapped up, a release being cut, an external list of changes that has run out, or the user asking whether the code is releasable. Do NOT load it at stage 1: recognising a list of changes as a phase is not the same as opening this skill, and framing needs only two things it does not hold — say the phase's size in one line, and read TECH-DEBT.md against the task."
 ---
 
 # Finishing a phase
@@ -59,6 +59,16 @@ disable comment, which is itself banned in `src/`.
 anything it prints — break its subject in a shape it has never been shown, and treat
 its first output as a claim about the instrument. Both rules, and the two gates here
 that went blind proving them, are the `fix-a-bug` skill's, under *Proving a cause*.
+
+**A refusal is evidence about the new thing, not an obstacle in front of it.** Two
+shapes, one root, and one phase hit both: a budget refused a paragraph, so two older
+paragraphs were displaced to fit it — and the paragraph was then deleted, because
+what the budget was saying is that it stated a rule the file next door already
+enforced. The same hour, a gate was carefully repointed at a document that a check
+twelve lines above already guarded, strictly, in both directions; the reviewer's
+phrase for it was *the duplication rule wearing a gate's clothes*. So before paying
+to fit something in, ask what already covers it: **read the neighbour before
+displacing it**, and before adding a check, read every check over the same subject.
 
 **A phase that touched `package.json` has a gate `npm run check` cannot see.** It
 resolves against this machine, so a lock file written here can be unsatisfiable on

@@ -1,3 +1,4 @@
+import { readdirSync } from "node:fs";
 import unusedImports from "eslint-plugin-unused-imports";
 import tsParser from "@typescript-eslint/parser";
 
@@ -496,7 +497,14 @@ const forbid = (bans, message) => {
 
 const FRAMEWORK = ["grammy", "grammy/*", "@resvg/*", "node:*"];
 
-const FEATURES = ["live-game", "merge-names", "scoresheet", "diagnostics", "language"];
+const FEATURES_FOLDER = "src/features";
+
+// Read from disk rather than listed: a folder left off a hand-written list gets no
+// fence at all, silently, which is the never-fires class this project has shipped
+// before. Adding a feature now costs nothing here.
+const FEATURES = readdirSync(FEATURES_FOLDER, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name);
 
 // Imports are written as Node subpath aliases (`#live-game/bot/x.ts`), so that is
 // the shape the bans have to name. The relative globs stay listed as well, so a

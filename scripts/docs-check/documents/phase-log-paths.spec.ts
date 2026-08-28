@@ -1,15 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
-  afterLogLine,
   citationsIn,
-  fieldsIn,
   logsOffTheMap,
   markersIn,
   markersMatching,
   pathComplaints,
   stageTitlesIn,
   stillBeingWritten,
-  theLogBlockIn,
   theLogsAmong,
 } from "./phase-log-paths.ts";
 
@@ -189,108 +186,6 @@ describe("stageTitlesIn", () => {
       "Review by an agent",
       "Release to production",
     ]);
-  });
-});
-
-describe("theLogBlockIn", () => {
-  it("should take the lines of the first fenced block and nothing after it", () => {
-    const log = "# A phase\n\n```\nKind:       process\n```\n\nprose that follows\n";
-
-    expect(theLogBlockIn(log)).toEqual(["Kind:       process"]);
-  });
-
-  it("should find nothing in a log that never opens a block", () => {
-    expect(theLogBlockIn("# A phase\n\njust prose\n")).toEqual([]);
-  });
-
-  it("should read to the end when the block was left unclosed", () => {
-    expect(theLogBlockIn("```\nKind:       process\n")).toEqual(["Kind:       process", ""]);
-  });
-
-  it("should not open on a fence quoted inside a sentence", () => {
-    expect(theLogBlockIn("the fence is ```\nKind:       process\n")).toEqual([]);
-  });
-});
-
-describe("afterLogLine", () => {
-  const NOTHING_READ = { standing: "", said: new Map<string, string>() };
-
-  it("should start a field and keep its value", () => {
-    expect(afterLogLine(NOTHING_READ, "Kind:       process").said.get("Kind")).toBe("process");
-  });
-
-  it("should carry a wrapped value onto the field still standing", () => {
-    const read = ["Path:       framing →", "            release"].reduce(afterLogLine, NOTHING_READ);
-
-    expect(read.said.get("Path")).toBe("framing → release");
-  });
-
-  it("should ignore a line arriving before any field has been named", () => {
-    expect(afterLogLine(NOTHING_READ, "   loose prose").said.size).toBe(NOTHING);
-  });
-
-  it("should not let a blank line inside the block pad the value it is standing in", () => {
-    const read = ["Kind:       process", "", "Path:       framing"].reduce(
-      afterLogLine,
-      NOTHING_READ
-    );
-
-    expect(read.said.get("Kind")).toBe("process");
-  });
-
-  it("should read a hyphenated field name, which Off-map is", () => {
-    expect(afterLogLine(NOTHING_READ, "Off-map:    none").said.get("Off-map")).toBe("none");
-  });
-
-  it("should not read a lower-case word before a colon as a field", () => {
-    const read = ["Path:       framing", "note: this is prose"].reduce(afterLogLine, NOTHING_READ);
-
-    expect(read.said.get("Path")).toBe("framing note: this is prose");
-  });
-
-  it("should not read an indented field name as a new field, since that is a wrapped value", () => {
-    const read = ["Path:       framing", "            Kind: not a field"].reduce(
-      afterLogLine,
-      NOTHING_READ
-    );
-
-    expect(read.said.has("Kind")).toBe(false);
-    expect(read.said.get("Path")).toBe("framing Kind: not a field");
-  });
-
-  it("should read a field written tight against its colon", () => {
-    expect(afterLogLine(NOTHING_READ, "Kind:process").said.get("Kind")).toBe("process");
-  });
-
-  it("should trim the value a field was written with", () => {
-    expect(afterLogLine(NOTHING_READ, "Kind:       process   ").said.get("Kind")).toBe("process");
-  });
-
-  it("should trim a wrapped line before joining it on", () => {
-    const read = ["Path:       framing →", "            release   "].reduce(
-      afterLogLine,
-      NOTHING_READ
-    );
-
-    expect(read.said.get("Path")).toBe("framing → release");
-  });
-
-  it("should treat a line of nothing but spaces as blank", () => {
-    const read = ["Kind:       process", "     ", "Path:       framing"].reduce(
-      afterLogLine,
-      NOTHING_READ
-    );
-
-    expect(read.said.get("Kind")).toBe("process");
-  });
-});
-
-describe("fieldsIn", () => {
-  it("should read every field of a log, wrapped values joined", () => {
-    const log = walking("framing → release", "quality gates");
-
-    expect(fieldsIn(log).get("Path")).toBe("framing → release");
-    expect(fieldsIn(log).get("Skipped")).toBe("quality gates");
   });
 });
 
@@ -564,5 +459,22 @@ describe("pathComplaints", () => {
     expect(said).toHaveLength(TWO_COMPLAINTS);
     expect(said.some((complaint) => complaint.includes('names "nowhere"'))).toBe(true);
     expect(said.some((complaint) => complaint.includes('"Release to production" stage'))).toBe(true);
+  });
+});
+
+describe("a log carrying an estimate", () => {
+  const guessing = walking("framing", "quality gates · review").replace(
+    "Off-map:    none",
+    "Off-map:    none\nRan:        ~50 min"
+  );
+
+  it("should be refused alongside the walk it does describe", () => {
+    const said = pathComplaints(A_LOG, guessing, THE_MARKERS, STILL_BEING_WRITTEN).join("\n");
+
+    expect(said).toContain('"Ran: ~50 min"');
+  });
+
+  it("should be let alone once the log is testimony rather than a draft", () => {
+    expect(pathComplaints(A_LOG, guessing, THE_MARKERS, ALREADY_TESTIMONY)).toHaveLength(NOTHING);
   });
 });

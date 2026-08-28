@@ -12,6 +12,7 @@
     "fileName": "reports/mutation/mutation.json"
   },
   "tempDirName": "reports/.stryker-tmp",
+  "ignorePatterns": ["/reports"],
   "htmlReporter": {
     "fileName": "reports/mutation/index.html"
   },

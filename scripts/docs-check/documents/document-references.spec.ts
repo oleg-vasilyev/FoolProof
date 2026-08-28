@@ -2,11 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   linkComplaints,
   specContentsComplaints,
-  unreachableHelpComplaints,
 } from "./document-references.ts";
 
-
-const NO_COMPLAINTS = 0;
 
 const ONE_COMPLAINT = 1;
 
@@ -130,43 +127,5 @@ describe("specContentsComplaints", () => {
 
   it("should not list the contents heading itself as a missing section", () => {
     expect(specContentsComplaints(contentsPointingAt("a-section"))).toEqual([]);
-  });
-});
-
-describe("unreachableHelpComplaints", () => {
-  it("should say nothing when the session document names every skill and agent", () => {
-    const complaints = unreachableHelpComplaints(
-      "read the add-a-feature skill, then the phase-reviewer agent",
-      ["add-a-feature"],
-      ["phase-reviewer"]
-    );
-
-    expect(complaints).toEqual([]);
-  });
-
-  it("should name a skill the session document never routes to", () => {
-    const complaints = unreachableHelpComplaints("nothing here about it", ["orphan-skill"], []);
-
-    expect(complaints).toHaveLength(ONE_COMPLAINT);
-    expect(complaints[FIRST]).toContain('"orphan-skill"');
-    expect(complaints[FIRST]).toContain("nobody loads");
-  });
-
-  it("should name an agent the session document never routes to", () => {
-    const complaints = unreachableHelpComplaints("nothing here about it", [], ["orphan-agent"]);
-
-    expect(complaints).toHaveLength(ONE_COMPLAINT);
-    expect(complaints[FIRST]).toContain('"orphan-agent"');
-    expect(complaints[FIRST]).toContain("never runs");
-  });
-
-  it("should find both kinds of complaint together", () => {
-    const complaints = unreachableHelpComplaints("nothing here", ["orphan-skill"], ["orphan-agent"]);
-
-    expect(complaints).toHaveLength(TWO_COMPLAINTS);
-  });
-
-  it("should say nothing when there is nothing to route to", () => {
-    expect(unreachableHelpComplaints("anything", [], [])).toHaveLength(NO_COMPLAINTS);
   });
 });

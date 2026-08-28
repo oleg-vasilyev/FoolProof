@@ -22,7 +22,7 @@ const PAGE_LINE_BUDGET = 120;
 const SKILL_BUDGETS: Readonly<Record<string, number>> = {
   "add-a-feature": 170,
   "add-repository-method": 80,
-  "finish-phase": 460,
+  "finish-phase": 470,
   "fix-a-bug": 160,
   "refresh-the-pictures": 240,
   retrospective: 185,

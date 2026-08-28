@@ -1,4 +1,12 @@
-import { mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { gzipSync } from "node:zlib";
@@ -17,7 +25,13 @@ const FIRST = 0;
 
 const BYTES_IN_KB = 1024;
 
+const OWNER_ONLY = 0o600;
+
+const NOBODY_ELSE = 0o077;
+
 const HEALTHY = "ok";
+
+process.umask(NOBODY_ELSE);
 
 const env = loadEnv();
 
@@ -38,6 +52,8 @@ const takeSnapshot = (into: string): void => {
   } finally {
     live.close();
   }
+
+  chmodSync(into, OWNER_ONLY);
 };
 
 const whatItHolds = (snapshot: string): string => {
@@ -99,7 +115,7 @@ const contents = whatItHolds(plain);
 
 const archive = `${plain}.gz`;
 
-writeFileSync(archive, gzipSync(readFileSync(plain)));
+writeFileSync(archive, gzipSync(readFileSync(plain)), { mode: OWNER_ONLY });
 rmSync(plain);
 
 const sizeInKb = Math.ceil(statSync(archive).size / BYTES_IN_KB);

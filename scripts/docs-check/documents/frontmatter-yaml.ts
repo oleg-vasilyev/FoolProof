@@ -19,6 +19,10 @@ const A_PLAIN_KEY_AND_VALUE = /^([a-zA-Z_-]+):[ \t]+(.*)$/;
 
 const A_MAPPING_INSIDE = /:[ \t]/;
 
+const A_DESCRIPTION = /^description:[ \t]+(.*)$/;
+
+const A_WRAPPING_QUOTE = /^["']|["']$/g;
+
 export const frontmatterOf = (text: string): readonly string[] => {
   const lines = text.split(BETWEEN_LINES);
 
@@ -57,3 +61,10 @@ export const frontmatterThatWillNotParse = (): readonly string[] => [
     frontmatterComplaints(agentFile(agent), read(agentFile(agent)))
   ),
 ];
+
+export const descriptionIn = (text: string): string =>
+  frontmatterOf(text).flatMap((line) => {
+    const said = A_DESCRIPTION.exec(line)?.[FIRST_GROUP];
+
+    return said === undefined ? [] : [said.replace(A_WRAPPING_QUOTE, "")];
+  })[NOTHING] ?? "";

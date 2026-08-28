@@ -477,18 +477,21 @@ evidence the scaffolding is a thing rather than a coincidence.
 None of these is wrong. They are the places where the next change is most likely to
 be awkward, with the trigger that would make the split pay for itself.
 
-| File | Lines | Why it is on the list | Split it when |
-|---|---|---|---|
-| `features/live-game/bot/card/card-service.ts` | 398 | The largest file in `src/`, and the only one doing four jobs: looking a card up, applying a tap, scheduling the debounced edit, and sweeping idle cards. It reads as a skeleton, which is why it has survived. | A fifth job arrives, or something other than the card service needs the debouncer |
-| `shared/repository/sqlite-repository.ts` | 443 | Every query in the app. It is meant to be the only file with SQL, so length is the price of that rule, not a smell. | The scoresheet's queries and the live card's queries stop overlapping — then two files behind one contract |
-| `e2e/fake-telegram/fake-telegram.ts` | 418 | One `switch` over nine Bot API methods, mixing protocol shapes with the chat log. A `bot-api-methods.ts` was planned and folded in to save a file; that was probably the wrong trade. | A tenth method is needed, or a change has to reach into the protocol shapes *and* the chat log to be made. The count of refusals was the trigger here and it was the wrong one: it had already fired before it was written, it fired twice more without anybody wanting the split, and refusals turn out to sit above the switch in four-line helpers that mix nothing |
-| `e2e/harness/scenario-chat.ts` | 273 | Module-level singletons plus a 25-member `Chat` interface that scenarios use as a language. The interface grows every time a scenario wants a new question answered. | The interface passes ~30 members — then split the driving verbs from the queries |
-| `e2e/hub/hub-server.ts` | 259 | Proxy, cache, page serving and port probing in one file. | Anything is added to the hub |
-| `scripts/docs-check/source/committed-pictures.ts` | 275 | Two subjects sharing only the word *committed*: whether the drawings on disk match what the renderers draw now, and whether the gallery's approved case lists match the samples. | Either subject grows a third kind of artifact |
-| `scripts/docs-check/source/site-pages.ts` | 178 | CSS coverage, image geometry and a page weight budget — three questions that meet only in the site they are asked about. | The site gains a kind of page, or the weight budget needs reasoning of its own |
-| `scripts/docs-check/source/source-tree.ts` | 136 | Holds `scriptsOutOfStep`, whose subject is `package.json` and not the tree, and a crowded-layer rule that names no document at all. | Anything else starts asking `package.json` a question — then the script table is its own file |
-| `scripts/docs-check/documents/document-references.ts` | 123 | Three kinds of reference — a link with an anchor, an entry in the spec's contents, a skill or agent `/help` names — read by three separate parsers. | A fourth kind of reference arrives |
-| `src/main.ts` | 67 | Two `??` defaults left inline in the diagnostics wiring, still the only place in `src/` with branch coverage at 50% (lines 48–49), and the one surviving mutant in the file. `optionalEnv()` took the other two and the empty-means-missing bug with them; these two remain because the fallback runs only when the key is absent, and `main.spec.ts` imports the module once, with the spy returning a value. | A second spec file reaches both branches — vitest isolates files, so no `vi.resetModules()` is involved. What stops it is the price: 180 lines of setup and fifteen `vi.mock` calls duplicated for two branches. Do it once that header is worth extracting for another reason |
+**The line counts this table used to carry are gone**: half were stale and no gate
+could have said so. The trigger decides a split, and `wc -l` answers the rest.
+
+| File | Why it is on the list | Split it when |
+|---|---|---|
+| `features/live-game/bot/card/card-service.ts` | The largest file in `src/`, and the only one doing four jobs: looking a card up, applying a tap, scheduling the debounced edit, and sweeping idle cards. It reads as a skeleton, which is why it has survived. | A fifth job arrives, or something other than the card service needs the debouncer |
+| `shared/repository/sqlite-repository.ts` | Every query in the app. It is meant to be the only file with SQL, so length is the price of that rule, not a smell. | The scoresheet's queries and the live card's queries stop overlapping — then two files behind one contract |
+| `e2e/fake-telegram/fake-telegram.ts` | One `switch` over nine Bot API methods, mixing protocol shapes with the chat log. A `bot-api-methods.ts` was planned and folded in to save a file; that was probably the wrong trade. | A tenth method is needed, or a change has to reach into the protocol shapes *and* the chat log to be made. The count of refusals was the trigger here and it was the wrong one: it had already fired before it was written, it fired twice more without anybody wanting the split, and refusals turn out to sit above the switch in four-line helpers that mix nothing |
+| `e2e/harness/scenario-chat.ts` | Module-level singletons plus a 25-member `Chat` interface that scenarios use as a language. The interface grows every time a scenario wants a new question answered. | The interface passes ~30 members — then split the driving verbs from the queries |
+| `e2e/hub/hub-server.ts` | Proxy, cache, page serving and port probing in one file. | Anything is added to the hub |
+| `scripts/docs-check/source/committed-pictures.ts` | Two subjects sharing only the word *committed*: whether the drawings on disk match what the renderers draw now, and whether the gallery's approved case lists match the samples. | Either subject grows a third kind of artifact |
+| `scripts/docs-check/source/site-pages.ts` | CSS coverage, image geometry and a page weight budget — three questions that meet only in the site they are asked about. | The site gains a kind of page, or the weight budget needs reasoning of its own |
+| `scripts/docs-check/source/source-tree.ts` | Holds `scriptsOutOfStep`, whose subject is `package.json` and not the tree, and a crowded-layer rule that names no document at all. | Anything else starts asking `package.json` a question — then the script table is its own file |
+| `scripts/docs-check/documents/document-references.ts` | Two kinds of reference — a link with an anchor and an entry in the spec's contents — read by two separate parsers. A third kind lived here until the flow drawing turned out to gate it already, strictly, in both directions. | A third kind of reference arrives, and is one nothing else already checks |
+| `src/main.ts` | Two `??` defaults left inline in the diagnostics wiring, still the only place in `src/` with branch coverage at 50% (lines 48–49), and the one surviving mutant in the file. `optionalEnv()` took the other two and the empty-means-missing bug with them; these two remain because the fallback runs only when the key is absent, and `main.spec.ts` imports the module once, with the spy returning a value. | A second spec file reaches both branches — vitest isolates files, so no `vi.resetModules()` is involved. What stops it is the price: 180 lines of setup and fifteen `vi.mock` calls duplicated for two branches. Do it once that header is worth extracting for another reason |
 
 ---
 
@@ -561,7 +564,7 @@ percentages are simulated, and `RAREST_FIRST` is a hand-written list precisely s
 reordering it is one edit. A second column, or a hand-placed thumb on the scale for the
 dozen rules that describe a moment rather than a shape, is the shape of the fix.
 
-## Three names are one example short of being decided
+## Two names are one example short of being decided
 
 `samples/` holds the states a feature is worth drawing at — a state, not a picture —
 and `samples/contact-sheet.ts` is the exception: it computes coordinates, assembles
@@ -575,15 +578,12 @@ scoresheet's `svg-tags.ts` with it.
 things it declares are pictures, and the fourth, `tools`, prints text and draws
 nothing — so its name describes three quarters of it.
 
-`scripts/docs-check/documents/phase-log-paths.ts` is the third: `theLogBlockIn`,
-`afterLogLine` and `fieldsIn` parse phase-log *fields* under a *paths* name.
-
 **Decide each the first time a second example arrives** — a second feature that draws
-anything, a second dev tool, a second check reading a phase-log field. Then
-`svg-tags.ts` has two callers and moves with the sheet following it, the contract says
-whether it is *drawings plus a passenger* or *what a feature lends the tool box*, and
-the field parser takes a name that predicts it. With one example each, every answer is
-a coin toss.
+anything, a second dev tool. Then `svg-tags.ts` has two callers and moves with the
+sheet following it, and the contract says whether it is *drawings plus a passenger* or
+*what a feature lends the tool box*. With one example each, every answer is a coin
+toss. A third name was on this list — the phase-log field parsers living under a
+*paths* name — and its second example arrived: they are `phase-log-fields.ts` now.
 
 ## Three corners of the tooling the mutation gate still cannot see
 

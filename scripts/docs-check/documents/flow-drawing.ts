@@ -10,6 +10,7 @@ import {
   skillFile,
 } from "../document-files.ts";
 import { packageScripts } from "../source-files.ts";
+import { descriptionIn } from "./frontmatter-yaml.ts";
 
 
 const NOTHING = 0;
@@ -25,6 +26,8 @@ const A_STAGE = /^\s*note over [^:]+: Stage (\d+)\./gm;
 const A_DECLARED_STAGE = /^> \*\*Stages? ([^*]+)\*\*/m;
 
 const A_NUMBER = /\d+/g;
+
+const A_STAGE_IN_PROSE = /\bstages? [\d,\sand]+/gi;
 
 const A_REQUEST_FROM_CLAUDE = /^\s*C->>([A-Za-z][A-Za-z0-9]*):/;
 
@@ -108,6 +111,30 @@ export const stagesDeclaredIn = (skill: string): readonly number[] => {
 
   return (declared?.[FIRST_GROUP]?.match(A_NUMBER) ?? []).map(Number);
 };
+
+export const stagesNamedIn = (description: string): readonly number[] =>
+  (description.match(A_STAGE_IN_PROSE) ?? []).flatMap((said) =>
+    (said.match(A_NUMBER) ?? []).map(Number)
+  );
+
+export const descriptionComplaints = (
+  claimed: ReadonlyMap<string, readonly number[]>,
+  described: ReadonlyMap<string, string>
+): readonly string[] =>
+  [...claimed].flatMap(([skill, stages]) => {
+    const named = stagesNamedIn(described.get(skill) ?? "");
+
+    return stages
+      .filter((stage) => !named.includes(stage))
+      .map(
+        (stage) =>
+          `${skillFile(skill)}: its title claims stage ${String(stage)} and its description ` +
+          `never says so. A description is the only part of a skill read before it is ` +
+          `loaded, so it is the only part that decides WHEN — and one naming no stage gets ` +
+          `obeyed at the owner's first message, which has cost this project a phase's whole ` +
+          `sequencing. Say "stage ${String(stage)}" in it`
+      );
+  });
 
 export const stageComplaints = (
   reached: readonly (readonly [string, number])[],
@@ -198,6 +225,14 @@ const stagesEachSkillClaims = (): ReadonlyMap<string, readonly number[]> =>
     ])
   );
 
+const descriptionsEachSkillCarries = (): ReadonlyMap<string, string> =>
+  new Map(
+    installedSkills().map((skill) => [
+      skill,
+      existsSync(skillFile(skill)) ? descriptionIn(read(skillFile(skill))) : "",
+    ])
+  );
+
 export const flowOutOfStep = (): readonly string[] =>
   flowComplaints(read(FLOW_DOCUMENT), {
     agents: definedAgents(),
@@ -207,6 +242,9 @@ export const flowOutOfStep = (): readonly string[] =>
 
 export const stagesOutOfStep = (): readonly string[] =>
   stageComplaints(skillsByStage(read(FLOW_DOCUMENT)), stagesEachSkillClaims());
+
+export const descriptionsOffTheirStage = (): readonly string[] =>
+  descriptionComplaints(stagesEachSkillClaims(), descriptionsEachSkillCarries());
 
 export const flowRepliesLeaveTheLaneTheyWereAskedOf = (): readonly string[] =>
   replyComplaints(read(FLOW_DOCUMENT));

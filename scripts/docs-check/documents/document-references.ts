@@ -1,14 +1,7 @@
 import { existsSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
 import { FIRST_GROUP, anchorOf, headingsOf } from "../markdown-text.ts";
-import {
-  DOCUMENTS,
-  SESSION_DOCUMENT,
-  SPEC_DOCUMENT,
-  definedAgents,
-  installedSkills,
-  read,
-} from "../document-files.ts";
+import { DOCUMENTS, SPEC_DOCUMENT, read } from "../document-files.ts";
 
 
 const NOTHING = 0;
@@ -97,26 +90,3 @@ export const specContentsComplaints = (text: string): readonly string[] => {
 export const specContentsOutOfStep = (): readonly string[] =>
   specContentsComplaints(read(SPEC_DOCUMENT));
 
-export const unreachableHelpComplaints = (
-  session: string,
-  skills: readonly string[],
-  agents: readonly string[]
-): readonly string[] => [
-  ...skills
-    .filter((skill) => !session.includes(skill))
-    .map(
-      (skill) =>
-        `${SESSION_DOCUMENT}: names no route to the "${skill}" skill — a skill ` +
-        `nothing points at is one nobody loads`
-    ),
-  ...agents
-    .filter((agent) => !session.includes(agent))
-    .map(
-      (agent) =>
-        `${SESSION_DOCUMENT}: names no route to the "${agent}" agent — an agent ` +
-        `nothing points at never runs`
-    ),
-];
-
-export const unreachableHelp = (): readonly string[] =>
-  unreachableHelpComplaints(read(SESSION_DOCUMENT), installedSkills(), definedAgents());

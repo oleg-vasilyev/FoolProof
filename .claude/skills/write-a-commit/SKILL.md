@@ -1,6 +1,6 @@
 ---
 name: write-a-commit
-description: Write a commit message or a release message in this repository's voice — the title, the body that explains why the previous shape was wrong, the gate numbers a phase-final commit carries, and the exact npm version command a release uses. Use before any commit, and before cutting a release tag.
+description: Write a commit message or a release message in this repository's voice — the title, the body that explains why the previous shape was wrong, the gate numbers a phase-final commit carries, and the exact npm version command a release uses. Stage 7 — use before any commit, and before cutting a release tag.
 ---
 
 # Writing a commit message

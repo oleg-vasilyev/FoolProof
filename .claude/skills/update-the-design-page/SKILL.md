@@ -1,6 +1,6 @@
 ---
 name: update-the-design-page
-description: Bring the Durak Stats Poster System page in Claude Design back in step with what the code actually draws — after the design changed mid-phase, after a new chart was drawn on the page, or after refresh-the-pictures redrew the mockups. Covers pulling the page, splicing the real drawings in, and pushing it back byte-checked.
+description: Bring the Durak Stats Poster System page in Claude Design back in step with what the code actually draws. Stage 5, after the pictures have been redrawn — use after the design changed mid-phase, after a new chart was drawn on the page, or after refresh-the-pictures redrew the mockups. Covers pulling the page, splicing the real drawings in, and pushing it back byte-checked.
 ---
 
 # Updating the design page

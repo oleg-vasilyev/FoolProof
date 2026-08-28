@@ -1,6 +1,6 @@
 ---
 name: refresh-the-pictures
-description: Everything the picture gate needs once it opens — the checklist of committed pictures to regenerate (the /stats mockups, the site posters, the Claude Design page, the OG previews, the icons), the gallery of edge cases and how to build one that presses a real edge, how the poster-reader is briefed, and how to triage what it reports. Use after the diff review, when a design change has landed in code, when docs:check reports mockups or posters out of step, or whenever a committed picture might no longer match what the product draws.
+description: Everything the picture gate needs once it opens — the checklist of committed pictures to regenerate (the /stats mockups, the site posters, the Claude Design page, the OG previews, the icons), the gallery of edge cases and how to build one that presses a real edge, how the poster-reader is briefed, and how to triage what it reports. Stage 5, so use after the diff review, when a design change has landed in code, when docs:check reports mockups or posters out of step, or whenever a committed picture might no longer match what the product draws.
 ---
 
 # Refreshing the pictures, and reading them

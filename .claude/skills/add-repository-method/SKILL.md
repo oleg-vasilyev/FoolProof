@@ -1,6 +1,6 @@
 ---
 name: add-repository-method
-description: Add a query or write to the FoolProof repository layer. Use whenever a feature needs data it cannot currently get — new SQL, a new domain method, a new column read. Covers the files that must change together and the two rules that make the layer worth having.
+description: Add a query or write to the FoolProof repository layer. Stage 1 work, while the interfaces are still being frozen — use whenever a feature needs data it cannot currently get — new SQL, a new domain method, a new column read. Covers the files that must change together and the two rules that make the layer worth having.
 ---
 
 # Adding a repository method

@@ -1,6 +1,6 @@
 ---
 name: write-an-e2e-scenario
-description: Write or change a scenario in FoolProof's e2e/ folder — when one is owed at all, the verbs a scenario drives the chat with, what to assert so it cannot silently start watching a different screen, and how it must end. Use whenever adding or editing a *.e2e.spec.ts, or deciding whether a change needs one.
+description: Write or change a scenario in FoolProof's e2e/ folder — when one is owed at all, the verbs a scenario drives the chat with, what to assert so it cannot silently start watching a different screen, and how it must end. Stage 4, once the review has said a scenario is owed — use whenever adding or editing a *.e2e.spec.ts, or deciding whether a change needs one.
 ---
 
 # Writing an e2e scenario

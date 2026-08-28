@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { frontmatterComplaints, frontmatterOf, unparseableKeys } from "./frontmatter-yaml.ts";
+import {
+  descriptionIn,
+  frontmatterComplaints,
+  frontmatterOf,
+  unparseableKeys,
+} from "./frontmatter-yaml.ts";
 
 
 const NOTHING = 0;
+
+const NOTHING_SAID = "";
 
 const ONE_KEY = 1;
 
@@ -107,5 +114,31 @@ describe("frontmatterComplaints", () => {
 
     expect(complaints[FIRST]).toContain("whenToUse");
     expect(unparseableKeys("---\nwhenToUse: after this: and that\n---\n")).toHaveLength(ONE_KEY);
+  });
+});
+
+describe("descriptionIn", () => {
+  it("should read a plain description", () => {
+    expect(descriptionIn("---\nname: one\ndescription: what it does\n---\n")).toBe("what it does");
+  });
+
+  it("should unwrap a description the YAML rule made somebody quote", () => {
+    expect(descriptionIn('---\ndescription: "Stage 3: the gates"\n---\n')).toBe(
+      "Stage 3: the gates"
+    );
+  });
+
+  it("should read nothing from a file with no description line", () => {
+    expect(descriptionIn("---\nname: one\n---\n")).toBe(NOTHING_SAID);
+  });
+
+  it("should read nothing from a file with no frontmatter at all", () => {
+    expect(descriptionIn("# Doing it\n\ndescription: not in a block\n")).toBe(NOTHING_SAID);
+  });
+
+  it("should take the first description when a block somehow holds two", () => {
+    expect(descriptionIn("---\ndescription: the first\ndescription: the second\n---\n")).toBe(
+      "the first"
+    );
   });
 });

@@ -44,8 +44,10 @@ the run can actually establish:
 
 - **Today's date**, which names the evidence directory every verdict cites.
 - **Whether the production server is reachable from this machine**, and by which
-  key. **The repository does not hold them** — no host, no `ssh` line, no key path,
-  deliberately — so they come with the brief or the phase is reported unreachable.
+  key. **The repository holds the host and not the key** — `deploy/configure-server.sh`
+  names the machine, because a provisioning script cannot provision an unnamed one;
+  no key and no key path is committed anywhere, deliberately. So the key comes with
+  the brief, or the phase is reported unreachable.
 - **A time budget.** The cut list at the bottom of this file is meaningless without
   one, and a run that discovers its limit at phase 8 has spent the budget on the
   cheap phases.

@@ -1,6 +1,6 @@
 ---
 name: write-a-doc
-description: Decide which FoolProof document a fact belongs in, and how to add it without duplicating what another file already says. Use before editing README.md, PLAN.md, CLAUDE.md, TECH-DEBT.md or any folder README, whenever a rule changes wording anywhere, and at the end of a phase that changed behaviour.
+description: Decide which FoolProof document a fact belongs in, and how to add it without duplicating what another file already says. Stage 6, where the documents a phase owes are settled — use before editing README.md, PLAN.md, CLAUDE.md, TECH-DEBT.md or any folder README, whenever a rule changes wording anywhere, and at the end of a phase that changed behaviour.
 ---
 
 # Writing a document here

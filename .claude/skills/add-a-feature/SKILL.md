@@ -1,6 +1,6 @@
 ---
 name: add-a-feature
-description: Add a new feature folder to FoolProof — the layers, the feature contract (commands, listen, resume), the two places a feature is named, the lint zone that fences it off, and the hazards the installer exists to prevent. Use when adding a command or a screen that is not part of an existing feature, or when changing what a feature declares to the installer.
+description: Add a new feature folder to FoolProof — the layers, the feature contract (commands, listen, resume), the two places a feature is named, the lint zone that fences it off, and the hazards the installer exists to prevent. Stage 1 work, before a line is written — use when adding a command or a screen that is not part of an existing feature, or when changing what a feature declares to the installer.
 ---
 
 # Adding a feature
@@ -9,8 +9,8 @@ description: Add a new feature folder to FoolProof — the layers, the feature c
 
 **A feature is a folder you can delete.** Removing `features/scoresheet/` must leave
 the rest compiling and passing, and adding one must not require editing another.
-The cost is paid in exactly two files — `src/main.ts` and `package.json` — and
-every step below serves that.
+Outside the folder it costs `package.json`, `src/main.ts` and the one spec that is
+supposed to know the roster — and every step below serves that.
 
 Name the folder after **what the player gets**, not after an internal noun:
 `live-game/` is the game running right now on a card of buttons, `merge-names/` is
@@ -99,22 +99,22 @@ of the rule is that every import line reads the same way.
 
 ## 4. Fence it off, and prove the fence
 
-Add the folder name to `FEATURES` in `eslint.config.js`. That generates the zones:
-`domain/`, `render/` and `samples/` may not import a framework or reach upward, and
-none may reach into another feature or `#app/`.
+Nothing to add: `eslint.config.js` reads `src/features/` from disk, so the folder you
+just made already has its zones — `domain/`, `render/` and `samples/` may not import a
+framework or reach upward, and none may reach into another feature or `#app/`.
 
 **A zone is not finished until a deliberate violation has been shown to fail the
 lint.** Write a throwaway file in each new zone that imports something banned, run
-`npx eslint` on it, see it fail, delete it. This project has shipped two zones that
-never fired, both silently:
+`npx eslint` on it, see it fail, delete it. Zones have shipped here that never fired,
+every one of them silently:
 
 - a later flat-config block **replaces** an earlier one for a file matched by both,
   so purity and independence have to be one pattern list per zone;
 - minimatch reads a leading `#` as a **comment**, so `#live-game/**` matches
   nothing — alias bans are compiled to `regex` patterns instead;
-- `no-restricted-imports` reads only a **static** `import`, so the 102 files loading
-  their subject with `await import("…")` — almost every spec — passed every zone. The
-  bans compile into `no-restricted-syntax` too; a static-only probe proves half a zone.
+- `no-restricted-imports` reads only a **static** `import`, so every file loading its
+  subject with `await import("…")` — almost every spec here — passed every zone. The
+  bans compile into `no-restricted-syntax` too, so a static-only probe proves half.
 
 ## 5. If the feature draws anything, open the drawings first
 

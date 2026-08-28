@@ -1,6 +1,6 @@
 ---
 name: fix-a-bug
-description: Fix something FoolProof already does wrong — reproducing it before reading any code, turning that reproduction into a test that fails first, proving a cause instead of guessing at one, and sweeping for the same shape elsewhere. Use when the owner reports the bot getting something wrong, when a checkup finding becomes the next phase, when a gate goes red for a reason its own message does not explain, and when a fault turns up in passing during work that came for something else.
+description: Fix something FoolProof already does wrong — reproducing it before reading any code, turning that reproduction into a test that fails first, proving a cause instead of guessing at one, and sweeping for the same shape elsewhere. It is drawn at stages 1, 2 and 3, because a fault can arrive while framing, while writing, or out of a red gate — use when the owner reports the bot getting something wrong, when a checkup finding becomes the next phase, when a gate goes red for a reason its own message does not explain, and when a fault turns up in passing during work that came for something else.
 ---
 
 # Fixing something that already went wrong
