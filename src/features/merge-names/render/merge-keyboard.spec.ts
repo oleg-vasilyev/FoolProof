@@ -142,11 +142,11 @@ describe("renderMergeKeyboard(copy, )", () => {
     });
 
     it("should withhold the way on until there is a merge to make", () => {
-      expect(handedOver([ANYA_ID])?.commit).toBeNull();
+      expect(handedOver([ANYA_ID])?.wayOn).toBeNull();
     });
 
     it("should offer Confirm as the way on once two names are picked", () => {
-      expect(handedOver([ANYA_ID, ANNA_ID])?.commit).toEqual({
+      expect(handedOver([ANYA_ID, ANNA_ID])?.wayOn).toEqual({
         text: copy.buttonConfirm,
         callback_data: ENCODED,
       });

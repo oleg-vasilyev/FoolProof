@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GRID_RIGHT, IMAGE_WIDTH, USUAL_ADVANCE, PAD, WIDEST_ADVANCE, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { GRID_RIGHT, IMAGE_WIDTH, USUAL_FALLBACK, PAD, WIDEST_FALLBACK, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { PLAYER_COLOURS, palette } from "#scoresheet/render/palette.ts";
 import {
   HEADING_RULE,
@@ -324,7 +324,7 @@ describe("renderPersonalCard()", () => {
         SUBJECT,
         expect.any(Number),
         fontSize.title,
-        WIDEST_ADVANCE
+        WIDEST_FALLBACK
       );
       expect(textSpy).not.toHaveBeenCalledWith(SUBJECT, expect.anything());
     });
@@ -332,7 +332,7 @@ describe("renderPersonalCard()", () => {
     it("should measure the subtitle at the size and weight it is actually set in", () => {
       renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
 
-      expect(widthOfSpy).toHaveBeenCalledWith(SUBTITLE, fontSize.subtitle, USUAL_ADVANCE);
+      expect(widthOfSpy).toHaveBeenCalledWith(SUBTITLE, fontSize.subtitle, USUAL_FALLBACK);
     });
 
     it("should take the subtitle's own width out of the room the name is fitted to", () => {
@@ -479,6 +479,7 @@ describe("renderPersonalCard()", () => {
       expect(eveningChartSpy).toHaveBeenCalledWith(copy, {
         nights: NIGHTS,
         top: PLOT_TOP,
+        label: CHART_LABEL,
         best: BEST,
         worst: WORST,
         ink: INK,

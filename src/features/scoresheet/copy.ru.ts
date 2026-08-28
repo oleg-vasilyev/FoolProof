@@ -140,7 +140,7 @@ export const copy: Copy = {
   sheetGameAcrossForms: { one: "партию", few: "партии", many: "партий" },
   sheetPlayerForms: { one: "игрок", few: "игрока", many: "игроков" },
 
-  sheetKeyDrawn: "ничья за последнее место",
+  sheetKeyDrawn: "ничья",
   sheetKeyFool: "дурак",
   sheetKeyAbsent: "пропуск",
 
@@ -175,6 +175,8 @@ export const copy: Copy = {
   personalChartArrives: (evenings: string) => `График появится через ${evenings}.`,
   personalBestEvening: "лучший вечер",
   personalWorstEvening: "худший вечер",
+  personalShortNight: (least: string) =>
+    `бледная точка · вечер короче, чем ${least} — ни лучший, ни худший`,
 
   personalFactsLabel: "ЧТО ЗАПОМНИЛОСЬ",
   personalFactsAwait: "Пока ничего — нужно больше партий.",

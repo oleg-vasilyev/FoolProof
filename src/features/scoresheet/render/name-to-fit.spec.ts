@@ -16,18 +16,20 @@ const fitted = (name: string, width = COLUMN): string =>
   nameToFit(name, width, DESIGN_SIZE, ADVANCE);
 
 describe("widthOf()", () => {
-  it("should measure a name as its letters against the advance it was given", () => {
-    const NAME = "Oleg";
-
-    expect(widthOf(NAME, DESIGN_SIZE, ADVANCE)).toBe(NAME.length * DESIGN_SIZE * ADVANCE);
+  it("should measure a name glyph by glyph against the face it will be drawn in", () => {
+    expect(widthOf("Щ", DESIGN_SIZE, ADVANCE)).toBeGreaterThan(widthOf("я", DESIGN_SIZE, ADVANCE));
   });
 
-  it("should measure the same name wider when the letters are the widest ones", () => {
+  it("should ignore the advance it was given wherever it has measured the glyph itself", () => {
     const WIDEST = 0.8;
 
-    expect(widthOf("Oleg", DESIGN_SIZE, WIDEST)).toBeGreaterThan(
-      widthOf("Oleg", DESIGN_SIZE, ADVANCE)
-    );
+    expect(widthOf("Oleg", DESIGN_SIZE, WIDEST)).toBe(widthOf("Oleg", DESIGN_SIZE, ADVANCE));
+  });
+
+  it("should charge a glyph the face was never measured for the advance it was given", () => {
+    const UNMEASURED = "☃";
+
+    expect(widthOf(UNMEASURED, DESIGN_SIZE, ADVANCE)).toBe(DESIGN_SIZE * ADVANCE);
   });
 
   it("should measure nothing as no width at all", () => {
@@ -82,12 +84,18 @@ describe("nameToFit()", () => {
     expect(widthOf(cut, DESIGN_SIZE, ADVANCE)).toBeLessThanOrEqual(NARROWEST_SLOT);
   });
 
-  it("should cut a name harder when told the letters are the widest ones", () => {
-    const WIDEST = 0.8;
+  it("should keep fewer of the widest letters than of the narrowest", () => {
+    const LONGEST_NAME = 32;
 
-    const name = "x".repeat(NAMES_THAT_FIT);
+    expect(fitted("Щ".repeat(LONGEST_NAME)).length).toBeLessThan(
+      fitted("l".repeat(LONGEST_NAME)).length
+    );
+  });
 
-    expect(nameToFit(name, COLUMN, DESIGN_SIZE, WIDEST).length).toBeLessThan(name.length);
+  it("should not leave a space hanging in front of the ellipsis", () => {
+    const NARROW = 150;
+
+    expect(fitted("Oleg Konstantinovich", NARROW)).not.toContain(` ${ELLIPSIS}`);
   });
 
   it("should cut to nothing but the ellipsis when the slot fits no letters at all", () => {

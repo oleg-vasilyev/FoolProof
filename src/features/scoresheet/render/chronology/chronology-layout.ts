@@ -1,6 +1,6 @@
 import { scoreSeries, type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
-import { GRID_RIGHT, IMAGE_MAX_HEIGHT, SHEET_BASE, USUAL_ADVANCE, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { GRID_RIGHT, IMAGE_MAX_HEIGHT, SHEET_BASE, USUAL_FALLBACK, PAD, fontSize } from "#scoresheet/render/card-metrics.ts";
 
 
 export const GUTTER = 86;
@@ -78,7 +78,7 @@ const LEGEND_PAD = LEGEND_TALLY_DROP - LEGEND_ROW_PITCH + LEGEND_TAIL;
 
 const LEGEND_NAME_MIN = 14;
 
-const LEGEND_SLOT_MIN = LEGEND_GUTTER + LEGEND_NAME_MIN * fontSize.legend * USUAL_ADVANCE;
+const LEGEND_SLOT_MIN = LEGEND_GUTTER + LEGEND_NAME_MIN * fontSize.legend * USUAL_FALLBACK;
 
 const LEGEND_COLUMNS_MAX = Math.floor(PLOT_WIDTH / LEGEND_SLOT_MIN);
 

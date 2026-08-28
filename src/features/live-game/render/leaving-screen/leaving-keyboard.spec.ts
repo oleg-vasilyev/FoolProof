@@ -144,7 +144,7 @@ describe("renderLeavingKeyboard()", () => {
   });
 
   it("should offer Play as the way on while a table is left to play it", () => {
-    expect(handedOver([ANYA.playerId])?.commit).toEqual({
+    expect(handedOver([ANYA.playerId])?.wayOn).toEqual({
       text: copy.buttonPlay,
       callback_data: encodedAs({
         leaving: [ANYA.playerId],
@@ -156,7 +156,7 @@ describe("renderLeavingKeyboard()", () => {
   it("should withhold it once too many are marked to make a game", () => {
     enoughToPlaySpy.mockReturnValue(false);
 
-    expect(handedOver(EVERYBODY)?.commit).toBeNull();
+    expect(handedOver(EVERYBODY)?.wayOn).toBeNull();
   });
 
   it("should ask the plan whether a game is left rather than counting the marks here", () => {

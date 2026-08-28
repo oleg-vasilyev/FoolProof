@@ -1,4 +1,4 @@
-import { FONT_FAMILY, GRID_RIGHT, IMAGE_WIDTH, USUAL_ADVANCE, PAD, WIDEST_ADVANCE, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { FONT_FAMILY, GRID_RIGHT, IMAGE_WIDTH, USUAL_FALLBACK, PAD, WIDEST_FALLBACK, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
 import { EYEBROW_TRACKING } from "#scoresheet/render/card-heading.ts";
 import { eveningTally, gameTally } from "#scoresheet/render/tally-phrases.ts";
@@ -47,7 +47,7 @@ const subtitleOf = (copy: Copy, card: CareerCard): string =>
   );
 
 const titleRoom = (copy: Copy, card: CareerCard): number =>
-  GRID_RIGHT - PAD - TITLE_GAP - widthOf(subtitleOf(copy, card), fontSize.subtitle, USUAL_ADVANCE);
+  GRID_RIGHT - PAD - TITLE_GAP - widthOf(subtitleOf(copy, card), fontSize.subtitle, USUAL_FALLBACK);
 
 const heading = (copy: Copy, card: CareerCard, ink: string): readonly string[] => [
   text(copy.personalEyebrow, {
@@ -58,7 +58,7 @@ const heading = (copy: Copy, card: CareerCard, ink: string): readonly string[] =
     "font-size": fontSize.eyebrow,
     "letter-spacing": EYEBROW_TRACKING,
   }),
-  text(nameToFit(card.displayName, titleRoom(copy, card), fontSize.title, WIDEST_ADVANCE), {
+  text(nameToFit(card.displayName, titleRoom(copy, card), fontSize.title, WIDEST_FALLBACK), {
     x: PAD,
     y: TITLE_BASELINE,
     fill: ink,
@@ -148,6 +148,7 @@ const chartSection = (section: ChartSection): readonly string[] => {
       : eveningChart(copy, {
           nights: card.nights,
           top: sheet.plotTop,
+          label: sheet.chartLabel,
           best: card.best,
           worst: card.worst,
           ink,

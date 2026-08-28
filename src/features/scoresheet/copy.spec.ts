@@ -4,7 +4,17 @@ import { copy as english } from "#scoresheet/copy.en.ts";
 import { copy as russian } from "#scoresheet/copy.ru.ts";
 import { copyIn, type Copy } from "#scoresheet/copy.ts";
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
-import { GRID_RIGHT, PAD, USUAL_ADVANCE, WIDEST_ADVANCE } from "#scoresheet/render/card-metrics.ts";
+import {
+  fontSize,
+  GRID_RIGHT,
+  PAD,
+  USUAL_FALLBACK,
+  WIDEST_FALLBACK,
+} from "#scoresheet/render/card-metrics.ts";
+import { KEY_LABEL_ROOM } from "#scoresheet/render/chronology/cell-key.ts";
+import { ENOUGH_TO_JUDGE_A_NIGHT } from "#scoresheet/domain/career/career-evenings.ts";
+import { TILE_TRACKING, personalFont } from "#scoresheet/render/personal/personal-metrics.ts";
+import { gameTally } from "#scoresheet/render/tally-phrases.ts";
 import {
   CURSE_FACT_FONT,
   CURSE_LABEL_FONT,
@@ -30,6 +40,8 @@ const MARKER = "«marker»";
 const A_TALLY = "19 games";
 
 const ANOTHER_TALLY = "4 times";
+
+const A_GAP_BETWEEN = 40;
 
 const A_WIDE_TALLY = "199 партий";
 
@@ -320,11 +332,32 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
       expect(copy.pacifistReason(A_TALLY)).toContain(A_TALLY);
     });
 
+    it("should leave the chart's hint clear of the label it shares a line with", () => {
+      const label =
+        widthOf(copy.personalChartLabel, personalFont.sectionLabel, WIDEST_FALLBACK) +
+        copy.personalChartLabel.length * TILE_TRACKING;
+      const hint = widthOf(
+        copy.personalShortNight(gameTally(copy, ENOUGH_TO_JUDGE_A_NIGHT)),
+        personalFont.axis,
+        WIDEST_FALLBACK
+      );
+
+      expect(label + hint + A_GAP_BETWEEN).toBeLessThanOrEqual(GRID_RIGHT - PAD);
+    });
+
+    it("should leave every key label inside the slot the grid's key gives it", () => {
+      for (const label of [copy.sheetKeyDrawn, copy.sheetKeyFool, copy.sheetKeyAbsent]) {
+        expect(widthOf(label, fontSize.keyLabel, WIDEST_FALLBACK), label).toBeLessThanOrEqual(
+          KEY_LABEL_ROOM
+        );
+      }
+    });
+
     it("should leave every award's justification inside the row it is printed on", () => {
       const room = GRID_RIGHT - TEXT_LEFT;
 
       for (const [name, reason] of reasonsOf(copy, A_WIDE_TALLY)) {
-        expect(widthOf(reason, ROOMY.reasonFont, USUAL_ADVANCE), `${name}: ${reason}`)
+        expect(widthOf(reason, ROOMY.reasonFont, USUAL_FALLBACK), `${name}: ${reason}`)
           .toBeLessThanOrEqual(room);
       }
     });
@@ -335,12 +368,12 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
       const A_TENTH_OF_IT = 2;
 
       const label =
-        widthOf(copy.awardsCurseLabel, CURSE_LABEL_FONT, WIDEST_ADVANCE) +
+        widthOf(copy.awardsCurseLabel, CURSE_LABEL_FONT, WIDEST_FALLBACK) +
         copy.awardsCurseLabel.length * CURSE_TRACKING;
       const fact = widthOf(
         copy.curseFact(A_WHOLE_EVENING, A_TALLY, A_TENTH_OF_IT),
         CURSE_FACT_FONT,
-        USUAL_ADVANCE
+        USUAL_FALLBACK
       );
 
       expect(label + fact).toBeLessThanOrEqual(GRID_RIGHT - PAD);

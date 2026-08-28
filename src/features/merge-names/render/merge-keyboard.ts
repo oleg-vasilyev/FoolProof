@@ -43,7 +43,7 @@ const controlsFor = (copy: Copy, selection: Selection): readonly InlineButton[] 
   controlRow({
     cancel: buttonFor(selection, copy.buttonCancel, { kind: ActionKind.Cancel }),
     back: buttonFor(selection, copy.buttonBack, { kind: ActionKind.Back }),
-    commit:
+    wayOn:
       selection.length >= MIN_TO_MERGE
         ? buttonFor(selection, copy.buttonConfirm, { kind: ActionKind.Confirm })
         : null,

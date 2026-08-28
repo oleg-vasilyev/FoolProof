@@ -174,6 +174,8 @@ export const copy = {
   personalChartArrives: (evenings: string) => `The chart arrives after ${evenings}.`,
   personalBestEvening: "best evening",
   personalWorstEvening: "worst evening",
+  personalShortNight: (least: string) =>
+    `faint dot · an evening shorter than ${least} is neither best nor worst`,
 
   personalFactsLabel: "WHAT STUCK",
   personalFactsAwait: "Nothing has stuck yet — it takes more games.",

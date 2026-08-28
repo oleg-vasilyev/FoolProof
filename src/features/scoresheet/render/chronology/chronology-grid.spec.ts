@@ -61,7 +61,7 @@ vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
 
 vi.mock("#scoresheet/render/card-metrics.ts", () => ({
   FONT_FAMILY: "Test Sans",
-  USUAL_ADVANCE: THE_USUAL_ADVANCE,
+  USUAL_FALLBACK: THE_USUAL_ADVANCE,
   fontSize: { columnName: COLUMN_NAME_FONT },
 }));
 

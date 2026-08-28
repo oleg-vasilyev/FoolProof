@@ -14,9 +14,9 @@ export const GRID_RIGHT = IMAGE_WIDTH - PAD;
 
 export { FONT_FAMILY } from "#shared/fonts/font-family.ts";
 
-export const USUAL_ADVANCE = 0.58;
+export const USUAL_FALLBACK = 0.58;
 
-export const WIDEST_ADVANCE = 0.8;
+export const WIDEST_FALLBACK = 0.8;
 
 export const fontSize = {
   eyebrow: 30,

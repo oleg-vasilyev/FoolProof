@@ -11,7 +11,7 @@ const NOTHING = 0;
 
 const ONE_PICTURE = 1;
 
-const CONFIRM = "✅ Confirm";
+const CONFIRM = "🟢 Confirm";
 
 const ANYAS_CARD = "Anya's card";
 

@@ -11,7 +11,7 @@ import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-k
 import type { Copy } from "#live-game/copy.ts";
 
 
-const NONE_PLACED = 0;
+const NONE_SEATED = 0;
 
 const captionFor = (copy: Copy, plan: SeatingPlan, slot: number, name: string): string => {
   const seat = seatNumberOf(plan, slot);
@@ -26,7 +26,7 @@ const buttonFor = (
   action: SeatingAction
 ): InlineButton => ({
   text,
-  callback_data: encodeSeatingCallback({ order, placed: plan.placed, action }),
+  callback_data: encodeSeatingCallback({ order, seated: plan.seated, action }),
 });
 
 const controlsFor = (
@@ -37,10 +37,10 @@ const controlsFor = (
   controlRow({
     cancel: buttonFor(plan, order, copy.buttonCancel, { kind: ActionKind.Cancel }),
     back: buttonFor(plan, order, copy.buttonBack, { kind: ActionKind.Back }),
-    commit: everyoneSeated(plan)
+    wayOn: everyoneSeated(plan)
       ? buttonFor(plan, order, copy.buttonPlay, { kind: ActionKind.Confirm })
       : null,
-    anythingToUndo: plan.placed > NONE_PLACED,
+    anythingToUndo: plan.seated.length > NONE_SEATED,
   });
 
 export const renderSeatingKeyboard = (copy: Copy, plan: SeatingPlan): InlineKeyboardRows => {
@@ -51,7 +51,7 @@ export const renderSeatingKeyboard = (copy: Copy, plan: SeatingPlan): InlineKeyb
       text: captionFor(copy, plan, slot, seat.displayName),
       callback_data: encodeSeatingCallback({
         order,
-        placed: plan.placed,
+        seated: plan.seated,
         action: { kind: ActionKind.Pick, playerId: seat.playerId },
       }),
     },

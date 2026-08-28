@@ -71,7 +71,7 @@ const THE_USUAL_ADVANCE = 0.5;
 
 vi.mock("#scoresheet/render/card-metrics.ts", () => ({
   FONT_FAMILY: "Test Sans",
-  USUAL_ADVANCE: THE_USUAL_ADVANCE,
+  USUAL_FALLBACK: THE_USUAL_ADVANCE,
   fontSize: { legend: LEGEND_FONT, legendLabel: LABEL_FONT, legendTally: TALLY_FONT },
 }));
 

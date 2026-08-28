@@ -53,8 +53,6 @@ const FIRST_PLACE = 1;
 
 const LAST_ROW = -1;
 
-const ABOVE_THE_CONTROLS = -2;
-
 const FIRST_CALL = 0;
 
 const ONLY_ARGUMENT = 0;
@@ -158,31 +156,39 @@ describe("renderKeyboard()", () => {
     });
   });
 
-  describe("the draw row", () => {
-    it("should give Draw a row of its own once two players remain", () => {
+  describe("declaring a draw", () => {
+    it("should offer Draw as the way on once two players remain", () => {
       drawAvailableSpy.mockReturnValue(true);
 
-      expect(render(stateWith({})).at(ABOVE_THE_CONTROLS)).toEqual([
-        { text: copy.buttonDraw, callback_data: expect.any(String) },
-      ]);
+      expect(handedOver(stateWith({}))?.wayOn).toEqual({
+        text: copy.buttonDraw,
+        callback_data: encodedAs({
+          gameId: GAME_ID,
+          action: ActionKind.Draw,
+          slot: null,
+          version: VERSION,
+        }),
+      });
     });
 
-    it("should keep that row out of the controls, so no way off the screen moves", () => {
+    it("should offer none while more than two players remain", () => {
+      expect(handedOver(stateWith({}))?.wayOn).toBeNull();
+    });
+
+    it("should give Confirm that slot instead once every place is known", () => {
+      phaseOfSpy.mockReturnValue(Phase.Ready);
       drawAvailableSpy.mockReturnValue(true);
 
-      expect(render(stateWith({})).at(LAST_ROW)).toEqual(THE_CONTROLS);
+      expect(handedOver(stateWith({}))?.wayOn?.text).toBe(copy.buttonConfirm);
     });
 
-    it("should draw no such row while more than two players remain", () => {
-      expect(render(stateWith({})).map((row) => row[0]?.text)).not.toContain(copy.buttonDraw);
-    });
-
-    it("should send Draw as its own action", () => {
+    it("should keep the card the same height whether or not a draw can be declared", () => {
       drawAvailableSpy.mockReturnValue(true);
+      const declarable = render(stateWith({})).length;
 
-      expect(render(stateWith({})).at(ABOVE_THE_CONTROLS)?.[0]?.callback_data).toBe(
-        encodedAs({ gameId: GAME_ID, action: ActionKind.Draw, slot: null, version: VERSION })
-      );
+      drawAvailableSpy.mockReturnValue(false);
+
+      expect(render(stateWith({}))).toHaveLength(declarable);
     });
   });
 
@@ -232,19 +238,19 @@ describe("renderKeyboard()", () => {
     });
 
     it("should offer no way on while places are still being recorded", () => {
-      expect(handedOver(stateWith({}))?.commit).toBeNull();
+      expect(handedOver(stateWith({}))?.wayOn).toBeNull();
     });
 
     it("should offer none before the starter is picked either", () => {
       phaseOfSpy.mockReturnValue(Phase.PickStarter);
 
-      expect(handedOver(stateWith({ starterSlot: null }))?.commit).toBeNull();
+      expect(handedOver(stateWith({ starterSlot: null }))?.wayOn).toBeNull();
     });
 
     it("should offer Confirm as the way on once every place is known", () => {
       phaseOfSpy.mockReturnValue(Phase.Ready);
 
-      expect(handedOver(stateWith({}))?.commit).toEqual({
+      expect(handedOver(stateWith({}))?.wayOn).toEqual({
         text: copy.buttonConfirm,
         callback_data: encodedAs({
           gameId: GAME_ID,

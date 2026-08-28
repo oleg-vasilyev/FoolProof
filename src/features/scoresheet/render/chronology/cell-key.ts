@@ -18,6 +18,8 @@ const MINI_HEIGHT = 38;
 
 const LABEL_GAP = 18;
 
+export const KEY_LABEL_ROOM = SLOT_WIDTH - MINI_WIDTH - LABEL_GAP;
+
 const PLACE_ABOVE_FOOL = 1;
 
 type KeyKind = typeof CellKind.Drawn | typeof CellKind.Fool | typeof CellKind.Absent;

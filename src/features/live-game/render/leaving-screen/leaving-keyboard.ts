@@ -33,7 +33,7 @@ const controlsFor = (
   controlRow({
     cancel: buttonFor(plan, order, copy.buttonCancel, { kind: ActionKind.Cancel }),
     back: buttonFor(plan, order, copy.buttonBack, { kind: ActionKind.Back }),
-    commit: enoughToPlay(plan)
+    wayOn: enoughToPlay(plan)
       ? buttonFor(plan, order, copy.buttonPlay, { kind: ActionKind.Confirm })
       : null,
     anythingToUndo: plan.leaving.length > NOTHING_MARKED,

@@ -4,7 +4,7 @@ import type { Seat } from "#live-game/domain/card-state.ts";
 
 export interface SeatingPlan {
   readonly roster: readonly Seat[];
-  readonly placed: number;
+  readonly seated: readonly number[];
 }
 
 export type SeatingAction =
@@ -25,50 +25,72 @@ export type SeatingTransition =
   | { readonly outcome: typeof Outcome.Cancelled }
   | { readonly outcome: typeof Outcome.Rejected };
 
-const NONE_PLACED = 0;
+const NONE_SEATED = 0;
 
 const ONE_SEAT = 1;
 
 const LAST_IS_FORCED = 1;
 
-const seatNumber = (slot: number): number => slot + ONE_SEAT;
+const NOT_SEATED = -1;
+
+const seatNumber = (at: number): number => at + ONE_SEAT;
+
+const seatIn = (plan: SeatingPlan, playerId: number): readonly Seat[] => {
+  const found = plan.roster.find((seat) => seat.playerId === playerId);
+
+  return found === undefined ? [] : [found];
+};
 
 export const everyoneSeated = (plan: SeatingPlan): boolean =>
-  plan.placed >= plan.roster.length - LAST_IS_FORCED;
+  plan.seated.length >= plan.roster.length - LAST_IS_FORCED;
 
-export const seatNumberOf = (plan: SeatingPlan, slot: number): number | null =>
-  slot < plan.placed || everyoneSeated(plan) ? seatNumber(slot) : null;
+export const seatNumberOf = (plan: SeatingPlan, slot: number): number | null => {
+  const seat = plan.roster[slot];
+
+  if (seat === undefined) {
+    return null;
+  }
+
+  const at = plan.seated.indexOf(seat.playerId);
+
+  if (at !== NOT_SEATED) {
+    return seatNumber(at);
+  }
+
+  return everyoneSeated(plan) ? seatNumber(plan.seated.length) : null;
+};
+
+const ringOf = (plan: SeatingPlan): readonly Seat[] => [
+  ...plan.seated.flatMap((playerId) => seatIn(plan, playerId)),
+  ...plan.roster.filter((seat) => !plan.seated.includes(seat.playerId)),
+];
 
 const seatedNext = (plan: SeatingPlan, playerId: number): SeatingTransition => {
-  if (everyoneSeated(plan)) {
+  if (everyoneSeated(plan) || plan.seated.includes(playerId)) {
     return { outcome: Outcome.Rejected };
   }
 
-  const unplaced = plan.roster.slice(plan.placed);
-  const among = unplaced.findIndex((seat) => seat.playerId === playerId);
-  const picked = unplaced[among];
+  const [picked] = seatIn(plan, playerId);
 
   if (picked === undefined) {
     return { outcome: Outcome.Rejected };
   }
 
-  const roster = [
-    ...plan.roster.slice(NONE_PLACED, plan.placed),
-    picked,
-    ...unplaced.filter((_, slot) => slot !== among),
-  ];
   return {
     outcome: Outcome.Updated,
-    plan: { roster, placed: plan.placed + ONE_SEAT },
+    plan: { ...plan, seated: [...plan.seated, playerId] },
     seated: picked,
-    seat: seatNumber(plan.placed),
+    seat: seatNumber(plan.seated.length),
   };
 };
 
 const steppedBack = (plan: SeatingPlan): SeatingTransition =>
-  plan.placed === NONE_PLACED
+  plan.seated.length === NONE_SEATED
     ? { outcome: Outcome.Rejected }
-    : { outcome: Outcome.SteppedBack, plan: { ...plan, placed: plan.placed - ONE_SEAT } };
+    : {
+        outcome: Outcome.SteppedBack,
+        plan: { ...plan, seated: plan.seated.slice(NONE_SEATED, plan.seated.length - ONE_SEAT) },
+      };
 
 export const applySeating = (plan: SeatingPlan, action: SeatingAction): SeatingTransition => {
   switch (action.kind) {
@@ -80,7 +102,7 @@ export const applySeating = (plan: SeatingPlan, action: SeatingAction): SeatingT
 
     case ActionKind.Confirm:
       return everyoneSeated(plan)
-        ? { outcome: Outcome.Seated, seats: plan.roster }
+        ? { outcome: Outcome.Seated, seats: ringOf(plan) }
         : { outcome: Outcome.Rejected };
 
     case ActionKind.Pick:

@@ -13,7 +13,10 @@ import {
   PLOT_LINE_WIDTH,
   personalFont,
 } from "#scoresheet/render/personal/personal-metrics.ts";
-import type { EveningShare } from "#scoresheet/domain/career/career-evenings.ts";
+import {
+  ENOUGH_TO_JUDGE_A_NIGHT,
+  type EveningShare,
+} from "#scoresheet/domain/career/career-evenings.ts";
 import type { EveningPlot } from "#scoresheet/render/personal/evening-chart.ts";
 
 
@@ -29,6 +32,8 @@ const textSpy = vi.fn();
 
 const percentLabelSpy = vi.fn();
 
+const gameTallySpy = vi.fn();
+
 vi.mock("#scoresheet/render/svg-tags.ts", () => ({
   circle: (attributes: Record<string, unknown>) => circleSpy(attributes),
   line: (attributes: Record<string, unknown>) => lineSpy(attributes),
@@ -39,6 +44,10 @@ vi.mock("#scoresheet/render/svg-tags.ts", () => ({
 
 vi.mock("#scoresheet/render/percent-label.ts", () => ({
   percentLabel: (share: number) => percentLabelSpy(share),
+}));
+
+vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
+  gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
 }));
 
 const { eveningChart } = await import("#scoresheet/render/personal/evening-chart.ts");
@@ -67,6 +76,12 @@ const NIGHTS = 8;
 
 const A_NIGHT = 3;
 
+const A_SHORT_NIGHT = 1;
+
+const LEAN = 16;
+
+const A_TALLY = "the-games";
+
 const NO_FOOLS = 0;
 
 const ALL_DECIDED = A_NIGHT;
@@ -74,6 +89,8 @@ const ALL_DECIDED = A_NIGHT;
 const NO_FIRSTS = 0;
 
 const PLOT_TOP = 1000;
+
+const CHART_LABEL = 940;
 
 const INK = "player-ink";
 
@@ -99,12 +116,18 @@ const eveningOf = (seriesNo: number): EveningShare => ({
   share: shareAt(seriesNo),
 });
 
+const shortEveningOf = (seriesNo: number): EveningShare => ({
+  ...eveningOf(seriesNo),
+  games: A_SHORT_NIGHT,
+});
+
 const nightsOf = (count: number): readonly EveningShare[] =>
   Array.from({ length: count }, (_unused, index) => eveningOf(index));
 
 const chartOf = (overrides: Partial<EveningPlot> = {}): EveningPlot => ({
   nights: nightsOf(NIGHTS),
   top: PLOT_TOP,
+  label: CHART_LABEL,
   best: null,
   worst: null,
   ink: INK,
@@ -151,6 +174,7 @@ describe("eveningChart()", () => {
     percentLabelSpy.mockImplementation((share: number) => pct(share));
     polylineSpy.mockReturnValue(CURVE_MARK);
     circleSpy.mockImplementation(() => "<circle/>");
+    gameTallySpy.mockReturnValue(A_TALLY);
     lineSpy.mockImplementation(() => "<line/>");
     pathSpy.mockImplementation(() => "<path/>");
     textSpy.mockImplementation((value: string) => `<text:${value}>`);
@@ -393,16 +417,20 @@ describe("eveningChart()", () => {
   });
 
   describe("saying what the two marks mean", () => {
-    it("should name the best evening beside its own mark", () => {
+    it("should lean the best evening's name towards whichever neighbour stands lower", () => {
       eveningChart(copy, chartOf({ best: eveningOf(BEST_AT) }));
 
-      expect(attributesOf(copy.personalBestEvening).x).toBe(points()[BEST_AT]?.[0]);
+      expect(attributesOf(copy.personalBestEvening).x).toBe((points()[BEST_AT]?.[0] ?? NEVER) - LEAN);
+      expect(attributesOf(copy.personalBestEvening)["text-anchor"]).toBe("end");
     });
 
-    it("should name the worst evening beside its own mark", () => {
+    it("should lean the worst evening's name the other way, so a falling curve misses it", () => {
       eveningChart(copy, chartOf({ worst: eveningOf(WORST_AT) }));
 
-      expect(attributesOf(copy.personalWorstEvening).x).toBe(points()[WORST_AT]?.[0]);
+      expect(attributesOf(copy.personalWorstEvening).x).toBe(
+        (points()[WORST_AT]?.[0] ?? NEVER) + LEAN
+      );
+      expect(attributesOf(copy.personalWorstEvening)["text-anchor"]).toBe("start");
     });
 
     it("should lift the best evening's name above its mark, where nothing can be drawn", () => {
@@ -440,10 +468,13 @@ describe("eveningChart()", () => {
       expect(textSpy).not.toHaveBeenCalledWith(copy.personalWorstEvening, expect.anything());
     });
 
-    it("should centre a name over a mark that sits away from both edges", () => {
-      eveningChart(copy, chartOf({ best: eveningOf(BEST_AT) }));
+    it("should lean a name at neither edge, where there is no neighbour to lean from", () => {
+      const LAST = NIGHTS - ONCE;
 
-      expect(attributesOf(copy.personalBestEvening)["text-anchor"]).toBe("middle");
+      eveningChart(copy, chartOf({ best: eveningOf(FIRST_EVENING), worst: eveningOf(LAST) }));
+
+      expect(attributesOf(copy.personalBestEvening).x).toBe(points()[FIRST_EVENING]?.[0]);
+      expect(attributesOf(copy.personalWorstEvening).x).toBe(points()[LAST]?.[0]);
     });
 
     it("should hold a name inside the plot when its mark sits at either edge", () => {
@@ -586,6 +617,55 @@ describe("eveningChart()", () => {
       const drawn = eveningChart(copy, chartOf({ nights: nightsOf(SHORT) }));
 
       expect(drawn).toHaveLength(GRID_ELEMENTS + ONCE + SHORT + ONCE);
+    });
+  });
+  describe("an evening too short to be judged", () => {
+    const SHORT_AT = 4;
+
+    const withAShortNight = (): readonly EveningShare[] =>
+      nightsOf(NIGHTS).map((night, index) => (index === SHORT_AT ? shortEveningOf(index) : night));
+
+    const hint = (): string => copy.personalShortNight(A_TALLY);
+
+    it("should draw its dot faint, so the eye can see why a title passed it over", () => {
+      eveningChart(copy, chartOf({ nights: withAShortNight() }));
+
+      expect(dots()[SHORT_AT]?.fill).toBe(palette.inkFaint);
+    });
+
+    it("should leave every night long enough to judge in the player's own ink", () => {
+      eveningChart(copy, chartOf({ nights: withAShortNight() }));
+
+      expect(dots().filter((dot) => dot.fill === INK)).toHaveLength(NIGHTS - ONCE);
+    });
+
+    it("should keep it the same size as the rest, since only the ink says anything", () => {
+      eveningChart(copy, chartOf({ nights: withAShortNight() }));
+
+      expect(dots()).toHaveLength(NIGHTS);
+    });
+
+    it("should say what a faint dot means, on the section label's own line", () => {
+      eveningChart(copy, chartOf({ nights: withAShortNight() }));
+
+      expect(attributesOf(hint())).toMatchObject({
+        x: GRID_RIGHT,
+        y: CHART_LABEL,
+        "text-anchor": "end",
+      });
+    });
+
+    it("should ask for the threshold as a finished tally rather than printing the number", () => {
+      eveningChart(copy, chartOf({ nights: withAShortNight() }));
+
+      expect(gameTallySpy).toHaveBeenCalledWith(copy, ENOUGH_TO_JUDGE_A_NIGHT);
+    });
+
+    it("should say nothing at all when every night was long enough", () => {
+      eveningChart(copy, chartOf());
+
+      expect(attributesOf(hint())).toEqual({});
+      expect(dots().filter((dot) => dot.fill === palette.inkFaint)).toHaveLength(NEVER);
     });
   });
 });

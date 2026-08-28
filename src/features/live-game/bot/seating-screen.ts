@@ -17,7 +17,7 @@ import { copyIn, type Copy } from "#live-game/copy.ts";
 import { copyFor, type CardContext } from "#live-game/bot/card-context.ts";
 
 
-const NOTHING_PLACED = 0;
+const NOBODY_SEATED: readonly number[] = [];
 
 const AS_HTML = { parse_mode: "HTML" } as const;
 
@@ -30,7 +30,7 @@ const planOf = (
   context: CardContext,
   chatId: number,
   order: readonly number[],
-  placed: number
+  seated: readonly number[]
 ): SeatingPlan | null => {
   const named = new Map(
     context.repo.playersInChat(chatId).map((player) => [player.id, player.display_name])
@@ -42,7 +42,7 @@ const planOf = (
     return displayName === undefined ? [] : [{ playerId, displayName }];
   });
 
-  return roster.length === order.length ? { roster, placed } : null;
+  return roster.length === order.length ? { roster, seated } : null;
 };
 
 const redraw = async (
@@ -89,7 +89,7 @@ export const askSeating = async (
   ctx: Command | TextMessage,
   seats: readonly Seat[]
 ): Promise<void> => {
-  const plan: SeatingPlan = { roster: seats, placed: NOTHING_PLACED };
+  const plan: SeatingPlan = { roster: seats, seated: NOBODY_SEATED };
 
   await ctx.reply(renderSeatingScreen(copy), screenOptions(copy, plan));
 };
@@ -105,7 +105,7 @@ export const onSeatingTap = async (context: CardContext, ctx: CallbackTap): Prom
     return;
   }
 
-  const plan = planOf(context, chatId, payload.order, payload.placed);
+  const plan = planOf(context, chatId, payload.order, payload.seated);
   if (plan === null) {
     await ctx.answerCallbackQuery(copy.seatingStale);
 

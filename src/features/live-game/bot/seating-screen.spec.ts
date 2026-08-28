@@ -60,9 +60,7 @@ const NEVER = 0;
 
 const ONCE = 1;
 
-const NONE_PLACED = 0;
-
-const ONE_PLACED = 1;
+const NOBODY_SEATED: readonly number[] = [];
 
 const DISTINCTIVE_SEAT = 4;
 
@@ -80,9 +78,11 @@ const SEATS = [
 
 const ORDER = [OLEG.id, ANYA.id, KIM.id];
 
-const PLAN = { roster: SEATS, placed: NONE_PLACED };
+const PLAN = { roster: SEATS, seated: NOBODY_SEATED };
 
-const NEXT_PLAN = { roster: SEATS, placed: ONE_PLACED };
+const ONE_SEATED = [OLEG.id];
+
+const NEXT_PLAN = { roster: SEATS, seated: ONE_SEATED };
 
 const ROTATED = [{ playerId: KIM.id, displayName: KIM.display_name }];
 
@@ -96,7 +96,7 @@ const KEYBOARD = [[{ text: "Oleg", callback_data: "d" }]];
 
 const MARKUP = { inline_keyboard: [[{ text: "converted", callback_data: "converted" }]] };
 
-const DATA = "s:3.7.f:0:p:7";
+const DATA = "S:137f::p:7";
 
 let repo: RepositoryStub;
 let locales: LocaleReaderStub;
@@ -127,7 +127,7 @@ describe("seating-screen", () => {
     keyboards.toMarkupSpy.mockReturnValue(MARKUP);
     decodeSeatingCallbackSpy.mockReturnValue({
       order: ORDER,
-      placed: NONE_PLACED,
+      seated: NOBODY_SEATED,
       action: { kind: ActionKind.Pick, playerId: ANYA.id },
     });
     applySeatingSpy.mockReturnValue({ outcome: Outcome.Rejected });
@@ -137,7 +137,10 @@ describe("seating-screen", () => {
     it("should post the screen with nobody seated yet", async () => {
       await askSeating(copy, ctx.command("/next_with Kim"), SEATS);
 
-      expect(renderSeatingKeyboardSpy).toHaveBeenCalledWith(copy, { roster: SEATS, placed: NONE_PLACED });
+      expect(renderSeatingKeyboardSpy).toHaveBeenCalledWith(copy, {
+        roster: SEATS,
+        seated: NOBODY_SEATED,
+      });
       expect(ctx.lastReply().text).toBe(SCREEN);
     });
 

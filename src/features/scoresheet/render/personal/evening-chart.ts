@@ -1,6 +1,7 @@
 import { FONT_FAMILY, GRID_RIGHT } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
 import { percentLabel } from "#scoresheet/render/percent-label.ts";
+import { gameTally } from "#scoresheet/render/tally-phrases.ts";
 import { circle, line, path, polyline, text } from "#scoresheet/render/svg-tags.ts";
 import {
   MARK_RADIUS,
@@ -12,7 +13,10 @@ import {
   POINT_RADIUS,
   personalFont,
 } from "#scoresheet/render/personal/personal-metrics.ts";
-import type { EveningShare } from "#scoresheet/domain/career/career-evenings.ts";
+import {
+  ENOUGH_TO_JUDGE_A_NIGHT,
+  type EveningShare,
+} from "#scoresheet/domain/career/career-evenings.ts";
 import type { Copy } from "#scoresheet/copy.ts";
 
 
@@ -42,9 +46,18 @@ const LABEL_LIFT = 26;
 
 const LABEL_DROP = 44;
 
+const LABEL_LEAN = 16;
+
+const NO_LEAN = 0;
+
+const TOWARDS_THE_HIGHER = true;
+
+const TOWARDS_THE_LOWER = false;
+
 export interface EveningPlot {
   readonly nights: readonly EveningShare[];
   readonly top: number;
+  readonly label: number;
   readonly best: EveningShare | null;
   readonly worst: EveningShare | null;
   readonly ink: string;
@@ -87,15 +100,32 @@ const curve = (plot: EveningPlot): string =>
     "stroke-width": PLOT_LINE_WIDTH,
   });
 
+const tooShortToJudge = (night: EveningShare): boolean =>
+  night.games < ENOUGH_TO_JUDGE_A_NIGHT;
+
 const eveningPoints = (plot: EveningPlot): readonly string[] =>
   plot.nights.map((night, index) =>
     circle({
       cx: xAt(plot, index),
       cy: yAt(plot, night.share),
       r: POINT_RADIUS,
-      fill: plot.ink,
+      fill: tooShortToJudge(night) ? palette.inkFaint : plot.ink,
     })
   );
+
+const shortNightHint = (copy: Copy, plot: EveningPlot): readonly string[] =>
+  plot.nights.some(tooShortToJudge)
+    ? [
+        text(copy.personalShortNight(gameTally(copy, ENOUGH_TO_JUDGE_A_NIGHT)), {
+          x: GRID_RIGHT,
+          y: plot.label,
+          fill: palette.inkKey,
+          "font-family": FONT_FAMILY,
+          "font-size": personalFont.axis,
+          "text-anchor": "end",
+        }),
+      ]
+    : [];
 
 const indexOfNight = (plot: EveningPlot, wanted: EveningShare | null): number =>
   wanted === null ? -ALONE : plot.nights.findIndex((night) => night.seriesNo === wanted.seriesNo);
@@ -105,23 +135,44 @@ const aboveMark = (plot: EveningPlot, share: number): number => yAt(plot, share)
 const belowMark = (plot: EveningPlot, share: number): number =>
   Math.min(yAt(plot, share) + LABEL_DROP, bottomOf(plot) - LABEL_LIFT);
 
-const markLabel = (plot: EveningPlot, at: number, said: string, y: number): string =>
-  text(said, {
-    x: xAt(plot, at),
-    y,
-    fill: palette.inkFaint,
-    "font-family": FONT_FAMILY,
-    "font-size": personalFont.axis,
-    "text-anchor": anchorAt(plot, at),
-  });
+const leansTowards = (plot: EveningPlot, at: number, higher: boolean): number => {
+  const before = plot.nights[at - ALONE]?.share;
+  const after = plot.nights[at + ALONE]?.share;
 
-const anchorAt = (plot: EveningPlot, at: number): string => {
+  if (before === undefined || after === undefined) {
+    return NO_LEAN;
+  }
+
+  return before > after === higher ? -LABEL_LEAN : LABEL_LEAN;
+};
+
+const anchorAt = (plot: EveningPlot, at: number, lean: number): string => {
   if (at === NOTHING) {
     return "start";
   }
 
-  return at === plot.nights.length - ALONE ? "end" : "middle";
+  if (at === plot.nights.length - ALONE) {
+    return "end";
+  }
+
+  return lean < NO_LEAN ? "end" : "start";
 };
+
+const markLabel = (
+  plot: EveningPlot,
+  at: number,
+  said: string,
+  y: number,
+  lean: number
+): string =>
+  text(said, {
+    x: xAt(plot, at) + lean,
+    y,
+    fill: palette.inkFaint,
+    "font-family": FONT_FAMILY,
+    "font-size": personalFont.axis,
+    "text-anchor": anchorAt(plot, at, lean),
+  });
 
 const highMark = (copy: Copy, plot: EveningPlot): readonly string[] => {
   const at = indexOfNight(plot, plot.best);
@@ -136,7 +187,13 @@ const highMark = (copy: Copy, plot: EveningPlot): readonly string[] => {
           r: MARK_RADIUS,
           fill: plot.ink,
         }),
-        markLabel(plot, at, copy.personalBestEvening, aboveMark(plot, night.share)),
+        markLabel(
+          plot,
+          at,
+          copy.personalBestEvening,
+          aboveMark(plot, night.share),
+          leansTowards(plot, at, TOWARDS_THE_LOWER)
+        ),
       ];
 };
 
@@ -155,7 +212,13 @@ const lowMark = (copy: Copy, plot: EveningPlot): readonly string[] => {
           stroke: palette.cellFool,
           "stroke-width": MARK_STROKE,
         }),
-        markLabel(plot, at, copy.personalWorstEvening, belowMark(plot, night.share)),
+        markLabel(
+          plot,
+          at,
+          copy.personalWorstEvening,
+          belowMark(plot, night.share),
+          leansTowards(plot, at, TOWARDS_THE_HIGHER)
+        ),
       ];
 };
 
@@ -199,5 +262,6 @@ export const eveningChart = (copy: Copy, plot: EveningPlot): readonly string[] =
   ...eveningPoints(plot),
   ...highMark(copy, plot),
   ...lowMark(copy, plot),
+  ...shortNightHint(copy, plot),
   ...axisNumbers(plot),
 ];

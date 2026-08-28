@@ -373,10 +373,17 @@ than resolved ids.
 ### Taking seats
 
 Once `/next_with` knows who is joining it shows a screen of its own: everyone at
-the new table, one per row, tapped in the order they sit. Each tap moves that name
-above the unplaced ones and marks it with its seat number. The second-to-last tap
-numbers the final seat too, because it has nowhere else to go — a table of five
-costs four taps rather than five.
+the new table, one per row, tapped in the order they sit. A tap marks that name with
+its seat number and **moves nothing**. The second-to-last tap numbers the final seat
+too, because it has nowhere else to go — a table of five costs four taps rather than
+five.
+
+The rows used to reorder, each tap lifting its name above the unplaced ones, and that
+was wrong for the same reason the card's Draw row was: the screen is tapped several
+times in a row, quickly, and the player is already looking at the next name when the
+first tap lands. Moving the list moves that name. The seating order is now carried
+beside the roster instead of being spelled by it, so the list a player reads is the
+list they were given and only the numbers appear.
 
 It does not open the card. **Play does**, and until it is tapped the order can still
 be walked back: the footer is [the control row](#the-control-row) — Cancel while the
@@ -407,11 +414,22 @@ sitting behind however many Backs it takes to empty the screen makes walking awa
 likelier of the two, and that is the price of the footer never showing two ways out
 at once.
 
-The order chosen so far lives in `callback_data`, the same way
+The table and the order chosen so far both live in `callback_data`, the same way
 [the `/merge` screen](#merge-has-no-state) keeps its selection, which is what makes
-the screen immune to a restart. Player ids are written in base 62 so that a table of
-ten with six-digit ids still fits the Bot API's 64 bytes; the codec's spec asserts
-that budget rather than trusting it.
+the screen immune to a restart. The shape is the one the leaving screen already
+uses and now shares with it: a width digit, then every player id in base 62 padded
+to that width, then the seats taken written as single base-62 digits **against the
+order they travel with**. No separators and no id ceiling, so a table of ten with
+six-digit ids spends 60 of the Bot API's 64 bytes even with every seat filled; the
+codec's spec asserts that budget rather than trusting it.
+
+**A screen drawn before this change is not read.** Its data spelled the seating
+order by reordering the ids, so the order the rows were *drawn* in is not in it —
+decoding such a button could only redraw the screen wrong, which is the bug being
+fixed. The screen letter changed from `s` to `S` instead, so an old button matches
+nothing and gets the bot's standing answer for a button from an older version. The
+leaving screen chose the opposite once and kept reading its old shape; it could,
+because there the old data still meant exactly what it says.
 
 Two things can have changed by the time Play is tapped, and both are checked there
 rather than assumed: a player named on the screen may have been merged away —
@@ -469,11 +487,17 @@ the text. There is no separate rollback command.
 ### When buttons appear
 
 - **Draw** — exactly when two unmarked players remain, that is after `n − 2` taps.
-  In a two-player game it is available immediately, before a single tap. It sits on
-  a row of its own, above the control row: it says how the game ended, not how to
-  leave the screen, so it is family with the names rather than with Back and Cancel
-- **Confirm** — once every position is determined. It replaces Draw; the two never
-  coexist
+  In a two-player game it is available immediately, before a single tap. It sits in
+  [the control row](#the-control-row)'s right-hand slot, beside Back, and **not on a
+  row of its own**. It used to have one, and the row was the bug: a Telegram message
+  grows upward, so a row appearing under the names moved every name the moment the
+  second-to-last player was marked — and the name a thumb was already travelling
+  towards went out from under it. With Draw in the slot the card is `n + 1` rows in
+  every phase, from the first tap to Confirm, and nothing a player is aiming at ever
+  moves
+- **Confirm** — once every position is determined. It takes the same slot Draw was
+  in, so tapping Draw changes the word under the thumb and nothing else. The two
+  never coexist, and cannot: Draw needs phase 2 and Confirm needs phase 3
 - **Back** — always in phase 2, absent in phase 1
 - **Cancel** — phase 1 only. Phase 2 always has a Back, and [the control
   row](#the-control-row) never draws both. A `/next` card opens *in* phase 2 with the
@@ -520,9 +544,9 @@ and do not accept a design that assumes them:
 Anya          ← still in the game
 💀 Anya       ← the fool, set automatically
 🤝 Anya       ← shared last place after a draw
-🤝 Draw       ← a row of its own, above the control row
-↩️ Back  ✅ Confirm    ← the control row: the way off on the left, the way on right
-❌ Cancel                ← phase 1, where there is nothing to step back from
+↩️ Back  🟢 Draw       ← two players left: the way on declares the draw
+↩️ Back  🟢 Confirm    ← the control row: the way off on the left, the way on right
+🔴 Cancel                ← phase 1, where there is nothing to step back from
 ```
 
 Exactly three emoji carry meaning on player buttons — done, fool, draw. Medals for
@@ -588,27 +612,47 @@ The same muscle memory decides the footer, so every screen a player builds up ov
 several taps ends in the same two slots: **the way off the screen on the left, the
 way on on the right.**
 
-- **The way off** is `❌ Cancel` while there is nothing to undo and `↩️ Back` after
+- **The way off** is `🔴 Cancel` while there is nothing to undo and `↩️ Back` after
   that — **never both**, because two buttons that close the same screen make the
   player read which is which, and because a button that moves between taps is a
   button that gets mis-tapped.
-- **The way on** is drawn only when the screen can actually be committed, and always
-  opens with `✅` — the one mark this emoji set renders unambiguously green.
-  `✅ Confirm` records a game, `✅ Play` opens one. A way on that would be refused is
-  not drawn: withholding it is how a screen says no, rather than a toast after the tap.
-- **Nothing else sits in either slot.** Draw is an outcome rather than a way off the
-  screen, so it takes a row of its own above the controls, and the card's control row
-  stays two slots wide even at a two-player table.
+- **The way on** is drawn only when the screen can move forward, and always opens
+  with `🟢`. `🟢 Confirm` records a game, `🟢 Play` opens one, `/merge`'s own
+  `🟢` folds two names together, and on a card with two players left `🟢 Draw` says how the game
+  ended. A way on that would be refused is not drawn: withholding it is how a screen
+  says no, rather than a toast after the tap.
+- **Only those three marks appear on a button anywhere in the bot**, and they mean
+  the same thing on every screen: red leaves, the arrow steps back, green goes on.
+  A player who has learned the footer on one screen has learned it on all four.
+
+That is a change of mind, and worth saying why. The way on used to open with `✅`,
+which was also the mark a player who had gone out carried on the card — one emoji
+doing two jobs a row apart. The colour is the part that has to stay constant, not
+the glyph, so `✅` was left to the players and the buttons took a shape of their own.
+`🟢 Draw` moving into the slot follows from the same rule: it is how the card goes
+on, so it is green and it is in the footer, and the row it used to have is gone
+because that row changed the card's height under a moving thumb — see
+[When buttons appear](#when-buttons-appear).
+
+**A mark on a row is a different vocabulary and stays one.** `✅` went out, `💀` was
+the fool, `🤝` shared last place, `🏷️` has taken a seat, `⏸️` is sitting this game
+out, `👑` keeps its name and `➕` folds into it. None of them is red, green, or an
+arrow, so nothing on a row can be read as a button.
 
 A screen that commits on a **single** tap has no control row and needs none:
 `/language` and the `/personal` roster are lists where any tap is the whole answer,
-so there is nothing to cancel and nothing to confirm.
+so there is nothing to cancel and nothing to confirm. `/language` still marks the
+language in force with `🟢`, because there the row *is* the way on.
 
 `shared/telegram/control-row.ts` is the only place a control row is assembled, and
-`project/one-control-row` fails a keyboard that writes one of the four captions
+`project/one-control-row` fails a keyboard that writes one of the five captions
 anywhere else. That rule matches names, so what it cannot see is a way off a screen
 under some other caption, one built in a file not named `*-keyboard.ts`, or a local
-function that happens to be called `controlRow` — those stay a reviewer's job.
+function that happens to be called `controlRow` — those stay a reviewer's job. What
+it also cannot see is the *marks*: each feature's `copy.spec.ts` asserts its own
+three captions open with the right one, because a copy table may not import another
+feature's and a rule spread over four tables drifts unless something reads all of
+them.
 
 ---
 
@@ -1316,6 +1360,24 @@ The chart below the tiles carries no scale line of its own: it had one, and it r
 the tile's own scale in different words a hand's width away, which reads as two
 definitions of one thing rather than as one said twice.
 
+**An evening of fewer than three games takes no title, and the chart says so.** *Best
+evening* and *worst evening* are picked only from evenings that reached three games,
+because one game decides nothing: a single hand lost puts a player at 0% for the night,
+and a single hand won at 100%, and neither is a fact about how the evening went. The
+threshold is `ENOUGH_TO_JUDGE_A_NIGHT`.
+
+The chart used to plot every evening identically while the titles quietly skipped the
+short ones, so a reader saw *worst evening* sitting above a lower point and read it as a
+bug — which is exactly what the owner reported it as. A rule the picture does not show is
+a rule the picture is lying about. So an evening too short to judge is **drawn in a
+fainter ink**, at the same place and the same size, with one line beside the section
+label saying what the faint dots mean. Faint rather than hollow, because the hollow ring
+already means *worst evening* on that same chart, and two meanings on one shape is the
+thing this poster set is trying to stop.
+
+The two titles also lean away from whichever neighbour the curve is falling towards, so
+a dive to 0% beside a marked point no longer runs the line through the words.
+
 Two denominators are used on purpose, and the card says which is which rather than
 leaving the reader to assume:
 
@@ -1394,12 +1456,21 @@ are what stops a young table's card from being empty.
 
 **The name in the heading is the one place the bot sets user data at 126px, and it
 shares that band with the counter on the right**, so it is cut to fit rather than
-allowed to overrun — the same ellipsis the chronology's column heads use. Fitting is
-by character count against an assumed advance, and there is no font metric to hand:
-measured off the rendered posters, ordinary text runs about 0.58 of the size and the
-widest bold Cyrillic about 0.8. The heading reserves the wider figure because being
-wrong there prints one line on top of another, while being wrong in a chronology
-column only crowds a gutter.
+allowed to overrun — the same ellipsis the chronology's column heads use. **Fitting is
+by measurement, glyph by glyph**, against a table generated from the shipped bold face
+by `scripts/measure-advances.ts` and committed as `src/shared/fonts/glyph-advances.ts`;
+`docs:check` holds the table's recorded fingerprint against the faces in `assets/fonts/`,
+so a changed face fails a gate rather than silently mis-fitting every poster.
+
+It used to be a character count against one assumed advance — about 0.58 of the size for
+ordinary text and 0.8 for the widest bold Cyrillic — and both halves of that were wrong.
+The wide figure was not wide enough: `Щ` is 1.071 em and `Ш` 1.063, so thirty-two of them
+put 1218px of ink where 948px is free and the name ran under the counter beside it. And a
+single figure cannot be right for both ends at once: raising it to cover `Щ` cuts
+«Александр» to «Алекс…» with a quarter of the room still free, because ordinary Russian
+names are six to nine letters and none of them is `Щ`. Only measuring the actual string
+answers both, which is why the table exists rather than a bigger constant. The advance a
+caller still passes is now the **fallback** for a glyph the table does not carry.
 
 **Everyone the roster offers has a card to draw**, which is not obvious from the
 schema: the roster is built from who was *seated* (`game_players`) and the card from

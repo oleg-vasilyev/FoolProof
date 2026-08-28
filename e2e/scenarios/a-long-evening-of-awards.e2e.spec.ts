@@ -3,9 +3,9 @@ import { describeScenario } from "../harness/describe-scenario.ts";
 import type { Chat } from "../harness/scenario-chat.ts";
 
 
-const CONFIRM = "✅ Confirm";
+const CONFIRM = "🟢 Confirm";
 
-const CANCEL = "❌ Cancel";
+const CANCEL = "🔴 Cancel";
 
 const BACK = "↩️ Back";
 
@@ -81,7 +81,7 @@ describeScenario("a long evening, with the table changing under it", (chat) => {
     await chat.tap("Oleg");
     await chat.tap("Anya");
     await chat.tap("Roma");
-    await chat.tap("✅ Play");
+    await chat.tap("🟢 Play");
 
     expect(chat.cardText()).toContain("Who went first?");
 

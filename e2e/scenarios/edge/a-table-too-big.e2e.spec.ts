@@ -13,7 +13,7 @@ const ONE_TOO_MANY = named(MOST_PLAYERS + 1);
 
 const ALMOST_FULL = named(MOST_PLAYERS - 1);
 
-const CANCEL = "❌ Cancel";
+const CANCEL = "🔴 Cancel";
 
 const BACK = "↩️ Back";
 
@@ -47,7 +47,7 @@ describeScenario("a table nobody could sit at", (chat) => {
       await chat.tap(name);
     }
 
-    await chat.tap("✅ Confirm");
+    await chat.tap("🟢 Confirm");
 
     expect(chat.lastText()).toContain(`${String(MOST_PLAYERS)} · <b>P10</b> — fool`);
   });
@@ -70,7 +70,7 @@ describeScenario("a table nobody could sit at", (chat) => {
       await chat.tap(name);
     }
 
-    await chat.tap("✅ Confirm");
+    await chat.tap("🟢 Confirm");
 
     expect(chat.lastText()).toContain(`${String(ALMOST_FULL.length)} · <b>P9</b> — fool`);
   });
@@ -85,8 +85,7 @@ describeScenario("a table nobody could sit at", (chat) => {
   it("should keep a seating screen for a full table inside the Bot API's button budget", async () => {
     await chat.tap("Kim");
 
-    expect(chat.captions()[0]).toBe("🪑 1 Kim");
-    expect(chat.captions().at(LAST)).toBe(BACK);
+    expect(chat.captions()).toEqual([...ALMOST_FULL, "🏷️ 1 Kim", BACK]);
 
     await chat.tap(BACK);
     await chat.tap(CANCEL);

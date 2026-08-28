@@ -6,7 +6,7 @@ import {
   GRID_RIGHT,
   IMAGE_WIDTH,
   PAD,
-  USUAL_ADVANCE,
+  USUAL_FALLBACK,
   fontSize,
 } from "#scoresheet/render/card-metrics.ts";
 
@@ -478,7 +478,7 @@ describe("legendRowsOf(), legendColumnsOf() and legendSlotOf()", () => {
     const ROOM_FOR_A_NAME = 14;
 
     for (const players of TABLE_SIZES) {
-      const room = (legendSlotOf(players) - LEGEND_GUTTER) / (fontSize.legend * USUAL_ADVANCE);
+      const room = (legendSlotOf(players) - LEGEND_GUTTER) / (fontSize.legend * USUAL_FALLBACK);
 
       expect(Math.floor(room), String(players)).toBeGreaterThanOrEqual(ROOM_FOR_A_NAME);
     }

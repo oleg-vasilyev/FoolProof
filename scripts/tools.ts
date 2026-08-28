@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { rasterize } from "#shared/drawing/rasterize.ts";
 import { rootDir } from "#shared/config/env.ts";
 import { repository } from "#shared/repository/repository-instance.ts";
+import { measureAdvances } from "./measure-advances.ts";
 import { refreshDesignPage } from "./design-page.ts";
 import { GALLERY_DIR, MOCKUP_DIR, SITE_POSTER_DIR } from "./drawn-into.ts";
 import { drawnByName, everyDrawing, featuresThatDraw } from "./feature-drawings.ts";
@@ -108,6 +109,11 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     does: `draw every edge of every poster into ${GALLERY_DIR}/ for a human or an agent to look at`,
     usage: "node scripts/tools.ts gallery",
     run: drawGallery,
+  },
+  advances: {
+    does: "measure every glyph a name can carry against the shipped bold face, so text is fitted rather than guessed at",
+    usage: "node scripts/tools.ts advances",
+    run: measureAdvances,
   },
   "forget-chat": {
     does: "delete one chat's games, players and language choice, leaving every other chat alone",

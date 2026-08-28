@@ -1,7 +1,7 @@
 import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
 import { type Cell } from "#scoresheet/domain/scoring.ts";
 import { CELL_INSET, CELL_SHRINK, GRID_LEFT, GRID_TOP, cellFontOf, columnCentre, indexFontOf, indexStrideOf, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
-import { FONT_FAMILY, USUAL_ADVANCE, fontSize } from "#scoresheet/render/card-metrics.ts";
+import { FONT_FAMILY, USUAL_FALLBACK, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { nameToFit } from "#scoresheet/render/name-to-fit.ts";
 import { type CellBox, baselineIn, cellFace } from "#scoresheet/render/chronology/cell-face.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
@@ -30,7 +30,7 @@ export const columnNames = (sheet: Sheet): readonly string[] =>
       player.displayName,
       sheet.columnWidth - NAME_GUTTER,
       fontSize.columnName,
-      USUAL_ADVANCE
+      USUAL_FALLBACK
     );
 
     return text(fitted, {

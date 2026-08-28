@@ -45,17 +45,18 @@ const buttonFor = (tap: CardTap, text: string, action: ActionKind): InlineButton
   callback_data: encodeCallback({ gameId: tap.gameId, action, slot: null, version: tap.version }),
 });
 
-const drawRows = (copy: Copy, state: CardState, tap: CardTap): InlineKeyboardRows =>
-  drawAvailable(state) ? [[buttonFor(tap, copy.buttonDraw, ActionKind.Draw)]] : [];
-
 const controlsFor = (copy: Copy, state: CardState, tap: CardTap): readonly InlineButton[] => {
   const phase = phaseOf(state);
 
   return controlRow({
     cancel: buttonFor(tap, copy.buttonCancel, ActionKind.Cancel),
     back: buttonFor(tap, copy.buttonBack, ActionKind.Back),
-    commit:
-      phase === Phase.Ready ? buttonFor(tap, copy.buttonConfirm, ActionKind.Confirm) : null,
+    wayOn:
+      phase === Phase.Ready
+        ? buttonFor(tap, copy.buttonConfirm, ActionKind.Confirm)
+        : drawAvailable(state)
+          ? buttonFor(tap, copy.buttonDraw, ActionKind.Draw)
+          : null,
     anythingToUndo: phase !== Phase.PickStarter,
   });
 };
@@ -77,5 +78,5 @@ export const renderKeyboard = (
     },
   ]);
 
-  return [...playerRows, ...drawRows(copy, state, tap), controlsFor(copy, state, tap)];
+  return [...playerRows, controlsFor(copy, state, tap)];
 };

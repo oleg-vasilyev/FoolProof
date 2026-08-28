@@ -20,7 +20,7 @@ describeScenario("a screen left open while the table moved on", (chat) => {
     await chat.tap("Oleg");
     await chat.tap("Anya");
     await chat.tap("Roma");
-    await chat.tap("✅ Confirm");
+    await chat.tap("🟢 Confirm");
 
     expect(chat.lastText()).toContain("3 · <b>Oleg</b> — fool");
   });
@@ -31,8 +31,8 @@ describeScenario("a screen left open while the table moved on", (chat) => {
     expect(chat.lastText()).toContain("Who is sitting this one out?");
 
     screenId = chat.messages().at(LAST)?.messageId ?? NOTHING;
-    playData = chat.dataFor("✅ Play") ?? "";
-    cancelData = chat.dataFor("❌ Cancel") ?? "";
+    playData = chat.dataFor("🟢 Play") ?? "";
+    cancelData = chat.dataFor("🔴 Cancel") ?? "";
 
     expect(playData).not.toBe("");
   });
@@ -42,7 +42,7 @@ describeScenario("a screen left open while the table moved on", (chat) => {
     await chat.tap("Oleg");
     await chat.tap("Anya");
     await chat.tap("Kim");
-    await chat.tap("✅ Confirm");
+    await chat.tap("🟢 Confirm");
 
     expect(chat.lastText()).toContain("3 · <b>Oleg</b> — fool");
   });
@@ -67,7 +67,7 @@ describeScenario("a screen left open while the table moved on", (chat) => {
     await chat.say("/next_without");
     await chat.tap("Anya");
 
-    expect(chat.captions()).not.toContain("❌ Cancel");
+    expect(chat.captions()).not.toContain("🔴 Cancel");
 
     screenId = chat.messages().at(LAST)?.messageId ?? NOTHING;
     backData = chat.dataFor("↩️ Back") ?? "";
@@ -80,7 +80,7 @@ describeScenario("a screen left open while the table moved on", (chat) => {
     await chat.tap("Oleg");
     await chat.tap("Anya");
     await chat.tap("Roma");
-    await chat.tap("✅ Confirm");
+    await chat.tap("🟢 Confirm");
 
     expect(chat.lastText()).toContain("3 · <b>Oleg</b> — fool");
   });

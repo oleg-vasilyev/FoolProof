@@ -1,13 +1,14 @@
 import { ActionKind } from "#live-game/domain/card-states.ts";
 import { fromBase62, toBase62 } from "#live-game/render/callback-data-codec.ts";
+import { fromBase62Row, marksOf, seatsOf, toBase62Row } from "#live-game/render/roster-codec.ts";
 import type { SeatingAction } from "#live-game/domain/seating-plan.ts";
 
 
-export const SEATING_TAPS = /^s:([0-9A-Za-z]+(?:\.[0-9A-Za-z]+)*):([0-9]+):([a-z]):(-|[0-9A-Za-z]+)$/;
+export const SEATING_TAPS = /^S:([0-9A-Za-z]+):([0-9A-Za-z]*):([a-z]):(-|[0-9A-Za-z]+)$/;
+
+const THE_SCREEN = "S";
 
 const NOTHING = "-";
-
-const BETWEEN_IDS = ".";
 
 const ACTION_CODES = {
   pick: "p",
@@ -24,7 +25,7 @@ const KINDS_BY_CODE = new Map<string, SeatingActionKind>(
 
 export interface SeatingPayload {
   readonly order: readonly number[];
-  readonly placed: number;
+  readonly seated: readonly number[];
   readonly action: SeatingAction;
 }
 
@@ -41,9 +42,9 @@ const actionOf = (kind: SeatingActionKind, arg: string): SeatingAction | null =>
 
 export const encodeSeatingCallback = (payload: SeatingPayload): string =>
   [
-    "s",
-    payload.order.map(toBase62).join(BETWEEN_IDS),
-    String(payload.placed),
+    THE_SCREEN,
+    toBase62Row(payload.order),
+    marksOf(payload.order, payload.seated),
     ACTION_CODES[payload.action.kind],
     argOf(payload.action),
   ].join(":");
@@ -54,20 +55,16 @@ export const decodeSeatingCallback = (data: string): SeatingPayload | null => {
     return null;
   }
 
-  const [, rawOrder = "", rawPlaced = "", rawCode = "", rawArg = ""] = match;
+  const [, rawOrder = "", rawMarks = "", rawCode = "", rawArg = ""] = match;
 
   const kind = KINDS_BY_CODE.get(rawCode);
   if (kind === undefined) {
     return null;
   }
 
+  const order = fromBase62Row(rawOrder);
   const action = actionOf(kind, rawArg);
+  const seated = order === null ? null : seatsOf(order, rawMarks);
 
-  return action === null
-    ? null
-    : {
-        order: rawOrder.split(BETWEEN_IDS).map(fromBase62),
-        placed: Number(rawPlaced),
-        action,
-      };
+  return order === null || action === null || seated === null ? null : { order, seated, action };
 };

@@ -4,7 +4,7 @@ import { describeScenario } from "../harness/describe-scenario.ts";
 
 const STRANGER = { id: 999, first_name: "Somebody else" };
 
-const CONFIRM = "✅ Confirm";
+const CONFIRM = "🟢 Confirm";
 
 describeScenario("/status answers the operator and nobody else", (chat) => {
   it("should report which database is in use", async () => {

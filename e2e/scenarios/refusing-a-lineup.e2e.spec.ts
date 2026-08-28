@@ -41,11 +41,11 @@ describeScenario("the bot refuses a line-up it cannot use", (chat) => {
     await chat.say("/game Kim, Dima");
 
     expect(chat.lastText()).toBe("A game is already in progress.");
-    expect(chat.captions()).toEqual(["Anya", "Roma", "❌ Cancel"]);
+    expect(chat.captions()).toEqual(["Anya", "Roma", "🔴 Cancel"]);
   });
 
   it("should leave the chat with nothing still open", async () => {
-    await chat.tap("❌ Cancel");
+    await chat.tap("🔴 Cancel");
 
     expect(chat.captions()).toEqual([]);
   });
@@ -54,7 +54,7 @@ describeScenario("the bot refuses a line-up it cannot use", (chat) => {
 describeScenario("Back undoes one step and Cancel throws the card away", (chat) => {
   it("should throw the card away on Cancel", async () => {
     await chat.say("/game Oleg, Anya, Roma");
-    await chat.tap("❌ Cancel");
+    await chat.tap("🔴 Cancel");
 
     expect(chat.lastAnswer()).toBe("Cancelled");
     expect(chat.captions()).toEqual([]);
@@ -79,12 +79,12 @@ describeScenario("Back undoes one step and Cancel throws the card away", (chat) 
     await chat.tap("↩️ Back");
 
     expect(chat.cardText()).toContain("Who went first?");
-    expect(chat.captions()).toContain("❌ Cancel");
+    expect(chat.captions()).toContain("🔴 Cancel");
     expect(chat.captions()).not.toContain("↩️ Back");
   });
 
   it("should leave the chat with nothing still open", async () => {
-    await chat.tap("❌ Cancel");
+    await chat.tap("🔴 Cancel");
 
     expect(chat.captions()).toEqual([]);
   });
@@ -96,7 +96,7 @@ describeScenario("/next repeats the line-up", (chat) => {
     await chat.tap("Oleg");
     await chat.tap("Anya");
     await chat.tap("Roma");
-    await chat.tap("✅ Confirm");
+    await chat.tap("🟢 Confirm");
 
     await chat.say("/next");
 
@@ -113,11 +113,11 @@ describeScenario("/next repeats the line-up", (chat) => {
     await chat.tap("↩️ Back");
 
     expect(chat.cardText()).toContain("Who went first?");
-    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "❌ Cancel"]);
+    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "🔴 Cancel"]);
   });
 
   it("should leave the chat with nothing still open", async () => {
-    await chat.tap("❌ Cancel");
+    await chat.tap("🔴 Cancel");
 
     expect(chat.captions()).toEqual([]);
   });

@@ -12,6 +12,8 @@ import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts"
 import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { PLAYER_COLOURS } from "#scoresheet/render/palette.ts";
+import { WIDEST_FALLBACK } from "#scoresheet/render/card-metrics.ts";
+import { widthOf } from "#scoresheet/render/name-to-fit.ts";
 import type { Honours } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
 
@@ -78,6 +80,8 @@ const A_FONT_SIZE = /font-size="([^"]+)"/;
 const A_BARE_NUMBER = /^\d+$/;
 
 const ELLIPSIS = "…";
+
+const A_WIDE_LETTER = 1.1;
 
 const ONE_SIZE = 1;
 
@@ -308,10 +312,12 @@ describe("a table too crowded for the names it seated", () => {
     expect(headings.map((heading) => heading.text)).toContain("Аня");
   });
 
-  it("should cut a long name down to the same length as every other cut one", () => {
+  it("should cut every long name to within a letter of the same width, so the cuts line up", () => {
     const cut = headings.filter((heading) => heading.text.endsWith(ELLIPSIS));
+    const widths = cut.map((heading) => widthOf(heading.text, Number(heading.size), WIDEST_FALLBACK));
+    const room = A_WIDE_LETTER * Number(cut[NONE_CUT]?.size ?? NONE_CUT);
 
-    expect(new Set(cut.map((heading) => heading.text.length)).size).toBe(ONE_SIZE);
+    expect(Math.max(...widths) - Math.min(...widths)).toBeLessThan(room);
   });
 
   it("should count that table in the form its own language gives ten", () => {

@@ -280,64 +280,11 @@ describe("decodeLeavingCallback()", () => {
   });
 });
 
-describe("decodeLeavingCallback(), on a screen drawn before the marks carried an order", () => {
-  it("should still read a mask, so a button already sitting in a chat keeps working", () => {
-    expect(decodeLeavingCallback("w:7.f.3.C:A:k:-")).toEqual({
-      order: ORDER,
-      leaving: [KIM, ROMA],
-      action: { kind: ActionKind.Confirm },
-    });
-  });
-
-  it("should still read that screen's Cancel, which is what leaves no dead screen behind", () => {
-    expect(decodeLeavingCallback("w:3.7:0:x:-")).toEqual({
-      order: [OLEG, ANYA],
-      leaving: NOBODY,
-      action: { kind: ActionKind.Cancel },
-    });
-  });
-
-  it("should read a mask as a seat over the order it travels with, not as an id", () => {
-    expect(decodeLeavingCallback("w:3.7:1:k:-")?.leaving).toEqual([OLEG]);
-    expect(decodeLeavingCallback("w:7.3:1:k:-")?.leaving).toEqual([ANYA]);
-  });
-
-  it("should read a shortened id back whole", () => {
-    expect(decodeLeavingCallback(`w:${WIDEST_ID_IN_BASE_62}.7:1:k:-`)).toEqual({
-      order: [WIDEST_ID, ANYA],
-      leaving: [WIDEST_ID],
-      action: { kind: ActionKind.Confirm },
-    });
-  });
-
-  it("should read a wide id back whole when it is not the first seat, dots and all", () => {
-    expect(decodeLeavingCallback(`w:7.${WIDEST_ID_IN_BASE_62}:2:k:-`)).toEqual({
-      order: [ANYA, WIDEST_ID],
-      leaving: [WIDEST_ID],
-      action: { kind: ActionKind.Confirm },
-    });
-  });
-
-  it.each([
-    ["no roster at all", "w::0:k:-"],
-    ["a gap in the roster", "w:3..7:0:k:-"],
-    ["an id that is not base 62", "w:3.-7:0:k:-"],
-    ["no mask", "w:3.7::k:-"],
-    ["a mask that is not base 62", "w:3.7:-1:k:-"],
-  ])("should refuse data with %s", (_unused, data) => {
-    expect(decodeLeavingCallback(data)).toBeNull();
-  });
-});
-
 describe("LEAVING_TAPS", () => {
   it.each(ACTIONS)("should match the $kind the codec writes", (action) => {
     const data = encodeLeavingCallback({ order: ORDER, leaving: [KIM], action });
 
     expect(LEAVING_TAPS.test(data)).toBe(true);
-  });
-
-  it("should match a screen drawn before the marks carried an order, so its taps still route", () => {
-    expect(LEAVING_TAPS.test("w:7.f.3.C:A:k:-")).toBe(true);
   });
 
   it("should not match a tap on the live card", () => {

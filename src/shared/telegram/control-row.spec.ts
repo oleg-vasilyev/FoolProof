@@ -7,7 +7,7 @@ const CANCEL: InlineButton = { text: "cancel caption", callback_data: "cancel-da
 
 const BACK: InlineButton = { text: "back caption", callback_data: "back-data" };
 
-const COMMIT: InlineButton = { text: "commit caption", callback_data: "commit-data" };
+const WAY_ON: InlineButton = { text: "way on caption", callback_data: "way-on-data" };
 
 const NOTHING_TO_UNDO = false;
 
@@ -21,8 +21,8 @@ const ALONE = 1;
 
 const A_WAY_OUT_AND_A_WAY_ON = 2;
 
-const rowWith = (commit: InlineButton | null, anythingToUndo: boolean) =>
-  controlRow({ cancel: CANCEL, back: BACK, commit, anythingToUndo });
+const rowWith = (wayOn: InlineButton | null, anythingToUndo: boolean) =>
+  controlRow({ cancel: CANCEL, back: BACK, wayOn, anythingToUndo });
 
 describe("controlRow()", () => {
   describe("the way off the screen", () => {
@@ -35,13 +35,13 @@ describe("controlRow()", () => {
     });
 
     it("should never draw both, so nothing asks which of two closes the screen", () => {
-      expect(rowWith(COMMIT, NOTHING_TO_UNDO)).not.toContain(BACK);
+      expect(rowWith(WAY_ON, NOTHING_TO_UNDO)).not.toContain(BACK);
     });
 
     it("should keep the way off the screen in the first slot, whichever it is", () => {
       expect([
-        rowWith(COMMIT, NOTHING_TO_UNDO)[FIRST_SLOT],
-        rowWith(COMMIT, SOMETHING_TO_UNDO)[FIRST_SLOT],
+        rowWith(WAY_ON, NOTHING_TO_UNDO)[FIRST_SLOT],
+        rowWith(WAY_ON, SOMETHING_TO_UNDO)[FIRST_SLOT],
       ]).toEqual([CANCEL, BACK]);
     });
   });
@@ -52,15 +52,15 @@ describe("controlRow()", () => {
     });
 
     it("should put the way on last, so it sits where the thumb expects it", () => {
-      expect(rowWith(COMMIT, SOMETHING_TO_UNDO).at(LAST_SLOT)).toEqual(COMMIT);
+      expect(rowWith(WAY_ON, SOMETHING_TO_UNDO).at(LAST_SLOT)).toEqual(WAY_ON);
     });
 
     it("should sit beside Cancel too, not only beside Back", () => {
-      expect(rowWith(COMMIT, NOTHING_TO_UNDO)).toEqual([CANCEL, COMMIT]);
+      expect(rowWith(WAY_ON, NOTHING_TO_UNDO)).toEqual([CANCEL, WAY_ON]);
     });
 
     it("should leave the row at two buttons, since a row is never anything else", () => {
-      expect(rowWith(COMMIT, SOMETHING_TO_UNDO)).toHaveLength(A_WAY_OUT_AND_A_WAY_ON);
+      expect(rowWith(WAY_ON, SOMETHING_TO_UNDO)).toHaveLength(A_WAY_OUT_AND_A_WAY_ON);
     });
   });
 });

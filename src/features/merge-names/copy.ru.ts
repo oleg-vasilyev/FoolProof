@@ -29,12 +29,12 @@ export const copy: Copy = {
 
   cancelledBody: "Отменено — ничего не слито.",
 
-  markKeeper: "⭐",
+  markKeeper: "👑",
   markAbsorbed: "➕",
 
-  buttonConfirm: "✅ Слить",
+  buttonConfirm: "🟢 Слить",
   buttonBack: "↩️ Назад",
-  buttonCancel: "❌ Отмена",
+  buttonCancel: "🔴 Отмена",
 
   candidate: (name: string, games: number) => `${name} · ${games}`,
 

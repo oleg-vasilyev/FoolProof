@@ -57,6 +57,7 @@ interface CareerCase {
   readonly players: readonly string[];
   readonly nights: number;
   readonly gamesEachNight: number;
+  readonly gamesOn?: (night: number) => number;
   readonly fate: Fate;
   readonly away?: Away;
   readonly drawn?: Drawn;
@@ -130,7 +131,9 @@ const nightOf = (shown: CareerCase, night: number): readonly CareerGame[] => {
     return [];
   }
 
-  return Array.from({ length: shown.gamesEachNight }, (_unused, game) => ({
+  const games = shown.gamesOn?.(night) ?? shown.gamesEachNight;
+
+  return Array.from({ length: games }, (_unused, game) => ({
     seriesNo: night + NIGHT_ONE,
     playedOn: nightDate(night),
     starterId: seated[(night + game) % seated.length] ?? null,
@@ -151,6 +154,12 @@ const SHORT_NAMES = ["Олег", "Аня", "Рома", "Дима", "Верони
 const THE_LONGEST_NAME = "Шжюмщ-Ащфыв".padEnd(LONGEST_NAME, "Ш");
 
 const A_LONG_BOGEY = "Александра-Константиновна";
+
+const THE_WIDEST_NAME = "Щ".repeat(LONGEST_NAME);
+
+const A_HAIR_OF_ROOM = "Макс aka Wolf";
+
+const AFTER_THE_SUBJECT = 1;
 
 const LONG_NAMES: readonly string[] = SHORT_NAMES.map((name, index) => {
   if (index + FIRST_ID === THE_SUBJECT) {
@@ -175,6 +184,14 @@ const A_CAREER_OF_YEARS = 111;
 const A_CLIMBING_CAREER = 7;
 
 const A_SHORT_NIGHT = 3;
+
+const A_NIGHT_OF_ONE = 1;
+
+const A_NIGHT_TOO_SHORT = 2;
+
+const THE_FEWEST_CHARTED = 5;
+
+const EVERY_SEVENTH = 7;
 
 const A_FULL_NIGHT = 6;
 
@@ -286,6 +303,65 @@ const CAREERS: readonly CareerCase[] = [
       return playerId === A_WANDERER && night >= GONE_FROM && night < BACK_ON;
     },
     drawn: everyFourthDrawn,
+  },
+  {
+    name: "a-passed-over-peak",
+    locale: Locale.Ru,
+    asks:
+      "the curve's highest and lowest points are one-game nights — both titles land" +
+      " elsewhere, and the faint dots with the hint say why the peaks were passed over",
+    players: SHORT_NAMES,
+    nights: A_CLIMBING_CAREER,
+    gamesEachNight: A_FULL_NIGHT,
+    gamesOn: (night) =>
+      night === FIRST || night === A_CLIMBING_CAREER - ONE_NIGHT ? A_NIGHT_OF_ONE : A_FULL_NIGHT,
+    fate: climbingNights,
+  },
+  {
+    name: "too-short-to-judge",
+    locale: Locale.En,
+    asks:
+      "five nights and none reaches three games — the whole curve is faint dots, no title" +
+      " is marked anywhere, and the hint alone carries the explanation",
+    players: SHORT_NAMES.slice(NOBODY, FIVE_AT_THE_TABLE),
+    nights: THE_FEWEST_CHARTED,
+    gamesEachNight: A_NIGHT_TOO_SHORT,
+    fate: climbingNights,
+  },
+  {
+    name: "a-crowded-curve",
+    locale: Locale.En,
+    asks:
+      "a career of years with one-game nights scattered through it and the best and worst" +
+      " adjacent — faint dots stay tellable from judged dots at the tightest pitch, and one" +
+      " sits right beside the worst ring",
+    players: SHORT_NAMES,
+    nights: A_CAREER_OF_YEARS,
+    gamesEachNight: A_FULL_NIGHT,
+    gamesOn: (night) => (night % EVERY_SEVENTH === FIRST ? A_NIGHT_OF_ONE : A_FULL_NIGHT),
+    fate: climbingNights,
+  },
+  {
+    name: "the-widest-name",
+    locale: Locale.Ru,
+    asks:
+      "thirty-two of the widest glyph the bold face carries — the heading cuts the name" +
+      " to its measured room instead of running through the counter beside it",
+    players: [THE_WIDEST_NAME, ...SHORT_NAMES.slice(AFTER_THE_SUBJECT, FIVE_AT_THE_TABLE)],
+    nights: A_LONG_CAREER,
+    gamesEachNight: A_FULL_NIGHT,
+    fate: asTheyFall,
+  },
+  {
+    name: "a-hair-of-room",
+    locale: Locale.En,
+    asks:
+      "a name whose measured ink all but fills the heading's room — kept whole, no ellipsis," +
+      " and still clear of the counter",
+    players: [A_HAIR_OF_ROOM, ...SHORT_NAMES.slice(AFTER_THE_SUBJECT, FIVE_AT_THE_TABLE)],
+    nights: A_LONG_CAREER,
+    gamesEachNight: A_FULL_NIGHT,
+    fate: asTheyFall,
   },
 ];
 

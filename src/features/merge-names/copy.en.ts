@@ -27,12 +27,12 @@ export const copy = {
 
   cancelledBody: "Cancelled — nothing merged.",
 
-  markKeeper: "⭐",
+  markKeeper: "👑",
   markAbsorbed: "➕",
 
-  buttonConfirm: "✅ Confirm",
+  buttonConfirm: "🟢 Confirm",
   buttonBack: "↩️ Back",
-  buttonCancel: "❌ Cancel",
+  buttonCancel: "🔴 Cancel",
 
   candidate: (name: string, games: number) => `${name} · ${games}`,
 

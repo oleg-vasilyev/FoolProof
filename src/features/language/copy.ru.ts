@@ -14,7 +14,7 @@ export const copy: Copy = {
 
   languageNames: { en: "English", ru: "Русский" },
 
-  markChosen: "✅",
+  markChosen: "🟢",
 
   tapChosen: (language: string) => `Выбрано: ${language}`,
   screenStale: "Экран устарел — отправь /language заново",

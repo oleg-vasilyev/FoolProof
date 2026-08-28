@@ -8,7 +8,7 @@ describeScenario("a whole game, from /game to Confirm", (chat) => {
 
     expect(chat.cardText()).toContain("Game 1");
     expect(chat.cardText()).toContain("Who went first?");
-    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "❌ Cancel"]);
+    expect(chat.captions()).toEqual(["Oleg", "Anya", "Roma", "🔴 Cancel"]);
   });
 
   it("should record who dealt and stop asking", async () => {
@@ -21,7 +21,7 @@ describeScenario("a whole game, from /game to Confirm", (chat) => {
 
   it("should put Back where Cancel was, so one button ever closes the card", () => {
     expect(chat.captions()).toContain("↩️ Back");
-    expect(chat.captions()).not.toContain("❌ Cancel");
+    expect(chat.captions()).not.toContain("🔴 Cancel");
   });
 
   it("should answer a tap with the position it recorded", async () => {
@@ -32,11 +32,11 @@ describeScenario("a whole game, from /game to Confirm", (chat) => {
   });
 
   it("should stop offering Cancel once a place is recorded", () => {
-    expect(chat.captions()).not.toContain("❌ Cancel");
+    expect(chat.captions()).not.toContain("🔴 Cancel");
   });
 
   it("should offer a draw once two players are left", () => {
-    expect(chat.captions()).toContain("🤝 Draw");
+    expect(chat.captions()).toContain("🟢 Draw");
   });
 
   it("should mark the last player left as the fool", async () => {
@@ -47,12 +47,12 @@ describeScenario("a whole game, from /game to Confirm", (chat) => {
   });
 
   it("should offer Confirm, and no longer a draw", () => {
-    expect(chat.captions()).toContain("✅ Confirm");
-    expect(chat.captions()).not.toContain("🤝 Draw");
+    expect(chat.captions()).toContain("🟢 Confirm");
+    expect(chat.captions()).not.toContain("🟢 Draw");
   });
 
   it("should replace the keyboard with the standings on Confirm", async () => {
-    await chat.tap("✅ Confirm");
+    await chat.tap("🟢 Confirm");
 
     expect(chat.lastAnswer()).toBe("Recorded");
     expect(chat.captions()).toEqual([]);
@@ -69,7 +69,7 @@ describeScenario("a whole game, from /game to Confirm", (chat) => {
   });
 
   it("should leave the chat with nothing still open", async () => {
-    await chat.tap("❌ Cancel");
+    await chat.tap("🔴 Cancel");
 
     expect(chat.captions()).toEqual([]);
   });

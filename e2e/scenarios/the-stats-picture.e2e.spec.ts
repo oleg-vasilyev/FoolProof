@@ -13,7 +13,7 @@ const ONE_PICTURE = 1;
 
 const BOTH_PICTURES = 2;
 
-const CONFIRM = "✅ Confirm";
+const CONFIRM = "🟢 Confirm";
 
 const playAnotherGame = async (chat: Chat, exits: readonly string[]): Promise<void> => {
   await chat.say("/next");

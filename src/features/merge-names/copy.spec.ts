@@ -7,6 +7,14 @@ import { copyIn } from "#merge-names/copy.ts";
 
 const MARKER = "«marker»";
 
+const THE_WAY_OFF = "🔴";
+
+const A_STEP_BACK = "↩️";
+
+const THE_WAY_ON = "🟢";
+
+const opensWith = (caption: unknown, mark: string): string => String(caption).slice(0, mark.length);
+
 const FIRST_OF_A_PAIR = "a";
 
 const SECOND_OF_A_PAIR = "b";
@@ -34,6 +42,20 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
 
   it("should know which language it is", () => {
     expect(copy.locale).toBe(locale);
+  });
+
+  it("should open the way off the screen with the one red mark", () => {
+    expect(opensWith(copy.buttonCancel, THE_WAY_OFF)).toBe(THE_WAY_OFF);
+  });
+
+  it("should open the step back with the one arrow", () => {
+    expect(opensWith(copy.buttonBack, A_STEP_BACK)).toBe(A_STEP_BACK);
+  });
+
+  it("should open every way on with the one green mark, whichever screen draws it", () => {
+    for (const caption of [copy.buttonConfirm]) {
+      expect(opensWith(caption, THE_WAY_ON)).toBe(THE_WAY_ON);
+    }
   });
 
   it("should leave no key without copy, however deep the table goes", () => {

@@ -6,7 +6,7 @@ describeScenario("picking the language a chat is played in", (chat) => {
   it("should open a screen with one button per language", async () => {
     await chat.say("/language");
 
-    expect(chat.captions()).toEqual(["✅ English", "Русский"]);
+    expect(chat.captions()).toEqual(["🟢 English", "Русский"]);
   });
 
   it("should ask the question in the language the chat speaks today", () => {
@@ -40,7 +40,7 @@ describeScenario("picking the language a chat is played in", (chat) => {
 
     expect(chat.cardText()).toContain("Партия 1");
     expect(chat.cardText()).toContain("Кто ходил первым?");
-    expect(chat.captions()).toContain("❌ Отмена");
+    expect(chat.captions()).toContain("🔴 Отмена");
   });
 
   it("should name the seat in Russian when a name is tapped", async () => {
@@ -51,12 +51,12 @@ describeScenario("picking the language a chat is played in", (chat) => {
 
   it("should put Назад where Отмена was, since the first move is now known", () => {
     expect(chat.captions()).toContain("↩️ Назад");
-    expect(chat.captions()).not.toContain("❌ Отмена");
+    expect(chat.captions()).not.toContain("🔴 Отмена");
   });
 
   it("should say so in Russian when the card is cancelled", async () => {
     await chat.tap("↩️ Назад");
-    await chat.tap("❌ Отмена");
+    await chat.tap("🔴 Отмена");
 
     expect(chat.lastAnswer()).toBe("Отменено");
     expect(chat.lastText()).toBe("Отменено — ничего не записано.");
@@ -76,7 +76,7 @@ describeScenario("picking the language a chat is played in", (chat) => {
   });
 
   it("should leave that card closed", async () => {
-    await chat.tap("❌ Отмена");
+    await chat.tap("🔴 Отмена");
 
     expect(chat.captions()).toEqual([]);
   });
@@ -85,7 +85,7 @@ describeScenario("picking the language a chat is played in", (chat) => {
     await chat.say("/language");
 
     expect(chat.cardText()).toContain("Язык");
-    expect(chat.captions()).toEqual(["English", "✅ Русский"]);
+    expect(chat.captions()).toEqual(["English", "🟢 Русский"]);
   });
 
   it("should switch back, marking the language the chat now speaks", async () => {
@@ -106,7 +106,7 @@ describeScenario("picking the language a chat is played in", (chat) => {
 
     await chat.say("/language");
 
-    expect(chat.captions()).toEqual(["English", "✅ Русский"]);
+    expect(chat.captions()).toEqual(["English", "🟢 Русский"]);
   });
 
   it("should republish that chat's menu on the restart, before anybody opens the screen", () => {

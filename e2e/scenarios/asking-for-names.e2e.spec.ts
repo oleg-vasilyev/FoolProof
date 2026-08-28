@@ -20,7 +20,7 @@ describeScenario("/game with no names asks for them", (chat) => {
   it("should open a card from a reply to the ask", async () => {
     await chat.replyToPrompt("Anya, Roma");
 
-    expect(chat.captions()).toEqual(["Anya", "Roma", "❌ Cancel"]);
+    expect(chat.captions()).toEqual(["Anya", "Roma", "🔴 Cancel"]);
   });
 
   it("should leave an answered ask standing", () => {
@@ -30,20 +30,20 @@ describeScenario("/game with no names asks for them", (chat) => {
   it("should allow a draw from the start in a two-player game", async () => {
     await chat.tap("Anya");
 
-    expect(chat.captions()).toContain("🤝 Draw");
+    expect(chat.captions()).toContain("🟢 Draw");
   });
 
   it("should mark both players as sharing the last place", async () => {
-    await chat.tap("🤝 Draw");
+    await chat.tap("🟢 Draw");
 
     expect(chat.lastAnswer()).toBe("Draw");
     expect(chat.captions()).toContain("🤝 Anya");
     expect(chat.captions()).toContain("🤝 Roma");
-    expect(chat.captions()).toContain("✅ Confirm");
+    expect(chat.captions()).toContain("🟢 Confirm");
   });
 
   it("should label the draw in the standings", async () => {
-    await chat.tap("✅ Confirm");
+    await chat.tap("🟢 Confirm");
 
     expect(chat.lastText()).toContain("— draw");
     expect(chat.captions()).toEqual([]);

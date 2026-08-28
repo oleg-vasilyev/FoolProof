@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GRID_RIGHT, PAD, USUAL_ADVANCE } from "#scoresheet/render/card-metrics.ts";
+import { GRID_RIGHT, PAD, USUAL_FALLBACK } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
 import {
   TILES_PER_ROW,
@@ -369,7 +369,7 @@ describe.each(BOTH_TABLES)("careerTiles() and the room a %s note has", (_named, 
       .map(([value]) => String(value));
 
     for (const note of notes) {
-      expect(note.length * personalFont.tileNote * USUAL_ADVANCE, note).toBeLessThan(columnWidth);
+      expect(note.length * personalFont.tileNote * USUAL_FALLBACK, note).toBeLessThan(columnWidth);
     }
   });
 });

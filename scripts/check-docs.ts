@@ -17,6 +17,7 @@ import {
   sitePostersOutOfStep,
 } from "./docs-check/source/committed-pictures.ts";
 import { formsBakedIntoCopy } from "./docs-check/source/copy-word-forms.ts";
+import { advancesOutOfStep } from "./docs-check/source/glyph-advances.ts";
 import { debtWithoutATrigger } from "./docs-check/documents/debt-entry-triggers.ts";
 import { DOCUMENTS } from "./docs-check/document-files.ts";
 import {
@@ -68,6 +69,7 @@ const complaints = [
   ...schemaOutOfStep(),
   ...requiredKeysOutOfStep(),
   ...envTemplateOutOfStep(),
+  ...advancesOutOfStep(),
   ...postersOutOfTheGallery(),
   ...casesOutOfStep(),
   ...mockupsOutOfStep(theMockups),

@@ -370,6 +370,7 @@ const project = {
           "buttonBack",
           "buttonConfirm",
           "buttonPlay",
+          "buttonDraw",
         ]);
 
         const drawn = context.filename.replace(A_WINDOWS_SEPARATOR, "/");
@@ -603,6 +604,15 @@ export default [
       "project/named-states": "error",
       "project/one-door-to-the-database": "error",
       "project/one-control-row": "error",
+    },
+  },
+  {
+    // The one generated file in src/. Its first two lines have to say so, because
+    // the reader's next move is otherwise to edit it by hand and lose the edit to
+    // the next run of scripts/measure-advances.ts.
+    files: ["src/shared/fonts/glyph-advances.ts"],
+    rules: {
+      "project/no-comments": "off",
     },
   },
   {

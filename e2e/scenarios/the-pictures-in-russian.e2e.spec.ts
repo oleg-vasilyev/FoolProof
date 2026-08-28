@@ -21,7 +21,7 @@ const POSTER_WIDTH = 1620;
 
 const TELEGRAM_HEIGHT_LIMIT = 2560;
 
-const CONFIRM = "✅ Записать";
+const CONFIRM = "🟢 Записать";
 
 const FULL_TABLE = [
   "Александра-Константиновна",

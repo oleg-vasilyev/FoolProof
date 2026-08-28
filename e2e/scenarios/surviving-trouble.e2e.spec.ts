@@ -36,7 +36,7 @@ describeScenario("a restart mid-game loses nothing", (chat) => {
   });
 
   it("should still be able to finish the game", async () => {
-    await chat.tap("✅ Confirm");
+    await chat.tap("🟢 Confirm");
 
     expect(chat.lastText()).toContain("3 · <b>Oleg</b> — fool");
   });
@@ -82,7 +82,7 @@ describeScenario("a tap against a card that moved on", (chat) => {
 
   it("should leave the chat with nothing still open", async () => {
     await chat.tap("Oleg");
-    await chat.tap("✅ Confirm");
+    await chat.tap("🟢 Confirm");
 
     expect(chat.captions()).toEqual([]);
   });

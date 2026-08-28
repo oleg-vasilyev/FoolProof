@@ -284,14 +284,14 @@ gate that weighs the picture sees the same bytes. The only reader that catches i
 person looking at the panel where the sentence happened to be longest.
 
 So when copy is printed at a known size into a known width, the spec that owns that copy
-measures it: `widthOf(line, font, USUAL_ADVANCE)` against the room, for **every** line of
+measures it: `widthOf(line, font, USUAL_FALLBACK)` against the room, for **every** line of
 the family rather than the one you just wrote. The curse note had such a guard and never
 clipped; the award reasons did not, and one shipped cut off mid-word — and the guard,
 once written, immediately found nine more lines that had been over the edge for releases.
 
 Use the widest plausible interpolation, not a typical one: a tally is `199 партий`, not
-`3 games`. `USUAL_ADVANCE` over-estimates real prose by roughly a tenth, which is the
-margin you want on a hard clip.
+`3 games`. Width is measured per glyph, so the advance passed is only a fallback for a
+glyph the table never saw: the margin comes from the interpolation, not the constant.
 
 ## Integration specs
 

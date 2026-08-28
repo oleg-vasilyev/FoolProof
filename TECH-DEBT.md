@@ -282,29 +282,24 @@ there is real data to choose between the three shapes rather than argue.
 
 ---
 
-## `WIDEST_ADVANCE` is out by a third, and the widest letter is not the one it names
+## A glyph the face was never measured for is still guessed at
 
-`card-metrics.ts` fits a name to its space with `WIDEST_ADVANCE = 0.8` em per
-character. Measured against the shipped bold face with resvg, that is not the widest
-anything: latin `W` is 0.967 em, `Ш` is 1.063 and `Щ` is 1.074. The model therefore
-under-measures by about a third at the worst input, and the player card's heading is
-where it shows — a name of 32 `Щ` puts 1218px of ink where 949px is free, so it runs
-into the games-and-evenings counter beside it. Live today, and reachable: a line-up
-takes any name a person types.
+`name-to-fit.ts` now measures a name glyph by glyph against a table generated from the
+shipped bold face, so `Щ` costs its real 1.071 em rather than the flat 0.8 the old
+`WIDEST_FALLBACK` charged everything. What survives is the fallback: a glyph outside the
+144 the table carries — Latin, Cyrillic, digits and the punctuation the copy uses — is
+still charged whatever advance the caller passed, which is a guess. A player may type a
+name in any script, and `lineup-parsing.ts` deliberately does not assume Latin.
 
-The gallery cannot see it because `one-huge-name` pads its 32 characters with `я`,
-which is 0.60 em — a plausible extreme rather than a constructed one, and it passes
-the broken limit exactly as easily as a working one.
+The hole is far narrower than the one it replaced, and it fails in the safe direction for
+`USUAL_FALLBACK` callers and the unsafe one for `WIDEST_FALLBACK` callers. Widening the
+table is one line in `scripts/measure-advances.ts` and a rerun; the reason not to do it
+blind is that every added range costs a resvg render at generation time and bytes in a
+file every poster imports.
 
-The fix is a real choice, not a number to bump. Raising the constant to 1.08 closes
-the hole in one line and charges the worst case to every ordinary name, which then
-truncates noticeably earlier. Measuring the actual string against a table of
-per-character advances is exact and free for ordinary names, but adds a generated
-table needing its own staleness gate. **Pick this up the first time a real player's
-name is cut wrong on a card, or when a second renderer needs to fit text** — the
-second reader turns the table from over-engineering into the obvious answer.
-
----
+**Widen it the first time a real player's name is drawn wrong, or when the bot is asked
+to speak a third language** — either is evidence about which ranges are worth carrying,
+which guessing now is not.
 
 ## A long name on a crowded evening exists nowhere on its own sheet
 
@@ -372,19 +367,20 @@ reader wants what the cell *shows*. The Russian has no verb at all — «в кл
 
 **Take it with the next phase that opens the awards copy.**
 
-## Two sentences name a rule instead of what the picture shows
+## A sentence names a rule instead of what the picture shows
 
-The arithmetic behind each is right; what fails is that a reader cannot get from the
-sentence back to the picture.
+The arithmetic behind it is right; what fails is that a reader cannot get from the
+sentence back to the picture. **«то верхняя половина, то нижняя»** at an odd table —
+the top half is `position <= tableSize / 2`, so third of five counts as the bottom, and
+nothing on the sheet lets a reader work that out.
 
-- **«то верхняя половина, то нижняя»** at an odd table — the top half is
-  `position <= tableSize / 2`, so third of five counts as the bottom, and nothing on
-  the sheet lets a reader work that out.
-- **«ничья за последнее место»** in the grid's key — still a fragment with no verb,
-  recoverable only from «ПЕРЕМИРИЕ» on the awards sheet beside it. The English "drew
-  for last" has its verb.
+This entry used to fault **«ничья за последнее место»** in the grid's key for having no
+verb. The owner settled it the other way: the label is just «ничья» now, no verb either,
+but in the same voice as «дурак» and «пропуск» beside it. Register was the defect, not
+verblessness. The overlap it also caused is held by a spec — `cell-key.ts` publishes
+`KEY_LABEL_ROOM` and `scoresheet/copy.spec.ts` measures every label against it.
 
-**Take them with the next phase that opens the awards copy.**
+**Take the surviving bullet with the next phase that opens the awards copy.**
 
 ## The grid's key explains one red digit and the grid draws two
 
@@ -393,8 +389,19 @@ four-handed game inside a five-handed evening prints a red **4** the key never a
 for — while that game counts toward «Дураком в N из M» on the awards sheet. Reading the
 digit takes working out that somebody sat out.
 
-**Take it with the phase that redraws the grid**, which is where a second key entry or a
-mark that does not depend on the table size would go.
+A later phase reached this entry and could not take it, which sharpens the trigger. The
+key lays its entries on a fixed pitch of 380px from `GRID_LEFT`, and three of them
+already end at 1286 of the 1560 available — a fourth would run past the right edge. So a
+second key entry is a relayout, not an addition.
+
+A poster reading found a second hole of the same shape: **the three entries are never
+drawn together in either language** — a sheet draws only what its evening earned, and the
+one gallery evening with draws in it is English, so the Russian «ничья» is measured by a
+gate and looked at by nobody.
+
+**Take both with the phase willing to move the key's slots** — where a mark not depending
+on the table size goes, and where a gallery case drawing all three entries in the other
+language belongs. `KEY_LABEL_ROOM` holds the copy inside today's pitch until then.
 
 ## Four findings from the first gallery reading were never checked against the code
 
@@ -590,12 +597,6 @@ left it alone with nowhere to hide.
 
 **Worth doing with the next phase that changes what one of these files decides, or
 that opens the mutation gate** — "touches `scripts/`" fired on one that only moved them.
-
-## The leaving screen still reads the wire format it stopped writing
-
-`leaving-callback-codec.ts` writes `W:` and reads `w:` too, so a screen already in a
-chat keeps a working `❌ Cancel` across the deploy that changed the shape. **Drop the
-old branch the next time this codec is opened** — such screens go stale within a day.
 
 ## The picture gate cannot fork until its triage half moves out
 

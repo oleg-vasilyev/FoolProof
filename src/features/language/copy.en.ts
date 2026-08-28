@@ -13,7 +13,7 @@ export const copy = {
 
   languageNames: { en: "English", ru: "Русский" },
 
-  markChosen: "✅",
+  markChosen: "🟢",
 
   tapChosen: (language: string) => `${language} it is`,
   screenStale: "Screen expired — send /language again",
