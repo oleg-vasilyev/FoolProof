@@ -12,3 +12,8 @@ too-short-to-judge — five nights and none reaches three games — the whole cu
 a-crowded-curve — a career of years with one-game nights scattered through it and the best and worst adjacent — faint dots stay tellable from judged dots at the tightest pitch, and one sits right beside the worst ring
 the-widest-name — thirty-two of the widest glyph the bold face carries — the heading cuts the name to its measured room instead of running through the counter beside it
 a-hair-of-room — a name whose measured ink all but fills the heading's room — kept whole, no ellipsis, and still clear of the counter
+far-better-than-the-seat — every judged figure well above its seat — the gap reads in the player's own colour on three tiles, and the first-move tile stays grey however far it strays
+far-worse-than-the-seat — share far under and fool far over — red carries the bad side on two tiles at once without ever touching the first move
+dead-on-expected — every figure within a point of its seat — no coloured segment anywhere, and every verdict says spot-on in the faint ink
+a-tick-against-the-counter — a ten-handed regular whose expectation sits at 10% — the tick's label clamps clear of the counter instead of running through it
+two-games-of-noise — a two-game visitor — the smallest denominators the tiles can show, and the widest delta pure luck can draw

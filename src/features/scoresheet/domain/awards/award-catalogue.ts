@@ -1,5 +1,7 @@
 export const ENOUGH_GAMES = 5;
 
+export const EVENING_MINIMUM = 5;
+
 export const LONG_ENOUGH = 8;
 
 export const AwardName = {
@@ -38,6 +40,15 @@ export const AwardName = {
   OpenersCurse: "openersCurse",
   Encore: "encore",
   FirstBlood: "firstBlood",
+  TheViceroy: "theViceroy",
+  TheKingslayer: "theKingslayer",
+  TheLastStand: "theLastStand",
+  TheirHour: "theirHour",
+  TheHalfNight: "theHalfNight",
+  PersonalBest: "personalBest",
+  FirstCleanNight: "firstCleanNight",
+  FirstWin: "firstWin",
+  NewAtTheTable: "newAtTheTable",
   FoolOfTheNight: "foolOfTheNight",
 } as const;
 
@@ -51,7 +62,7 @@ type Earned<Name extends AwardName, Facts> = {
 export type Award =
   | Earned<
       typeof AwardName.King,
-      { readonly percent: number; readonly games: number; readonly passed: boolean }
+      { readonly percent: number; readonly games: number }
     >
   | Earned<typeof AwardName.WireToWire, { readonly games: number }>
   | Earned<typeof AwardName.TheFavourite, { readonly firsts: number; readonly games: number }>
@@ -87,10 +98,25 @@ export type Award =
   | Earned<typeof AwardName.OpenersCurse, { readonly opens: number; readonly burns: number }>
   | Earned<typeof AwardName.Encore, { readonly run: number }>
   | Earned<typeof AwardName.FirstBlood, Record<never, never>>
+  | Earned<typeof AwardName.TheViceroy, { readonly percent: number; readonly games: number }>
+  | Earned<typeof AwardName.TheKingslayer, { readonly over: number; readonly games: number }>
+  | Earned<typeof AwardName.TheLastStand, { readonly duels: number; readonly games: number }>
+  | Earned<typeof AwardName.TheirHour, { readonly firsts: number; readonly games: number }>
+  | Earned<typeof AwardName.TheHalfNight, { readonly games: number; readonly rounds: number }>
+  | Earned<
+      typeof AwardName.PersonalBest,
+      { readonly percent: number; readonly evenings: number }
+    >
+  | Earned<typeof AwardName.FirstCleanNight, { readonly games: number; readonly evenings: number }>
+  | Earned<typeof AwardName.FirstWin, { readonly evenings: number }>
+  | Earned<typeof AwardName.NewAtTheTable, { readonly games: number }>
   | Earned<typeof AwardName.FoolOfTheNight, { readonly fools: number; readonly games: number }>;
 
 export const RAREST_FIRST: readonly AwardName[] = [
+  AwardName.NewAtTheTable,
+  AwardName.TheHalfNight,
   AwardName.FalseDawn,
+  AwardName.FirstWin,
   AwardName.TheFlatline,
   AwardName.TheComeback,
   AwardName.TheCameo,
@@ -98,6 +124,7 @@ export const RAREST_FIRST: readonly AwardName[] = [
   AwardName.TheLadder,
   AwardName.TheSlide,
   AwardName.SweetRevenge,
+  AwardName.FirstCleanNight,
   AwardName.ThePendulum,
   AwardName.TheRollercoaster,
   AwardName.SecondWind,
@@ -114,15 +141,20 @@ export const RAREST_FIRST: readonly AwardName[] = [
   AwardName.Teflon,
   AwardName.GroundhogDay,
   AwardName.TheDoorman,
+  AwardName.TheKingslayer,
   AwardName.HatTrick,
   AwardName.TheInvisible,
   AwardName.HotSeat,
   AwardName.TheTruce,
+  AwardName.PersonalBest,
   AwardName.TheIrishGoodbye,
   AwardName.AllOrNothing,
   AwardName.TheFavourite,
   AwardName.Untouchable,
   AwardName.Encore,
+  AwardName.TheLastStand,
+  AwardName.TheirHour,
+  AwardName.TheViceroy,
   AwardName.FirstBlood,
   AwardName.FoolOfTheNight,
   AwardName.King,

@@ -163,27 +163,6 @@ to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
 
 ---
 
-## Ten seats share eight colours
-
-`PLAYER_COLOURS` holds eight and `colourFor` indexes it modulo eight, while
-`MOST_PLAYERS` is ten. A nine- or ten-handed table therefore gives two players the
-same colour — in the chronology's legend, in its column headings, and on the awards
-sheet, where the coloured bar beside a name is the only thing telling two winners
-apart. The `crowded-table` gallery case is exactly ten and does it twice; a checkup
-confirmed it against the code rather than the picture.
-
-Two more colours would close the arithmetic and not the question: colour is doing
-the whole job of identity on those sheets, and at ten players a palette that stays
-legible on a dark ground is already stretched. The honest fix is a drawing decision
-— a second distinguishing mark, or an admission that the legend is the key and the
-chart is the picture — which is why this is not a two-line patch. It came out of the
-first cold read of the whole gallery and is the one finding from it confirmed in the
-code and still standing.
-
-**Take it with the next phase that redraws a poster**, which will want a
-`poster-designer` mockup anyway — or the first time a real chat seats nine.
-
----
 
 ## The server installs the whole toolbox to run two packages
 
@@ -319,24 +298,6 @@ a limit nobody has reached.
 
 ---
 
-## The Russian copy speaks to a man, and the table does not know who it is talking to
-
-Names are typed, not tagged, so the bot cannot know a player's gender — and the
-Russian table is written in the masculine past tense throughout: «Ходил первым»,
-«Пропустил», «Сыграл», «Побывал дураком», «Вёл график», «Вышел первым». Against a
-female name every one of those is wrong, and a cold reading of the awards sheet named
-two of them by hand before anybody counted the rest.
-
-It cannot be fixed one line at a time: two of nine corrected reads worse than none,
-since the remaining seven then look deliberate, and a lookup cannot help because
-gender is not derivable from a typed name. What the language does allow is a voice
-with no past-tense verb in it — a noun phrase, a count, a colon. «Первых ходов — 5, и
-дураком в 2 из них» already reads that way, and it is the sheet's best line.
-
-**Rewrite the Russian reasons into that voice the next time the awards copy is opened
-for anything else** — the cost is one pass over one table, and it is much cheaper
-attached to a phase already editing those lines than as a phase of its own. Until then
-a woman at the table reads a sheet written about a man.
 
 ## The player card never says which table its expectation is read off
 
@@ -346,26 +307,15 @@ caption shows a different number on two players' cards with nothing on either to
 explain why. Naming it costs a line the card does not have; the fix is a drawing
 decision, not a caption.
 
-**Take it with the next phase that opens the player card.**
+The card now says *отметка на полосе — ожидаемый % для стола такого размера*, so the
+reader is told the number depends on the table size. It still never prints **which**
+sizes: a player who mostly sat five-handed and a player who mostly sat three-handed read
+different numbers under the same words, with nothing on either card explaining why.
 
-## One scale, two vocabularies, one poster apart
+**Take it the next time the card has a line to spare** — the note is the place a table
+size would go, and there is no room beside it today.
 
-The player card's tile says «0% — последнее место, 100% — первое»; the season sheet's
-hint says «50% — половина стола · 100% — первое место в каждой партии». Neither is
-wrong and both describe the same quantity, but a player who reads both is taught the
-scale twice in vocabularies that do not overlap: one names the ends, the other the
-middle. A cold reader found it only by holding the two side by side.
 
-**Take it with the next phase that opens the scoresheet copy** — the decision is which
-of the two teaches the scale, not which sentence to edit.
-
-## The grid's hint hands the cell a printer's verb, in English
-
-`copy.en.ts`'s `sheetGridHint` reads "every cell prints the place taken", where a
-reader wants what the cell *shows*. The Russian has no verb at all — «в клетке занятое
-место» — so this was only ever about the one language.
-
-**Take it with the next phase that opens the awards copy.**
 
 ## A sentence names a rule instead of what the picture shows
 
@@ -506,9 +456,15 @@ is not a participation award — the card says what one person did that nobody e
 but a rule fitting two players could name the runner-up where there is room, the way
 the truce already names everybody in a drawn game.
 
-**Pick it up when a third real evening leaves somebody unnamed**, and check it against
-the evenings on disk rather than against the simulation, which cannot see this: it
-measures how often each rule fires, never how the chosen rows are spread over a table.
+The third real evening did leave somebody unnamed, and the answer was a guarantee in the
+selection rather than a rule that names two: every seated player now takes a row before
+rarity fills the rest. What is left of this entry is the original observation — several
+rules describe a situation two people can be in, and each still hands out one row, so the
+runner-up goes unsaid even when there is space.
+
+**Pick it up when a rule fitting two players is the reason somebody still goes unnamed**
+— the guarantee hides that case now, so the evidence has to be an evening where a player
+fires nothing *because* another player took the only row their shared situation offers.
 
 ## Sixteen user-visible lines the gallery never draws
 
@@ -543,6 +499,40 @@ in its holder line and reads twice as well for it.
 seat-neighbour rule would be the second. The fix is resolving names before
 `awardReason` rather than after: a change to what the render layer is handed, and not
 worth making for one line.
+
+## "The newest series is tonight" is a convention nothing can check
+
+`pastBefore` drops the newest series and calls the rest a player's past, and `honoursFor`
+is handed both halves separately. Nothing ties them: `SeriesChronology` carries no
+`seriesNo`, so the function cannot tell whether the chronology it is judging is the
+series it just excluded. Under today's three callers it holds — every one reads both out
+of the same repository in the same handler — but `honoursFor` called for an older evening
+would silently compare a player against a past that includes the very evening being drawn,
+and the awards would read as though tonight had already happened twice.
+
+**Close it the first time a second way of getting a chronology appears** — a re-draw of an
+older evening, an export, a second bot command — by passing the series the chronology came
+from and refusing the pair when it does not match.
+
+## The fire rates in `PLAN.md` were measured by a tool that is not in the repository
+
+The catalogue's **Fires** column is the number `RAREST_FIRST` is ordered by, and it comes
+from a simulator — four thousand synthetic evenings scored through the real rules. That
+simulator has never been committed: it was written once, read once, and thrown away, and
+this phase had to write a second one from scratch to place nine new awards. The second one
+does not agree with the first everywhere (THE COMEBACK reads 1.3% in the table and 11% in
+the new run), because the two model arrivals, departures and draws differently — so the
+column now mixes numbers from two models and says so nowhere.
+
+That mattered immediately: PART OF THE EVENING shipped in this phase demanding *fewer than
+half the games* **and** *at least five games*, which at a five-to-ten-game evening cannot
+both hold. It fired on 0 of 4000 evenings. A committed simulator would have caught a dead
+rule the day it was written; the gates never can, because a rule that never fires breaks
+nothing.
+
+**Commit the simulator the next time a rule is added or a threshold moved** — that is the
+moment its absence costs something, and the fix is one script plus a case asserting no rule
+fires never.
 
 ## Rarity ranks a vivid fact below an abstract one
 

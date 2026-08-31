@@ -4,14 +4,14 @@ import { copy } from "#scoresheet/copy.en.ts";
 
 const gamesShortOfAwardsSpy = vi.fn();
 
-const gameTallySpy = vi.fn();
+const gamesAcrossSpy = vi.fn();
 
 vi.mock("#scoresheet/domain/awards/awards.ts", () => ({
   gamesShortOfAwards: (played: number) => gamesShortOfAwardsSpy(played),
 }));
 
 vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
-  gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
+  gamesAcross: (table: unknown, games: number) => gamesAcrossSpy(table, games),
 }));
 
 const { chronologyCaption } = await import("#scoresheet/render/chronology/chronology-caption.ts");
@@ -32,7 +32,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 
   gamesShortOfAwardsSpy.mockReturnValue(SHORT_BY);
-  gameTallySpy.mockReturnValue(TALLY_MARK);
+  gamesAcrossSpy.mockReturnValue(TALLY_MARK);
 });
 
 describe("chronologyCaption()", () => {
@@ -46,8 +46,8 @@ describe("chronologyCaption()", () => {
   it("should count the remainder in words rather than print a bare number", () => {
     chronologyCaption(copy, PLAYED);
 
-    expect(gameTallySpy).toHaveBeenCalledTimes(ONCE);
-    expect(gameTallySpy).toHaveBeenCalledWith(copy, SHORT_BY);
+    expect(gamesAcrossSpy).toHaveBeenCalledTimes(ONCE);
+    expect(gamesAcrossSpy).toHaveBeenCalledWith(copy, SHORT_BY);
   });
 
   it("should promise the awards with the finished tally in it", () => {
@@ -66,7 +66,7 @@ describe("chronologyCaption()", () => {
 
     chronologyCaption(copy, PLAYED);
 
-    expect(gameTallySpy).toHaveBeenCalledTimes(NEVER);
+    expect(gamesAcrossSpy).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should speak while even one game is still missing", () => {

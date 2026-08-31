@@ -209,6 +209,13 @@ close enough. Side by side, the questions answer themselves — does this one ha
 section plate every other poster has, is the legend held apart from the scale the way
 the chronology holds them apart, is the same thing called the same name on both.
 
+**A fragment is not a panel.** A tile, a row, a section drawn alone answers *is this
+legible* and leaves *does the screen still work* unasked — and the owner cannot judge the
+second from the first. Three rounds of one redesign went on tiles shown by themselves, and
+the first question asked when the whole card finally appeared was about the space beneath
+them, which no tile panel could have raised. Draw the section in place, at the size the
+screen is read at, from the first contact sheet.
+
 **3. The inventory of everything the picture says.** A table: every mark, every
 colour, every label, every number format — and beside each, **the words a player
 would use for it**. You cannot judge your own labels as a reader, because you chose

@@ -1,7 +1,16 @@
-import { AwardName, RAREST_FIRST } from "#scoresheet/domain/awards/award-catalogue.ts";
+import {
+  AwardName,
+  EVENING_MINIMUM,
+  RAREST_FIRST,
+} from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { SeriesChronology } from "#shared/repository/repository-contract.ts";
 import type { Award, Honours } from "#scoresheet/domain/awards/award-catalogue.ts";
-import { sessionAppearances, type SessionAppearances } from "#scoresheet/domain/session-appearances.ts";
+import {
+  playedGames,
+  sessionAppearances,
+  type PlayerAppearances,
+  type SessionAppearances,
+} from "#scoresheet/domain/session-appearances.ts";
 import { foolOfTheNight, kingOfTheTable } from "#scoresheet/domain/awards/share-awards.ts";
 import {
   allOrNothing,
@@ -44,9 +53,22 @@ import {
 } from "#scoresheet/domain/awards/chart-awards.ts";
 import { thePacifist, theTruce } from "#scoresheet/domain/awards/table-awards.ts";
 import { theNemesis } from "#scoresheet/domain/awards/rivalry-awards.ts";
+import {
+  theHalfNight,
+  theKingslayer,
+  theLastStand,
+  theViceroy,
+  theirHour,
+} from "#scoresheet/domain/awards/standing-awards.ts";
+import {
+  firstCleanNight,
+  firstWin,
+  newAtTheTable,
+  personalBest,
+  type PastRule,
+} from "#scoresheet/domain/awards/past-awards.ts";
+import type { EveningPast } from "#scoresheet/domain/awards/evening-past.ts";
 
-
-export const EVENING_MINIMUM = 5;
 
 const MOST_AWARDS = 9;
 
@@ -56,18 +78,24 @@ const NO_ROWS = 0;
 
 const NOT_SHORT = 0;
 
-const RULES_IN_ORDER: readonly ((evening: SessionAppearances) => Award | null)[] = [
+const RULES_IN_ORDER: readonly PastRule[] = [
   kingOfTheTable,
   wireToWire,
   theFavourite,
+  theViceroy,
   hatTrick,
   homeAdvantage,
   untouchable,
+  personalBest,
+  firstWin,
+  firstCleanNight,
   teflon,
   hotSeat,
   theComeback,
   theLadder,
   sweetRevenge,
+  theirHour,
+  theKingslayer,
   ironSeat,
   theTruce,
   thePacifist,
@@ -75,6 +103,8 @@ const RULES_IN_ORDER: readonly ((evening: SessionAppearances) => Award | null)[]
   theDoorman,
   neverAsked,
   theLatecomer,
+  newAtTheTable,
+  theHalfNight,
   revolvingDoor,
   theCameo,
   secondWind,
@@ -85,6 +115,7 @@ const RULES_IN_ORDER: readonly ((evening: SessionAppearances) => Award | null)[]
   thePendulum,
   theRollercoaster,
   allOrNothing,
+  theLastStand,
   theIrishGoodbye,
   theAnchor,
   theSlide,
@@ -106,6 +137,11 @@ const OVERSHADOWED: readonly (readonly [AwardName, AwardName])[] = [
   [AwardName.FirstBlood, AwardName.SecondWind],
   [AwardName.HotSeat, AwardName.HomeAdvantage],
   [AwardName.TheFavourite, AwardName.King],
+  [AwardName.TheInvisible, AwardName.King],
+  [AwardName.TheLadder, AwardName.TheComeback],
+  [AwardName.PersonalBest, AwardName.King],
+  [AwardName.ThePendulum, AwardName.WireToWire],
+  [AwardName.TheFlatline, AwardName.King],
 ];
 
 const sharesAWinner = (award: Award, other: Award): boolean =>
@@ -176,27 +212,90 @@ const spreadOut = (ranked: readonly Award[], rows: Rows, room: number): readonly
   ];
 };
 
-const pinnedRows = (selection: Selection): Rows =>
-  [selection.king, selection.fool]
-    .filter((award): award is Award => award !== null)
-    .reduce(rowsAfter, new Map<number, number>());
+const crownedRows = (selection: Selection): Rows =>
+  selection.king === null ? new Map<number, number>() : rowsAfter(new Map(), selection.king);
+
+const storiesAbout = (ranked: readonly Award[], playerId: number): number =>
+  ranked.filter((award) => award.winners.includes(playerId)).length;
+
+const leastToSayFirst = (
+  players: readonly PlayerAppearances[],
+  ranked: readonly Award[]
+): readonly number[] =>
+  [...players]
+    .sort(
+      (one, other) =>
+        storiesAbout(ranked, one.playerId) - storiesAbout(ranked, other.playerId)
+    )
+    .map((player) => player.playerId);
+
+const unspokenFor = (
+  evening: SessionAppearances,
+  selection: Selection,
+  ranked: readonly Award[]
+): readonly number[] =>
+  leastToSayFirst(
+    evening.players.filter(
+      (player) =>
+        playedGames(player) > NO_ROWS &&
+        !(selection.king?.winners.includes(player.playerId) ?? false)
+    ),
+    ranked
+  );
+
+const bestRowFor = (ranked: readonly Award[], playerId: number): Award | null =>
+  ranked.find((award) => award.winners.includes(playerId)) ?? null;
+
+const aRowEach = (
+  ranked: readonly Award[],
+  waiting: readonly number[],
+  room: number
+): readonly Award[] => {
+  const [next, ...rest] = waiting;
+
+  if (next === undefined || room <= NO_ROWS) {
+    return [];
+  }
+
+  const taken = bestRowFor(ranked, next);
+
+  if (taken === null) {
+    return aRowEach(ranked, rest, room);
+  }
+
+  return [
+    taken,
+    ...aRowEach(
+      ranked.filter((award) => award !== taken),
+      rest.filter((playerId) => !taken.winners.includes(playerId)),
+      room - ONE_ROW
+    ),
+  ];
+};
 
 export const gamesShortOfAwards = (played: number): number =>
   Math.max(EVENING_MINIMUM - played, NOT_SHORT);
 
-export const honoursFor = (chronology: SeriesChronology): Honours | null => {
+export const honoursFor = (
+  chronology: SeriesChronology,
+  past: EveningPast
+): Honours | null => {
   if (chronology.games.length < EVENING_MINIMUM) {
     return null;
   }
 
   const evening = sessionAppearances(chronology);
-  const fired = RULES_IN_ORDER.flatMap((rule) => rule(evening) ?? []);
+  const fired = RULES_IN_ORDER.flatMap((rule) => rule(evening, past) ?? []);
   const selection = splitOut(fired);
-  const chosen = spreadOut(
-    [...selection.rest].sort(rarestFirst),
-    pinnedRows(selection),
-    roomFor(selection)
+  const ranked = [...selection.rest].sort(rarestFirst);
+  const room = roomFor(selection);
+  const promised = aRowEach(ranked, unspokenFor(evening, selection, ranked), room);
+  const filled = spreadOut(
+    ranked.filter((award) => !promised.includes(award)),
+    promised.reduce(rowsAfter, crownedRows(selection)),
+    room - promised.length
   );
+  const chosen = [...promised, ...filled];
   const printed = fired.filter(
     (award) => award === selection.king || chosen.includes(award)
   );

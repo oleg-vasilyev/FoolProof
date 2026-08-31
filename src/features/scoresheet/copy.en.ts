@@ -57,13 +57,20 @@ export const copy = {
     openersCurse: "OPENER'S CURSE",
     encore: "ENCORE",
     firstBlood: "FIRST BLOOD",
+    theViceroy: "THE VICEROY",
+    theKingslayer: "THE KINGSLAYER",
+    theLastStand: "THE LAST STAND",
+    theirHour: "THEIR HOUR",
+    theHalfNight: "PART OF THE EVENING",
+    personalBest: "PERSONAL BEST",
+    firstCleanNight: "FIRST CLEAN NIGHT",
+    firstWin: "FIRST WIN",
+    newAtTheTable: "NEW AT THE TABLE",
     foolOfTheNight: "FOOL OF THE NIGHT",
   },
 
   kingReason: (percent: number, games: string) =>
-    `${percent}% of the table below them over ${games}. Nobody sat higher.`,
-  kingPassedReason: (percent: number, games: string) =>
-    `${percent}% of the table below them over ${games}. Only the fool sat higher.`,
+    `${percent}% of the table below them over ${games} — the night's best total.`,
   wireToWireReason: (games: string) =>
     `In front on the chart, game after game, all ${games}.`,
   favouriteReason: (firsts: number, games: string) =>
@@ -77,7 +84,7 @@ export const copy = {
   hotSeatReason: (opens: number) =>
     `Opened ${opens} of the games and was left the fool in none of them.`,
   comebackReason: (sank: number, percent: number) =>
-    `Last at halfway, only ${sank}% of the field behind. ${percent}% by the end.`,
+    `From ${sank}% at halfway to ${percent}% by the end. Nobody sat lower at the turn.`,
   ladderReason: (games: string) => `A climb of ${games} — each one better than the one before.`,
   sweetRevengeReason: (times: string, comebacks: string) =>
     `Left the fool ${times}, and ${comebacks} came straight back out first.`,
@@ -120,6 +127,22 @@ export const copy = {
     `Opened ${opens} of the games and was left the fool in ${burns} of them.`,
   encoreReason: (games: string) =>
     `${games} running as the fool. An encore nobody asked for.`,
+  viceroyReason: (percent: number, games: string) =>
+    `${percent}% of the table below them over ${games}. Only the king sat higher.`,
+  kingslayerReason: (over: string, games: string) =>
+    `Above the king ${over} in ${games} — more than anybody else.`,
+  theirHourReason: (times: string, games: string) =>
+    `Out first ${times} in ${games}, from a share below the table's average.`,
+  lastStandReason: (duels: string, games: string) =>
+    `Last two ${duels} in ${games} — the fool was somebody else.`,
+  halfNightReason: (games: string, rounds: number) =>
+    `Only ${games} of ${rounds}, and still above the table's average.`,
+  personalBestReason: (percent: number, evenings: string) =>
+    `${percent}% — a record, with ${evenings} behind them.`,
+  firstCleanNightReason: (games: string, evenings: string) =>
+    `${games} and never the fool — after ${evenings} that all had one.`,
+  firstWinReason: (evenings: string) => `A first place at last, after ${evenings} without one.`,
+  newAtTheTableReason: (games: string) => `A first evening at this table, ${games} of it.`,
   firstBloodReason: "Fool of the evening's first game.",
   foolReason: (fools: number, games: string) =>
     `Left the fool in ${fools} of ${games} — more often than anybody else.`,
@@ -129,10 +152,10 @@ export const copy = {
   sheetEyebrow: "SESSION LOG",
   sheetTitle: "CHRONOLOGY",
   sheetGridLabel: "GAME BY GAME",
-  sheetGridHint: "columns in seating order · every cell prints the place taken",
+  sheetGridHint: "columns in seating order · each cell shows the place taken",
   sheetShareLabel: "OPPONENTS BEATEN",
-  sheetShareHint: "50% is half the table · 100% is first in every game",
-  sheetLegendLabel: "BEST FIRST",
+  sheetShareHint: "0% is last · 100% is first in every game",
+  sheetLegendLabel: "BEST TO WORST",
 
   sheetGameForms: { one: "game", few: "games", many: "games" },
   sheetGameOfForms: { one: "game", few: "games", many: "games" },
@@ -163,12 +186,12 @@ export const copy = {
   sheetTimeForms: { one: "time", few: "times", many: "times" },
 
   tileShare: "OPPONENTS BEATEN",
-  tileShareScale: "0% is last, 100% is first",
   tileFool: "THE FOOL",
   tileFirst: "FIRST PLACE",
   tileFirstMove: "THE FIRST MOVE",
   tileOutOf: (part: number, whole: number) => `${part} of ${whole}`,
-  tileSeatPredicts: (expected: string) => `seat predicts ${expected}`,
+  tileExpectationNote:
+    "the mark on the bar — the % expected at a table this size",
 
   personalChartLabel: "OPPONENTS BEATEN BY EVENING",
   personalChartArrives: (evenings: string) => `The chart arrives after ${evenings}.`,

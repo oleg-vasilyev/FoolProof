@@ -13,22 +13,14 @@ import {
   SHEET_BOTTOM,
   TEASER_BOTTOM_GAP,
   TEASER_FLOOR_DROP,
-  TILES_PER_ROW,
-  TILES_TOP,
   TILE_BOTTOM_GAP,
-  TILE_COUNT,
-  TILE_ROW_HEIGHT,
-  TILE_SECOND_NOTE_DROP,
+  TILES_NOTE_BASELINE,
 } from "#scoresheet/render/personal/personal-metrics.ts";
 
 
 const NOTHING = 0;
 
-const ONE_ROW = 1;
-
 export const MOST_ROWS = 3;
-
-const ROWS_BELOW_THE_FIRST = Math.ceil(TILE_COUNT / TILES_PER_ROW) - ONE_ROW;
 
 export interface PlacedFact {
   readonly fact: CareerFact;
@@ -57,7 +49,7 @@ export const rowFactsIn = (facts: readonly CareerFact[]): readonly CareerFact[] 
 
 export const personalLayoutOf = (card: CareerCard): PersonalLayout => {
   const afterTiles =
-    TILES_TOP + ROWS_BELOW_THE_FIRST * TILE_ROW_HEIGHT + TILE_SECOND_NOTE_DROP + TILE_BOTTOM_GAP;
+    TILES_NOTE_BASELINE + TILE_BOTTOM_GAP;
 
   const chartLabel = afterTiles + SECTION_LABEL_DROP;
   const charted = card.nights.length >= ENOUGH_NIGHTS_TO_CHART;

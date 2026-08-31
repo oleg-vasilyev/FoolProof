@@ -1,13 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Mock } from "vitest";
-import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
+import { Finish } from "#scoresheet/domain/game-outcomes.ts";
+import { AwardName, EVENING_MINIMUM } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
+import type { EveningPast } from "#scoresheet/domain/awards/evening-past.ts";
 
 
 const eveningOfSpy = vi.fn();
 
+const playedGamesSpy = vi.fn();
+
 vi.mock("#scoresheet/domain/session-appearances.ts", () => ({
   sessionAppearances: (chronology: unknown) => eveningOfSpy(chronology),
+  playedGames: (player: unknown) => playedGamesSpy(player),
 }));
 
 type RuleSpy = Mock<(evening: unknown) => unknown>;
@@ -87,7 +92,22 @@ vi.mock("#scoresheet/domain/awards/rivalry-awards.ts", () => ({
   theNemesis: ruleFor(AwardName.TheNemesis),
 }));
 
-const { EVENING_MINIMUM, gamesShortOfAwards, honoursFor } = await import(
+vi.mock("#scoresheet/domain/awards/standing-awards.ts", () => ({
+  theViceroy: ruleFor(AwardName.TheViceroy),
+  theKingslayer: ruleFor(AwardName.TheKingslayer),
+  theLastStand: ruleFor(AwardName.TheLastStand),
+  theirHour: ruleFor(AwardName.TheirHour),
+  theHalfNight: ruleFor(AwardName.TheHalfNight),
+}));
+
+vi.mock("#scoresheet/domain/awards/past-awards.ts", () => ({
+  personalBest: ruleFor(AwardName.PersonalBest),
+  firstCleanNight: ruleFor(AwardName.FirstCleanNight),
+  firstWin: ruleFor(AwardName.FirstWin),
+  newAtTheTable: ruleFor(AwardName.NewAtTheTable),
+}));
+
+const { gamesShortOfAwards, honoursFor } = await import(
   "#scoresheet/domain/awards/awards.ts"
 );
 
@@ -102,6 +122,19 @@ const ROMANI = 6;
 const OLEG = 3;
 
 const SOME_EVENING = { rounds: NOTHING, players: [], starters: [] };
+
+const NO_PAST: EveningPast = { players: [] };
+
+const seatedAs = (...playerIds: readonly number[]) => ({
+  rounds: EVENING_MINIMUM,
+  players: playerIds.map((playerId) => ({
+    playerId,
+    share: NOTHING,
+    running: [],
+    appearances: [{ round: NOTHING, finish: Finish.Middle, position: ONCE, tableSize: ONCE }],
+  })),
+  starters: [],
+});
 
 const CURSE = { burns: ONCE, games: EVENING_MINIMUM, predicted: NOTHING };
 
@@ -142,12 +175,13 @@ const everyRuleFires = (): void => {
 };
 
 const namesOf = (games = ENOUGH): readonly string[] =>
-  honoursFor(games)?.awards.map((award) => award.name) ?? [];
+  honoursFor(games, NO_PAST)?.awards.map((award) => award.name) ?? [];
 
 beforeEach(() => {
   vi.clearAllMocks();
 
   eveningOfSpy.mockReturnValue(SOME_EVENING);
+  playedGamesSpy.mockReturnValue(EVENING_MINIMUM);
   tableCurseSpy.mockReturnValue(null);
 
   for (const spy of Object.values(ruleSpies)) {
@@ -157,22 +191,22 @@ beforeEach(() => {
 
 describe("honoursFor()", () => {
   it("should refuse an evening one game short", () => {
-    expect(honoursFor(chronologyOf(EVENING_MINIMUM - ONCE))).toBeNull();
+    expect(honoursFor(chronologyOf(EVENING_MINIMUM - ONCE), NO_PAST)).toBeNull();
   });
 
   it("should accept an evening of exactly five games", () => {
-    expect(honoursFor(ENOUGH)).not.toBeNull();
+    expect(honoursFor(ENOUGH, NO_PAST)).not.toBeNull();
   });
 
   it("should read the evening out of the chronology once", () => {
-    honoursFor(ENOUGH);
+    honoursFor(ENOUGH, NO_PAST);
 
     expect(eveningOfSpy).toHaveBeenCalledWith(ENOUGH);
     expect(eveningOfSpy).toHaveBeenCalledTimes(ONCE);
   });
 
   it("should judge every rule against that same evening", () => {
-    honoursFor(ENOUGH);
+    honoursFor(ENOUGH, NO_PAST);
 
     for (const spy of Object.values(ruleSpies)) {
       expect(spy).toHaveBeenCalledWith(SOME_EVENING);
@@ -201,7 +235,7 @@ describe("honoursFor()", () => {
   it("should hand over the table's own fact alongside the awards", () => {
     tableCurseSpy.mockReturnValue(CURSE);
 
-    expect(honoursFor(ENOUGH)?.curse).toBe(CURSE);
+    expect(honoursFor(ENOUGH, NO_PAST)?.curse).toBe(CURSE);
   });
 
   describe("when more rules fire than fit on the card", () => {
@@ -228,12 +262,12 @@ describe("honoursFor()", () => {
 
       expect(namesOf()).toEqual([
         AwardName.King,
+        AwardName.FirstWin,
         AwardName.TheComeback,
-        AwardName.TheLadder,
+        AwardName.NewAtTheTable,
+        AwardName.TheHalfNight,
         AwardName.TheCameo,
-        AwardName.TheFlatline,
         AwardName.TheAnchor,
-        AwardName.TheSlide,
         AwardName.FalseDawn,
         AwardName.FoolOfTheNight,
       ]);
@@ -261,12 +295,12 @@ describe("honoursFor()", () => {
 
     it("should hand the last row back to rarity once everybody who fired has one", () => {
       firesFor(AwardName.TheComeback, OLEG);
-      firesFor(AwardName.TheLadder, OLEG);
+      firesFor(AwardName.TheCameo, OLEG);
       firesFor(AwardName.Encore, ROMANI);
 
       expect(namesOf()).toEqual([
         AwardName.TheComeback,
-        AwardName.TheLadder,
+        AwardName.TheCameo,
         AwardName.Encore,
       ]);
     });
@@ -274,9 +308,9 @@ describe("honoursFor()", () => {
     it("should not let one player hold every row while another holds none", () => {
       fires(
         AwardName.TheComeback,
-        AwardName.TheLadder,
-        AwardName.TheCameo,
         AwardName.TheFlatline,
+        AwardName.TheCameo,
+        AwardName.TheLatecomer,
         AwardName.TheAnchor,
         AwardName.TheSlide,
         AwardName.FalseDawn,
@@ -298,12 +332,111 @@ describe("honoursFor()", () => {
         AwardName.TheIrishGoodbye,
         AwardName.TheTruce,
         AwardName.HotSeat,
-        AwardName.TheInvisible,
+        AwardName.ThePendulum,
         AwardName.TheLadder
       );
 
       expect(namesOf()).toContain(AwardName.TheLadder);
       expect(namesOf()).not.toContain(AwardName.Encore);
+    });
+
+    it("should find a row for a player the fool's plate is the only word about", () => {
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI));
+      fires(
+        AwardName.FirstWin,
+        AwardName.FirstCleanNight,
+        AwardName.NewAtTheTable,
+        AwardName.PersonalBest,
+        AwardName.FalseDawn,
+        AwardName.TheFlatline,
+        AwardName.TheComeback,
+        AwardName.TheCameo
+      );
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.FoolOfTheNight, ROMANI);
+      firesFor(AwardName.TheLastStand, ROMANI);
+
+      expect(namesOf()).toContain(AwardName.TheLastStand);
+    });
+
+    it("should spend that row on the commonest award rather than drop it", () => {
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI));
+      fires(AwardName.FirstWin, AwardName.PersonalBest);
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.FoolOfTheNight, ROMANI);
+      firesFor(AwardName.TheLastStand, ROMANI);
+
+      expect(namesOf()).toEqual([
+        AwardName.King,
+        AwardName.FirstWin,
+        AwardName.TheLastStand,
+        AwardName.FoolOfTheNight,
+      ]);
+    });
+
+    it("should count the king's own row as having spoken for him", () => {
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI));
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.TheCameo, OLEG);
+      firesFor(AwardName.TheLastStand, ROMANI);
+
+      expect(namesOf()).toEqual([
+        AwardName.King,
+        AwardName.TheCameo,
+        AwardName.TheLastStand,
+      ]);
+    });
+
+    it("should carry on when a player fired nothing at all", () => {
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI));
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.TheCameo, OLEG);
+
+      expect(namesOf()).toEqual([AwardName.King, AwardName.TheCameo]);
+    });
+
+    it("should never spend one award on two players' guarantees", () => {
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI));
+      firesShared(AwardName.TheTruce, OLEG, ROMANI);
+
+      expect(namesOf().filter((name) => name === AwardName.TheTruce)).toHaveLength(ONCE);
+    });
+
+    it("should let one shared award speak for everybody it names", () => {
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI));
+      firesShared(AwardName.TheTruce, OLEG, ROMANI);
+
+      expect(namesOf()).toEqual([AwardName.TheTruce]);
+    });
+
+    it("should give the row to the player the card has said least about", () => {
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI));
+      firesFor(AwardName.TheCameo, OLEG);
+      firesFor(AwardName.TheFlatline, OLEG);
+      firesFor(AwardName.Encore, ROMANI);
+
+      expect(namesOf()).toContain(AwardName.Encore);
+    });
+
+    it("should drop the pendulum when the same player led the chart all evening", () => {
+      firesFor(AwardName.WireToWire, OLEG);
+      firesFor(AwardName.ThePendulum, OLEG);
+
+      expect(namesOf()).toEqual([AwardName.WireToWire]);
+    });
+
+    it("should keep the pendulum when somebody else led the chart", () => {
+      firesFor(AwardName.WireToWire, OLEG);
+      firesFor(AwardName.ThePendulum, ROMANI);
+
+      expect(namesOf()).toContain(AwardName.ThePendulum);
+    });
+
+    it("should drop the flatline when the same player took the crown", () => {
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.TheFlatline, OLEG);
+
+      expect(namesOf()).toEqual([AwardName.King]);
     });
 
     it("should still print the rarest in the catalogue's order, not in the rarity order", () => {
@@ -429,7 +562,7 @@ describe("gamesShortOfAwards()", () => {
   it("should agree with the threshold the same module refuses on", () => {
     const short = EVENING_MINIMUM - ONCE;
 
-    expect(honoursFor(chronologyOf(short))).toBeNull();
+    expect(honoursFor(chronologyOf(short), NO_PAST)).toBeNull();
     expect(gamesShortOfAwards(short)).toBeGreaterThan(NOTHING);
   });
 });

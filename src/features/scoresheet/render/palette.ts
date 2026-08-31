@@ -20,14 +20,16 @@ export const palette = {
 } as const;
 
 export const PLAYER_COLOURS: readonly string[] = [
-  "#e8c547",
-  "#9b7de0",
-  "#7ba7d7",
-  "#4fb3c4",
-  "#e0a3c8",
-  "#cfa46a",
-  "#8f9bb3",
-  "#b58a6a",
+  "#e7bf5d",
+  "#779af5",
+  "#e67e54",
+  "#26dafe",
+  "#4cb774",
+  "#f4a3f3",
+  "#e486c8",
+  "#6fd087",
+  "#17c0d6",
+  "#c5aa2b",
 ];
 
 export const colourFor = (column: number): string =>

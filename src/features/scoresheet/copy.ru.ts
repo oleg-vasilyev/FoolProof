@@ -32,7 +32,7 @@ export const copy: Copy = {
     teflon: "ДУРАК НЕ ЛИПНЕТ",
     hotSeat: "ГОРЯЧИЙ СТУЛ",
     theComeback: "ВОЗВРАЩЕНИЕ",
-    theLadder: "В ГОРУ",
+    theLadder: "ВОСХОЖДЕНИЕ",
     sweetRevenge: "СЛАДКАЯ МЕСТЬ",
     ironSeat: "ЖЕЛЕЗНЫЙ СТУЛ",
     theTruce: "ПЕРЕМИРИЕ",
@@ -58,13 +58,20 @@ export const copy: Copy = {
     openersCurse: "ПРОКЛЯТИЕ ПЕРВОГО ХОДА",
     encore: "НА БИС",
     firstBlood: "ПЕРВАЯ КРОВЬ",
+    theViceroy: "ВИЦЕ-КОРОЛЬ",
+    theKingslayer: "ОБИДЧИК КОРОЛЯ",
+    theLastStand: "ПОСЛЕДНИЙ РУБЕЖ",
+    theirHour: "СВОЙ ЧАС",
+    theHalfNight: "НЕ ВЕСЬ ВЕЧЕР",
+    personalBest: "ЛИЧНЫЙ РЕКОРД",
+    firstCleanNight: "ВПЕРВЫЕ ЧИСТО",
+    firstWin: "ПЕРВАЯ ПОБЕДА",
+    newAtTheTable: "НОВИЧОК ЗА СТОЛОМ",
     foolOfTheNight: "ДУРАК ВЕЧЕРА",
   },
 
   kingReason: (percent: number, games: string) =>
-    `${percent}% соперников позади за ${games}. Выше не сидел никто.`,
-  kingPassedReason: (percent: number, games: string) =>
-    `${percent}% соперников позади за ${games}. Выше сидел только дурак вечера.`,
+    `${percent}% соперников позади за ${games} — лучший итог вечера.`,
   wireToWireReason: (games: string) =>
     `Впереди на графике весь вечер, партия за партией, все ${games}.`,
   favouriteReason: (firsts: number, games: string) =>
@@ -77,7 +84,7 @@ export const copy: Copy = {
     `Дураком ни разу за ${streak} подряд — лучшая серия вечера.`,
   hotSeatReason: (opens: number) => `Первых ходов — ${opens}, и дураком ни в одном из них.`,
   comebackReason: (sank: number, percent: number) =>
-    `К середине позади только ${sank}% соперников, хуже всех. К концу — ${percent}%.`,
+    `С ${sank}% в середине вечера до ${percent}% к концу. Ниже в тот момент не сидел никто.`,
   ladderReason: (games: string) => `${games} подряд — каждая следующая лучше предыдущей.`,
   sweetRevengeReason: (times: string, comebacks: string) =>
     `Дураком — ${times}, и ${comebacks} следом первое место.`,
@@ -87,14 +94,14 @@ export const copy: Copy = {
   pacifistReason: (draws: string) =>
     `${draws} за вечер закончились ничьей — и ни одна без этого игрока.`,
   nemesisReason: (over: string) =>
-    `${over} вместе с одним соперником — и он ни разу не был выше.`,
+    `${over} с одним и тем же соперником — и ни разу позади.`,
   doormanReason: (opens: number, games: string) =>
     `Первых ходов — ${opens} из ${games}. Ход всё возвращался.`,
-  neverAskedReason: (games: string) => `${games} — и ни разу не выпало ходить первым.`,
+  neverAskedReason: (games: string) => `${games} — и первый ход ни разу не выпал.`,
   latecomerReason: (joinedAt: number, percent: number) =>
     `В игре только с партии ${joinedAt} — и уже ${percent}% соперников позади.`,
   revolvingDoorReason: (missed: number, games: string) =>
-    `${games} за вечер — и ${missed} пропущено в середине.`,
+    `Сыграно ${games} — и ${missed} пропущено в середине вечера.`,
   cameoReason: (games: string) => `Одна из ${games} — и всё.`,
   secondWindReason: (burnedBy: number, games: string) =>
     `Дураком в партии ${burnedBy} — и больше ни разу за ${games}.`,
@@ -121,6 +128,22 @@ export const copy: Copy = {
   openersCurseReason: (opens: number, burns: number) =>
     `Первых ходов — ${opens}, и дураком в ${burns} из них.`,
   encoreReason: (games: string) => `${games} подряд — дураком. На бис никто не просил.`,
+  viceroyReason: (percent: number, games: string) =>
+    `${percent}% соперников позади за ${games}. Выше — только король стола.`,
+  kingslayerReason: (over: string, games: string) =>
+    `Выше короля стола — ${over} из ${games}, чаще всех за столом.`,
+  theirHourReason: (times: string, games: string) =>
+    `Первое место ${times} из ${games} — при доле ниже средней за столом.`,
+  lastStandReason: (duels: string, games: string) =>
+    `Последняя пара — ${duels} из ${games}, и дураком всякий раз другой.`,
+  halfNightReason: (games: string, rounds: number) =>
+    `Всего ${games} из ${rounds} — и всё равно выше среднего по столу.`,
+  personalBestReason: (percent: number, evenings: string) =>
+    `${percent}% — рекорд за всё время. За плечами ${evenings}.`,
+  firstCleanNightReason: (games: string, evenings: string) =>
+    `${games} — и ни разу дураком. До этого ${evenings} без единого чистого.`,
+  firstWinReason: (evenings: string) => `Первое место — впервые. До этого ${evenings} без единого.`,
+  newAtTheTableReason: (games: string) => `Первый вечер за этим столом, и сразу ${games}.`,
   firstBloodReason: "Дурак первой партии вечера.",
   foolReason: (fools: number, games: string) =>
     `Дураком в ${fools} из ${games}. Чаще всех за вечер.`,
@@ -132,8 +155,8 @@ export const copy: Copy = {
   sheetGridLabel: "ПАРТИЯ ЗА ПАРТИЕЙ",
   sheetGridHint: "колонки — в порядке рассадки · в клетке занятое место",
   sheetShareLabel: "ВЫШЕ СОПЕРНИКОВ",
-  sheetShareHint: "50% — половина стола · 100% — первое место в каждой партии",
-  sheetLegendLabel: "ЛУЧШИЕ СВЕРХУ",
+  sheetShareHint: "0% — последнее место · 100% — первое место в каждой партии",
+  sheetLegendLabel: "ОТ ЛУЧШИХ К ХУДШИМ",
 
   sheetGameForms: { one: "партия", few: "партии", many: "партий" },
   sheetGameOfForms: { one: "партии", few: "партий", many: "партий" },
@@ -164,12 +187,12 @@ export const copy: Copy = {
   sheetTimeForms: { one: "раз", few: "раза", many: "раз" },
 
   tileShare: "ВЫШЕ СОПЕРНИКОВ",
-  tileShareScale: "0% — последнее место, 100% — первое",
   tileFool: "ДУРАК",
   tileFirst: "ПЕРВОЕ МЕСТО",
   tileFirstMove: "ПЕРВЫЙ ХОД",
   tileOutOf: (part: number, whole: number) => `${part} из ${whole}`,
-  tileSeatPredicts: (expected: string) => `рассадка предсказывает ${expected}`,
+  tileExpectationNote:
+    "отметка на полосе — ожидаемый % для стола такого размера",
 
   personalChartLabel: "ВЫШЕ СОПЕРНИКОВ ПО ВЕЧЕРАМ",
   personalChartArrives: (evenings: string) => `График появится через ${evenings}.`,
@@ -193,10 +216,10 @@ export const copy: Copy = {
     openersCurse: "ПЕРВЫЙ ХОД НЕ К ДОБРУ",
     theHomecoming: "СНОВА ЗА СТОЛОМ",
     neverWentFirst: "БЕЗ ПЕРВОГО ХОДА",
-    theHeadStart: "ВЕЧНО ХОДИТ ПЕРВЫМ",
+    theHeadStart: "ВЕЧНО ПЕРВЫЙ ХОД",
     theBadPatch: "ЧЁРНАЯ ПОЛОСА",
     theCleanRun: "ЧИСТАЯ СЕРИЯ",
-    theSurvivor: "ВЫХОДИТ СУХИМ",
+    theSurvivor: "СУХИМ ИЗ ВОДЫ",
     lightningRod: "ГРОМООТВОД",
     everPresent: "НИ ОДНОГО ПРОПУСКА",
     foundingMember: "С САМОГО НАЧАЛА",
@@ -209,9 +232,9 @@ export const copy: Copy = {
   alongsideReason: (burns: number, games: string, usual: number) =>
     `Вместе сыграно ${games}, дураком из них ${burns} — обычно выходит ${usual}.`,
   patsyReason: (won: number, duels: string) =>
-    `Оставались в конце вдвоём ${duels} — и в ${won} из них соперник оказывался слабее.`,
+    `Оставались в конце вдвоём ${duels} — и в ${won} из них верх был за этим игроком.`,
   bogeyReason: (lost: number, duels: string) =>
-    `Оставались в конце вдвоём ${duels} — и в ${lost} из них соперник оказывался сильнее.`,
+    `Оставались в конце вдвоём ${duels} — и в ${lost} из них верх был за соперником.`,
   atSizeReason: (burns: number, games: string, usual: number) =>
     `За столом такого размера сыграно ${games}, дураком из них ${burns} — обычно ${usual}.`,
   atTableOf: (seats: number) => `стол на ${seats}`,
@@ -225,7 +248,7 @@ export const copy: Copy = {
   betweenDates: (from: string, until: string) => `С ${from} по ${until}.`,
   cleanRunHolder: (games: string) => `${games} начисто`,
   againstTheSeatReason: (games: string, expected: string, actual: string) =>
-    `Из ${games} рассадка предсказывает дурака в ${expected}, а вышло ${actual}.`,
+    `Из ${games} рассадка отводит дураку ${expected} — а вышло ${actual}.`,
   everPresentReason: "Ни одного пропущенного вечера за этим столом.",
   foundingReason: (evenings: string) => `Первый вечер в записях, ${evenings} назад.`,
   newcomerReason: (evenings: string) => `${evenings} за плечами. Стол ещё присматривается.`,

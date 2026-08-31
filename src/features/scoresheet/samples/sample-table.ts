@@ -1,5 +1,6 @@
 import { copy } from "#scoresheet/copy.en.ts";
 import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
+import { NO_PAST } from "#scoresheet/domain/awards/evening-past.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
@@ -150,7 +151,7 @@ const subjectColumn = (evening: SeriesChronology): number =>
 
 export const posters = (): Posters => {
   const evening = sampleEvening();
-  const honours = honoursFor(evening);
+  const honours = honoursFor(evening, NO_PAST);
 
   if (honours === null) {
     throw new Error("the sample evening is too short to earn awards — lengthen EXIT_ORDERS");

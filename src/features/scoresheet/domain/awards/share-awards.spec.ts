@@ -111,20 +111,6 @@ describe("kingOfTheTable()", () => {
     expect(award?.name === AwardName.King ? award.games : NOTHING).toBe(EIGHTEEN);
   });
 
-  it("should not claim the crown was passed when no fool was crowned at all", () => {
-    rankingPicks(null, oleg);
-    const award = kingOfTheTable(EVENING);
-
-    expect(award?.name === AwardName.King ? award.passed : true).toBe(false);
-  });
-
-  it("should not claim the crown was passed when the fool sat below the king", () => {
-    rankingPicks(anna, oleg);
-    const award = kingOfTheTable(EVENING);
-
-    expect(award?.name === AwardName.King ? award.passed : true).toBe(false);
-  });
-
   describe("when the fool also tops the shares", () => {
     it("should keep the fool out of the field the crown is ranked from", () => {
       rankingPicks(oleg, anna);
@@ -138,40 +124,6 @@ describe("kingOfTheTable()", () => {
       rankingPicks(oleg, anna);
 
       expect(kingOfTheTable(EVENING)?.winners).toEqual([ANNA]);
-    });
-
-    it("should say the crown was passed, so the card cannot claim nobody sat higher", () => {
-      rankingPicks(oleg, anna);
-      const award = kingOfTheTable(EVENING);
-
-      expect(award?.name === AwardName.King ? award.passed : false).toBe(true);
-    });
-
-    it("should say so when the fool only drew level with the king rather than beating them", () => {
-      const LEVEL = 0.5;
-
-      const foolLevel: PlayerAppearances = {
-        playerId: OLEG,
-        share: LEVEL,
-        running: [],
-        appearances: [],
-      };
-
-      const kingLevel: PlayerAppearances = {
-        playerId: ANNA,
-        share: LEVEL,
-        running: [],
-        appearances: [],
-      };
-
-      rankingPicks(foolLevel, kingLevel);
-      const award = kingOfTheTable({
-        rounds: EIGHTEEN,
-        players: [foolLevel, kingLevel],
-        starters: [],
-      });
-
-      expect(award?.name === AwardName.King ? award.passed : false).toBe(true);
     });
 
     it("should report the share of the player it fell to", () => {
@@ -258,12 +210,12 @@ describe("foolOfTheNight()", () => {
   });
 
   describe("who is eligible", () => {
-    it("should rank an eligible player by the share of games they lost", () => {
+    it("should rank an eligible player by how many games they lost, with the share breaking ties", () => {
       foolOfTheNight(EVENING);
       playedGamesSpy.mockReturnValue(ENOUGH_GAMES);
       foolCountSpy.mockReturnValue(ONCE);
 
-      expect(meritUsed(FOOL_RANKING)(oleg)).toBe(ONCE / ENOUGH_GAMES);
+      expect(meritUsed(FOOL_RANKING)(oleg)).toBe(ONCE + ONCE / ENOUGH_GAMES);
     });
 
     it("should refuse to rank a player one game short", () => {

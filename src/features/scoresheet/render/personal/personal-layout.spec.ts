@@ -11,10 +11,8 @@ import {
   SHEET_BOTTOM,
   TEASER_BOTTOM_GAP,
   TEASER_FLOOR_DROP,
-  TILES_TOP,
   TILE_BOTTOM_GAP,
-  TILE_SECOND_NOTE_DROP,
-  TILE_ROW_HEIGHT,
+  TILES_NOTE_BASELINE,
 } from "#scoresheet/render/personal/personal-metrics.ts";
 import { IMAGE_MAX_HEIGHT } from "#scoresheet/render/card-metrics.ts";
 import { ENOUGH_NIGHTS_TO_CHART } from "#scoresheet/domain/career/career-evenings.ts";
@@ -114,7 +112,7 @@ const cardOf = (overrides: Partial<CareerCard> = {}): CareerCard =>
 const chartedCard = (overrides: Partial<CareerCard> = {}): CareerCard =>
   cardOf({ nights: nightsOf(ENOUGH_NIGHTS_TO_CHART), ...overrides });
 
-const AFTER_TILES = TILES_TOP + TILE_ROW_HEIGHT + TILE_SECOND_NOTE_DROP + TILE_BOTTOM_GAP;
+const AFTER_TILES = TILES_NOTE_BASELINE + TILE_BOTTOM_GAP;
 
 const AFTER_TEASER =
   AFTER_TILES + SECTION_LABEL_DROP + TEASER_FLOOR_DROP + TEASER_BOTTOM_GAP;

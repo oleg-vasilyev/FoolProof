@@ -3,6 +3,7 @@ import type { Drawing } from "#shared/drawings/drawings-contract.ts";
 import { LONGEST_NAME } from "#shared/table/table-limits.ts";
 import { copyIn } from "#scoresheet/copy.ts";
 import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
+import { NO_PAST, type EveningPast } from "#scoresheet/domain/awards/evening-past.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import type { Finalist, SeriesChronology } from "#shared/repository/repository-contract.ts";
@@ -12,6 +13,27 @@ import { personalCards } from "#scoresheet/samples/career-edges.ts";
 
 
 const GALLERY_DATE = "2026-08-11";
+
+const FIVE_ROUNDS = 5;
+
+const THREE_ROUNDS = 3;
+
+const LEADER_FIRST: Round = { order: [0, 1, 2, 3], drawn: false, burned: false };
+
+const LEADER_FIRST_SWAPPED: Round = { order: [0, 2, 1, 3], drawn: false, burned: false };
+
+const RECORDS_BEHIND: EveningPast = {
+  players: [
+    { playerId: 1, evenings: [{ share: 0.95, fools: 0, firsts: 0, games: 8 }] },
+    {
+      playerId: 2,
+      evenings: [
+        { share: 0.2, fools: 3, firsts: 2, games: 8 },
+        { share: 0.25, fools: 2, firsts: 1, games: 7 },
+      ],
+    },
+  ],
+};
 
 const FIRST_ID = 1;
 
@@ -38,6 +60,7 @@ interface Case {
   readonly players: readonly string[];
   readonly rounds: readonly Round[];
   readonly handle?: string;
+  readonly past?: EveningPast;
 }
 
 const rotate = (order: readonly number[], by: number): readonly number[] =>
@@ -273,6 +296,17 @@ const GALLERY: readonly Case[] = [
     handle: WIDEST_HANDLE,
   },
   {
+    name: "personal-records",
+    locale: Locale.Ru,
+    asks: "the awards that read a player's own history — a first win, a first clean night and a newcomer at once, beside a king whose own past was better than tonight",
+    players: SHORT_NAMES.slice(NOBODY, FOUR_AT_THE_TABLE),
+    rounds: [
+      ...Array.from({ length: FIVE_ROUNDS }, () => LEADER_FIRST),
+      ...Array.from({ length: THREE_ROUNDS }, () => LEADER_FIRST_SWAPPED),
+    ],
+    past: RECORDS_BEHIND,
+  },
+  {
     name: "shortest-handle",
     locale: Locale.Ru,
     asks: "the shortest handle Telegram allows — still the sheet's own mark rather than a stray word",
@@ -286,7 +320,7 @@ const GALLERY: readonly Case[] = [
 const drawingsFor = (shown: Case): readonly Drawing[] => {
   const copy = copyIn(shown.locale);
   const evening = eveningOf(shown);
-  const honours = honoursFor(evening);
+  const honours = honoursFor(evening, shown.past ?? NO_PAST);
 
   return [
     {

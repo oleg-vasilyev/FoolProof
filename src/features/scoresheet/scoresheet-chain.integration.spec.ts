@@ -6,6 +6,7 @@ import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { copy } from "#scoresheet/copy.en.ts";
 import { copy as russian } from "#scoresheet/copy.ru.ts";
 import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
+import { pastBefore } from "#scoresheet/domain/awards/evening-past.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
@@ -224,8 +225,14 @@ const playerColoursOn = (svg: string, name: string): readonly string[] => [
   ),
 ];
 
+const pastIn = (chatId: number) => {
+  const history = repo.careerHistory(chatId);
+
+  return pastBefore(history);
+};
+
 const honoursIn = (chatId: number): Honours => {
-  const found = honoursFor(seriesIn(chatId));
+  const found = honoursFor(seriesIn(chatId), pastIn(chatId));
 
   if (found === null) {
     throw new Error("the evening that was just played earned no honours");
@@ -395,7 +402,7 @@ describe("an evening reaching the awards", () => {
   });
 
   it("should refuse to hand out anything while the evening is short", () => {
-    expect(honoursFor(seriesIn(SHORT_EVENING_CHAT))).toBeNull();
+    expect(honoursFor(seriesIn(SHORT_EVENING_CHAT), pastIn(SHORT_EVENING_CHAT))).toBeNull();
   });
 
   it("should hand the fool to whoever the recorded positions left last", () => {
@@ -413,7 +420,6 @@ describe("an evening reaching the awards", () => {
       winners: [idFor(AWARDS_CHAT, OLEG)],
       percent: FULL_PERCENT,
       games: ENOUGH_EVENING,
-      passed: false,
     });
   });
 

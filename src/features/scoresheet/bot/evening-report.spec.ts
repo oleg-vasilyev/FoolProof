@@ -90,7 +90,7 @@ const eveningOf = (games: number): SeriesChronology => ({
 });
 
 const awardWonBy = (winners: readonly number[]): Award =>
-  ({ name: AwardName.King, winners, percent: NONE, games: GAMES, passed: false }) as Award;
+  ({ name: AwardName.King, winners, percent: NONE, games: GAMES }) as Award;
 
 const honoursOf = (awards: readonly Award[], curse: Honours["curse"] = null): Honours => ({
   awards,

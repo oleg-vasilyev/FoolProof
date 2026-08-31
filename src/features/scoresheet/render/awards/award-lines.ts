@@ -1,7 +1,13 @@
 import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Copy } from "#scoresheet/copy.ts";
-import { gameTally, gamesAcross, gamesOf, timeTally } from "#scoresheet/render/tally-phrases.ts";
+import {
+  eveningTally,
+  gameTally,
+  gamesAcross,
+  gamesOf,
+  timeTally,
+} from "#scoresheet/render/tally-phrases.ts";
 
 
 export const awardTitle = (copy: Copy, award: Award): string => copy.awardTitles[award.name];
@@ -12,9 +18,7 @@ export const awardWinner = (copy: Copy, names: readonly string[], wholeTable: bo
 export const awardReason = (copy: Copy, award: Award): string => {
   switch (award.name) {
     case AwardName.King:
-      return award.passed
-        ? copy.kingPassedReason(award.percent, gamesAcross(copy, award.games))
-        : copy.kingReason(award.percent, gamesAcross(copy, award.games));
+      return copy.kingReason(award.percent, gamesAcross(copy, award.games));
 
     case AwardName.WireToWire:
       return copy.wireToWireReason(gamesAcross(copy, award.games));
@@ -117,6 +121,36 @@ export const awardReason = (copy: Copy, award: Award): string => {
 
     case AwardName.Encore:
       return copy.encoreReason(gameTally(copy, award.run));
+
+    case AwardName.TheViceroy:
+      return copy.viceroyReason(award.percent, gamesAcross(copy, award.games));
+
+    case AwardName.TheKingslayer:
+      return copy.kingslayerReason(timeTally(copy, award.over), gamesOf(copy, award.games));
+
+    case AwardName.TheirHour:
+      return copy.theirHourReason(timeTally(copy, award.firsts), gamesOf(copy, award.games));
+
+    case AwardName.TheLastStand:
+      return copy.lastStandReason(timeTally(copy, award.duels), gamesOf(copy, award.games));
+
+    case AwardName.TheHalfNight:
+      return copy.halfNightReason(gameTally(copy, award.games), award.rounds);
+
+    case AwardName.PersonalBest:
+      return copy.personalBestReason(award.percent, eveningTally(copy, award.evenings));
+
+    case AwardName.FirstCleanNight:
+      return copy.firstCleanNightReason(
+        gameTally(copy, award.games),
+        eveningTally(copy, award.evenings)
+      );
+
+    case AwardName.FirstWin:
+      return copy.firstWinReason(eveningTally(copy, award.evenings));
+
+    case AwardName.NewAtTheTable:
+      return copy.newAtTheTableReason(gameTally(copy, award.games));
 
     case AwardName.FirstBlood:
       return copy.firstBloodReason;

@@ -1123,16 +1123,23 @@ So there are two orders:
 - **KING OF THE TABLE and FOOL OF THE NIGHT are pinned.** They fire on essentially
   every evening that qualifies, they are the two an evening is expected to have, and
   a card missing them reads as broken rather than as unusual.
-- **The free slots go to whoever the card has said least about, and rarity breaks
+- **Every player at the table gets a row before rarity gets a say.** A first pass
+  walks the players the card has not spoken for yet — least-said-about first — and
+  gives each their best-ranked award; only then does rarity fill what is left. The
+  king's own row counts as having spoken for him; **the fool's plate does not**,
+  because a player who is the fool every Friday is exactly the one the guarantee
+  exists for, and counting the plate would skip him. So the fool always has two rows:
+  the plate, and something else.
+- **The guarantee is best-effort, and the card says nothing when it cannot keep it.**
+  Most rules demand five games, so a player who sat two of twenty can still fire
+  nothing at all. No filler row is invented for them: a row worth nothing is worse
+  than no row.
+- **What is left over goes to whoever the card has said least about, and rarity breaks
   the tie.** The ranking is `RAREST_FIRST` in `award-catalogue.ts`: one list, every
   award exactly once, rarest first. A spec asserts it is complete, because the
   selection indexes into it. Rarity alone was the rule until two real evenings were
   read: on the first, one player took four of the nine rows while the only award
-  another player had earned all night was dropped for being common. Awards cluster on
-  whoever had a remarkable evening, so ranking by rarity ranks that person's facts
-  again and again. Each row now goes to the award whose winner holds the fewest rows
-  so far — counting the two pinned ones — and only among equals does the rarer win.
-  Once everybody who fired has a row the rule is rarity again, unchanged.
+  another player had earned all night was dropped for being common.
 - **The card then prints the chosen nine in the catalogue's own order**, which is
   glory to disgrace.
 
@@ -1157,14 +1164,20 @@ rule finds a winner at all — the number `RAREST_FIRST` is ordered by.
 | KING OF THE TABLE | beating the most of the table | ≥ 5 games | 100% |
 | AHEAD ALL NIGHT | in front on the chart after every game but the first | evening ≥ 10, ≥ 8 games | 27% |
 | THE FAVOURITE | going out first more often than not | ≥ 50%, ≥ 8 games | 61% |
+| THE VICEROY | the best total behind the king, fool excluded | ≥ 5 games | 97% |
 | HAT TRICK | going out first in four games running | run ≥ 4 | 54% |
 | FROM THE OFF | opening a game and going out of it first | ≥ 3 times | 46% |
 | UNTOUCHABLE | never the fool all evening | ≥ 8 games | 62% |
+| PERSONAL BEST | a share beating every earlier evening of their own | ≥ 5 games, ≥ 1 evening behind | 70% |
+| FIRST WIN | a first place at this table, ever | ≥ 5 games, ≥ 1 evening behind | 8% |
+| FIRST CLEAN NIGHT | a first evening without being the fool | ≥ 5 games, ≥ 1 evening behind | 26% |
 | TEFLON | the longest clean run, by somebody who was burned at least once | run ≥ 7 | 49% |
 | HOT SEAT | opening games and never being left the fool in one | ≥ 4 opens | 57% |
 | THE COMEBACK | lowest on the chart at halfway, back above mid-table since | evening ≥ 8 | 1.3% |
 | THE CLIMB | finishing better than the game before, four running | run ≥ 4 | 7% |
 | SWEET REVENGE | leaving first in the game after being the fool | ≥ 2 of them | 13% |
+| THEIR HOUR | a first place from a share below the table average | ≥ 5 games | 93% |
+| THE KINGSLAYER | finishing above the king more often than anybody | ≥ 3 times, alone | 57% |
 | IRON SEAT | the only player who sat through every game | evening ≥ 10 | 23% |
 | THE TRUCE | everybody who was in a drawn game | a draw happened | 58% |
 | THE PACIFIST | being in every drawn game of the evening | ≥ 2 draws | 18% |
@@ -1172,6 +1185,8 @@ rule finds a winner at all — the number `RAREST_FIRST` is ordered by.
 | THE DOORMAN | opening more games than anybody else | ≥ 6, alone | 52% |
 | NEVER ASKED | sitting a long evening without ever opening a game | ≥ 10 games | 30% |
 | THE LATECOMER | arriving late and still finishing at or above mid-table | game ≥ 4, ≥ 5 games | 18% |
+| NEW AT THE TABLE | a first evening, at a table that is not new | ≥ 5 games | 2% |
+| PART OF THE EVENING | missing a third of it and still beating the table average | < ⅔ of games, ≥ 5 games | 3% |
 | REVOLVING DOOR | missing a stretch in the middle and coming back | gap ≥ 2, ≥ 5 games | 16% |
 | THE CAMEO | playing exactly one game of the evening | evening ≥ 8 | 1.3% |
 | SECOND WIND | the fool early, and never again | in the first 3, ≥ 8 games | 16% |
@@ -1182,6 +1197,7 @@ rule finds a winner at all — the number `RAREST_FIRST` is ordered by.
 | THE PENDULUM | swapping halves of the table game after game | run ≥ 6 | 15% |
 | THE ROLLERCOASTER | the widest gap between their best and worst on the chart | ≥ 60% of the scale, evening ≥ 8 | 15% |
 | ALL OR NOTHING | most games finished at an edge — first out or fool | ≥ 75%, ≥ 5 games | 60% |
+| THE LAST STAND | coming out of the last pair with somebody else the fool | ≥ 3 times | 91% |
 | THE IRISH GOODBYE | leaving before the end, and not as the fool | left early | 59% |
 | THE ANCHOR | every game in the bottom half, and never the fool | ≥ 5 games | 2.4% |
 | THE SLIDE | finishing worse than the game before, four running | run ≥ 4 | 8% |
@@ -1189,7 +1205,7 @@ rule finds a winner at all — the number `RAREST_FIRST` is ordered by.
 | OPENER'S CURSE | opening a game and being left the fool in that same game | ≥ 2 times | 42% |
 | ENCORE | the fool in three games running | ≥ 3 running | 72% |
 | FIRST BLOOD | the fool of the very first game | never the same person as FOOL |  92% |
-| FOOL OF THE NIGHT | the worst fool rate | ≥ 5 games | 99% |
+| FOOL OF THE NIGHT | losing the most games, the rate breaking ties | ≥ 5 games | 91% |
 
 The percentages are **modelled, not observed**. Four thousand synthetic evenings —
 four to six players, five to twenty games, with arrivals, departures, missed games,
@@ -1205,7 +1221,7 @@ once.
 
 #### When an award would say nothing the card has not said
 
-Two pairs are nested. The lesser is dropped when the greater names the same player,
+Nine pairs are nested. The lesser is dropped when the greater names the same player,
 and it is dropped **before** the free slots are handed out, so it cannot cost a rarer
 award its place:
 
@@ -1214,6 +1230,12 @@ award its place:
 | FIRST BLOOD | FOOL OF THE NIGHT names the same player | one person, burned twice on one card |
 | HOT SEAT | FROM THE OFF names the same player | winning every game you opened already says you lost none of them |
 | THE FAVOURITE | KING OF THE TABLE names the same player | sitting highest and going out first most often is one story told twice |
+| THE INVISIBLE | KING OF THE TABLE names the same player | the owner read "king of the table" beside "neither top nor bottom" as a contradiction |
+| THE CLIMB | THE COMEBACK names the same player | climbing out of the bottom and improving game on game read as one fact twice |
+| PERSONAL BEST | KING OF THE TABLE names the same player | the same percentage, printed twice, three rows apart |
+| FIRST BLOOD | SECOND WIND names the same player | burned first and never again is the same game, told forwards and backwards |
+| THE PENDULUM | AHEAD ALL NIGHT names the same player | the owner read "in front all evening" beside "top half then bottom, turn about" as a contradiction — the chart is a running mean and the pendulum reads single games, and nothing on the card says so |
+| THE FLATLINE | KING OF THE TABLE names the same player | never leaving mid-table cannot be the evening's best total in the same breath |
 
 Three rules about how a winner is chosen, each of which changed who won on that
 evening:
@@ -1221,6 +1243,10 @@ evening:
 - **A rate award is ranked on the rate, not on the count.** Two players with twelve
   middling games are not equal if one played seventeen and the other nineteen.
   Ranking on the count made the same player win three awards while another won none.
+  **FOOL OF THE NIGHT is the exception, and it was earned the hard way**: ranked on
+  the rate, the plate went to a player with four red cells while the chronology beside
+  it showed another with five, and the line says *чаще всех за вечер*. A reader counts
+  the red cells. So the plate goes on the count, and the rate breaks ties.
 - **Every rate award also demands five games**, including the two the catalogue
   states only as percentages. Three games out of three is not 100%, it is three
   games, and `/stats` already refuses to shrink small samples elsewhere.
@@ -1285,12 +1311,24 @@ first winner's row.
 
 ### One colour per player, for one evening
 
-Eight colours, taken in order and repeated past the eighth, so the only question is
-which of them a player gets. All three posters answer it from the **same** list: the
+Ten colours — one for every seat the table may sit — taken in order, so the only
+question is which of them a player gets. They are **chosen by measurement, not by
+eye**: a search over lightness, chroma and hue maximises the smallest perceptual gap
+in the palette, and does it for every prefix, because a five-handed table uses the
+first five and a ten-handed one uses all ten. The palette that shipped before this
+was picked by eye and had two pairs a reader could not tell apart on a chart line;
+`palette.spec.ts` now fails when any pair falls under the gap a line needs, which is
+the only thing that can catch the next well-meaning tweak. All three posters answer it from the **same** list: the
 players of the latest series, in the order they first sat down. The chronology's
 column heading, its chart line, the coloured bar beside a name on the awards sheet
 and every mark on that player's own card therefore agree, and somebody who opens all
 three in one sitting sees one colour throughout.
+
+**Each chart line is also named at its right-hand end**, in the line's own colour,
+with the names parted vertically when two lines finish level and a thin leader run
+back to the line it belongs to. That is what stops colour from carrying the whole
+job of identity: the reader gets the name where they are already looking, instead of
+carrying a hue back to the legend.
 
 What this deliberately does not promise is the same colour next Friday. The order is
 the order people arrived in tonight, so it moves when the seating does. Pinning the
@@ -1333,26 +1371,40 @@ subtitle said, and they were the two with nothing under them, so a regular grid 
 band of empty space in it for no reason a reader could work out. Deleting them answers
 both.
 
-Each of the three counted rates carries **the rate a player would post if places fell
-at random** — the mean of `1 / tableSize` across the games they actually sat in. A raw
-percentage is not comparable between players: whoever mostly played three-handed burns
-roughly a third of the time by the shape of the game, and whoever played six-handed
-roughly a sixth. The card names where that number comes from rather than calling it
-*expected*, because the word claims an authority it has not shown; the fact rows below
-already said *the seat alone predicts*, and the tiles now say the same thing in two
-words. In Russian those two words are *рассадка предсказывает* and not *место
-предсказывает*, which was the first wording and had to go: one of the tiles it sits
-under is ПЕРВОЕ МЕСТО, where *место* has just meant the place a player finished in, and
-a cold reader parsed the note as a claim about that.
+Each rate carries **the rate a player would post if places fell at random** — the mean
+of `1 / tableSize` across the games they actually sat in, and one half exactly for the
+share, since a place drawn at random finishes above half the field however many sit
+down. A raw percentage is not comparable between players: whoever mostly played
+three-handed burns roughly a third of the time by the shape of the game, and whoever
+played six-handed roughly a sixth.
 
-The share tile carries no count either. It prints **both** ends of its scale on one
-line and then the same baseline the other three carry. Both ends, because one end alone
-reads as a claim rather than a scale: a card showing `0%` with `100% — первым в каждой
-партии` directly beneath it puts two statements in one block that contradict each other,
-and a reader who does not already know it is a legend has no way to tell. That baseline is always `50%` and needs no data: however many sit at
-the table, a place drawn at random finishes above half the field, so the null for this
-figure is one half exactly. Printing it costs nothing and makes the four tiles read as
-one instrument instead of three plus an exception. The tile is also no longer called a share: the figure is literally the
+**That number is drawn, not read.** Under every figure runs a 0–100 bar: the figure's
+own reach filled dim, a bright tick where the random rate falls, and the stretch
+*between the two* — the distance itself — filled with a colour that carries which way
+it went. The player's own colour when the gap is in their favour, the sheet's red when
+it is against them, and nothing at all when the figure sits on its expectation, so a
+card with no colour on it says *ordinary* without a word. The owner's complaint that
+opened this was that two cards — one player never the fool in sixteen games, another
+the fool in thirteen of thirty-two — read the same until you read the small print.
+Colour answers it in the first second; the figures answer it in the second one.
+
+**Which way is "in their favour" is per tile, and the first move has no favour at all.**
+A share above the tick is good, a fool rate above it is bad, and the first move is
+dealt rather than played — so its gap is always drawn in neutral grey, however far it
+strays. Colouring it would praise a player for the deal.
+
+**Under ten decided games nothing is judged.** The gap is drawn grey instead, because
+two games can put a figure thirty points from its expectation by luck alone, and a
+card that shouts about it is lying with a true number.
+
+The expectation is said in words **once**, under the whole block rather than on each
+tile: four repetitions of the same phrase read as noise, and the tick plus one note is
+the same information at a quarter of the ink.
+
+The share tile prints the count of games where the others print a count out of a whole,
+and its scale is taught by the chronology's own hint rather than restated here — the two
+used to teach it in vocabularies that did not overlap, one naming the ends and the other
+the middle. The tile is also no longer called a share: the figure is literally the
 proportion of opponents finished above, so it is named that — «ВЫШЕ СОПЕРНИКОВ», "opponents
 beaten" — on the card, on the chronology's chart and in the king of the table's own
 line. A name that has to be explained by the label beneath it is a name that failed.

@@ -13,7 +13,10 @@ const playerTallySpy = vi.fn();
 
 const timeTallySpy = vi.fn();
 
+const eveningTallySpy = vi.fn();
+
 vi.mock("#scoresheet/render/tally-phrases.ts", () => ({
+  eveningTally: (table: unknown, evenings: number) => eveningTallySpy(table, evenings),
   gameTally: (table: unknown, games: number) => gameTallySpy(table, games),
   gamesAcross: (table: unknown, games: number) => gamesAcrossSpy(table, games),
   gamesOf: (table: unknown, games: number) => gamesOfSpy(table, games),
@@ -35,6 +38,8 @@ const headcountOf = (players: number): string => `heads(${String(players)})`;
 
 const timesOf = (times: number): string => `times(${String(times)})`;
 
+const nightsOf = (evenings: number): string => `nights(${String(evenings)})`;
+
 const ONCE = 1;
 
 const WINNER = 1;
@@ -50,7 +55,7 @@ const oneOf = (name: AwardName): number => NAMES.indexOf(name) + FIRST_FACT;
 const twoOf = (name: AwardName): number => oneOf(name) + SECOND_FACT;
 
 const SAMPLES: readonly Award[] = [
-  { name: AwardName.King, winners: [WINNER], percent: oneOf(AwardName.King), games: twoOf(AwardName.King), passed: false },
+  { name: AwardName.King, winners: [WINNER], percent: oneOf(AwardName.King), games: twoOf(AwardName.King) },
   { name: AwardName.WireToWire, winners: [WINNER], games: oneOf(AwardName.WireToWire) },
   { name: AwardName.TheFavourite, winners: [WINNER], firsts: oneOf(AwardName.TheFavourite), games: twoOf(AwardName.TheFavourite) },
   { name: AwardName.HatTrick, winners: [WINNER], run: oneOf(AwardName.HatTrick) },
@@ -85,6 +90,15 @@ const SAMPLES: readonly Award[] = [
   { name: AwardName.OpenersCurse, winners: [WINNER], opens: oneOf(AwardName.OpenersCurse), burns: twoOf(AwardName.OpenersCurse) },
   { name: AwardName.Encore, winners: [WINNER], run: oneOf(AwardName.Encore) },
   { name: AwardName.FirstBlood, winners: [WINNER] },
+  { name: AwardName.TheViceroy, winners: [WINNER], percent: oneOf(AwardName.TheViceroy), games: twoOf(AwardName.TheViceroy) },
+  { name: AwardName.TheKingslayer, winners: [WINNER], over: oneOf(AwardName.TheKingslayer), games: twoOf(AwardName.TheKingslayer) },
+  { name: AwardName.TheLastStand, winners: [WINNER], duels: oneOf(AwardName.TheLastStand), games: twoOf(AwardName.TheLastStand) },
+  { name: AwardName.TheirHour, winners: [WINNER], firsts: oneOf(AwardName.TheirHour), games: twoOf(AwardName.TheirHour) },
+  { name: AwardName.TheHalfNight, winners: [WINNER], games: oneOf(AwardName.TheHalfNight), rounds: twoOf(AwardName.TheHalfNight) },
+  { name: AwardName.PersonalBest, winners: [WINNER], percent: oneOf(AwardName.PersonalBest), evenings: twoOf(AwardName.PersonalBest) },
+  { name: AwardName.FirstCleanNight, winners: [WINNER], games: oneOf(AwardName.FirstCleanNight), evenings: twoOf(AwardName.FirstCleanNight) },
+  { name: AwardName.FirstWin, winners: [WINNER], evenings: oneOf(AwardName.FirstWin) },
+  { name: AwardName.NewAtTheTable, winners: [WINNER], games: oneOf(AwardName.NewAtTheTable) },
   { name: AwardName.FoolOfTheNight, winners: [WINNER], fools: oneOf(AwardName.FoolOfTheNight), games: twoOf(AwardName.FoolOfTheNight) },
 ];
 
@@ -99,6 +113,7 @@ describe("award-lines", () => {
     gamesAcrossSpy.mockImplementation((_table: unknown, games: number) => acrossOf(games));
     gamesOfSpy.mockImplementation((_table: unknown, games: number) => outOf(games));
     timeTallySpy.mockImplementation((_table: unknown, times: number) => timesOf(times));
+    eveningTallySpy.mockImplementation((_table: unknown, evenings: number) => nightsOf(evenings));
     playerTallySpy.mockImplementation((_table: unknown, players: number) => headcountOf(players));
   });
 

@@ -29,6 +29,8 @@ const {
   LEGEND_GUTTER,
   LEGEND_ROW_PITCH,
   LEGEND_SLOT_MAX,
+  LEGEND_WIDTH,
+  NAME_ROOM,
   PLOT_INSET,
   PLOT_LEFT,
   PLOT_RIGHT,
@@ -340,8 +342,8 @@ describe("the page geometry", () => {
 });
 
 describe("the plot geometry", () => {
-  it("should keep the plot's right edge inside the grid's right edge by exactly PLOT_INSET", () => {
-    expect(GRID_RIGHT - PLOT_RIGHT).toBe(PLOT_INSET);
+  it("should leave the names at the line ends room inside the grid's right edge", () => {
+    expect(GRID_RIGHT - PLOT_RIGHT).toBe(PLOT_INSET + NAME_ROOM);
   });
 
   it("should sit the plot's left edge on the grid's own left edge", () => {
@@ -462,7 +464,7 @@ describe("legendRowsOf(), legendColumnsOf() and legendSlotOf()", () => {
     for (const players of TABLE_SIZES) {
       const filled = legendColumnsOf(players) * legendSlotOf(players);
 
-      expect(filled, String(players)).toBeLessThanOrEqual(PLOT_WIDTH);
+      expect(filled, String(players)).toBeLessThanOrEqual(LEGEND_WIDTH);
     }
   });
 

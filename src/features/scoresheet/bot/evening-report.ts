@@ -1,5 +1,6 @@
 import { copyIn } from "#scoresheet/copy.ts";
 import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
+import { pastBefore } from "#scoresheet/domain/awards/evening-past.ts";
 import { awardReason, awardTitle, awardWinner } from "#scoresheet/render/awards/award-lines.ts";
 import { gameTally } from "#scoresheet/render/tally-phrases.ts";
 import { createLocaleReader } from "#shared/locale/chat-locale.ts";
@@ -20,7 +21,8 @@ export const reportOnTheNewestEvening = (chatId: number): readonly string[] => {
   }
 
   const copy = copyIn(createLocaleReader(repository)(chatId));
-  const honours = honoursFor(chronology);
+  const history = repository.careerHistory(chatId);
+  const honours = honoursFor(chronology, pastBefore(history));
   const nameOf = new Map(chronology.players.map((one) => [one.playerId, one.displayName]));
   const opening = `${chronology.startedOn} — ${String(chronology.games.length)} games, ${String(chronology.players.length)} players`;
 

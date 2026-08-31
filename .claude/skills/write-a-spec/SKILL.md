@@ -284,10 +284,10 @@ gate that weighs the picture sees the same bytes. The only reader that catches i
 person looking at the panel where the sentence happened to be longest.
 
 So when copy is printed at a known size into a known width, the spec that owns that copy
-measures it: `widthOf(line, font, USUAL_FALLBACK)` against the room, for **every** line of
-the family rather than the one you just wrote. The curse note had such a guard and never
-clipped; the award reasons did not, and one shipped cut off mid-word — and the guard,
-once written, immediately found nine more lines that had been over the edge for releases.
+measures it: `widthOf(line, font, USUAL_FALLBACK)` against the room. **The list of lines it
+measures is itself a case**, asserting it equals the union it came from — the list is
+hand-written, and the phase adding a line is the phase that forgets it. Nine award reasons
+walked past this guard with it already in place; the completeness case failed on the first.
 
 Use the widest plausible interpolation, not a typical one: a tally is `199 партий`, not
 `3 games`. Width is measured per glyph, so the advance passed is only a fallback for a

@@ -88,6 +88,15 @@ const reasonsOf = (copy: Copy, tally: string): readonly (readonly [string, strin
     ["openersCurse", copy.openersCurseReason(FIFTY_ONE, TWO)],
     ["encore", copy.encoreReason(tally)],
     ["firstBlood", copy.firstBloodReason],
+    ["theViceroy", copy.viceroyReason(FIFTY_ONE, tally)],
+    ["theKingslayer", copy.kingslayerReason(tally, tally)],
+    ["theLastStand", copy.lastStandReason(tally, tally)],
+    ["theirHour", copy.theirHourReason(tally, tally)],
+    ["theHalfNight", copy.halfNightReason(tally, FIFTY_ONE)],
+    ["personalBest", copy.personalBestReason(FIFTY_ONE, tally)],
+    ["firstCleanNight", copy.firstCleanNightReason(tally, tally)],
+    ["firstWin", copy.firstWinReason(tally)],
+    ["newAtTheTable", copy.newAtTheTableReason(tally)],
     ["foolOfTheNight", copy.foolReason(TWO, tally)],
     ["curse", copy.curseFact(EIGHT, tally, TWO)],
   ];
@@ -288,6 +297,25 @@ describe.each(LOCALES)("the %s copy table", (locale) => {
   describe("the awards", () => {
     it("should give every award in the catalogue a title", () => {
       expect(Object.keys(copy.awardTitles)).toHaveLength(AWARDS_IN_THE_CATALOGUE);
+    });
+
+    it("should leave the note under the player card's tiles inside the card", () => {
+      const CARD_ROOM = GRID_RIGHT - PAD;
+
+      expect(
+        widthOf(copy.tileExpectationNote, personalFont.tileNote, USUAL_FALLBACK),
+        copy.tileExpectationNote
+      ).toBeLessThanOrEqual(CARD_ROOM);
+    });
+
+    it("should measure every award the catalogue names, so no new line escapes the room check", () => {
+      const CURSE_IS_NOT_AN_AWARD = "curse";
+
+      const measured = reasonsOf(copy, A_TALLY)
+        .map(([name]) => name)
+        .filter((name) => name !== CURSE_IS_NOT_AN_AWARD);
+
+      expect([...measured].sort()).toEqual([...Object.values(AwardName)].sort());
     });
 
     it("should leave no award title empty", () => {

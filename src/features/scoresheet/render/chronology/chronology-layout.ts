@@ -23,7 +23,13 @@ export const PLOT_INSET = 24;
 
 export const PLOT_LEFT = GRID_LEFT;
 
-export const PLOT_RIGHT = GRID_RIGHT - PLOT_INSET;
+export const NAME_ROOM = 210;
+
+export const NAME_GAP = 22;
+
+export const LEGEND_WIDTH = GRID_RIGHT - PLOT_INSET - PLOT_LEFT;
+
+export const PLOT_RIGHT = GRID_RIGHT - PLOT_INSET - NAME_ROOM;
 
 export const PLOT_WIDTH = PLOT_RIGHT - PLOT_LEFT;
 
@@ -80,7 +86,7 @@ const LEGEND_NAME_MIN = 14;
 
 const LEGEND_SLOT_MIN = LEGEND_GUTTER + LEGEND_NAME_MIN * fontSize.legend * USUAL_FALLBACK;
 
-const LEGEND_COLUMNS_MAX = Math.floor(PLOT_WIDTH / LEGEND_SLOT_MIN);
+const LEGEND_COLUMNS_MAX = Math.floor(LEGEND_WIDTH / LEGEND_SLOT_MIN);
 
 export const legendRowsOf = (players: number): number =>
   Math.ceil(players / LEGEND_COLUMNS_MAX);
@@ -89,7 +95,7 @@ export const legendColumnsOf = (players: number): number =>
   Math.ceil(players / legendRowsOf(players));
 
 export const legendSlotOf = (players: number): number =>
-  Math.min(LEGEND_SLOT_MAX, PLOT_WIDTH / legendColumnsOf(players));
+  Math.min(LEGEND_SLOT_MAX, LEGEND_WIDTH / legendColumnsOf(players));
 
 const bottomPadOf = (players: number): number =>
   LEGEND_PAD + legendRowsOf(players) * LEGEND_ROW_PITCH;

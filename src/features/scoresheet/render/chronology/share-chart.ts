@@ -4,6 +4,7 @@ import { FONT_FAMILY, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { NEUTRAL, type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
 import { circle, line, path, polyline, text } from "#scoresheet/render/svg-tags.ts";
+import { endLabels } from "#scoresheet/render/chronology/chart-end-labels.ts";
 import { percentLabel } from "#scoresheet/render/percent-label.ts";
 
 
@@ -181,4 +182,5 @@ export const shareChart = (sheet: Sheet): readonly string[] => [
   ...roundLabels(sheet),
   ...shareLines(sheet),
   ...endDots(sheet),
+  ...endLabels(sheet, yOf),
 ];

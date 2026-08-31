@@ -1,5 +1,5 @@
 import { CellKind } from "#scoresheet/domain/game-outcomes.ts";
-import { LEGEND_GUTTER, LEGEND_LABEL_DROP, LEGEND_NAME_DROP, LEGEND_ROW_PITCH, LEGEND_RULE_DROP, LEGEND_SHARE_DROP, LEGEND_TALLY_DROP, PLOT_LEFT, PLOT_WIDTH, chartBottomOf, legendColumnsOf, legendSlotOf, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
+import { LEGEND_GUTTER, LEGEND_LABEL_DROP, LEGEND_NAME_DROP, LEGEND_ROW_PITCH, LEGEND_RULE_DROP, LEGEND_SHARE_DROP, LEGEND_TALLY_DROP, LEGEND_WIDTH, PLOT_LEFT, chartBottomOf, legendColumnsOf, legendSlotOf, type Sheet } from "#scoresheet/render/chronology/chronology-layout.ts";
 import { FONT_FAMILY, USUAL_FALLBACK, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { nameToFit } from "#scoresheet/render/name-to-fit.ts";
 import { type ScoredPlayer } from "#scoresheet/domain/scoring.ts";
@@ -98,7 +98,7 @@ const skipNote = (copy: Copy, sheet: Sheet): readonly string[] => {
   }
 
   const baseline = chartBottomOf(sheet) + LEGEND_LABEL_DROP;
-  const left = PLOT_LEFT + PLOT_WIDTH - NOTE_ROOM;
+  const left = PLOT_LEFT + LEGEND_WIDTH - NOTE_ROOM;
 
   return [
     line({

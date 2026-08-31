@@ -1,5 +1,6 @@
 import { copyIn } from "#scoresheet/copy.ts";
 import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
+import { NO_PAST } from "#scoresheet/domain/awards/evening-past.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import { Locale } from "#shared/locale/locales.ts";
@@ -51,7 +52,7 @@ const pairIn = (
   evening: SeriesChronology
 ): Readonly<Record<string, string>> => {
   const copy = copyIn(locale);
-  const honours = honoursFor(evening);
+  const honours = honoursFor(evening, NO_PAST);
 
   if (honours === null) {
     throw new Error("the sample evening earns no awards — lengthen EXIT_ORDERS in sample-table.ts");

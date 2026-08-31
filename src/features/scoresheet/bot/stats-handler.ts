@@ -7,6 +7,7 @@ import type { Command } from "#shared/telegram/telegram-contexts.ts";
 import type { LocaleReader } from "#shared/locale/chat-locale.ts";
 import type { Honours } from "#scoresheet/domain/awards/award-catalogue.ts";
 import { gamesShortOfAwards, honoursFor } from "#scoresheet/domain/awards/awards.ts";
+import { pastBefore, type EveningPast } from "#scoresheet/domain/awards/evening-past.ts";
 import { chronologyCaption } from "#scoresheet/render/chronology/chronology-caption.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
@@ -50,7 +51,7 @@ const sendAwards = async (
 const withSession = async (
   context: ScoresheetContext,
   ctx: Command,
-  draw: (copy: Copy, chronology: SeriesChronology) => Promise<void>
+  draw: (copy: Copy, chronology: SeriesChronology, past: EveningPast) => Promise<void>
 ): Promise<void> => {
   const copy = copyIn(context.localeIn(ctx.chat.id));
   const chronology = context.repo.seriesChronology(ctx.chat.id);
@@ -61,14 +62,16 @@ const withSession = async (
     return;
   }
 
-  await draw(copy, chronology);
+  const history = context.repo.careerHistory(ctx.chat.id);
+
+  await draw(copy, chronology, pastBefore(history));
 };
 
 export const onStats = async (context: ScoresheetContext, ctx: Command): Promise<void> =>
-  withSession(context, ctx, async (copy, chronology) => {
+  withSession(context, ctx, async (copy, chronology, past) => {
     await sendChronology(copy, ctx, chronology);
 
-    const honours = honoursFor(chronology);
+    const honours = honoursFor(chronology, past);
 
     if (honours !== null) {
       await sendAwards(copy, ctx, chronology, honours);
@@ -79,8 +82,8 @@ export const onChronology = async (context: ScoresheetContext, ctx: Command): Pr
   withSession(context, ctx, (copy, chronology) => sendChronology(copy, ctx, chronology));
 
 export const onAwards = async (context: ScoresheetContext, ctx: Command): Promise<void> =>
-  withSession(context, ctx, async (copy, chronology) => {
-    const honours = honoursFor(chronology);
+  withSession(context, ctx, async (copy, chronology, past) => {
+    const honours = honoursFor(chronology, past);
 
     if (honours === null) {
       await ctx.reply(

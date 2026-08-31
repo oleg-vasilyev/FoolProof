@@ -195,6 +195,12 @@ const EVERY_SEVENTH = 7;
 
 const A_FULL_NIGHT = 6;
 
+const TEN_AT_THE_TABLE = 10;
+
+const A_SINGLE_NIGHT = 1;
+
+const TOO_FEW_TO_JUDGE = 2;
+
 const A_NIGHT_THAT_RAN_LONG = 9;
 
 const A_LATE_ARRIVAL = 5;
@@ -327,6 +333,61 @@ const CAREERS: readonly CareerCase[] = [
     nights: THE_FEWEST_CHARTED,
     gamesEachNight: A_NIGHT_TOO_SHORT,
     fate: climbingNights,
+  },
+  {
+    name: "far-better-than-the-seat",
+    locale: Locale.Ru,
+    asks:
+      "every judged figure well above its seat — the gap reads in the player's own colour on" +
+      " three tiles, and the first-move tile stays grey however far it strays",
+    players: SHORT_NAMES.slice(NOBODY, FIVE_AT_THE_TABLE),
+    nights: A_LONG_CAREER,
+    gamesEachNight: A_FULL_NIGHT,
+    fate: winsEveryGame,
+  },
+  {
+    name: "far-worse-than-the-seat",
+    locale: Locale.Ru,
+    asks:
+      "share far under and fool far over — red carries the bad side on two tiles at once" +
+      " without ever touching the first move",
+    players: SHORT_NAMES.slice(NOBODY, FIVE_AT_THE_TABLE),
+    nights: A_LONG_CAREER,
+    gamesEachNight: A_FULL_NIGHT,
+    fate: burnsEveryGame,
+  },
+  {
+    name: "dead-on-expected",
+    locale: Locale.Ru,
+    asks:
+      "every figure within a point of its seat — no coloured segment anywhere, and each bar" +
+      " carries its tick alone",
+    players: SHORT_NAMES.slice(NOBODY, FIVE_AT_THE_TABLE),
+    nights: A_LONG_CAREER,
+    gamesEachNight: A_FULL_NIGHT,
+    fate: asTheyFall,
+  },
+  {
+    name: "a-tick-against-the-counter",
+    locale: Locale.Ru,
+    asks:
+      "a ten-handed regular whose expectation sits at a tenth — the tick stands near the" +
+      " left end of the bar and its figure still reads clear of the count below",
+    players: SHORT_NAMES.slice(NOBODY, TEN_AT_THE_TABLE),
+    nights: A_LONG_CAREER,
+    gamesEachNight: A_FULL_NIGHT,
+    fate: asTheyFall,
+  },
+  {
+    name: "two-games-of-noise",
+    locale: Locale.Ru,
+    asks:
+      "a two-game visitor — the smallest denominators the tiles can show, and every gap held" +
+      " grey because two games judge nobody",
+    players: SHORT_NAMES.slice(NOBODY, FIVE_AT_THE_TABLE),
+    nights: A_SINGLE_NIGHT,
+    gamesEachNight: TOO_FEW_TO_JUDGE,
+    fate: winsEveryGame,
   },
   {
     name: "a-crowded-curve",

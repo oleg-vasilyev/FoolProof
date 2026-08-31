@@ -19,9 +19,13 @@ const PLOT_INSET = 24;
 
 const PLOT_LEFT = GRID_LEFT;
 
-const PLOT_RIGHT = GRID_RIGHT - PLOT_INSET;
+const NAME_ROOM = 210;
+
+const PLOT_RIGHT = GRID_RIGHT - PLOT_INSET - NAME_ROOM;
 
 const PLOT_WIDTH = PLOT_RIGHT - PLOT_LEFT;
+
+const LEGEND_WIDTH = GRID_RIGHT - PLOT_INSET - PLOT_LEFT;
 
 const LEGEND_SLOT_MAX = 284;
 
@@ -90,6 +94,7 @@ vi.mock("#scoresheet/render/chronology/chronology-layout.ts", () => ({
   LEGEND_TALLY_DROP,
   PLOT_LEFT,
   PLOT_WIDTH,
+  LEGEND_WIDTH,
   chartBottomOf: () => CHART_BOTTOM,
   legendColumnsOf: (players: number) => legendColumnsOfSpy(players),
   legendSlotOf: (players: number) => legendSlotOfSpy(players),
@@ -477,7 +482,7 @@ describe("shareLegend()", () => {
       const note = Number(attributesOfText(copy.sheetKeyAbsent).x);
 
       expect(note).toBeGreaterThan(Number(attributesOfText(copy.sheetLegendLabel).x));
-      expect(note).toBeLessThan(PLOT_LEFT + PLOT_WIDTH);
+      expect(note).toBeLessThan(PLOT_LEFT + LEGEND_WIDTH);
     });
 
     it("should lift the sample SAMPLE_LIFT above its label's baseline", () => {

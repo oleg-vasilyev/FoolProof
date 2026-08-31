@@ -3,15 +3,33 @@ import { SHEET_BASE } from "#scoresheet/render/card-metrics.ts";
 
 export const HEADING_RULE = 350;
 
-export const TILE_ROW_HEIGHT = 292;
+export const TILE_ROW_HEIGHT = 252;
 
 export const TILES_TOP = 448;
 
-export const TILE_VALUE_DROP = 128;
+export const TILE_VALUE_DROP = 112;
 
-export const TILE_NOTE_DROP = 170;
+export const TILE_NOTE_DROP = 196;
 
-export const TILE_SECOND_NOTE_DROP = 208;
+export const TILE_BAR_DROP = 140;
+
+export const TILE_BAR_WIDTH = 560;
+
+export const TILE_BAR_HEIGHT = 12;
+
+export const TILE_BAR_RADIUS = 6;
+
+export const TILE_TICK_RISE = 7;
+
+export const TILE_TICK_DROP = 19;
+
+export const TILE_TICK_WIDTH = 3;
+
+export const TILE_MARK_GAP = 24;
+
+export const TILE_MARK_LIFT = 13;
+
+export const NOTE_BELOW_TILES = 52;
 
 export const TILES_PER_ROW = 2;
 
@@ -74,9 +92,9 @@ export const PLATE_REASON_DROP = 176;
 export const SHEET_BOTTOM = SHEET_BASE;
 
 export const personalFont = {
-  tileLabel: 30,
-  tileValue: 116,
-  tileNote: 29,
+  tileLabel: 28,
+  tileValue: 96,
+  tileNote: 27,
   sectionLabel: 30,
   chartTeaser: 32,
   axis: 22,
@@ -98,3 +116,10 @@ export const POINT_RADIUS = 6;
 export const MARK_RADIUS = 10;
 
 export const MARK_STROKE = 5;
+
+const ONE_ROW = 1;
+
+const ROWS_BELOW_THE_FIRST = Math.ceil(TILE_COUNT / TILES_PER_ROW) - ONE_ROW;
+
+export const TILES_NOTE_BASELINE =
+  TILES_TOP + ROWS_BELOW_THE_FIRST * TILE_ROW_HEIGHT + TILE_NOTE_DROP + NOTE_BELOW_TILES;

@@ -1,92 +1,156 @@
 import { FONT_FAMILY, GRID_RIGHT, PAD } from "#scoresheet/render/card-metrics.ts";
 import { palette } from "#scoresheet/render/palette.ts";
 import { percentLabel } from "#scoresheet/render/percent-label.ts";
-import { text } from "#scoresheet/render/svg-tags.ts";
+import { gameTally } from "#scoresheet/render/tally-phrases.ts";
+import { rect, line, text } from "#scoresheet/render/svg-tags.ts";
 import {
   TILES_PER_ROW,
   TILES_TOP,
+  TILE_BAR_DROP,
+  TILE_BAR_HEIGHT,
+  TILE_BAR_RADIUS,
+  TILE_BAR_WIDTH,
+  TILE_MARK_GAP,
+  TILE_MARK_LIFT,
   TILE_NOTE_DROP,
+  TILES_NOTE_BASELINE,
   TILE_ROW_HEIGHT,
-  TILE_SECOND_NOTE_DROP,
+  TILE_TICK_DROP,
+  TILE_TICK_RISE,
+  TILE_TICK_WIDTH,
   TILE_TRACKING,
   TILE_VALUE_DROP,
   personalFont,
 } from "#scoresheet/render/personal/personal-metrics.ts";
+import { gapOf } from "#scoresheet/render/personal/tile-gap.ts";
+import { Standing } from "#scoresheet/render/personal/tile-standings.ts";
 import type { CareerCard } from "#scoresheet/domain/career/career-card.ts";
 import type { Copy } from "#scoresheet/copy.ts";
 
 
-type TileNotes = readonly [string, string];
+const HIGHER_IS_BETTER = true;
+
+const HIGHER_IS_WORSE = false;
+
+const A_DEAL_NOT_A_SKILL = 0;
 
 interface Tile {
   readonly label: string;
-  readonly value: string;
-  readonly notes: TileNotes;
+  readonly value: number;
+  readonly expected: number;
+  readonly decided: number;
+  readonly favours: boolean;
+  readonly count: string;
   readonly ink: string;
 }
 
-const FIRST_NOTE = 0;
-
-const SECOND_NOTE = 1;
-
 const columnWidth = (): number => (GRID_RIGHT - PAD) / TILES_PER_ROW;
-
-const countAndChance = (copy: Copy, count: string, chance: number): TileNotes => [
-  count,
-  copy.tileSeatPredicts(percentLabel(chance)),
-];
 
 const tilesOf = (copy: Copy, card: CareerCard, ink: string): readonly Tile[] => [
   {
     label: copy.tileShare,
-    value: percentLabel(card.share),
-    notes: countAndChance(copy, copy.tileShareScale, card.tally.shareChance),
+    value: card.share,
+    expected: card.tally.shareChance,
+    decided: card.tally.games,
+    favours: HIGHER_IS_BETTER,
+    count: gameTally(copy, card.tally.games),
     ink,
   },
   {
     label: copy.tileFool,
-    value: percentLabel(card.tally.foolRate),
-    notes: countAndChance(
-      copy,
-      copy.tileOutOf(card.tally.fools, card.tally.decided),
-      card.tally.seatChanceInDecided
-    ),
-    ink: palette.cellFool,
+    value: card.tally.foolRate,
+    expected: card.tally.seatChanceInDecided,
+    decided: card.tally.decided,
+    favours: HIGHER_IS_WORSE,
+    count: copy.tileOutOf(card.tally.fools, card.tally.decided),
+    ink: palette.ink,
   },
   {
     label: copy.tileFirst,
-    value: percentLabel(card.tally.firstRate),
-    notes: countAndChance(
-      copy,
-      copy.tileOutOf(card.tally.firsts, card.tally.games),
-      card.tally.seatChance
-    ),
+    value: card.tally.firstRate,
+    expected: card.tally.seatChance,
+    decided: card.tally.games,
+    favours: HIGHER_IS_BETTER,
+    count: copy.tileOutOf(card.tally.firsts, card.tally.games),
     ink: palette.ink,
   },
   {
     label: copy.tileFirstMove,
-    value: percentLabel(card.tally.openRate),
-    notes: countAndChance(
-      copy,
-      copy.tileOutOf(card.tally.opens, card.tally.games),
-      card.tally.seatChance
-    ),
+    value: card.tally.openRate,
+    expected: card.tally.seatChance,
+    decided: A_DEAL_NOT_A_SKILL,
+    favours: HIGHER_IS_BETTER,
+    count: copy.tileOutOf(card.tally.opens, card.tally.games),
     ink: palette.ink,
   },
 ];
 
-const noteLine = (note: string, left: number, baseline: number): string =>
-  text(note, {
+const gapInkOf = (standing: Standing, ink: string): string | null => {
+  switch (standing) {
+    case Standing.Better:
+      return ink;
+
+    case Standing.Worse:
+      return palette.cellFool;
+
+    case Standing.Unproven:
+      return palette.inkFigure;
+
+    case Standing.Level:
+      return null;
+  }
+};
+
+const barAt = (left: number, top: number, width: number, fill: string): string =>
+  rect({
     x: left,
-    y: baseline,
-    fill: palette.inkFaint,
-    "font-family": FONT_FAMILY,
-    "font-size": personalFont.tileNote,
+    y: top,
+    width,
+    height: TILE_BAR_HEIGHT,
+    rx: TILE_BAR_RADIUS,
+    fill,
   });
 
-const drawTile = (tile: Tile, index: number): readonly string[] => {
+const gapAt = (left: number, top: number, tile: Tile, playerInk: string): readonly string[] => {
+  const gap = gapOf(tile.value, tile.expected, tile.decided, tile.favours);
+  const ink = gapInkOf(gap.standing, playerInk);
+
+  return ink === null
+    ? []
+    : [
+        rect({
+          x: left + TILE_BAR_WIDTH * gap.from,
+          y: top,
+          width: TILE_BAR_WIDTH * (gap.to - gap.from),
+          height: TILE_BAR_HEIGHT,
+          fill: ink,
+        }),
+      ];
+};
+
+const markAt = (left: number, top: number, expected: number): readonly string[] => [
+  line({
+    x1: left + TILE_BAR_WIDTH * expected,
+    y1: top - TILE_TICK_RISE,
+    x2: left + TILE_BAR_WIDTH * expected,
+    y2: top + TILE_TICK_DROP,
+    stroke: palette.ink,
+    "stroke-width": TILE_TICK_WIDTH,
+  }),
+  text(percentLabel(expected), {
+    x: left + TILE_BAR_WIDTH + TILE_MARK_GAP,
+    y: top + TILE_MARK_LIFT,
+    fill: palette.inkHint,
+    "font-family": FONT_FAMILY,
+    "font-weight": "bold",
+    "font-size": personalFont.tileNote,
+  }),
+];
+
+const drawTile = (tile: Tile, index: number, playerInk: string): readonly string[] => {
   const left = PAD + (index % TILES_PER_ROW) * columnWidth();
   const top = TILES_TOP + Math.floor(index / TILES_PER_ROW) * TILE_ROW_HEIGHT;
+  const barTop = top + TILE_BAR_DROP;
 
   return [
     text(tile.label, {
@@ -97,7 +161,7 @@ const drawTile = (tile: Tile, index: number): readonly string[] => {
       "font-size": personalFont.tileLabel,
       "letter-spacing": TILE_TRACKING,
     }),
-    text(tile.value, {
+    text(percentLabel(tile.value), {
       x: left,
       y: top + TILE_VALUE_DROP,
       fill: tile.ink,
@@ -105,10 +169,27 @@ const drawTile = (tile: Tile, index: number): readonly string[] => {
       "font-weight": "bold",
       "font-size": personalFont.tileValue,
     }),
-    noteLine(tile.notes[FIRST_NOTE], left, top + TILE_NOTE_DROP),
-    noteLine(tile.notes[SECOND_NOTE], left, top + TILE_SECOND_NOTE_DROP),
+    barAt(left, barTop, TILE_BAR_WIDTH, palette.cellPlaced),
+    barAt(left, barTop, TILE_BAR_WIDTH * tile.value, palette.inkFaint),
+    ...gapAt(left, barTop, tile, playerInk),
+    ...markAt(left, barTop, tile.expected),
+    text(tile.count, {
+      x: left,
+      y: top + TILE_NOTE_DROP,
+      fill: palette.inkFaint,
+      "font-family": FONT_FAMILY,
+      "font-size": personalFont.tileNote,
+    }),
   ];
 };
 
-export const careerTiles = (copy: Copy, card: CareerCard, ink: string): readonly string[] =>
-  tilesOf(copy, card, ink).flatMap(drawTile);
+export const careerTiles = (copy: Copy, card: CareerCard, ink: string): readonly string[] => [
+  ...tilesOf(copy, card, ink).flatMap((tile, index) => drawTile(tile, index, ink)),
+  text(copy.tileExpectationNote, {
+    x: PAD,
+    y: TILES_NOTE_BASELINE,
+    fill: palette.inkFaint,
+    "font-family": FONT_FAMILY,
+    "font-size": personalFont.tileNote,
+  }),
+];

@@ -16,14 +16,16 @@ const NONE = 0;
 const shareOfTheTable = (player: PlayerAppearances): number | null =>
   playedGames(player) >= ENOUGH_GAMES ? player.share : null;
 
-const foolRate = (player: PlayerAppearances): number | null =>
-  playedGames(player) >= ENOUGH_GAMES ? foolCount(player) / playedGames(player) : null;
+const foolsThenRate = (player: PlayerAppearances): number | null =>
+  playedGames(player) >= ENOUGH_GAMES
+    ? foolCount(player) + foolCount(player) / playedGames(player)
+    : null;
 
 const wearsThePlate = (fool: Award | null, player: PlayerAppearances): boolean =>
   fool !== null && fool.winners.includes(player.playerId);
 
 export const foolOfTheNight = (evening: SessionAppearances): Award | null => {
-  const winner = standoutBy(evening.players, foolRate);
+  const winner = standoutBy(evening.players, foolsThenRate);
 
   if (winner === null || foolCount(winner) === NONE) {
     return null;
@@ -36,15 +38,6 @@ export const foolOfTheNight = (evening: SessionAppearances): Award | null => {
     games: playedGames(winner),
   };
 };
-
-const outshoneBy = (
-  evening: SessionAppearances,
-  fool: Award | null,
-  winner: PlayerAppearances
-): boolean =>
-  evening.players.some(
-    (player) => wearsThePlate(fool, player) && player.share >= winner.share
-  );
 
 export const kingOfTheTable = (evening: SessionAppearances): Award | null => {
   const fool = foolOfTheNight(evening);
@@ -60,6 +53,5 @@ export const kingOfTheTable = (evening: SessionAppearances): Award | null => {
     winners: [winner.playerId],
     percent: Math.round(winner.share * PERCENT),
     games: playedGames(winner),
-    passed: outshoneBy(evening, fool, winner),
   };
 };
