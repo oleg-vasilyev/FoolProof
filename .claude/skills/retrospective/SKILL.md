@@ -15,6 +15,13 @@ a compaction the user can see coming.
 Answer from evidence in this session, not from how you generally work. Where a
 count is asked for, count. An answer with no number in it is a guess.
 
+**And the walk is what happened, not what the drawing prescribes.** A log written
+from the drawing reads correct to everybody, its author included — this gate's own
+first draft filed the designer before the renderer and the frozen interfaces before
+the code already written against them, and the owner caught it. Write the order the
+timestamps show, a stage twice where it was entered twice, and let it be ugly: the
+drawing is only tested by the phases that departed from it.
+
 ## The six questions
 
 1. **Rework.** What was built and then rebuilt? For each, name the moment the
@@ -106,16 +113,9 @@ it had been — and owes the closing message, but it owes no accompanying rule,
 because no rule was ever what it described.
 
 **Generalising a participant moves every arrow in its scenes, not the ones that
-name it.** That is how the only such error so far was made, and it was made here:
-one phase widened the reviewer's lane into an agent lane serving six agents, moved
-the two arrows that said *the poster-designer agent* and *the plan-reviewer agent*,
-and left the work and the reply behind in the subagent lane. The drawing then showed
-a request going to one participant and the answer coming back from another, and it
-shipped that way — caught by the owner the next day, reading his own map. A lane
-changing mid-scene is invisible while reading a single line, which is exactly why
-it survived the redraw that caused it, so the guard is mechanical now: `docs:check`
-follows each errand from Claude Code to whoever hands work back, and fails when
-that is not the participant the errand went to.
+name it.** One phase widened the reviewer's lane, moved the arrows naming agents and
+left the replies in the old lane — a request going to one participant and the answer
+returning from another. `docs:check` now follows each errand to whoever answers.
 
 Both halves are enforced, because the phase that most needs them would forget them: a
 `PostToolUse` hook says the obligation aloud as the file is edited, `.githooks/commit-msg`
