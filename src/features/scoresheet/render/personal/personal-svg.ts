@@ -1,5 +1,6 @@
 import { FONT_FAMILY, GRID_RIGHT, IMAGE_WIDTH, USUAL_FALLBACK, PAD, WIDEST_FALLBACK, fontSize } from "#scoresheet/render/card-metrics.ts";
 import { colourFor, palette } from "#scoresheet/render/palette.ts";
+import type { ColumnLookup } from "#scoresheet/render/personal/colour-column.ts";
 import { EYEBROW_TRACKING } from "#scoresheet/render/card-heading.ts";
 import { eveningTally, gameTally } from "#scoresheet/render/tally-phrases.ts";
 import { sessionDate } from "#scoresheet/render/session-date.ts";
@@ -159,11 +160,11 @@ const chartSection = (section: ChartSection): readonly string[] => {
 export const renderPersonalCard = (
   copy: Copy,
   card: CareerCard,
-  column: number,
+  columnOf: ColumnLookup,
   handle: string
 ): string => {
   const sheet = personalLayoutOf(card);
-  const ink = colourFor(column);
+  const ink = colourFor(columnOf(card.playerId));
 
   return svgOf(IMAGE_WIDTH, sheet.height, [
     rect({ x: NOTHING, y: NOTHING, width: IMAGE_WIDTH, height: sheet.height, fill: palette.sheet }),
@@ -174,7 +175,7 @@ export const renderPersonalCard = (
     ...(sheet.facts.length === NOTHING && sheet.plate === null
       ? teaserBody(copy.personalFactsAwait, sheet.factsLabel)
       : []),
-    ...factRows(copy, sheet.facts, ink),
+    ...factRows(copy, sheet.facts, ink, columnOf),
     ...(sheet.plate === null ? [] : topFactPlate(copy, sheet.plate, ink)),
     ...posterBaseboard(handle, sheet.height),
   ]);

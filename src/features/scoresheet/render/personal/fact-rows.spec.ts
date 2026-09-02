@@ -25,6 +25,15 @@ const factLinesSpy = vi.fn();
 
 const factInkSpy = vi.fn();
 
+const columnOfSpy = vi.fn();
+
+const colourForSpy = vi.fn();
+
+vi.mock("#scoresheet/render/palette.ts", () => ({
+  palette: { ink: "the-ink", inkFigure: "the-figure", inkMuted: "the-muted" },
+  colourFor: (column: number) => colourForSpy(column),
+}));
+
 vi.mock("#scoresheet/render/svg-tags.ts", () => ({
   rect: (attributes: Record<string, unknown>) => rectSpy(attributes),
   text: (value: string, attributes: Record<string, unknown>) => textSpy(value, attributes),
@@ -74,9 +83,27 @@ const OTHER_HOLDER = "another-holder";
 
 const OTHER_REASON = "another-reason";
 
-const LINES = { title: TITLE_MARK, holder: HOLDER_MARK, reason: REASON_MARK };
+const A_RIVAL_ID = 7;
 
-const OTHER_LINES = { title: OTHER_TITLE, holder: OTHER_HOLDER, reason: OTHER_REASON };
+const A_RIVAL_COLUMN = 3;
+
+const RIVAL_COLOUR = "the-rival-colour";
+
+const LINES = {
+  title: TITLE_MARK,
+  holder: HOLDER_MARK,
+  holderId: null,
+  reason: REASON_MARK,
+};
+
+const RIVAL_LINES = { ...LINES, holderId: A_RIVAL_ID };
+
+const OTHER_LINES = {
+  title: OTHER_TITLE,
+  holder: OTHER_HOLDER,
+  holderId: null,
+  reason: OTHER_REASON,
+};
 
 const FIRST_FACT = { name: CareerFactName.TheBlinder } as unknown as CareerFact;
 
@@ -100,33 +127,35 @@ describe("factRows()", () => {
 
     factLinesSpy.mockReturnValue(LINES);
     factInkSpy.mockReturnValue(TONE);
+    columnOfSpy.mockReturnValue(A_RIVAL_COLUMN);
+    colourForSpy.mockReturnValue(RIVAL_COLOUR);
     rectSpy.mockImplementation(() => SPINE_MARK);
     textSpy.mockImplementation((value: string) => marked(value));
   });
 
   describe("how much it draws", () => {
     it("should draw nothing at all when the sheet placed no facts", () => {
-      expect(factRows(copy, [], INK)).toEqual([]);
+      expect(factRows(copy, [], INK, columnOfSpy)).toEqual([]);
       expect(rectSpy).toHaveBeenCalledTimes(NEVER);
       expect(factLinesSpy).toHaveBeenCalledTimes(NEVER);
     });
 
     it("should draw a spine and four lines for the one fact it was given", () => {
-      expect(factRows(copy, [placed(FIRST_FACT)], INK)).toHaveLength(PARTS_IN_A_ROW);
+      expect(factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy)).toHaveLength(PARTS_IN_A_ROW);
       expect(textSpy).toHaveBeenCalledTimes(LINES_IN_A_ROW);
     });
 
     it("should draw one row for every fact placed, flattened into one list", () => {
       factLinesSpy.mockReturnValueOnce(LINES).mockReturnValueOnce(OTHER_LINES);
 
-      expect(factRows(copy, TWO_ROWS, INK)).toHaveLength(PARTS_IN_A_ROW * TWICE);
+      expect(factRows(copy, TWO_ROWS, INK, columnOfSpy)).toHaveLength(PARTS_IN_A_ROW * TWICE);
       expect(rectSpy).toHaveBeenCalledTimes(TWICE);
     });
   });
 
   describe("where a row's words come from", () => {
     it("should write up each fact the layout placed, in the order it placed them", () => {
-      factRows(copy, TWO_ROWS, INK);
+      factRows(copy, TWO_ROWS, INK, columnOfSpy);
 
       expect(factLinesSpy.mock.calls).toEqual([
         [copy, FIRST_FACT],
@@ -135,7 +164,7 @@ describe("factRows()", () => {
     });
 
     it("should write the title, the holder and the reason it was handed", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(textSpy.mock.calls.map((call) => call[0])).toEqual([
         "01",
@@ -148,7 +177,7 @@ describe("factRows()", () => {
     it("should follow the lines it is given rather than fixing them", () => {
       factLinesSpy.mockReturnValue(OTHER_LINES);
 
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(textSpy).toHaveBeenCalledWith(OTHER_TITLE, expect.anything());
       expect(textSpy).not.toHaveBeenCalledWith(TITLE_MARK, expect.anything());
@@ -157,7 +186,7 @@ describe("factRows()", () => {
     it("should give each row the lines written for its own fact", () => {
       factLinesSpy.mockReturnValueOnce(LINES).mockReturnValueOnce(OTHER_LINES);
 
-      factRows(copy, TWO_ROWS, INK);
+      factRows(copy, TWO_ROWS, INK, columnOfSpy);
 
       expect(attributesOf(TITLE_MARK).y).toBe(TOP + FACT_TITLE_DROP);
       expect(attributesOf(OTHER_TITLE).y).toBe(NEXT_TOP + FACT_TITLE_DROP);
@@ -166,7 +195,7 @@ describe("factRows()", () => {
 
   describe("the ink a row is drawn in", () => {
     it("should ask for each fact's own tone, offering the ink it was handed", () => {
-      factRows(copy, TWO_ROWS, INK);
+      factRows(copy, TWO_ROWS, INK, columnOfSpy);
 
       expect(factInkSpy.mock.calls).toEqual([
         [FIRST_FACT, INK],
@@ -175,20 +204,47 @@ describe("factRows()", () => {
     });
 
     it("should spine the row in the tone it was given back, not in the raw ink", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(spines()[0]).toEqual(expect.objectContaining({ fill: TONE }));
       expect(spines()[0]?.fill).not.toBe(INK);
     });
 
-    it("should set the holder in that same tone", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+    it("should set a holder that names nobody in that same tone", () => {
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(attributesOf(HOLDER_MARK).fill).toBe(TONE);
+      expect(columnOfSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should set a holder who is a player in that player's own colour, not the card's", () => {
+      factLinesSpy.mockReturnValue(RIVAL_LINES);
+
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
+
+      expect(attributesOf(HOLDER_MARK).fill).toBe(RIVAL_COLOUR);
+      expect(attributesOf(HOLDER_MARK).fill).not.toBe(TONE);
+    });
+
+    it("should ask for the colour of the player the line names, not of the card's subject", () => {
+      factLinesSpy.mockReturnValue(RIVAL_LINES);
+
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
+
+      expect(columnOfSpy).toHaveBeenCalledWith(A_RIVAL_ID);
+      expect(colourForSpy).toHaveBeenCalledWith(A_RIVAL_COLUMN);
+    });
+
+    it("should keep the spine in the row's tone even when the holder is a player", () => {
+      factLinesSpy.mockReturnValue(RIVAL_LINES);
+
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
+
+      expect(spines()[0]).toEqual(expect.objectContaining({ fill: TONE }));
     });
 
     it("should leave the title, the place and the reason out of the tone", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(attributesOf(TITLE_MARK).fill).toBe(palette.ink);
       expect(attributesOf("01").fill).toBe(palette.inkFigure);
@@ -198,14 +254,14 @@ describe("factRows()", () => {
 
   describe("numbering the rows", () => {
     it("should count the rows from one, not from zero", () => {
-      factRows(copy, TWO_ROWS, INK);
+      factRows(copy, TWO_ROWS, INK, columnOfSpy);
 
       expect(textSpy).toHaveBeenCalledWith("01", expect.anything());
       expect(textSpy).toHaveBeenCalledWith("02", expect.anything());
     });
 
     it("should pad a single digit to two places", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(textSpy).toHaveBeenCalledWith("01", expect.anything());
       expect(textSpy).not.toHaveBeenCalledWith("1", expect.anything());
@@ -214,7 +270,7 @@ describe("factRows()", () => {
     it("should leave a two-digit place unpadded", () => {
       const many = Array.from({ length: TENTH_PLACE }, () => placed(FIRST_FACT));
 
-      factRows(copy, many, INK);
+      factRows(copy, many, INK, columnOfSpy);
 
       expect(textSpy).toHaveBeenCalledWith(String(TENTH_PLACE), expect.anything());
     });
@@ -222,7 +278,7 @@ describe("factRows()", () => {
 
   describe("where a row's four lines sit", () => {
     it("should stand the spine at the left margin, inset from both ends of the row", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(spines()[0]).toEqual(
         expect.objectContaining({
@@ -235,28 +291,28 @@ describe("factRows()", () => {
     });
 
     it("should set the place between the spine and the title", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(attributesOf("01").x).toBe(PAD + FACT_INDEX_INDENT);
       expect(attributesOf("01").x as number).toBeLessThan(attributesOf(TITLE_MARK).x as number);
     });
 
     it("should share one baseline between the place and the title", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(attributesOf(TITLE_MARK).y).toBe(TOP + FACT_TITLE_DROP);
       expect(attributesOf("01").y).toBe(TOP + FACT_TITLE_DROP);
     });
 
     it("should stack the holder and the reason under the title", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(attributesOf(HOLDER_MARK).y).toBe(TOP + FACT_HOLDER_DROP);
       expect(attributesOf(REASON_MARK).y).toBe(TOP + FACT_REASON_DROP);
     });
 
     it("should indent the title, the holder and the reason to the same text edge", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       for (const value of [TITLE_MARK, HOLDER_MARK, REASON_MARK]) {
         expect(attributesOf(value).x).toBe(PAD + FACT_TEXT_INDENT);
@@ -266,7 +322,7 @@ describe("factRows()", () => {
     it("should draw a second row against its own top, not the first one's", () => {
       factLinesSpy.mockReturnValueOnce(LINES).mockReturnValueOnce(OTHER_LINES);
 
-      factRows(copy, TWO_ROWS, INK);
+      factRows(copy, TWO_ROWS, INK, columnOfSpy);
 
       expect(spines()[ONCE]).toEqual(
         expect.objectContaining({ y: NEXT_TOP + FACT_SPINE_INSET })
@@ -275,7 +331,7 @@ describe("factRows()", () => {
     });
 
     it("should hand back the spine first and then the four lines in order", () => {
-      const drawn = factRows(copy, [placed(FIRST_FACT)], INK);
+      const drawn = factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(drawn[0]).toBe(SPINE_MARK);
       expect(drawn.slice(ONCE)).toEqual([
@@ -289,7 +345,7 @@ describe("factRows()", () => {
 
   describe("how a row is set", () => {
     it("should set the title bold, largest, in the card's plain ink", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(attributesOf(TITLE_MARK)["font-weight"]).toBe("bold");
       expect(attributesOf(TITLE_MARK)["font-size"]).toBe(personalFont.factTitle);
@@ -297,7 +353,7 @@ describe("factRows()", () => {
     });
 
     it("should set the holder bold and smaller than the title", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(attributesOf(HOLDER_MARK)["font-weight"]).toBe("bold");
       expect(attributesOf(HOLDER_MARK)["font-size"]).toBe(personalFont.factHolder);
@@ -305,14 +361,14 @@ describe("factRows()", () => {
     });
 
     it("should set the reason muted and unbolded", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(attributesOf(REASON_MARK)["font-size"]).toBe(personalFont.factReason);
       expect(attributesOf(REASON_MARK)["font-weight"]).toBeUndefined();
     });
 
     it("should set the place in the figure ink, apart from the title beside it", () => {
-      factRows(copy, [placed(FIRST_FACT)], INK);
+      factRows(copy, [placed(FIRST_FACT)], INK, columnOfSpy);
 
       expect(attributesOf("01")["font-size"]).toBe(personalFont.factIndex);
       expect(attributesOf("01")["font-weight"]).toBeUndefined();

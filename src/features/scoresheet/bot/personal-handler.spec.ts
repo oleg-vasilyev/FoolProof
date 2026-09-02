@@ -25,7 +25,7 @@ const decodePersonalCallbackSpy = vi.fn();
 
 const rasterizeSpy = vi.fn();
 
-const colourColumnOfSpy = vi.fn();
+const columnLookupOfSpy = vi.fn();
 
 const copyInSpy = vi.fn();
 
@@ -40,8 +40,8 @@ vi.mock("#scoresheet/domain/career/career-card.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/personal/colour-column.ts", () => ({
-  colourColumnOf: (evening: unknown, roster: unknown, playerId: unknown) =>
-    colourColumnOfSpy(evening, roster, playerId),
+  columnLookupOf: (evening: unknown, roster: unknown) => (playerId: number) =>
+    columnLookupOfSpy(evening, roster, playerId),
 }));
 
 vi.mock("#scoresheet/render/personal/personal-svg.ts", () => ({
@@ -99,6 +99,11 @@ const EVENING = {
 
 const A_COLUMN = 5;
 
+const HANDED_THE_LOOKUP = 2;
+
+const lookupGiven = (): ((playerId: number) => number) =>
+  renderPersonalCardSpy.mock.calls[0]?.[HANDED_THE_LOOKUP] as (playerId: number) => number;
+
 const TAP_DATA = "pc:7";
 
 describe("personal-handler", () => {
@@ -124,7 +129,7 @@ describe("personal-handler", () => {
     rasterizeSpy.mockResolvedValue(DRAWN_BYTES);
     repo.careerHistorySpy.mockReturnValue(HISTORY);
     repo.seriesChronologySpy.mockReturnValue(EVENING);
-    colourColumnOfSpy.mockReturnValue(A_COLUMN);
+    columnLookupOfSpy.mockReturnValue(A_COLUMN);
   });
 
   describe("onPersonal()", () => {
@@ -277,24 +282,37 @@ describe("personal-handler", () => {
       expect(repo.seriesChronologySpy).toHaveBeenCalledWith(CHAT_ID);
     });
 
-    it("should choose the colour from that evening and the chat's whole roster", async () => {
+    it("should hand over a lookup reading this evening and the chat's whole roster", async () => {
       await onPersonalTap(contextOf(), ctx.tap(TAP_DATA));
+      lookupGiven()(OLEG);
 
-      expect(colourColumnOfSpy).toHaveBeenCalledWith(EVENING, HISTORY.players, OLEG);
+      expect(columnLookupOfSpy).toHaveBeenCalledWith(EVENING, HISTORY.players, OLEG);
     });
 
-    it("should choose the colour for the player whose card was built", async () => {
-      careerCardSpy.mockReturnValue({ playerId: ANYA, displayName: "Anya" });
+    it("should answer for any player at the table, not only the card's subject", async () => {
+      await onPersonalTap(contextOf(), ctx.tap(TAP_DATA));
+      lookupGiven()(ANYA);
 
-      await onPersonalTap(contextOf(), ctx.tap("pc:9"));
-
-      expect(colourColumnOfSpy).toHaveBeenCalledWith(EVENING, HISTORY.players, ANYA);
+      expect(columnLookupOfSpy).toHaveBeenCalledWith(EVENING, HISTORY.players, ANYA);
     });
 
-    it("should draw the card in the column it was given", async () => {
+    it("should read the evening once however many players the card asks about", async () => {
+      await onPersonalTap(contextOf(), ctx.tap(TAP_DATA));
+      lookupGiven()(OLEG);
+      lookupGiven()(ANYA);
+
+      expect(repo.seriesChronologySpy).toHaveBeenCalledTimes(ONCE);
+    });
+
+    it("should draw the card with that lookup rather than one fixed column", async () => {
       await onPersonalTap(contextOf(), ctx.tap(TAP_DATA));
 
-      expect(renderPersonalCardSpy).toHaveBeenCalledWith(copy, CARD, A_COLUMN, THE_HANDLE);
+      expect(renderPersonalCardSpy).toHaveBeenCalledWith(
+        copy,
+        CARD,
+        expect.any(Function),
+        THE_HANDLE
+      );
     });
 
     it("should rasterize what the renderer drew", async () => {

@@ -6,6 +6,13 @@ const NOT_SEATED = -1;
 const columnIn = (players: readonly PlayerColumn[], playerId: number): number =>
   players.findIndex((player) => player.playerId === playerId);
 
+export type ColumnLookup = (playerId: number) => number;
+
+export const columnLookupOf = (
+  evening: SeriesChronology | null,
+  roster: readonly PlayerColumn[]
+): ColumnLookup => (playerId) => colourColumnOf(evening, roster, playerId);
+
 export const colourColumnOf = (
   evening: SeriesChronology | null,
   roster: readonly PlayerColumn[],

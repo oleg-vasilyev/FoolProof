@@ -10,7 +10,7 @@ import { pastBefore } from "#scoresheet/domain/awards/evening-past.ts";
 import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
-import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
+import { columnLookupOf } from "#scoresheet/render/personal/colour-column.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { PLAYER_COLOURS } from "#scoresheet/render/palette.ts";
 import { WIDEST_FALLBACK } from "#scoresheet/render/card-metrics.ts";
@@ -365,7 +365,12 @@ describe("one player, one colour, across an evening's posters", () => {
       OLEG
     );
     cardInk = playerColoursOn(
-      renderPersonalCard(copy, card, colourColumnOf(evening, grewDifferently, subject), A_HANDLE),
+      renderPersonalCard(
+        copy,
+        card,
+        columnLookupOf(evening, grewDifferently),
+        A_HANDLE
+      ),
       OLEG
     );
   });

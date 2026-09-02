@@ -5,7 +5,7 @@ import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
 import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
-import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
+import { columnLookupOf } from "#scoresheet/render/personal/colour-column.ts";
 import { BOT_HANDLE } from "#scoresheet/samples/sample-handle.ts";
 import type {
   CareerGame,
@@ -194,7 +194,7 @@ export const posters = (): Posters => {
     personal: renderPersonalCard(
       copy,
       career,
-      colourColumnOf(evening, history.players, SAMPLE_SUBJECT),
+      columnLookupOf(evening, history.players),
       BOT_HANDLE
     ),
   };

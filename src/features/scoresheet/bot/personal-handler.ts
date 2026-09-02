@@ -6,7 +6,7 @@ import type { LocaleReader } from "#shared/locale/chat-locale.ts";
 import { DEFAULT_LOCALE } from "#shared/locale/locales.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { decodePersonalCallback } from "#scoresheet/render/personal/personal-callback-codec.ts";
-import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
+import { columnLookupOf } from "#scoresheet/render/personal/colour-column.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
 import { renderRosterKeyboard } from "#scoresheet/render/personal/roster-keyboard.ts";
 import { copyIn } from "#scoresheet/copy.ts";
@@ -64,8 +64,8 @@ export const onPersonalTap = async (context: PersonalContext, ctx: CallbackTap):
   await ctx.editMessageText(copy.personalPicked(card.displayName));
   await ctx.answerCallbackQuery();
 
-  const column = colourColumnOf(context.repo.seriesChronology(chatId), history.players, card.playerId);
-  const drawn = await rasterize(renderPersonalCard(copy, card, column, handleOf(ctx.me.username)));
+  const columnOf = columnLookupOf(context.repo.seriesChronology(chatId), history.players);
+  const drawn = await rasterize(renderPersonalCard(copy, card, columnOf, handleOf(ctx.me.username)));
 
   await ctx.replyWithPhoto(new InputFile(drawn, CARD_FILENAME));
 };

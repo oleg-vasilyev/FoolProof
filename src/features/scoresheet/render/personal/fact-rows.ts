@@ -1,5 +1,5 @@
 import { FONT_FAMILY, PAD } from "#scoresheet/render/card-metrics.ts";
-import { palette } from "#scoresheet/render/palette.ts";
+import { colourFor, palette } from "#scoresheet/render/palette.ts";
 import { rect, text } from "#scoresheet/render/svg-tags.ts";
 import {
   FACT_HEIGHT,
@@ -15,6 +15,7 @@ import {
 import { factInk } from "#scoresheet/render/personal/fact-ink.ts";
 import { factLines } from "#scoresheet/render/personal/fact-lines.ts";
 import type { PlacedFact } from "#scoresheet/render/personal/personal-layout.ts";
+import type { ColumnLookup } from "#scoresheet/render/personal/colour-column.ts";
 import type { Copy } from "#scoresheet/copy.ts";
 
 
@@ -26,14 +27,18 @@ const BOTH_ENDS = 2;
 
 const INDEX_FILL = "0";
 
-const drawn = (
-  copy: Copy,
-  placed: PlacedFact,
-  place: number,
-  ink: string
-): readonly string[] => {
+interface FactRow {
+  readonly copy: Copy;
+  readonly placed: PlacedFact;
+  readonly place: number;
+  readonly ink: string;
+  readonly columnOf: ColumnLookup;
+}
+
+const drawn = ({ copy, placed, place, ink, columnOf }: FactRow): readonly string[] => {
   const lines = factLines(copy, placed.fact);
   const tone = factInk(placed.fact, ink);
+  const holderInk = lines.holderId === null ? tone : colourFor(columnOf(lines.holderId));
 
   return [
     rect({
@@ -61,7 +66,7 @@ const drawn = (
     text(lines.holder, {
       x: PAD + FACT_TEXT_INDENT,
       y: placed.top + FACT_HOLDER_DROP,
-      fill: tone,
+      fill: holderInk,
       "font-family": FONT_FAMILY,
       "font-weight": "bold",
       "font-size": personalFont.factHolder,
@@ -79,6 +84,9 @@ const drawn = (
 export const factRows = (
   copy: Copy,
   facts: readonly PlacedFact[],
-  ink: string
+  ink: string,
+  columnOf: ColumnLookup
 ): readonly string[] =>
-  facts.flatMap((placed, index) => drawn(copy, placed, index + ONE_PLACE, ink));
+  facts.flatMap((placed, index) =>
+    drawn({ copy, placed, place: index + ONE_PLACE, ink, columnOf })
+  );

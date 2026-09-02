@@ -1347,8 +1347,22 @@ cannot do before nine sit down.
 
 A card is drawn for anybody on the roster, including somebody who did not play
 tonight. Having no seat in the evening, they take their colour from their place in
-the chat's roster instead — and nothing they could be compared against is on the
-screen.
+the chat's roster instead.
+
+**A card carries two players' colours, not one.** A fact held up by a rival prints
+that rival's name in the rival's own colour, asked for the same way the subject's
+is, so the name on the card and the same name on tonight's chronology agree. The
+spine beside each fact and the fill of the top plate stay the subject's accent
+throughout: they are the card's own colour, and a plate taking its hue from whoever
+it happened to name would read as the card changing subject.
+
+Two colours from one palette of ten can collide, and on this card in one further
+way: a subject who did not play tonight is numbered off the chat's roster while the
+rival is numbered off the evening, so the two indices are counted from different
+lists and may land on the same hue. That is accepted rather than fixed, because
+**on this card the colour never carries identity alone** — every coloured name is
+written out beside its colour. The chronology's chart is where colour does carry it
+alone, and the limit is recorded there.
 
 ### One player's card, for all time
 

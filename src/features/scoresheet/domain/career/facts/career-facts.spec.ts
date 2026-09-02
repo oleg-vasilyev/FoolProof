@@ -199,8 +199,11 @@ const SUBJECT: CareerSubject = {
   nights: [],
 };
 
+const A_RIVAL_ID = 2;
+
 const jinxOn = (rival: string): CareerFact => ({
   name: CareerFactName.TheJinx,
+  rivalId: A_RIVAL_ID,
   rival,
   games: SOME_GAMES,
   burns: SOME_BURNS,
@@ -209,6 +212,7 @@ const jinxOn = (rival: string): CareerFact => ({
 
 const charmOn = (rival: string): CareerFact => ({
   name: CareerFactName.TheCharm,
+  rivalId: A_RIVAL_ID,
   rival,
   games: MORE_GAMES,
   burns: NO_BURNS,
@@ -217,6 +221,7 @@ const charmOn = (rival: string): CareerFact => ({
 
 const bogeyOn = (rival: string): CareerFact => ({
   name: CareerFactName.TheBogey,
+  rivalId: A_RIVAL_ID,
   rival,
   duels: SOME_DUELS,
   lost: SOME_LOSSES,
@@ -224,6 +229,7 @@ const bogeyOn = (rival: string): CareerFact => ({
 
 const patsyOn = (rival: string): CareerFact => ({
   name: CareerFactName.ThePatsy,
+  rivalId: A_RIVAL_ID,
   rival,
   duels: SOME_DUELS,
   won: SOME_WINS,

@@ -16,8 +16,12 @@ const THE_FIRST_EVENING_ITSELF = 1;
 export interface FactLines {
   readonly title: string;
   readonly holder: string;
+  readonly holderId: number | null;
   readonly reason: string;
 }
+
+export const holderIdOf = (fact: CareerFact): number | null =>
+  "rivalId" in fact ? fact.rivalId : null;
 
 interface Body {
   readonly holder: string;
@@ -145,5 +149,6 @@ const bodyOf = (copy: Copy, fact: CareerFact): Body => {
 
 export const factLines = (copy: Copy, fact: CareerFact): FactLines => ({
   title: copy.factTitles[fact.name],
+  holderId: holderIdOf(fact),
   ...bodyOf(copy, fact),
 });

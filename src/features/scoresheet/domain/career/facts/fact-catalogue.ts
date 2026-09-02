@@ -29,11 +29,13 @@ interface Evening {
 }
 
 interface Duel {
+  readonly rivalId: number;
   readonly rival: string;
   readonly duels: number;
 }
 
 interface Alongside {
+  readonly rivalId: number;
   readonly rival: string;
   readonly games: number;
   readonly burns: number;

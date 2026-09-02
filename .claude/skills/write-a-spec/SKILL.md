@@ -81,9 +81,9 @@ killed all six at once. The consumer's reference assertion is then doing the onl
 it can do, which is proving the subject reached for the right key.
 
 So: when an assertion turns out to be an identity, ask which spec the claim belongs to
-before typing a literal. And note what the surviving list looked like — the copy spec
-named four counted nouns out of seven, and a list that is *nearly* complete reads
-exactly like one that is.
+before typing a literal — an expectation the subject computes is not one, and belongs in
+the table beside its case. And note what the surviving list looked like: the copy spec
+named four nouns of seven, and a list *nearly* complete reads exactly like one that is.
 
 **An existing spec file's habits are not precedent.** `feature-installer.spec.ts`
 had always run `copyIn` real, and a new `describe` added there copied that instead

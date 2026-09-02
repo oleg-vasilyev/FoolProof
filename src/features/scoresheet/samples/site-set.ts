@@ -6,7 +6,7 @@ import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.t
 import { Locale } from "#shared/locale/locales.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
-import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
+import { columnLookupOf } from "#scoresheet/render/personal/colour-column.ts";
 import type { CareerHistory, SeriesChronology } from "#shared/repository/repository-contract.ts";
 import { BOT_HANDLE } from "#scoresheet/samples/sample-handle.ts";
 import {
@@ -25,9 +25,12 @@ const cardIn = (locale: Locale, evening: SeriesChronology, career: CareerHistory
     throw new Error("the sample career has no games — check NAMES and EXIT_ORDERS in sample-table.ts");
   }
 
-  const column = colourColumnOf(evening, career.players, SAMPLE_SUBJECT);
-
-  return renderPersonalCard(copyIn(locale), card, column, BOT_HANDLE);
+  return renderPersonalCard(
+    copyIn(locale),
+    card,
+    columnLookupOf(evening, career.players),
+    BOT_HANDLE
+  );
 };
 
 const pairIn = (

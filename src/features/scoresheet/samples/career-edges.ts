@@ -2,6 +2,7 @@ import { Locale } from "#shared/locale/locales.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { copyIn } from "#scoresheet/copy.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
+import { columnLookupOf } from "#scoresheet/render/personal/colour-column.ts";
 import { BOT_HANDLE } from "#scoresheet/samples/sample-handle.ts";
 import type { CareerGame, CareerHistory, Finalist } from "#shared/repository/repository-contract.ts";
 import type { Drawing } from "#shared/drawings/drawings-contract.ts";
@@ -33,8 +34,6 @@ const A_DATE_ALONE = 10;
 const THE_SUBJECT = 1;
 
 const THE_BOGEY = 3;
-
-const SUBJECT_COLUMN = 0;
 
 const ENOUGH_TO_PLAY = 3;
 
@@ -427,7 +426,8 @@ const CAREERS: readonly CareerCase[] = [
 ];
 
 const drawingOf = (shown: CareerCase): Drawing => {
-  const card = careerCard(historyOf(shown), THE_SUBJECT);
+  const history = historyOf(shown);
+  const card = careerCard(history, THE_SUBJECT);
 
   if (card === null) {
     throw new Error(`${shown.name}: the subject finished no game — check its fate and its nights`);
@@ -436,7 +436,12 @@ const drawingOf = (shown: CareerCase): Drawing => {
   return {
     file: `${shown.name}-personal`,
     asks: shown.asks,
-    svg: renderPersonalCard(copyIn(shown.locale), card, SUBJECT_COLUMN, BOT_HANDLE),
+    svg: renderPersonalCard(
+      copyIn(shown.locale),
+      card,
+      columnLookupOf(null, history.players),
+      BOT_HANDLE
+    ),
   };
 };
 

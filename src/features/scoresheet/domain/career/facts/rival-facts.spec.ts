@@ -218,6 +218,7 @@ const BORIS_FACED_MORE_OFTEN = [
 
 const ANYA_TOOK_THEM_ALL = {
   name: CareerFactName.TheBogey,
+  rivalId: ANYA,
   rival: ANYAS_NAME,
   duels: ENOUGH_DUELS,
   lost: ENOUGH_DUELS,
@@ -270,9 +271,15 @@ const ONE_NIGHT_SHORT_ALONGSIDE = [
   ...repeated(OLEG_WON_OUTRIGHT, ENOUGH_TOGETHER - BURNS_ALONGSIDE - ONE_SHORT),
 ];
 
-const alongside = (name: CareerFactName, rival: string, tail: number): unknown => ({
+const alongside = (
+  name: CareerFactName,
+  rivalId: number,
+  rival: string,
+  tail: number
+): unknown => ({
   fact: {
     name,
+    rivalId,
     rival,
     games: ENOUGH_TOGETHER,
     burns: BURNS_ALONGSIDE,
@@ -297,6 +304,7 @@ describe("rival facts", () => {
 
       expect(theBogey(subjectOf(history))).toEqual({
         name: CareerFactName.TheBogey,
+        rivalId: ANYA,
         rival: ANYAS_NAME,
         duels: ENOUGH_DUELS,
         lost: ENOUGH_DUELS,
@@ -330,6 +338,7 @@ describe("rival facts", () => {
     it("should keep the rival already holding the title when a later one only draws level", () => {
       expect(theBogey(subjectOf(EVENLY_MATCHED))).toEqual({
         name: CareerFactName.TheBogey,
+        rivalId: ANYA,
         rival: ANYAS_NAME,
         duels: ENOUGH_DUELS,
         lost: TIED_LOSSES,
@@ -339,6 +348,7 @@ describe("rival facts", () => {
     it("should rank on losses before duels, so facing somebody more often is not enough", () => {
       expect(theBogey(subjectOf(BORIS_FACED_MORE_BUT_WON_MORE))).toEqual({
         name: CareerFactName.TheBogey,
+        rivalId: ANYA,
         rival: ANYAS_NAME,
         duels: ENOUGH_DUELS,
         lost: LOST_TO_ANYA,
@@ -350,6 +360,7 @@ describe("rival facts", () => {
     it("should name the rival the player lost the most duels to", () => {
       expect(theBogey(subjectOf(BOTH_FACED_ENOUGH))).toEqual({
         name: CareerFactName.TheBogey,
+        rivalId: ANYA,
         rival: ANYAS_NAME,
         duels: ENOUGH_DUELS,
         lost: LOST_TO_ANYA,
@@ -367,6 +378,7 @@ describe("rival facts", () => {
     it("should judge a rival faced exactly enough duels", () => {
       expect(theBogey(subjectOf(ANYA_ALWAYS_WON))).toEqual({
         name: CareerFactName.TheBogey,
+        rivalId: ANYA,
         rival: ANYAS_NAME,
         duels: ENOUGH_DUELS,
         lost: ENOUGH_DUELS,
@@ -376,6 +388,7 @@ describe("rival facts", () => {
     it("should ignore a rival faced one duel short of enough", () => {
       expect(theBogey(subjectOf(BORIS_ONE_DUEL_SHORT))).toEqual({
         name: CareerFactName.TheBogey,
+        rivalId: ANYA,
         rival: ANYAS_NAME,
         duels: ENOUGH_DUELS,
         lost: TIED_LOSSES,
@@ -395,6 +408,7 @@ describe("rival facts", () => {
     it("should break a tie on losses by the rival faced more often", () => {
       expect(theBogey(subjectOf(BORIS_FACED_MORE_OFTEN))).toEqual({
         name: CareerFactName.TheBogey,
+        rivalId: BORIS,
         rival: BORISS_NAME,
         duels: ENOUGH_DUELS + ONE_MORE,
         lost: TIED_LOSSES,
@@ -404,6 +418,7 @@ describe("rival facts", () => {
     it("should break a tie on losses and duels by the rival whose name comes first", () => {
       expect(theBogey(subjectOf(EVENLY_MATCHED, BORIS_BEFORE_ANYA))).toEqual({
         name: CareerFactName.TheBogey,
+        rivalId: ANYA,
         rival: ANYAS_NAME,
         duels: ENOUGH_DUELS,
         lost: TIED_LOSSES,
@@ -424,6 +439,7 @@ describe("rival facts", () => {
     it("should name the rival the player won the most duels against", () => {
       expect(thePatsy(subjectOf(BOTH_FACED_ENOUGH))).toEqual({
         name: CareerFactName.ThePatsy,
+        rivalId: BORIS,
         rival: BORISS_NAME,
         duels: ENOUGH_DUELS,
         won: ENOUGH_DUELS - LOST_TO_BORIS,
@@ -441,6 +457,7 @@ describe("rival facts", () => {
     it("should judge a rival faced exactly enough duels", () => {
       expect(thePatsy(subjectOf(ANYA_ALWAYS_LOST))).toEqual({
         name: CareerFactName.ThePatsy,
+        rivalId: ANYA,
         rival: ANYAS_NAME,
         duels: ENOUGH_DUELS,
         won: ENOUGH_DUELS,
@@ -450,6 +467,7 @@ describe("rival facts", () => {
     it("should ignore a rival faced one duel short of enough", () => {
       expect(thePatsy(subjectOf(BORIS_ONE_DUEL_SHORT_OF_WINS))).toEqual({
         name: CareerFactName.ThePatsy,
+        rivalId: ANYA,
         rival: ANYAS_NAME,
         duels: ENOUGH_DUELS,
         won: TIED_LOSSES,
@@ -483,6 +501,7 @@ describe("rival facts", () => {
     it("should break a tie on wins by the rival faced more often", () => {
       expect(thePatsy(subjectOf(BORIS_WON_AGAINST_MORE_OFTEN))).toEqual({
         name: CareerFactName.ThePatsy,
+        rivalId: BORIS,
         rival: BORISS_NAME,
         duels: ENOUGH_DUELS + ONE_MORE,
         won: TIED_LOSSES,
@@ -495,8 +514,8 @@ describe("rival facts", () => {
       theJinx(subjectOf(ENOUGH_ALONGSIDE));
 
       expect(notablePickSpy).toHaveBeenCalledWith([
-        alongside(CareerFactName.TheJinx, ANYAS_NAME, A_TAIL),
-        alongside(CareerFactName.TheJinx, BORISS_NAME, A_TAIL),
+        alongside(CareerFactName.TheJinx, ANYA, ANYAS_NAME, A_TAIL),
+        alongside(CareerFactName.TheJinx, BORIS, BORISS_NAME, A_TAIL),
       ]);
     });
 
@@ -546,8 +565,8 @@ describe("rival facts", () => {
       theCharm(subjectOf(ENOUGH_ALONGSIDE));
 
       expect(notablePickSpy).toHaveBeenCalledWith([
-        alongside(CareerFactName.TheCharm, ANYAS_NAME, ANOTHER_TAIL),
-        alongside(CareerFactName.TheCharm, BORISS_NAME, ANOTHER_TAIL),
+        alongside(CareerFactName.TheCharm, ANYA, ANYAS_NAME, ANOTHER_TAIL),
+        alongside(CareerFactName.TheCharm, BORIS, BORISS_NAME, ANOTHER_TAIL),
       ]);
     });
 

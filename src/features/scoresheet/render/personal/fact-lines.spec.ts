@@ -33,7 +33,7 @@ vi.mock("#scoresheet/render/session-date.ts", () => ({
   sessionDate: (table: unknown, isoDate: string) => sessionDateSpy(table, isoDate),
 }));
 
-const { factLines } = await import("#scoresheet/render/personal/fact-lines.ts");
+const { factLines, holderIdOf } = await import("#scoresheet/render/personal/fact-lines.ts");
 
 const dated = (isoDate: string): string => `date[${isoDate}]`;
 
@@ -59,10 +59,14 @@ interface Sample {
   readonly timesWith: readonly number[];
   readonly percentsWith: readonly number[];
   readonly holderShows: string;
+  readonly holderIs: number | null;
   readonly whyShows: readonly string[];
 }
 
+const NOBODY = null;
+
 const NOTHING_ASKED: Omit<Sample, "fact"> = {
+  holderIs: NOBODY,
   dates: [],
   gamesWith: [],
   acrossWith: [],
@@ -100,6 +104,8 @@ const ON_RECORD = 38;
 
 const SINCE_THE_FIRST = 37;
 
+const A_RIVAL_ID = 2;
+
 const CHARM_RIVAL = "Rina";
 
 const JINX_RIVAL = "Nadia";
@@ -130,28 +136,46 @@ const SAMPLES: readonly Sample[] = [
     }
   ),
   sampleOf(
-    { name: CareerFactName.TheCharm, rival: CHARM_RIVAL, games: 13, burns: 5, usualBurns: 4 },
+    {
+      name: CareerFactName.TheCharm,
+      rivalId: A_RIVAL_ID,
+      rival: CHARM_RIVAL,
+      games: 13,
+      burns: 5,
+      usualBurns: 4,
+    },
     {
       acrossWith: [13],
       holderShows: CHARM_RIVAL,
+      holderIs: A_RIVAL_ID,
       whyShows: ["5", across(13), "4"],
     }
   ),
   sampleOf(
-    { name: CareerFactName.TheJinx, rival: JINX_RIVAL, games: 14, burns: 6, usualBurns: 7 },
+    {
+      name: CareerFactName.TheJinx,
+      rivalId: A_RIVAL_ID,
+      rival: JINX_RIVAL,
+      games: 14,
+      burns: 6,
+      usualBurns: 7,
+    },
     {
       acrossWith: [14],
       holderShows: JINX_RIVAL,
+      holderIs: A_RIVAL_ID,
       whyShows: ["6", across(14), "7"],
     }
   ),
   sampleOf(
-    { name: CareerFactName.ThePatsy, rival: PATSY_RIVAL, duels: 15, won: 8 },
-    { timesWith: [15], holderShows: PATSY_RIVAL, whyShows: ["8", times(15)] }
+    { name: CareerFactName.ThePatsy, rivalId: A_RIVAL_ID, rival: PATSY_RIVAL, duels: 15, won: 8 },
+    { timesWith: [15], holderShows: PATSY_RIVAL,
+      holderIs: A_RIVAL_ID, whyShows: ["8", times(15)] }
   ),
   sampleOf(
-    { name: CareerFactName.TheBogey, rival: BOGEY_RIVAL, duels: 16, lost: 3 },
-    { timesWith: [16], holderShows: BOGEY_RIVAL, whyShows: ["3", times(16)] }
+    { name: CareerFactName.TheBogey, rivalId: A_RIVAL_ID, rival: BOGEY_RIVAL, duels: 16, lost: 3 },
+    { timesWith: [16], holderShows: BOGEY_RIVAL,
+      holderIs: A_RIVAL_ID, whyShows: ["3", times(16)] }
   ),
   sampleOf(
     { name: CareerFactName.BigTableCharm, seats: 7, games: 17, burns: 4, usualBurns: 2 },
@@ -367,6 +391,16 @@ describe("factLines()", () => {
       const lines = factLines(copy, sample.fact);
 
       expect(lines.reason).not.toBe(lines.holder);
+    });
+  });
+
+  describe("whether the holder is a player the card can colour", () => {
+    it.each(SAMPLES)("should say who $fact.name is held up by, if anybody", (sample) => {
+      expect(holderIdOf(sample.fact)).toBe(sample.holderIs);
+    });
+
+    it.each(SAMPLES)("should carry that onto $fact.name's own lines", (sample) => {
+      expect(factLines(copy, sample.fact).holderId).toBe(sample.holderIs);
     });
   });
 });

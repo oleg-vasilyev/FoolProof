@@ -19,6 +19,7 @@ export const ENOUGH_DUELS = 6;
 export const ENOUGH_TOGETHER = 12;
 
 interface Pairing {
+  readonly rivalId: number;
   readonly rival: string;
   readonly duels: number;
   readonly lost: number;
@@ -65,6 +66,7 @@ const pairingWith = (
   );
 
   return {
+    rivalId,
     rival,
     duels: duelled.length,
     lost: duelled.filter((standing) => burnedIn(standing.game.placements, playerId)).length,
@@ -127,6 +129,7 @@ export const theBogey = (subject: CareerSubject): CareerFact | null => {
     ? null
     : {
         name: CareerFactName.TheBogey,
+        rivalId: chief.rivalId,
         rival: chief.rival,
         duels: chief.duels,
         lost: chief.lost,
@@ -140,6 +143,7 @@ export const thePatsy = (subject: CareerSubject): CareerFact | null => {
     ? null
     : {
         name: CareerFactName.ThePatsy,
+        rivalId: chief.rivalId,
         rival: chief.rival,
         duels: chief.duels,
         won: chief.duels - chief.lost,
@@ -156,6 +160,7 @@ const alongsideField = (
     .map((pairing) => ({
       fact: {
         name,
+        rivalId: pairing.rivalId,
         rival: pairing.rival,
         games: pairing.together,
         burns: pairing.burns,

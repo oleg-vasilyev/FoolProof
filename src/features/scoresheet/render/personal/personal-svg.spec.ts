@@ -27,6 +27,8 @@ const chartTeaserSpy = vi.fn();
 
 const factRowsSpy = vi.fn();
 
+const columnOfSpy = vi.fn();
+
 const topFactPlateSpy = vi.fn();
 
 const eveningTallySpy = vi.fn();
@@ -68,7 +70,8 @@ vi.mock("#scoresheet/render/personal/chart-teaser.ts", () => ({
 }));
 
 vi.mock("#scoresheet/render/personal/fact-rows.ts", () => ({
-  factRows: (table: unknown, facts: unknown, ink: unknown) => factRowsSpy(table, facts, ink),
+  factRows: (table: unknown, facts: unknown, ink: unknown, columnOf: unknown) =>
+    factRowsSpy(table, facts, ink, columnOf),
 }));
 
 vi.mock("#scoresheet/render/personal/top-fact-plate.ts", () => ({
@@ -127,6 +130,8 @@ const FIRST_CALL = 0;
 const ROOM_ASKED_FOR = 1;
 
 const COLUMN = 2;
+
+const SUBJECT_ID = 4;
 
 const SHEET_HEIGHT = 2400;
 
@@ -191,6 +196,7 @@ const EVENING_TALLY_MARK = "the-evenings";
 const TEASER_HINT_MARK = "the-teaser-hint";
 
 const CARD = {
+  playerId: SUBJECT_ID,
   displayName: SUBJECT,
   since: SINCE,
   tally: { games: GAMES, evenings: EVENINGS },
@@ -242,6 +248,7 @@ describe("renderPersonalCard()", () => {
     chartTeaserSpy.mockReturnValue(TEASER_HINT_MARK);
     posterBaseboardSpy.mockReturnValue([BASEBOARD_MARK]);
     factRowsSpy.mockReturnValue([FACTS_MARK]);
+    columnOfSpy.mockReturnValue(COLUMN);
     topFactPlateSpy.mockReturnValue([PLATE_MARK]);
     eveningTallySpy.mockReturnValue(EVENING_TALLY_MARK);
     gameTallySpy.mockReturnValue(GAME_TALLY_MARK);
@@ -256,14 +263,14 @@ describe("renderPersonalCard()", () => {
 
   describe("the sheet it draws on", () => {
     it("should lay the card out exactly once, from the card it was given", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(personalLayoutOfSpy).toHaveBeenCalledTimes(ONCE);
       expect(personalLayoutOfSpy).toHaveBeenCalledWith(CARD);
     });
 
     it("should size the drawing to the layout's own height", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(svgOfSpy).toHaveBeenCalledWith(IMAGE_WIDTH, SHEET_HEIGHT, expect.anything());
     });
@@ -272,13 +279,13 @@ describe("renderPersonalCard()", () => {
       const SHORT_SHEET = 1056;
       personalLayoutOfSpy.mockReturnValue(sheetOf({ ...BARE_SHEET, height: SHORT_SHEET }));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(svgOfSpy).toHaveBeenCalledWith(IMAGE_WIDTH, SHORT_SHEET, expect.anything());
     });
 
     it("should paint a background over the whole sheet", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(rectSpy).toHaveBeenCalledWith({
         x: ORIGIN,
@@ -290,19 +297,19 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should paint the background before anything else", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(body()[0]).toBe(BACKGROUND_MARK);
     });
 
     it("should hand back whatever svgOf built", () => {
-      expect(renderPersonalCard(copy, CARD, COLUMN, A_HANDLE)).toBe("<svg/>");
+      expect(renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE)).toBe("<svg/>");
     });
   });
 
   describe("the heading", () => {
     it("should print the card's own eyebrow, tracked as a heading eyebrow is", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(attributesOf(copy.personalEyebrow)["letter-spacing"]).toBe(EYEBROW_TRACKING);
       expect(attributesOf(copy.personalEyebrow).fill).toBe(palette.inkMuted);
@@ -310,7 +317,7 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should title the card with the player's own name", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(attributesOf(FITTED_NAME).x).toBe(PAD);
       expect(attributesOf(FITTED_NAME)["font-weight"]).toBe("bold");
@@ -318,7 +325,7 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should print the name it was handed back, never the name it was given", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(nameToFitSpy).toHaveBeenCalledWith(
         SUBJECT,
@@ -330,7 +337,7 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should measure the subtitle at the size and weight it is actually set in", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(widthOfSpy).toHaveBeenCalledWith(SUBTITLE, fontSize.subtitle, USUAL_FALLBACK);
     });
@@ -338,26 +345,26 @@ describe("renderPersonalCard()", () => {
     it("should take the subtitle's own width out of the room the name is fitted to", () => {
       const A_WIDER_SUBTITLE = SUBTITLE_WIDTH * 2;
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
       const roomy = nameToFitSpy.mock.calls[FIRST_CALL]?.[ROOM_ASKED_FOR] as number;
 
       widthOfSpy.mockReturnValue(A_WIDER_SUBTITLE);
       nameToFitSpy.mockClear();
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
       const tight = nameToFitSpy.mock.calls[FIRST_CALL]?.[ROOM_ASKED_FOR] as number;
 
       expect(roomy - tight).toBe(A_WIDER_SUBTITLE - SUBTITLE_WIDTH);
     });
 
     it("should leave the name a gap short of the subtitle rather than butt them together", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
       const room = nameToFitSpy.mock.calls[FIRST_CALL]?.[ROOM_ASKED_FOR] as number;
 
       expect(room).toBeLessThan(GRID_RIGHT - PAD - SUBTITLE_WIDTH);
     });
 
     it("should hang the title below the eyebrow that introduces it", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(attributesOf(FITTED_NAME).y as number).toBeGreaterThan(
         attributesOf(copy.personalEyebrow).y as number
@@ -365,7 +372,7 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should date the card from when the player started, through the date table", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(sessionDateSpy).toHaveBeenCalledWith(copy, SINCE);
       expect(attributesOf(SINCE_LINE)["text-anchor"]).toBe("end");
@@ -373,7 +380,7 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should build the subtitle from the games and the evenings, each through its own tally", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(gameTallySpy).toHaveBeenCalledWith(copy, GAMES);
       expect(eveningTallySpy).toHaveBeenCalledWith(copy, EVENINGS);
@@ -381,7 +388,7 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should not build the subtitle out of the raw counts", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(textSpy).not.toHaveBeenCalledWith(
         copy.personalSubtitle(String(GAMES), String(EVENINGS)),
@@ -390,7 +397,7 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should hang the subtitle under the date on the right-hand edge", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(attributesOf(SUBTITLE).x).toBe(GRID_RIGHT);
       expect(attributesOf(SUBTITLE)["text-anchor"]).toBe("end");
@@ -400,7 +407,7 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should rule the heading off across the card", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(ruledAt(HEADING_RULE)).toHaveLength(ONCE);
       expect(ruledAt(HEADING_RULE)[0]).toEqual(
@@ -411,39 +418,45 @@ describe("renderPersonalCard()", () => {
 
   describe("the player's own colour", () => {
     it("should title the card in the colour of the column it was given", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(attributesOf(FITTED_NAME).fill).toBe(INK);
     });
 
     it("should give the chart, the rows and the plate the same ink as the title", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(eveningChartSpy).toHaveBeenCalledWith(copy, expect.objectContaining({ ink: INK }));
-      expect(factRowsSpy).toHaveBeenCalledWith(copy, FACTS, INK);
+      expect(factRowsSpy).toHaveBeenCalledWith(copy, FACTS, INK, columnOfSpy);
       expect(topFactPlateSpy).toHaveBeenCalledWith(copy, PLATE, INK);
     });
 
     it("should change the ink with the column, not fix it", () => {
       const ANOTHER_COLUMN = 5;
 
-      renderPersonalCard(copy, CARD, ANOTHER_COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, () => ANOTHER_COLUMN, A_HANDLE);
 
       expect(attributesOf(FITTED_NAME).fill).toBe(PLAYER_COLOURS[ANOTHER_COLUMN]);
       expect(attributesOf(FITTED_NAME).fill).not.toBe(INK);
+    });
+
+    it("should ink the card from the subject's own column, not from any other player", () => {
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
+
+      expect(columnOfSpy).toHaveBeenCalledWith(SUBJECT_ID);
     });
   });
 
   describe("the tiles", () => {
     it("should draw the tiles from the card itself, not from the layout", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(careerTilesSpy).toHaveBeenCalledTimes(ONCE);
       expect(careerTilesSpy).toHaveBeenCalledWith(copy, CARD);
     });
 
     it("should draw the tiles under the heading", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(body().indexOf(TILES_MARK)).toBeGreaterThan(body().indexOf(marked(FITTED_NAME)));
     });
@@ -451,7 +464,7 @@ describe("renderPersonalCard()", () => {
 
   describe("the evening chart", () => {
     it("should label the section where the layout put the label", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(attributesOf(copy.personalChartLabel).y).toBe(CHART_LABEL);
       expect(attributesOf(copy.personalChartLabel).x).toBe(PAD);
@@ -460,7 +473,7 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should rule the section off above its own label, flat across the card", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(ruledAt(CHART_LABEL - SECTION_LABEL_DROP)).toHaveLength(ONCE);
       expect(ruledAt(CHART_LABEL - SECTION_LABEL_DROP)[0]).toEqual(
@@ -473,7 +486,7 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should plot the card's own nights where the layout put the plot", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(eveningChartSpy).toHaveBeenCalledTimes(ONCE);
       expect(eveningChartSpy).toHaveBeenCalledWith(copy, {
@@ -489,18 +502,18 @@ describe("renderPersonalCard()", () => {
     it("should hint at the chart to come where a drawn one would stand", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(textSpy).toHaveBeenCalledWith(TEASER_HINT_MARK, expect.anything());
     });
 
     it("should never repeat the chronology's scale line, drawn chart or not", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(textSpy).not.toHaveBeenCalledWith(copy.sheetShareHint, expect.anything());
 
       personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(textSpy).not.toHaveBeenCalledWith(copy.sheetShareHint, expect.anything());
     });
@@ -508,7 +521,7 @@ describe("renderPersonalCard()", () => {
     it("should keep calling the section by the chart's own name with no chart in it", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(textSpy).toHaveBeenCalledWith(copy.personalChartLabel, expect.anything());
       expect(attributesOf(copy.personalChartLabel)["y"]).toBe(CHART_LABEL);
@@ -517,14 +530,14 @@ describe("renderPersonalCard()", () => {
     it("should ask the teaser about the nights the card actually holds", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(chartTeaserSpy).toHaveBeenCalledTimes(ONCE);
       expect(chartTeaserSpy).toHaveBeenCalledWith(copy, NIGHTS.length);
     });
 
     it("should leave the teaser unasked when there is a chart to draw", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(chartTeaserSpy).toHaveBeenCalledTimes(NEVER);
       expect(textSpy).toHaveBeenCalledWith(copy.personalChartLabel, expect.anything());
@@ -533,7 +546,7 @@ describe("renderPersonalCard()", () => {
     it("should stand the teaser on the same baseline the chart's scale would use", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(attributesOf(TEASER_HINT_MARK)["y"]).toBe(CHART_LABEL + TEASER_TEXT_DROP);
     });
@@ -541,7 +554,7 @@ describe("renderPersonalCard()", () => {
     it("should plot nothing when the layout left the plot out", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf({ plotTop: null }));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(eveningChartSpy).toHaveBeenCalledTimes(NEVER);
       expect(body()).not.toContain(CHART_MARK);
@@ -550,7 +563,7 @@ describe("renderPersonalCard()", () => {
 
   describe("the fact rows", () => {
     it("should label the facts where the layout put the label, with no hint beside it", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(attributesOf(copy.personalFactsLabel).y).toBe(FACTS_LABEL);
       expect(
@@ -561,7 +574,7 @@ describe("renderPersonalCard()", () => {
     });
 
     it("should rule the facts off above their own label, flat across the card", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(ruledAt(FACTS_LABEL - SECTION_LABEL_DROP)).toHaveLength(ONCE);
       expect(ruledAt(FACTS_LABEL - SECTION_LABEL_DROP)[0]).toEqual(
@@ -577,7 +590,7 @@ describe("renderPersonalCard()", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf({ ...BARE_SHEET, factsLabel: FACTS_LABEL }));
       factRowsSpy.mockReturnValue([]);
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(body()).toEqual([
         BACKGROUND_MARK,
@@ -602,7 +615,7 @@ describe("renderPersonalCard()", () => {
     it("should keep the facts label on a card that has no facts to put under it", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(textSpy).toHaveBeenCalledWith(copy.personalFactsLabel, expect.anything());
     });
@@ -610,7 +623,7 @@ describe("renderPersonalCard()", () => {
     it("should say what the empty facts section is waiting for", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(textSpy).toHaveBeenCalledWith(copy.personalFactsAwait, expect.anything());
     });
@@ -618,20 +631,20 @@ describe("renderPersonalCard()", () => {
     it("should keep that promise off a card whose only fact went on the plate", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf({ facts: [], plate: PLATE }));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(textSpy).not.toHaveBeenCalledWith(copy.personalFactsAwait, expect.anything());
     });
 
     it("should hand the fact rows the very facts the layout placed, and not the card", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(factRowsSpy).toHaveBeenCalledTimes(ONCE);
-      expect(factRowsSpy).toHaveBeenCalledWith(copy, FACTS, INK);
+      expect(factRowsSpy).toHaveBeenCalledWith(copy, FACTS, INK, columnOfSpy);
     });
 
     it("should draw the rows under the chart", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(body().indexOf(FACTS_MARK)).toBeGreaterThan(body().indexOf(CHART_MARK));
     });
@@ -639,21 +652,21 @@ describe("renderPersonalCard()", () => {
 
   describe("the top fact plate", () => {
     it("should plate the very fact the layout placed there", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(topFactPlateSpy).toHaveBeenCalledTimes(ONCE);
       expect(topFactPlateSpy).toHaveBeenCalledWith(copy, PLATE, INK);
     });
 
     it("should draw the plate below everything but the baseboard", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(body().at(-TWICE)).toBe(PLATE_MARK);
       expect(body().at(-ONCE)).toBe(BASEBOARD_MARK);
     });
 
     it("should sign the card at its own foot, from the height the layout settled on", () => {
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(posterBaseboardSpy).toHaveBeenCalledWith(A_HANDLE, SHEET_HEIGHT);
     });
@@ -661,7 +674,7 @@ describe("renderPersonalCard()", () => {
     it("should draw no plate when the layout left it out", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf({ plate: null }));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(topFactPlateSpy).toHaveBeenCalledTimes(NEVER);
       expect(body()).not.toContain(PLATE_MARK);
@@ -673,7 +686,7 @@ describe("renderPersonalCard()", () => {
 
       personalLayoutOfSpy.mockReturnValue(sheetOf({ plate: ANOTHER_PLATE }));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(topFactPlateSpy).toHaveBeenCalledWith(copy, ANOTHER_PLATE, INK);
     });
@@ -684,7 +697,7 @@ describe("renderPersonalCard()", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
       factRowsSpy.mockReturnValue([]);
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(body()).toEqual([
         BACKGROUND_MARK,
@@ -710,15 +723,15 @@ describe("renderPersonalCard()", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
       factRowsSpy.mockReturnValue([]);
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
-      expect(factRowsSpy).toHaveBeenCalledWith(copy, [], INK);
+      expect(factRowsSpy).toHaveBeenCalledWith(copy, [], INK, columnOfSpy);
     });
 
     it("should rule off the heading, both promises and the floor under each", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       expect(lineSpy).toHaveBeenCalledTimes(FIVE_RULES);
     });
@@ -726,7 +739,7 @@ describe("renderPersonalCard()", () => {
     it("should hold the chart's place with a dashed floor rather than empty space", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       const floor = lineSpy.mock.calls[CHART_FLOOR]?.[0] as Record<string, unknown>;
 
@@ -738,7 +751,7 @@ describe("renderPersonalCard()", () => {
     it("should centre the sentence over the card rather than hang it off an edge", () => {
       personalLayoutOfSpy.mockReturnValue(sheetOf(BARE_SHEET));
 
-      renderPersonalCard(copy, CARD, COLUMN, A_HANDLE);
+      renderPersonalCard(copy, CARD, columnOfSpy, A_HANDLE);
 
       const sentence = attributesOf(TEASER_HINT_MARK);
 
