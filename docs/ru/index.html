@@ -256,7 +256,7 @@
               <p class="font-mono text-[13px] text-accent">/stats_awards</p>
               <h3 class="mt-3 text-[26px] font-bold tracking-[-0.01em]">Награды</h3>
               <p class="mt-4 text-[17px] leading-relaxed text-muted">
-                Их сорок пять, а на постере девять: король и дурак — всегда, остальные места
+                Их больше сорока, а на постере девять: король и дурак — всегда, остальные места
                 расходятся по столу, начиная с самых редких. Поэтому две пятницы не
                 выглядят одинаково.
               </p>
@@ -518,7 +518,21 @@ if (deck) {
     }
     tabs[shown].focus();
   });
-  wideEnough.addEventListener("change", arrange);
+  const warmTheHidden = () => {
+    if (!wideEnough.matches) {
+      return;
+    }
+    for (const panel of panels) {
+      const picture = panel.querySelector("img");
+      picture.loading = "eager";
+      picture.decode().catch(() => undefined);
+    }
+  };
+  wideEnough.addEventListener("change", () => {
+    arrange();
+    warmTheHidden();
+  });
+  window.addEventListener("load", warmTheHidden);
   arrange();
 }
 </script>

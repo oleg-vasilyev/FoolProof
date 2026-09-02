@@ -450,7 +450,7 @@ cannot fix this one, because on 21 August **no rule fired for her at all**. She 
 after game 7 of 13, which is exactly THE IRISH GOODBYE, and the rule went to the other
 player who left, because `bestBy` returns one winner.
 
-So the catalogue's coverage of a table is narrower than its forty-five rules suggest:
+So the catalogue's coverage of a table is narrower than its length suggests:
 several describe a situation two people can be in, and each hands out one row. The fix
 is not a participation award — the card says what one person did that nobody else did —
 but a rule fitting two players could name the runner-up where there is room, the way
