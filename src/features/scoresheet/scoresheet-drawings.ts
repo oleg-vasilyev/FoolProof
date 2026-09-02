@@ -1,8 +1,7 @@
 import { reportOnTheNewestEvening } from "#scoresheet/bot/evening-report.ts";
 import { contactSheet } from "#scoresheet/samples/contact-sheet.ts";
 import { gallery } from "#scoresheet/samples/gallery-edges.ts";
-import { posters } from "#scoresheet/samples/sample-table.ts";
-import { sitePosters } from "#scoresheet/samples/site-set.ts";
+import { posters } from "#scoresheet/samples/site-set.ts";
 import type { Drawing, FeatureDrawings } from "#shared/drawings/drawings-contract.ts";
 
 
@@ -39,8 +38,7 @@ const theNewestEvening = (args: readonly string[]): readonly string[] => {
 };
 
 export const drawings: FeatureDrawings = {
-  mockups: () => asDrawings(posters(), "the sample evening, drawn by the renderer itself"),
-  sitePosters: () => asDrawings(sitePosters(), "the same evening, drawn for the website"),
+  posters: () => asDrawings(posters(), "the sample evening, in every language it is shown in"),
   gallery: everyEdge,
   tools: {
     evening: {

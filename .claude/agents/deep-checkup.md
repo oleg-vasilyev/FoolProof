@@ -339,7 +339,7 @@ assumption and say what a rehearsal would need.
 
 ## Phase 8 — design versus implementation
 
-Compare the committed mockups and posters (`docs/mockups/`, `docs/posters/`)
+Compare the committed posters (`docs/posters/`, every language)
 with what the code draws now — `docs:check` compares SVGs, so your work is the
 rest: run the gallery (`node scripts/tools.ts gallery` in the clone), open the
 edges, and judge implemented / partial / drifted / missing per screen. Check

@@ -74,7 +74,7 @@ sequenceDiagram
         R->>R: name the cases the drawing must survive before drawing: emptiest, fullest, widest, each optional part gone, a tie
         R->>R: draw every named case, rasterize with the real fonts, look at each PNG, and redraw whatever fails the look
         R->>R: lay them into one contact sheet: every case, the neighbour it will sit next to, and an inventory naming every mark and label in a player's words
-        R->>C: the named cases, committed as docs/mockups/[gallery script].cases.txt — docs:check later holds the gallery to them
+        R->>C: the named cases, committed as docs/posters/[gallery script].cases.txt — docs:check later holds the gallery to them
         R-->>C: the sheet, the SVG behind each panel, and which numbers the drawing assumes exist
         C->>R: the copy-reader agent — the inventory of every line the drawing puts on the poster, read as sentences
         R-->>C: the ones no person would say, each with a better line
@@ -183,7 +183,7 @@ sequenceDiagram
         end
         C->>K: the refresh-the-pictures skill
         K-->>C: the table of every committed picture, what draws it, and which have no gate but the table
-        C->>C: draw the gallery and regenerate the stale ones — mockups, posters, previews, icons
+        C->>C: draw the gallery and regenerate the stale ones — posters, previews, icons
         C->>R: the poster-reader agent — the contact sheet, every regenerated PNG, the lines to read, but never what any of it is for
         R-->>C: what each line says to somebody who has never seen the code, then the set read against itself
         opt the phase had a mockup approved at stage 1

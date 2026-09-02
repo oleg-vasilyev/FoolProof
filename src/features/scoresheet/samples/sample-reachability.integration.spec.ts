@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { careerHistories } from "#scoresheet/samples/career-edges.ts";
 import { gallery, galleryEvenings } from "#scoresheet/samples/gallery-edges.ts";
-import { posters, sampleCareer, sampleEvening } from "#scoresheet/samples/sample-table.ts";
-import { sitePosters } from "#scoresheet/samples/site-set.ts";
+import { sampleCareer, sampleEvening } from "#scoresheet/samples/sample-table.ts";
+import { posters } from "#scoresheet/samples/site-set.ts";
 import type { Finalist, PlayerColumn } from "#shared/repository/repository-contract.ts";
 import { LONGEST_NAME, MIN_PLAYERS, MOST_PLAYERS } from "#shared/table/table-limits.ts";
 
@@ -210,22 +210,28 @@ describe("the states the samples draw", () => {
       ).toEqual([]);
     });
 
-    it("should draw the three posters every mockup is made of", () => {
+    it("should draw all three posters, in both languages, from one set", () => {
       const drawn = posters();
 
-      expect(Object.keys(drawn)).toEqual(["chronology", "awards", "personal"]);
+      expect(Object.keys(drawn)).toEqual([
+        "chronology-en",
+        "awards-en",
+        "personal-en",
+        "chronology-ru",
+        "awards-ru",
+        "personal-ru",
+      ]);
 
       for (const [name, svg] of Object.entries(drawn)) {
         expect(svg.startsWith("<svg"), `${name} is not a drawing`).toBe(true);
       }
     });
 
-    it("should draw the site's own set in both languages", () => {
-      const drawn = Object.keys(sitePosters());
+    it("should leave no name the sample was written with on an English poster", () => {
+      const english = posters()["chronology-en"] ?? "";
+      const asWritten = sampleEvening().players.map((player) => player.displayName);
 
-      expect(drawn.filter((name) => name.endsWith("-en")).length).toBe(
-        drawn.filter((name) => name.endsWith("-ru")).length
-      );
+      expect(asWritten.filter((name) => english.includes(name))).toEqual([]);
     });
   });
 });

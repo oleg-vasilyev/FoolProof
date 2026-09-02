@@ -1,6 +1,6 @@
 ---
 name: refresh-the-pictures
-description: Everything the picture gate needs once it opens — the checklist of committed pictures to regenerate (the /stats mockups, the site posters, the Claude Design page, the OG previews, the icons), the gallery of edge cases and how to build one that presses a real edge, how the poster-reader is briefed, and how to triage what it reports. Stage 5, so use after the diff review, when a design change has landed in code, when docs:check reports mockups or posters out of step, or whenever a committed picture might no longer match what the product draws.
+description: Everything the picture gate needs once it opens — the checklist of committed pictures to regenerate (the posters, in every language and every format, the Claude Design page, the OG previews, the icons), the gallery of edge cases and how to build one that presses a real edge, how the poster-reader is briefed, and how to triage what it reports. Stage 5, so use after the diff review, when a design change has landed in code, when docs:check reports the posters out of step, or whenever a committed picture might no longer match what the product draws.
 ---
 
 # Refreshing the pictures, and reading them
@@ -22,8 +22,8 @@ redrawing. Skipping a row silently is how an icon ships in last year's colour.
 
 | Picture | Drawn by | What catches it going stale |
 |---|---|---|
-| `docs/mockups/*.svg` + `.png` | `node scripts/tools.ts mockups` | `docs:check` compares the SVG |
-| `docs/posters/*-{en,ru}.svg` + `.webp` | `node scripts/tools.ts site-posters` | `docs:check` compares the SVG, and weighs and measures the WebP |
+| `docs/posters/*-{en,ru}.svg` + `.webp` | `node scripts/tools.ts posters` | `docs:check` compares the SVG, and weighs and measures the WebP the pages carry |
+| `docs/posters/*-en.png` — what README shows, at the width the bot sends | the same command | nothing — this row |
 | `docs/previews/og-cover*.png` | by hand, from the site's own look | nothing — this row |
 | `docs/favicon.png`, `docs/apple-touch-icon.png` | by hand, from the bot's avatar | nothing — this row |
 | the Claude Design page | the `update-the-design-page` skill, end to end | `docs:check` compares `design-page.sync` |
@@ -65,7 +65,7 @@ poster can still be redrawn wrongly and pass, which is what the reader below is 
    Measure before `e2e:changed`, so a red suite means the bot, not the harness:
 
    ```
-   node -e "import('./scripts/feature-drawings.ts').then(async ({everyDrawing})=>{const {rasterize}=await import('./src/shared/drawing/rasterize.ts');for(const d of await everyDrawing(o=>o.mockups())){await rasterize(d.svg);const t=performance.now();await rasterize(d.svg);console.log(d.file,(performance.now()-t).toFixed(0)+'ms');}})"
+   node -e "import('./scripts/feature-drawings.ts').then(async ({everyDrawing})=>{const {rasterize}=await import('./src/shared/drawing/rasterize.ts');for(const d of await everyDrawing(o=>o.posters())){await rasterize(d.svg);const t=performance.now();await rasterize(d.svg);console.log(d.file,(performance.now()-t).toFixed(0)+'ms');}})"
    ```
 
 ## The hand-made rows
@@ -95,7 +95,7 @@ case through; a phase that adds a poster owes it cases in the same phase.
 **The cases are not invented here.** They were named at stage 1, before the mockup was
 drawn, and the owner approved a picture of each one — so this step copies that list
 into the gallery and draws it against the real renderer. The list is a committed file,
-`docs/mockups/<edges module>.cases.txt`, and `docs:check` fails **both** directions —
+`docs/posters/<edges module>.cases.txt`, and `docs:check` fails **both** directions —
 a held case the gallery stopped drawing, and a drawn case the list does not hold — so
 keeping the two in step needs no vigilance. What is still yours is that the gate
 polices consistency and not approval: writing the new edge into the list yourself
@@ -239,6 +239,6 @@ right edge, and two more crowned a comeback that never fell below mid-table.
 
 ## What this skill hands off
 
-If the mockups or the posters were redrawn, the page in Claude Design is now behind
+If the posters were redrawn, the page in Claude Design is now behind
 the code — a separate job with its own trap list, and a `context: fork` skill — so
 invoke **`update-the-design-page`**, naming which drawings moved, and read its answer.

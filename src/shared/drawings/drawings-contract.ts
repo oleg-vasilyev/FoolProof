@@ -11,8 +11,7 @@ export interface CommandLineTool {
 }
 
 export interface FeatureDrawings {
-  readonly mockups: () => readonly Drawing[];
-  readonly sitePosters: () => readonly Drawing[];
+  readonly posters: () => readonly Drawing[];
   readonly gallery: () => readonly Drawing[];
   readonly tools: Readonly<Record<string, CommandLineTool>>;
 }

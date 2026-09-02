@@ -11,7 +11,7 @@ background: false
 > **Stage 5** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
 
 **Do this now, in a subagent that remembers no conversation.** What moved is
-`$ARGUMENTS`; when that is empty, read it off `git diff` over `docs/mockups/`. Hand
+`$ARGUMENTS`; when that is empty, read it off `git diff` over `docs/posters/`. Hand
 back only the revision the page now carries, step 4's byte verdict, and each sentence
 step 3 changed with what it said before. If something decisive is in neither this
 file, `$ARGUMENTS` nor the disk, stop and say so rather than guess at the page.
@@ -28,7 +28,7 @@ Two directions lead here:
   procedure below: the mockup on the page has to come from the renderer. An
   unbuilt chart stays under *Ideas* with its reasoning intact, and moves up
   only when it gains a real mockup — never rewritten from memory.
-- **The code moved first** — `refresh-the-pictures` redrew the mockups. Run the
+- **The code moved first** — `refresh-the-pictures` redrew the posters. Run the
   procedure directly.
 
 ## The procedure
@@ -53,9 +53,9 @@ Two directions lead here:
 4. **Push it back**: `finalize_plan` with the one path (it wants `deletes` too,
    even empty), then `write_files` with `localPath`. Read it back and compare
    against the local file — the write is done only when they are byte-identical.
-5. **The splice already wrote `docs/mockups/design-page.sync`**, which holds the
+5. **The splice already wrote `docs/posters/design-page.sync`**, which holds the
    fingerprint of the drawings it put on the page, and `docs:check` fails while
-   that fingerprint and the mockups disagree. Commit it with the phase — but only
+   that fingerprint and the English posters disagree. Commit it with the phase — but only
    after step 4 passed, because until then it claims a sync that did not happen.
    That file is the whole reason this skill can no longer be forgotten: the page
    lives behind a login, so nothing else in the repository can notice it is stale.

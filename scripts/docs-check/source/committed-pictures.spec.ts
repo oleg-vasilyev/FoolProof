@@ -37,12 +37,10 @@ const {
   casesOutOfStepComplaints,
   designPageOutOfStep,
   designPageOutOfStepComplaints,
-  mockupsOutOfStep,
-  mockupsOutOfStepComplaints,
+  postersOutOfStep,
+  postersOutOfStepComplaints,
   postersOutOfTheGallery,
   postersOutOfTheGalleryComplaints,
-  sitePostersOutOfStep,
-  sitePostersOutOfStepComplaints,
 } = await import("./committed-pictures.ts");
 
 
@@ -180,7 +178,7 @@ describe("casesOutOfStepComplaints", () => {
 
     expect(complaints).toHaveLength(ONE_COMPLAINT);
     expect(complaints[FIRST]).toContain(SCRIPT_SOURCE);
-    expect(complaints[FIRST]).toContain("docs/mockups/live-game-edges.cases.txt");
+    expect(complaints[FIRST]).toContain("docs/posters/live-game-edges.cases.txt");
     expect(complaints[FIRST]).toContain("judged against nothing");
   });
 
@@ -188,7 +186,7 @@ describe("casesOutOfStepComplaints", () => {
     const complaints = casesOutOfStepComplaints([], [LIST], {}, { [LIST]: "" });
 
     expect(complaints).toHaveLength(ONE_COMPLAINT);
-    expect(complaints[FIRST]).toContain("docs/mockups/live-game-edges.cases.txt");
+    expect(complaints[FIRST]).toContain("docs/posters/live-game-edges.cases.txt");
     expect(complaints[FIRST]).toContain("live-game-edges.ts");
     expect(complaints[FIRST]).toContain("nothing was ever written to draw");
   });
@@ -205,83 +203,55 @@ describe("casesOutOfStepComplaints", () => {
   });
 });
 
-describe("mockupsOutOfStepComplaints", () => {
+describe("postersOutOfStepComplaints", () => {
   const CARD = "card";
   const SVG = "<svg>card</svg>";
 
   it("should say nothing when the committed picture matches what the code draws now", () => {
-    const complaints = mockupsOutOfStepComplaints({ [CARD]: SVG }, { [CARD]: SVG }, [`${CARD}.svg`]);
+    const complaints = postersOutOfStepComplaints({ [CARD]: SVG }, { [CARD]: SVG }, [`${CARD}.svg`]);
 
     expect(complaints).toEqual([]);
   });
 
   it("should say a picture was never drawn when nothing is committed for it", () => {
-    const complaints = mockupsOutOfStepComplaints({ [CARD]: SVG }, { [CARD]: undefined }, []);
+    const complaints = postersOutOfStepComplaints({ [CARD]: SVG }, { [CARD]: undefined }, []);
 
     expect(complaints).toHaveLength(ONE_COMPLAINT);
-    expect(complaints[FIRST]).toContain(`docs/mockups/${CARD}.svg`);
+    expect(complaints[FIRST]).toContain(`docs/posters/${CARD}.svg`);
     expect(complaints[FIRST]).toContain("never drawn");
-    expect(complaints[FIRST]).toContain('node scripts/tools.ts mockups');
+    expect(complaints[FIRST]).toContain('node scripts/tools.ts posters');
   });
 
   it("should say the renderer draws something else now when the committed picture differs", () => {
-    const complaints = mockupsOutOfStepComplaints(
+    const complaints = postersOutOfStepComplaints(
       { [CARD]: SVG },
       { [CARD]: "<svg>different</svg>" },
       [`${CARD}.svg`]
     );
 
     expect(complaints).toHaveLength(ONE_COMPLAINT);
-    expect(complaints[FIRST]).toContain(`docs/mockups/${CARD}.svg`);
+    expect(complaints[FIRST]).toContain(`docs/posters/${CARD}.svg`);
     expect(complaints[FIRST]).toContain('"refresh-the-pictures" skill redraws this');
     expect(complaints[FIRST]).toContain('"update-the-design-page"');
   });
 
   it("should name a committed picture no feature draws any more", () => {
-    const complaints = mockupsOutOfStepComplaints({}, {}, ["ghost.svg"]);
+    const complaints = postersOutOfStepComplaints({}, {}, ["ghost.svg"]);
 
     expect(complaints).toHaveLength(ONE_COMPLAINT);
-    expect(complaints[FIRST]).toContain("docs/mockups/ghost.svg");
+    expect(complaints[FIRST]).toContain("docs/posters/ghost.svg");
     expect(complaints[FIRST]).toContain("no feature draws this any more");
     expect(complaints[FIRST]).toContain("delete it with whatever stopped drawing it");
   });
 
   it("should ignore a file on disk that is not a picture at all", () => {
-    expect(mockupsOutOfStepComplaints({}, {}, ["notes.txt"])).toEqual([]);
+    expect(postersOutOfStepComplaints({}, {}, ["notes.txt"])).toEqual([]);
   });
 
   it("should not call a picture orphaned when a feature still draws it under that name", () => {
-    const complaints = mockupsOutOfStepComplaints({ [CARD]: SVG }, { [CARD]: SVG }, [`${CARD}.svg`]);
+    const complaints = postersOutOfStepComplaints({ [CARD]: SVG }, { [CARD]: SVG }, [`${CARD}.svg`]);
 
     expect(complaints).toEqual([]);
-  });
-});
-
-describe("sitePostersOutOfStepComplaints", () => {
-  const CARD = "card";
-  const SVG = "<svg>card</svg>";
-
-  it("should say nothing when the committed poster matches what the site draws now", () => {
-    const complaints = sitePostersOutOfStepComplaints({ [CARD]: SVG }, { [CARD]: SVG }, [
-      `${CARD}.svg`,
-    ]);
-
-    expect(complaints).toEqual([]);
-  });
-
-  it("should point the tool name at site-posters, not at mockups", () => {
-    const complaints = sitePostersOutOfStepComplaints({ [CARD]: SVG }, { [CARD]: undefined }, []);
-
-    expect(complaints).toHaveLength(ONE_COMPLAINT);
-    expect(complaints[FIRST]).toContain(`docs/posters/${CARD}.svg`);
-    expect(complaints[FIRST]).toContain("node scripts/tools.ts site-posters");
-  });
-
-  it("should name an orphaned site poster under docs/posters, not docs/mockups", () => {
-    const complaints = sitePostersOutOfStepComplaints({}, {}, ["ghost.svg"]);
-
-    expect(complaints).toHaveLength(ONE_COMPLAINT);
-    expect(complaints[FIRST]).toContain("docs/posters/ghost.svg");
   });
 });
 
@@ -300,12 +270,12 @@ describe("designPageOutOfStepComplaints", () => {
     expect(complaints[FIRST]).toContain("rewrites this file with the fingerprint it pushed");
   });
 
-  it("should say nothing when the synced fingerprint matches what the mockups hash to now", () => {
-    expect(designPageOutOfStepComplaints(DRAWN_NOW, `mockups: ${DRAWN_NOW}`)).toEqual([]);
+  it("should say nothing when the synced fingerprint matches what the posters hash to now", () => {
+    expect(designPageOutOfStepComplaints(DRAWN_NOW, `posters: ${DRAWN_NOW}`)).toEqual([]);
   });
 
   it("should say the page is behind when the synced fingerprint no longer matches", () => {
-    const complaints = designPageOutOfStepComplaints(SOMETHING_ELSE, `mockups: ${DRAWN_NOW}`);
+    const complaints = designPageOutOfStepComplaints(SOMETHING_ELSE, `posters: ${DRAWN_NOW}`);
 
     expect(complaints).toHaveLength(ONE_COMPLAINT);
     expect(complaints[FIRST]).toContain('"update-the-design-page" skill');
@@ -350,43 +320,34 @@ describe("the readers, against a repository that is not there", () => {
     expect(postersOutOfTheGallery().length).toBeGreaterThan(NOTHING);
   });
 
-  it("should take the approved lists off the mockups folder rather than a list in code", () => {
+  it("should take the approved lists off the posters folder rather than a list in code", () => {
     readdirSyncSpy.mockReturnValue(["gallery-edges.cases.txt", "a-poster.svg"]);
     foldersNamedSpy.mockReturnValue(["src/features/scoresheet/samples"]);
     readSpy.mockReturnValue("");
 
     casesOutOfStep();
 
-    expect(readdirSyncSpy).toHaveBeenCalledWith("docs/mockups");
-    expect(readSpy).toHaveBeenCalledWith(join("docs/mockups", "gallery-edges.cases.txt"));
-    expect(readSpy).not.toHaveBeenCalledWith(join("docs/mockups", "a-poster.svg"));
+    expect(readdirSyncSpy).toHaveBeenCalledWith("docs/posters");
+    expect(readSpy).toHaveBeenCalledWith(join("docs/posters", "gallery-edges.cases.txt"));
+    expect(readSpy).not.toHaveBeenCalledWith(join("docs/posters", "a-poster.svg"));
   });
 
-  it("should read a committed mockup only where one exists, and list the folder besides", () => {
+  it("should read a committed poster only where one exists, and list the folder besides", () => {
     existsSyncSpy.mockReturnValue(true);
     readSpy.mockReturnValue("<svg>one</svg>");
     readdirSyncSpy.mockReturnValue(["a.svg"]);
 
-    expect(mockupsOutOfStep({ a: "<svg>one</svg>" })).toEqual([]);
-    expect(existsSyncSpy).toHaveBeenCalledWith("docs/mockups/a.svg");
-    expect(readdirSyncSpy).toHaveBeenCalledWith("docs/mockups");
+    expect(postersOutOfStep({ a: "<svg>one</svg>" })).toEqual([]);
+    expect(existsSyncSpy).toHaveBeenCalledWith("docs/posters/a.svg");
+    expect(readdirSyncSpy).toHaveBeenCalledWith("docs/posters");
   });
 
-  it("should say a mockup is out of step when the committed file says something else", () => {
+  it("should say a poster is out of step when the committed file says something else", () => {
     existsSyncSpy.mockReturnValue(true);
     readSpy.mockReturnValue("<svg>stale</svg>");
     readdirSyncSpy.mockReturnValue(["a.svg"]);
 
-    expect(mockupsOutOfStep({ a: "<svg>fresh</svg>" })).toHaveLength(ONE_COMPLAINT);
-  });
-
-  it("should weigh the site posters against their own folder, not the mockups one", () => {
-    existsSyncSpy.mockReturnValue(true);
-    readSpy.mockReturnValue("<svg>one</svg>");
-    readdirSyncSpy.mockReturnValue(["a.svg"]);
-
-    expect(sitePostersOutOfStep({ a: "<svg>one</svg>" })).toEqual([]);
-    expect(readdirSyncSpy).toHaveBeenCalledWith("docs/posters");
+    expect(postersOutOfStep({ a: "<svg>fresh</svg>" })).toHaveLength(ONE_COMPLAINT);
   });
 
   it("should say the design page is behind when nothing was ever synced", () => {

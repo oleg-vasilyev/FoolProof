@@ -59,7 +59,7 @@ const setIn = (
   [`personal-${locale}`]: cardIn(locale, evening, career),
 });
 
-export const sitePosters = (): Readonly<Record<string, string>> => ({
+export const posters = (): Readonly<Record<string, string>> => ({
   ...setIn(Locale.En, englishEvening(), englishCareer()),
   ...setIn(Locale.Ru, sampleEvening(), sampleCareer()),
 });

@@ -1,6 +1,11 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { drawnByName } from "./feature-drawings.ts";
+import { POSTER_DIR } from "./drawn-into.ts";
+import { Locale } from "#shared/locale/locales.ts";
+
+
+export const ENGLISH_SUFFIX = `-${Locale.En}`;
 
 
 const A_NAMED_SLOT = /(<div class="poster" data-poster="([a-z]+)">)([\s\S]*?)(<\/div>)/g;
@@ -41,7 +46,16 @@ const withFreshPosters = (page: string, drawn: Readonly<Record<string, string>>)
   return spliced;
 };
 
-export const DESIGN_PAGE_SYNC = "docs/mockups/design-page.sync";
+export const DESIGN_PAGE_SYNC = `${POSTER_DIR}/design-page.sync`;
+
+export const inSlotNames = (
+  drawn: Readonly<Record<string, string>>
+): Readonly<Record<string, string>> =>
+  Object.fromEntries(
+    Object.entries(drawn)
+      .filter(([name]) => name.endsWith(ENGLISH_SUFFIX))
+      .map(([name, svg]) => [name.slice(0, -ENGLISH_SUFFIX.length), svg])
+  );
 
 export const fingerprintOf = (drawn: Readonly<Record<string, string>>): string =>
   createHash("sha256")
@@ -54,13 +68,13 @@ export const fingerprintOf = (drawn: Readonly<Record<string, string>>): string =
     .digest("hex");
 
 export const refreshDesignPage = async (from: string, to: string): Promise<void> => {
-  const drawn = await drawnByName((offered) => offered.mockups());
+  const drawn = inSlotNames(await drawnByName((offered) => offered.posters()));
   const spliced = withFreshPosters(readFileSync(from, "utf8"), drawn);
 
   writeFileSync(to, spliced, "utf8");
   writeFileSync(
     DESIGN_PAGE_SYNC,
-    `mockups: ${fingerprintOf(drawn)}\n`,
+    `posters: ${fingerprintOf(drawn)}\n`,
     "utf8"
   );
 

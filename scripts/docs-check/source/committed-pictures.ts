@@ -1,7 +1,7 @@
 import { existsSync, readdirSync } from "node:fs";
 import { basename, join, normalize } from "node:path";
-import { DESIGN_PAGE_SYNC, fingerprintOf } from "../../design-page.ts";
-import { MOCKUP_DIR, SITE_POSTER_DIR } from "../../drawn-into.ts";
+import { DESIGN_PAGE_SYNC, fingerprintOf, inSlotNames } from "../../design-page.ts";
+import { POSTER_DIR } from "../../drawn-into.ts";
 import { read } from "../document-files.ts";
 import { A_LINE, FIRST_GROUP } from "../markdown-text.ts";
 import {
@@ -23,7 +23,7 @@ const A_DRAWN_CASE = /name: "([^"]+)"/g;
 
 const A_TYPESCRIPT_FILE = /\.ts$/;
 
-const A_SYNCED_FINGERPRINT = /^mockups: ([0-9a-f]{64})$/m;
+const A_SYNCED_FINGERPRINT = /^posters: ([0-9a-f]{64})$/m;
 
 const A_PATH_SEPARATOR = /[\\/]/;
 
@@ -97,7 +97,7 @@ const drawingsEntries = (): readonly string[] =>
     .filter((entry) => existsSync(entry));
 
 const approvedListsIn = (): readonly string[] =>
-  readdirSync(MOCKUP_DIR).filter((name) => AN_APPROVED_CASE_LIST.test(name));
+  readdirSync(POSTER_DIR).filter((name) => AN_APPROVED_CASE_LIST.test(name));
 
 const scriptBehind = (list: string): string =>
   `${AN_APPROVED_CASE_LIST.exec(list)?.[FIRST_GROUP] ?? ""}.ts`;
@@ -163,7 +163,7 @@ export const casesOutOfStepComplaints = (
 
     if (source === undefined) {
       return [
-        `${MOCKUP_DIR}/${list}: names ${script}, which no feature holds — an approved ` +
+        `${POSTER_DIR}/${list}: names ${script}, which no feature holds — an approved ` +
           `list of edges that nothing was ever written to draw`,
       ];
     }
@@ -176,7 +176,7 @@ export const casesOutOfStepComplaints = (
         .filter((one) => !drawn.includes(`name: "${one}"`))
         .map(
           (one) =>
-            `${MOCKUP_DIR}/${list}: "${one}" was approved on a contact sheet and ` +
+            `${POSTER_DIR}/${list}: "${one}" was approved on a contact sheet and ` +
             `${source} draws no case by that name — an edge the owner looked at is now ` +
             `drawn by nobody`
         ),
@@ -185,7 +185,7 @@ export const casesOutOfStepComplaints = (
         .filter((one) => !approved.includes(one))
         .map(
           (one) =>
-            `${source}: draws a case called "${one}" that ${MOCKUP_DIR}/${list} does not ` +
+            `${source}: draws a case called "${one}" that ${POSTER_DIR}/${list} does not ` +
             `hold — the gallery is read against the owner's own list, so an edge appearing ` +
             `only in the code is one nobody agreed was worth drawing`
         ),
@@ -198,7 +198,7 @@ export const casesOutOfStepComplaints = (
       .map(
         (source) =>
           `${source}: draws cases no approved list holds — put the edges the owner ` +
-          `signed off into ${MOCKUP_DIR}/${basename(source).replace(A_TYPESCRIPT_FILE, "")}` +
+          `signed off into ${POSTER_DIR}/${basename(source).replace(A_TYPESCRIPT_FILE, "")}` +
           `.cases.txt, or the gallery is judged against nothing`
       ),
     ...lists.flatMap(casesMissingFrom),
@@ -213,42 +213,24 @@ export const casesOutOfStep = (): readonly string[] => {
     sources,
     lists,
     Object.fromEntries(sources.map((source) => [source, read(source)])),
-    Object.fromEntries(lists.map((list) => [list, read(join(MOCKUP_DIR, list))]))
+    Object.fromEntries(lists.map((list) => [list, read(join(POSTER_DIR, list))]))
   );
 };
 
-export const mockupsOutOfStepComplaints = (
-  mockups: Readonly<Record<string, string>>,
+export const postersOutOfStepComplaints = (
+  posters: Readonly<Record<string, string>>,
   committed: Readonly<Record<string, string | undefined>>,
   filesOnDisk: readonly string[]
 ): readonly string[] => [
-  ...drawingsOutOfStepComplaints(MOCKUP_DIR, mockups, "mockups", committed),
-  ...picturesNobodyDrawsComplaints(MOCKUP_DIR, mockups, filesOnDisk),
+  ...drawingsOutOfStepComplaints(POSTER_DIR, posters, "posters", committed),
+  ...picturesNobodyDrawsComplaints(POSTER_DIR, posters, filesOnDisk),
 ];
 
-export const mockupsOutOfStep = (mockups: Readonly<Record<string, string>>): readonly string[] =>
-  mockupsOutOfStepComplaints(
-    mockups,
-    committedContentsOf(MOCKUP_DIR, mockups),
-    readdirSync(MOCKUP_DIR)
-  );
-
-export const sitePostersOutOfStepComplaints = (
-  sitePosters: Readonly<Record<string, string>>,
-  committed: Readonly<Record<string, string | undefined>>,
-  filesOnDisk: readonly string[]
-): readonly string[] => [
-  ...drawingsOutOfStepComplaints(SITE_POSTER_DIR, sitePosters, "site-posters", committed),
-  ...picturesNobodyDrawsComplaints(SITE_POSTER_DIR, sitePosters, filesOnDisk),
-];
-
-export const sitePostersOutOfStep = (
-  sitePosters: Readonly<Record<string, string>>
-): readonly string[] =>
-  sitePostersOutOfStepComplaints(
-    sitePosters,
-    committedContentsOf(SITE_POSTER_DIR, sitePosters),
-    readdirSync(SITE_POSTER_DIR)
+export const postersOutOfStep = (posters: Readonly<Record<string, string>>): readonly string[] =>
+  postersOutOfStepComplaints(
+    posters,
+    committedContentsOf(POSTER_DIR, posters),
+    readdirSync(POSTER_DIR)
   );
 
 export const designPageOutOfStepComplaints = (
@@ -268,9 +250,9 @@ export const designPageOutOfStepComplaints = (
 };
 
 export const designPageOutOfStep = (
-  mockups: Readonly<Record<string, string>>
+  posters: Readonly<Record<string, string>>
 ): readonly string[] =>
   designPageOutOfStepComplaints(
-    fingerprintOf(mockups),
+    fingerprintOf(inSlotNames(posters)),
     existsSync(DESIGN_PAGE_SYNC) ? read(DESIGN_PAGE_SYNC) : undefined
   );

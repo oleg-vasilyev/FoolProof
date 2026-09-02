@@ -187,6 +187,7 @@ is not part of `npm run check` because it belongs to `e2e/`, not to the app.
 
 Read `git diff <phase-start>..HEAD` against `CLAUDE.md` — the whole diff at once, not
 the individual commits, because a rule breaks across commits more often than inside one.
+**Stage the phase first** — an unstaged file reads to the reviewer as a missing one.
 
 **This pass is always the `phase-reviewer` subagent, and never a re-read.** It is
 not a size judgement and not something to ask permission for: you cannot review
@@ -274,10 +275,10 @@ exports — so ask only the two things it does not:
 The gallery proves a line **fits**. Nothing else asks whether it is something a
 person would say, and two releases shipped word salad that was drawn correctly and
 approved by everyone who saw it. So the reading is the **`copy-reader`** agent's, it
-may not be done by whoever wrote the table, and it happens in stage 2 **the moment
-the table is written** — a finding there edits one file, and the same finding at the
-end of the phase edits a table, the code behind a sentence, the specs asserting it
-and every poster drawing it.
+may not be done by whoever wrote the table, and it happens in stage 2 **the moment the
+table is written** — a finding there edits one file, and the same finding at the end of
+the phase edits a table, the code behind a sentence, the specs asserting it and every
+poster drawing it.
 
 At the end of the phase it runs a second time **only over what moved since**. A phase
 that changed no copy after stage 2 owes nothing here and says so in the commit.
@@ -313,18 +314,17 @@ Three things decide whether this is a gate at all, so they are known before it o
 - **You still own the conclusion.** The agent produces readings; deciding that a
   reading is wrong, and what the line should say instead, is yours.
 - **The output is specific claims, not a verdict**, and those readings go into the
-  commit's `Gallery:` line. "Looked, fine" is the green light with nothing behind it;
-  a gate whose evidence never leaves the launching agent's context is satisfiable by
-  saying it ran.
+  commit's `Gallery:` line. "Looked, fine" is the green light with nothing behind it; a
+  gate whose evidence never leaves the launching agent's context is satisfiable by saying
+  it ran.
 
 **A gate that covers part of a checklist replaces that part, never the list.** Two
 phases in a row redrew the mockups here without ever loading `refresh-the-pictures`,
 because `docs:check` had already named which pictures were stale — so the loop ran
 off the failing gate, and the rows that had no gate were never walked. The Claude
 Design page was one of them, and it went two releases without a poster that had been
-shipping all along. It has a gate now; the half that generalises is the other one —
-when a check tells you what to fix, ask what that check cannot see before believing
-the list is finished.
+shipping all along. It has a gate now; the half that generalises is the other one — when
+a check tells you what to fix, ask what it cannot see before believing the list is done.
 
 ## 7. A retrospective — when the phase actually cost something
 

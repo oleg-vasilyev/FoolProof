@@ -119,14 +119,14 @@ every one of them silently:
 ## 5. If the feature draws anything, open the drawings first
 
 Before sketching a new poster or screen, **open the committed PNGs in
-`docs/mockups/` and look at them**. Not the renderer, not the palette module —
+`docs/posters/` and look at them**. Not the renderer, not the palette module —
 the pictures. The visual language here is carried by things no source file states:
 sheets run past two thousand pixels tall, sections are dense, a row is a numbered
 index plus a coloured spine plus a title plus a muted reason, and the headline bad
 news is a full-width red plate.
 
 A mockup drawn from reading `palette.ts` and `card-metrics.ts` came back from the
-owner twice, and the fix both times was already sitting in `docs/mockups/awards.png`.
+owner twice, and the fix both times was already sitting in `docs/posters/awards-en.png`.
 Two `Read` calls would have skipped both rounds.
 
 Then draw the mockup with the real renderer as soon as one exists, and **look at

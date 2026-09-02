@@ -209,7 +209,7 @@ fixture, and the rules that could be tested without one already are.
 
 ## The design page's sync marker proves the splice, not the push
 
-`docs/mockups/design-page.sync` holds the fingerprint of the drawings
+`docs/posters/design-page.sync` holds the fingerprint of the drawings
 `node scripts/tools.ts design-page` put into the page, and `docs:check` fails while
 that fingerprint and the mockups disagree — which is what stopped the page falling
 two releases behind again. But the splice writes the marker locally and the push
@@ -375,7 +375,7 @@ their space**, which opens the same three files anyway.
 
 ## The design-page gate assumes one account owns both the repository and the page
 
-`docs:check` compares `docs/mockups/design-page.sync` against the drawings the code
+`docs:check` compares `docs/posters/design-page.sync` against the drawings the code
 produces, and that is the only thing in the repository that can notice the Claude
 Design page has gone stale — the page lives behind a login, so nothing else can see
 it. The gate is right to exist. What it silently assumes is that whoever can commit

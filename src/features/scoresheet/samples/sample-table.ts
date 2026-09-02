@@ -1,12 +1,3 @@
-import { copy } from "#scoresheet/copy.en.ts";
-import { honoursFor } from "#scoresheet/domain/awards/awards.ts";
-import { NO_PAST } from "#scoresheet/domain/awards/evening-past.ts";
-import { renderAwards } from "#scoresheet/render/awards/awards-svg.ts";
-import { renderScoresheet } from "#scoresheet/render/chronology/chronology-svg.ts";
-import { careerCard } from "#scoresheet/domain/career/career-card.ts";
-import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
-import { columnLookupOf } from "#scoresheet/render/personal/colour-column.ts";
-import { BOT_HANDLE } from "#scoresheet/samples/sample-handle.ts";
 import type {
   CareerGame,
   CareerHistory,
@@ -167,35 +158,3 @@ export const englishEvening = (): SeriesChronology => renamed(sampleEvening(), L
 
 export const englishCareer = (): CareerHistory => renamed(sampleCareer(), LATIN_NAMES);
 
-export type Posters = {
-  readonly chronology: string;
-  readonly awards: string;
-  readonly personal: string;
-};
-
-export const posters = (): Posters => {
-  const evening = englishEvening();
-  const history = englishCareer();
-  const honours = honoursFor(evening, NO_PAST);
-
-  if (honours === null) {
-    throw new Error("the sample evening is too short to earn awards — lengthen EXIT_ORDERS");
-  }
-
-  const career = careerCard(history, SAMPLE_SUBJECT);
-
-  if (career === null) {
-    throw new Error("the sample career has no games — check NAMES and EXIT_ORDERS");
-  }
-
-  return {
-    chronology: renderScoresheet(copy, evening, BOT_HANDLE),
-    awards: renderAwards(copy, evening, honours, BOT_HANDLE),
-    personal: renderPersonalCard(
-      copy,
-      career,
-      columnLookupOf(evening, history.players),
-      BOT_HANDLE
-    ),
-  };
-};

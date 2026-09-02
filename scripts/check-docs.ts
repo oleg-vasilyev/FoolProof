@@ -12,9 +12,8 @@ import { envTemplateOutOfStep, requiredKeysOutOfStep } from "./docs-check/source
 import {
   casesOutOfStep,
   designPageOutOfStep,
-  mockupsOutOfStep,
+  postersOutOfStep,
   postersOutOfTheGallery,
-  sitePostersOutOfStep,
 } from "./docs-check/source/committed-pictures.ts";
 import { formsBakedIntoCopy } from "./docs-check/source/copy-word-forms.ts";
 import { advancesOutOfStep } from "./docs-check/source/glyph-advances.ts";
@@ -40,9 +39,7 @@ const NOTHING = 0;
 
 const FAILED = 1;
 
-const theMockups = await drawnByName((offered) => offered.mockups());
-
-const theSitePosters = await drawnByName((offered) => offered.sitePosters());
+const thePosters = await drawnByName((offered) => offered.posters());
 
 const complaints = [
   ...formsBakedIntoCopy(),
@@ -72,9 +69,8 @@ const complaints = [
   ...advancesOutOfStep(),
   ...postersOutOfTheGallery(),
   ...casesOutOfStep(),
-  ...mockupsOutOfStep(theMockups),
-  ...designPageOutOfStep(theMockups),
-  ...sitePostersOutOfStep(theSitePosters),
+  ...postersOutOfStep(thePosters),
+  ...designPageOutOfStep(thePosters),
   ...siteCssOutOfStep(),
   ...imagesOutOfStep(),
 ];

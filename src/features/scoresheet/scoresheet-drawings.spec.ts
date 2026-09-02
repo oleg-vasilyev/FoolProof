@@ -10,8 +10,6 @@ const gallerySpy = vi.fn();
 
 const postersSpy = vi.fn();
 
-const sitePostersSpy = vi.fn();
-
 vi.mock("#scoresheet/bot/evening-report.ts", () => ({
   reportOnTheNewestEvening: (chatId: number) => reportOnTheNewestEveningSpy(chatId),
 }));
@@ -24,12 +22,8 @@ vi.mock("#scoresheet/samples/gallery-edges.ts", () => ({
   gallery: () => gallerySpy() as readonly Drawing[],
 }));
 
-vi.mock("#scoresheet/samples/sample-table.ts", () => ({
-  posters: () => postersSpy() as Readonly<Record<string, string>>,
-}));
-
 vi.mock("#scoresheet/samples/site-set.ts", () => ({
-  sitePosters: () => sitePostersSpy() as Readonly<Record<string, string>>,
+  posters: () => postersSpy() as Readonly<Record<string, string>>,
 }));
 
 const { drawings } = await import("#scoresheet/scoresheet-drawings.ts");
@@ -53,38 +47,25 @@ describe("what the scoresheet offers to be drawn", () => {
     vi.clearAllMocks();
 
     gallerySpy.mockReturnValue([AN_EDGE]);
-    postersSpy.mockReturnValue({ chronology: "<svg>a</svg>", awards: "<svg>b</svg>" });
-    sitePostersSpy.mockReturnValue({ "chronology-en": "<svg>c</svg>" });
+    postersSpy.mockReturnValue({ "chronology-en": "<svg>a</svg>", "chronology-ru": "<svg>b</svg>" });
     contactSheetSpy.mockReturnValue("<svg>sheet</svg>");
     reportOnTheNewestEveningSpy.mockReturnValue(["one line", "another"]);
   });
 
-  describe("mockups", () => {
-    it("should offer each sample poster under the file it is written to", () => {
-      expect(drawings.mockups().map((drawing) => [drawing.file, drawing.svg])).toEqual([
-        ["chronology", "<svg>a</svg>"],
-        ["awards", "<svg>b</svg>"],
+  describe("posters", () => {
+    it("should offer every poster under the file it is written to, locale and all", () => {
+      expect(drawings.posters().map((drawing) => [drawing.file, drawing.svg])).toEqual([
+        ["chronology-en", "<svg>a</svg>"],
+        ["chronology-ru", "<svg>b</svg>"],
       ]);
     });
 
     it("should say what every one of them is, since the gallery prints that line", () => {
-      expect(drawings.mockups().filter((drawing) => drawing.asks.trim().length > SAYS_NOTHING)).toHaveLength(
-        drawings.mockups().length
-      );
-    });
-  });
-
-  describe("sitePosters", () => {
-    it("should offer the website's own set the same way", () => {
-      expect(drawings.sitePosters().map((drawing) => [drawing.file, drawing.svg])).toEqual([
-        ["chronology-en", "<svg>c</svg>"],
-      ]);
+      expect(
+        drawings.posters().filter((drawing) => drawing.asks.trim().length > SAYS_NOTHING)
+      ).toHaveLength(drawings.posters().length);
     });
 
-    it("should not describe the website's set the way it describes the mockups", () => {
-      expect(drawings.sitePosters()[FIRST]?.asks).not.toBe(drawings.mockups()[FIRST]?.asks);
-      expect(drawings.sitePosters()[FIRST]?.asks.trim().length).toBeGreaterThan(SAYS_NOTHING);
-    });
   });
 
   describe("gallery", () => {

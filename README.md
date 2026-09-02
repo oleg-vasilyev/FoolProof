@@ -47,12 +47,12 @@ is what the Confirm button is for; two merges at once are refused with the reaso
 
 `/stats` answers with two PNGs: the chronology of the evening, then the awards.
 Both are below at the size a phone gets them, and both were drawn by the bot's own
-renderer over a sample evening rather than by hand — `node scripts/tools.ts mockups`
+renderer over a sample evening rather than by hand — `node scripts/tools.ts posters`
 redraws them whenever the drawing code changes.
 
 | The chronology — a row per game, a column per player | The awards — at most nine, and the fool last |
 |---|---|
-| [![The chronology poster](docs/mockups/chronology.png)](docs/mockups/chronology.png) | [![The awards poster](docs/mockups/awards.png)](docs/mockups/awards.png) |
+| [![The chronology poster](docs/posters/chronology-en.png)](docs/posters/chronology-en.png) | [![The awards poster](docs/posters/awards-en.png)](docs/posters/awards-en.png) |
 
 `/personal` answers with a third: one player's card for everything they have ever
 played here. Pick a name from the keyboard it offers and it draws the numbers, the
@@ -62,7 +62,7 @@ table get two different cards.
 
 | The player card — six numbers, a career chart, and whichever facts this player earned |
 |---|
-| [![The player card poster](docs/mockups/personal.png)](docs/mockups/personal.png) |
+| [![The player card poster](docs/posters/personal-en.png)](docs/posters/personal-en.png) |
 
 The grid prints the finishing position in every cell, and marks only what an
 ordinary finish is not: drew for last, left the fool, did not play. Under it, each
@@ -76,7 +76,7 @@ Every colour, size and rule behind the two is specified in the [poster design
 system](https://claude.ai/design/p/dfdd20cb-3609-4baa-935d-eb20b8257c2c?file=Durak+Stats+Poster+System.dc.html),
 which lives in Claude Design rather than here and opens only for somebody with
 access to that project. It is not decoration: the two mockups on it are the same
-SVG committed under `docs/mockups/`, and `npm run check` fails when either stops
+SVG committed under `docs/posters/`, and `npm run check` fails when either stops
 matching what the renderer draws. Two skills keep the three in step:
 `refresh-the-pictures` redraws what the repository holds, and
 `update-the-design-page` carries the result back to the page.
@@ -254,14 +254,14 @@ Two parts of it are generated rather than written:
 
 | What | Rebuilt by |
 |---|---|
-| `docs/posters/` — the six pictures the pages show, drawn as WebP at the width they are read at | `node scripts/tools.ts site-posters` |
+| `docs/posters/` — every poster in both languages: SVG, the WebP the pages show at the width they are read at, and a PNG of the English three at the width the bot sends | `node scripts/tools.ts posters` |
 | `docs/styles.computed.css` — Tailwind, minified and committed | `node scripts/tools.ts site-css` |
 
 **`npm run docs:check` fails on either being stale**, and that is the point: a push
 is the deploy, so a forgotten rebuild does not wait to be noticed — it ships. The
-posters are the bot's own renders of the same sample evening as the mockups above,
-English copy with Latin names for one page and Russian for the other, compared
-against what the renderer draws today. The stylesheet is checked the way its
+posters are the bot's own renders of one sample evening — English copy with Latin
+names for one page, Russian for the other, and the English three are the very files
+shown at the top of this README — compared against what the renderer draws today. The stylesheet is checked the way its
 failure actually arrives: every class either page uses has to have a rule in it, so
 adding one and forgetting the rebuild is a red gate rather than an unstyled element
 in production.
@@ -328,7 +328,7 @@ src/
                         a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
 docs/                   the website GitHub Pages serves — everything in here is public
-docs/mockups/           the posters this file shows, drawn by scripts/tools.ts,
+docs/posters/           the posters this file shows, drawn by scripts/tools.ts,
                         served along with the site because they live inside it
 deploy/                 the systemd units a server is installed from, the scripts
                         that put the newest tag live and send the server its

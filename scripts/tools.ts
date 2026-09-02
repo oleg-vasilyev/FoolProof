@@ -4,8 +4,8 @@ import { rasterize } from "#shared/drawing/rasterize.ts";
 import { rootDir } from "#shared/config/env.ts";
 import { repository } from "#shared/repository/repository-instance.ts";
 import { measureAdvances } from "./measure-advances.ts";
-import { refreshDesignPage } from "./design-page.ts";
-import { GALLERY_DIR, MOCKUP_DIR, SITE_POSTER_DIR } from "./drawn-into.ts";
+import { ENGLISH_SUFFIX, refreshDesignPage } from "./design-page.ts";
+import { GALLERY_DIR, POSTER_DIR } from "./drawn-into.ts";
 import { drawnByName, everyDrawing, featuresThatDraw } from "./feature-drawings.ts";
 import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
 import { siteImageOf } from "./site-images.ts";
@@ -30,33 +30,20 @@ interface Tool {
   run(args: readonly string[]): void | Promise<void>;
 }
 
-const drawInto = async (
-  folder: string,
-  drawings: Readonly<Record<string, string>>
-): Promise<void> => {
-  const directory = resolve(rootDir, folder);
+const writePosters = async (): Promise<void> => {
+  const directory = resolve(rootDir, POSTER_DIR);
 
   mkdirSync(directory, { recursive: true });
 
-  for (const [name, svg] of Object.entries(drawings)) {
-    writeFileSync(resolve(directory, `${name}.svg`), svg, "utf8");
-    writeFileSync(resolve(directory, `${name}.png`), await rasterize(svg));
-    console.log(`${folder}/${name}.png`);
-  }
-};
-
-const writeMockups = async (): Promise<void> =>
-  drawInto(MOCKUP_DIR, await drawnByName((offered) => offered.mockups()));
-
-const writeSitePosters = async (): Promise<void> => {
-  const directory = resolve(rootDir, SITE_POSTER_DIR);
-
-  mkdirSync(directory, { recursive: true });
-
-  for (const [name, svg] of Object.entries(await drawnByName((offered) => offered.sitePosters()))) {
+  for (const [name, svg] of Object.entries(await drawnByName((offered) => offered.posters()))) {
     writeFileSync(resolve(directory, `${name}.svg`), svg, "utf8");
     writeFileSync(resolve(directory, `${name}.webp`), await siteImageOf(svg));
-    console.log(`${SITE_POSTER_DIR}/${name}.webp`);
+
+    if (name.endsWith(ENGLISH_SUFFIX)) {
+      writeFileSync(resolve(directory, `${name}.png`), await rasterize(svg));
+    }
+
+    console.log(`${POSTER_DIR}/${name}`);
   }
 };
 
@@ -88,15 +75,12 @@ const forgetChat = (args: readonly string[]): void => {
 };
 
 const TOOLS: Readonly<Record<string, Tool>> = {
-  mockups: {
-    does: `draw the sample evening into ${MOCKUP_DIR}/ as SVG and PNG`,
-    usage: "node scripts/tools.ts mockups",
-    run: writeMockups,
-  },
-  "site-posters": {
-    does: `draw the same evening in both languages into ${SITE_POSTER_DIR}/`,
-    usage: "node scripts/tools.ts site-posters",
-    run: writeSitePosters,
+  posters: {
+    does:
+      `draw the sample evening into ${POSTER_DIR}/ in every language — SVG and WebP for ` +
+      `each, and a PNG of the English set at the width the bot itself sends`,
+    usage: "node scripts/tools.ts posters",
+    run: writePosters,
   },
   "site-css": {
     does: `rebuild ${SITE_CSS} from ${SITE_CSS_SOURCE} and the classes the pages use`,
