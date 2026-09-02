@@ -63,12 +63,6 @@ vi.mock("#scoresheet/render/palette.ts", () => ({
   colourFor: (column: number) => colourForSpy(column),
 }));
 
-const endLabelsSpy = vi.fn();
-
-vi.mock("#scoresheet/render/chronology/chart-end-labels.ts", () => ({
-  endLabels: (sheet: unknown, yOf: unknown) => endLabelsSpy(sheet, yOf),
-}));
-
 vi.mock("#scoresheet/render/percent-label.ts", () => ({
   percentLabel: (share: number) => percentLabelSpy(share),
 }));
@@ -152,7 +146,6 @@ describe("shareChart()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    endLabelsSpy.mockReturnValue([]);
     circleSpy.mockImplementation(() => "<circle/>");
     lineSpy.mockImplementation(() => "<line/>");
     pathSpy.mockImplementation(() => "<path/>");

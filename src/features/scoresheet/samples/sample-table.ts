@@ -11,13 +11,24 @@ import type {
   CareerGame,
   CareerHistory,
   Finalist,
+  PlayerColumn,
   SeriesChronology,
 } from "#shared/repository/repository-contract.ts";
 
 
 const SAMPLE_DATE = "2026-08-06";
 
-const NAMES = ["Олег", "Аня", "Рома", "Дима", "Вероника"];
+const SEATED_AS = [
+  { cyrillic: "Олег", latin: "Oleg" },
+  { cyrillic: "Аня", latin: "Anya" },
+  { cyrillic: "Рома", latin: "Roma" },
+  { cyrillic: "Дима", latin: "Dima" },
+  { cyrillic: "Вероника", latin: "Veronika" },
+];
+
+const NAMES = SEATED_AS.map((seat) => seat.cyrillic);
+
+const LATIN_NAMES = SEATED_AS.map((seat) => seat.latin);
 
 const FIRST_ID = 1;
 
@@ -140,24 +151,38 @@ export const sampleCareer = (): CareerHistory => ({
   games: Array.from({ length: NIGHTS_IN_A_CAREER }, (_, night) => nightOf(night)).flat(),
 });
 
+interface Seated {
+  readonly players: readonly PlayerColumn[];
+}
+
+const renamed = <T extends Seated>(subject: T, names: readonly string[]): T => ({
+  ...subject,
+  players: subject.players.map((player, index) => ({
+    ...player,
+    displayName: names[index] ?? player.displayName,
+  })),
+});
+
+export const englishEvening = (): SeriesChronology => renamed(sampleEvening(), LATIN_NAMES);
+
+export const englishCareer = (): CareerHistory => renamed(sampleCareer(), LATIN_NAMES);
+
 export type Posters = {
   readonly chronology: string;
   readonly awards: string;
   readonly personal: string;
 };
 
-const subjectColumn = (evening: SeriesChronology): number =>
-  colourColumnOf(evening, sampleCareer().players, SAMPLE_SUBJECT);
-
 export const posters = (): Posters => {
-  const evening = sampleEvening();
+  const evening = englishEvening();
+  const history = englishCareer();
   const honours = honoursFor(evening, NO_PAST);
 
   if (honours === null) {
     throw new Error("the sample evening is too short to earn awards — lengthen EXIT_ORDERS");
   }
 
-  const career = careerCard(sampleCareer(), SAMPLE_SUBJECT);
+  const career = careerCard(history, SAMPLE_SUBJECT);
 
   if (career === null) {
     throw new Error("the sample career has no games — check NAMES and EXIT_ORDERS");
@@ -166,6 +191,11 @@ export const posters = (): Posters => {
   return {
     chronology: renderScoresheet(copy, evening, BOT_HANDLE),
     awards: renderAwards(copy, evening, honours, BOT_HANDLE),
-    personal: renderPersonalCard(copy, career, subjectColumn(evening), BOT_HANDLE),
+    personal: renderPersonalCard(
+      copy,
+      career,
+      colourColumnOf(evening, history.players, SAMPLE_SUBJECT),
+      BOT_HANDLE
+    ),
   };
 };

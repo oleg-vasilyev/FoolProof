@@ -7,33 +7,16 @@ import { Locale } from "#shared/locale/locales.ts";
 import { careerCard } from "#scoresheet/domain/career/career-card.ts";
 import { renderPersonalCard } from "#scoresheet/render/personal/personal-svg.ts";
 import { colourColumnOf } from "#scoresheet/render/personal/colour-column.ts";
-import type { CareerHistory, PlayerColumn, SeriesChronology } from "#shared/repository/repository-contract.ts";
+import type { CareerHistory, SeriesChronology } from "#shared/repository/repository-contract.ts";
 import { BOT_HANDLE } from "#scoresheet/samples/sample-handle.ts";
-import { SAMPLE_SUBJECT, sampleCareer, sampleEvening } from "#scoresheet/samples/sample-table.ts";
+import {
+  SAMPLE_SUBJECT,
+  englishCareer,
+  englishEvening,
+  sampleCareer,
+  sampleEvening,
+} from "#scoresheet/samples/sample-table.ts";
 
-
-const LATIN_NAMES = ["Oleg", "Anya", "Roma", "Dima", "Veronika"];
-
-interface Seated {
-  readonly players: readonly PlayerColumn[];
-}
-
-const renamed = <T extends Seated>(subject: T, names: readonly string[]): T => {
-  if (names.length !== subject.players.length) {
-    throw new Error(
-      `LATIN_NAMES has ${String(names.length)} names for ` +
-        `${String(subject.players.length)} players — the English poster would keep a Cyrillic one`
-    );
-  }
-
-  return {
-    ...subject,
-    players: subject.players.map((player, index) => ({
-      ...player,
-      displayName: names[index] ?? player.displayName,
-    })),
-  };
-};
 
 const cardIn = (locale: Locale, evening: SeriesChronology, career: CareerHistory): string => {
   const card = careerCard(career, SAMPLE_SUBJECT);
@@ -74,6 +57,6 @@ const setIn = (
 });
 
 export const sitePosters = (): Readonly<Record<string, string>> => ({
-  ...setIn(Locale.En, renamed(sampleEvening(), LATIN_NAMES), renamed(sampleCareer(), LATIN_NAMES)),
+  ...setIn(Locale.En, englishEvening(), englishCareer()),
   ...setIn(Locale.Ru, sampleEvening(), sampleCareer()),
 });

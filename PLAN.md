@@ -1324,11 +1324,18 @@ column heading, its chart line, the coloured bar beside a name on the awards she
 and every mark on that player's own card therefore agree, and somebody who opens all
 three in one sitting sees one colour throughout.
 
-**Each chart line is also named at its right-hand end**, in the line's own colour,
-with the names parted vertically when two lines finish level and a thin leader run
-back to the line it belongs to. That is what stops colour from carrying the whole
-job of identity: the reader gets the name where they are already looking, instead of
-carrying a hue back to the legend.
+**The legend under the chart is the only place a colour is tied to a name**; a line
+ends in a dot, not in its player's name. Naming each line at its right-hand end was
+built and then taken out again. It read as a third copy of a list the reader already
+had twice, in the very same order — the legend sorts by the final running share, and
+that is the exact number a line ends at — and the 210px kept clear for the names cost
+the plot a seventh of its width, which the legend beneath it never gave up. What the
+removal concedes is real and worth writing down: `colourFor` cycles a palette of ten.
+A game seats at most ten, so inside one game every line has a colour of its own; an
+evening whose seats changed hands can show more than ten players, and there two lines
+share a hue. The legend cannot separate them either, because it keys by colour too —
+so the end labels were covering an ambiguity the palette creates, not earning their
+width. Widening the palette is what would actually fix it.
 
 What this deliberately does not promise is the same colour next Friday. The order is
 the order people arrived in tonight, so it moves when the seating does. Pinning the

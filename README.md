@@ -180,7 +180,8 @@ runs the bot, the gates, their parts, then the two test families.
 Telegram. Everything else runs against the fake one in `e2e/`.
 
 Coverage and mutation write their reports into `reports/`, which is gitignored
-whole — nothing about testing lands next to the source.
+whole — nothing about testing lands next to the source. Anything else that ends up
+there is swept by `node scripts/tools.ts tidy-reports`.
 
 Occasional jobs stay out of that table and live behind one script, which lists
 itself and what each one is for when run with no argument:

@@ -30,7 +30,6 @@ const {
   LEGEND_ROW_PITCH,
   LEGEND_SLOT_MAX,
   LEGEND_WIDTH,
-  NAME_ROOM,
   PLOT_INSET,
   PLOT_LEFT,
   PLOT_RIGHT,
@@ -342,8 +341,12 @@ describe("the page geometry", () => {
 });
 
 describe("the plot geometry", () => {
-  it("should leave the names at the line ends room inside the grid's right edge", () => {
-    expect(GRID_RIGHT - PLOT_RIGHT).toBe(PLOT_INSET + NAME_ROOM);
+  it("should carry the plot out to the grid's right edge, less its own inset", () => {
+    expect(GRID_RIGHT - PLOT_RIGHT).toBe(PLOT_INSET);
+  });
+
+  it("should give the legend below exactly the span the plot occupies", () => {
+    expect(LEGEND_WIDTH).toBe(PLOT_WIDTH);
   });
 
   it("should sit the plot's left edge on the grid's own left edge", () => {

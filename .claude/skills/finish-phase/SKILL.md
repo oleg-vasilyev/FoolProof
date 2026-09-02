@@ -30,6 +30,7 @@ after the review, in their own stages, so checking them here fails on work not
 yet due — and a review finding would force an expensive redraw twice. The line
 still holds where it matters: `check:push` in CI and `check:release` at the tag
 both run `docs:check`.
+Sweep `reports/` first: `node scripts/tools.ts tidy-reports` drops what nothing owns.
 
 ## 1. Lint and types
 
@@ -110,10 +111,11 @@ longer exists — and there is no partial result to salvage, because the report 
 written last. One phase started the changed-file run in the background, took eight
 review findings during it, and had to kill it at fifteen minutes with nothing to show.
 Backgrounding it is right; backgrounding it *before the last edit* is fifteen minutes
-of a machine that could have been running the e2e suite. Everything else can overlap
-with it — writing documents, redrawing pictures, reading a subagent's report — but the
-**e2e suite cannot**: `QUIET_MS` decides the bot has finished, and a machine busy with
-mutants makes renders slow enough to cross it.
+of a machine that could have been running the e2e suite. **Every job that reads the
+whole tree owes the same rule**: redrawing the pictures syncs the design page against
+what the renderer draws, so a sample edited after it buys a second sync. Documents and
+a subagent's report overlap safely; the **e2e suite cannot**: `QUIET_MS` decides the
+bot has finished, and a machine busy with mutants makes renders slow enough to cross it.
 
 Everything about *running* it sits in [running the mutation
 gate](running-the-mutation-gate.md) — the glob that quietly mutates the specs and
@@ -183,9 +185,8 @@ is not part of `npm run check` because it belongs to `e2e/`, not to the app.
 
 ## 5. A review pass over the phase's whole diff
 
-Read `git diff <phase-start>..HEAD` against `CLAUDE.md` — the whole diff at once,
-not the individual commits, because a rule breaks across commits more often than
-inside one.
+Read `git diff <phase-start>..HEAD` against `CLAUDE.md` — the whole diff at once, not
+the individual commits, because a rule breaks across commits more often than inside one.
 
 **This pass is always the `phase-reviewer` subagent, and never a re-read.** It is
 not a size judgement and not something to ask permission for: you cannot review
@@ -452,9 +453,8 @@ A phase's cost is dominated by rework, not by thinking, and the same few mistake
 have produced most of it here: a signature that crossed a layer before it was frozen,
 a new path that silently dropped what the old one also did, a design settled in a
 session that has since ended, a bulk rewrite that reported success over a file it
-never touched. Read [where a phase's budget actually
-goes](where-the-budget-goes.md) while planning one, and again after one cost more
-than it should have.
+never touched. Read [where a phase's budget actually goes](where-the-budget-goes.md)
+while planning one, and again after one cost more than it should have.
 
 ## What to delegate
 

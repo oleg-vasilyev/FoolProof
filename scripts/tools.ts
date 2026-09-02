@@ -9,6 +9,7 @@ import { GALLERY_DIR, MOCKUP_DIR, SITE_POSTER_DIR } from "./drawn-into.ts";
 import { drawnByName, everyDrawing, featuresThatDraw } from "./feature-drawings.ts";
 import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
 import { siteImageOf } from "./site-images.ts";
+import { REPORTS_DIR, tidyReports } from "./tidy-reports.ts";
 
 
 const AFTER_NODE_AND_SCRIPT = 2;
@@ -109,6 +110,11 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     does: `draw every edge of every poster into ${GALLERY_DIR}/ for a human or an agent to look at`,
     usage: "node scripts/tools.ts gallery",
     run: drawGallery,
+  },
+  "tidy-reports": {
+    does: `delete everything under ${REPORTS_DIR}/ that no config, script or agent names`,
+    usage: "node scripts/tools.ts tidy-reports",
+    run: tidyReports,
   },
   advances: {
     does: "measure every glyph a name can carry against the shipped bold face, so text is fitted rather than guessed at",

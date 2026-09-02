@@ -23,15 +23,11 @@ export const PLOT_INSET = 24;
 
 export const PLOT_LEFT = GRID_LEFT;
 
-export const NAME_ROOM = 210;
-
-export const NAME_GAP = 22;
-
-export const LEGEND_WIDTH = GRID_RIGHT - PLOT_INSET - PLOT_LEFT;
-
-export const PLOT_RIGHT = GRID_RIGHT - PLOT_INSET - NAME_ROOM;
+export const PLOT_RIGHT = GRID_RIGHT - PLOT_INSET;
 
 export const PLOT_WIDTH = PLOT_RIGHT - PLOT_LEFT;
+
+export const LEGEND_WIDTH = PLOT_WIDTH;
 
 const HALF = 2;
 
