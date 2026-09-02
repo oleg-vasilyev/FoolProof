@@ -45,6 +45,66 @@
 }
 
 @layer components {
+
+  .deck-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    color: var(--color-muted);
+    transition:
+      border-color 0.15s,
+      color 0.15s;
+  }
+
+  .deck-arrow:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .deck-tab {
+    border: 1px solid transparent;
+    border-radius: 0.625rem;
+    padding: 0.5rem 0.875rem;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-dim);
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
+
+  .deck-tab:hover {
+    color: var(--color-ink);
+  }
+
+  .deck-tab[aria-selected="true"] {
+    border-color: var(--color-line);
+    background-color: var(--color-raised);
+    color: var(--color-ink);
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (min-width: 64rem) {
+    @keyframes deck-in {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    [data-turned] .deck-slide[data-on] {
+      animation: deck-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  }
+
   .eyebrow {
     font-family: var(--font-mono);
     font-size: 13px;

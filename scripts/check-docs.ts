@@ -33,6 +33,7 @@ import {
   scriptsOutOfStep,
 } from "./docs-check/source/source-tree.ts";
 import { imagesOutOfStep, siteCssOutOfStep } from "./docs-check/source/site-pages.ts";
+import { lineEndingsOutOfStep } from "./docs-check/source/line-endings.ts";
 
 
 const NOTHING = 0;
@@ -73,6 +74,7 @@ const complaints = [
   ...designPageOutOfStep(thePosters),
   ...siteCssOutOfStep(),
   ...imagesOutOfStep(),
+  ...lineEndingsOutOfStep(),
 ];
 
 for (const complaint of complaints) {

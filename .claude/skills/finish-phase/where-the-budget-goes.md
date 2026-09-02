@@ -33,14 +33,21 @@ A phase's cost is dominated by rework, not by thinking:
   it.** One session was a command away from "repairing" a gallery fixture back to a
   state a previous session had already tried, caught in review and written up at
   length. Reading cost a minute; the correction would have cost the phase.
-- **A bulk rewrite is a script written to a file and run with `node`** — never a
-  heredoc, which died twice on shell quoting before the first one landed. Anchor on
+- **Any script that edits a file in this repository is written to a file and run with
+  `node`** — a bulk rewrite, a one-line patch, a splice that assembles a page from
+  parts, all of it; never a heredoc, which died twice on shell quoting before the
+  first one landed. The genre is not the index, and indexing on it is what let this
+  rule miss twice: a splice conceived as a *builder* matched neither "bulk" nor
+  "rewrite" and repeated both failures below. Anchor on
   the call as it appears, not on the name: replacing `awardRow(` blindly also rewrote
   `describe("awardRow()")`. **And it reports every replacement it did not make, then
   exits non-zero** — `String.replace` returns the string unchanged when the needle is
   absent, so one script here announced "cases rewritten" over a file it had not
   touched, CRLF against LF-shaped needles, and the lie held until the suite failed
-  with the old case names still in it.
+  with the old case names still in it. **It also takes its base from the commit, not
+  from the working tree**: `git checkout` restores the *index*, so a splice re-run
+  after staging read its own output as the original and landed the section twice —
+  found by a byte budget rather than by anything watching the splice.
 
 **An edit made by a script ends with a lint run, not with a glance.** The editor hook
 lints a file as it is written; a patch applied by a throwaway script gets no such

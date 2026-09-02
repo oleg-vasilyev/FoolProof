@@ -10,3 +10,8 @@
 # Not read by a host, but copied to .env and sent to one — a CRLF checkout would
 # put a carriage return on the end of every value, including the token.
 .env.example text eol=lf
+
+# `docs:check` reads this file and fails a working copy that has drifted from what a
+# rule above demands, so an attribute here is enforced rather than merely declared.
+# It understands a literal path and a `*` standing for part of one folder name; a
+# pattern git allows but it cannot read is refused out loud rather than passed over.

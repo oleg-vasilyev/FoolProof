@@ -123,6 +123,12 @@ describe("selectorFor", () => {
     expect(selectorFor("md:w-1/2")).toBe(".md\\:w-1\\/2");
   });
 
+  it("should escape the brackets and commas an arbitrary value brings", () => {
+    expect(selectorFor("lg:h-[clamp(480px,78vh,820px)]")).toBe(
+      ".lg\\:h-\\[clamp\\(480px\\,78vh\\,820px\\)\\]"
+    );
+  });
+
   it("should leave a plain class alone but for its dot", () => {
     expect(selectorFor("card")).toBe(".card");
   });

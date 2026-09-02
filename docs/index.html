@@ -223,39 +223,70 @@
         a table after Telegram has recompressed them.
       </p>
 
-      <div class="mt-12 grid gap-10 md:grid-cols-2">
-        <figure class="reveal">
-          <img src="posters/chronology-en.webp" width="1048" height="1518" loading="lazy" decoding="async"
-               alt="The chronology poster: a row for each of twelve games and a column for each of five players, every cell printing where that player finished, with a dash for a game they sat out."
-               class="w-full rounded-xl border border-line">
-          <figcaption class="mt-4 text-[16px] leading-relaxed text-muted">
-            <strong class="font-semibold text-ink">The chronology.</strong> A row per game, a
-            column per player. It marks only what an ordinary finish is not: drew for last,
-            left the fool, did not play.
-          </figcaption>
-        </figure>
+      <div class="mt-12 lg:grid lg:grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)] lg:items-start lg:gap-8" data-deck>
+        <div role="tablist" aria-orientation="vertical" aria-label="Which poster to show"
+             class="reveal hidden gap-2 lg:flex lg:flex-col lg:py-8">
+          <button type="button" class="deck-tab text-left" id="poster-tab-1" role="tab" aria-controls="poster-panel-1" aria-selected="true">The chronology</button>
+          <button type="button" class="deck-tab text-left" id="poster-tab-2" role="tab" aria-controls="poster-panel-2" aria-selected="false" tabindex="-1">The awards</button>
+          <button type="button" class="deck-tab text-left" id="poster-tab-3" role="tab" aria-controls="poster-panel-3" aria-selected="false" tabindex="-1">The player's card</button>
+        </div>
 
-        <figure class="reveal">
-          <img src="posters/awards-en.webp" width="1048" height="1593" loading="lazy" decoding="async"
-               alt="The awards poster: nine titles earned over the evening, with the fool of the night on a red banner at the bottom."
-               class="w-full rounded-xl border border-line">
-          <figcaption class="mt-4 text-[16px] leading-relaxed text-muted">
-            <strong class="font-semibold text-ink">The awards.</strong> Thirty-six exist and
-            nine fit, so the card keeps the king and the fool and shares the rest around the
-            table, rarest first — which is what stops every Friday reading the same.
-          </figcaption>
-        </figure>
+        <div class="reveal flex flex-col gap-14 lg:col-start-2 lg:row-start-1 lg:block">
+          <figure class="deck-slide grid gap-6 lg:hidden lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-10 lg:data-[on]:grid"
+                  id="poster-panel-1" role="tabpanel" aria-labelledby="poster-tab-1" data-on>
+            <img src="posters/chronology-en.webp" width="1048" height="1518" loading="lazy" decoding="async"
+                 alt="The chronology poster: a row for each of twelve games and a column for each of five players, every cell printing where that player finished, with a dash for a game they sat out."
+                 class="mx-auto w-full max-w-[560px] rounded-xl border border-line lg:h-[clamp(420px,68vh,600px)] lg:w-auto lg:max-w-none xl:h-[clamp(480px,86vh,760px)]">
+            <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
+              <p class="font-mono text-[13px] text-accent">/stats_chronology</p>
+              <h3 class="mt-3 text-[26px] font-bold tracking-[-0.01em]">The chronology</h3>
+              <p class="mt-4 text-[17px] leading-relaxed text-muted">
+                A row per game, a column per player. It marks only what an ordinary finish is
+                not: drew for last, left the fool, did not play.
+              </p>
+            </figcaption>
+          </figure>
 
-        <figure class="reveal">
-          <img src="posters/personal-en.webp" width="1048" height="1656" loading="lazy" decoding="async"
-               alt="The player card: four rates about one player, a chart of the opponents they beat evening by evening, and the facts that stuck across their whole record."
-               class="w-full rounded-xl border border-line">
-          <figcaption class="mt-4 text-[16px] leading-relaxed text-muted">
-            <strong class="font-semibold text-ink">The player's card.</strong> One player across
-            everything they ever played. Twenty facts compete for four places, so two people at
-            the same table get cards that read nothing alike.
-          </figcaption>
-        </figure>
+          <figure class="deck-slide grid gap-6 lg:hidden lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-10 lg:data-[on]:grid"
+                  id="poster-panel-2" role="tabpanel" aria-labelledby="poster-tab-2">
+            <img src="posters/awards-en.webp" width="1048" height="1593" loading="lazy" decoding="async"
+                 alt="The awards poster: nine titles earned over the evening, with the fool of the night on a red banner at the bottom."
+                 class="mx-auto w-full max-w-[560px] rounded-xl border border-line lg:h-[clamp(420px,68vh,600px)] lg:w-auto lg:max-w-none xl:h-[clamp(480px,86vh,760px)]">
+            <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
+              <p class="font-mono text-[13px] text-accent">/stats_awards</p>
+              <h3 class="mt-3 text-[26px] font-bold tracking-[-0.01em]">The awards</h3>
+              <p class="mt-4 text-[17px] leading-relaxed text-muted">
+                Forty-five exist and nine fit, so the poster keeps the king and the fool and
+                shares the rest around the table, rarest first — which is what stops every
+                Friday reading the same.
+              </p>
+            </figcaption>
+          </figure>
+
+          <figure class="deck-slide grid gap-6 lg:hidden lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-10 lg:data-[on]:grid"
+                  id="poster-panel-3" role="tabpanel" aria-labelledby="poster-tab-3">
+            <img src="posters/personal-en.webp" width="1048" height="1656" loading="lazy" decoding="async"
+                 alt="The player's card: four percentages about one player, a chart of the opponents they beat evening by evening, and the facts that stuck across their whole record."
+                 class="mx-auto w-full max-w-[560px] rounded-xl border border-line lg:h-[clamp(420px,68vh,600px)] lg:w-auto lg:max-w-none xl:h-[clamp(480px,86vh,760px)]">
+            <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
+              <p class="font-mono text-[13px] text-accent">/personal</p>
+              <h3 class="mt-3 text-[26px] font-bold tracking-[-0.01em]">The player's card</h3>
+              <p class="mt-4 text-[17px] leading-relaxed text-muted">
+                One player across everything they ever played. Twenty facts compete for four
+                places, so two people at the same table rarely get cards that read alike.
+              </p>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="reveal hidden justify-end gap-2 lg:col-start-2 lg:row-start-1 lg:mb-8 lg:flex lg:self-end">
+          <button type="button" class="deck-arrow" data-deck-step="-1" aria-label="Previous poster">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
+          <button type="button" class="deck-arrow" data-deck-step="1" aria-label="Next poster">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -440,6 +471,56 @@ document.querySelectorAll('a[href*="t.me/"]').forEach((link) => {
     });
   });
 });
+
+const deck = document.querySelector("[data-deck]");
+if (deck) {
+  const panels = [...deck.querySelectorAll(".deck-slide")];
+  const tabs = [...deck.querySelectorAll(".deck-tab")];
+  const namedBy = panels.map((panel) => panel.getAttribute("aria-labelledby") ?? "");
+  const wideEnough = window.matchMedia("(min-width: 64rem)");
+  let shown = 0;
+  const show = (next) => {
+    shown = (next + panels.length) % panels.length;
+    deck.setAttribute("data-turned", "");
+    panels.forEach((panel, at) => panel.toggleAttribute("data-on", at === shown));
+    tabs.forEach((tab, at) => {
+      tab.setAttribute("aria-selected", String(at === shown));
+      tab.tabIndex = at === shown ? 0 : -1;
+    });
+  };
+  const arrange = () => {
+    panels.forEach((panel, at) => {
+      if (wideEnough.matches) {
+        panel.setAttribute("role", "tabpanel");
+        panel.setAttribute("aria-labelledby", namedBy[at]);
+      } else {
+        panel.removeAttribute("role");
+        panel.removeAttribute("aria-labelledby");
+      }
+    });
+  };
+  tabs.forEach((tab, at) => tab.addEventListener("click", () => show(at)));
+  deck.querySelectorAll("[data-deck-step]").forEach((arrow) => {
+    arrow.addEventListener("click", () => show(shown + Number(arrow.dataset.deckStep)));
+  });
+  deck.querySelector('[role="tablist"]').addEventListener("keydown", (event) => {
+    const onwards = event.key === "ArrowRight" || event.key === "ArrowDown";
+    const backwards = event.key === "ArrowLeft" || event.key === "ArrowUp";
+    const toTheEnds = event.key === "Home" || event.key === "End";
+    if (!onwards && !backwards && !toTheEnds) {
+      return;
+    }
+    event.preventDefault();
+    if (toTheEnds) {
+      show(event.key === "Home" ? 0 : panels.length - 1);
+    } else {
+      show(shown + (onwards ? 1 : -1));
+    }
+    tabs[shown].focus();
+  });
+  wideEnough.addEventListener("change", arrange);
+  arrange();
+}
 </script>
 
 </body>

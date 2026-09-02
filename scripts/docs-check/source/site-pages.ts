@@ -11,7 +11,7 @@ const A_CLASS_ATTRIBUTE = /class="([^"]+)"/g;
 
 const BETWEEN_CLASSES = /\s+/;
 
-const ESCAPED_IN_A_SELECTOR = /[.:[\]/]/g;
+const ESCAPED_IN_A_SELECTOR = /[^\w-]/g;
 
 const A_DRAWN_IMAGE = /<img\s[^>]*>/g;
 

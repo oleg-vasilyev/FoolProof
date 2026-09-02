@@ -1059,7 +1059,7 @@ card is meant to be read at full width. `/stats_chronology` and `/stats_awards`
 send one of the two on their own.
 
 Awards need **five games** in the session. Below that `/stats` sends the chronology
-without the second picture, because a card that fires three of thirty-six rules reads
+without the second picture, because a card that fires three of forty-five rules reads
 as a bug rather than as a thin evening — but it captions the chronology with the games
 still owed, and `/stats_awards` answers in text with the same remainder. **Both name
 what is missing, never the threshold**: a player who has played three games is told to
@@ -1110,7 +1110,7 @@ takes the plain best-by-merit winner, ties broken as before.
 
 #### Two orders, and why there have to be two
 
-The catalogue holds **thirty-six** awards and the card holds **nine**, so most
+The catalogue holds **forty-five** awards and the card holds **nine**, so most
 evenings something is dropped. *Which* nine are chosen and *what order* they print in
 are different questions, and answering both with one list was the flaw the first
 thirteen shipped with: the rules were tried in printing order and the first nine that
@@ -1276,7 +1276,7 @@ kind of question, and the house rule already makes the opener a fact about seati
 whoever sat immediately before the last fool. But `seat_index` stops at the
 repository: `SeriesChronology` carries the players in the order they first appeared,
 not the ring of each game. So a neighbour award costs a repository method, and none
-of the thirty-six needs one.
+of the forty-five needs one.
 
 **CURTAIN CALL** — the fool of the evening's last game — is not in the catalogue at
 all: the bot has no signal that an evening has ended, so mid-session it would crown
