@@ -6,8 +6,9 @@ then draws the evening back as posters.
 
 **[The landing page](https://oleg-vasilyev.github.io/FoolProof/)** is where the
 product is: the screens, all three posters, and the questions a player asks, in
-English and Russian. This file is the technical half — how to run it, how it is laid
-out, and where everything else is written down.
+English and Russian, with [the case study](#the-website) beside it. This file is the
+technical half — how to run it, how it is laid out, and where everything else is
+written down.
 
 One thing has to be said here too, because it explains every decision below. Input
 happens on a Friday night, on a phone, one-handed, between games, so the whole product
@@ -246,9 +247,19 @@ still wrong with it.
 Telegram has no bot store, so nothing outside it can find the bot on its own.
 [oleg-vasilyev.github.io/FoolProof](https://oleg-vasilyev.github.io/FoolProof/) is
 the address a directory listing, a forum post or a search result can point at. It is
-two static pages — English, and Russian under `/ru/` — served by GitHub Pages
-straight out of `docs/` on `main`, so a push is the whole deploy: no workflow, no
-second branch, nothing to keep in step by hand.
+static pages — a landing and a case study, each in English and in Russian under
+`/ru/` — served by GitHub Pages straight out of `docs/` on `main`, so a push is the
+whole deploy: no workflow, no second branch, nothing to keep in step by hand.
+
+**[The case study](https://oleg-vasilyev.github.io/FoolProof/case-study/)** is the
+other thing the site says: how the harness around this bot — `CLAUDE.md`, the
+skills, the agents, the hooks, the lint rules and `docs:check` — was built, broken
+and rebuilt over the 274 commits between 28 July and 2 September 2026, told in six
+eras, with a strip of every commit and charts read from the tree at each one. It was
+written from the git history alone. Both languages share
+`docs/case-study/commit-history-charts.js`, which carries the per-commit numbers and draws
+them; they are a snapshot of the history at commit 274, dated on the page, and
+nothing regenerates them.
 
 Two parts of it are generated rather than written:
 

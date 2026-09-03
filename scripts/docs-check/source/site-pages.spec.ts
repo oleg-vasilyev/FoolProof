@@ -241,7 +241,7 @@ describe("imageComplaints", () => {
 
     expect(said).toHaveLength(ONE_COMPLAINT);
     expect(said[FIRST]).toContain("KB of pictures, past the");
-    expect(said[FIRST]).toContain("220KB a landing page may spend");
+    expect(said[FIRST]).toContain("220KB a page of the site may spend");
     expect(said[FIRST]).toContain("rather than raising this");
   });
 });

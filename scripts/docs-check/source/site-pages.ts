@@ -160,7 +160,7 @@ export const imageComplaints = (
     : [
         ...complaints,
         `${page}: serves ${String(Math.round(served / KILOBYTE))}KB of pictures, past the ` +
-          `${String(A_PAGE_BUDGET / KILOBYTE)}KB a landing page may spend — draw them ` +
+          `${String(A_PAGE_BUDGET / KILOBYTE)}KB a page of the site may spend — draw them ` +
           `smaller or in a leaner format rather than raising this`,
       ];
 };

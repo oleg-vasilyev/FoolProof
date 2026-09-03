@@ -2,6 +2,8 @@
 
 @source "./index.html";
 @source "./ru/index.html";
+@source "./case-study/index.html";
+@source "./ru/case-study/index.html";
 
 @theme {
   --color-ground: #0b0a09;
@@ -152,6 +154,414 @@
   .cmd {
     font-family: var(--font-mono);
     color: var(--color-accent);
+  }
+
+  .prose {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  .prose p + p,
+  .prose ul + p,
+  .prose p + ul {
+    margin-top: 1.1em;
+  }
+
+  .prose strong {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    color: var(--color-accent);
+  }
+
+  .prose ul {
+    padding-left: 1.25rem;
+    list-style: disc;
+  }
+
+  .prose li + li {
+    margin-top: 0.5em;
+  }
+
+  .prose a {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-line);
+    text-underline-offset: 4px;
+  }
+
+  .prose a:hover {
+    color: var(--color-accent);
+    text-decoration-color: var(--color-accent);
+  }
+
+  .prose h3 {
+    margin-top: 2.25rem;
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+  }
+
+  .prose h3 + p {
+    margin-top: 0.75rem;
+  }
+
+  .said {
+    border-left: 3px solid var(--color-accent);
+    padding: 0.25rem 0 0.25rem 1.25rem;
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--color-ink);
+    text-wrap: pretty;
+  }
+
+  .said cite {
+    display: block;
+    margin-top: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-style: normal;
+    color: var(--color-dim);
+  }
+
+  .said cite a {
+    color: var(--color-accent);
+  }
+
+  .hash {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    color: var(--color-accent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .hash:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .tile {
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    background-color: var(--color-card);
+    padding: 0.875rem 1rem;
+  }
+
+  .tile-value {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+    line-height: 1.1;
+  }
+
+  .tile-label {
+    margin-top: 0.25rem;
+    font-size: 13px;
+    color: var(--color-dim);
+  }
+
+  .era-band {
+    position: sticky;
+    top: 4.6rem;
+    z-index: 30;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    background-color: color-mix(in srgb, var(--color-card) 92%, transparent);
+    backdrop-filter: blur(8px);
+    padding: 0.625rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-dim);
+  }
+
+  .era-dot {
+    display: inline-block;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 999px;
+  }
+
+  .then-now {
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    background-color: var(--color-panel);
+    overflow: hidden;
+  }
+
+  .then-now-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .then-now-tab {
+    flex: 1;
+    padding: 0.625rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-dim);
+    transition:
+      background-color 0.15s,
+      color 0.15s;
+  }
+
+  .then-now-tab[aria-pressed="true"] {
+    background-color: var(--color-raised);
+    color: var(--color-ink);
+  }
+
+  .then-now-body {
+    padding: 1rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-muted);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .then-now-body[hidden] {
+    display: none;
+  }
+
+  .then-now-note {
+    border-top: 1px solid var(--color-line);
+    padding: 0.625rem 1.25rem;
+    font-size: 14px;
+    color: var(--color-dim);
+  }
+
+  .chart {
+    border: 1px solid var(--color-line);
+    border-radius: 1rem;
+    background-color: var(--color-card);
+    padding: 1.25rem 1.25rem 1rem;
+  }
+
+  .chart-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  .chart-sub {
+    margin-top: 0.25rem;
+    font-size: 14px;
+    color: var(--color-dim);
+  }
+
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin-top: 0.75rem;
+    font-size: 13px;
+    color: var(--color-muted);
+  }
+
+  .chart-key {
+    display: inline-block;
+    width: 1.25rem;
+    height: 0;
+    border-top: 2px solid currentColor;
+    vertical-align: middle;
+    margin-right: 0.4rem;
+  }
+
+  .chart-plot {
+    position: relative;
+    margin-top: 0.75rem;
+  }
+
+  .chart-plot svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .chart-grid {
+    stroke: var(--color-line);
+    stroke-width: 1;
+  }
+
+  .chart-axis {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--color-dim);
+  }
+
+  .chart-ref {
+    stroke: var(--color-edge);
+    stroke-width: 1;
+    stroke-dasharray: none;
+  }
+
+  .chart-ref-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--color-muted);
+  }
+
+  .chart-line {
+    fill: none;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .chart-dot {
+    stroke: var(--color-card);
+    stroke-width: 2;
+  }
+
+  .chart-cross {
+    stroke: var(--color-edge);
+    stroke-width: 1;
+    pointer-events: none;
+  }
+
+  .chart-tip {
+    position: absolute;
+    z-index: 5;
+    min-width: 11rem;
+    max-width: 18rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.625rem;
+    background-color: var(--color-raised);
+    padding: 0.625rem 0.75rem;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-muted);
+    box-shadow: 0 14px 32px -18px rgb(0 0 0 / 0.9);
+    pointer-events: none;
+  }
+
+  .chart-tip[hidden] {
+    display: none;
+  }
+
+  .chart-tip-head {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-dim);
+  }
+
+  .chart-tip-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .chart-tip-row b {
+    font-weight: 700;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chart-table {
+    margin-top: 0.75rem;
+  }
+
+  .chart-table summary {
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-dim);
+  }
+
+  .chart-table summary:hover {
+    color: var(--color-ink);
+  }
+
+  .chart-table table {
+    margin-top: 0.5rem;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chart-table th,
+  .chart-table td {
+    border-top: 1px solid var(--color-line);
+    padding: 0.35rem 0.5rem;
+    text-align: right;
+    color: var(--color-muted);
+  }
+
+  .chart-table th:first-child,
+  .chart-table td:first-child {
+    text-align: left;
+  }
+
+  .chart-table th {
+    color: var(--color-dim);
+    font-weight: 500;
+  }
+
+  .tl {
+    position: relative;
+  }
+
+  .tl svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .tl-commit {
+    cursor: pointer;
+  }
+
+  .tl-commit rect {
+    transition: opacity 0.15s;
+  }
+
+  .tl-commit:hover rect {
+    opacity: 1;
+  }
+
+  .tl-tag {
+    fill: var(--color-ink);
+  }
+
+  .tl-era-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--color-dim);
+  }
+
+  .pattern-n {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 40rem) {
+    .chart-axis,
+    .chart-ref-label {
+      font-size: 22px;
+    }
+
+    .tl-era-label {
+      display: none;
+    }
   }
 
   .key {

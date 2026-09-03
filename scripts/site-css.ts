@@ -10,7 +10,12 @@ export const SITE_CSS_SOURCE = "docs/styles.source.css";
 
 export const SITE_CSS = "docs/styles.computed.css";
 
-export const SITE_PAGES = ["docs/index.html", "docs/ru/index.html"];
+export const SITE_PAGES = [
+  "docs/index.html",
+  "docs/ru/index.html",
+  "docs/case-study/index.html",
+  "docs/ru/case-study/index.html",
+];
 
 const installedTailwind = (): string =>
   (

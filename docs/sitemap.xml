@@ -13,4 +13,16 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://oleg-vasilyev.github.io/FoolProof/ru/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oleg-vasilyev.github.io/FoolProof/"/>
   </url>
+  <url>
+    <loc>https://oleg-vasilyev.github.io/FoolProof/case-study/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oleg-vasilyev.github.io/FoolProof/case-study/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://oleg-vasilyev.github.io/FoolProof/ru/case-study/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oleg-vasilyev.github.io/FoolProof/case-study/"/>
+  </url>
+  <url>
+    <loc>https://oleg-vasilyev.github.io/FoolProof/ru/case-study/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oleg-vasilyev.github.io/FoolProof/case-study/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://oleg-vasilyev.github.io/FoolProof/ru/case-study/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oleg-vasilyev.github.io/FoolProof/case-study/"/>
+  </url>
 </urlset>
