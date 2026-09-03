@@ -18,19 +18,19 @@ Two rules for this file, so it stays useful:
 
 ## One dependency is held past its own maintainer
 
-`package.json` carries an `overrides` block with a single entry lifting `qs` past
-a denial-of-service advisory. Nothing here depends on `qs`: Stryker pins
-`typed-rest-client ~2.3.0`, and that pins the vulnerable `qs` — so the choice was
-an override or a standing advisory that costs attention at every audit. It is a
-development dependency and never runs on the server, which is why this is a
-tidiness problem rather than a security one.
+`package.json` carries an `overrides` block with two entries lifting `qs` and
+`fast-uri` past their advisories. Nothing here depends on either: Stryker pins
+`typed-rest-client ~2.3.0`, and that pins the vulnerable `qs`; its `ajv` pulls the
+`fast-uri` — so the choice was an override or a standing advisory that costs attention
+at every audit. Both are development dependencies and never run on the server, which
+is why this is a tidiness problem rather than a security one.
 
 **Stryker 10.0.0 carries the same `typed-rest-client ~2.3.0`**, so a major bump does
 not close this, and 2.3.1 still pins `qs 6.15.1` exactly. An override claims a package
 works against a version its author never tested; the mutation run keeps that honest.
 
-**Delete the block when Stryker ships a release that bumps `typed-rest-client`
-itself** — `npm audit` going quiet without it is the check.
+**Delete an entry when Stryker ships a release that bumps `typed-rest-client` or
+`ajv` itself** — the check is whether `npm audit` is quiet once that entry is deleted.
 
 ## A backup that stops happening announces it by silence
 
@@ -46,30 +46,13 @@ backup directory, red past forty days. It is deliberately not done yet, because 
 `/status` to read a path that is not the database — the first time that feature would
 touch the filesystem for a reason other than the one it was built for.
 
-A checkup found the timer has never actually fired on schedule: the only snapshot is a
-hand-made one from 13 August and the first scheduled run is 1 September, so the monthly
-path is untested rather than merely unwatched.
+Two snapshots exist — a hand-made one from 13 August, and the first the timer sent on
+schedule, 1 September (71 games, 16 players) — so the monthly path has fired once and
+is unwatched rather than untested.
 
 **Pick it up when the timer goes back to daily**, which is the same trigger as a
 second table starting to play — or sooner, the first time the answer to "when did
 this last run" is wanted while something is actually broken.
-
----
-
-## The deploy is idempotent against HEAD, and HEAD is not what is running
-
-`foolproof-deploy.sh` decides there is nothing to do by comparing the newest tag
-against `git rev-parse HEAD`, and its `ERR` trap keeps that true through a
-*failure* by putting the previous commit back. What the trap cannot cover is being
-killed outright: the checkout happens before `npm ci` and the restart, so a SIGKILL
-in that window — an OOM kill on a 1 GB VM during an install is the realistic way in —
-leaves HEAD at the new tag with the old code running, and every later run finds
-nothing to do and exits 0. The bot silently never gets the release. The fix is a
-stamp file written *after* the restart, compared instead of HEAD.
-
-**Take it the next time anything touches `deploy/`**, alongside the `--omit=dev`
-change above: same script, same need for somebody awake to watch the deploy that
-follows.
 
 ---
 
@@ -130,19 +113,6 @@ first time the fake is caught disagreeing with a real signature.
 
 ---
 
-## Two `main.spec.ts` cases fail inside Stryker and nowhere else
-
-`should register a handler for SIGTERM` and `should run the same shutdown on SIGTERM`
-pass under `npm test` and are reported failed in every Stryker run, on any `--mutate`
-target — including files with nothing to do with signals. Stryker carries on because
-both cover zero mutants, so the score is honest; what is lost is two cases' worth of
-killing power over `main.ts` and a pair of red lines a reader learns to skip. The
-cause is the runner's handling of a process-level `SIGTERM` listener, not the
-assertions.
-
-**Chase it when a mutant in `main.ts`'s signal wiring survives**, or when the noise
-first makes somebody miss a real failure in that output.
-
 ## Half of drawing a poster still blocks the event loop
 
 `rasterize()` draws through `renderAsync`, which hands the work to a thread and
@@ -160,26 +130,6 @@ busiest hour is one Friday evening.
 **Pick it up when more than a handful of chats use the bot at once**, or the first
 time a tap on a live card visibly waits behind somebody else's `/stats`. The number
 to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
-
----
-
-
-## The server installs the whole toolbox to run two packages
-
-`deploy/foolproof-deploy.sh` runs a plain `npm ci`, which installs devDependencies,
-so every deploy puts Stryker, vitest, eslint, typescript and now a WebP encoder onto
-a production box that imports none of them. `src/` needs exactly two packages —
-`grammy` and `@resvg/resvg-js` — because Node strips types natively and nothing in
-the running bot reaches for a test runner.
-
-`npm ci --omit=dev` is the whole fix and makes deploys smaller and faster. It was not
-taken when the encoder was added: that phase ran overnight while the owner slept, and
-a deploy script is the one place with no automatic gate — a wrong guess there is a bot
-that does not start, found in the morning.
-
-**Take it the next time anything touches `deploy/`**, when somebody is awake to
-watch the deploy that follows — or the first time an install is slow enough to
-notice.
 
 ---
 
@@ -231,8 +181,8 @@ which is the failure this entry exists to make recognisable.
 `roster-keyboard.ts` draws one row per player the chat has ever seated, and nothing
 caps the list. Every other keyboard is bounded by the table — at most ten seats — but
 this one grows with the chat's whole history, and it is a *reply markup*, which the
-Bot API limits by payload size rather than by a documented row count. Nine players
-today, so nothing is close; the real limit has never been measured, and the failure
+Bot API limits by payload size rather than by a documented row count. Nothing is close
+today; the real limit has never been measured, and the failure
 mode is `/personal` refusing to send its screen at all rather than degrading.
 
 **Measure the real ceiling and paginate when a chat passes twenty players** — or
@@ -286,8 +236,8 @@ The chronology cuts a column heading to fit its column, and the legend under the
 is where a reader recovers the whole name. On an evening with eleven or more distinct
 players the legend wraps to three rows, its slots narrow to the same order of width as
 a heading, and both copies of the name are cut — so «Владимир-Вяче…» and
-«Александра-Ко…» appear on the sheet twice and in full nowhere. The ten-player cases
-are unaffected: two legend rows leave slots wide enough.
+«Александра-Ко…» appear on the sheet twice and in full nowhere. The ten-player case in the
+gallery cuts both long names twice as well.
 
 The fix is layout with taste in it — wrap a legend name to a second line, drop the
 share to give the name the width, or print the roster once at full width somewhere —
@@ -438,7 +388,6 @@ could have said so. The trigger decides a split, and `wc -l` answers the rest.
 | `scripts/docs-check/source/site-pages.ts` | CSS coverage, image geometry and a page weight budget — three questions that meet only in the site they are asked about. | The site gains a kind of page, or the weight budget needs reasoning of its own |
 | `scripts/docs-check/source/source-tree.ts` | Holds `scriptsOutOfStep`, whose subject is `package.json` and not the tree, and a crowded-layer rule that names no document at all. | Anything else starts asking `package.json` a question — then the script table is its own file |
 | `scripts/docs-check/documents/document-references.ts` | Two kinds of reference — a link with an anchor and an entry in the spec's contents — read by two separate parsers. A third kind lived here until the flow drawing turned out to gate it already, strictly, in both directions. | A third kind of reference arrives, and is one nothing else already checks |
-| `src/main.ts` | Two `??` defaults left inline in the diagnostics wiring, still the only place in `src/` with branch coverage at 50% (lines 48–49), and the one surviving mutant in the file. `optionalEnv()` took the other two and the empty-means-missing bug with them; these two remain because the fallback runs only when the key is absent, and `main.spec.ts` imports the module once, with the spy returning a value. | A second spec file reaches both branches — vitest isolates files, so no `vi.resetModules()` is involved. What stops it is the price: 180 lines of setup and fifteen `vi.mock` calls duplicated for two branches. Do it once that header is worth extracting for another reason |
 
 ---
 
@@ -575,13 +524,14 @@ toss. A third name was on this list — the phase-log field parsers living under
 ## Three corners of the tooling the mutation gate still cannot see
 
 `scripts/docs-check/` and `scripts/hooks/` are mutated at 80% now — 83.79% over the
-whole folder — and three things that reason sit outside both families:
+whole folder, measured 28 August 2026 — and three things that reason sit outside both families:
 `design-page.ts`, whose `refuse()` branches have no spec; `e2e-changed.ts`, which
 decides which scenarios a diff can reach; and `mutate-changed.ts`, which routes a
 changed file to one of the two runs and is scored by neither.
 
-One module also passes only on the average — `source/env-keys.ts` at 78.02%, short
-by its readers. Those are reachable: mocking `node:fs` lifted `source-tree.ts` from
+One module also passes only on the average — `source/env-keys.ts` at 78.02% the same
+day, short by its readers. Those are reachable: mocking `node:fs` lifted
+`source-tree.ts` from
 60.98% to 92.68%, and took `reading-budgets.ts` 77.78% to 100% the moment a diff
 left it alone with nowhere to hide.
 

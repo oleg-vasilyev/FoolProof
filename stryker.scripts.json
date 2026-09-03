@@ -17,6 +17,7 @@
   "mutate": [
     "scripts/docs-check/**/*.ts",
     "scripts/hooks/**/*.ts",
+    "scripts/check-phase.ts",
     "!scripts/**/*.spec.ts",
     "!scripts/**/*.stub.ts",
     "!scripts/docs-check/source-files.ts",

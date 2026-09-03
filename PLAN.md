@@ -133,9 +133,9 @@ Two consequences worth stating, because both are easy to get wrong:
 
 Player names are user data, not copy: they may be in any script and are stored and
 displayed exactly as typed. Adding a third language means an entry in the language
-table, one more `copy.<code>.ts` per feature, a case in each feature's `copy.ts`, and
-a plural rule if the language needs one — the compiler names every one of those, and
-nothing else changes.
+table, one more `copy.<code>.ts` at the root and in every feature, a case in each
+`copy.ts`, and a plural rule if the language needs one — the compiler names every one
+of those, and nothing else changes.
 
 ---
 

@@ -22,7 +22,7 @@ const changedFile = () => {
 
 // The folders `npm run lint` covers. A file the hook skips is one whose
 // violation waits until the end of the turn instead of surfacing at the edit.
-const LINTED_FOLDERS = ["src", "scripts"];
+const LINTED_FOLDERS = ["src", "scripts", "e2e"];
 
 const file = changedFile();
 const inSource =

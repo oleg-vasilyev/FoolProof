@@ -1,4 +1,4 @@
-import { drawnByName } from "./feature-drawings.ts";
+import { drawnByName, featuresThatDraw } from "./feature-drawings.ts";
 import {
   flowWouldNotRender,
   mermaidLinesCarryingASeparator,
@@ -18,13 +18,18 @@ import {
 import { formsBakedIntoCopy } from "./docs-check/source/copy-word-forms.ts";
 import { advancesOutOfStep } from "./docs-check/source/glyph-advances.ts";
 import { debtWithoutATrigger } from "./docs-check/documents/debt-entry-triggers.ts";
-import { DOCUMENTS } from "./docs-check/document-files.ts";
+import { DOCUMENTS, read } from "./docs-check/document-files.ts";
 import {
   descriptionsOffTheirStage,
   flowOutOfStep,
   flowRepliesLeaveTheLaneTheyWereAskedOf,
   stagesOutOfStep,
 } from "./docs-check/documents/flow-drawing.ts";
+import {
+  TOOLS_SCRIPT,
+  commandsNobodyHas,
+  toolVerbsIn,
+} from "./docs-check/documents/named-commands.ts";
 import { phaseLogsOffTheMap } from "./docs-check/documents/phase-log-paths.ts";
 import { schemaOutOfStep } from "./docs-check/source/running-schema.ts";
 import {
@@ -42,6 +47,11 @@ const FAILED = 1;
 
 const thePosters = await drawnByName((offered) => offered.posters());
 
+const theToolVerbs = new Set([
+  ...toolVerbsIn(read(TOOLS_SCRIPT)),
+  ...(await featuresThatDraw()).flatMap((offered) => Object.keys(offered.tools)),
+]);
+
 const complaints = [
   ...formsBakedIntoCopy(),
   ...brokenLinks(),
@@ -55,6 +65,7 @@ const complaints = [
   ...frontmatterThatWillNotParse(),
   ...debtWithoutATrigger(),
   ...flowOutOfStep(),
+  ...commandsNobodyHas(theToolVerbs),
   ...flowRepliesLeaveTheLaneTheyWereAskedOf(),
   ...flowWouldNotRender(),
   ...mermaidLinesCarryingASeparator(),

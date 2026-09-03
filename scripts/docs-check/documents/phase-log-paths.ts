@@ -40,6 +40,8 @@ const OFF_MAP = "Off-map";
 
 const THE_OWED_FIELDS = [WALKED, SKIPPED, OFF_MAP];
 
+const A_STAGE_NO_PHASE_WALKS = "The checkup";
+
 export const PHASE_LOGS_FOLDER = "logbook/phases";
 
 const THE_PUBLISHED_TRUNK = "origin/main...HEAD";
@@ -68,6 +70,9 @@ export const markersIn = (drawing: string): readonly Marker[] =>
 
 export const stageTitlesIn = (markers: readonly Marker[]): readonly string[] =>
   markers.filter((marker) => marker.kind === A_STAGE).map((marker) => marker.text);
+
+export const isOwedByEveryLog = (title: string): boolean =>
+  !title.toLowerCase().startsWith(A_STAGE_NO_PHASE_WALKS.toLowerCase());
 
 export const citationsIn = (value: string, separator: RegExp): readonly string[] =>
   value.trim() === NOTHING_TO_SAY || value.trim() === NOWHERE
@@ -178,11 +183,12 @@ export const pathComplaints = (
       complaintAbout(file, SKIPPED, citation, markersMatching(citation, markers))
     ),
     ...stageTitlesIn(markers)
+      .filter(isOwedByEveryLog)
       .filter((title) => !accounted.has(title))
       .map(
         (title) =>
           `${file}: says nothing about the "${title}" stage — every stage of ` +
-          `${FLOW_DOCUMENT} is either on the walk or in the skipped list, so that a ` +
+          `${FLOW_DOCUMENT} a phase can walk is either on the walk or in the skipped list, so that a ` +
           `phase which quietly went round one cannot read as a phase that forgot to mention it`
       ),
     ...sameLineTwice.map(

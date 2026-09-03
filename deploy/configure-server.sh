@@ -68,6 +68,15 @@ set -Eeuo pipefail
 kept=$TARGET.previous
 incoming=$TARGET.incoming
 
+# Before anything is moved: on a box where the unit is not installed yet the
+# restart below fails, and the rollback would then blame a configuration that is
+# fine. README.md#running-it-on-a-server installs the unit first for this reason.
+if ! systemctl cat $SERVICE >/dev/null 2>&1; then
+  rm -f "\$incoming"
+  echo "configure: $SERVICE is not installed on the server — install and enable the unit first, then run this again"
+  exit 1
+fi
+
 tidy() {
   rm -f "\$kept" "\$incoming"
 }

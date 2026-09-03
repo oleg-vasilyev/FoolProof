@@ -15,11 +15,15 @@ A laptop that has to be awake on a Friday evening is the weakest part of the set
 and moving off it is cheap: long polling means the host opens **no port, needs no
 domain and no certificate**, so a firewall with nothing but SSH in it is enough.
 Anything that runs Node 24 will do. This one runs on a free Oracle Cloud VM with
-1 GB of memory, where the service idles at about 95 MB — 100.8 MB after half a day
-up, against a 148.8 MB peak — and the heaviest `/stats` peaks at 411 MB.
+1 GB of memory. Measured on 23 August 2026 the service idled at about 95 MB, and the
+heaviest `/stats` peaked at 411 MB; on 3 September it sat at 175 MB a day after a
+restart, with a 205 MB peak and some of it swapped, so the figure is still climbing
+and `systemctl show foolproof -p MemoryCurrent` is the thing to write down weekly.
 
 On the server, once. Ubuntu's own Node is too old, and the unit files name
-`/usr/local/bin`, which is where the tarball puts it:
+`/usr/local/bin`, which is where the tarball puts it. `--omit=dev` because the bot
+imports two packages and the backup script none; a test runner has no business on
+a box this size:
 
 ```bash
 curl -fsSLO https://nodejs.org/dist/v24.19.0/node-v24.19.0-linux-x64.tar.xz
@@ -28,20 +32,46 @@ node -v && npm -v
 
 git clone https://github.com/oleg-vasilyev/FoolProof.git
 cd FoolProof
-npm ci
+npm ci --omit=dev
 ```
 
-The deploy timer and `configure-server.sh` both run `sudo systemctl` **without a
-password prompt**, from a non-interactive session that has nowhere to type one, so
-the account needs that granted once:
+`configure-server.sh` restarts the bot over `sudo systemctl` **without a password
+prompt**, from a non-interactive session that has nowhere to type one, so the account
+needs that one command granted once — that command and no other, because a line
+granting all of `systemctl` lets the same account stop anything on the box:
 
 ```bash
-echo 'ubuntu ALL=(ALL) NOPASSWD: /usr/bin/systemctl' | sudo tee /etc/sudoers.d/foolproof
+echo 'ubuntu ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart foolproof.service' | sudo tee /etc/sudoers.d/foolproof
 sudo chmod 440 /etc/sudoers.d/foolproof
 ```
 
+Copy an existing database to the path `configure-server.sh` names as `DB_PATH`
+before the first start (with its `-wal` and `-shm` sidecars —
+[README.md](../README.md#two-databases-and-only-one-of-them-is-real) says why all
+three); the schema creates whatever is missing, so a file from an older version
+needs no migration.
+
+Then hand it to systemd, **enabled but not yet started**: the configuration is not
+there yet, and it is the next step that starts the bot and watches it come up.
+[`deploy/foolproof.service`](foolproof.service) is the unit, and it assumes the user
+`ubuntu`, the clone at `/home/ubuntu/FoolProof` and npm at `/usr/local/bin/npm` —
+edit those three lines if yours differ:
+
+```bash
+sudo install -m 644 deploy/foolproof.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable foolproof
+```
+
+The unit runs `npm run start:prod`, so **changing how production starts is a change
+to `package.json`**, which a release delivers by itself. Changing the unit is not:
+a deploy never touches `/etc`, so a release that edits `foolproof.service` needs
+that first line run again by hand — the same as the deploy script.
+
 Then send it its configuration, **from your machine**, where `.env` is the copy you
-can edit:
+can edit. The script refuses, before moving anything, on a box where the unit above
+is not installed — a restart there fails, and the rollback would blame a
+configuration that is fine:
 
 ```bash
 cp .env.example .env    # fill in the token and your own id, then
@@ -62,26 +92,11 @@ crash-looping bot healthy. If the wait runs out with the service still up but
 nothing said, the script leaves the new file in place and tells you to read the
 journal — rolling back a configuration that may be fine is the worse mistake.
 
-Copy an existing database to that path before the first start (with its `-wal` and
-`-shm` sidecars — [README.md](../README.md#two-databases-and-only-one-of-them-is-real)
-says why all three); the schema creates whatever is missing, so
-a file from an older version needs no migration.
-
-Then hand it to systemd. [`deploy/foolproof.service`](foolproof.service) is
-the unit, and it assumes the user `ubuntu`, the clone at `/home/ubuntu/FoolProof`
-and npm at `/usr/local/bin/npm` — edit those three lines if yours differ:
+From then on the journal is where the bot talks:
 
 ```bash
-sudo install -m 644 deploy/foolproof.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now foolproof
 journalctl -u foolproof -f
 ```
-
-The unit runs `npm run start:prod`, so **changing how production starts is a change
-to `package.json`**, which a release delivers by itself. Changing the unit is not:
-a deploy never touches `/etc`, so a release that edits `foolproof.service` needs
-that first line run again by hand — the same as the deploy script.
 
 `systemctl restart foolproof` and `systemctl stop foolproof` reach the bot the same
 way `Ctrl+C` does, so the pending edit is still flushed. The unit brings the bot
@@ -103,11 +118,39 @@ git push --follow-tags
 ```
 
 **The server pulls; nothing pushes to it** — the same property long polling gives
-the bot, and worth keeping for the same reason: no deploy key in anyone else's
-hands, no port opened for one, nothing to rotate, and a public repository means the
-check needs no credentials at all. What it costs is that a release takes up to five
-minutes rather than being instant, and that a deploy is reported in the server's
-journal rather than in a browser.
+the bot, and worth keeping for the same reason: no port opened for a push, and
+nothing on the box that could write to the repository. What it costs is that a
+release takes up to five minutes rather than being instant, and that a deploy is
+reported in the server's journal rather than in a browser.
+
+The pull is signed with a **read-only deploy key**, and that is not a nicety: a
+public repository can be fetched anonymously, but GitHub limits anonymous downloads
+and refuses one now and then, and git reports the refusal as a missing username. The
+journal showed 181 such refusals in four days of September 2026, and one release
+went live thirty-two minutes after its push instead of five. The key can only read,
+lives on the server under the `ubuntu` user and outside the clone, and is one line to
+revoke on GitHub. Make it on the server, once:
+
+```bash
+ssh-keygen -t ed25519 -N '' -C foolproof-deploy -f ~/.ssh/foolproof-deploy
+ssh-keyscan github.com >> ~/.ssh/known_hosts
+cat ~/.ssh/foolproof-deploy.pub
+```
+
+Add the printed public key at github.com → the repository → Settings → Deploy keys,
+**without write access**, then point the clone at the SSH address and prove the
+fetch works before the timer depends on it:
+
+```bash
+git -C ~/FoolProof remote set-url origin git@github.com:oleg-vasilyev/FoolProof.git
+GIT_SSH_COMMAND='ssh -i ~/.ssh/foolproof-deploy -o IdentitiesOnly=yes' git -C ~/FoolProof fetch --tags origin
+```
+
+The script names both the key and the known-hosts file outright rather than trusting
+`$HOME`: it runs as root and drops to `ubuntu` on the way, and which home that leaves
+ssh looking under is a question the script need not answer. A clone still on the
+`https://` address is fetched anonymously, as before; an SSH address with no key at
+the named path is refused out loud.
 
 Nothing has to be true before enabling it: a checkout that already contains the
 newest tag is left alone, so a server sitting on unreleased commits is not
@@ -125,6 +168,27 @@ The last line a deploy prints says the bot is running again, and means only that
 systemd has it: a release that starts and then crash-loops inside the supervisor
 looks the same from outside. The journal above is the thing to read.
 
+What is running is recorded in `/home/ubuntu/.foolproof-deployed`, written after the
+restart has been seen to hold, and the script compares the newest tag against that
+rather than against the clone's `HEAD`. The clone can lie: a deploy killed between
+the checkout and the restart — an out-of-memory kill during `npm ci` is the realistic
+way on a 1 GB box — leaves `HEAD` at the new tag with the old code serving, and a
+script trusting `HEAD` would then find nothing to do forever. The stamp cannot name a
+version that was never started, so the next run simply deploys again. A box with no
+stamp yet falls back to `HEAD`, which is right for a clone somebody just made — and
+it is also the way back after checking an older tag out by hand: the stamp still
+names the newer one, so remove it, and the next run compares against what is
+actually checked out.
+
+A fetch that fails is retried twice, twenty seconds apart, and a run that still
+cannot fetch exits non-zero, so it shows here and is the first thing to look at when
+a pushed tag has not gone live:
+
+```bash
+systemctl list-units --failed
+journalctl -u foolproof-deploy -p err --since -1d
+```
+
 Install the script and the two units, and note the **timer** is what gets enabled —
 the service beside it is one deploy, which is what `systemctl start` above runs:
 
@@ -138,7 +202,9 @@ sudo systemctl enable --now foolproof-deploy.timer
 
 The script is installed outside the clone rather than run from it, for the reason
 in `foolproof-deploy.service`. It means a release that changes the deploy script
-needs that first line run by hand; nothing else about a release does.
+needs that first line run by hand; nothing else about a release does. The install
+it runs is `npm ci --omit=dev`, the same as the first one above: the tree the checks
+ran against, minus the tools that ran them.
 
 ### Backups, and getting the games back
 

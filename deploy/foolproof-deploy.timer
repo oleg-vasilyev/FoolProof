@@ -1,8 +1,9 @@
 # How often the server looks for a new tag. Five minutes is chosen against what
 # the delay costs rather than what the check costs: pushing a tag is deliberate,
 # and nobody watching a release minds five minutes. The check itself is one
-# `git fetch --tags` against a public repository and does nothing at all when the
-# newest tag is already the one running.
+# `git fetch --tags`, signed with the read-only deploy key so GitHub does not
+# count it among the anonymous downloads it limits, and does nothing at all when
+# the newest tag is already the one running.
 
 [Unit]
 Description=Look for a newer FoolProof tag every few minutes

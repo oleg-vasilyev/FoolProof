@@ -114,6 +114,11 @@ run `npm run check` and trust it. Spend the pass on what no rule can check:
 
 ## What comes back
 
+**Write the report to `reports/phase-review-<date>.md` as each finding lands, and
+repeat it whole in the final reply.** A run cut short — a usage limit, a crash — then
+leaves what it found instead of nothing, which is the difference between relaunching
+a reviewer and paying for one twice.
+
 Three parts, in this order, and the first is one line:
 
 ```

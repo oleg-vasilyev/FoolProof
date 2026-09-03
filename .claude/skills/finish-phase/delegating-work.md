@@ -21,6 +21,11 @@ here — *an independent scope is delegated on sight* — and the narrowing is t
 owner's, decided against this skill's own ledger after three phases in a row paid the
 same rework. Below the threshold, doing it yourself is cheaper than briefing.
 
+A writing brief names the **shape** wanted — *a check over every README, under a name
+that predicts its exports* — never the file to extend: a brief naming the file has
+chosen the name for an agent that will not question it, and one phase paid the review
+to move the result back out of `flow-drawing.ts`.
+
 **A question is delegated at any size, and the threshold does not apply to it.** That
 number weighs writing a brief against writing the code yourself; a read-only errand has
 no such arithmetic, because the alternative is reading the files in your own window and
@@ -71,33 +76,28 @@ judgement:
   time. Three writers were told to run Stryker, whose sandbox lives *inside* the
   repository — so one run copied another's half-written sandbox and died, and the
   brief needed two corrections mid-flight. Ask what each agent runs, and where that
-  writes; anything exclusive stays with you and runs after they finish. The same hour
-  produced the general form of the mistake twice more, a config flag and a threshold
-  flag both invented rather than read: **a tool's behaviour you did not observe is a
-  guess**, and `--help` costs a second.
+  writes; anything exclusive stays with you and runs after they finish. **A tool's
+  behaviour you did not observe is a guess** — two flags were invented rather than
+  read the same hour, and `--help` costs a second.
 - **Launch parallel agents in one message**, and do not block on one whose files are
   disjoint from yours. Their reports are not shown to the owner — relay what matters.
 - **"Launched" is not "running".** A launch can return success and leave nothing
-  behind: no task, an empty output file, no folder on disk. One designer failed that
-  way and was reported to the owner as still thinking, thirteen minutes late. Follow
-  a launch with a non-blocking status check, and tell an agent that produces files to
-  create its output folder first, so progress is visible on disk instead of inferred.
+  behind — one designer failed that way and was reported to the owner as still
+  thinking, thirteen minutes late. Follow a launch with a non-blocking status check,
+  and tell an agent that produces files to create its output folder first.
 - **Stalled twice means finished — but read the tree before redoing anything.** Take
-  what landed, do the rest yourself, repair what it left half-edited; one phase lost
-  twenty minutes and still hand-wrote five of twelve files, and another nearly
-  rewrote seven specs the agent had in fact delivered ten minutes earlier.
+  what landed and do the rest yourself; one phase nearly rewrote seven specs the
+  agent had in fact delivered ten minutes earlier.
 - **Say what its report must carry, because a hand-briefed agent has no file to hold
   it.** The six named agents each declare a `What comes back`; this one is defined by
   the brief alone, and what a caller cannot reconstruct is **which files it actually
   wrote**, which it was given and did not, why, and anything it touched that the
   brief never named. Ask for that list in those words.
 - **An agent that cannot do something says so instead of doing something adjacent.**
-  Nothing propagates upward here: a report is text, a narrowed pass reads exactly
-  like a completed one, and no gate is watching. Put it in the brief in those words.
+  A narrowed pass reads exactly like a completed one, and no gate is watching.
 - **A model that refuses or dies mid-run is the caller's problem, not the agent's.**
-  Re-run the errand on another model and say in the phase's record which one — what
-  may not be substituted is the property the agent was chosen for, which for every
-  reading pass here is a context that did not write the thing.
+  Re-run the errand and say in the phase's record on which model — what may not be
+  substituted is the property the agent was chosen for: a context that did not write it.
 - **What never leaves your hands:** copy, commit messages and document prose, because
   the voice is the product here, and anything resting on why-context this session
   accumulated — why a threshold is 7 and not 5 — which no brief can carry. The poster

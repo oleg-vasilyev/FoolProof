@@ -11,6 +11,7 @@ import {
 } from "../document-files.ts";
 import { packageScripts } from "../source-files.ts";
 import { descriptionIn } from "./frontmatter-yaml.ts";
+import { A_NAMED_COMMAND } from "./named-commands.ts";
 
 
 const NOTHING = 0;
@@ -18,8 +19,6 @@ const NOTHING = 0;
 const A_NAMED_AGENT = /the ([a-z][a-z0-9-]*[a-z0-9]) agent/g;
 
 const A_NAMED_SKILL = /the `?([a-z][a-z0-9-]*[a-z0-9])`? skill/g;
-
-const A_NAMED_COMMAND = /npm run ([a-z][a-z:-]*[a-z])/g;
 
 const A_STAGE = /^\s*note over [^:]+: Stage (\d+)\./gm;
 

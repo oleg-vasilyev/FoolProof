@@ -82,6 +82,13 @@ sequenceDiagram
         C->>U: the contact sheet for approval — everything to compare, in one image
         U-->>C: approved, or changes
     end
+    opt the change is a page of the site under docs/, not a poster
+        C->>C: build the page and look at it at a phone's width and a laptop's — a page is laid out by the browser, so the contact sheet is the built page itself
+        C->>S: one cold reader per language, given the built page and nothing else — what each sentence says to somebody who has never seen the code
+        S-->>C: the lines no person would say, and the ones that mean nothing without the code
+        C->>U: the built page for approval, at both widths
+        U-->>C: approved, or changes
+    end
     C->>K: the add-a-feature skill
     K-->>C: how a feature is shaped: the layers, where files go, how they are named
     C->>K: the write-a-spec skill
@@ -176,6 +183,10 @@ sequenceDiagram
         C->>R: the copy-reader agent — only what moved since, and the call sites that now exist
         R-->>C: the same verdicts, on the lines that changed under it
         C->>C: take the better lines as written, and where a sentence claimed more than the rule delivers, fix the code behind it
+    end
+    opt the change is a page of the site under docs/
+        C->>S: one cold reader per language over the built page, and a fact-checker whenever the prose retells history — every quote and number taken again from git, after every wave of edits
+        S-->>C: the sentences that read wrong, and the claims git does not back
     end
     opt the change touched what the bot or the site draws
         opt the phase added a poster the gallery has never drawn

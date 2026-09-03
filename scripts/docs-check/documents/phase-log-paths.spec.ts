@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   citationsIn,
+  isOwedByEveryLog,
   logsOffTheMap,
   markersIn,
   markersMatching,
@@ -459,6 +460,58 @@ describe("pathComplaints", () => {
     expect(said).toHaveLength(TWO_COMPLAINTS);
     expect(said.some((complaint) => complaint.includes('names "nowhere"'))).toBe(true);
     expect(said.some((complaint) => complaint.includes('"Release to production" stage'))).toBe(true);
+  });
+});
+
+describe("isOwedByEveryLog", () => {
+  it("should not owe the checkup stage, which no phase walks", () => {
+    expect(isOwedByEveryLog("The checkup — occasional, and it is allowed to fix nothing")).toBe(
+      false
+    );
+  });
+
+  it("should owe every other stage", () => {
+    expect(isOwedByEveryLog("Quality gates")).toBe(true);
+  });
+
+  it("should read the checkup's opening words whatever their case", () => {
+    expect(isOwedByEveryLog("the checkup")).toBe(false);
+  });
+
+  it("should owe a stage that merely mentions the checkup further in", () => {
+    expect(isOwedByEveryLog("Release, then the checkup")).toBe(true);
+  });
+});
+
+describe("a drawing with the checkup stage on it", () => {
+  const drawn = markersIn(
+    [
+      A_DRAWING,
+      "    note over U,R: Stage 5. The checkup — occasional, and it is allowed to fix nothing",
+      "    U->>C: look the whole thing over",
+    ].join("\n")
+  );
+
+  it("should pass a log that leaves the checkup out of both the walk and the skipped list", () => {
+    const log = walking("framing → quality gates → review by → release", "none");
+
+    expect(pathComplaints(A_LOG, log, drawn, STILL_BEING_WRITTEN)).toHaveLength(NOTHING);
+  });
+
+  it("should still name any other stage a log leaves out", () => {
+    const log = walking("framing → quality gates → release", "none");
+
+    const said = pathComplaints(A_LOG, log, drawn, STILL_BEING_WRITTEN);
+
+    expect(said).toHaveLength(ONE_COMPLAINT);
+    expect(said[FIRST]).toContain('says nothing about the "Review by an agent" stage');
+    expect(said[FIRST]).toContain("a phase can walk is either on the walk or in the skipped list");
+  });
+
+  it("should still let a log cite the checkup as skipped", () => {
+    const log = walking("framing → quality gates → review by → release", "the checkup");
+
+    expect(pathComplaints(A_LOG, log, drawn, STILL_BEING_WRITTEN)).toHaveLength(NOTHING);
   });
 });
 

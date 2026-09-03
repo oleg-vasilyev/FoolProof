@@ -44,3 +44,31 @@ export const installedSkills = (): readonly string[] => readdirSync(SKILLS_FOLDE
 
 export const definedAgents = (): readonly string[] =>
   readdirSync(AGENTS_FOLDER).map((file) => file.replace(A_MARKDOWN_FILE, ""));
+
+export const skillDocuments = (): readonly string[] =>
+  installedSkills().flatMap((skill) => [
+    skillFile(skill),
+    ...skillPages(skill).map((page) => join(SKILLS_FOLDER, skill, page)),
+  ]);
+
+export const agentDocuments = (): readonly string[] =>
+  readdirSync(AGENTS_FOLDER)
+    .filter((file) => A_MARKDOWN_FILE.test(file))
+    .map((file) => join(AGENTS_FOLDER, file));
+
+const A_README = "README.md";
+
+const THE_ROOT = ".";
+
+const NOT_WALKED_FOR_READMES = new Set(["node_modules", ".git", "reports", "data"]);
+
+const readmesUnder = (folder: string): readonly string[] =>
+  readdirSync(folder, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.isDirectory()) {
+      return NOT_WALKED_FOR_READMES.has(entry.name) ? [] : readmesUnder(join(folder, entry.name));
+    }
+
+    return entry.name === A_README ? [join(folder, entry.name)] : [];
+  });
+
+export const everyReadme = (): readonly string[] => readmesUnder(THE_ROOT);

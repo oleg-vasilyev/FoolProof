@@ -117,12 +117,12 @@ So the last step of understanding a fault is **grep for its shape, not for its
 symptom** — the wrong call, the missing guard, the assumption — across `src/`,
 `scripts/`, `e2e/`, `.claude/` and the documents. Two traps make that grep lie:
 
-- **`\b` is ASCII-only.** A word boundary does not match around Cyrillic, so a search
-  for a Russian word bounded that way finds nothing and reports it as nothing.
-- **A name that changed has callers no compiler sees.** Skills and documents hold
-  commands that are run by hand. `docs:check` now fails a document naming a path this
-  repository does not have, so that half is mechanical; a changed *name* still rots
-  in silence.
+- **`\b` is ASCII-only**, and `project/no-ascii-word-boundary` refuses a pattern that
+  carries both; a search typed by hand still has to spell the boundary as
+  `(?<![\p{L}\p{N}])`.
+- **A name that changed has callers no compiler sees.** `docs:check` fails a document
+  naming a path, an `npm run` script or a `scripts/tools.ts` verb that does not exist;
+  a changed *function* name still rots in silence.
 
 What the sweep finds goes into the phase's size before any of it is fixed.
 

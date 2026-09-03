@@ -338,6 +338,61 @@ const project = {
         };
       },
     },
+    // JavaScript's `\b` is ASCII-only: around a Cyrillic letter it never matches,
+    // silently, so a pattern that carries both a non-ASCII code point and a word
+    // boundary is one whose boundary half is dead. The lookarounds
+    // `(?<![\p{L}\p{N}])` and `(?![\p{L}\p{N}])` with the `u` flag are the working
+    // spelling. A regex literal and a `RegExp("…")` string are both read; a pattern
+    // built from a variable is invisible, as computed specifiers are to the zones.
+    "no-ascii-word-boundary": {
+      meta: {
+        type: "problem",
+        schema: [],
+        messages: {
+          dead:
+            "\\b is ASCII-only, so it never matches around the non-ASCII characters this " +
+            "pattern carries — spell the boundary as (?<![\\p{L}\\p{N}]) and (?![\\p{L}\\p{N}]) " +
+            "with the u flag.",
+        },
+      },
+      create(context) {
+        const A_WORD_BOUNDARY = /\\b/;
+
+        const A_NON_ASCII_CHARACTER = /[^\u0000-\u007f]/u;
+
+        const isDead = (pattern) =>
+          A_WORD_BOUNDARY.test(pattern) && A_NON_ASCII_CHARACTER.test(pattern);
+
+        const buildsARegExp = (node) =>
+          (node.type === "NewExpression" || node.type === "CallExpression") &&
+          node.callee.type === "Identifier" &&
+          node.callee.name === "RegExp";
+
+        return {
+          Literal(node) {
+            if (node.regex !== undefined && isDead(node.regex.pattern)) {
+              context.report({ node, messageId: "dead" });
+            }
+          },
+          "NewExpression, CallExpression"(node) {
+            if (!buildsARegExp(node)) {
+              return;
+            }
+
+            const [pattern] = node.arguments;
+
+            if (
+              pattern !== undefined &&
+              pattern.type === "Literal" &&
+              typeof pattern.value === "string" &&
+              isDead(pattern.value)
+            ) {
+              context.report({ node: pattern, messageId: "dead" });
+            }
+          },
+        };
+      },
+    },
     // "One control row." What such a row is, and why its two slots never vary,
     // is PLAN.md's "The control row" — including the three shapes this rule
     // cannot see, which stay a reviewer's job. Here is only the enforcement. It
@@ -582,6 +637,7 @@ export default [
       "project/no-comments": "error",
       "project/imports-first": "error",
       "project/blank-lines-after-imports": "error",
+      "project/no-ascii-word-boundary": "error",
     },
   },
   {

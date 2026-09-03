@@ -68,8 +68,8 @@ table get two different cards.
 The grid prints the finishing position in every cell, and marks only what an
 ordinary finish is not: drew for last, left the fool, did not play. Under it, each
 player's running share of the table — 50% is mid-table, 100% is winning every game.
-The awards need five games before there are any. Thirty-six of them exist and nine
-fit, so the card keeps the king and the fool and fills the rest with
+The awards need five games before there are any. More of them exist than the nine
+that fit, so the card keeps the king and the fool and fills the rest with
 [the rarest of what the evening earned](PLAN.md#two-orders-and-why-there-have-to-be-two)
 — which is what stops every Friday reading the same.
 
@@ -158,18 +158,18 @@ runs the bot, the gates, their parts, then the two test families.
 | `npm start` | The same bot in a browser against a fake Telegram — no token, no network, and the one to run here |
 | `npm run check` | Lint, types, documents and tests — the everyday gate to keep at zero |
 | `npm run check:push` | What a push to `main` must not break — lint, types (app and harness), the harness's own tests, documents; the website ships from `main`, the app's tests wait for the tag. **CI runs this on every push** |
-| `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — each test run exactly once. No `docs:check`: documents and pictures are finished after the review, in their own stages |
+| `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — each test run exactly once, stopping at the first red gate and naming the one command that re-runs just it; a green run ends with the same five commands, because an edit re-runs only the gate it touches. No `docs:check`: documents and pictures are finished after the review, in their own stages |
 | `npm run check:release` | The full battery: `check:push`, then coverage, all mutants, every scenario. **CI runs this on every release tag** |
 | `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run docs:check` | Links, anchors, the source tree, the script table above, and that every skill and agent is reachable from `CLAUDE.md` |
+| `npm run docs:check` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists |
 | `npm test` | Vitest, once — units and integration together |
 | `npm run test:unit` | Only the unit specs, where everything outside the file is mocked |
 | `npm run test:integration` | Only `*.integration.spec.ts` — the seams where third-party code runs for real |
 | `npm run test:watch` | Vitest left running while you edit |
 | `npm run test:coverage` | Vitest with coverage; fails below 70% on any metric |
 | `npm run test:mutation:changed` | Stryker over the files that differ from `origin/main`, about a minute |
-| `npm run test:mutation` | Stryker over everything, about five minutes; two runs, the bot at 85% and the tooling at 80% |
+| `npm run test:mutation` | Stryker over everything, about twenty minutes; two runs, the bot at 85% and the tooling at 80% |
 | `npm run e2e` | Whole scenarios against the real bot and a fake Telegram |
 | `npm run e2e:changed` | Only the scenarios the diff against `origin/main` can reach |
 | `npm run e2e:watch` | The same run, slowed down, in one browser tab |

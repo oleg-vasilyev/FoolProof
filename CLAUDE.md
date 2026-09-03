@@ -125,7 +125,7 @@ case, plus `ё` → `е`, and the parser must not assume latin
 the rest compiling and passing, and adding a feature must not require editing
 another one. Deleting one was tested by deleting it, twice: the only failures are in
 `main.ts` and `main.spec.ts`, the composition root and the one spec *supposed* to
-know the roster. **Nothing in `scripts/` may name a feature** — the tooling asks
+know the roster. **Nothing in `scripts/` may import a feature** — the tooling asks
 what features offer through `shared/drawings/drawings-contract.ts` and finds them at
 run time, so a deleted folder simply stops being listed, and `docs:check` reports
 the pictures it left behind instead of failing to compile. The procedure for adding
@@ -210,7 +210,7 @@ composition root, the same job `src/main.ts` does one level up. There is no
 
 Purity and independence are **lint rules, not aspirations**: `domain/`, `render/`
 and `samples/` may not import `grammy`, `node:*` or the rasterizer, one feature may
-not import another, and `scripts/` may name none of them. Specs and stubs sit beside
+not import another, and `scripts/` may import none of them. Specs and stubs sit beside
 their subject, so a feature carries its own tests out of the door with it.
 
 ### The domain layer is a pure reducer
@@ -235,7 +235,8 @@ the website's build both need it and neither may reach into the other's feature.
 `shared/text/html-escape.ts` and
 `scoresheet/render/svg-tags.ts` are each the only place their kind of markup is
 assembled, so a name cannot reach the output unescaped. Geometry belongs in
-`chronology-layout.ts` and `card-metrics.ts`; nothing else computes a coordinate.
+`card-metrics.ts` and each poster's own `*-layout.ts` or `*-metrics.ts` beside it; a
+drawing file never computes a coordinate of its own.
 
 One Bot API fact that is easy to get backwards, and `PLAN.md` explains why:
 **escape user data reaching the message body, never button captions** — Telegram
@@ -314,6 +315,7 @@ judgement. `eslint.config.js` holds the checkable ones, several with no core equ
 | An import belongs in the header, not further down | `project/imports-first` |
 | Two blank lines after the last import | `project/blank-lines-after-imports` (autofixed) |
 | A number must be named by a `const` | `project/named-numbers` |
+| A `\b` beside a non-ASCII character never matches, so the pair is refused | `project/no-ascii-word-boundary` |
 | A state is read from its own table, specs included | `project/named-states` |
 | Only `sqlite-repository.ts` opens the database | `project/one-door-to-the-database` |
 | A screen's way off and way on are drawn in one place | `project/one-control-row` |

@@ -27,6 +27,11 @@ is to find what a green pipeline cannot see.
    go, number the files, and let the report cite only them.
 3. **When a fact cannot be established, record it as a risk under the worst
    assumption and mark it `UNVERIFIED`.** Never guess in the project's favour.
+   And a finding of the shape *nothing covers X* — no scenario, no spec, no gate — is
+   read against the skill that owns that kind of artifact before it is written:
+   `write-an-e2e-scenario` says in so many words that `/start` earns no scenario, and
+   a checkup that reported it as the one uncovered command sent a phase to write
+   what a rule forbids.
 4. **Fix nothing.** The audit is read-only with respect to the working tree and
    the branch. Experiments run in a fresh clone under a temp directory, never in
    `D:\Temp\FoolProof` itself. The only writes allowed in the main tree are
@@ -144,10 +149,10 @@ actually is, and a verdict of *drop the number* / *date it* / *it earns its plac
 summary.** That line is not documentation about the file — it is what decides
 whether the file is ever opened, so a wrong one is worse than wrong prose: the
 corrected body is never read because nothing loads it. `docs:check` now proves
-each skill and agent is *named* somewhere in `CLAUDE.md`, which is reachability
-only; whether it fires at the right **moment** is yours. For every skill and agent,
-lay three things side by side — the `description:`, the row in `CLAUDE.md`'s
-routing table, and the stage in `DEVELOPMENT-FLOW.md` that names it — and ask:
+the flow drawing reaches every skill and agent and that each description names its
+own stage; whether it fires at the right **moment** is yours. For every skill and
+agent, lay two things side by side — the `description:` and the step in
+`DEVELOPMENT-FLOW.md` that reaches for it — and ask:
 
 - **Does the description fire when the drawing calls for it?** A skill the flow
   consults while framing a feature, described as something to use at the end,
@@ -158,7 +163,7 @@ routing table, and the stage in `DEVELOPMENT-FLOW.md` that names it — and ask:
   flow consults it a stage earlier, while interfaces are still being frozen.
 - **Does it name a command or a gate that still exists?** `refresh-the-pictures`
   pointed at a report `npm run check` produced and the phase loop no longer does.
-- **Does the routing row promise what the description delivers?** A row saying
+- **Does the step promise what the description delivers?** A step saying
   "closing a phase" and a description saying "any list of changes" are two rules,
   and a reader gets whichever they opened first.
 - **Is anything reachable only by luck?** An agent named in no document runs only
@@ -173,11 +178,10 @@ retrospective's sixth question asks what each phase made obsolete, so a rule tha
 today is caught — but only today's. Every rule written before that question existed
 has never been asked, and nothing else will ever ask: a phase reads a skill to obey
 it, not to audit it. That backlog is this checkup's, and it is far too large for one
-visit, so take **one skill or agent per checkup**, in the order `CLAUDE.md`'s routing
-table lists them, continuing after the one the previous report names. That order is
-held by nothing — `docs:check` proves each file is named in `CLAUDE.md`, not where —
-so when the named one has been deleted or moved, take the nearest row after where it
-stood, and let a file added mid-cycle wait for the next lap. Rule by rule:
+visit, so take **one skill or agent per checkup**, in the order `DEVELOPMENT-FLOW.md` first
+reaches for them, continuing after the one the previous report names. When the named
+one has been deleted, take the next the drawing reaches for after where it stood, and
+let a file added mid-cycle wait for the next lap. Rule by rule:
 
 - **Is a machine already enforcing it?** A lint rule, a `docs:check` complaint or a
   gate that fires on the same fault makes the paragraph a second copy — and a reader
@@ -310,7 +314,10 @@ while its specs are green is a defect of the test system, recorded separately.
 
 Secrets: scan the working tree AND the full git history (gitleaks/trufflehog
 if available, otherwise targeted greps for token shapes, `BOT_TOKEN=`,
-key-material headers) — generated projects commit keys "for a minute".
+key-material headers) — generated projects commit keys "for a minute". The
+working-tree grep excludes `.env*` (`--exclude='.env*'`): the local `.env` holds the
+real token on purpose, and a match there prints it into the report, which is the red
+line. One checkup did exactly that.
 Dependencies: `npm audit`, abandoned packages, names that look like typos of
 real ones. Application level: which commands are operator-gated and whether the
 gate holds (`OPERATOR_TG_ID`), what a hostile group member can reach through

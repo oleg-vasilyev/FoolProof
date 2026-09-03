@@ -166,6 +166,15 @@ describe("seating-plan", () => {
       expect(transition).toEqual({ outcome: Outcome.Seated, seats: [ROMA, OLEG, KIM, ANYA] });
     });
 
+    it("should skip a tapped player the roster no longer names, rather than seat a blank", () => {
+      const transition = applySeating(
+        planOf(AT_THE_TABLE, [ANYA.playerId, STRANGER_ID, KIM.playerId]),
+        { kind: ActionKind.Confirm }
+      );
+
+      expect(transition).toEqual({ outcome: Outcome.Seated, seats: [ANYA, KIM, OLEG, ROMA] });
+    });
+
     it("should refuse to seat a table with a seat still to be chosen", () => {
       const transition = applySeating(planOf(AT_THE_TABLE, [ANYA.playerId, KIM.playerId]), {
         kind: ActionKind.Confirm,

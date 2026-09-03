@@ -1,6 +1,7 @@
 #!/bin/sh
 #
-# Keep DEVELOPMENT-FLOW.md honest in the two ways a machine can check.
+# Keep DEVELOPMENT-FLOW.md and the logbook honest in the three ways a machine can
+# check.
 #
 # It is the owner's map of how this product gets built. The retrospective may
 # redraw it without asking — stalling a finished phase on a decision already
@@ -16,11 +17,33 @@
 # hooks, the CI. Editing the prose or the colours around the drawing is not
 # that, and is not asked for either.
 #
+# The third gate is about the logbook rather than the drawing. A phase that
+# closes with a 'Retro:' or 'Gates:' paragraph has been through its retrospective,
+# and the retrospective writes logbook/phases/<date>-<slug>.md before the commit —
+# three of twelve phases in one week carried the paragraph and staged no log, and
+# the checkup that counts the logs had nothing to count. The log is new by
+# definition: one file per phase, never an edit to an older one.
+#
 # Installed by npm install: prepare points core.hooksPath at this folder.
 
 message_file="$1"
 
 staged=$(git diff --cached --name-only)
+
+if grep -qE '^(Retro|Gates):' "$message_file"; then
+  new_logs=$(git diff --cached --name-only --diff-filter=A -- logbook/phases/)
+
+  if [ -z "$new_logs" ]; then
+    echo "commit-msg: this message closes a phase and no phase log is staged with it."
+    echo
+    echo "A 'Retro:' or 'Gates:' paragraph says the retrospective ran, and the"
+    echo "retrospective writes the log before the commit — a new file under"
+    echo "logbook/phases/, named <date>-<slug>.md after this commit's title, in the"
+    echo "format logbook/README.md gives. Stage it with the code it describes; a phase"
+    echo "whose log is written later is one the checkup counts as never logged."
+    exit 1
+  fi
+fi
 
 if ! echo "$staged" | grep -q '^DEVELOPMENT-FLOW\.md$'; then
   exit 0

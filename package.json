@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "engines": {
-    "node": ">=24"
+    "node": ">=24.2"
   },
   "imports": {
     "#app/*": "./src/*",
@@ -22,7 +22,7 @@
     "start:prod": "node --env-file=.env.production src/supervisor.ts",
     "check": "npm run lint && npm run typecheck && npm run docs:check && npm run test",
     "check:push": "npm run lint && npm run typecheck && npm run e2e:typecheck && npm run e2e:test && npm run docs:check",
-    "check:phase": "npm run lint && npm run typecheck && npm run test:coverage && npm run test:mutation:changed && npm run e2e:changed",
+    "check:phase": "node scripts/check-phase.ts",
     "check:release": "npm run check:push && npm run test:coverage && npm run test:mutation && npm run e2e",
     "lint": "eslint src scripts e2e",
     "lint:fix": "eslint --fix src scripts e2e",
@@ -42,7 +42,8 @@
     "e2e:typecheck": "tsc -p e2e --noEmit && tsc -p e2e/pages --noEmit"
   },
   "overrides": {
-    "qs": "^6.15.2"
+    "qs": "^6.16.0",
+    "fast-uri": "^3.1.6"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

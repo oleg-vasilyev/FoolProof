@@ -53,6 +53,9 @@ through. `Path:` and `Skipped:` say which of them this phase actually walked, an
 between them they must name **every stage in the drawing** — a stage in neither is
 the one failure this field exists to make impossible, because a phase that quietly
 went round a stage and a phase that simply did not mention it read identically.
+The checkup stage is the one exemption: it runs between phases and is never a step of
+one, so a log owes it on neither side — every log naming it under `Skipped:` was the
+rule reading a stage no phase can walk as one every phase went round.
 
 **A citation is the opening words of a line in the drawing** — enough of them to fit
 one line and no more. That line may be a stage (`framing`, `quality gates`) or a
@@ -121,7 +124,9 @@ What is actually knowable:
   is only a stand-in for it, right when the phase began where the last one ended and
   wrong otherwise: one phase reported 3h31m that way for 1h08m of work, the difference
   being an unrelated errand between the two commits. The end is the final commit's own
-  `%cI`. `date +%F` is a date with no time in it and cannot produce a duration — the
+  `%cI`. **So wall clock may not be `not measured` when both ends are in the
+  transcript** — the opening message carries a time, and `git log --format=%cI -1`
+  gives the second the moment the phase commits. `date +%F` is a date with no time in it and cannot produce a duration — the
   first version of this page recommended it anyway.
 
 `Found by:` is the field the checkup was built for and the easiest to fill in the

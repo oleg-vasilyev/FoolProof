@@ -13,7 +13,8 @@ const A_FENCE = /^\s*```/;
 
 const A_FIELD = /^([A-Z][A-Za-z-]*):[ \t]*(.*)$/;
 
-const A_HEDGE_BEFORE_A_NUMBER = /(?:[~≈]|\b(?:about|roughly|around|approx[a-z]*)\b\s+)\d/i;
+const A_HEDGE_BEFORE_A_NUMBER =
+  /(?:[~≈]|(?<![\p{L}\p{N}])(?:about|roughly|around|approx[a-z]*)(?![\p{L}\p{N}])\s+)\d/iu;
 
 const A_NUMBER_LEFT_VAGUE = /\d\s*-?ish\b/i;
 
