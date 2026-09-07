@@ -5,24 +5,26 @@ Asked:      «нужна команда, которая для текущего 
             чтобы Рома стал Романи» · «согласен по всем трём, попутно закрой merge —
             начинай фазу»
 Kind:       feature
-Ran:        ≈1h10m (2026-09-07T11:20Z, the size line, → 2026-09-07T12:30Z, this log) ·
-            Fable 5.1 throughout · 993,480 subagent tokens (plan-reviewer 98,273 ·
-            copy-reader 33,889 · render writer 101,502 · bot writer 104,450 · wiring
-            writer 96,887 · phase-reviewer 131,281 · retrospective fork 427,198)
+Ran:        56m (2026-09-07T11:34Z, the plan file written, → 2026-09-07T12:30Z, this
+            log; the framing before the plan file not measured) · Fable 5.1 throughout ·
+            993,480 subagent tokens (plan-reviewer 98,273 · copy-reader 33,889 · render
+            writer 101,502 · bot writer 104,450 · wiring writer 96,887 · phase-reviewer
+            131,281 · retrospective fork 427,198)
 Path:       Framing the task and the mockup → check the tech debt → every question at
             once, before any work → the size of the phase in one line → the
             add-a-feature skill → the write-a-spec skill → the add-repository-method
-            skill → freeze the interfaces → the plan-reviewer agent → the finding,
-            while nothing is written yet → Writing the code and the tests → write both
-            copy tables first → the copy-reader agent → briefs to every subagent in one
-            go → Quality gates → the finish-phase skill → Review by an agent that did
-            not write the diff → the phase-reviewer agent → the write-an-e2e-scenario
-            skill → Retrospective — fixing the process and the documents → the
-            retrospective skill → npm run docs:check → Release to production → the
-            write-a-commit skill → npm version with the release message
-Skipped:    the fix-a-bug skill · the poster-designer agent · one cold reader per
-            language, given the built page · Reading every sentence, then syncing every
-            picture (no table moved after stage 2, no drawing changed) · the
+            skill → now, knowing the rules, freeze the interfaces → the plan-reviewer
+            agent → the finding, while nothing is written yet → Writing the code and
+            the tests → write both copy tables first → the copy-reader agent — the
+            finished sentences and the signatures they will be called from → briefs to
+            every subagent in one go → Quality gates → the finish-phase skill → Review
+            by an agent that did not write the diff → the phase-reviewer agent → the
+            write-an-e2e-scenario skill → Retrospective — fixing the process and the
+            documents → the retrospective skill → npm run docs:check → Release to
+            production → the write-a-commit skill → npm version with the release message
+Skipped:    reproduce it on the platform it happened on · the poster-designer agent ·
+            one cold reader per language, given the built page · the copy-reader agent
+            — only what moved since, and the call sites that now exist · the
             refresh-the-pictures skill · the update-the-design-page skill · the
             skill-auditor agent
 Off-map:    the copy tables were written and read while the plan-reviewer was still
