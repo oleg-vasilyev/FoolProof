@@ -36,8 +36,12 @@ An exclusion added to the config is not in force until you have found everything
 else that decides the same thing; this one was silently ignored for a whole run:
 
 ```
-npx stryker run --mutate "src/features/<x>/*.ts,!src/**/*.spec.ts" --reporters clear-text
+npx stryker run --mutate "src/features/<x>/*.ts,!src/**/*.spec.ts" --reporters clear-text,json
 ```
+
+Keep `json` in that list: with `clear-text` alone the `mutation.json` on disk is the
+*previous* run's, and a survivor triaged off it reads tests that no longer exist. One
+phase paid a whole extra Stryker run to learn that its new cases had been counted.
 
 Stryker will otherwise mutate `cell-face.spec.ts`, where almost every mutant
 survives because nothing tests the tests — one phase read a 55% total off a run

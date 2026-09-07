@@ -8,6 +8,7 @@ import { ApiRetryStub } from "#shared/telegram/api-retry.stub.ts";
 import { BotClientOptionsStub } from "#shared/telegram/bot-client-options.stub.ts";
 import { LiveGameFeatureStub } from "#live-game/live-game-feature.stub.ts";
 import { MergeNamesFeatureStub } from "#merge-names/merge-names-feature.stub.ts";
+import { ReplaceNamesFeatureStub } from "#replace-names/replace-names-feature.stub.ts";
 import { ScoresheetFeatureStub } from "#scoresheet/scoresheet-feature.stub.ts";
 import { DiagnosticsFeatureStub } from "#diagnostics/diagnostics-feature.stub.ts";
 import { LanguageFeatureStub } from "#language/language-feature.stub.ts";
@@ -75,6 +76,8 @@ const liveGame = new LiveGameFeatureStub();
 
 const mergeNames = new MergeNamesFeatureStub();
 
+const replaceNames = new ReplaceNamesFeatureStub();
+
 const scoresheet = new ScoresheetFeatureStub();
 
 const diagnostics = new DiagnosticsFeatureStub();
@@ -86,6 +89,7 @@ const chatLocale = new ChatLocaleStub();
 const INSTALLED = [
   liveGame.feature,
   mergeNames.feature,
+  replaceNames.feature,
   scoresheet.feature,
   diagnostics.feature,
   language.feature,
@@ -147,6 +151,8 @@ vi.mock("#shared/telegram/bot-client-options.ts", () => clientOptions.module);
 vi.mock("#live-game/live-game-feature.ts", () => liveGame.module);
 
 vi.mock("#merge-names/merge-names-feature.ts", () => mergeNames.module);
+
+vi.mock("#replace-names/replace-names-feature.ts", () => replaceNames.module);
 
 vi.mock("#scoresheet/scoresheet-feature.ts", () => scoresheet.module);
 
@@ -210,6 +216,10 @@ describe("main.ts", () => {
 
   it("should hand the merge feature the real repository", () => {
     expect(mergeNames.depsGiven()?.repo).toBe(repository.stub);
+  });
+
+  it("should hand the replace feature the real repository", () => {
+    expect(replaceNames.depsGiven()?.repo).toBe(repository.stub);
   });
 
   it("should install every feature", () => {

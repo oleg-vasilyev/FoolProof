@@ -1,0 +1,119 @@
+import { describe, expect, it } from "vitest";
+import { LOCALES, Locale } from "#shared/locale/locales.ts";
+import { copy as english } from "#replace-names/copy.en.ts";
+import { copy as russian } from "#replace-names/copy.ru.ts";
+import { copyIn } from "#replace-names/copy.ts";
+
+
+const MARKER = "«marker»";
+
+const THE_WAY_OFF = "🔴";
+
+const THE_WAY_ON = "🟢";
+
+const MONTHS_IN_A_YEAR = 12;
+
+const opensWith = (caption: unknown, mark: string): string => String(caption).slice(0, mark.length);
+
+const FIRST_OF_A_PAIR = "a";
+
+const SECOND_OF_A_PAIR = "b";
+
+const halfOf = (index: number, half: string): string => `${MARKER}${String(index)}${half}`;
+
+const argumentsFor = (arity: number): readonly (readonly string[])[] =>
+  Array.from({ length: arity }, (_unused, index) => [
+    halfOf(index, FIRST_OF_A_PAIR),
+    halfOf(index, SECOND_OF_A_PAIR),
+  ]);
+
+describe("copyIn()", () => {
+  it("should hand back the English table for English", () => {
+    expect(copyIn(Locale.En)).toBe(english);
+  });
+
+  it("should hand back the Russian table for Russian", () => {
+    expect(copyIn(Locale.Ru)).toBe(russian);
+  });
+});
+
+describe.each(LOCALES)("the %s copy table", (locale) => {
+  const copy: Record<string, unknown> = copyIn(locale);
+
+  it("should know which language it is", () => {
+    expect(copy.locale).toBe(locale);
+  });
+
+  it("should open the way off the screen with the one red mark", () => {
+    expect(opensWith(copy.buttonCancel, THE_WAY_OFF)).toBe(THE_WAY_OFF);
+  });
+
+  it("should open every way on with the one green mark, whichever screen draws it", () => {
+    for (const caption of [copy.buttonConfirm]) {
+      expect(opensWith(caption, THE_WAY_ON)).toBe(THE_WAY_ON);
+    }
+  });
+
+  it("should leave no key without copy, however deep the table goes", () => {
+    const walk = (value: unknown, path: string): void => {
+      if (typeof value === "string") {
+        expect(value, path).not.toBe("");
+
+        return;
+      }
+
+      if (typeof value === "object" && value !== null) {
+        for (const [key, nested] of Object.entries(value)) {
+          walk(nested, `${path}.${key}`);
+        }
+      }
+    };
+
+    walk(copy, "copy");
+  });
+
+  it("should interpolate every argument every copy function is given", () => {
+    for (const [key, value] of Object.entries(copy)) {
+      if (typeof value !== "function") {
+        continue;
+      }
+
+      const shapes: Record<string, unknown> = english;
+      const master = shapes[key];
+      const arity = typeof master === "function" ? master.length : 0;
+      const given = argumentsFor(arity);
+      const written = String((value as (...args: unknown[]) => string)(...given));
+
+      expect(written, `${key} wrote nothing`).not.toBe("");
+      expect(written, `${key} wrote nothing`).not.toBe("undefined");
+
+      for (const [index] of given.entries()) {
+        expect(written, `${key} dropped argument ${String(index)}`).toContain(
+          halfOf(index, FIRST_OF_A_PAIR)
+        );
+        expect(written, `${key} dropped argument ${String(index)}`).toContain(
+          halfOf(index, SECOND_OF_A_PAIR)
+        );
+
+        expect(
+          written,
+          `${key} ran the two halves of argument ${String(index)} together`
+        ).not.toContain(`${halfOf(index, FIRST_OF_A_PAIR)}${halfOf(index, SECOND_OF_A_PAIR)}`);
+      }
+    }
+  });
+
+  it("should give the counted noun all three forms", () => {
+    expect(copy.gameForms).toEqual(
+      expect.objectContaining({
+        one: expect.any(String),
+        few: expect.any(String),
+        many: expect.any(String),
+      })
+    );
+  });
+
+  it("should name every month of the year, so a date is never drawn without one", () => {
+    expect(copy.months).toHaveLength(MONTHS_IN_A_YEAR);
+  });
+});

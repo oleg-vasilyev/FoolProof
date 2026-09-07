@@ -72,6 +72,7 @@ describeScenario("/help and the / menu agree", (chat) => {
       "next_with",
       "next_without",
       "merge",
+      "replace",
       "stats",
       "stats_chronology",
       "stats_awards",

@@ -1,7 +1,8 @@
+import { NameProblem } from "#shared/table/name-problems.ts";
+
+
 export const Problem = {
-  Empty: "empty",
-  Duplicates: "duplicates",
-  TooLong: "too_long",
+  ...NameProblem,
   TooFew: "too_few",
   TooMany: "too_many",
   UnknownNames: "unknown_names",

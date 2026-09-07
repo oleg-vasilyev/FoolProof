@@ -1,6 +1,7 @@
 import { Bot } from "grammy";
 import { createLiveGameFeature } from "#live-game/live-game-feature.ts";
 import { createMergeNamesFeature } from "#merge-names/merge-names-feature.ts";
+import { createReplaceNamesFeature } from "#replace-names/replace-names-feature.ts";
 import { createScoresheetFeature } from "#scoresheet/scoresheet-feature.ts";
 import { createDiagnosticsFeature } from "#diagnostics/diagnostics-feature.ts";
 import { createLanguageFeature } from "#language/language-feature.ts";
@@ -40,6 +41,7 @@ const publishMenu = (chatId: number, locale: Locale): Promise<void> =>
 const features = [
   createLiveGameFeature({ repo: repository, api: bot.api, log, localeIn }),
   createMergeNamesFeature({ repo: repository, localeIn }),
+  createReplaceNamesFeature({ repo: repository, localeIn }),
   createScoresheetFeature({ repo: repository, localeIn }),
   createDiagnosticsFeature({
     repo: repository,

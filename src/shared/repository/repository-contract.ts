@@ -108,6 +108,27 @@ export interface RosterRepository {
   mergePlayers(keeperId: number, absorbedIds: readonly number[]): void;
 }
 
+export interface Evening {
+  startedOn: string;
+  firstGameId: number;
+  gameIds: readonly number[];
+  players: readonly PlayerTally[];
+}
+
+export interface ReplaceRepository {
+  liveCardInChat(chatId: number): CardRecord | null;
+  latestEvening(chatId: number): Evening | null;
+  playersInChat(chatId: number): readonly PlayerRecord[];
+  createPlayer(chatId: number, displayName: string): PlayerRecord;
+  replaceInGames(
+    chatId: number,
+    gameIds: readonly number[],
+    fromPlayerId: number,
+    toPlayerId: number
+  ): void;
+  forgetUnplayedPlayers(chatId: number): void;
+}
+
 export interface ScoresheetRepository {
   seriesChronology(chatId: number): SeriesChronology | null;
   careerHistory(chatId: number): CareerHistory | null;
@@ -160,6 +181,7 @@ export interface MaintenanceRepository {
 export interface Repository
   extends CardRepository,
     RosterRepository,
+    ReplaceRepository,
     ScoresheetRepository,
     DiagnosticsRepository,
     LocaleRepository,

@@ -4,6 +4,7 @@ import type {
   CareerHistory,
   ChatLocaleChoice,
   ChatSummary,
+  Evening,
   Finalist,
   ForgottenChat,
   GameRecord,
@@ -47,6 +48,8 @@ export class RepositoryStub implements Repository {
   public rosterInChatSpy = vi.fn();
   public playedTogetherSpy = vi.fn();
   public mergePlayersSpy = vi.fn();
+  public latestEveningSpy = vi.fn();
+  public replaceInGamesSpy = vi.fn();
   public liveCardsSpy = vi.fn();
   public cardByIdSpy = vi.fn();
   public lastGameSpy = vi.fn();
@@ -78,6 +81,7 @@ export class RepositoryStub implements Repository {
     this.liveCardInChatSpy.mockReturnValue(null);
     this.rosterInChatSpy.mockReturnValue([]);
     this.playedTogetherSpy.mockReturnValue(false);
+    this.latestEveningSpy.mockReturnValue(null);
     this.liveCardsSpy.mockReturnValue([]);
     this.cardByIdSpy.mockReturnValue(null);
     this.lastGameSpy.mockReturnValue(null);
@@ -119,6 +123,19 @@ export class RepositoryStub implements Repository {
 
   public mergePlayers(keeperId: number, absorbedIds: readonly number[]): void {
     this.mergePlayersSpy(keeperId, absorbedIds);
+  }
+
+  public latestEvening(chatId: number): Evening | null {
+    return this.latestEveningSpy(chatId);
+  }
+
+  public replaceInGames(
+    chatId: number,
+    gameIds: readonly number[],
+    fromPlayerId: number,
+    toPlayerId: number
+  ): void {
+    this.replaceInGamesSpy(chatId, gameIds, fromPlayerId, toPlayerId);
   }
 
   public liveCards(): readonly CardRecord[] {

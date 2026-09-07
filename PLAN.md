@@ -30,6 +30,7 @@ quietly lose the other.
 | [Telegram keyboard rules](#telegram-keyboard-rules) | What the Bot API allows a keyboard to be, and how the card fits inside it |
 | [Technical requirements for callbacks](#technical-requirements-for-callbacks) | The 64-byte limit and what has to fit in it |
 | [Merging two names into one](#merging-two-names-into-one) | The `/merge` screen, what it refuses, and why there is no undo |
+| [Replacing one name by another for one evening](#replacing-one-name-by-another-for-one-evening) | The `/replace` correction, why it takes typed names, what it refuses, and what it re-checks before writing |
 | [Data model](#data-model) | The schema, then what every picture is computed from — the chronology, the awards, the player card |
 | [Invariants](#invariants) | The handful of things that must never stop being true |
 | [What survives a failure](#what-survives-a-failure) | Restarts, crashes, deploys, backups, and what `/status` reports |
@@ -733,6 +734,73 @@ is no undo: the confirmation step is the undo.
 
 ---
 
+## Replacing one name by another for one evening
+
+Two people called Рома play here; the second was written down as Романи so the
+scoresheet could tell them apart. One Friday Рома stayed home, and whoever typed
+`/game` wrote Рома out of habit — eleven games later the evening belongs to the
+wrong man. `/merge` cannot fix it: the two names are two people, and folding one
+into the other would be a second mistake on top of the first.
+
+`/replace Рома, Романи` is the correction: **in the latest recorded evening, the
+one written as Рома was really Романи.** It applies to the newest series and to
+nothing else, because the mistake is noticed on the `/stats` poster the same night
+or the next day; a week later, when a newer evening exists, the command no longer
+reaches the old one, and that case is left to whoever runs the bot.
+
+It takes the two names typed rather than a roster of buttons, unlike `/merge`, for two
+reasons: there is no diagnosis to make — the person typing already knows both names —
+and the second name may be one nobody has typed before, which no button could offer.
+The bot answers with one screen reading the decision back —
+`Рома → Романи`, then how many games on which date would be rewritten — and the
+usual two slots, `🔴 Cancel` and `🟢 Replace`. The date is the UTC date of the
+evening's first game, the same one the `/stats` heading carries, so a game that began
+after midnight in Minsk is still dated by the evening it opened. When the arriving name is new to the
+chat, the screen says so, because a typo here would create a player rather than
+find one. The confirmation is the undo.
+
+Refusals, each stated in words:
+
+- **Anything but two names.** The command's own usage line is the answer.
+- **The two names are one name** under the normalisation the parser applies to
+  every name, so `Рома, рома` is refused rather than silently doing nothing.
+- **No evening recorded yet.**
+- **The written name did not sit down this evening.**
+- **The arriving name sat at the table this evening too.** Then they are two people
+  and the record is right; nothing is replaced. The schema would refuse anyway —
+  `game_players` is keyed on `(game_id, player_id)` — the point is that the person
+  learns why.
+- **A game is running.** A live card is rebuilt from `game_players` on every tap, so
+  moving a player underneath it changes the game in progress. Checked when the
+  command arrives and again at `🟢 Replace`.
+
+The arriving player is created when the screen is sent, the same moment `/game`
+creates one, so the button can carry an id. That row is unreferenced until the tap,
+and the sweep behind invariant 7 runs from several places — a cancelled `/game`, an
+abandoned table, `/replace`'s own Cancel — so the screen may outlive the row it points
+at, and a `/merge` opened meanwhile lists the newcomer with no games. **`🟢 Replace`
+therefore re-derives everything before writing**: the newest evening must still begin
+with the game the button named, the leaving player must still sit in it, the arriving
+player must still exist and must still not; anything else answers *screen expired*,
+and the person sends `/replace` again. A game confirmed inside the same evening between
+the screen and the tap passes that check, and is rewritten with the rest — the evening
+is what the command was about, and the screen's count was the count at the time.
+
+A replacement repoints `game_players`, `game_events` and `games.starter_player_id`
+for the evening's games, renormalises their seating, and sweeps the chat's
+unreferenced players — so a leaving name with no other evenings disappears, which is
+also what makes `/replace Ромa, Рома` with a stray Latin letter fix a typo. All of it
+is one transaction. As with `/merge`, the way on is always drawn and the refusals arrive
+as toasts: the screen cannot know what will have changed by the time it is tapped.
+
+**Invariant 6 is read with these two commands in mind.** A frozen game is immutable
+*through the card*: nothing a player taps on a card can change a confirmed result. A
+repointed `player_id` or a renumbered `seat_index` is a correction of who sat there,
+not of what happened, and the order of columns on the chronology poster follows the
+corrected seating.
+
+---
+
 ## Data model
 
 ```sql
@@ -855,6 +923,12 @@ someone has to remember to write.
 `Oleg, Anya, Roma` and `Roma, Oleg, Anya` describe the same table. When writing
 `seat_index`, the list is **rotated so that the player with the smallest `player_id`
 ends up in position zero**. Without this, neighbour analytics falls apart.
+
+The rotation lives in one place, `shared/table/seat-rotation.ts`, and **every
+repointing of a `player_id` rotates again** — `/merge` and `/replace` both put a
+different id in a seat, and either can make the smallest one move. `/merge` did not
+rotate for its first weeks, and the next `/next` copied the crooked table into new
+games as it stood.
 
 ### `/stats`
 
@@ -1621,7 +1695,9 @@ bundled with Node 24 is well past both.
    two names one player a repointed foreign key rather than a rewrite
 5. **`actor_tg_id` is written on every event.** It gives the "who keeps the records"
    metric
-6. **A game in `FROZEN` is immutable**
+6. **A game in `FROZEN` is immutable through the card.** Who sat in it may still be
+   corrected — [Replacing one name by another](#replacing-one-name-by-another-for-one-evening)
+   says how far that goes
 7. **A player row exists only while something still points at it.** Discarding a game
    deletes every player in that chat left unreferenced by `game_players`,
    `game_events` and `games.starter_player_id`, because `/game` creates them before

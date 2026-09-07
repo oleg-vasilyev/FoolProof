@@ -6,6 +6,7 @@ import {
   requireText,
 } from "#shared/repository/column-values.ts";
 import { Locale } from "#shared/locale/locales.ts";
+import { rotateToLowestId } from "#shared/table/seat-rotation.ts";
 import {
   groupByCareerGame,
   groupByGame,
@@ -22,6 +23,7 @@ import {
 } from "#shared/repository/row-records.ts";
 import type {
   CardRecord,
+  Evening,
   ExitRecord,
   Repository,
   SeatRecord,
@@ -31,6 +33,8 @@ import type {
 const FIRST_GAME = 1;
 
 const NO_PLAYERS = 0;
+
+const NO_GAMES = 0;
 
 const SINCE_A_DAY = "-1 day";
 
@@ -115,6 +119,50 @@ const losersOf = (gameId: number): readonly number[] => {
   return rows.map((row) => requireNum(row.player_id));
 };
 
+const normaliseSeats = (gameIds: readonly number[]): void => {
+  const reseat = db.prepare(
+    "UPDATE game_players SET seat_index = ? WHERE game_id = ? AND player_id = ?"
+  );
+
+  for (const gameId of gameIds) {
+    const seats = seatsOf(gameId).map((seat) => ({ playerId: seat.player_id }));
+
+    rotateToLowestId(seats).forEach((seat, seatIndex) => {
+      reseat.run(seatIndex, gameId, seat.playerId);
+    });
+  }
+};
+
+const gamesSeating = (playerIds: readonly number[]): readonly number[] => {
+  const rows: readonly Row[] = db
+    .prepare(
+      `SELECT DISTINCT game_id FROM game_players
+       WHERE player_id IN (${placeholdersFor(playerIds)})`
+    )
+    .all(...playerIds);
+
+  return rows.map((row) => requireNum(row.game_id));
+};
+
+const repointGames = (
+  gameIds: readonly number[],
+  fromPlayerIds: readonly number[],
+  toPlayerId: number
+): void => {
+  const inGames = placeholdersFor(gameIds);
+  const from = placeholdersFor(fromPlayerIds);
+
+  db.prepare(
+    `UPDATE game_players SET player_id = ? WHERE player_id IN (${from}) AND game_id IN (${inGames})`
+  ).run(toPlayerId, ...fromPlayerIds, ...gameIds);
+  db.prepare(
+    `UPDATE game_events SET player_id = ? WHERE player_id IN (${from}) AND game_id IN (${inGames})`
+  ).run(toPlayerId, ...fromPlayerIds, ...gameIds);
+  db.prepare(
+    `UPDATE games SET starter_player_id = ? WHERE starter_player_id IN (${from}) AND id IN (${inGames})`
+  ).run(toPlayerId, ...fromPlayerIds, ...gameIds);
+};
+
 const cardOf = (row: Row): CardRecord => {
   const game = toGame(row);
 
@@ -182,22 +230,59 @@ export const sqliteRepository: Repository = {
       return;
     }
 
-    const holes = placeholdersFor(absorbedIds);
+    transact(() => {
+      const touched = gamesSeating(absorbedIds);
+
+      repointGames(touched, absorbedIds, keeperId);
+      normaliseSeats(touched);
+
+      db.prepare(`DELETE FROM players WHERE id IN (${placeholdersFor(absorbedIds)})`).run(
+        ...absorbedIds
+      );
+    });
+  },
+
+  latestEvening(chatId) {
+    const games: readonly Row[] = db
+      .prepare(`SELECT id, date(started_at) AS started_on FROM (${LATEST_SERIES}) ORDER BY started_at, id`)
+      .all(chatId, chatId);
+
+    const first = games[0];
+    if (first === undefined) {
+      return null;
+    }
+
+    const players = db
+      .prepare(
+        `SELECT p.id AS player_id, p.display_name, COUNT(*) AS games
+         FROM (${LATEST_SERIES}) g
+         JOIN game_players gp ON gp.game_id = g.id
+         JOIN players p ON p.id = gp.player_id
+         GROUP BY p.id, p.display_name
+         ORDER BY p.display_name, p.id`
+      )
+      .all(chatId, chatId)
+      .map(toPlayerTally);
+
+    const evening: Evening = {
+      startedOn: requireText(first.started_on),
+      firstGameId: requireNum(first.id),
+      gameIds: games.map((row) => requireNum(row.id)),
+      players,
+    };
+
+    return evening;
+  },
+
+  replaceInGames(chatId, gameIds, fromPlayerId, toPlayerId) {
+    if (gameIds.length === NO_GAMES) {
+      return;
+    }
 
     transact(() => {
-      db.prepare(`UPDATE game_players SET player_id = ? WHERE player_id IN (${holes})`).run(
-        keeperId,
-        ...absorbedIds
-      );
-      db.prepare(`UPDATE game_events SET player_id = ? WHERE player_id IN (${holes})`).run(
-        keeperId,
-        ...absorbedIds
-      );
-      db.prepare(`UPDATE games SET starter_player_id = ? WHERE starter_player_id IN (${holes})`).run(
-        keeperId,
-        ...absorbedIds
-      );
-      db.prepare(`DELETE FROM players WHERE id IN (${holes})`).run(...absorbedIds);
+      repointGames(gameIds, [fromPlayerId], toPlayerId);
+      normaliseSeats(gameIds);
+      db.prepare(UNREFERENCED_PLAYERS).run(chatId);
     });
   },
 

@@ -12,6 +12,7 @@
     "#shared/*": "./src/shared/*",
     "#live-game/*": "./src/features/live-game/*",
     "#merge-names/*": "./src/features/merge-names/*",
+    "#replace-names/*": "./src/features/replace-names/*",
     "#scoresheet/*": "./src/features/scoresheet/*",
     "#diagnostics/*": "./src/features/diagnostics/*",
     "#language/*": "./src/features/language/*"

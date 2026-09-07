@@ -13,6 +13,12 @@ something *missing*. The rest:
   equivalent mutants and type-narrowing guards; the threshold is 85 in `src/` and 80
   for the tooling, and `finish-phase` says why they differ. One left
   alive on purpose is worth a sentence in the commit message, not another two rounds.
+  The proof that a guard is only narrowing: `written === undefined || played ===
+  undefined` beside `names.length !== 2` gives four survivors that no input can reach,
+  because the length check already refuses every case the first two do. And a branch
+  after a regexp that fixes the alphabet — `[kx]` then `KINDS_BY_CODE.get(code) ===
+  undefined` — is dead code copied from a sibling with a wider pattern: delete it,
+  do not test it.
 - **Read the survivor's own line before believing it is a gap.** A line number quoted
   from memory cost a whole extra run: the rule everyone worried about was already
   killed and the survivor beside it was equivalent. Print the mutant and its

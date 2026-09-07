@@ -117,7 +117,7 @@ no test can catch it breaking; `write-a-spec` has the mutants that proved it, an
 
 Player names are user data, not copy. Matching normalises via Unicode NFC and lower
 case, plus `ё` → `е`, and the parser must not assume latin
-(`features/live-game/domain/lineup-parsing.ts`).
+(`shared/table/name-list.ts`; `live-game` only strips the command off first).
 
 ## Architecture
 
@@ -154,6 +154,7 @@ src/
   features/
     live-game/          playing a game on a live card
     merge-names/        the /merge screen that makes two names one player
+    replace-names/      the /replace screen that puts an evening under the right name
     scoresheet/         the pictures /stats and /personal send back
     diagnostics/        the /status report about the bot itself
     language/           the /language screen a chat picks its language on
@@ -166,7 +167,8 @@ src/
     locale/             the language table, the plural rules, the chat's choice
     logging/            the scoped logger
     repository/         the connection, the contract, the SQL
-    table/              how many may sit down, and how long a name may be
+    table/              how many may sit down, how a list of names is read, and how
+                        a table is rotated so the same one always reads the same
     telegram/           context types, the feature contract, api retries and
                         what they cost, the client options pointing a run elsewhere
     text/               HTML escaping

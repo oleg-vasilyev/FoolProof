@@ -94,10 +94,31 @@ forced from two directions: a feature may not import another, and choosing betwe
 singular and plural is exactly what `copy.en.ts` is forbidden to decide. The
 scoresheet's side has grown to seven such phrases, hence the name.
 
-**Move it to `shared/text/` when a third feature needs to count something.** Four
-lines twice is cheaper than a shared module with two callers.
+The third feature arrived — `/replace` counts games too — and showed the move was never
+needed: the shared half already exists as `counted()` in `shared/locale/plural-rules.ts`,
+and `diagnostics` and `replace-names` call it straight from `render/` with the copy's
+own forms. The two wrappers are the duplication, not the counting.
+
+**Delete each wrapper the next time its file is touched for another reason** — inline
+`counted(copy.locale, games, copy.gameForms)` at its callers and drop the spec that
+tested a one-line delegation. Not worth a phase of its own.
 
 ---
+
+## An evening's date is spelled out twice, and both spellings are UTC
+
+`scoresheet/render/session-date.ts` and `replace-names/render/evening-date.ts` are the
+same eight lines — split the ISO date, name the month from the copy's own `months`
+table, fall back to the raw string — and each feature carries its own twelve month
+names in both languages. The copy is forced the same way the counting was: a feature
+may not import a feature. Both read `date(started_at)`, which is UTC, so a game
+started after midnight Minsk time is dated the day after the evening it belongs to;
+`PLAN.md` notes it beside the `/stats` heading and the `/replace` screen.
+
+**Move the formatter and the month names to `shared/locale/` the first time either
+copy has to change** — a configurable timezone is the likely reason, and a fix landing
+in one of the two would have `/stats` and `/replace` dating the same evening
+differently.
 
 ## `feature-installer.ts` is faked by hand in `main.spec.ts`
 
@@ -218,7 +239,7 @@ shipped bold face, so `Щ` costs its real 1.071 em rather than the flat 0.8 the 
 `WIDEST_FALLBACK` charged everything. What survives is the fallback: a glyph outside the
 144 the table carries — Latin, Cyrillic, digits and the punctuation the copy uses — is
 still charged whatever advance the caller passed, which is a guess. A player may type a
-name in any script, and `lineup-parsing.ts` deliberately does not assume Latin.
+name in any script, and `shared/table/name-list.ts` deliberately does not assume Latin.
 
 The hole is far narrower than the one it replaced, and it fails in the safe direction for
 `USUAL_FALLBACK` callers and the unsafe one for `WIDEST_FALLBACK` callers. Widening the

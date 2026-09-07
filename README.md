@@ -29,6 +29,7 @@ finish, and tap Confirm. There is nothing to type after the line-up.
 | `/stats_awards` | The awards picture on its own; needs five games |
 | `/personal` | One player's card for all time — pick a name, get the poster |
 | `/merge` | Folds a name typed twice into the right one |
+| `/replace Roma, Romani` | The last evening was written under the wrong name — this is who really played |
 | `/language` | Picks the language this chat is played in — English or Russian |
 | `/start` | What the bot is, and a button that puts it in a group |
 | `/help` | What the commands do and how the card works |
@@ -43,6 +44,12 @@ Somebody types a name one way once and another way for the rest of the evening, 
 behind it, and the **first name tapped is the one that stays**. There is no undo, which
 is what the Confirm button is for; two merges at once are refused with the reason, and
 [PLAN.md](PLAN.md#merging-two-names-into-one) says why.
+
+The other way round — two people, one of them written under the other's name all
+evening — is `/replace Roma, Romani`: the name as written, then who really played. It
+rewrites the latest evening only, reads the decision back before doing it, and refuses
+when both names sat at that table, because then they really are two people;
+[PLAN.md](PLAN.md#replacing-one-name-by-another-for-one-evening) has the rest.
 
 ### The pictures it sends back
 
@@ -331,6 +338,7 @@ src/
   features/
     live-game/          playing a game on a live card of buttons
     merge-names/        the /merge screen
+    replace-names/      the /replace screen
     scoresheet/         the pictures /stats and /personal send back
     diagnostics/        the /status report about the bot itself
     language/           the /language screen that picks the chat's language

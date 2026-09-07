@@ -138,15 +138,14 @@ survived into review — an axis with a single label, and a sheet 36px past
 
 - Every file gets a spec beside it, and everything it imports is mocked. Load the
   `write-a-spec` skill before writing them.
-- Every user-readable string lives in `copy.en.ts` and nowhere else. **A copy
-  function interpolates; it never decides** — choosing between `1 game` and
-  `2 games` is a `render/` job, because specs leave the copy table real and a
-  decision made inside it is compared against itself.
+- Every user-readable string lives in `copy.en.ts` and nowhere else, and a copy
+  function interpolates rather than decides — `CLAUDE.md` has why.
+- **Freeze a refusal union against the copy lines it will be spoken with**: every
+  argument a refusal's line interpolates is a field of that union member, not
+  something the handler digs up afterwards.
 - A keyboard whose buttons carry `callback_data` gets e2e scenarios; see
   [`e2e/README.md`](../../../e2e/README.md). A **URL** button does not earn one on
   its own — nothing routes back to the bot, so there is no dispatch to prove.
-  `/start` offers one and is covered by `feature-installer.integration.spec.ts`,
-  which drives a real grammY `Bot`.
 - A new feature that adds a repository method or a screen with states is a
   contract-changing phase: it owes a `PLAN.md` section. The `finish-phase` skill has
   the table and the gates.

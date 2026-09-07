@@ -33,6 +33,8 @@ const LONGER_THAN_A_DAY = "-2 days";
 
 const LONGER_THAN_A_WEEK = "-8 days";
 
+const A_DATE_LENGTH = "YYYY-MM-DD".length;
+
 const seedPlayers = (...names: readonly string[]): readonly number[] =>
   names.map((name) => repo.createPlayer(CHAT_ID, name).id);
 
@@ -279,6 +281,20 @@ describe("merging one name into another", () => {
     expect(repo.rosterInChat(CHAT_ID)).toHaveLength(THREE);
   });
 
+  it("should seat the lowest id first again once the keeper takes a seat", () => {
+    const [anya = NONE, oleg = NONE, anna = NONE, dima = NONE] = seedPlayers(
+      "Аня",
+      "Oleg",
+      "Анна",
+      "Дима"
+    );
+    const gameId = playFullGame([oleg, anna, dima], [oleg, anna], [dima]);
+
+    repo.mergePlayers(anya, [anna]);
+
+    expect(repo.cardById(gameId)?.seats.map((seat) => seat.player_id)).toEqual([anya, dima, oleg]);
+  });
+
   it("should refuse to seat one player twice in one game", () => {
     const [oleg = NONE, anya = NONE] = seedPlayers("Oleg", "Anya");
     playFullGame([oleg, anya], [oleg], [anya]);
@@ -293,6 +309,175 @@ describe("merging one name into another", () => {
     expect(() => repo.mergePlayers(oleg, [anya])).toThrow();
 
     expect(repo.rosterInChat(CHAT_ID)).toHaveLength(TWO);
+  });
+});
+
+describe("the latest evening", () => {
+  it("should be null when nothing has been played", () => {
+    expect(repo.latestEvening(CHAT_ID)).toBeNull();
+  });
+
+  it("should list the games of the newest series only, in the order played", () => {
+    const [oleg = NONE, anya = NONE] = seedPlayers("Oleg", "Anya");
+    playFullGame([oleg, anya], [oleg], [anya]);
+    ageAllGames(LONGER_THAN_A_DAY);
+    const first = playFullGame([oleg, anya], [anya], [oleg]);
+    const second = playFullGame([oleg, anya], [oleg], [anya]);
+
+    expect(repo.latestEvening(CHAT_ID)?.gameIds).toEqual([first, second]);
+  });
+
+  it("should name the evening's first game, which is what tells one evening from the next", () => {
+    const [oleg = NONE, anya = NONE] = seedPlayers("Oleg", "Anya");
+    playFullGame([oleg, anya], [oleg], [anya]);
+    ageAllGames(LONGER_THAN_A_DAY);
+    const first = playFullGame([oleg, anya], [anya], [oleg]);
+    playFullGame([oleg, anya], [oleg], [anya]);
+
+    expect(repo.latestEvening(CHAT_ID)?.firstGameId).toBe(first);
+  });
+
+  it("should date the evening by its first game", () => {
+    const [oleg = NONE, anya = NONE] = seedPlayers("Oleg", "Anya");
+    const gameId = playFullGame([oleg, anya], [oleg], [anya]);
+    ageGame(gameId, LONGER_THAN_A_DAY);
+    const dayBeforeYesterday = repo.cardById(gameId)?.game.started_at.slice(0, A_DATE_LENGTH);
+
+    expect(repo.latestEvening(CHAT_ID)?.startedOn).toBe(dayBeforeYesterday);
+  });
+
+  it("should count each player's games within the evening, not their whole history", () => {
+    const [oleg = NONE, anya = NONE, roma = NONE] = seedPlayers("Oleg", "Anya", "Roma");
+    playFullGame([oleg, anya], [oleg], [anya]);
+    ageAllGames(LONGER_THAN_A_DAY);
+    playFullGame([oleg, anya, roma], [oleg, anya], [roma]);
+    playFullGame([oleg, anya], [anya], [oleg]);
+
+    expect(repo.latestEvening(CHAT_ID)?.players).toEqual([
+      { playerId: anya, displayName: "Anya", games: TWO },
+      { playerId: oleg, displayName: "Oleg", games: TWO },
+      { playerId: roma, displayName: "Roma", games: ONCE },
+    ]);
+  });
+
+  it("should leave out a card still being played", () => {
+    const [oleg = NONE, anya = NONE] = seedPlayers("Oleg", "Anya");
+    const played = playFullGame([oleg, anya], [oleg], [anya]);
+    repo.openGame(CHAT_ID, [oleg, anya]);
+
+    expect(repo.latestEvening(CHAT_ID)?.gameIds).toEqual([played]);
+  });
+
+  it("should keep chats apart", () => {
+    const [oleg = NONE, anya = NONE] = seedPlayers("Oleg", "Anya");
+    playFullGame([oleg, anya], [oleg], [anya]);
+
+    expect(repo.latestEvening(OTHER_CHAT_ID)).toBeNull();
+  });
+});
+
+describe("replacing one player by another in some games", () => {
+  const seedEvening = (): {
+    roma: number;
+    romani: number;
+    oleg: number;
+    tonight: readonly number[];
+    lastWeek: number;
+  } => {
+    const [roma = NONE, oleg = NONE, romani = NONE] = seedPlayers("Roma", "Oleg", "Romani");
+    const lastWeek = playFullGame([roma, oleg], [roma], [oleg]);
+    ageAllGames(LONGER_THAN_A_DAY);
+    const first = playFullGame([roma, oleg], [oleg], [roma]);
+    const second = playFullGame([roma, oleg], [roma], [oleg]);
+    repo.updateCard(second, "FROZEN", TWO, roma);
+
+    return { roma, romani, oleg, tonight: [first, second], lastWeek };
+  };
+
+  it("should seat the arriving player where the leaving one sat", () => {
+    const { roma, romani, tonight } = seedEvening();
+
+    repo.replaceInGames(CHAT_ID, tonight, roma, romani);
+
+    for (const gameId of tonight) {
+      expect(repo.cardById(gameId)?.seats.map((seat) => seat.player_id)).toContain(romani);
+      expect(repo.cardById(gameId)?.seats.map((seat) => seat.player_id)).not.toContain(roma);
+    }
+  });
+
+  it("should carry the results over", () => {
+    const { roma, romani, tonight } = seedEvening();
+
+    repo.replaceInGames(CHAT_ID, tonight, roma, romani);
+
+    expect(repo.cardById(tonight[0] ?? NONE)?.exits.map((exit) => exit.player_id)).toContain(romani);
+  });
+
+  it("should hand over who went first", () => {
+    const { roma, romani, tonight } = seedEvening();
+
+    repo.replaceInGames(CHAT_ID, tonight, roma, romani);
+
+    expect(repo.cardById(tonight[1] ?? NONE)?.game.starter_player_id).toBe(romani);
+  });
+
+  it("should seat the lowest id first again", () => {
+    const { roma, romani, oleg, tonight } = seedEvening();
+
+    repo.replaceInGames(CHAT_ID, tonight, roma, romani);
+
+    expect(repo.cardById(tonight[0] ?? NONE)?.seats.map((seat) => seat.player_id)).toEqual([
+      oleg,
+      romani,
+    ]);
+  });
+
+  it("should leave the leaving player's other games alone", () => {
+    const { roma, romani, tonight, lastWeek } = seedEvening();
+
+    repo.replaceInGames(CHAT_ID, tonight, roma, romani);
+
+    expect(repo.cardById(lastWeek)?.seats.map((seat) => seat.player_id)).toContain(roma);
+  });
+
+  it("should keep the leaving player while a game still names them", () => {
+    const { roma, romani, tonight } = seedEvening();
+
+    repo.replaceInGames(CHAT_ID, tonight, roma, romani);
+
+    expect(repo.playersInChat(CHAT_ID).map((player) => player.id)).toContain(roma);
+  });
+
+  it("should forget the leaving player once nothing names them", () => {
+    const { roma, romani, tonight, lastWeek } = seedEvening();
+
+    repo.replaceInGames(CHAT_ID, [lastWeek, ...tonight], roma, romani);
+
+    expect(repo.playersInChat(CHAT_ID).map((player) => player.id)).not.toContain(roma);
+  });
+
+  it("should do nothing when no game was named, not even sweep", () => {
+    const { roma, romani, tonight } = seedEvening();
+    const bystander = repo.createPlayer(CHAT_ID, "Bystander").id;
+
+    repo.replaceInGames(CHAT_ID, [], roma, romani);
+
+    expect(repo.cardById(tonight[0] ?? NONE)?.seats.map((seat) => seat.player_id)).toContain(roma);
+    expect(repo.playersInChat(CHAT_ID).map((player) => player.id)).toContain(bystander);
+  });
+
+  it("should refuse when the arriving player already sits in one of the games", () => {
+    const { roma, oleg, tonight } = seedEvening();
+
+    expect(() => repo.replaceInGames(CHAT_ID, tonight, roma, oleg)).toThrow();
+  });
+
+  it("should leave every game as it was when it refuses", () => {
+    const { roma, oleg, tonight } = seedEvening();
+
+    expect(() => repo.replaceInGames(CHAT_ID, tonight, roma, oleg)).toThrow();
+
+    expect(repo.cardById(tonight[1] ?? NONE)?.game.starter_player_id).toBe(roma);
   });
 });
 
