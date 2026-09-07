@@ -18,6 +18,7 @@ export const gameRecordOf = (overrides: Partial<GameRecord> = {}): GameRecord =>
   starter_player_id: null,
   started_at: "2026-07-29 20:00:00",
   confirmed_at: null,
+  reopened_by: null,
   ...overrides,
 });
 

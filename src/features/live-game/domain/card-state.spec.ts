@@ -385,6 +385,12 @@ describe("apply()", () => {
 
       expect(apply(state, { kind: ActionKind.Cancel }).outcome).toBe("rejected");
     });
+
+    it("should reject a cancel on a reopened card even with nothing recorded, since the game is real", () => {
+      const state = cardStateOf(THREE, { reopened: true });
+
+      expect(apply(state, { kind: ActionKind.Cancel }).outcome).toBe("rejected");
+    });
   });
 
   it("should never mutate the state it is given", () => {

@@ -38,6 +38,7 @@ export const toGame = (row: Row): GameRecord => ({
   starter_player_id: nullableNum(row.starter_player_id),
   started_at: requireText(row.started_at),
   confirmed_at: nullableText(row.confirmed_at),
+  reopened_by: nullableNum(row.reopened_by),
 });
 
 export const toSeat = (row: Row): SeatRecord => ({

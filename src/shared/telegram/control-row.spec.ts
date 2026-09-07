@@ -38,6 +38,16 @@ describe("controlRow()", () => {
       expect(rowWith(WAY_ON, NOTHING_TO_UNDO)).not.toContain(BACK);
     });
 
+    it("should draw no way off at all when the screen has none to offer and nothing to undo", () => {
+      expect(controlRow({ cancel: null, back: BACK, wayOn: WAY_ON, anythingToUndo: NOTHING_TO_UNDO }))
+        .toEqual([WAY_ON]);
+    });
+
+    it("should still offer Back on such a screen once something can be undone", () => {
+      expect(controlRow({ cancel: null, back: BACK, wayOn: null, anythingToUndo: SOMETHING_TO_UNDO }))
+        .toEqual([BACK]);
+    });
+
     it("should keep the way off the screen in the first slot, whichever it is", () => {
       expect([
         rowWith(WAY_ON, NOTHING_TO_UNDO)[FIRST_SLOT],

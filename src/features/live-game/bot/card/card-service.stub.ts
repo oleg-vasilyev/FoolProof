@@ -9,6 +9,7 @@ const NOTHING_REDRAWN = 0;
 export class CardServiceStub {
   public openSpy = vi.fn();
   public tapSpy = vi.fn();
+  public reopenLatestSpy = vi.fn();
   public redrawLiveSpy = vi.fn();
   public sweepIdleSpy = vi.fn();
   public shutdownSpy = vi.fn();
@@ -18,6 +19,7 @@ export class CardServiceStub {
   public constructor() {
     this.openSpy.mockResolvedValue(undefined);
     this.tapSpy.mockResolvedValue("");
+    this.reopenLatestSpy.mockResolvedValue(true);
     this.redrawLiveSpy.mockResolvedValue(NOTHING_REDRAWN);
     this.sweepIdleSpy.mockResolvedValue(NOTHING_SWEPT);
     this.shutdownSpy.mockResolvedValue(undefined);
@@ -25,6 +27,7 @@ export class CardServiceStub {
     this.service = {
       open: this.openSpy,
       tap: this.tapSpy,
+      reopenLatest: this.reopenLatestSpy,
       redrawLive: this.redrawLiveSpy,
       sweepIdle: this.sweepIdleSpy,
       shutdown: this.shutdownSpy,

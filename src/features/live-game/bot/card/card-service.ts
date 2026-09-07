@@ -2,7 +2,12 @@ import { ActionKind, Outcome, Phase } from "#live-game/domain/card-states.ts";
 import type { Api } from "grammy";
 import { createDebouncer, type Debouncer } from "#shared/timing/debounce.ts";
 import type { Logger } from "#shared/logging/logger.ts";
-import type { CardRecord, Finalist, CardRepository } from "#shared/repository/repository-contract.ts";
+import type {
+  CardRecord,
+  Finalist,
+  CardRepository,
+  GameRecord,
+} from "#shared/repository/repository-contract.ts";
 import {
   apply,
   nameAt,
@@ -44,6 +49,7 @@ export const PICKED_BY_HAND = null;
 export interface CardService {
   open(copy: Copy, chatId: number, seats: readonly Seat[], starterSlot: number | null): Promise<void>;
   tap(copy: Copy, payload: CallbackPayload, actorTgId: number): Promise<string>;
+  reopenLatest(copy: Copy, chatId: number, actorTgId: number): Promise<boolean>;
   redrawLive(): Promise<number>;
   sweepIdle(idleSeconds: number): Promise<number>;
   shutdown(): Promise<void>;
@@ -108,6 +114,7 @@ const toCardState = (card: CardRecord): CardState => {
     starterSlot,
     exits,
     drawAccepted: card.game.state === Phase.Ready && seats.length - exits.length > 1,
+    reopened: card.game.reopened_by !== null,
   };
 };
 
@@ -174,7 +181,7 @@ const redrawOf = (context: EditingContext, card: CardRecord): EditRequest => {
 
   return editOf(
     card,
-    renderCard(copy, state, context.repo.gameNumberInSeries(card.game.chat_id)),
+    renderCard(copy, state, context.repo.numberOfGame(card.game.id)),
     renderKeyboard(copy, state, card.game.id, card.game.state_version)
   );
 };
@@ -212,7 +219,7 @@ const openCard = async (
     seats.map((seat) => seat.playerId)
   );
 
-  const state: CardState = { seats, starterSlot, exits: [], drawAccepted: false };
+  const state: CardState = { seats, starterSlot, exits: [], drawAccepted: false, reopened: false };
 
   if (starterSlot !== null) {
     repo.updateCard(gameId, phaseOf(state), FIRST_VERSION, starterPlayerId(state));
@@ -221,7 +228,7 @@ const openCard = async (
   try {
     const message = await api.sendMessage(
       chatId,
-      renderCard(copy, state, repo.gameNumberInSeries(chatId)),
+      renderCard(copy, state, repo.numberOfGame(gameId)),
       {
         parse_mode: "HTML",
         reply_markup: toMarkup(renderKeyboard(copy, state, gameId, FIRST_VERSION)),
@@ -322,7 +329,7 @@ const tapKnownCard = async (
     before,
     actorTgId,
     version: card.game.state_version + 1,
-    gameNumber: context.repo.gameNumberInSeries(card.game.chat_id),
+    gameNumber: context.repo.numberOfGame(card.game.id),
   };
 
   switch (transition.outcome) {
@@ -360,21 +367,95 @@ const tapCard = async (
   }
 };
 
+const abandonCard = async (context: EditingContext, game: GameRecord): Promise<void> => {
+  context.repo.discardGame(game.id);
+  await context.sendEdit({
+    chatId: game.chat_id,
+    messageId: game.message_id,
+    text: spokenIn(context, game.chat_id).abandonedBody,
+    keyboard: null,
+  });
+};
+
+const freezeAgain = async (
+  context: EditingContext,
+  game: GameRecord,
+  reopenedBy: number
+): Promise<void> => {
+  const card = context.repo.cardById(game.id);
+
+  if (card === null) {
+    return;
+  }
+
+  const state = toCardState(card);
+  const copy = spokenIn(context, game.chat_id);
+
+  context.repo.confirmGame(game.id, finalistsOf(state), reopenedBy, card.game.state_version + 1);
+  await context.sendEdit(
+    editOf(card, renderResult(copy, state, context.repo.numberOfGame(game.id)), null)
+  );
+};
+
 const sweepIdleCards = async (context: EditingContext, idleSeconds: number): Promise<number> => {
   const stale = context.repo.idleCards(idleSeconds);
 
   for (const game of stale) {
     context.edits.cancel(String(game.id));
-    context.repo.discardGame(game.id);
-    await context.sendEdit({
-      chatId: game.chat_id,
-      messageId: game.message_id,
-      text: spokenIn(context, game.chat_id).abandonedBody,
-      keyboard: null,
-    });
+
+    if (game.reopened_by === null) {
+      await abandonCard(context, game);
+    } else {
+      await freezeAgain(context, game, game.reopened_by);
+    }
   }
 
   return stale.length;
+};
+
+const unfrozenAgain = (frozen: CardRecord, actorTgId: number): CardRecord => {
+  const lastPosition = frozen.exits.reduce((last, exit) => Math.max(last, exit.position), 0);
+
+  return {
+    ...frozen,
+    game: { ...frozen.game, state: Phase.Ready, reopened_by: actorTgId },
+    exits: frozen.exits.filter((exit) => exit.position !== lastPosition),
+  };
+};
+
+const reopenLatestCard = async (
+  context: EditingContext,
+  copy: Copy,
+  chatId: number,
+  actorTgId: number
+): Promise<boolean> => {
+  const frozen = context.repo.latestFrozenCard(chatId);
+
+  if (frozen === null) {
+    return false;
+  }
+
+  const card = unfrozenAgain(frozen, actorTgId);
+  const state = toCardState(card);
+  const version = card.game.state_version + 1;
+  const message = await context.api.sendMessage(
+    chatId,
+    renderCard(copy, state, context.repo.numberOfGame(card.game.id)),
+    {
+      parse_mode: "HTML",
+      reply_markup: toMarkup(renderKeyboard(copy, state, card.game.id, version)),
+    }
+  );
+
+  if (!context.repo.reopenGame(card.game.id, message.message_id, actorTgId)) {
+    await context.api.deleteMessage(chatId, message.message_id);
+
+    return true;
+  }
+
+  await context.sendEdit(editOf(frozen, copy.reopenedBody, null));
+
+  return true;
 };
 
 export function createCardService(deps: CardServiceDeps): CardService {
@@ -391,6 +472,7 @@ export function createCardService(deps: CardServiceDeps): CardService {
   return {
     open: (copy, chatId, seats, starterSlot) => openCard(context, copy, chatId, seats, starterSlot),
     tap: (copy, payload, actorTgId) => tapCard(context, copy, payload, actorTgId),
+    reopenLatest: (copy, chatId, actorTgId) => reopenLatestCard(context, copy, chatId, actorTgId),
     redrawLive: () => redrawLiveCards(context),
     sweepIdle: (idleSeconds) => sweepIdleCards(context, idleSeconds),
     shutdown: () => edits.flushAll(),

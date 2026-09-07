@@ -40,6 +40,7 @@ export const copy = {
   commandNext: "Another game, same line-up",
   commandNextWith: "Another game, plus more players — /next_with Zhenya",
   commandNextWithout: "Another game, minus whoever taps out",
+  commandReopen: "Reopen the last game to fix a wrong tap",
 
   helpGame: "/game Oleg, Anya, Roma — open a game; the list is the seating order around the table",
   helpNext:
@@ -48,6 +49,8 @@ export const copy = {
     "/next_with Zhenya, Sasha — the same line-up plus these; you then tap everyone in seating order, and who goes first is picked by hand",
   helpNextWithout:
     "/next_without — tap whoever is sitting out, or name them: /next_without Oleg",
+  helpReopen:
+    "/reopen — the last recorded game comes back as a card; Back undoes the wrong taps, then Confirm records it again",
   helpCard: [
     "Tap a name to record who went first, then tap players in the order they go out.",
     "The last one left is the fool and gets marked for you. Draw appears once two players are left.",
@@ -91,6 +94,8 @@ export const copy = {
   cancelledNotice: "Cancelled",
   cancelledBody: "Cancelled — nothing recorded.",
   abandonedBody: "Abandoned after three quiet hours — nothing recorded.",
+  reopenedBody: "Reopened — the card is below.",
+  nothingToReopen: "No game recorded here yet, so there is nothing to reopen.",
 };
 
 export type Copy = typeof copy;

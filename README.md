@@ -24,6 +24,7 @@ finish, and tap Confirm. There is nothing to type after the line-up.
 | `/next` | A new card with the same line-up; the fool's neighbour goes first |
 | `/next_with Zhenya` | The same line-up plus these players; asks for the names if sent without any, then asks where everyone sits |
 | `/next_without Oleg` | The same line-up minus these players; sent bare, it lists the table and you tap whoever is sitting out |
+| `/reopen` | The last recorded game comes back as a card: Back takes the wrong taps off, Confirm records it again |
 | `/stats` | How the current session is going: the chronology, then the awards |
 | `/stats_chronology` | The chronology picture on its own |
 | `/stats_awards` | The awards picture on its own; needs five games |
@@ -50,6 +51,11 @@ evening — is `/replace Roma, Romani`: the name as written, then who really pla
 rewrites the latest evening only, reads the decision back before doing it, and refuses
 when both names sat at that table, because then they really are two people;
 [PLAN.md](PLAN.md#replacing-one-name-by-another-for-one-evening) has the rest.
+
+A wrong tap noticed only after Confirm is `/reopen`: the last recorded game comes back
+as a live card standing just before Confirm, Back takes the wrong taps off, and Confirm
+records it again under the same number. A reopened card has no Cancel, because the
+game is real; [PLAN.md](PLAN.md#reopening-the-last-game) says what else is different.
 
 ### The pictures it sends back
 

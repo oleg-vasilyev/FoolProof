@@ -49,7 +49,7 @@ const controlsFor = (copy: Copy, state: CardState, tap: CardTap): readonly Inlin
   const phase = phaseOf(state);
 
   return controlRow({
-    cancel: buttonFor(tap, copy.buttonCancel, ActionKind.Cancel),
+    cancel: state.reopened ? null : buttonFor(tap, copy.buttonCancel, ActionKind.Cancel),
     back: buttonFor(tap, copy.buttonBack, ActionKind.Back),
     wayOn:
       phase === Phase.Ready

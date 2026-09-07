@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS games (
   starter_player_id INTEGER REFERENCES players(id),
   started_at        TEXT NOT NULL DEFAULT (datetime('now')),
   confirmed_at      TEXT,
-  last_touched_at   TEXT NOT NULL DEFAULT (datetime('now'))
+  last_touched_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  reopened_by       INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_games_chat_started ON games(chat_id, started_at);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_games_one_live ON games(chat_id) WHERE confirmed_at IS NULL;
@@ -65,6 +66,14 @@ CREATE TABLE IF NOT EXISTS chat_locales (
   chosen_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 `);
+
+const REOPENED_BY = "reopened_by";
+
+const gamesColumns = db.prepare("SELECT name FROM pragma_table_info('games')").all();
+
+if (!gamesColumns.some((column) => column.name === REOPENED_BY)) {
+  db.exec(`ALTER TABLE games ADD COLUMN ${REOPENED_BY} INTEGER`);
+}
 
 db.exec(`
 CREATE VIEW IF NOT EXISTS game_series AS

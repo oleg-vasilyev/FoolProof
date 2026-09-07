@@ -53,6 +53,8 @@ export class RepositoryStub implements Repository {
   public liveCardsSpy = vi.fn();
   public cardByIdSpy = vi.fn();
   public lastGameSpy = vi.fn();
+  public latestFrozenCardSpy = vi.fn();
+  public reopenGameSpy = vi.fn();
   public openGameSpy = vi.fn();
   public attachMessageSpy = vi.fn();
   public updateCardSpy = vi.fn();
@@ -61,7 +63,7 @@ export class RepositoryStub implements Repository {
   public confirmGameSpy = vi.fn();
   public discardGameSpy = vi.fn();
   public idleCardsSpy = vi.fn();
-  public gameNumberInSeriesSpy = vi.fn();
+  public numberOfGameSpy = vi.fn();
   public seriesChronologySpy = vi.fn();
   public careerHistorySpy = vi.fn();
   public storageSummarySpy = vi.fn();
@@ -85,9 +87,11 @@ export class RepositoryStub implements Repository {
     this.liveCardsSpy.mockReturnValue([]);
     this.cardByIdSpy.mockReturnValue(null);
     this.lastGameSpy.mockReturnValue(null);
+    this.latestFrozenCardSpy.mockReturnValue(null);
+    this.reopenGameSpy.mockReturnValue(true);
     this.openGameSpy.mockReturnValue(1);
     this.idleCardsSpy.mockReturnValue([]);
-    this.gameNumberInSeriesSpy.mockReturnValue(FIRST_GAME_NUMBER);
+    this.numberOfGameSpy.mockReturnValue(FIRST_GAME_NUMBER);
     this.seriesChronologySpy.mockReturnValue(null);
     this.careerHistorySpy.mockReturnValue(null);
     this.storageSummarySpy.mockReturnValue(EMPTY_STORAGE);
@@ -150,6 +154,14 @@ export class RepositoryStub implements Repository {
     return this.lastGameSpy(chatId);
   }
 
+  public latestFrozenCard(chatId: number): CardRecord | null {
+    return this.latestFrozenCardSpy(chatId);
+  }
+
+  public reopenGame(gameId: number, messageId: number, actorTgId: number): boolean {
+    return this.reopenGameSpy(gameId, messageId, actorTgId);
+  }
+
   public openGame(chatId: number, playerIds: readonly number[]): number {
     return this.openGameSpy(chatId, playerIds);
   }
@@ -205,8 +217,8 @@ export class RepositoryStub implements Repository {
     return this.chatSummarySpy();
   }
 
-  public gameNumberInSeries(chatId: number): number {
-    return this.gameNumberInSeriesSpy(chatId);
+  public numberOfGame(gameId: number): number {
+    return this.numberOfGameSpy(gameId);
   }
 
   public seriesChronology(chatId: number): SeriesChronology | null {

@@ -1,6 +1,6 @@
 import { ActionKind, Outcome } from "#live-game/domain/card-states.ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { cardRecordOf, playerIdOf } from "#shared/repository/database-records.stub.ts";
+import { cardRecordOf, gameRecordOf, playerIdOf } from "#shared/repository/database-records.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { DebounceStub } from "#shared/timing/debounce.stub.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
@@ -85,6 +85,8 @@ const MESSAGE_ID = 500;
 
 const ACTOR_ID = 777;
 
+const REOPENER_ID = 4242;
+
 const IDLE_SECONDS = 10_800;
 
 const GAME_NUMBER = 3;
@@ -156,7 +158,7 @@ describe("createCardService()", () => {
     seatAtSpy.mockReturnValue({ playerId: playerIdOf(ROMA), displayName: "Roma" });
     starterPlayerIdSpy.mockReturnValue(playerIdOf(OLEG));
     repo.openGameSpy.mockReturnValue(GAME_ID);
-    repo.gameNumberInSeriesSpy.mockReturnValue(GAME_NUMBER);
+    repo.numberOfGameSpy.mockReturnValue(GAME_NUMBER);
 
     build();
   });
@@ -241,7 +243,7 @@ describe("createCardService()", () => {
       await cards.open(copy, CHAT_ID, seatsOf(...THREE), null);
 
       expect(renderCardSpy).toHaveBeenCalledWith(copy, 
-        expect.objectContaining({ starterSlot: null, exits: [], drawAccepted: false }),
+        expect.objectContaining({ starterSlot: null, exits: [], drawAccepted: false, reopened: false }),
         GAME_NUMBER
       );
     });
@@ -729,7 +731,7 @@ describe("createCardService()", () => {
   });
 
   describe("sweepIdle()", () => {
-    const idle = [{ id: GAME_ID, chat_id: CHAT_ID, message_id: MESSAGE_ID }];
+    const idle = [gameRecordOf({ id: GAME_ID, chat_id: CHAT_ID, message_id: MESSAGE_ID })];
 
     it("should ask the repository which cards went quiet", async () => {
       repo.idleCardsSpy.mockReturnValue([]);
@@ -777,6 +779,170 @@ describe("createCardService()", () => {
 
       expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(NEVER);
     });
+
+    describe("a reopened card that went quiet", () => {
+      const reopened = [
+        gameRecordOf({ id: GAME_ID, chat_id: CHAT_ID, message_id: MESSAGE_ID, reopened_by: REOPENER_ID }),
+      ];
+
+      beforeEach(() => {
+        repo.idleCardsSpy.mockReturnValue(reopened);
+        repo.cardByIdSpy.mockReturnValue(
+          cardRecordOf(THREE, { id: GAME_ID, state_version: STORED_VERSION, reopened_by: REOPENER_ID })
+        );
+        remainingSlotsSpy.mockReturnValue([ROMA]);
+      });
+
+      it("should freeze it again as it stands rather than delete a real game", async () => {
+        await cards.sweepIdle(IDLE_SECONDS);
+
+        expect(repo.discardGameSpy).toHaveBeenCalledTimes(NEVER);
+        expect(repo.confirmGameSpy).toHaveBeenCalledWith(
+          GAME_ID,
+          [{ playerId: playerIdOf(ROMA), position: ONCE }],
+          REOPENER_ID,
+          STORED_VERSION + 1
+        );
+      });
+
+      it("should show the standings with no keyboard, the way Confirm does", async () => {
+        await cards.sweepIdle(IDLE_SECONDS);
+
+        expect(telegram.lastEdit().text).toBe(RESULT_TEXT);
+        expect(telegram.lastEdit().markup).toBeUndefined();
+      });
+
+      it("should leave a card alone whose row has gone meanwhile", async () => {
+        repo.cardByIdSpy.mockReturnValue(null);
+
+        await cards.sweepIdle(IDLE_SECONDS);
+
+        expect(repo.confirmGameSpy).toHaveBeenCalledTimes(NEVER);
+        expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(NEVER);
+      });
+    });
+  });
+
+  describe("reopenLatest()", () => {
+    const FROZEN_MESSAGE_ID = 321;
+
+    const frozen = () =>
+      cardRecordOf(
+        THREE,
+        {
+          id: GAME_ID,
+          chat_id: CHAT_ID,
+          message_id: FROZEN_MESSAGE_ID,
+          state: "FROZEN",
+          state_version: STORED_VERSION,
+          confirmed_at: "2026-09-04 20:00:00",
+        },
+        [OLEG, ANYA, ROMA]
+      );
+
+    beforeEach(() => {
+      repo.latestFrozenCardSpy.mockReturnValue(frozen());
+    });
+
+    it("should answer false and touch nothing when the chat has no frozen game", async () => {
+      repo.latestFrozenCardSpy.mockReturnValue(null);
+
+      expect(await cards.reopenLatest(copy, CHAT_ID, ACTOR_ID)).toBe(false);
+      expect(telegram.sendMessageSpy).toHaveBeenCalledTimes(NEVER);
+      expect(repo.reopenGameSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should ask for the latest frozen card of that chat", async () => {
+      await cards.reopenLatest(copy, CHAT_ID, ACTOR_ID);
+
+      expect(repo.latestFrozenCardSpy).toHaveBeenCalledWith(CHAT_ID);
+    });
+
+    it("should render the card as it stood before Confirm: the last place taken off, reopened", async () => {
+      await cards.reopenLatest(copy, CHAT_ID, ACTOR_ID);
+
+      expect(renderCardSpy).toHaveBeenCalledWith(
+        copy,
+        expect.objectContaining({ exits: [OLEG, ANYA], reopened: true }),
+        GAME_NUMBER
+      );
+    });
+
+    it("should take every finalist off when the last place was shared", async () => {
+      repo.latestFrozenCardSpy.mockReturnValue({
+        ...frozen(),
+        exits: [
+          { player_id: playerIdOf(OLEG), position: 1 },
+          { player_id: playerIdOf(ANYA), position: 2 },
+          { player_id: playerIdOf(ROMA), position: 2 },
+        ],
+      });
+
+      await cards.reopenLatest(copy, CHAT_ID, ACTOR_ID);
+
+      expect(renderCardSpy.mock.calls[0]?.[1]).toMatchObject({ exits: [OLEG], drawAccepted: true });
+    });
+
+    it("should number the card by the game it reopens", async () => {
+      await cards.reopenLatest(copy, CHAT_ID, ACTOR_ID);
+
+      expect(repo.numberOfGameSpy).toHaveBeenCalledWith(GAME_ID);
+    });
+
+    it("should send a new card with a keyboard at the next version", async () => {
+      await cards.reopenLatest(copy, CHAT_ID, ACTOR_ID);
+
+      expect(renderKeyboardSpy).toHaveBeenCalledWith(copy, expect.anything(), GAME_ID, STORED_VERSION + 1);
+      expect(telegram.lastSend()).toEqual({ text: CARD_TEXT, markup: MARKUP });
+      expect(telegram.sendMessageSpy).toHaveBeenCalledWith(
+        CHAT_ID,
+        CARD_TEXT,
+        expect.objectContaining({ parse_mode: "HTML" })
+      );
+    });
+
+    it("should unfreeze the game only once the new card is posted, pointing it at that message", async () => {
+      telegram.sendMessageSpy.mockResolvedValue({ message_id: MESSAGE_ID });
+
+      await cards.reopenLatest(copy, CHAT_ID, ACTOR_ID);
+
+      expect(repo.reopenGameSpy).toHaveBeenCalledWith(GAME_ID, MESSAGE_ID, ACTOR_ID);
+      expect(telegram.sendMessageSpy.mock.invocationCallOrder[0]).toBeLessThan(
+        repo.reopenGameSpy.mock.invocationCallOrder[0] ?? NEVER
+      );
+    });
+
+    it("should leave the database untouched when Telegram refuses the new card", async () => {
+      telegram.sendMessageSpy.mockRejectedValue(new Error(EDIT_REFUSED));
+
+      await expect(cards.reopenLatest(copy, CHAT_ID, ACTOR_ID)).rejects.toThrow(EDIT_REFUSED);
+      expect(repo.reopenGameSpy).toHaveBeenCalledTimes(NEVER);
+      expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should take its own card back down when somebody reopened the game first", async () => {
+      telegram.sendMessageSpy.mockResolvedValue({ message_id: MESSAGE_ID });
+      repo.reopenGameSpy.mockReturnValue(false);
+
+      expect(await cards.reopenLatest(copy, CHAT_ID, ACTOR_ID)).toBe(true);
+      expect(telegram.deleteMessageSpy).toHaveBeenCalledWith(CHAT_ID, MESSAGE_ID);
+      expect(telegram.editMessageTextSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should tell the old result message it was reopened, with no keyboard", async () => {
+      await cards.reopenLatest(copy, CHAT_ID, ACTOR_ID);
+
+      expect(telegram.editMessageTextSpy).toHaveBeenCalledWith(
+        CHAT_ID,
+        FROZEN_MESSAGE_ID,
+        copy.reopenedBody,
+        expect.objectContaining({ reply_markup: undefined })
+      );
+    });
+
+    it("should answer true once the card is back", async () => {
+      expect(await cards.reopenLatest(copy, CHAT_ID, ACTOR_ID)).toBe(true);
+    });
   });
 
   describe("shutdown()", () => {
@@ -816,6 +982,22 @@ describe("createCardService()", () => {
       await cards.tap(copy, payload("back", null), ACTOR_ID);
 
       expect(stateHandedToReducer()).toMatchObject({ starterSlot: null });
+    });
+
+    it("should mark the state reopened when somebody reopened the game", async () => {
+      cardWith({ reopened_by: REOPENER_ID });
+
+      await cards.tap(copy, payload("back", null), ACTOR_ID);
+
+      expect(stateHandedToReducer()).toMatchObject({ reopened: true });
+    });
+
+    it("should leave an ordinary card unmarked", async () => {
+      cardWith({ reopened_by: null });
+
+      await cards.tap(copy, payload("back", null), ACTOR_ID);
+
+      expect(stateHandedToReducer()).toMatchObject({ reopened: false });
     });
 
     it("should ignore an exit belonging to nobody at this table", async () => {

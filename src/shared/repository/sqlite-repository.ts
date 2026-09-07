@@ -32,6 +32,11 @@ import type {
 
 const FIRST_GAME = 1;
 
+const NOTHING_CHANGED = 0;
+
+const EARLIER_THAN_G = (alias: string): string =>
+  `(${alias}.started_at < g.started_at OR (${alias}.started_at = g.started_at AND ${alias}.id < g.id))`;
+
 const NO_PLAYERS = 0;
 
 const NO_GAMES = 0;
@@ -346,6 +351,48 @@ export const sqliteRepository: Repository = {
     return { seats: seatsOf(gameId), loserIds: losersOf(gameId) };
   },
 
+  latestFrozenCard(chatId) {
+    return cardFrom(
+      db
+        .prepare(
+          `SELECT * FROM games
+           WHERE chat_id = ? AND confirmed_at IS NOT NULL
+           ORDER BY started_at DESC, id DESC
+           LIMIT 1`
+        )
+        .get(chatId)
+    );
+  },
+
+  reopenGame(gameId, messageId, actorTgId) {
+    return transact(() => {
+      const unfrozen = db
+        .prepare(
+          `UPDATE games
+           SET state = 'READY',
+               state_version = state_version + 1,
+               confirmed_at = NULL,
+               message_id = ?,
+               reopened_by = ?,
+               last_touched_at = datetime('now')
+           WHERE id = ? AND confirmed_at IS NOT NULL`
+        )
+        .run(messageId, actorTgId, gameId);
+
+      if (unfrozen.changes === NOTHING_CHANGED) {
+        return false;
+      }
+
+      db.prepare(
+        `DELETE FROM game_events
+         WHERE game_id = ?
+           AND position = (SELECT MAX(position) FROM game_events WHERE game_id = ?)`
+      ).run(gameId, gameId);
+
+      return true;
+    });
+  },
+
   openGame(chatId, playerIds) {
     return transact(() => {
       const inserted = db
@@ -404,6 +451,7 @@ export const sqliteRepository: Repository = {
          SET state = 'FROZEN',
              state_version = ?,
              confirmed_at = datetime('now'),
+             reopened_by = NULL,
              last_touched_at = datetime('now')
          WHERE id = ?`
       ).run(version, gameId);
@@ -428,26 +476,32 @@ export const sqliteRepository: Repository = {
       .prepare(
         `SELECT * FROM games
          WHERE confirmed_at IS NULL
+           AND (reopened_by IS NULL OR state = 'READY')
            AND unixepoch('now') - unixepoch(last_touched_at) >= ?`
       )
       .all(idleSeconds)
       .map(toGame);
   },
 
-  gameNumberInSeries(chatId) {
+  numberOfGame(gameId) {
     const row = db
       .prepare(
         `SELECT COALESCE((
-           SELECT COUNT(*) FROM game_series
-           WHERE chat_id = ?
-             AND series_no = (SELECT MAX(series_no) FROM game_series WHERE chat_id = ?)
-             AND (
-               SELECT unixepoch('now') - unixepoch(MAX(started_at))
-               FROM games WHERE chat_id = ? AND confirmed_at IS NOT NULL
+           SELECT COUNT(*) FROM game_series s
+           WHERE s.chat_id = g.chat_id
+             AND ${EARLIER_THAN_G("s")}
+             AND s.series_no = (
+               SELECT MAX(series_no) FROM game_series e
+               WHERE e.chat_id = g.chat_id AND ${EARLIER_THAN_G("e")}
+             )
+             AND unixepoch(g.started_at) - (
+               SELECT unixepoch(MAX(started_at)) FROM game_series e
+               WHERE e.chat_id = g.chat_id AND ${EARLIER_THAN_G("e")}
              ) <= ?
-         ), 0) + 1 AS game_no`
+         ), 0) + 1 AS game_no
+         FROM games g WHERE g.id = ?`
       )
-      .get(chatId, chatId, chatId, SERIES_GAP_SECONDS);
+      .get(SERIES_GAP_SECONDS, gameId);
 
     return numberOr(row?.game_no, FIRST_GAME);
   },

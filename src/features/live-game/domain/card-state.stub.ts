@@ -13,5 +13,6 @@ export const cardStateOf = (
   starterSlot: null,
   exits: [],
   drawAccepted: false,
+  reopened: false,
   ...overrides,
 });

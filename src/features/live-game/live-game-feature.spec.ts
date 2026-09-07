@@ -38,6 +38,8 @@ const onNamesReplySpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<
 
 const onTapSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
 
+const onReopenSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
+
 vi.mock("#live-game/bot/card/card-service.ts", () => ({
   createCardService: (deps: unknown) => {
     createCardServiceSpy(deps);
@@ -70,6 +72,10 @@ vi.mock("#live-game/bot/lineup/names-reply.ts", () => ({
 
 vi.mock("#live-game/bot/card/tap-handler.ts", () => ({
   onTap: (context: unknown, ctx: unknown) => onTapSpy(context, ctx),
+}));
+
+vi.mock("#live-game/bot/card/reopen-handler.ts", () => ({
+  onReopen: (context: unknown, ctx: unknown) => onReopenSpy(context, ctx),
 }));
 
 const CARD_TAPS = /^the-card-taps$/;
@@ -160,12 +166,13 @@ describe("createLiveGameFeature()", () => {
   });
 
   describe("the commands it declares", () => {
-    it("should offer game, next, next_with and next_without, in that order", () => {
+    it("should offer game, next, next_with, next_without and reopen, in that order", () => {
       expect(build().commands.map((route) => route.command)).toEqual([
         "game",
         "next",
         "next_with",
         "next_without",
+        "reopen",
       ]);
     });
 
@@ -175,6 +182,7 @@ describe("createLiveGameFeature()", () => {
         copy.commandNext,
         copy.commandNextWith,
         copy.commandNextWithout,
+        copy.commandReopen,
       ]);
     });
 
@@ -184,6 +192,7 @@ describe("createLiveGameFeature()", () => {
         copy.helpNext,
         copy.helpNextWith,
         copy.helpNextWithout,
+        copy.helpReopen,
       ]);
     });
 
@@ -193,6 +202,7 @@ describe("createLiveGameFeature()", () => {
         russian.commandNext,
         russian.commandNextWith,
         russian.commandNextWithout,
+        russian.commandReopen,
       ]);
     });
 
@@ -226,6 +236,12 @@ describe("createLiveGameFeature()", () => {
       await build().commands[3]?.run("the-context" as never);
 
       expect(onNextWithoutSpy).toHaveBeenCalledWith(expect.anything(), "the-context");
+    });
+
+    it("should route reopen to its own handler", async () => {
+      await build().commands[4]?.run("the-context" as never);
+
+      expect(onReopenSpy).toHaveBeenCalledWith(expect.anything(), "the-context");
     });
 
     it("should hand its handlers a context carrying the repository", async () => {

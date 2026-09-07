@@ -21,7 +21,7 @@ Name it `*.integration.spec.ts`, so nobody mistakes it for the default, and put
 it beside the code like every other spec. `npm run test:unit` and
 `npm run test:integration` run them separately; `npm test` runs both.
 
-Seven exist. Three cover the contracts:
+Eight exist. Four cover the contracts:
 
 - **`src/feature-installer.integration.spec.ts`** drives a real grammY `Bot`
   through `bot.handleUpdate()`, intercepting the network at
@@ -34,6 +34,11 @@ Seven exist. Three cover the contracts:
   would assert nothing. Set `process.env.DB_PATH` before importing, because
   `sqlite-connection.ts` opens the connection at module load — and close the connection before
   deleting the file, or Windows refuses and the temp files pile up.
+- **`shared/repository/sqlite-connection.integration.spec.ts`** writes a file in the
+  schema of an older release with plain `node:sqlite` **before** importing the
+  connection, then asserts the column the release added is there. It is the only
+  gate on that path: `docs:check` compares `CREATE` statements and never sees an
+  `ALTER`, and a fresh file gets the column from `CREATE TABLE` without it.
 - **`shared/telegram/api-retry.integration.spec.ts`** installs the real transformer
   over a fake wire on a real `Bot`. Order matters and reads backwards: the **last**
   transformer installed is the outermost, so the wire goes on first. It pins the

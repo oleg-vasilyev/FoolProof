@@ -31,6 +31,7 @@ quietly lose the other.
 | [Technical requirements for callbacks](#technical-requirements-for-callbacks) | The 64-byte limit and what has to fit in it |
 | [Merging two names into one](#merging-two-names-into-one) | The `/merge` screen, what it refuses, and why there is no undo |
 | [Replacing one name by another for one evening](#replacing-one-name-by-another-for-one-evening) | The `/replace` correction, why it takes typed names, what it refuses, and what it re-checks before writing |
+| [Reopening the last game](#reopening-the-last-game) | The `/reopen` correction, what comes back, and why a reopened card has no Cancel and is never abandoned |
 | [Data model](#data-model) | The schema, then what every picture is computed from — the chronology, the awards, the player card |
 | [Invariants](#invariants) | The handful of things that must never stop being true |
 | [What survives a failure](#what-survives-a-failure) | Restarts, crashes, deploys, backups, and what `/status` reports |
@@ -472,18 +473,23 @@ RECORDING --Back, no exits yet--> PICK_STARTER (starter is reset)
 RECORDING --one player left--> READY (the last one is the fool, automatic)
 RECORDING --Draw------------> READY (the two remaining share a position)
 
-READY --Confirm-------------> FROZEN (terminal, written to the database)
+READY --Confirm-------------> FROZEN (written to the database)
 READY --Back----------------> RECORDING
 
+FROZEN --/reopen, latest game only--> READY (reopened: no Cancel, never abandoned)
+
 ANY live state --3 h idle--> ABANDONED (terminal, NOT written to the database)
+a reopened card, READY --3 h idle--> FROZEN (as it stands)
+a reopened card, not READY --3 h idle--> stays live
 ```
 
 `CANCELLED` and `ABANDONED` are never written to the database at all. This is a
 deliberate decision: losing one unfinished game a month is cheaper than dragging a
 `nullable position` through the whole schema.
 
-`FROZEN` is irreversible. The keyboard is removed entirely and the result stays in
-the text. There is no separate rollback command.
+`FROZEN` removes the keyboard entirely and leaves the result in the text; the one way
+back is [`/reopen`](#reopening-the-last-game), which reaches the latest recorded game
+and nothing older.
 
 ### When buttons appear
 
@@ -797,7 +803,61 @@ as toasts: the screen cannot know what will have changed by the time it is tappe
 *through the card*: nothing a player taps on a card can change a confirmed result. A
 repointed `player_id` or a renumbered `seat_index` is a correction of who sat there,
 not of what happened, and the order of columns on the chronology poster follows the
-corrected seating.
+corrected seating. What happened is corrected the other way round, by making the
+game a card again.
+
+---
+
+## Reopening the last game
+
+A real evening recorded the wrong fool in one game: a tap landed on the wrong name,
+nobody looked before Confirm, and the record was wrong until somebody edited the
+database by hand. `/reopen` is that correction from the chat. It takes no argument
+and reaches **the latest recorded game of the chat**, whichever evening it belongs
+to — the mistake is noticed on the standings or on the `/stats` poster, so the game
+it concerns is nearly always the last one, and an older one is left to whoever runs
+the bot, the same line `/replace` draws.
+
+What comes back is the card **as it stood just before Confirm**: the finalists'
+events — the ones Confirm wrote, at the last position — are deleted, the game is
+unfrozen in `READY`, and a fresh card message is posted with the marks up to that
+point and the usual Back and Confirm. Back then takes the wrong taps off one at a
+time and the table records the rest again; Confirm is the ordinary Confirm, and the
+finalists are written afresh in the name of whoever taps it. The old result message
+is edited to say the game was reopened, with no keyboard, so nothing in the chat
+still looks like the record. The game keeps its `started_at`, so it keeps its place
+in the series and its number: a card is numbered by its own game (`numberOfGame`),
+never by counting from *now*, which is what a card reopened the next day would
+otherwise get wrong.
+
+Three things a reopened card does differently, all because it is a real game and
+not a draft:
+
+- **No Cancel.** Cancel deletes the row, and a reopened row is a result somebody
+  played for. The state carries `reopened`, the reducer refuses the action and the
+  keyboard does not draw the button — one fact, in the domain, read by both. Back
+  all the way down leaves a card asking who went first, and the only way off it is
+  to play it through to Confirm; until somebody does, the chat opens no other card.
+- **Never abandoned.** The idle sweep deletes an abandoned card, which here would
+  delete a recorded game. So a reopened card standing in `READY` is **frozen again
+  as it stands** when it goes quiet for three hours — the result as tapped, in the
+  name of whoever reopened it, which is what `reopened_by` is a Telegram id for. A
+  reopened card that Back has taken out of `READY` is left live: freezing it would
+  write a result nobody tapped, and the chat is blocked from a new card only until
+  somebody finishes this one.
+- **It refuses nothing on its own.** `/reopen` with a live card is refused the way
+  every card-opening command is, as a reply to the live card; with nothing recorded
+  it says so.
+
+Order matters at the edge, and the order is: post the new card, then unfreeze.
+Telegram refusing the message leaves the database untouched — no half-reopened game,
+nothing for a restart to redraw wrongly — and the transaction that unfreezes also
+points the row at the new message, so a restart between the two finds either a
+frozen game or a live card with a message to redraw, never a result message wearing a
+keyboard.
+
+While the card is live the game is not in `game_series`, so `/stats` and `/next`
+do not see it — the same as any game before Confirm.
 
 ---
 
@@ -821,7 +881,8 @@ CREATE TABLE games (
   starter_player_id INTEGER REFERENCES players(id),
   started_at        TEXT NOT NULL DEFAULT (datetime('now')),
   confirmed_at      TEXT,
-  last_touched_at   TEXT NOT NULL DEFAULT (datetime('now'))
+  last_touched_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  reopened_by       INTEGER
 );
 CREATE INDEX idx_games_chat_started ON games(chat_id, started_at);
 
@@ -1695,9 +1756,12 @@ bundled with Node 24 is well past both.
    two names one player a repointed foreign key rather than a rewrite
 5. **`actor_tg_id` is written on every event.** It gives the "who keeps the records"
    metric
-6. **A game in `FROZEN` is immutable through the card.** Who sat in it may still be
-   corrected — [Replacing one name by another](#replacing-one-name-by-another-for-one-evening)
-   says how far that goes
+6. **A game in `FROZEN` is immutable through the card while it stays frozen.** Who
+   sat in it may still be corrected —
+   [Replacing one name by another](#replacing-one-name-by-another-for-one-evening)
+   says how far that goes — and what happened in it is corrected only by
+   [reopening it](#reopening-the-last-game), which makes it a live card again
+   rather than editing a frozen one
 7. **A player row exists only while something still points at it.** Discarding a game
    deletes every player in that chat left unreferenced by `game_players`,
    `game_events` and `games.starter_player_id`, because `/game` creates them before
@@ -1892,13 +1956,15 @@ exactly why the supervisor tells the new process how the old one ended.
 | A single player in the list | Reject, a minimum of two |
 | Duplicate names in one `/game` | Reject with a message |
 | An unknown name | Create the player silently — a typo becomes a player, and `/merge` is how it is undone |
+| The wrong fool was confirmed | `/reopen` brings the last game back as a card standing before Confirm; Back and Confirm do the rest |
+| A reopened card is forgotten | Frozen again as it stands after three hours if it is `READY`; left live otherwise, since nothing tapped is invented |
 
 Two the bot does **not** handle yet, both found while building the end-to-end
 harness rather than in a game:
 
 | Situation | What happens today |
 |---|---|
-| Somebody deletes the bot's card message in Telegram | The row stays live, so there is nothing to tap and nothing to cancel, and `/game` is refused until the idle sweep abandons it three hours later. The startup redraw deletes a game whose message was never posted, but not one whose message is gone |
+| Somebody deletes the bot's card message in Telegram | The row stays live, so there is nothing to tap and nothing to cancel, and `/game` is refused until the idle sweep abandons it three hours later. The startup redraw deletes a game whose message was never posted, but not one whose message is gone. A reopened card that Back took out of `READY` is never swept, so deleting its message leaves the chat with the operator |
 | `Ctrl+C` reaches the bot on Windows through a parent process | It cannot: a spawned parent cannot deliver `SIGINT`, so the graceful flush is skipped and the last debounced edit is lost. In a terminal the console sends the signal to the whole group, which is the case that matters |
 
 ---

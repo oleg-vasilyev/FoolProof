@@ -13,6 +13,7 @@ export interface GameRecord {
   starter_player_id: number | null;
   started_at: string;
   confirmed_at: string | null;
+  reopened_by: number | null;
 }
 
 export interface SeatRecord {
@@ -86,6 +87,8 @@ export interface CardRepository {
   liveCards(): readonly CardRecord[];
   cardById(gameId: number): CardRecord | null;
   lastGame(chatId: number): LastGame | null;
+  latestFrozenCard(chatId: number): CardRecord | null;
+  reopenGame(gameId: number, messageId: number, actorTgId: number): boolean;
 
   openGame(chatId: number, playerIds: readonly number[]): number;
   attachMessage(gameId: number, messageId: number): void;
@@ -98,7 +101,7 @@ export interface CardRepository {
   discardGame(gameId: number): void;
 
   idleCards(idleSeconds: number): readonly GameRecord[];
-  gameNumberInSeries(chatId: number): number;
+  numberOfGame(gameId: number): number;
 }
 
 export interface RosterRepository {

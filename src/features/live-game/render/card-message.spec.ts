@@ -35,7 +35,7 @@ const TWO_EXITS = [ANYA, 2];
 const TWICE = 2;
 
 const stateWith = (over: Partial<CardState>): CardState =>
-  ({ seats: [], starterSlot: OLEG, exits: [], drawAccepted: false, ...over }) as CardState;
+  ({ seats: [], starterSlot: OLEG, exits: [], drawAccepted: false, reopened: false, ...over }) as CardState;
 
 const linesOf = (rendered: string): readonly string[] => rendered.split("\n");
 

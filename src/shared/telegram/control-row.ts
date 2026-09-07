@@ -2,11 +2,14 @@ import type { InlineButton } from "#shared/telegram/inline-keyboard.ts";
 
 
 export interface Controls {
-  readonly cancel: InlineButton;
+  readonly cancel: InlineButton | null;
   readonly back: InlineButton;
   readonly wayOn: InlineButton | null;
   readonly anythingToUndo: boolean;
 }
+
+const present = (button: InlineButton | null): readonly InlineButton[] =>
+  button === null ? [] : [button];
 
 export const controlRow = ({
   cancel,
@@ -14,6 +17,6 @@ export const controlRow = ({
   wayOn,
   anythingToUndo,
 }: Controls): readonly InlineButton[] => [
-  anythingToUndo ? back : cancel,
-  ...(wayOn === null ? [] : [wayOn]),
+  ...present(anythingToUndo ? back : cancel),
+  ...present(wayOn),
 ];

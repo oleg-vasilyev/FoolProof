@@ -21,6 +21,8 @@ const MESSAGE_ID = 500;
 
 const IDLE_SECONDS = 10_800;
 
+const NO_SUCH_GAME = 987_654;
+
 const NONE = 0;
 
 const ONCE = 1;
@@ -861,6 +863,121 @@ describe("confirmGame()", () => {
   });
 });
 
+describe("latestFrozenCard()", () => {
+  it("should answer null in a chat with no recorded game", () => {
+    repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));
+
+    expect(repo.latestFrozenCard(CHAT_ID)).toBeNull();
+  });
+
+  it("should find the newest confirmed game of that chat with its seats and every exit", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
+    const newest = playFullGame(ids, [ids[2] ?? NONE, ids[0] ?? NONE], [ids[1] ?? NONE]);
+    const card = repo.latestFrozenCard(CHAT_ID);
+
+    expect(card?.game.id).toBe(newest);
+    expect(card?.seats.map((seat) => seat.display_name)).toEqual(["Oleg", "Anya", "Roma"]);
+    expect(card?.exits.map((exit) => exit.player_id)).toEqual([ids[2], ids[0], ids[1]]);
+  });
+
+  it("should not look into another chat", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+
+    expect(repo.latestFrozenCard(OTHER_CHAT_ID)).toBeNull();
+  });
+});
+
+describe("reopenGame()", () => {
+  const NEW_MESSAGE_ID = 777_000;
+
+  const REOPENER_ID = 4242;
+
+  it("should take the last place off, unfreeze the row and point it at the new card", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    const gameId = playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
+
+    const reopened = repo.reopenGame(gameId, NEW_MESSAGE_ID, REOPENER_ID);
+    const card = repo.cardById(gameId);
+
+    expect(reopened).toBe(true);
+    expect(card?.exits.map((exit) => exit.player_id)).toEqual([ids[0], ids[1]]);
+    expect(card?.game).toMatchObject({
+      confirmed_at: null,
+      state: "READY",
+      message_id: NEW_MESSAGE_ID,
+      reopened_by: REOPENER_ID,
+    });
+  });
+
+  it("should take both finalists off when the last place was shared", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    const gameId = playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE, ids[2] ?? NONE]);
+
+    repo.reopenGame(gameId, NEW_MESSAGE_ID, REOPENER_ID);
+
+    expect(repo.cardById(gameId)?.exits.map((exit) => exit.player_id)).toEqual([ids[0]]);
+  });
+
+  it("should advance the version so a stale tap on the old message is refused", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    const gameId = playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    const before = repo.cardById(gameId)?.game.state_version ?? NONE;
+
+    repo.reopenGame(gameId, NEW_MESSAGE_ID, REOPENER_ID);
+
+    expect(repo.cardById(gameId)?.game.state_version).toBe(before + 1);
+  });
+
+  it("should make the game the chat's live card again", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    const gameId = playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+
+    repo.reopenGame(gameId, NEW_MESSAGE_ID, REOPENER_ID);
+
+    expect(repo.liveCardInChat(CHAT_ID)?.game.id).toBe(gameId);
+  });
+
+  it("should touch nothing and say so when the game is not frozen", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    const gameId = repo.openGame(CHAT_ID, ids);
+    repo.appendExit(gameId, ids[0] ?? NONE, ONCE, ACTOR_ID);
+
+    const reopened = repo.reopenGame(gameId, NEW_MESSAGE_ID, REOPENER_ID);
+    const card = repo.cardById(gameId);
+
+    expect(reopened).toBe(false);
+    expect(card?.exits).toHaveLength(ONCE);
+    expect(card?.game.reopened_by).toBeNull();
+  });
+
+  it("should keep the game where it was in the series", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    const gameId = playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+
+    repo.reopenGame(gameId, NEW_MESSAGE_ID, REOPENER_ID);
+
+    expect(repo.numberOfGame(gameId)).toBe(TWO);
+  });
+
+  it("should let Confirm freeze it again with the mark taken off", () => {
+    const ids = seedPlayers("Oleg", "Anya", "Roma");
+    const gameId = playFullGame(ids, [ids[0] ?? NONE, ids[1] ?? NONE], [ids[2] ?? NONE]);
+    repo.reopenGame(gameId, NEW_MESSAGE_ID, REOPENER_ID);
+    repo.dropLastExit(gameId);
+    repo.appendExit(gameId, ids[2] ?? NONE, TWO, ACTOR_ID);
+
+    repo.confirmGame(gameId, [{ playerId: ids[1] ?? NONE, position: THREE }], ACTOR_ID, THREE);
+    const card = repo.cardById(gameId);
+
+    expect(card?.game).toMatchObject({ state: "FROZEN", reopened_by: null });
+    expect(card?.game.confirmed_at).not.toBeNull();
+    expect(repo.lastGame(CHAT_ID)?.loserIds).toEqual([ids[1]]);
+  });
+});
+
 describe("forgetUnplayedPlayers()", () => {
   it("should forget a player created for a table that never became a game", () => {
     repo.createPlayer(CHAT_ID, "Kmi");
@@ -1049,26 +1166,70 @@ describe("idleCards()", () => {
 
     expect(repo.idleCards(IDLE_SECONDS)).toHaveLength(NONE);
   });
-});
 
-describe("gameNumberInSeries()", () => {
-  it("should start at one in an empty chat", () => {
-    expect(repo.gameNumberInSeries(CHAT_ID)).toBe(ONCE);
+  it("should hand over a reopened card that still stands ready, so it can be frozen again", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    const gameId = playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    repo.reopenGame(gameId, MESSAGE_ID, ACTOR_ID);
+    db.prepare("UPDATE games SET last_touched_at = datetime('now','-4 hours')").run();
+
+    expect(repo.idleCards(IDLE_SECONDS).map((game) => game.reopened_by)).toEqual([ACTOR_ID]);
   });
 
-  it("should advance with each confirmed game", () => {
+  it("should leave a reopened card alone once Back has taken it out of ready", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    const gameId = playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    repo.reopenGame(gameId, MESSAGE_ID, ACTOR_ID);
+    repo.updateCard(gameId, "RECORDING", TWO, ids[0] ?? NONE);
+    db.prepare("UPDATE games SET last_touched_at = datetime('now','-4 hours')").run();
+
+    expect(repo.idleCards(IDLE_SECONDS)).toHaveLength(NONE);
+  });
+});
+
+describe("numberOfGame()", () => {
+  it("should number the first game of an empty chat one", () => {
+    const gameId = repo.openGame(CHAT_ID, seedPlayers("Oleg", "Anya"));
+
+    expect(repo.numberOfGame(gameId)).toBe(ONCE);
+  });
+
+  it("should answer one for a game that does not exist", () => {
+    expect(repo.numberOfGame(NO_SUCH_GAME)).toBe(ONCE);
+  });
+
+  it("should advance with each confirmed game before it", () => {
     const ids = seedPlayers("Oleg", "Anya");
     playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    const gameId = repo.openGame(CHAT_ID, ids);
 
-    expect(repo.gameNumberInSeries(CHAT_ID)).toBe(2);
+    expect(repo.numberOfGame(gameId)).toBe(2);
   });
 
   it("should restart after a long gap", () => {
     const ids = seedPlayers("Oleg", "Anya");
     playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
     ageAllGames("-2 days");
+    const gameId = repo.openGame(CHAT_ID, ids);
 
-    expect(repo.gameNumberInSeries(CHAT_ID)).toBe(ONCE);
+    expect(repo.numberOfGame(gameId)).toBe(ONCE);
+  });
+
+  it("should number a game by where it started, not by when it is asked", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    const first = playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    const second = playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    ageAllGames("-2 days");
+
+    expect([repo.numberOfGame(first), repo.numberOfGame(second)]).toEqual([ONCE, TWO]);
+  });
+
+  it("should not count a game of another chat", () => {
+    const ids = seedPlayers("Oleg", "Anya");
+    playFullGame(ids, [ids[0] ?? NONE], [ids[1] ?? NONE]);
+    const gameId = repo.openGame(OTHER_CHAT_ID, ids);
+
+    expect(repo.numberOfGame(gameId)).toBe(ONCE);
   });
 });
 

@@ -22,6 +22,7 @@ const SCENARIOS_OF: Record<string, readonly string[]> = {
     "asking-for-names",
     "changing-the-table",
     "surviving-trouble",
+    "reopening-the-last-game",
     "edge/hostile-names",
     "edge/a-table-too-big",
   ],

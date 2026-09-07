@@ -29,6 +29,8 @@ const THREE = 3;
 
 const STARTER_ID = 9;
 
+const REOPENER_ID = 7777;
+
 const AS_NUMBER = 111;
 
 const AS_NULLABLE_NUMBER = 222;
@@ -101,6 +103,7 @@ describe("row mappers", () => {
       starter_player_id: STARTER_ID,
       started_at: "2026-07-24 20:00:00",
       confirmed_at: null,
+      reopened_by: REOPENER_ID,
     };
 
     it("should take each column through the coercion its type needs", () => {
@@ -113,7 +116,15 @@ describe("row mappers", () => {
         starter_player_id: AS_NULLABLE_NUMBER,
         started_at: AS_TEXT,
         confirmed_at: AS_NULLABLE_TEXT,
+        reopened_by: AS_NULLABLE_NUMBER,
       });
+    });
+
+    it("should read who reopened it as nullable, since most games never were", () => {
+      toGame(row);
+
+      expect(values.nullableNumSpy).toHaveBeenCalledWith(REOPENER_ID);
+      expect(values.requireNumSpy).not.toHaveBeenCalledWith(REOPENER_ID);
     });
 
     it("should read the starter as nullable, since nobody may have opened yet", () => {

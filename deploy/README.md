@@ -48,8 +48,11 @@ sudo chmod 440 /etc/sudoers.d/foolproof
 Copy an existing database to the path `configure-server.sh` names as `DB_PATH`
 before the first start (with its `-wal` and `-shm` sidecars —
 [README.md](../README.md#two-databases-and-only-one-of-them-is-real) says why all
-three); the schema creates whatever is missing, so a file from an older version
-needs no migration.
+three); the schema creates whatever is missing and adds a column an older file
+lacks as the connection opens, so a file from an older version needs no migration.
+The other direction is not free: a release before 1.19 does not know a reopened
+card from an abandoned one, so rolling back while one is live lets its idle sweep
+delete a recorded game three hours later — confirm the card first.
 
 Then hand it to systemd, **enabled but not yet started**: the configuration is not
 there yet, and it is the next step that starts the bot and watches it come up.

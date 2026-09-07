@@ -39,6 +39,16 @@ export class ContextStub {
   public command(text: string): Command {
     return {
       chat: { id: CHAT_ID },
+      from: { id: USER_ID },
+      msg: { message_id: COMMAND_MESSAGE_ID, text },
+      reply: this.replySpy,
+    } as unknown as Command;
+  }
+
+  public commandFromNobody(text: string): Command {
+    return {
+      chat: { id: CHAT_ID },
+      from: undefined,
       msg: { message_id: COMMAND_MESSAGE_ID, text },
       reply: this.replySpy,
     } as unknown as Command;

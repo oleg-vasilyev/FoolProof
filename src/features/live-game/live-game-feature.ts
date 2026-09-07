@@ -10,6 +10,7 @@ import { onGame } from "#live-game/bot/lineup/lineup-from-names.ts";
 import { onNext, onNextWith, onNextWithout } from "#live-game/bot/lineup/lineup-from-last-game.ts";
 import { onNamesReply } from "#live-game/bot/lineup/names-reply.ts";
 import { onTap } from "#live-game/bot/card/tap-handler.ts";
+import { onReopen } from "#live-game/bot/card/reopen-handler.ts";
 import { onSeatingTap } from "#live-game/bot/seating-screen.ts";
 import { onLeavingTap } from "#live-game/bot/leaving-screen.ts";
 import { createPromptRegistry } from "#live-game/bot/prompt-registry.ts";
@@ -66,6 +67,12 @@ export const createLiveGameFeature = (deps: LiveGameDeps): Feature => {
         menuDescription: (locale) => copyIn(locale).commandNextWithout,
         help: (locale) => copyIn(locale).helpNextWithout,
         run: (ctx) => onNextWithout(context, ctx),
+      },
+      {
+        command: "reopen",
+        menuDescription: (locale) => copyIn(locale).commandReopen,
+        help: (locale) => copyIn(locale).helpReopen,
+        run: (ctx) => onReopen(context, ctx),
       },
     ],
 

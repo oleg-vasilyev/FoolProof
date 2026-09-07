@@ -70,7 +70,14 @@ const THREE_SEATS = [
 ];
 
 const stateWith = (over: Partial<CardState>): CardState =>
-  ({ seats: THREE_SEATS, starterSlot: OLEG, exits: [], drawAccepted: false, ...over }) as CardState;
+  ({
+    seats: THREE_SEATS,
+    starterSlot: OLEG,
+    exits: [],
+    drawAccepted: false,
+    reopened: false,
+    ...over,
+  }) as CardState;
 
 const encodedAs = (payload: CallbackPayload): string =>
   `cb(${payload.gameId},${payload.action},${String(payload.slot)},${payload.version})`;
@@ -207,6 +214,10 @@ describe("renderKeyboard()", () => {
           version: VERSION,
         }),
       });
+    });
+
+    it("should hand it no Cancel on a reopened card, which is a real game and not a draft", () => {
+      expect(handedOver(stateWith({ reopened: true }))?.cancel).toBeNull();
     });
 
     it("should hand it a Back carrying the back action", () => {

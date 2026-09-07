@@ -13,6 +13,7 @@ export interface CardState {
   readonly starterSlot: number | null;
   readonly exits: readonly number[];
   readonly drawAccepted: boolean;
+  readonly reopened: boolean;
 }
 
 export type Action =
@@ -77,7 +78,7 @@ export const starterPlayerId = (state: CardState): number | null =>
   state.starterSlot === null ? null : (seatAt(state, state.starterSlot)?.playerId ?? null);
 
 export const cancelHonoured = (state: CardState): boolean =>
-  state.exits.length === 0 && !state.drawAccepted;
+  state.exits.length === 0 && !state.drawAccepted && !state.reopened;
 
 const isSlot = (state: CardState, slot: number): boolean =>
   Number.isInteger(slot) && slot >= 0 && slot < state.seats.length;
