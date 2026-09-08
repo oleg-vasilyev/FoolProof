@@ -13,11 +13,16 @@ const onReplaceSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<voi
 
 const onTapSpy = vi.fn(async (_context: unknown, _ctx: unknown): Promise<void> => undefined);
 
+const onNamesReplySpy = vi.fn(
+  async (_context: unknown, _ctx: unknown): Promise<void> => undefined
+);
+
 const REPLACE_TAPS = /^the-replace-taps$/;
 
 vi.mock("#replace-names/bot/replace-handler.ts", () => ({
   onReplace: (context: unknown, ctx: unknown) => onReplaceSpy(context, ctx),
   onTap: (context: unknown, ctx: unknown) => onTapSpy(context, ctx),
+  onNamesReply: (context: unknown, ctx: unknown) => onNamesReplySpy(context, ctx),
 }));
 
 vi.mock("#replace-names/render/replace-callback-codec.ts", () => ({ REPLACE_TAPS }));
@@ -76,11 +81,18 @@ describe("createReplaceNamesFeature()", () => {
   });
 
   describe("what it listens to", () => {
-    it("should register a tap listener and nothing else", () => {
+    it("should register one tap listener and one text listener", () => {
       build().listen?.(listeners);
 
       expect(listeners.onTapSpy).toHaveBeenCalledTimes(ONCE);
-      expect(listeners.onTextSpy).not.toHaveBeenCalled();
+      expect(listeners.onTextSpy).toHaveBeenCalledTimes(ONCE);
+    });
+
+    it("should send a text message to its reply handler", async () => {
+      build().listen?.(listeners);
+      await listeners.textListener()?.("the-text" as never);
+
+      expect(onNamesReplySpy).toHaveBeenCalledWith(expect.anything(), "the-text");
     });
 
     it("should claim only the taps its own codec encodes", () => {

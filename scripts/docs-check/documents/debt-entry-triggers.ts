@@ -14,7 +14,7 @@ const AFTER_THE_PREAMBLE = 1;
 const AN_ENTRY = /^## (.+)$/gm;
 
 const A_CONDITION =
-  "when|once|if|until|as soon as|the day|the next time|the first time|the next phase|the phase that";
+  "when|once|if|until|as soon as|the day|the moment|the next time|the first time|the next phase|the phase that";
 
 const A_STATED_CONDITION = new RegExp(`\\b(?:${A_CONDITION})\\b`, "i");
 

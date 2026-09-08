@@ -1,12 +1,17 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { cardRecordOf } from "#shared/repository/database-records.stub.ts";
+import { ForceReplyPromptStub, PROMPT_MESSAGE_ID } from "#shared/telegram/force-reply-prompt.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
-import { CHAT_ID, COMMAND_MESSAGE_ID, ContextStub, SENT_MESSAGE_ID } from "#live-game/bot/grammy-context.stub.ts";
+import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
 import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
 
+
+const forceReply = new ForceReplyPromptStub();
+
+vi.mock("#shared/telegram/force-reply-prompt.ts", () => forceReply.module);
 
 const { askForNames, commandText, refusedBecauseLive } = await import(
   "#live-game/bot/card-context.ts"
@@ -89,50 +94,23 @@ describe("askForNames()", () => {
   const context = () => contextOf(new RepositoryStub(), prompts);
 
   beforeEach(() => {
+    vi.clearAllMocks();
+
     prompts = new PromptRegistryStub();
     ctx = new ContextStub();
   });
 
-  it("should send the question it was given", async () => {
-    await askForNames(context(), ctx.command("/game"), QUESTION, PLACEHOLDER);
+  it("should ask the question as a forced reply to the command", async () => {
+    const command = ctx.command("/game");
 
-    expect(ctx.lastReply().text).toBe(QUESTION);
+    await askForNames(context(), command, QUESTION, PLACEHOLDER);
+
+    expect(forceReply.askAsReplySpy).toHaveBeenCalledWith(command, QUESTION, PLACEHOLDER);
   });
 
-  it("should force a reply so the input field opens", async () => {
+  it("should remember the id of the prompt that was sent", async () => {
     await askForNames(context(), ctx.command("/game"), QUESTION, PLACEHOLDER);
 
-    expect(ctx.lastReply().options.reply_markup).toMatchObject({
-      force_reply: true,
-      selective: true,
-    });
-  });
-
-  it("should set the placeholder it was given", async () => {
-    await askForNames(context(), ctx.command("/game"), QUESTION, PLACEHOLDER);
-
-    expect(ctx.lastReply().options.reply_markup).toMatchObject({
-      input_field_placeholder: PLACEHOLDER,
-    });
-  });
-
-  it("should quote the command message", async () => {
-    await askForNames(context(), ctx.command("/game"), QUESTION, PLACEHOLDER);
-
-    expect(ctx.lastReply().options.reply_parameters).toEqual({
-      message_id: COMMAND_MESSAGE_ID,
-    });
-  });
-
-  it("should quote nothing when the command carried no message", async () => {
-    await askForNames(context(), ctx.commandWithoutMessage(), QUESTION, PLACEHOLDER);
-
-    expect(ctx.lastReply().options.reply_parameters).toBeUndefined();
-  });
-
-  it("should remember the sent prompt id", async () => {
-    await askForNames(context(), ctx.command("/game"), QUESTION, PLACEHOLDER);
-
-    expect(prompts.rememberSpy).toHaveBeenCalledWith(CHAT_ID, SENT_MESSAGE_ID);
+    expect(prompts.rememberSpy).toHaveBeenCalledWith(CHAT_ID, PROMPT_MESSAGE_ID);
   });
 });

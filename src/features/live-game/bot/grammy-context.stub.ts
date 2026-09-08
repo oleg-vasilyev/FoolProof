@@ -12,12 +12,6 @@ export const COMMAND_MESSAGE_ID = 10;
 
 export const SENT_MESSAGE_ID = 500;
 
-interface QuotedMessage {
-  readonly text: string | undefined;
-  readonly fromBot: boolean;
-  readonly senderless?: boolean;
-}
-
 const lastCall = (spy: ReturnType<typeof vi.fn>): { text: string; options: Record<string, unknown> } => {
   const calls = spy.mock.calls;
   const last = calls[calls.length - 1];
@@ -62,23 +56,11 @@ export class ContextStub {
     } as unknown as Command;
   }
 
-  public textMessage(text: string, quoted?: QuotedMessage): TextMessage {
+  public textMessage(text: string): TextMessage {
     return {
       chat: { id: CHAT_ID },
       me: { id: BOT_ID },
-      message: {
-        text,
-        reply_to_message:
-          quoted === undefined
-            ? undefined
-            : {
-                text: quoted.text,
-                from:
-                  quoted.senderless === true
-                    ? undefined
-                    : { id: quoted.fromBot ? BOT_ID : USER_ID },
-              },
-      },
+      message: { text },
       reply: this.replySpy,
     } as unknown as TextMessage;
   }

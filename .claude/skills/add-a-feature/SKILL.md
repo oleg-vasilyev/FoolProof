@@ -76,8 +76,9 @@ here:
 
 - **Commands must be registered before any `bot.on("message:text")` filter**, or a
   text handler that returns without calling `next()` silently swallows every
-  command below it. The installer registers every feature's commands first, then
-  the listeners, so a feature physically cannot get this wrong.
+  command below it. The installer registers commands first, then listeners, and calls
+  `next()` after each text listener — which is what lets a second feature hear text
+  at all; a scenario replying to the *other* feature's question proves it.
 - **`onTap` takes the pattern the feature owns**, not just a handler:
   `listeners.onTap(MERGE_TAPS, handler)`. A bare `bot.on("callback_query:data")`
   per feature meant the first feature registered saw every tap and answered "Card

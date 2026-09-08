@@ -103,9 +103,8 @@ Reading: `chat.captions()`, `chat.cardText()`, `chat.lastText()`, `chat.lastAnsw
 - **Assert the text before the captions when a screen boundary is involved.** A new
   screen inserted before an old one usually lists the same names, so a scenario
   asserting only `captions()` keeps passing while looking at a different message —
-  guarding nothing, at exactly the moment there is something new to guard. This has
-  happened: the seating screen slipped in front of the card and every assertion in
-  `changing-the-table` stayed green.
+  guarding nothing, exactly when there is something new to guard. It has happened: the
+  seating screen slipped in front of the card and `changing-the-table` stayed green.
 - **Keep a button's data from the state the invariant is about, not the state the
   flow reaches first.** A scenario that saves a tap for later reads it off whichever
   screen is standing at the time, and that is usually the emptiest one. The
@@ -119,8 +118,10 @@ Reading: `chat.captions()`, `chat.cardText()`, `chat.lastText()`, `chat.lastAnsw
   scenario that leaves one open and names the message, because the chat log outlives
   the database reset between files: a screen left open sits there for the rest of the
   run, tappable, against a game that no longer exists. Closing is behaviour worth its
-  own `it`, not teardown — the stale-tap scenario has to *finish* its game, since
-  Cancel is gone once an exit is recorded.
+  own `it`, not teardown — the stale-tap scenario *finishes* its game, since Cancel is
+  gone once an exit is recorded.
+- **Captions are derived, never typed from the command** — the card rotates to the
+  lowest player id, so `Anya, Roma` after Roma has played reads `Roma, Anya`.
 
 ## Judging one you did not write
 

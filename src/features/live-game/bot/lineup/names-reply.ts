@@ -1,5 +1,6 @@
 import type { TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import { LOCALES } from "#shared/locale/locales.ts";
+import { answeredPromptText } from "#shared/telegram/force-reply-prompt.ts";
 import { copyIn } from "#live-game/copy.ts";
 import { copyFor, refusedBecauseLive, type CardContext } from "#live-game/bot/card-context.ts";
 import { openFromNames } from "#live-game/bot/lineup/lineup-from-names.ts";
@@ -24,16 +25,11 @@ const promptsIn = (locale: (typeof LOCALES)[number]): readonly (readonly [string
 
 const ANSWERED_BY = new Map<string, Answered>(LOCALES.flatMap(promptsIn));
 
-const askedIn = (text: string | undefined): Answered | null =>
-  ANSWERED_BY.get(text ?? "") ?? null;
+const askedIn = (text: string | null): Answered | null =>
+  text === null ? null : (ANSWERED_BY.get(text) ?? null);
 
 export const onNamesReply = async (context: CardContext, ctx: TextMessage): Promise<void> => {
-  const prompt = ctx.message.reply_to_message;
-  if (prompt?.from?.id !== ctx.me.id) {
-    return;
-  }
-
-  const answered = askedIn(prompt.text);
+  const answered = askedIn(answeredPromptText(ctx));
   if (answered === null) {
     return;
   }

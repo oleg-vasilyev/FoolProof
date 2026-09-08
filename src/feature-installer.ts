@@ -27,7 +27,7 @@ const helpBody = (features: readonly Feature[], locale: Locale): string => {
   return [
     copy.botLead,
     "",
-    ...listedRoutesOf(features).map((route) => route.help(locale)),
+    ...listedRoutesOf(features).flatMap((route) => [route.help(locale), ""]),
     copy.helpSelf,
     "",
     ...features.flatMap((feature) => feature.notes?.(locale) ?? []),
@@ -50,7 +50,10 @@ const addToGroupMarkup = (copy: Copy, username: string) => ({
 
 const listenersOn = (bot: Bot): Listeners => ({
   onText: (run) => {
-    bot.on("message:text", (ctx) => run(ctx));
+    bot.on("message:text", async (ctx, next) => {
+      await run(ctx);
+      await next();
+    });
   },
   onTap: (owns, run) => {
     bot.callbackQuery(owns, (ctx) => run(ctx));

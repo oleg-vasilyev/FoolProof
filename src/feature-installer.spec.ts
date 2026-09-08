@@ -172,6 +172,16 @@ describe("installFeatures()", () => {
       expect(bot.onSpy).toHaveBeenCalledWith("message:text", expect.any(Function));
     });
 
+    it("should pass a text message on to the next listener, so two features may read it", async () => {
+      const nextSpy = vi.fn().mockResolvedValue(undefined);
+      install([listensToText("game")]);
+      const wired = bot.onSpy.mock.calls[0]?.[1] as (ctx: unknown, next: () => Promise<void>) => Promise<void>;
+
+      await wired({}, nextSpy);
+
+      expect(nextSpy).toHaveBeenCalledTimes(ONCE);
+    });
+
     it("should wire a tap listener to the pattern the feature says it owns", () => {
       install([listensToTaps("game")]);
 
@@ -316,13 +326,19 @@ describe("installFeatures()", () => {
       expect(lines.length).toBeGreaterThan(2);
     });
 
-    it("should lay the whole message out in a fixed shape", async () => {
-      const text = await helpText([featureOf({ name: "game", notes: () => ["a note"] })]);
+    it("should lay the whole message out in a fixed shape, a blank line between commands", async () => {
+      const text = await helpText([
+        featureOf({ name: "game", notes: () => ["a note"] }),
+        featureOf({ name: "stats" }),
+      ]);
 
       expect(text.split("\n")).toEqual([
         copy.botLead,
         "",
         `/game — does it in ${DEFAULT_LOCALE}`,
+        "",
+        `/stats — does it in ${DEFAULT_LOCALE}`,
+        "",
         copy.helpSelf,
         "",
         "a note",

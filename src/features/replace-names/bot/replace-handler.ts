@@ -1,12 +1,13 @@
 import { ActionKind, Refusal } from "#replace-names/domain/replace-states.ts";
 import type { ReplaceRepository } from "#shared/repository/repository-contract.ts";
-import type { CallbackTap, Command } from "#shared/telegram/telegram-contexts.ts";
+import type { CallbackTap, Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import type { LocaleReader } from "#shared/locale/chat-locale.ts";
-import { DEFAULT_LOCALE } from "#shared/locale/locales.ts";
+import { DEFAULT_LOCALE, LOCALES } from "#shared/locale/locales.ts";
 import { parseNameList, type NamesResult } from "#shared/table/name-list.ts";
 import { NameProblem } from "#shared/table/name-problems.ts";
 import { LONGEST_NAME } from "#shared/table/table-limits.ts";
 import { toMarkup } from "#shared/telegram/inline-keyboard.ts";
+import { answeredPromptText, askAsReply } from "#shared/telegram/force-reply-prompt.ts";
 import {
   planReplacement,
   recheck,
@@ -30,9 +31,14 @@ export interface ReplaceContext {
   readonly localeIn: LocaleReader;
 }
 
+type Asked = Command | TextMessage;
+
 type NamesProblem = Exclude<NamesResult, { ok: true }>;
 
 type PlanRefusal = Exclude<PlanResult, { ok: true }>;
+
+const isOwnPrompt = (text: string): boolean =>
+  LOCALES.some((locale) => copyIn(locale).askNamesPrompt === text);
 
 const problemReply = (copy: Copy, parsed: NamesProblem): string => {
   switch (parsed.problem) {
@@ -70,7 +76,7 @@ const refusalReply = (copy: Copy, result: PlanRefusal): string => {
 const proposeOn = async (
   context: ReplaceContext,
   copy: Copy,
-  ctx: Command,
+  ctx: Asked,
   plan: Replacement
 ): Promise<void> => {
   const toId =
@@ -88,28 +94,31 @@ const proposeOn = async (
   });
 };
 
-export const onReplace = async (context: ReplaceContext, ctx: Command): Promise<void> => {
+const refusedBecauseLive = async (
+  copy: Copy,
+  context: ReplaceContext,
+  ctx: Asked
+): Promise<boolean> => {
+  if (context.repo.liveCardInChat(ctx.chat.id) === null) {
+    return false;
+  }
+
+  await ctx.reply(copy.gameRunning);
+
+  return true;
+};
+
+const planFrom = async (
+  context: ReplaceContext,
+  copy: Copy,
+  ctx: Asked,
+  names: readonly string[]
+): Promise<void> => {
   const chatId = ctx.chat.id;
-  const copy = copyIn(context.localeIn(chatId));
-
-  if (context.repo.liveCardInChat(chatId) !== null) {
-    await ctx.reply(copy.gameRunning);
-
-    return;
-  }
-
-  const parsed = parseNameList(ctx.match);
-
-  if (!parsed.ok) {
-    await ctx.reply(problemReply(copy, parsed));
-
-    return;
-  }
-
   const result = planReplacement(
     context.repo.latestEvening(chatId),
     context.repo.playersInChat(chatId),
-    parsed.names
+    names
   );
 
   if (!result.ok) {
@@ -119,6 +128,46 @@ export const onReplace = async (context: ReplaceContext, ctx: Command): Promise<
   }
 
   await proposeOn(context, copy, ctx, result.plan);
+};
+
+const replaceFrom = async (
+  context: ReplaceContext,
+  ctx: Asked,
+  text: string,
+  whenEmpty: (copy: Copy) => Promise<void>
+): Promise<void> => {
+  const copy = copyIn(context.localeIn(ctx.chat.id));
+
+  if (await refusedBecauseLive(copy, context, ctx)) {
+    return;
+  }
+
+  const parsed = parseNameList(text);
+
+  if (!parsed.ok) {
+    await (parsed.problem === NameProblem.Empty
+      ? whenEmpty(copy)
+      : ctx.reply(problemReply(copy, parsed)));
+
+    return;
+  }
+
+  await planFrom(context, copy, ctx, parsed.names);
+};
+
+export const onReplace = (context: ReplaceContext, ctx: Command): Promise<void> =>
+  replaceFrom(context, ctx, ctx.match, (copy) =>
+    askAsReply(ctx, copy.askNamesPrompt, copy.askNamesPlaceholder).then(() => undefined)
+  );
+
+export const onNamesReply = async (context: ReplaceContext, ctx: TextMessage): Promise<void> => {
+  const answered = answeredPromptText(ctx);
+
+  if (answered === null || !isOwnPrompt(answered)) {
+    return;
+  }
+
+  await replaceFrom(context, ctx, ctx.message.text, (copy) => ctx.reply(copy.askNames).then(() => undefined));
 };
 
 const cancel = async (

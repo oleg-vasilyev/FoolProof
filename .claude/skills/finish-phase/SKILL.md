@@ -212,9 +212,9 @@ reviewing, it is worth holding still for five minutes.
 
 **The other half of holding still is not yours.** A review launched while the owner is
 still refining something in the diff is killed by their next message rather than by
-your edit — one phase killed two reviews inside four minutes, both over the same
-drawing, and paid for two runs that reported nothing. Whatever is still being discussed
-with the owner, the review waits on the discussion and not on the code.
+your edit — one phase killed two reviews inside four minutes over the same drawing.
+The review waits on the discussion, not on the code; and a request sent while the
+reviewer is out is scope, landed after the report even outside the reviewer's paths.
 
 The three breaks had one shape, so the fix is a question asked **before** launching,
 not more resolve afterwards: **what does this phase change outside `src/`?** Deploy

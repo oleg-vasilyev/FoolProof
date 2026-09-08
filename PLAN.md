@@ -186,26 +186,41 @@ the bot is already where it belongs.
 `/start` stays out of `setMyCommands`: Telegram renders it as a button of its own, so
 a menu row would buy nothing.
 
+`/help` is one line per command with a blank line between them, and the notes about
+the card after the list. Telegram wraps a long line over three or four rows on a
+phone, so a list with no gaps reads as one paragraph — the command names are the
+only thing that varies from row to row, and with nothing separating them the eye has
+nowhere to land. Bold would need `parse_mode` and an escape on every help line, and
+a gap does the same job for nothing.
+
 ### A command with no names asks for them
 
 Tapping a command in Telegram's `/` menu sends it immediately — the client gives
-no chance to type arguments, and no Bot API setting changes that. So a bare
-`/game` is not an error: the bot replies with a `force_reply` prompt, the client
-opens the input field with that message quoted, and the names arrive in the next
-message. This also survives privacy mode, which hides ordinary group chatter from
-bots but always delivers replies to the bot's own messages.
+no chance to type arguments, and no Bot API setting changes that; the client also
+offers to complete a half-typed command, and accepting the completion sends it the
+same way. So **every command that needs an argument treats a bare call as a
+question, never as an error**: the bot replies with a `force_reply` prompt, the
+client opens the input field with that message quoted, and the argument arrives in
+the next message. A usage line in the chat is the wrong answer to a menu tap — it
+tells the person to type the command a second time, by hand, which is what the menu
+was there to save. This also survives privacy mode, which hides ordinary group
+chatter from bots but always delivers replies to the bot's own messages.
 
-`/next_with` does the same, with its own question and its own placeholder, because a
-menu tap is exactly how it will usually be sent. **`/next_without` no longer asks in
-words** — it draws the last line-up as buttons, and the reply path for it is gone
-rather than left unreachable: a prompt and an inline keyboard cannot share a message,
-because a message has one `reply_markup`, and the only sender of that prompt was the
-branch the screen replaced.
+`/game`, `/next_with` and `/replace` each ask their own question, with a placeholder
+showing the shape of the answer. **`/next_without` no longer asks in words** — it
+draws the last line-up as buttons, and the reply path for it is gone rather than
+left unreachable: a prompt and an inline keyboard cannot share a message, because a
+message has one `reply_markup`, and the only sender of that prompt was the branch the
+screen replaced. `/reopen`, `/merge` and `/personal` need no argument at all.
 
 The answer is recognised by matching `reply_to_message` against the bot's own id
-and then looking the **exact prompt text** up in a table of the three questions —
-which is what makes three questions share one slot per chat without any state:
-the quote inside the player's own reply says which one is being answered.
+and then looking the **exact prompt text** up in the table of questions the feature
+asks, in every language — which is what makes several questions share one slot per
+chat without any state: the quote inside the player's own reply says which one is
+being answered. Each feature reads every text message and keeps only the replies to
+its own questions, so a text listener must pass the update on to the next one;
+the installer does that once, for all of them, the same way it keeps commands ahead
+of text.
 
 A reply that still names nobody is refused in words rather than asked again. A
 second `force_reply` on the same question reads as a bot stuck in a loop, and in
@@ -767,7 +782,10 @@ find one. The confirmation is the undo.
 
 Refusals, each stated in words:
 
-- **Anything but two names.** The command's own usage line is the answer.
+- **One name, or three.** The command's own usage line is the answer. No names at
+  all is not a refusal but a question — see [A command with no names asks for
+  them](#a-command-with-no-names-asks-for-them) — and a reply to that question
+  which still names nobody gets the usage line rather than a second question.
 - **The two names are one name** under the normalisation the parser applies to
   every name, so `Рома, рома` is refused rather than silently doing nothing.
 - **No evening recorded yet.**

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
+import { ForceReplyPromptStub } from "#shared/telegram/force-reply-prompt.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { copy as russian } from "#live-game/copy.ru.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
@@ -12,6 +13,10 @@ import { CardContextStub } from "#live-game/bot/card-context.stub.ts";
 const cardContext = new CardContextStub();
 
 vi.mock("#live-game/bot/card-context.ts", () => cardContext.module);
+
+const forceReply = new ForceReplyPromptStub();
+
+vi.mock("#shared/telegram/force-reply-prompt.ts", () => forceReply.module);
 
 const openFromNamesSpy = vi.fn();
 
@@ -28,6 +33,8 @@ vi.mock("#live-game/bot/lineup/lineup-from-last-game.ts", () => ({
 const { onNamesReply } = await import("#live-game/bot/lineup/names-reply.ts");
 
 const NEVER = 0;
+
+const LINEUP = "Oleg, Anya, Roma";
 
 describe("onNamesReply()", () => {
   let repo: RepositoryStub;
@@ -50,32 +57,33 @@ describe("onNamesReply()", () => {
     ctx = new ContextStub();
 
     cardContext.refusedBecauseLiveSpy.mockResolvedValue(false);
+    forceReply.answeredPromptTextSpy.mockReturnValue(copy.lineupPrompt);
     openFromNamesSpy.mockResolvedValue(undefined);
     joinFromNamesSpy.mockResolvedValue(undefined);
   });
 
-  it("should route a reply to the line-up prompt to openFromNames", async () => {
-    const built = context();
-    const message = ctx.textMessage("Oleg, Anya, Roma", { text: copy.lineupPrompt, fromBot: true });
-
-    await onNamesReply(built, message);
-
-    expect(openFromNamesSpy).toHaveBeenCalledWith(built, message, "Oleg, Anya, Roma");
-    expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
-  });
-
-  it("should ignore a reply to a message of its own that carries no text", async () => {
-    const message = ctx.textMessage("Oleg, Anya", { text: undefined, fromBot: true });
+  it("should ask the prompt reader which question the message answers", async () => {
+    const message = ctx.textMessage(LINEUP);
 
     await onNamesReply(context(), message);
 
-    expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
+    expect(forceReply.answeredPromptTextSpy).toHaveBeenCalledWith(message);
+  });
+
+  it("should route a reply to the line-up prompt to openFromNames", async () => {
+    const built = context();
+    const message = ctx.textMessage(LINEUP);
+
+    await onNamesReply(built, message);
+
+    expect(openFromNamesSpy).toHaveBeenCalledWith(built, message, LINEUP);
     expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should recognise a prompt it asked in the other language", async () => {
+    forceReply.answeredPromptTextSpy.mockReturnValue(russian.lineupPrompt);
     const built = context();
-    const message = ctx.textMessage("Олег, Аня", { text: russian.lineupPrompt, fromBot: true });
+    const message = ctx.textMessage("Олег, Аня");
 
     await onNamesReply(built, message);
 
@@ -83,8 +91,9 @@ describe("onNamesReply()", () => {
   });
 
   it("should tell that language's joiners prompt from its line-up one", async () => {
+    forceReply.answeredPromptTextSpy.mockReturnValue(russian.joinersPrompt);
     const built = context();
-    const message = ctx.textMessage("Дима", { text: russian.joinersPrompt, fromBot: true });
+    const message = ctx.textMessage("Дима");
 
     await onNamesReply(built, message);
 
@@ -93,8 +102,9 @@ describe("onNamesReply()", () => {
   });
 
   it("should route a reply to the joiners prompt to joinFromNames", async () => {
+    forceReply.answeredPromptTextSpy.mockReturnValue(copy.joinersPrompt);
     const built = context();
-    const message = ctx.textMessage("Dima", { text: copy.joinersPrompt, fromBot: true });
+    const message = ctx.textMessage("Dima");
 
     await onNamesReply(built, message);
 
@@ -103,12 +113,9 @@ describe("onNamesReply()", () => {
   });
 
   it("should leave a reply to the old leavers prompt to somebody else", async () => {
-    const message = ctx.textMessage("Anya", {
-      text: "Кто выходит? Пришли имена.",
-      fromBot: true,
-    });
+    forceReply.answeredPromptTextSpy.mockReturnValue("Кто выходит? Пришли имена.");
 
-    await onNamesReply(context(), message);
+    await onNamesReply(context(), ctx.textMessage("Anya"));
 
     expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
     expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
@@ -116,61 +123,35 @@ describe("onNamesReply()", () => {
   });
 
   it("should forget the line-up prompt before delegating", async () => {
-    const message = ctx.textMessage("Oleg, Anya, Roma", { text: copy.lineupPrompt, fromBot: true });
-
-    await onNamesReply(context(), message);
+    await onNamesReply(context(), ctx.textMessage(LINEUP));
 
     expect(prompts.forgetSpy).toHaveBeenCalledWith(CHAT_ID);
     expect(prompts.dropUnansweredSpy).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should forget the joiners prompt before delegating", async () => {
-    const message = ctx.textMessage("Dima", { text: copy.joinersPrompt, fromBot: true });
+    forceReply.answeredPromptTextSpy.mockReturnValue(copy.joinersPrompt);
 
-    await onNamesReply(context(), message);
+    await onNamesReply(context(), ctx.textMessage("Dima"));
 
     expect(prompts.forgetSpy).toHaveBeenCalledWith(CHAT_ID);
     expect(prompts.dropUnansweredSpy).toHaveBeenCalledTimes(NEVER);
   });
 
-
   it("should ignore a reply to some other message of the bot", async () => {
-    const message = ctx.textMessage("Oleg, Anya", { text: "something else", fromBot: true });
+    forceReply.answeredPromptTextSpy.mockReturnValue("something else");
 
-    await onNamesReply(context(), message);
-
-    expect(prompts.forgetSpy).toHaveBeenCalledTimes(NEVER);
-    expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
-    expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
-  });
-
-  it("should ignore a quote of the prompt written by a person", async () => {
-    const message = ctx.textMessage("Oleg, Anya", { text: copy.lineupPrompt, fromBot: false });
-
-    await onNamesReply(context(), message);
-
-    expect(prompts.forgetSpy).toHaveBeenCalledTimes(NEVER);
-    expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
-  });
-
-  it("should ignore ordinary chatter with no quote", async () => {
-    const message = ctx.textMessage("just talking");
-
-    await onNamesReply(context(), message);
+    await onNamesReply(context(), ctx.textMessage("Oleg, Anya"));
 
     expect(prompts.forgetSpy).toHaveBeenCalledTimes(NEVER);
     expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
     expect(joinFromNamesSpy).toHaveBeenCalledTimes(NEVER);
   });
 
-  it("should ignore a reply to a message with no sender, without throwing", async () => {
-    const message = ctx.textMessage("Anya", {
-      text: copy.lineupPrompt,
-      fromBot: true,
-      senderless: true,
-    });
+  it("should ignore a message that answers no question of the bot", async () => {
+    forceReply.answeredPromptTextSpy.mockReturnValue(null);
 
-    await expect(onNamesReply(context(), message)).resolves.toBeUndefined();
+    await onNamesReply(context(), ctx.textMessage("just talking"));
 
     expect(prompts.forgetSpy).toHaveBeenCalledTimes(NEVER);
     expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
@@ -179,9 +160,8 @@ describe("onNamesReply()", () => {
 
   it("should refuse when a card went live while the line-up prompt stood", async () => {
     cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
-    const message = ctx.textMessage("Oleg, Anya, Roma", { text: copy.lineupPrompt, fromBot: true });
 
-    await onNamesReply(context(), message);
+    await onNamesReply(context(), ctx.textMessage(LINEUP));
 
     expect(cardContext.refusedBecauseLiveSpy).toHaveBeenCalled();
     expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);
@@ -190,9 +170,9 @@ describe("onNamesReply()", () => {
 
   it("should refuse when a card went live while the joiners prompt stood", async () => {
     cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
-    const message = ctx.textMessage("Dima", { text: copy.joinersPrompt, fromBot: true });
+    forceReply.answeredPromptTextSpy.mockReturnValue(copy.joinersPrompt);
 
-    await onNamesReply(context(), message);
+    await onNamesReply(context(), ctx.textMessage("Dima"));
 
     expect(cardContext.refusedBecauseLiveSpy).toHaveBeenCalled();
     expect(openFromNamesSpy).toHaveBeenCalledTimes(NEVER);

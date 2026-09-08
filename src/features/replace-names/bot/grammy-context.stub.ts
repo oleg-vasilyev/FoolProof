@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import type { CallbackTap, Command } from "#shared/telegram/telegram-contexts.ts";
+import type { CallbackTap, Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 
 
 export const CHAT_ID = -100777;
@@ -25,6 +25,15 @@ export class ContextStub {
       match: text,
       reply: this.replySpy,
     } as unknown as Command;
+  }
+
+  public textMessage(text: string): TextMessage {
+    return {
+      chat: { id: CHAT_ID },
+      from: { id: USER_ID },
+      message: { text },
+      reply: this.replySpy,
+    } as unknown as TextMessage;
   }
 
   public callbackTap(data: string): CallbackTap {

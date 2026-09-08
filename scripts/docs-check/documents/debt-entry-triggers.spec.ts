@@ -94,6 +94,12 @@ describe("debtComplaints", () => {
     expect(said[FIRST]).toContain("widen A_CONDITION rather than rewording the entry");
   });
 
+  it("should read 'the moment' as a condition", () => {
+    const list = "# Debt\n\npreamble\n\n## Owed\n\nreason\n\n**Do it the moment a third one arrives.**\n";
+
+    expect(debtComplaints(list)).toHaveLength(NO_ENTRIES);
+  });
+
   it("should say nothing when every entry closes on a trigger", () => {
     const list = "# Debt\n\npreamble\n\n## Owed\n\nreason\n\n**Once it happens twice.**\n";
 

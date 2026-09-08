@@ -5,14 +5,20 @@ import { LONGEST_NAME } from "#shared/table/table-limits.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { InlineKeyboardStub } from "#shared/telegram/inline-keyboard.stub.ts";
+import { ForceReplyPromptStub } from "#shared/telegram/force-reply-prompt.stub.ts";
 import { DEFAULT_LOCALE, Locale } from "#shared/locale/locales.ts";
 import type { Evening, PlayerRecord, PlayerTally } from "#shared/repository/repository-contract.ts";
 import type { Payload, Replacement } from "#replace-names/domain/replace-plan.ts";
 import { copy } from "#replace-names/copy.en.ts";
+import { copy as russian } from "#replace-names/copy.ru.ts";
 import { CHAT_ID, ContextStub } from "#replace-names/bot/grammy-context.stub.ts";
 
 
 const keyboards = new InlineKeyboardStub();
+
+const prompts = new ForceReplyPromptStub();
+
+vi.mock("#shared/telegram/force-reply-prompt.ts", () => prompts.module);
 
 const parseNameListSpy = vi.fn();
 
@@ -70,7 +76,7 @@ vi.mock("#replace-names/copy.ts", () => ({
   copyIn: (locale: unknown) => copyInSpy(locale),
 }));
 
-const { onReplace, onTap } = await import("#replace-names/bot/replace-handler.ts");
+const { onNamesReply, onReplace, onTap } = await import("#replace-names/bot/replace-handler.ts");
 
 const ONCE = 1;
 
@@ -214,12 +220,18 @@ describe("replace-handler", () => {
         expect(parseNameListSpy).toHaveBeenCalledWith(TYPED);
       });
 
-      it("should ask for names when none came", async () => {
+      it("should ask for the names with a prompt that opens the reply box when none came", async () => {
         parseNameListSpy.mockReturnValue({ ok: false, problem: NameProblem.Empty });
+        const command = ctx.command();
 
-        await onReplace(context(), ctx.command());
+        await onReplace(context(), command);
 
-        expect(ctx.lastReply().text).toBe(copy.askNames);
+        expect(prompts.askAsReplySpy).toHaveBeenCalledWith(
+          command,
+          copy.askNamesPrompt,
+          copy.askNamesPlaceholder
+        );
+        expect(ctx.replySpy).toHaveBeenCalledTimes(NEVER);
       });
 
       it("should say the same name twice replaces nothing", async () => {
@@ -247,11 +259,24 @@ describe("replace-handler", () => {
       });
 
       it("should not plan anything on a bad list", async () => {
+        parseNameListSpy.mockReturnValue({
+          ok: false,
+          problem: NameProblem.Duplicates,
+          names: [WRITTEN],
+        });
+
+        await onReplace(context(), ctx.command(TYPED));
+
+        expect(ctx.replySpy).toHaveBeenCalledTimes(ONCE);
+        expect(planReplacementSpy).not.toHaveBeenCalled();
+        expect(keyboards.toMarkupSpy).not.toHaveBeenCalled();
+      });
+
+      it("should not plan anything when it asked instead", async () => {
         parseNameListSpy.mockReturnValue({ ok: false, problem: NameProblem.Empty });
 
         await onReplace(context(), ctx.command());
 
-        expect(ctx.replySpy).toHaveBeenCalledTimes(ONCE);
         expect(planReplacementSpy).not.toHaveBeenCalled();
         expect(keyboards.toMarkupSpy).not.toHaveBeenCalled();
       });
@@ -343,6 +368,75 @@ describe("replace-handler", () => {
         });
       });
 
+    });
+  });
+
+  describe("onNamesReply()", () => {
+    beforeEach(() => {
+      prompts.answeredPromptTextSpy.mockReturnValue(copy.askNamesPrompt);
+    });
+
+    it("should read the names out of a reply to its own question", async () => {
+      const message = ctx.textMessage(TYPED);
+
+      await onNamesReply(context(), message);
+
+      expect(prompts.answeredPromptTextSpy).toHaveBeenCalledWith(message);
+      expect(parseNameListSpy).toHaveBeenCalledWith(TYPED);
+      expect(ctx.lastReply().text).toBe(PROPOSAL);
+    });
+
+    it("should recognise the question it asked in the other language", async () => {
+      copyInSpy.mockImplementation((locale) => (locale === Locale.Ru ? russian : copy));
+      prompts.answeredPromptTextSpy.mockReturnValue(russian.askNamesPrompt);
+
+      await onNamesReply(context(), ctx.textMessage(TYPED));
+
+      expect(ctx.lastReply().text).toBe(PROPOSAL);
+    });
+
+    it("should leave a message that answers no question of its own alone", async () => {
+      prompts.answeredPromptTextSpy.mockReturnValue(null);
+
+      await onNamesReply(context(), ctx.textMessage(TYPED));
+
+      expect(parseNameListSpy).toHaveBeenCalledTimes(NEVER);
+      expect(ctx.replySpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should leave a reply to some other question of the bot alone", async () => {
+      prompts.answeredPromptTextSpy.mockReturnValue("Who is playing?");
+
+      await onNamesReply(context(), ctx.textMessage(TYPED));
+
+      expect(parseNameListSpy).toHaveBeenCalledTimes(NEVER);
+      expect(ctx.replySpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should refuse while a game is being played", async () => {
+      repo.liveCardInChatSpy.mockReturnValue(LIVE_CARD);
+
+      await onNamesReply(context(), ctx.textMessage(TYPED));
+
+      expect(ctx.lastReply().text).toBe(copy.gameRunning);
+      expect(parseNameListSpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should refuse in words rather than ask again when the reply names nobody", async () => {
+      parseNameListSpy.mockReturnValue({ ok: false, problem: NameProblem.Empty });
+
+      await onNamesReply(context(), ctx.textMessage(""));
+
+      expect(ctx.lastReply().text).toBe(copy.askNames);
+      expect(prompts.askAsReplySpy).toHaveBeenCalledTimes(NEVER);
+    });
+
+    it("should refuse a plan the domain refused", async () => {
+      planReplacementSpy.mockReturnValue(refusedBy(Refusal.NoEvening));
+
+      await onNamesReply(context(), ctx.textMessage(TYPED));
+
+      expect(ctx.lastReply().text).toBe(copy.noEvening);
     });
   });
 

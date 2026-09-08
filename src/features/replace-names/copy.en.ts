@@ -6,11 +6,13 @@ export const copy = {
 
   commandReplace: "Fix a name in the last evening",
   helpReplace:
-    "/replace — somebody was written under the wrong name all evening; give the name written, then the one who really played: /replace Roma, Romani",
+    "/replace — somebody was written under the wrong name all evening; give the name as written, then the one who really played: /replace Roma, Romani",
 
   header: "<b>Replacing a name</b>",
   askNames:
     "Two names: the one written down, then the one who really played. For example: /replace Roma, Romani",
+  askNamesPrompt: "Which name was written down, and who really played? Send both names.",
+  askNamesPlaceholder: "Roma, Romani",
   sameName: "That is the same name twice — nothing to replace.",
   nameTooLong: (longest: number, names: readonly string[]) =>
     `Too long for a name: ${names.join(", ")}. No longer than ${longest} characters.`,

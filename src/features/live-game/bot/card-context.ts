@@ -1,6 +1,7 @@
 import type { CardRepository } from "#shared/repository/repository-contract.ts";
 import type { Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import type { LocaleReader } from "#shared/locale/chat-locale.ts";
+import { askAsReply } from "#shared/telegram/force-reply-prompt.ts";
 import { copyIn, type Copy } from "#live-game/copy.ts";
 import type { CardService } from "#live-game/bot/card/card-service.ts";
 import type { PromptRegistry } from "#live-game/bot/prompt-registry.ts";
@@ -41,17 +42,7 @@ export const askForNames = async (
   question: string,
   placeholder: string
 ): Promise<void> => {
-  const commandMessageId = ctx.msg?.message_id;
-
-  const prompt = await ctx.reply(question, {
-    reply_parameters:
-      commandMessageId === undefined ? undefined : { message_id: commandMessageId },
-    reply_markup: {
-      force_reply: true,
-      selective: true,
-      input_field_placeholder: placeholder,
-    },
-  });
+  const prompt = await askAsReply(ctx, question, placeholder);
 
   context.prompts.remember(ctx.chat.id, prompt.message_id);
 };

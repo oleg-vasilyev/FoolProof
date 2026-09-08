@@ -2,6 +2,8 @@ import { expect, it } from "vitest";
 import { describeScenario } from "../harness/describe-scenario.ts";
 
 
+const ASK_PROMPT = "Which name was written down, and who really played? Send both names.";
+
 const playGame = async (
   chat: Parameters<Parameters<typeof describeScenario>[1]>[0],
   lineup: string,
@@ -84,6 +86,44 @@ describeScenario("the wrong Roma was written down all evening", (chat) => {
     await chat.say("/merge");
 
     expect(chat.captions()).toEqual(["Anya · 2", "Oleg · 2", "Romani · 2", "🔴 Cancel"]);
+
+    await chat.tap("🔴 Cancel");
+  });
+});
+
+describeScenario("/replace with no names asks for them", (chat) => {
+  let promptId: number | null = null;
+
+  it("should ask, and open the reply box", async () => {
+    await playGame(chat, "Roma, Oleg, Anya", ["Oleg", "Anya"]);
+
+    await chat.say("/replace");
+
+    expect(chat.lastText()).toBe(ASK_PROMPT);
+    expect(chat.promptId()).not.toBeNull();
+    expect(chat.captions()).toEqual([]);
+
+    promptId = chat.promptId();
+  });
+
+  it("should read the correction back from a reply to the ask", async () => {
+    await chat.replyToPrompt("Roma, Romani");
+
+    expect(chat.cardText()).toContain("Roma → <b>Romani</b>");
+    expect(chat.captions()).toEqual(["🔴 Cancel", "🟢 Replace"]);
+  });
+
+  it("should leave an answered ask standing", async () => {
+    expect(chat.messages().some((message) => message.messageId === promptId)).toBe(true);
+
+    await chat.tap("🔴 Cancel");
+  });
+
+  it("should still open a card from a reply to the line-up ask, the other feature's", async () => {
+    await chat.say("/game");
+    await chat.replyToPrompt("Anya, Roma");
+
+    expect(chat.captions()).toEqual(["Roma", "Anya", "🔴 Cancel"]);
 
     await chat.tap("🔴 Cancel");
   });
