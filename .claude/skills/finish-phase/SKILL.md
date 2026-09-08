@@ -329,10 +329,10 @@ a check tells you what to fix, ask what it cannot see before believing the list 
 ## 7. A retrospective — when the phase actually cost something
 
 Gate 5 judges the diff; this one judges what producing it cost — rework, gates run
-twice, subagents briefed too thinly to be useful. **Run the `retrospective` skill in a
-fork of this conversation** — its evidence is the transcript, so a cold agent is blind
-to it and a fork inherits it whole — then land each lesson as a rule somewhere durable
-yourself, rather than letting the fork write while a reviewer may still be reading.
+twice, subagents briefed too thinly to be useful. **Run the `retrospective` skill in
+this conversation, in one turn** — its evidence is the transcript, so a cold agent is
+blind to it, and a fork re-sends the whole transcript per call and was the costliest
+line of two phases running — then land each lesson as a rule somewhere durable.
 
 **It opens when there is something to count**: something was rebuilt, a gate ran
 twice, an agent was paid for a report nobody used, or a decision was guessed that was

@@ -1,6 +1,6 @@
 ---
 name: retrospective
-description: Review how a stretch of development was actually carried out — rework, repeated gate runs, subagent use, sequencing, re-reading — and convert each lesson into a durable rule. Stage 6, run in a fork of the conversation whose transcript is its evidence — use as the last gate of finish-phase, which falls BEFORE the release rather than after it, when the context is about to be compacted, or whenever the user asks how the work could have gone faster or cheaper. Nothing in a phase asks for this gate, because its whole value goes to the next one — so reaching the final commit is itself the cue.
+description: Review how a stretch of development was actually carried out — rework, repeated gate runs, subagent use, sequencing, re-reading — and convert each lesson into a durable rule. Stage 6, run in the conversation whose transcript is its evidence, never in a fork — use as the last gate of finish-phase, which falls BEFORE the release rather than after it, when the context is about to be compacted, or whenever the user asks how the work could have gone faster or cheaper. Nothing in a phase asks for this gate, because its whole value goes to the next one — so reaching the final commit is itself the cue.
 ---
 
 # Reviewing the process, not the code
@@ -8,9 +8,11 @@ description: Review how a stretch of development was actually carried out — re
 > **Stage 6** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
 
 Gate 5 asks whether the diff is releasable. This asks whether producing it was
-worth what it cost. It is the only gate whose subject is the transcript, so it has
-to run **while the transcript is still there** — at the end of a phase, or before
-a compaction the user can see coming.
+worth what it cost. It is the only gate whose subject is the transcript, so it runs
+**while the transcript is still there** — at the end of a phase, or before a
+compaction the user can see coming — **here, in one turn, never in a fork**: a fork
+re-sends the whole transcript per call, and twice running it was the costliest line
+of the phase for six lines back.
 
 Answer from evidence in this session, not from how you generally work. Where a
 count is asked for, count. An answer with no number in it is a guess.
@@ -61,11 +63,9 @@ drawing is only tested by the phases that departed from it.
 ## Nothing else asks what a phase should take out
 
 The first five questions all add, and so does every gate before them. Every rule here
-was written by a phase that had just been bitten, and none carries an expiry, so the
-budgets force a removal at the ceiling rather than when a rule is finished. This
-question catches only what *this* phase killed; the older backlog is `deep-checkup`'s.
-
-Two tests answer question six, and both are facts rather than taste:
+was written by a phase just bitten and none carries an expiry, so the budgets force a
+removal at the ceiling. This question catches only what *this* phase killed; the older
+backlog is `deep-checkup`'s. Two tests answer it, both facts rather than taste:
 
 - **A rule a machine now checks must leave the prose.** `CLAUDE.md` already says
   anything checkable is a lint rule and not a paragraph, and nothing enforces it — so

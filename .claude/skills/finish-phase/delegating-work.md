@@ -111,8 +111,8 @@ A **fork** inherits the whole conversation instead of starting cold, so it is pr
 the *conversation* rather than the task — a one-line answer needing no tools measured
 391762 tokens here — and buys your own window back, nothing else. **Never fork a gate
 whose value is coldness**: forking the reviewer or either reader is re-reading your own
-work under a second name. **The retrospective is the one gate a fork is strictly better
-at**, its evidence being the transcript no cold agent sees.
+work under a second name. The retrospective looked made for a fork and cost 313,321
+then 237,649 tokens for six lines back, so it runs in the conversation itself now.
 
 `context: fork` is a *different* mechanism: an isolated subagent driven by the skill
 body, with no conversation. It reads as *always delegated* and writes on every

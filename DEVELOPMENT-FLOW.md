@@ -213,10 +213,9 @@ sequenceDiagram
     rect rgb(253, 242, 248)
     note over C,K: Stage 6. Retrospective — fixing the process and the documents
     opt something was rebuilt, a gate ran twice, an agent was paid for nothing, or a bug reached a player
-        C->>S: the retrospective, run in a fork of this very conversation — its evidence is the transcript, which no cold agent can see and a fork inherits whole
-        S->>K: the retrospective skill
-        K-->>S: six questions about how the work went, each answered with a count, the last asking what should now come out
-        S-->>C: the six answers, each carrying its number rather than an impression, and the rules it proposes — but it writes no file, because a reviewer may still be reading
+        C->>K: the retrospective skill, run in this very conversation — its evidence is the transcript, which no cold agent can see, and a fork re-sends all of it to answer
+        K-->>C: six questions about how the work went, each answered with a count, the last asking what should now come out
+        C->>C: the six answers, each carrying its number rather than an impression, and the rules they propose — written in one turn, before any file
         C->>C: land each rule yourself, in the file whose readers it is for
         opt the phase fixed something that had already shipped
             C->>C: name the gate that should have caught it, and what it would take for that gate to see it
