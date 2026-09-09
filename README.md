@@ -74,9 +74,9 @@ share of the table evening by evening, what stuck, and who has been the worst ne
 Twenty facts can stick and a card prints at most four, so two players at the same
 table get two different cards.
 
-| The player card — six numbers, a career chart, and whichever facts this player earned | |
-|---|---|
-| [![The player card poster](docs/posters/personal-en.png)](docs/posters/personal-en.png) | |
+| The player card — six numbers, a career chart, and whichever facts this player earned |
+|---|
+| <a href="docs/posters/personal-en.png"><img src="docs/posters/personal-en.png" alt="The player card poster" width="49%"></a> |
 
 The grid prints the finishing position in every cell, and marks only what an
 ordinary finish is not: drew for last, left the fool, did not play. Under it, each
