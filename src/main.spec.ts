@@ -56,6 +56,10 @@ const apiRetry = new ApiRetryStub();
 
 const clientOptions = new BotClientOptionsStub();
 
+const PROMPT_REGISTRY = { marker: "the-prompt-registry" };
+
+const createPromptRegistrySpy = vi.fn((_api: unknown, _log: unknown) => PROMPT_REGISTRY);
+
 const CLIENT_OPTIONS = { client: { apiRoot: "http://127.0.0.1:8081" } };
 
 const order: string[] = [];
@@ -95,11 +99,13 @@ const INSTALLED = [
   language.feature,
 ];
 
-const installFeaturesSpy = vi.fn((_bot: unknown, _features: unknown, _log: unknown, _localeIn: unknown) => {
-  order.push("install");
+const installFeaturesSpy = vi.fn(
+  (_bot: unknown, _features: unknown, _log: unknown, _localeIn: unknown, _prompts: unknown) => {
+    order.push("install");
 
-  return [liveGame.stopSpy];
-});
+    return [liveGame.stopSpy];
+  }
+);
 
 const publishCommandMenuSpy = vi.fn(
   async (_api: unknown, _features: unknown, _log: unknown, _chat: unknown): Promise<void> => {
@@ -134,8 +140,8 @@ vi.mock("grammy", () => ({
 vi.mock("#shared/logging/logger.ts", () => logging.module);
 
 vi.mock("#app/feature-installer.ts", (): typeof import("#app/feature-installer.ts") => ({
-  installFeatures: (bot, features, log, localeIn) =>
-    installFeaturesSpy(bot, features, log, localeIn),
+  installFeatures: (bot, features, log, localeIn, prompts) =>
+    installFeaturesSpy(bot, features, log, localeIn, prompts),
   publishCommandMenu: (api, features, log, chat) => publishCommandMenuSpy(api, features, log, chat),
   republishChatMenus: (api, features, log, choices) =>
     republishChatMenusSpy(api, features, log, choices),
@@ -147,6 +153,10 @@ vi.mock("#shared/lifecycle/crash-exit.ts", () => crashExit.module);
 vi.mock("#shared/telegram/api-retry.ts", () => apiRetry.module);
 
 vi.mock("#shared/telegram/bot-client-options.ts", () => clientOptions.module);
+
+vi.mock("#shared/telegram/prompt-registry.ts", () => ({
+  createPromptRegistry: (api: unknown, log: unknown) => createPromptRegistrySpy(api, log),
+}));
 
 vi.mock("#live-game/live-game-feature.ts", () => liveGame.module);
 
@@ -311,6 +321,16 @@ describe("main.ts", () => {
   it("should hand every feature the same locale reader", () => {
     expect(language.depsGiven()?.localeIn).toBe(chatLocale.reader.read);
     expect(diagnostics.depsGiven()?.localeIn).toBe(chatLocale.reader.read);
+  });
+
+  it("should build the prompt registry from the api and the log", () => {
+    expect(createPromptRegistrySpy).toHaveBeenCalledWith(botApi, logging.logger);
+  });
+
+  it("should hand the one prompt registry to every feature that asks, and to the installer", () => {
+    expect(liveGame.depsGiven()?.prompts).toBe(PROMPT_REGISTRY);
+    expect(replaceNames.depsGiven()?.prompts).toBe(PROMPT_REGISTRY);
+    expect(installFeaturesSpy.mock.calls[0]?.[4]).toBe(PROMPT_REGISTRY);
   });
 
   it("should teach the api to retry, so one lost packet does not lose a tap", () => {

@@ -568,20 +568,6 @@ needed rather than pointed at, and one real picture phase has proven the handoff
 fork that cannot reach the `poster-reader` would read pictures its own run drew, and
 that returns looking exactly like success.
 
-## The `/replace` question is not taken back when it goes unanswered
-
-`PLAN.md` says a prompt nobody answered is deleted by the next command that opens a
-card, so at most one `force_reply` is ever pending per chat. That registry lives in
-`live-game`, and a feature may not import another, so the question `/replace` asks
-with no names is outside it: a bare `/replace` followed by `/game` leaves the first
-question standing with its reply still pending in the draft. It is answered correctly
-whenever somebody does reply, and `/replace` a second time asks a second time rather
-than clearing the first — the cost is a stale draft, not a wrong record. Two features
-asking is one short of the shape being clear. **Move the registry to
-`shared/telegram/` and hand one instance to every feature that asks a question the
-moment a third feature asks one, or the moment a stale draft is reported from a real
-chat.**
-
 ## Not debt, deliberately
 
 Listed so nobody "fixes" them:

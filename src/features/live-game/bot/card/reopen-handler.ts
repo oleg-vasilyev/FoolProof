@@ -5,8 +5,6 @@ import { copyFor, refusedBecauseLive, type CardContext } from "#live-game/bot/ca
 export const onReopen = async (context: CardContext, ctx: Command): Promise<void> => {
   const copy = copyFor(context, ctx.chat.id);
 
-  await context.prompts.dropUnanswered(ctx.chat.id);
-
   if (await refusedBecauseLive(copy, context, ctx)) {
     return;
   }

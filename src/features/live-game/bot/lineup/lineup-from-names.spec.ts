@@ -4,7 +4,7 @@ import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
-import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
+import { PromptRegistryStub } from "#shared/telegram/prompt-registry.stub.ts";
 import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
 import { CardContextStub } from "#live-game/bot/card-context.stub.ts";
 
@@ -176,11 +176,6 @@ describe("onGame()", () => {
     cardContext.askForNamesSpy.mockResolvedValue(undefined);
   });
 
-  it("should clear a prompt nobody answered before doing anything else", async () => {
-    await onGame(context(), ctx.command("/game Oleg, Anya, Roma"));
-
-    expect(prompts.dropUnansweredSpy).toHaveBeenCalledWith(CHAT_ID);
-  });
 
   it("should open a card with the rotated seats and null as the third argument", async () => {
     await onGame(context(), ctx.command("/game Oleg, Anya, Roma"));

@@ -5,6 +5,7 @@ import { Bot } from "grammy";
 import { createLiveGameFeature } from "#live-game/live-game-feature.ts";
 import { encodeCallback } from "#live-game/render/callback-data-codec.ts";
 import { installFeatures } from "#app/feature-installer.ts";
+import { createPromptRegistry } from "#shared/telegram/prompt-registry.ts";
 import type { Feature } from "#shared/telegram/feature-contract.ts";
 import type { Command } from "#shared/telegram/telegram-contexts.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
@@ -78,11 +79,13 @@ describe("the bot, driven end to end", () => {
       ],
     };
 
+    const prompts = createPromptRegistry(bot.api, log);
     stops = installFeatures(
       bot,
-      [createLiveGameFeature({ repo, api: bot.api, log, localeIn: locales.read }), lateFeature],
+      [createLiveGameFeature({ repo, api: bot.api, log, localeIn: locales.read, prompts }), lateFeature],
       log,
-      locales.read
+      locales.read,
+      prompts
     );
 
     bot.api.config.use((_prev, method, payload) => {

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { ListenersStub } from "#shared/telegram/feature-contract.stub.ts";
 import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
+import { PromptRegistryStub } from "#shared/telegram/prompt-registry.stub.ts";
 import { Locale } from "#shared/locale/locales.ts";
 import { copy } from "#replace-names/copy.en.ts";
 import { copy as russian } from "#replace-names/copy.ru.ts";
@@ -33,8 +34,10 @@ describe("createReplaceNamesFeature()", () => {
   let repo: RepositoryStub;
   let listeners: ListenersStub;
   let locales: LocaleReaderStub;
+  let prompts: PromptRegistryStub;
 
-  const build = () => createReplaceNamesFeature({ repo, localeIn: locales.read });
+  const build = () =>
+    createReplaceNamesFeature({ repo, localeIn: locales.read, prompts: prompts.registry });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -42,6 +45,7 @@ describe("createReplaceNamesFeature()", () => {
     repo = new RepositoryStub();
     listeners = new ListenersStub();
     locales = new LocaleReaderStub();
+    prompts = new PromptRegistryStub();
   });
 
   describe("what it offers", () => {

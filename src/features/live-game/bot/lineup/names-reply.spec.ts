@@ -5,7 +5,7 @@ import { ForceReplyPromptStub } from "#shared/telegram/force-reply-prompt.stub.t
 import { copy } from "#live-game/copy.en.ts";
 import { copy as russian } from "#live-game/copy.ru.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
-import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
+import { PromptRegistryStub } from "#shared/telegram/prompt-registry.stub.ts";
 import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
 import { CardContextStub } from "#live-game/bot/card-context.stub.ts";
 

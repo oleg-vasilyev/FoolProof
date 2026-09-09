@@ -6,7 +6,7 @@ import { playerIdOf, seatRecordsOf } from "#shared/repository/database-records.s
 import { copy } from "#live-game/copy.en.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
 import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
-import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
+import { PromptRegistryStub } from "#shared/telegram/prompt-registry.stub.ts";
 import { CardContextStub } from "#live-game/bot/card-context.stub.ts";
 
 
@@ -157,12 +157,6 @@ describe("a line-up taken from the last game", () => {
   });
 
   describe("onNext()", () => {
-    it("should clear a prompt nobody answered", async () => {
-      await onNext(context(), ctx.command("/next"));
-
-      expect(prompts.dropUnansweredSpy).toHaveBeenCalledWith(CHAT_ID);
-    });
-
     it("should refuse while a card is live", async () => {
       cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
 
@@ -206,12 +200,6 @@ describe("a line-up taken from the last game", () => {
   });
 
   describe("onNextWith()", () => {
-    it("should clear a prompt nobody answered", async () => {
-      await onNextWith(context(), ctx.command("/next_with Dima"));
-
-      expect(prompts.dropUnansweredSpy).toHaveBeenCalledWith(CHAT_ID);
-    });
-
     it("should refuse while a card is live", async () => {
       cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
 
@@ -353,12 +341,6 @@ describe("a line-up taken from the last game", () => {
   });
 
   describe("onNextWithout()", () => {
-    it("should clear a prompt nobody answered", async () => {
-      await onNextWithout(context(), ctx.command("/next_without Anya"));
-
-      expect(prompts.dropUnansweredSpy).toHaveBeenCalledWith(CHAT_ID);
-    });
-
     it("should refuse while a card is live", async () => {
       cardContext.refusedBecauseLiveSpy.mockResolvedValue(true);
 

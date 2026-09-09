@@ -4,7 +4,7 @@ import type { LocaleReader } from "#shared/locale/chat-locale.ts";
 import { askAsReply } from "#shared/telegram/force-reply-prompt.ts";
 import { copyIn, type Copy } from "#live-game/copy.ts";
 import type { CardService } from "#live-game/bot/card/card-service.ts";
-import type { PromptRegistry } from "#live-game/bot/prompt-registry.ts";
+import type { PromptRegistry } from "#shared/telegram/prompt-registry.ts";
 
 
 export interface CardContext {

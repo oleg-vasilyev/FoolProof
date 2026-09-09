@@ -13,7 +13,7 @@ import { onTap } from "#live-game/bot/card/tap-handler.ts";
 import { onReopen } from "#live-game/bot/card/reopen-handler.ts";
 import { onSeatingTap } from "#live-game/bot/seating-screen.ts";
 import { onLeavingTap } from "#live-game/bot/leaving-screen.ts";
-import { createPromptRegistry } from "#live-game/bot/prompt-registry.ts";
+import type { PromptRegistry } from "#shared/telegram/prompt-registry.ts";
 import { CARD_TAPS } from "#live-game/render/callback-data-codec.ts";
 import { SEATING_TAPS } from "#live-game/render/seating-screen/seating-callback-codec.ts";
 import { LEAVING_TAPS } from "#live-game/render/leaving-screen/leaving-callback-codec.ts";
@@ -27,16 +27,17 @@ export interface LiveGameDeps {
   readonly api: Api;
   readonly log: Logger;
   readonly localeIn: LocaleReader;
+  readonly prompts: PromptRegistry;
 }
 
 export const createLiveGameFeature = (deps: LiveGameDeps): Feature => {
-  const { repo, api, log, localeIn } = deps;
+  const { repo, api, log, localeIn, prompts } = deps;
   const cards = createCardService({ repo, api, log, localeIn });
 
   const context: CardContext = {
     repo,
     cards,
-    prompts: createPromptRegistry(api, log),
+    prompts,
     localeIn,
   };
 

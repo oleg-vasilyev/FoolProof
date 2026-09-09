@@ -9,7 +9,7 @@ import { InlineKeyboardStub } from "#shared/telegram/inline-keyboard.stub.ts";
 import { seatsOf } from "#live-game/domain/card-state.stub.ts";
 import type { CallbackAction, CallbackPayload } from "#live-game/render/callback-data-codec.ts";
 import { copy } from "#live-game/copy.en.ts";
-import { TelegramApiStub } from "#live-game/bot/grammy-api.stub.ts";
+import { TelegramApiStub } from "#shared/telegram/grammy-api.stub.ts";
 
 
 const debounce = new DebounceStub();

@@ -4,7 +4,7 @@ import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
 import { CHAT_ID, ContextStub, USER_ID } from "#live-game/bot/grammy-context.stub.ts";
-import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
+import { PromptRegistryStub } from "#shared/telegram/prompt-registry.stub.ts";
 import { CardContextStub } from "#live-game/bot/card-context.stub.ts";
 
 
@@ -48,11 +48,6 @@ describe("onReopen()", () => {
     expect(cardContext.copyForSpy).toHaveBeenCalledWith(expect.objectContaining({ repo }), CHAT_ID);
   });
 
-  it("should drop a question left unanswered, since this command supersedes it", async () => {
-    await reopen();
-
-    expect(prompts.dropUnansweredSpy).toHaveBeenCalledWith(CHAT_ID);
-  });
 
   it("should reopen the latest game of this chat in the name of whoever asked", async () => {
     await reopen();

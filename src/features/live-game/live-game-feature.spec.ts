@@ -4,17 +4,14 @@ import { ListenersStub } from "#shared/telegram/feature-contract.stub.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { Locale } from "#shared/locale/locales.ts";
+import { PromptRegistryStub } from "#shared/telegram/prompt-registry.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { copy as russian } from "#live-game/copy.ru.ts";
 
 
 const CARD_SERVICE = { marker: "the-card-service" };
 
-const PROMPT_REGISTRY = { marker: "the-prompt-registry" };
-
 const createCardServiceSpy = vi.fn((_deps: unknown) => CARD_SERVICE);
-
-const createPromptRegistrySpy = vi.fn((_api: unknown, _log: unknown) => PROMPT_REGISTRY);
 
 const stopSweepSpy = vi.fn();
 
@@ -46,10 +43,6 @@ vi.mock("#live-game/bot/card/card-service.ts", () => ({
 
     return { ...CARD_SERVICE, shutdown: shutdownSpy, redrawLive: redrawLiveSpy };
   },
-}));
-
-vi.mock("#live-game/bot/prompt-registry.ts", () => ({
-  createPromptRegistry: (api: unknown, log: unknown) => createPromptRegistrySpy(api, log),
 }));
 
 vi.mock("#live-game/bot/card/idle-sweep.ts", () => ({
@@ -120,9 +113,16 @@ describe("createLiveGameFeature()", () => {
   let repo: RepositoryStub;
   let log: LoggerStub;
   let locales: LocaleReaderStub;
+  let prompts: PromptRegistryStub;
 
   const build = () =>
-    createLiveGameFeature({ repo, api: API as never, log, localeIn: locales.read });
+    createLiveGameFeature({
+      repo,
+      api: API as never,
+      log,
+      localeIn: locales.read,
+      prompts: prompts.registry,
+    });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -130,6 +130,7 @@ describe("createLiveGameFeature()", () => {
     repo = new RepositoryStub();
     log = new LoggerStub();
     locales = new LocaleReaderStub();
+    prompts = new PromptRegistryStub();
     stopSweepSpy.mockImplementation(() => undefined);
     shutdownSpy.mockImplementation(async () => undefined);
   });
@@ -144,12 +145,6 @@ describe("createLiveGameFeature()", () => {
         log,
         localeIn: locales.read,
       });
-    });
-
-    it("should give the prompt registry the api and the log", () => {
-      build();
-
-      expect(createPromptRegistrySpy).toHaveBeenCalledWith(API, log);
     });
 
     it("should start the idle sweep over its own card service", () => {

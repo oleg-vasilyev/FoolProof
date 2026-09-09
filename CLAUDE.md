@@ -171,7 +171,8 @@ src/
                         a table is rotated so the same one always reads the same
     telegram/           context types, the feature contract, api retries and
                         what they cost, the client options pointing a run elsewhere,
-                        and the question a command asks when it came without its argument
+                        the question a command asks when it came without its argument,
+                        and the one such question a chat may have standing
     text/               HTML escaping
     timing/             the edit debouncer, the slowest render this run drew
 ```

@@ -8,7 +8,7 @@ import { copy } from "#live-game/copy.en.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
 import { CHAT_ID, ContextStub } from "#live-game/bot/grammy-context.stub.ts";
 import { InlineKeyboardStub } from "#shared/telegram/inline-keyboard.stub.ts";
-import { PromptRegistryStub } from "#live-game/bot/prompt-registry.stub.ts";
+import { PromptRegistryStub } from "#shared/telegram/prompt-registry.stub.ts";
 
 
 const keyboards = new InlineKeyboardStub();

@@ -20,6 +20,7 @@ import { createLogger } from "#shared/logging/logger.ts";
 import { repository } from "#shared/repository/repository-instance.ts";
 import { createApiRetry } from "#shared/telegram/api-retry.ts";
 import { botClientOptions } from "#shared/telegram/bot-client-options.ts";
+import { createPromptRegistry } from "#shared/telegram/prompt-registry.ts";
 
 
 const FIRST_START = 1;
@@ -35,13 +36,15 @@ installCrashExit(log);
 
 const localeIn = createLocaleReader(repository);
 
+const prompts = createPromptRegistry(bot.api, log);
+
 const publishMenu = (chatId: number, locale: Locale): Promise<void> =>
   publishCommandMenu(bot.api, features, log, { chatId, locale });
 
 const features = [
-  createLiveGameFeature({ repo: repository, api: bot.api, log, localeIn }),
+  createLiveGameFeature({ repo: repository, api: bot.api, log, localeIn, prompts }),
   createMergeNamesFeature({ repo: repository, localeIn }),
-  createReplaceNamesFeature({ repo: repository, localeIn }),
+  createReplaceNamesFeature({ repo: repository, localeIn, prompts }),
   createScoresheetFeature({ repo: repository, localeIn }),
   createDiagnosticsFeature({
     repo: repository,
@@ -54,7 +57,7 @@ const features = [
   createLanguageFeature({ repo: repository, localeIn, publishMenu }),
 ];
 
-const stops = installFeatures(bot, features, log, localeIn);
+const stops = installFeatures(bot, features, log, localeIn, prompts);
 
 const shutdown = createShutdown([...stops, () => bot.stop()]);
 

@@ -5,7 +5,8 @@ import { LONGEST_NAME } from "#shared/table/table-limits.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { InlineKeyboardStub } from "#shared/telegram/inline-keyboard.stub.ts";
-import { ForceReplyPromptStub } from "#shared/telegram/force-reply-prompt.stub.ts";
+import { ForceReplyPromptStub, PROMPT_MESSAGE_ID } from "#shared/telegram/force-reply-prompt.stub.ts";
+import { PromptRegistryStub } from "#shared/telegram/prompt-registry.stub.ts";
 import { DEFAULT_LOCALE, Locale } from "#shared/locale/locales.ts";
 import type { Evening, PlayerRecord, PlayerTally } from "#shared/repository/repository-contract.ts";
 import type { Payload, Replacement } from "#replace-names/domain/replace-plan.ts";
@@ -159,8 +160,9 @@ describe("replace-handler", () => {
   let repo: RepositoryStub;
   let ctx: ContextStub;
   let locales: LocaleReaderStub;
+  let registry: PromptRegistryStub;
 
-  const context = () => ({ repo, localeIn: locales.read });
+  const context = () => ({ repo, localeIn: locales.read, prompts: registry.registry });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -168,6 +170,7 @@ describe("replace-handler", () => {
     repo = new RepositoryStub();
     ctx = new ContextStub();
     locales = new LocaleReaderStub(Locale.Ru);
+    registry = new PromptRegistryStub();
 
     repo.latestEveningSpy.mockReturnValue(EVENING);
     repo.playersInChatSpy.mockReturnValue(ROSTER);
@@ -232,6 +235,20 @@ describe("replace-handler", () => {
           copy.askNamesPlaceholder
         );
         expect(ctx.replySpy).toHaveBeenCalledTimes(NEVER);
+      });
+
+      it("should remember the question it asked, so the next command can take it back", async () => {
+        parseNameListSpy.mockReturnValue({ ok: false, problem: NameProblem.Empty });
+
+        await onReplace(context(), ctx.command());
+
+        expect(registry.rememberSpy).toHaveBeenCalledWith(CHAT_ID, PROMPT_MESSAGE_ID);
+      });
+
+      it("should remember nothing when it did not ask", async () => {
+        await onReplace(context(), ctx.command(TYPED));
+
+        expect(registry.rememberSpy).toHaveBeenCalledTimes(NEVER);
       });
 
       it("should say the same name twice replaces nothing", async () => {
@@ -384,6 +401,20 @@ describe("replace-handler", () => {
       expect(prompts.answeredPromptTextSpy).toHaveBeenCalledWith(message);
       expect(parseNameListSpy).toHaveBeenCalledWith(TYPED);
       expect(ctx.lastReply().text).toBe(PROPOSAL);
+    });
+
+    it("should let an answered question stand rather than delete it later", async () => {
+      await onNamesReply(context(), ctx.textMessage(TYPED));
+
+      expect(registry.forgetSpy).toHaveBeenCalledWith(CHAT_ID);
+    });
+
+    it("should not forget a question that was not its own", async () => {
+      prompts.answeredPromptTextSpy.mockReturnValue("some other question");
+
+      await onNamesReply(context(), ctx.textMessage(TYPED));
+
+      expect(registry.forgetSpy).toHaveBeenCalledTimes(NEVER);
     });
 
     it("should recognise the question it asked in the other language", async () => {

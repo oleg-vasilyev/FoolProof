@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Feature } from "#shared/telegram/feature-contract.ts";
 import { featureOf } from "#shared/telegram/feature-contract.stub.ts";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
+import { PromptRegistryStub } from "#shared/telegram/prompt-registry.stub.ts";
 import { ChatLocaleStub, LocaleReaderStub } from "#shared/locale/chat-locale.stub.ts";
 import { DEFAULT_LOCALE, Locale } from "#shared/locale/locales.ts";
 import { copy } from "#app/copy.en.ts";
@@ -31,6 +32,13 @@ const BOT_USERNAME = "FoolProofMegaBot";
 const IN_PRIVATE = true;
 
 const IN_GROUP = false;
+
+const COMMAND_CONTEXT = {
+  chat: { id: CHAT_ID },
+  reply: vi.fn(async () => undefined),
+  hasChatType: () => false,
+  me: { username: BOT_USERNAME },
+};
 
 class BotMock {
   public registrations: string[] = [];
@@ -85,13 +93,14 @@ const listensToText = (name: string): Feature =>
 describe("installFeatures()", () => {
   let bot: BotMock;
   let locales: LocaleReaderStub;
+  let prompts: PromptRegistryStub;
 
   const replySpy = vi.fn();
 
   const chatTypeSpy = vi.fn();
 
   const install = (features: readonly Feature[]) =>
-    installFeatures(bot as never, features, logStub, locales.read);
+    installFeatures(bot as never, features, logStub, locales.read, prompts.registry);
 
   const helpIn = async (features: readonly Feature[], chatId = CHAT_ID): Promise<string> => {
     install(features);
@@ -111,6 +120,7 @@ describe("installFeatures()", () => {
 
     bot = new BotMock();
     locales = new LocaleReaderStub();
+    prompts = new PromptRegistryStub();
     replySpy.mockResolvedValue(undefined);
   });
 
@@ -205,9 +215,59 @@ describe("installFeatures()", () => {
       install([route]);
       const registered = bot.commandSpy.mock.calls.find((call) => call[0] === "game")?.[1];
 
-      await (registered as (ctx: unknown) => Promise<void>)("the-context");
+      await (registered as (ctx: unknown) => Promise<void>)(COMMAND_CONTEXT);
 
-      expect(route.commands[0]?.run).toHaveBeenCalledWith("the-context");
+      expect(route.commands[0]?.run).toHaveBeenCalledWith(COMMAND_CONTEXT);
+    });
+  });
+
+  describe("a question left unanswered", () => {
+    const fire = async (name: string, features: readonly Feature[]) => {
+      install(features);
+      const registered = bot.commandSpy.mock.calls.find((call) => call[0] === name)?.[1];
+
+      await (registered as (ctx: unknown) => Promise<void>)(COMMAND_CONTEXT);
+    };
+
+    it("should be taken back before a feature's command runs", async () => {
+      const route = featureOf({ name: "game" });
+
+      await fire("game", [route]);
+
+      expect(prompts.dropUnansweredSpy).toHaveBeenCalledWith(CHAT_ID);
+      expect(prompts.dropUnansweredSpy.mock.invocationCallOrder[0] ?? 0).toBeLessThan(
+        vi.mocked(route.commands[0]?.run ?? vi.fn()).mock.invocationCallOrder[0] ?? 0
+      );
+    });
+
+    it("should be taken back by a command of a feature that never asks", async () => {
+      await fire("stats", [featureOf({ name: "stats" })]);
+
+      expect(prompts.dropUnansweredSpy).toHaveBeenCalledWith(CHAT_ID);
+    });
+
+    it("should be taken back by help too", async () => {
+      await fire("help", [featureOf({ name: "game" })]);
+
+      expect(prompts.dropUnansweredSpy).toHaveBeenCalledWith(CHAT_ID);
+    });
+
+    it("should be taken back by start too", async () => {
+      await fire("start", [featureOf({ name: "game" })]);
+
+      expect(prompts.dropUnansweredSpy).toHaveBeenCalledWith(CHAT_ID);
+    });
+
+    it("should be left alone by a text message, which may be its answer", async () => {
+      install([listensToText("game")]);
+      const registered = bot.onSpy.mock.calls.find((call) => call[0] === "message:text")?.[1];
+
+      await (registered as (ctx: unknown, next: () => Promise<void>) => Promise<void>)(
+        COMMAND_CONTEXT,
+        async () => undefined
+      );
+
+      expect(prompts.dropUnansweredSpy).toHaveBeenCalledTimes(NEVER);
     });
   });
 

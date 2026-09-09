@@ -153,3 +153,34 @@ describeScenario("/replace with nothing recorded, then while a game is being pla
     expect(chat.captions()).toEqual([]);
   });
 });
+
+describeScenario("an unanswered /replace ask is taken back by the next command", (chat) => {
+  let promptId: number | null = null;
+
+  it("should stand after a bare /replace", async () => {
+    await playGame(chat, "Roma, Oleg, Anya", ["Oleg", "Anya"]);
+
+    await chat.say("/replace");
+
+    promptId = chat.promptId();
+
+    expect(promptId).not.toBeNull();
+  });
+
+  it("should be deleted by /stats, a command of another feature", async () => {
+    await chat.say("/stats");
+
+    expect(chat.messages().some((message) => message.messageId === promptId)).toBe(false);
+    expect(chat.promptId()).toBeNull();
+  });
+
+  it("should be deleted by a second bare /replace, and asked again", async () => {
+    await chat.say("/replace");
+    const first = chat.promptId();
+
+    await chat.say("/replace");
+
+    expect(chat.messages().some((message) => message.messageId === first)).toBe(false);
+    expect(chat.promptId()).not.toBeNull();
+  });
+});

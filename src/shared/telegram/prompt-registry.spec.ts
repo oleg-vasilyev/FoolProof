@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { LoggerStub } from "#shared/logging/logger.stub.ts";
-import { TelegramApiStub } from "#live-game/bot/grammy-api.stub.ts";
-import { createPromptRegistry, type PromptRegistry } from "#live-game/bot/prompt-registry.ts";
+import { TelegramApiStub } from "#shared/telegram/grammy-api.stub.ts";
+import { createPromptRegistry, type PromptRegistry } from "#shared/telegram/prompt-registry.ts";
 
 
 const CHAT = -100777;

@@ -1,6 +1,8 @@
 import type { Api, Bot } from "grammy";
 import type { Feature, Listeners } from "#shared/telegram/feature-contract.ts";
+import type { Command } from "#shared/telegram/telegram-contexts.ts";
 import type { Logger } from "#shared/logging/logger.ts";
+import type { PromptRegistry } from "#shared/telegram/prompt-registry.ts";
 import type { ChatLocaleChoice } from "#shared/repository/repository-contract.ts";
 import { localeFrom, type LocaleReader } from "#shared/locale/chat-locale.ts";
 import { DEFAULT_LOCALE, type Locale } from "#shared/locale/locales.ts";
@@ -47,6 +49,17 @@ const addToGroupMarkup = (copy: Copy, username: string) => ({
     [{ text: copy.buttonAddToGroup, url: `https://t.me/${username}?startgroup=true` }],
   ],
 });
+
+type Registrar = (name: string, run: (ctx: Command) => Promise<void>) => void;
+
+const commandsOn =
+  (bot: Bot, prompts: PromptRegistry): Registrar =>
+  (name, run) => {
+    bot.command(name, async (ctx) => {
+      await prompts.dropUnanswered(ctx.chat.id);
+      await run(ctx);
+    });
+  };
 
 const listenersOn = (bot: Bot): Listeners => ({
   onText: (run) => {
@@ -116,17 +129,20 @@ export const installFeatures = (
   bot: Bot,
   features: readonly Feature[],
   log: Logger,
-  localeIn: LocaleReader
+  localeIn: LocaleReader,
+  prompts: PromptRegistry
 ): readonly (() => Promise<void>)[] => {
+  const command = commandsOn(bot, prompts);
+
   for (const route of routesOf(features)) {
-    bot.command(route.command, (ctx) => route.run(ctx));
+    command(route.command, (ctx) => route.run(ctx));
   }
 
-  bot.command(HELP, async (ctx) => {
+  command(HELP, async (ctx) => {
     await ctx.reply(helpBody(features, localeIn(ctx.chat.id)));
   });
 
-  bot.command(START, async (ctx) => {
+  command(START, async (ctx) => {
     const locale = localeIn(ctx.chat.id);
     const alone = ctx.hasChatType("private");
 

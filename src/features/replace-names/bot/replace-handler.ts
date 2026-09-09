@@ -2,6 +2,7 @@ import { ActionKind, Refusal } from "#replace-names/domain/replace-states.ts";
 import type { ReplaceRepository } from "#shared/repository/repository-contract.ts";
 import type { CallbackTap, Command, TextMessage } from "#shared/telegram/telegram-contexts.ts";
 import type { LocaleReader } from "#shared/locale/chat-locale.ts";
+import type { PromptRegistry } from "#shared/telegram/prompt-registry.ts";
 import { DEFAULT_LOCALE, LOCALES } from "#shared/locale/locales.ts";
 import { parseNameList, type NamesResult } from "#shared/table/name-list.ts";
 import { NameProblem } from "#shared/table/name-problems.ts";
@@ -29,6 +30,7 @@ import { copyIn, type Copy } from "#replace-names/copy.ts";
 export interface ReplaceContext {
   readonly repo: ReplaceRepository;
   readonly localeIn: LocaleReader;
+  readonly prompts: PromptRegistry;
 }
 
 type Asked = Command | TextMessage;
@@ -156,9 +158,11 @@ const replaceFrom = async (
 };
 
 export const onReplace = (context: ReplaceContext, ctx: Command): Promise<void> =>
-  replaceFrom(context, ctx, ctx.match, (copy) =>
-    askAsReply(ctx, copy.askNamesPrompt, copy.askNamesPlaceholder).then(() => undefined)
-  );
+  replaceFrom(context, ctx, ctx.match, async (copy) => {
+    const prompt = await askAsReply(ctx, copy.askNamesPrompt, copy.askNamesPlaceholder);
+
+    context.prompts.remember(ctx.chat.id, prompt.message_id);
+  });
 
 export const onNamesReply = async (context: ReplaceContext, ctx: TextMessage): Promise<void> => {
   const answered = answeredPromptText(ctx);
@@ -166,6 +170,8 @@ export const onNamesReply = async (context: ReplaceContext, ctx: TextMessage): P
   if (answered === null || !isOwnPrompt(answered)) {
     return;
   }
+
+  context.prompts.forget(ctx.chat.id);
 
   await replaceFrom(context, ctx, ctx.message.text, (copy) => ctx.reply(copy.askNames).then(() => undefined));
 };

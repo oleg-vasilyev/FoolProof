@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import type { PromptRegistry } from "#live-game/bot/prompt-registry.ts";
+import type { PromptRegistry } from "#shared/telegram/prompt-registry.ts";
 
 
 export class PromptRegistryStub {

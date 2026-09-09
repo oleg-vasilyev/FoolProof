@@ -234,8 +234,13 @@ Two rules keep the prompt from becoming litter, both learned the hard way:
   reply interface behaves erratically.
 - **Delete a prompt only if it goes unanswered.** There is no API call to withdraw
   a `force_reply`, so a prompt nobody replied to would keep the reply pending in
-  the chat's draft indefinitely. Every command that opens a card therefore clears
-  any prompt still standing, and at most one is ever live per chat. An **answered** prompt
+  the chat's draft indefinitely. **Every command therefore clears any prompt still
+  standing** — the installer does it once, before the command runs, so a feature that
+  never asks a question still takes back the one another feature left, and at most
+  one is ever live per chat. A command that asks a question records it in that one
+  registry, and a reply that answers it takes it out. A command sent *as* the reply
+  is run as a command and its quoted prompt is deleted like any other — the one
+  tombstone this rule accepts, since a command is not an answer. An **answered** prompt
   must be left alone: deleting it turns the quote inside the player's own reply
   into "Deleted message", which is permanent and looks worse than the draft it was
   meant to fix.

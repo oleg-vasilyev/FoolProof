@@ -1,6 +1,7 @@
 import type { Feature, Listeners } from "#shared/telegram/feature-contract.ts";
 import type { ReplaceRepository } from "#shared/repository/repository-contract.ts";
 import type { LocaleReader } from "#shared/locale/chat-locale.ts";
+import type { PromptRegistry } from "#shared/telegram/prompt-registry.ts";
 import { copyIn } from "#replace-names/copy.ts";
 import {
   onNamesReply,
@@ -14,10 +15,11 @@ import { REPLACE_TAPS } from "#replace-names/render/replace-callback-codec.ts";
 export interface ReplaceNamesDeps {
   readonly repo: ReplaceRepository;
   readonly localeIn: LocaleReader;
+  readonly prompts: PromptRegistry;
 }
 
 export const createReplaceNamesFeature = (deps: ReplaceNamesDeps): Feature => {
-  const context: ReplaceContext = { repo: deps.repo, localeIn: deps.localeIn };
+  const context: ReplaceContext = { repo: deps.repo, localeIn: deps.localeIn, prompts: deps.prompts };
 
   return {
     commands: [

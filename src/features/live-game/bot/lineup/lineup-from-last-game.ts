@@ -92,8 +92,6 @@ const beginNext = async (
   context: CardContext,
   ctx: Command
 ): Promise<LastGame | null> => {
-  await context.prompts.dropUnanswered(ctx.chat.id);
-
   if (await refusedBecauseLive(copy, context, ctx)) {
     return null;
   }
