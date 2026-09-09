@@ -1,5 +1,6 @@
 import { EventEmitter } from "node:events";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { BATTERY, GATE } from "./gate-names.ts";
 import type { GateVerdict } from "./gate-verdict.ts";
 
 
@@ -89,7 +90,7 @@ const THIRD = 2;
 
 const THE_NUMBERS = { kind: "none" } as const;
 
-const THE_VERDICT = { kind: "ran", gate: "lint", named: false, ok: true, exitCode: PASSED } as unknown as GateVerdict;
+const THE_VERDICT = { kind: "ran", gate: GATE.lint, named: false, ok: true, exitCode: PASSED } as unknown as GateVerdict;
 
 const A_SCOPE = "since v1.20.0";
 
@@ -154,7 +155,7 @@ beforeEach(() => {
 });
 
 const runAndClose = async (code: number | null, against?: string) => {
-  const pending = runGate("lint", against, [LINT_STEP]);
+  const pending = runGate(GATE.lint, against, [LINT_STEP]);
 
   child.say("first line\nsecond");
   child.complain(" line\n");
@@ -194,7 +195,7 @@ describe("writeVerdict() and forgetVerdicts()", () => {
   });
 
   it("should remove the verdict file of each gate named, and mind a missing one not at all", () => {
-    forgetVerdicts(["lint", "e2e:changed"]);
+    forgetVerdicts([GATE.lint, GATE.e2eChanged]);
 
     expect(rmSyncSpy.mock.calls).toEqual([
       ["reports/gates/lint.json", { force: true }],
@@ -206,18 +207,18 @@ describe("writeVerdict() and forgetVerdicts()", () => {
 describe("verdictsOnDisk()", () => {
   it("should read the battery's gates in the battery's order, leaving out one with no verdict yet", () => {
     filesOnDisk({
-      "reports/gates/typecheck.json": JSON.stringify({ gate: "typecheck" }),
-      "reports/gates/lint.json": JSON.stringify({ gate: "lint" }),
-      "reports/gates/e2e.json": JSON.stringify({ gate: "e2e" }),
+      "reports/gates/typecheck.json": JSON.stringify({ gate: GATE.typecheck }),
+      "reports/gates/lint.json": JSON.stringify({ gate: GATE.lint }),
+      "reports/gates/e2e.json": JSON.stringify({ gate: GATE.e2e }),
     });
 
-    expect(verdictsOnDisk("check:quick")).toEqual([{ gate: "lint" }, { gate: "typecheck" }]);
+    expect(verdictsOnDisk(BATTERY.quick)).toEqual([{ gate: GATE.lint }, { gate: GATE.typecheck }]);
   });
 
   it("should leave out a verdict file that is not JSON, rather than throw inside a battery", () => {
     filesOnDisk({ "reports/gates/lint.json": "{ cut off" });
 
-    expect(verdictsOnDisk("check:quick")).toEqual([]);
+    expect(verdictsOnDisk(BATTERY.quick)).toEqual([]);
   });
 });
 
@@ -225,7 +226,7 @@ describe("batteryOnDisk()", () => {
   it("should take the battery the walker wrote down", () => {
     filesOnDisk({ "reports/gates/battery.txt": "check:release\n" });
 
-    expect(batteryOnDisk()).toBe("check:release");
+    expect(batteryOnDisk()).toBe(BATTERY.release);
   });
 
   it("should say null when no walker wrote one, or the name is no battery", () => {
@@ -246,7 +247,7 @@ describe("rewriteParagraph()", () => {
 
     rewriteParagraph();
 
-    expect(gatesParagraphSpy).toHaveBeenCalledWith([THE_VERDICT], "check:push");
+    expect(gatesParagraphSpy).toHaveBeenCalledWith([THE_VERDICT], BATTERY.push);
     expect(writeFileSyncSpy).toHaveBeenCalledWith("reports/gates/gates-paragraph.txt", "Gates: a paragraph.\n");
   });
 
@@ -308,8 +309,8 @@ describe("runGate()", () => {
   it("should read the numbers for the gate's scope once it has closed", async () => {
     await runAndClose(PASSED, "v1.20.0");
 
-    expect(scopeOfSpy).toHaveBeenCalledWith("lint", "v1.20.0", []);
-    expect(numbersForSpy).toHaveBeenCalledWith("lint", A_SCOPE, readOrNull, [
+    expect(scopeOfSpy).toHaveBeenCalledWith(GATE.lint, "v1.20.0", []);
+    expect(numbersForSpy).toHaveBeenCalledWith(GATE.lint, A_SCOPE, readOrNull, [
       "$ node node_modules/eslint/bin/eslint.js --quiet src",
       "first line",
       "second line",
@@ -322,7 +323,7 @@ describe("runGate()", () => {
 
     expect(verdict).toBe(THE_VERDICT);
     expect(verdictOfSpy).toHaveBeenCalledWith(
-      "lint",
+      GATE.lint,
       false,
       RED,
       expect.any(Date),
@@ -339,7 +340,7 @@ describe("runGate()", () => {
   });
 
   it("should settle red when the gate could not even be started, with the reason in the log", async () => {
-    const pending = runGate("lint", undefined, [LINT_STEP]);
+    const pending = runGate(GATE.lint, undefined, [LINT_STEP]);
 
     child.fail(new Error("spawn ENOENT"));
 
@@ -352,7 +353,7 @@ describe("runGate()", () => {
   });
 
   it("should settle once when a failed start is followed by a close, as node does", async () => {
-    const pending = runGate("lint", undefined, [LINT_STEP]);
+    const pending = runGate(GATE.lint, undefined, [LINT_STEP]);
 
     child.fail(new Error("spawn ENOENT"));
     child.close(null);
@@ -373,13 +374,13 @@ describe("runGate()", () => {
 
     expect(writeFileSyncSpy).toHaveBeenCalledWith("reports/gates/lint.json", JSON.stringify(THE_VERDICT, null, 2));
     expect(writeFileSyncSpy).toHaveBeenLastCalledWith("reports/gates/gates-paragraph.txt", "Gates: a paragraph.\n");
-    expect(gatesParagraphSpy).toHaveBeenCalledWith([THE_VERDICT], "check:quick");
+    expect(gatesParagraphSpy).toHaveBeenCalledWith([THE_VERDICT], BATTERY.quick);
   });
 });
 
 describe("runGate(), a gate of two steps", () => {
   it("should run the second step only after the first passed, each under its own line in one log", async () => {
-    const pending = runGate("e2e:typecheck", undefined, TWO_STEPS);
+    const pending = runGate(GATE.e2eTypecheck, undefined, TWO_STEPS);
 
     child.close(PASSED);
     await new Promise((done) => setImmediate(done));
@@ -398,7 +399,7 @@ describe("runGate(), a gate of two steps", () => {
   });
 
   it("should stop at the first red step and carry its code, never starting the next", async () => {
-    const pending = runGate("e2e:typecheck", undefined, TWO_STEPS);
+    const pending = runGate(GATE.e2eTypecheck, undefined, TWO_STEPS);
 
     child.close(RED);
     await pending;
@@ -421,7 +422,7 @@ describe("main()", () => {
 
   it("should run the named gate with the baseline from the environment, say its line and pass its exit code on", async () => {
     verdictOfSpy.mockReturnValue({ ...THE_VERDICT, exitCode: RED });
-    const pending = main(["node", "gate-runner.ts", "lint"], { MUTATE_AGAINST: "v1.20.0" }, say, "D:/Temp/FoolProof");
+    const pending = main(["node", "gate-runner.ts", GATE.lint], { MUTATE_AGAINST: "v1.20.0" }, say, "D:/Temp/FoolProof");
 
     child.close(RED);
 
@@ -438,13 +439,13 @@ describe("main()", () => {
       "reports/lint/findings.json",
       "src",
       "scripts",
-      "e2e",
+      GATE.e2e,
     ]);
     expect(say).toHaveBeenCalledWith("a line");
   });
 
   it("should refuse files for a gate that takes none before anything runs or is written", async () => {
-    const status = await main(["node", "gate-runner.ts", "lint", "src/a.ts"], {}, say, "D:/Temp/FoolProof");
+    const status = await main(["node", "gate-runner.ts", GATE.lint, "src/a.ts"], {}, say, "D:/Temp/FoolProof");
 
     expect(status).toBe(FAILED);
     expect(say.mock.calls.at(-1)?.[FIRST]).toContain("lint takes no files");
@@ -457,9 +458,9 @@ const ROOT = "D:/Temp/FoolProof";
 
 describe("runGate(), with arguments", () => {
   const runNamed = async () => {
-    verdictOfSpy.mockReturnValue({ ...THE_VERDICT, gate: "test" });
+    verdictOfSpy.mockReturnValue({ ...THE_VERDICT, gate: GATE.test });
     const pending = runGate(
-      "test",
+      GATE.test,
       undefined,
       [{ bin: TEST_STEP.bin, args: [...TEST_STEP.args, "src/a.spec.ts", "src/b.spec.ts"] }],
       ["src/a.spec.ts", "src/b.spec.ts"]
@@ -493,12 +494,12 @@ describe("runGate(), with arguments", () => {
   });
 
   it("should read the scope with the arguments, so a named mutation says so", async () => {
-    const pending = runGate("test:mutation:changed", "v1.20.0", [TEST_STEP], ["scripts/a.ts"]);
+    const pending = runGate(GATE.mutationChanged, "v1.20.0", [TEST_STEP], ["scripts/a.ts"]);
 
     child.close(PASSED);
     await pending;
 
-    expect(scopeOfSpy).toHaveBeenCalledWith("test:mutation:changed", "v1.20.0", ["scripts/a.ts"]);
+    expect(scopeOfSpy).toHaveBeenCalledWith(GATE.mutationChanged, "v1.20.0", ["scripts/a.ts"]);
   });
 });
 
@@ -506,7 +507,7 @@ describe("main(), the reasons under a red line", () => {
   const say = vi.fn();
 
   it("should take the gate from the first argument and pass the rest on", async () => {
-    const pending = main(["node", "gate-runner.ts", "test", "src/a.spec.ts"], {}, say, ROOT);
+    const pending = main(["node", "gate-runner.ts", GATE.test, "src/a.spec.ts"], {}, say, ROOT);
 
     child.close(PASSED);
     await pending;
@@ -523,7 +524,7 @@ describe("main(), the reasons under a red line", () => {
   it("should print the reasons the summary gives for a red verdict, after its line", async () => {
     verdictOfSpy.mockReturnValue({ ...THE_VERDICT, ok: false, exitCode: RED });
     reasonLinesSpy.mockReturnValue(["  ✗ a failure"]);
-    const pending = main(["node", "gate-runner.ts", "lint"], {}, say, ROOT);
+    const pending = main(["node", "gate-runner.ts", GATE.lint], {}, say, ROOT);
 
     child.close(RED);
     await pending;
@@ -539,7 +540,7 @@ describe("runGate(), what the verdict is told about naming", () => {
 
     expect(verdictOfSpy.mock.calls[FIRST]?.[SECOND]).toBe(false);
 
-    const pending = runGate("test", undefined, [TEST_STEP], ["src/a.spec.ts"]);
+    const pending = runGate(GATE.test, undefined, [TEST_STEP], ["src/a.spec.ts"]);
 
     child.close(PASSED);
     await pending;

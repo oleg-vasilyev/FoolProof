@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { BATTERIES, COMMANDS, isBattery, type Battery, type Gate } from "./gate-list.ts";
+import { BATTERIES, COMMANDS, isBattery } from "./gate-list.ts";
+import { BATTERY, GATE, type Battery, type Gate } from "./gate-names.ts";
 import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH } from "./gate-paths.ts";
 import { forgetVerdicts, runGate, writeVerdict } from "./gate-runner.ts";
 import { FAILED, PASSED, skippedVerdict, type GateVerdict } from "./gate-verdict.ts";
@@ -11,11 +12,11 @@ const NOTHING = 0;
 
 const A_RELEASE_TAG = /^v\d/;
 
-const RELEASING: Battery = "check:release";
+const RELEASING: Battery = BATTERY.release;
 
-export const THE_SUITE: Gate = "test:coverage";
+export const THE_SUITE: Gate = GATE.coverage;
 
-export const NEEDS_THE_SUITE: readonly Gate[] = ["test:mutation:changed", "test:mutation"];
+export const NEEDS_THE_SUITE: readonly Gate[] = [GATE.mutationChanged, GATE.mutation];
 
 export type Baseline =
   | { readonly ok: true; readonly tag: string }

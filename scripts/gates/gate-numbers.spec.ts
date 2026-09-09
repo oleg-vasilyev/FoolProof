@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { GATE } from "./gate-names.ts";
 
 
 const calculateMetricsSpy = vi.fn();
@@ -123,49 +124,49 @@ describe("the report paths", () => {
 
 describe("outputsOf()", () => {
   it("should name nothing for a gate whose tool writes no report", () => {
-    expect(outputsOf("typecheck")).toEqual([]);
-    expect(outputsOf("docs-check")).toEqual([]);
-    expect(outputsOf("e2e:typecheck")).toEqual([]);
+    expect(outputsOf(GATE.typecheck)).toEqual([]);
+    expect(outputsOf(GATE.docsCheck)).toEqual([]);
+    expect(outputsOf(GATE.e2eTypecheck)).toEqual([]);
   });
 
   it("should name the findings file ESLint writes, so a stale one is forgotten before the run", () => {
-    expect(outputsOf("lint")).toEqual([LINT_FINDINGS]);
+    expect(outputsOf(GATE.lint)).toEqual([LINT_FINDINGS]);
     expect(LINT_FINDINGS).toBe("reports/lint/findings.json");
   });
 
   it("should name both files the coverage run writes", () => {
-    expect(outputsOf("test:coverage")).toEqual([TESTS_RESULTS, COVERAGE_SUMMARY]);
+    expect(outputsOf(GATE.coverage)).toEqual([TESTS_RESULTS, COVERAGE_SUMMARY]);
   });
 
   it("should name both families' reports for a mutation run, changed or full", () => {
-    expect(outputsOf("test:mutation:changed")).toEqual([
+    expect(outputsOf(GATE.mutationChanged)).toEqual([
       "reports/mutation/mutation.json",
       "reports/mutation-scripts/mutation.json",
     ]);
-    expect(outputsOf("test:mutation")).toEqual(outputsOf("test:mutation:changed"));
+    expect(outputsOf(GATE.mutation)).toEqual(outputsOf(GATE.mutationChanged));
   });
 
   it("should name the e2e results for either e2e run", () => {
-    expect(outputsOf("e2e")).toEqual([E2E_RESULTS]);
-    expect(outputsOf("e2e:changed")).toEqual([E2E_RESULTS]);
+    expect(outputsOf(GATE.e2e)).toEqual([E2E_RESULTS]);
+    expect(outputsOf(GATE.e2eChanged)).toEqual([E2E_RESULTS]);
   });
 
   it("should name the harness's own results file for the harness units", () => {
-    expect(outputsOf("test:e2e-harness")).toEqual([HARNESS_RESULTS]);
+    expect(outputsOf(GATE.harness)).toEqual([HARNESS_RESULTS]);
   });
 });
 
 describe("scopeOf()", () => {
   it("should call the full run everything, whatever the baseline says", () => {
-    expect(scopeOf("test:mutation", "v1.20.0")).toBe("everything");
+    expect(scopeOf(GATE.mutation, "v1.20.0")).toBe("everything");
   });
 
   it("should call a changed run with no baseline the diff", () => {
-    expect(scopeOf("test:mutation:changed", undefined)).toBe("the diff");
+    expect(scopeOf(GATE.mutationChanged, undefined)).toBe("the diff");
   });
 
   it("should name the baseline a changed run was given", () => {
-    expect(scopeOf("test:mutation:changed", "v1.20.0")).toBe("since v1.20.0");
+    expect(scopeOf(GATE.mutationChanged, "v1.20.0")).toBe("since v1.20.0");
   });
 });
 
@@ -179,7 +180,7 @@ describe("numbersFor()", () => {
   });
 
   it("should carry no numbers for the documents gate, whose complaints are its output", () => {
-    expect(numbersFor("docs-check", "the diff", everything, NO_OUTPUT)).toEqual({ kind: "none" });
+    expect(numbersFor(GATE.docsCheck, "the diff", everything, NO_OUTPUT)).toEqual({ kind: "none" });
   });
 
   it("should read lint's findings out of the file ESLint wrote, and say when it wrote none", () => {
@@ -187,17 +188,17 @@ describe("numbersFor()", () => {
       { filePath: "D:/x/src/a.ts", messages: [{ ruleId: "no-var", severity: 2, line: 3, column: 1, message: "no var" }] },
     ]);
 
-    expect(numbersFor("lint", "the diff", readerOver({ [LINT_FINDINGS]: lintJson }), NO_OUTPUT)).toEqual({
+    expect(numbersFor(GATE.lint, "the diff", readerOver({ [LINT_FINDINGS]: lintJson }), NO_OUTPUT)).toEqual({
       kind: "findings",
       findings: [{ file: "D:/x/src/a.ts", line: 3, column: 1, rule: "no-var", message: "no var" }],
     });
-    expect(numbersFor("lint", "the diff", nothing, NO_OUTPUT)).toEqual({ kind: "missing", expected: LINT_FINDINGS });
+    expect(numbersFor(GATE.lint, "the diff", nothing, NO_OUTPUT)).toEqual({ kind: "missing", expected: LINT_FINDINGS });
   });
 
   it("should read both typechecks' findings out of the captured output, since tsc writes no file", () => {
     const output = ["src/a.ts(1,14): error TS2322: Type 'string' is not assignable to type 'number'.", ""];
 
-    for (const gate of ["typecheck", "e2e:typecheck"] as const) {
+    for (const gate of [GATE.typecheck, GATE.e2eTypecheck] as const) {
       expect(numbersFor(gate, "the diff", nothing, output)).toEqual({
         kind: "findings",
         findings: [{ file: "src/a.ts", line: 1, column: 14, rule: "TS2322", message: "Type 'string' is not assignable to type 'number'." }],
@@ -206,21 +207,21 @@ describe("numbersFor()", () => {
   });
 
   it("should count the harness units out of the harness's own results", () => {
-    expect(numbersFor("test:e2e-harness", "the diff", everything, NO_OUTPUT)).toEqual({
+    expect(numbersFor(GATE.harness, "the diff", everything, NO_OUTPUT)).toEqual({
       kind: "harness",
       cases: CASES,
       files: FILES,
       failed: FAILED,
       failures: [],
     });
-    expect(numbersFor("test:e2e-harness", "the diff", nothing, NO_OUTPUT)).toEqual({
+    expect(numbersFor(GATE.harness, "the diff", nothing, NO_OUTPUT)).toEqual({
       kind: "missing",
       expected: HARNESS_RESULTS,
     });
   });
 
   it("should read coverage's four percentages in statements, branches, functions, lines order", () => {
-    expect(numbersFor("test:coverage", "the diff", everything, NO_OUTPUT)).toEqual({
+    expect(numbersFor(GATE.coverage, "the diff", everything, NO_OUTPUT)).toEqual({
       kind: "coverage",
       cases: CASES,
       files: FILES,
@@ -234,7 +235,7 @@ describe("numbersFor()", () => {
   });
 
   it("should say the results were never written when a coverage run left nothing", () => {
-    expect(numbersFor("test:coverage", "the diff", nothing, NO_OUTPUT)).toEqual({
+    expect(numbersFor(GATE.coverage, "the diff", nothing, NO_OUTPUT)).toEqual({
       kind: "missing",
       expected: TESTS_RESULTS,
     });
@@ -243,7 +244,7 @@ describe("numbersFor()", () => {
   it("should still count the cases and the failures when a red suite wrote no coverage", () => {
     const withoutSummary = readerOver({ [TESTS_RESULTS]: vitestJson(CASES, FAILED, FILES) });
 
-    expect(numbersFor("test:coverage", "the diff", withoutSummary, NO_OUTPUT)).toEqual({
+    expect(numbersFor(GATE.coverage, "the diff", withoutSummary, NO_OUTPUT)).toEqual({
       kind: "tests",
       cases: CASES,
       files: FILES,
@@ -253,7 +254,7 @@ describe("numbersFor()", () => {
   });
 
   it("should score each mutation family from its own report against its own bar", () => {
-    expect(numbersFor("test:mutation:changed", "since v1.20.0", everything, NO_OUTPUT)).toEqual({
+    expect(numbersFor(GATE.mutationChanged, "since v1.20.0", everything, NO_OUTPUT)).toEqual({
       kind: "mutation",
       scope: "since v1.20.0",
       families: [
@@ -282,7 +283,7 @@ describe("numbersFor()", () => {
   });
 
   it("should hand the report's files to the score calculation, not the whole report", () => {
-    numbersFor("test:mutation", "everything", everything, NO_OUTPUT);
+    numbersFor(GATE.mutation, "everything", everything, NO_OUTPUT);
 
     expect(calculateMetricsSpy).toHaveBeenNthCalledWith(FIRST_CALL, SOURCE_FILES);
     expect(calculateMetricsSpy).toHaveBeenNthCalledWith(SECOND_CALL, TOOLING_FILES);
@@ -294,7 +295,7 @@ describe("numbersFor()", () => {
       "reports/mutation/mutation.json": SOURCE_REPORT,
     });
 
-    expect(numbersFor("test:mutation:changed", "the diff", sourceOnly, NO_OUTPUT)).toMatchObject({
+    expect(numbersFor(GATE.mutationChanged, "the diff", sourceOnly, NO_OUTPUT)).toMatchObject({
       kind: "mutation",
       families: [{ family: "source" }],
     });
@@ -304,12 +305,12 @@ describe("numbersFor()", () => {
     const reportOnly = readerOver({ "reports/mutation/mutation.json": SOURCE_REPORT });
     const configOnly = readerOver({ "scripts/gates/config/stryker.config.json": SOURCE_CONFIG });
 
-    expect(numbersFor("test:mutation", "everything", reportOnly, NO_OUTPUT)).toMatchObject({ families: [] });
-    expect(numbersFor("test:mutation", "everything", configOnly, NO_OUTPUT)).toMatchObject({ families: [] });
+    expect(numbersFor(GATE.mutation, "everything", reportOnly, NO_OUTPUT)).toMatchObject({ families: [] });
+    expect(numbersFor(GATE.mutation, "everything", configOnly, NO_OUTPUT)).toMatchObject({ families: [] });
   });
 
   it("should report no families at all when nothing was mutated", () => {
-    expect(numbersFor("test:mutation:changed", "the diff", nothing, NO_OUTPUT)).toEqual({
+    expect(numbersFor(GATE.mutationChanged, "the diff", nothing, NO_OUTPUT)).toEqual({
       kind: "mutation",
       scope: "the diff",
       families: [],
@@ -317,20 +318,20 @@ describe("numbersFor()", () => {
   });
 
   it("should count e2e cases out of the e2e results, for the changed run too", () => {
-    expect(numbersFor("e2e", "the diff", everything, NO_OUTPUT)).toEqual({
+    expect(numbersFor(GATE.e2e, "the diff", everything, NO_OUTPUT)).toEqual({
       kind: "e2e",
       cases: CASES,
       files: FILES,
       failed: FAILED,
       failures: [],
     });
-    expect(numbersFor("e2e:changed", "the diff", everything, NO_OUTPUT)).toEqual(
-      numbersFor("e2e", "the diff", everything, NO_OUTPUT)
+    expect(numbersFor(GATE.e2eChanged, "the diff", everything, NO_OUTPUT)).toEqual(
+      numbersFor(GATE.e2e, "the diff", everything, NO_OUTPUT)
     );
   });
 
   it("should say which file an e2e run failed to write", () => {
-    expect(numbersFor("e2e", "the diff", nothing, NO_OUTPUT)).toEqual({ kind: "missing", expected: E2E_RESULTS });
+    expect(numbersFor(GATE.e2e, "the diff", nothing, NO_OUTPUT)).toEqual({ kind: "missing", expected: E2E_RESULTS });
   });
 });
 
@@ -364,7 +365,7 @@ const redJson = (failed: number): string =>
 
 describe("failuresIn(), read off the reporter's real shape", () => {
   it("should name each failed assertion by file, full name and its message with the stack frames cut off", () => {
-    const numbers = numbersFor("test", "the diff", readerOver({ [TESTS_RESULTS]: redJson(1) }), NO_OUTPUT);
+    const numbers = numbersFor(GATE.test, "the diff", readerOver({ [TESTS_RESULTS]: redJson(1) }), NO_OUTPUT);
 
     expect(numbers).toMatchObject({
       kind: "tests",
@@ -385,7 +386,7 @@ describe("failuresIn(), read off the reporter's real shape", () => {
       }],
     });
 
-    expect(numbersFor("test", "the diff", readerOver({ [TESTS_RESULTS]: json }), NO_OUTPUT)).toMatchObject({
+    expect(numbersFor(GATE.test, "the diff", readerOver({ [TESTS_RESULTS]: json }), NO_OUTPUT)).toMatchObject({
       failures: [{ file: A_FAILED_FILE, name: THE_FILE_DID_NOT_LOAD, message: expect.stringContaining("LINT_FINDINGS") }],
     });
   });
@@ -402,43 +403,43 @@ describe("failuresIn(), read off the reporter's real shape", () => {
       }] }],
     });
 
-    expect(numbersFor("e2e", "the diff", readerOver({ [E2E_RESULTS]: e2eJson }), NO_OUTPUT)).toMatchObject({
+    expect(numbersFor(GATE.e2e, "the diff", readerOver({ [E2E_RESULTS]: e2eJson }), NO_OUTPUT)).toMatchObject({
       failures: [{ botLog: "reports/e2e/bot/picking-the-language-a-chat-is-played-in.log" }],
     });
   });
 
   it("should keep at most ten failures, the rest being in the log", () => {
-    const numbers = numbersFor("test", "the diff", readerOver({ [TESTS_RESULTS]: redJson(ELEVEN) }), NO_OUTPUT);
+    const numbers = numbersFor(GATE.test, "the diff", readerOver({ [TESTS_RESULTS]: redJson(ELEVEN) }), NO_OUTPUT);
 
     expect(numbers.kind === "tests" ? numbers.failures : []).toHaveLength(MOST_FAILURES);
   });
 
   it("should carry no failures for a green run, on every reporter-backed kind", () => {
-    for (const gate of ["test", "test:coverage", "test:e2e-harness", "e2e"] as const) {
+    for (const gate of [GATE.test, GATE.coverage, GATE.harness, GATE.e2e] as const) {
       expect(numbersFor(gate, "the diff", everything, NO_OUTPUT)).toMatchObject({ failures: [] });
     }
   });
 
   it("should name the suite's results file as what a bare test run writes and reads", () => {
-    expect(outputsOf("test")).toEqual([TESTS_RESULTS]);
-    expect(numbersFor("test", "the diff", nothing, NO_OUTPUT)).toEqual({ kind: "missing", expected: TESTS_RESULTS });
+    expect(outputsOf(GATE.test)).toEqual([TESTS_RESULTS]);
+    expect(numbersFor(GATE.test, "the diff", nothing, NO_OUTPUT)).toEqual({ kind: "missing", expected: TESTS_RESULTS });
   });
 });
 
 describe("scopeOf(), with named files", () => {
   it("should name the count of files when the run was given some, whatever the baseline", () => {
-    expect(scopeOf("test:mutation:changed", "v1.20.0", ["a.ts", "b.ts"])).toBe("named 2");
+    expect(scopeOf(GATE.mutationChanged, "v1.20.0", ["a.ts", "b.ts"])).toBe("named 2");
   });
 
   it("should still call the full run everything", () => {
-    expect(scopeOf("test:mutation", undefined, ["a.ts"])).toBe("everything");
+    expect(scopeOf(GATE.mutation, undefined, ["a.ts"])).toBe("everything");
   });
 });
 
 describe("numbersFor(), an e2e run over the diff with nothing to play", () => {
   it("should carry no numbers rather than complain, since playing nothing writes nothing", () => {
-    expect(numbersFor("e2e:changed", "the diff", nothing, NO_OUTPUT)).toEqual({ kind: "none" });
-    expect(numbersFor("e2e", "the diff", nothing, NO_OUTPUT)).toEqual({ kind: "missing", expected: E2E_RESULTS });
+    expect(numbersFor(GATE.e2eChanged, "the diff", nothing, NO_OUTPUT)).toEqual({ kind: "none" });
+    expect(numbersFor(GATE.e2e, "the diff", nothing, NO_OUTPUT)).toEqual({ kind: "missing", expected: E2E_RESULTS });
   });
 });
 

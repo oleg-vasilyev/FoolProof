@@ -1,5 +1,6 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { VITEST } from "./tool-binaries.ts";
+import { E2E_CONFIG } from "./gate-list.ts";
 
 
 const BASELINE = process.env.E2E_AGAINST ?? "origin/main";
@@ -85,7 +86,7 @@ const play = (files: readonly string[] | null): number => {
 
   const run = spawnSync(
     process.execPath,
-    [VITEST, "run", "--config", "e2e/vitest.e2e.config.ts", ...(files ?? [])],
+    [VITEST, "run", "--config", E2E_CONFIG, ...(files ?? [])],
     { stdio: "inherit" }
   );
 

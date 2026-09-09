@@ -1,4 +1,5 @@
-import { rerunCommandFor, type Battery } from "./gate-list.ts";
+import { rerunCommandFor } from "./gate-list.ts";
+import type { Battery } from "./gate-names.ts";
 import { lineFor, type GateVerdict } from "./gate-verdict.ts";
 import type { Failure, FamilyScore, GateNumbers, MutationScope } from "./gate-numbers.ts";
 import type { Finding } from "./finding.ts";

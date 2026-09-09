@@ -1,8 +1,13 @@
+import { ALL_GATES, COMMANDS, GATE_RUNNER } from "../gates/gate-list.ts";
+import type { Gate } from "../gates/gate-names.ts";
+
+
 const THE_WHOLE_MATCH = 0;
 
 const NOTHING = 0;
 
-export const GATE_RUNNER = "scripts/gates/gate-runner.ts";
+const gateOffered = (gate: Gate): string =>
+  COMMANDS[gate].takesFiles ? `${gate} [files]` : gate;
 
 const A_TOOL_THROUGH_NPX = /(?:^|[\s;&|(])npx\s+(?:--no-install\s+)?(?:eslint|tsc|vitest|stryker)(?![\w-])/g;
 
@@ -33,9 +38,8 @@ export const gateRunByHand = (command: string): string | null => {
 
   return [
     `Refused: ${found.join(", ")} runs a gate by hand.`,
-    `Every gate runs through node ${GATE_RUNNER} <gate> — lint, typecheck, e2e:typecheck,`,
-    "docs-check, test [files], test:coverage, test:mutation:changed [files], test:mutation,",
-    "e2e, e2e:changed, test:e2e-harness — which leaves the log and the verdict under",
+    `Every gate runs through node ${GATE_RUNNER} <gate> — ${ALL_GATES.map(gateOffered).join(", ")} —`,
+    "which leaves the log and the verdict under",
     "reports/gates/ and names the config, now that the configs live in scripts/gates/config/",
     "and the tool's bare name finds none.",
   ].join("\n");

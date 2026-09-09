@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { BATTERY, GATE } from "./gate-names.ts";
 import type { GateVerdict, RanVerdict } from "./gate-verdict.ts";
 import type { GateNumbers } from "./gate-numbers.ts";
 
@@ -42,9 +43,9 @@ const verdictWith = (gate: RanVerdict["gate"], ok: boolean, numbers: GateNumbers
 
 const SKIPPED: GateVerdict = {
   kind: "skipped",
-  gate: "test:mutation:changed",
+  gate: GATE.mutationChanged,
   ok: false,
-  because: "test:coverage",
+  because: GATE.coverage,
   startedAt: "2026-09-09T10:00:00.000Z",
 };
 
@@ -80,20 +81,20 @@ const TOOLING_SCORED = { ...SOURCE_SCORED, family: "tooling", score: 84.02 } as 
 const E2E: GateNumbers = { kind: "e2e", cases: 205, files: 17, failed: NO_FAILURES, failures: [] };
 
 const aGreenPhase = (): readonly GateVerdict[] => [
-  verdictWith("lint", true, NONE),
-  verdictWith("typecheck", true, NONE),
-  verdictWith("test:coverage", true, COVERAGE),
-  verdictWith("test:mutation:changed", true, {
+  verdictWith(GATE.lint, true, NONE),
+  verdictWith(GATE.typecheck, true, NONE),
+  verdictWith(GATE.coverage, true, COVERAGE),
+  verdictWith(GATE.mutationChanged, true, {
     kind: "mutation",
     scope: "the diff",
     families: [SOURCE_SCORED],
   }),
-  verdictWith("e2e:changed", true, E2E),
+  verdictWith(GATE.e2eChanged, true, E2E),
 ];
 
 describe("gatesParagraph()", () => {
   it("should write the green paragraph in the fixed shape the commit template asks for", () => {
-    expect(gatesParagraph(aGreenPhase(), "check:phase")).toBe(
+    expect(gatesParagraph(aGreenPhase(), BATTERY.phase)).toBe(
       "Gates: check:phase green — 4651 tests in 199 files, coverage 99.84/97.61/100/99.83, " +
         "mutation 99.52% over the changed source and nothing to run over the tooling, " +
         "e2e 205 cases in 17 files."
@@ -102,14 +103,14 @@ describe("gatesParagraph()", () => {
 
   it("should name both families when both ran, in source then tooling order", () => {
     const verdicts = [
-      verdictWith("test:mutation:changed", true, {
+      verdictWith(GATE.mutationChanged, true, {
         kind: "mutation",
         scope: "since v1.20.0",
         families: [TOOLING_SCORED, SOURCE_SCORED],
       }),
     ];
 
-    expect(gatesParagraph(verdicts, "check:release")).toBe(
+    expect(gatesParagraph(verdicts, BATTERY.release)).toBe(
       "Gates: check:release green — mutation 99.52% over the source changed since v1.20.0 " +
         "and 84.02% over the tooling changed since v1.20.0."
     );
@@ -117,61 +118,61 @@ describe("gatesParagraph()", () => {
 
   it("should call the full run a run over everything", () => {
     const verdicts = [
-      verdictWith("test:mutation", true, {
+      verdictWith(GATE.mutation, true, {
         kind: "mutation",
         scope: "everything",
         families: [SOURCE_SCORED, TOOLING_SCORED],
       }),
     ];
 
-    expect(gatesParagraph(verdicts, "check:release")).toContain(
+    expect(gatesParagraph(verdicts, BATTERY.release)).toContain(
       "mutation 99.52% over all the source and 84.02% over all the tooling"
     );
   });
 
   it("should say a family the full run never reached was not run, rather than that it had nothing", () => {
     const verdicts = [
-      verdictWith("test:mutation", false, { kind: "mutation", scope: "everything", families: [SOURCE_SCORED] }),
+      verdictWith(GATE.mutation, false, { kind: "mutation", scope: "everything", families: [SOURCE_SCORED] }),
     ];
 
-    expect(gatesParagraph(verdicts, "check:release")).toContain("tooling not run");
-    expect(gatesParagraph(verdicts, "check:release")).not.toContain("nothing to run over the tooling");
+    expect(gatesParagraph(verdicts, BATTERY.release)).toContain("tooling not run");
+    expect(gatesParagraph(verdicts, BATTERY.release)).not.toContain("nothing to run over the tooling");
   });
 
   it("should count the harness units apart from the suite", () => {
     const verdicts = [
-      verdictWith("test:e2e-harness", true, { kind: "harness", cases: 75, files: 9, failed: NO_FAILURES, failures: [] }),
+      verdictWith(GATE.harness, true, { kind: "harness", cases: 75, files: 9, failed: NO_FAILURES, failures: [] }),
     ];
 
-    expect(gatesParagraph(verdicts, "check:push")).toBe(
+    expect(gatesParagraph(verdicts, BATTERY.push)).toBe(
       "Gates: check:push green — 75 cases in 9 files of harness units."
     );
   });
 
   it("should say a suite that wrote no coverage as tests without coverage, never as harness units", () => {
     const verdicts = [
-      verdictWith("test:coverage", true, { kind: "tests", cases: 4771, files: 207, failed: NO_FAILURES, failures: [] }),
+      verdictWith(GATE.coverage, true, { kind: "tests", cases: 4771, files: 207, failed: NO_FAILURES, failures: [] }),
     ];
 
-    expect(gatesParagraph(verdicts, "check:quick")).toBe(
+    expect(gatesParagraph(verdicts, BATTERY.quick)).toBe(
       "Gates: check:quick green — 4771 tests in 207 files, no coverage written."
     );
   });
 
   it("should open RED with every red gate named, and the failures counted where a tool counts them", () => {
     const verdicts = [
-      verdictWith("lint", false, NONE),
-      verdictWith("test:coverage", false, { ...COVERAGE, failed: THREE_FAILED }),
-      verdictWith("e2e:changed", true, E2E),
+      verdictWith(GATE.lint, false, NONE),
+      verdictWith(GATE.coverage, false, { ...COVERAGE, failed: THREE_FAILED }),
+      verdictWith(GATE.e2eChanged, true, E2E),
     ];
 
-    expect(gatesParagraph(verdicts, "check:phase")).toBe(
+    expect(gatesParagraph(verdicts, BATTERY.phase)).toBe(
       "Gates: check:phase RED (lint red, test:coverage red (3 failed)) — e2e 205 cases in 17 files."
     );
   });
 
   it("should not count zero failures on a gate that was red for another reason", () => {
-    expect(gatesParagraph([verdictWith("test:coverage", false, COVERAGE)], "check:phase")).toBe(
+    expect(gatesParagraph([verdictWith(GATE.coverage, false, COVERAGE)], BATTERY.phase)).toBe(
       "Gates: check:phase RED (test:coverage red)."
     );
   });
@@ -179,47 +180,47 @@ describe("gatesParagraph()", () => {
   it("should count a red lint's or typecheck's findings in the paragraph, and say nothing at zero", () => {
     const finding = { file: "src/a.ts", line: 1, column: 1, rule: "x", message: "m" };
 
-    expect(gatesParagraph([verdictWith("lint", false, { kind: "findings", findings: [finding, finding] })], "check:quick")).toBe(
+    expect(gatesParagraph([verdictWith(GATE.lint, false, { kind: "findings", findings: [finding, finding] })], BATTERY.quick)).toBe(
       "Gates: check:quick RED (lint red (2 findings))."
     );
-    expect(gatesParagraph([verdictWith("typecheck", false, { kind: "findings", findings: [finding] })], "check:quick")).toBe(
+    expect(gatesParagraph([verdictWith(GATE.typecheck, false, { kind: "findings", findings: [finding] })], BATTERY.quick)).toBe(
       "Gates: check:quick RED (typecheck red (1 finding))."
     );
-    expect(gatesParagraph([verdictWith("lint", false, { kind: "findings", findings: [] })], "check:quick")).toBe(
+    expect(gatesParagraph([verdictWith(GATE.lint, false, { kind: "findings", findings: [] })], BATTERY.quick)).toBe(
       "Gates: check:quick RED (lint red)."
     );
   });
 
   it("should name the family under its bar when a mutation gate is red", () => {
     const verdicts = [
-      verdictWith("test:mutation:changed", false, {
+      verdictWith(GATE.mutationChanged, false, {
         kind: "mutation",
         scope: "the diff",
         families: [SOURCE_SCORED, { ...TOOLING_SCORED, score: 76.07, bar: 80 }],
       }),
     ];
 
-    expect(gatesParagraph(verdicts, "check:phase")).toBe(
+    expect(gatesParagraph(verdicts, BATTERY.phase)).toBe(
       "Gates: check:phase RED (test:mutation:changed red (76.07% tooling under the 80% bar))."
     );
   });
 
   it("should say a skipped gate was skipped and why, as a red gate", () => {
-    expect(gatesParagraph([SKIPPED], "check:phase")).toBe(
+    expect(gatesParagraph([SKIPPED], BATTERY.phase)).toBe(
       "Gates: check:phase RED (test:mutation:changed red (skipped, test:coverage was red))."
     );
   });
 
   it("should say which file a green gate failed to write, rather than invent a number", () => {
-    const verdicts = [verdictWith("e2e", true, { kind: "missing", expected: "reports/e2e/results.json" })];
+    const verdicts = [verdictWith(GATE.e2e, true, { kind: "missing", expected: "reports/e2e/results.json" })];
 
-    expect(gatesParagraph(verdicts, "check:release")).toBe(
+    expect(gatesParagraph(verdicts, BATTERY.release)).toBe(
       "Gates: check:release green — no numbers: reports/e2e/results.json was not written."
     );
   });
 
   it("should end after the verdict when no gate carries numbers", () => {
-    expect(gatesParagraph([verdictWith("lint", true, NONE)], "check:quick")).toBe("Gates: check:quick green.");
+    expect(gatesParagraph([verdictWith(GATE.lint, true, NONE)], BATTERY.quick)).toBe("Gates: check:quick green.");
   });
 });
 
@@ -245,7 +246,7 @@ describe("summaryLines()", () => {
   });
 
   it("should end a red run with the command that re-runs each red gate alone", () => {
-    const lines = summaryLines([verdictWith("lint", false, NONE), verdictWith("e2e", false, NONE)], ROOT);
+    const lines = summaryLines([verdictWith(GATE.lint, false, NONE), verdictWith(GATE.e2e, false, NONE)], ROOT);
 
     expect(lines.slice(-THREE_FAILED)).toEqual([
       "Re-run a red gate alone, not the whole battery:",
@@ -267,7 +268,7 @@ describe("summaryLines()", () => {
 
   it("should print a gate's reasons under its line, so a battery says what a single run would", () => {
     const finding = { file: "src/a.ts", line: 8, column: 1, rule: "project/no-comments", message: "No comments" };
-    const lines = summaryLines([verdictWith("lint", false, { kind: "findings", findings: [finding] })], ROOT);
+    const lines = summaryLines([verdictWith(GATE.lint, false, { kind: "findings", findings: [finding] })], ROOT);
 
     expect(lines.slice(0, 2)).toEqual(["lint: a line", "  ✗ src/a.ts:8:1 project/no-comments — No comments"]);
   });
@@ -285,14 +286,14 @@ const A_FAILURE = {
 describe("gatesParagraph(), a run over named files", () => {
   it("should say how many named files a family's score covers, singular and plural", () => {
     const one = [
-      verdictWith("test:mutation:changed", true, { kind: "mutation", scope: "named 1", families: [TOOLING_SCORED] }),
+      verdictWith(GATE.mutationChanged, true, { kind: "mutation", scope: "named 1", families: [TOOLING_SCORED] }),
     ];
     const two = [
-      verdictWith("test:mutation:changed", true, { kind: "mutation", scope: "named 2", families: [SOURCE_SCORED] }),
+      verdictWith(GATE.mutationChanged, true, { kind: "mutation", scope: "named 2", families: [SOURCE_SCORED] }),
     ];
 
-    expect(gatesParagraph(one, "check:phase")).toContain("84.02% over 1 named tooling file");
-    expect(gatesParagraph(two, "check:phase")).toContain("99.52% over 2 named source files");
+    expect(gatesParagraph(one, BATTERY.phase)).toContain("84.02% over 1 named tooling file");
+    expect(gatesParagraph(two, BATTERY.phase)).toContain("99.52% over 2 named source files");
   });
 });
 
@@ -309,12 +310,12 @@ describe("relativeTo()", () => {
 
 describe("reasonLines()", () => {
   it("should say nothing for a green gate or a skipped one", () => {
-    expect(reasonLines(verdictWith("lint", true, NONE), ROOT)).toEqual([]);
+    expect(reasonLines(verdictWith(GATE.lint, true, NONE), ROOT)).toEqual([]);
     expect(reasonLines(SKIPPED, ROOT)).toEqual([]);
   });
 
   it("should list each finding as file:line:col rule — message, the file made relative", () => {
-    const red = verdictWith("lint", false, {
+    const red = verdictWith(GATE.lint, false, {
       kind: "findings",
       findings: [
         { file: "D:\\Temp\\FoolProof\\src\\a.ts", line: 8, column: 1, rule: "project/no-comments", message: "No comments" },
@@ -329,7 +330,7 @@ describe("reasonLines()", () => {
   });
 
   it("should point an e2e failure at the bot log of its scenario, under the message", () => {
-    const red = verdictWith("e2e", false, {
+    const red = verdictWith(GATE.e2e, false, {
       kind: "e2e", cases: 1, files: 1, failed: 1,
       failures: [{ ...A_FAILURE, message: "expected\nreceived", botLog: "reports/e2e/bot/whole-game.log" }],
     });
@@ -348,7 +349,7 @@ describe("reasonLines()", () => {
       ],
       total: 5,
     };
-    const green = verdictWith("test:mutation:changed", true, {
+    const green = verdictWith(GATE.mutationChanged, true, {
       kind: "mutation", scope: "the diff", families: [{ ...TOOLING_SCORED, survivors }],
     });
 
@@ -358,11 +359,11 @@ describe("reasonLines()", () => {
       "    ✗ scripts/gates/b.ts:3 NoCoverage «true»",
       "    and 3 more in tooling's report",
     ]);
-    expect(reasonLines(verdictWith("test:mutation:changed", true, { kind: "mutation", scope: "the diff", families: [SOURCE_SCORED] }), ROOT)).toEqual([]);
+    expect(reasonLines(verdictWith(GATE.mutationChanged, true, { kind: "mutation", scope: "the diff", families: [SOURCE_SCORED] }), ROOT)).toEqual([]);
   });
 
   it("should list each failed assertion with its file made relative, its name and its message", () => {
-    const red = verdictWith("test", false, { kind: "tests", cases: 2, files: 1, failed: 1, failures: [A_FAILURE] });
+    const red = verdictWith(GATE.test, false, { kind: "tests", cases: 2, files: 1, failed: 1, failures: [A_FAILURE] });
 
     expect(reasonLines(red, ROOT)).toEqual([
       "  ✗ scripts/gate-paths.spec.ts › fileStemOf() should turn the colons into dashes: AssertionError: expected 'a' to be 'b'",
@@ -370,13 +371,13 @@ describe("reasonLines()", () => {
   });
 
   it("should fall back to the verdict's tail, indented, when the kind carries no failures", () => {
-    const red = { ...verdictWith("docs-check", false, NONE), tail: ["README.md: a complaint", "1 problem(s)"] };
+    const red = { ...verdictWith(GATE.docsCheck, false, NONE), tail: ["README.md: a complaint", "1 problem(s)"] };
 
     expect(reasonLines(red, ROOT)).toEqual(["  README.md: a complaint", "  1 problem(s)"]);
   });
 
   it("should fall back to the tail when a reporter-backed gate died before writing any failure", () => {
-    const red = { ...verdictWith("e2e", false, { kind: "e2e", cases: 0, files: 0, failed: 0, failures: [] }), tail: ["killed"] };
+    const red = { ...verdictWith(GATE.e2e, false, { kind: "e2e", cases: 0, files: 0, failed: 0, failures: [] }), tail: ["killed"] };
 
     expect(reasonLines(red, ROOT)).toEqual(["  killed"]);
   });

@@ -1,67 +1,49 @@
 import { FAMILIES } from "./mutation-families.ts";
 import { ESLINT, STRYKER, TSC, VITEST } from "./tool-binaries.ts";
 import { LINT_FINDINGS } from "./gate-numbers.ts";
+import { BATTERY, GATE, type Battery, type Gate } from "./gate-names.ts";
 
 
-export const THE_CHECK_GATES = ["lint", "typecheck", "docs-check", "test:coverage"] as const;
+export const THE_CHECK_GATES = [GATE.lint, GATE.typecheck, GATE.docsCheck, GATE.coverage] as const;
 
 export const THE_PUSH_GATES = [
-  "lint",
-  "typecheck",
-  "e2e:typecheck",
-  "test:e2e-harness",
-  "docs-check",
+  GATE.lint,
+  GATE.typecheck,
+  GATE.e2eTypecheck,
+  GATE.harness,
+  GATE.docsCheck,
 ] as const;
 
 export const THE_PHASE_GATES = [
-  "lint",
-  "typecheck",
-  "test:coverage",
-  "test:mutation:changed",
-  "e2e:changed",
+  GATE.lint,
+  GATE.typecheck,
+  GATE.coverage,
+  GATE.mutationChanged,
+  GATE.e2eChanged,
 ] as const;
 
 export const THE_RELEASE_GATES = [
   ...THE_PUSH_GATES,
-  "test:coverage",
-  "test:mutation:changed",
-  "e2e",
+  GATE.coverage,
+  GATE.mutationChanged,
+  GATE.e2e,
 ] as const;
 
-export const THE_SINGLE_GATES = ["test"] as const;
+export const THE_SINGLE_GATES = [GATE.test] as const;
 
-export const THE_FULL_MUTATION = "test:mutation";
+export const THE_FULL_MUTATION = GATE.mutation;
 
-export type Gate =
-  | (typeof THE_CHECK_GATES)[number]
-  | (typeof THE_PUSH_GATES)[number]
-  | (typeof THE_PHASE_GATES)[number]
-  | (typeof THE_RELEASE_GATES)[number]
-  | (typeof THE_SINGLE_GATES)[number]
-  | typeof THE_FULL_MUTATION;
-
-export const ALL_GATES: readonly Gate[] = [
-  ...new Set<Gate>([
-    ...THE_CHECK_GATES,
-    ...THE_PUSH_GATES,
-    ...THE_PHASE_GATES,
-    ...THE_RELEASE_GATES,
-    ...THE_SINGLE_GATES,
-    THE_FULL_MUTATION,
-  ]),
-];
+export const ALL_GATES: readonly Gate[] = Object.values(GATE);
 
 export const isGate = (name: string | undefined): name is Gate =>
   name !== undefined && ALL_GATES.includes(name as Gate);
 
-export const BATTERIES = {
-  "check:quick": THE_CHECK_GATES,
-  "check:push": THE_PUSH_GATES,
-  "check:phase": THE_PHASE_GATES,
-  "check:release": THE_RELEASE_GATES,
-} as const;
-
-export type Battery = keyof typeof BATTERIES;
+export const BATTERIES: Readonly<Record<Battery, readonly Gate[]>> = {
+  [BATTERY.quick]: THE_CHECK_GATES,
+  [BATTERY.push]: THE_PUSH_GATES,
+  [BATTERY.phase]: THE_PHASE_GATES,
+  [BATTERY.release]: THE_RELEASE_GATES,
+};
 
 export const isBattery = (name: string | undefined): name is Battery =>
   name !== undefined && Object.hasOwn(BATTERIES, name);
@@ -94,7 +76,7 @@ const oneStep = (bin: string, ...args: readonly string[]): GateCommand => ({
 });
 
 export const COMMANDS: Readonly<Record<Gate, GateCommand>> = {
-  lint: oneStep(
+  [GATE.lint]: oneStep(
     ESLINT,
     "--config",
     ESLINT_CONFIG,
@@ -105,22 +87,22 @@ export const COMMANDS: Readonly<Record<Gate, GateCommand>> = {
     LINT_FINDINGS,
     ...LINTED_FOLDERS
   ),
-  typecheck: oneStep(TSC, "--noEmit", "--pretty", "false"),
-  "e2e:typecheck": {
+  [GATE.typecheck]: oneStep(TSC, "--noEmit", "--pretty", "false"),
+  [GATE.e2eTypecheck]: {
     steps: [
       { bin: TSC, args: ["-p", "e2e", "--noEmit", "--pretty", "false"] },
       { bin: TSC, args: ["-p", "e2e/pages", "--noEmit", "--pretty", "false"] },
     ],
     takesFiles: false,
   },
-  "docs-check": oneStep("scripts/docs-check/check-docs.ts"),
-  test: { ...oneStep(VITEST, "run", "--config", VITEST_CONFIG), takesFiles: true },
-  "test:coverage": oneStep(VITEST, "run", "--config", VITEST_CONFIG, "--coverage"),
-  "test:e2e-harness": oneStep(VITEST, "run", "--config", HARNESS_CONFIG),
-  e2e: oneStep(VITEST, "run", "--config", E2E_CONFIG),
-  "e2e:changed": oneStep("scripts/gates/e2e-changed.ts"),
-  "test:mutation:changed": { ...oneStep("scripts/gates/mutate-changed.ts"), takesFiles: true },
-  "test:mutation": {
+  [GATE.docsCheck]: oneStep("scripts/docs-check/check-docs.ts"),
+  [GATE.test]: { ...oneStep(VITEST, "run", "--config", VITEST_CONFIG), takesFiles: true },
+  [GATE.coverage]: oneStep(VITEST, "run", "--config", VITEST_CONFIG, "--coverage"),
+  [GATE.harness]: oneStep(VITEST, "run", "--config", HARNESS_CONFIG),
+  [GATE.e2e]: oneStep(VITEST, "run", "--config", E2E_CONFIG),
+  [GATE.e2eChanged]: oneStep("scripts/gates/e2e-changed.ts"),
+  [GATE.mutationChanged]: { ...oneStep("scripts/gates/mutate-changed.ts"), takesFiles: true },
+  [GATE.mutation]: {
     steps: FAMILIES.map((family) => ({ bin: STRYKER, args: ["run", family.config] })),
     takesFiles: false,
   },

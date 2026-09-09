@@ -1,4 +1,4 @@
-import type { Gate } from "./gate-list.ts";
+import type { Gate } from "./gate-names.ts";
 import { logPathOf } from "./gate-paths.ts";
 import type { GateNumbers } from "./gate-numbers.ts";
 

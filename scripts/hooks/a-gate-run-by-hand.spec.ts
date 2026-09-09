@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { GATE_RUNNER, gateRunByHand, toolsRunByHandIn } from "./a-gate-run-by-hand.ts";
+import { gateRunByHand, toolsRunByHandIn } from "./a-gate-run-by-hand.ts";
+import { GATE_RUNNER } from "../gates/gate-list.ts";
 
 
 describe("toolsRunByHandIn()", () => {
@@ -50,9 +51,10 @@ describe("gateRunByHand()", () => {
 
     expect(refusal?.split("\n")).toEqual([
       "Refused: npx tsc, node_modules/vitest/vitest.mjs runs a gate by hand.",
-      `Every gate runs through node ${GATE_RUNNER} <gate> — lint, typecheck, e2e:typecheck,`,
-      "docs-check, test [files], test:coverage, test:mutation:changed [files], test:mutation,",
-      "e2e, e2e:changed, test:e2e-harness — which leaves the log and the verdict under",
+      `Every gate runs through node ${GATE_RUNNER} <gate> — lint, typecheck, e2e:typecheck, docs-check, ` +
+        "test [files], test:coverage, test:e2e-harness, e2e, e2e:changed, test:mutation:changed [files], " +
+        "test:mutation —",
+      "which leaves the log and the verdict under",
       "reports/gates/ and names the config, now that the configs live in scripts/gates/config/",
       "and the tool's bare name finds none.",
     ]);

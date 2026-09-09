@@ -7,10 +7,9 @@ import {
   isBattery,
   isGate,
   stepsFor,
-  type Battery,
-  type Gate,
   type Step,
 } from "./gate-list.ts";
+import type { Battery, Gate } from "./gate-names.ts";
 import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH, logPathOf, verdictPathOf } from "./gate-paths.ts";
 import { numbersFor, outputsOf, scopeOf, type MutationScope } from "./gate-numbers.ts";
 import { FAILED, PASSED, lineFor, verdictOf, type GateVerdict, type RanVerdict } from "./gate-verdict.ts";

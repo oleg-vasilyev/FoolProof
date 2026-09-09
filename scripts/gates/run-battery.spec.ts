@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { COMMANDS } from "./gate-list.ts";
+import { BATTERY, GATE } from "./gate-names.ts";
 import type { GateVerdict } from "./gate-verdict.ts";
 
 
@@ -76,7 +77,7 @@ const RED = 1;
 const verdictFor = (gate: GateVerdict["gate"], ok: boolean): GateVerdict =>
   ({ kind: "ran", gate, ok }) as GateVerdict;
 
-const SKIPPED = { kind: "skipped", gate: "test:mutation:changed", ok: false } as unknown as GateVerdict;
+const SKIPPED = { kind: "skipped", gate: GATE.mutationChanged, ok: false } as unknown as GateVerdict;
 
 const GIT_OPTIONS = { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] };
 
@@ -100,14 +101,14 @@ beforeEach(() => {
 
 describe("THE_SUITE and NEEDS_THE_SUITE", () => {
   it("should make only the mutation runs wait on a green suite, since Stryker's dry run needs one", () => {
-    expect(THE_SUITE).toBe("test:coverage");
-    expect(NEEDS_THE_SUITE).toEqual(["test:mutation:changed", "test:mutation"]);
+    expect(THE_SUITE).toBe(GATE.coverage);
+    expect(NEEDS_THE_SUITE).toEqual([GATE.mutationChanged, GATE.mutation]);
   });
 });
 
 describe("walkTheGates()", () => {
   it("should run every gate in order and collect one verdict each", async () => {
-    const gates = ["lint", "typecheck", "test:coverage"] as const;
+    const gates = [GATE.lint, GATE.typecheck, GATE.coverage] as const;
 
     const verdicts = await walkTheGates(gates, runGateSpy, skip);
 
@@ -117,56 +118,56 @@ describe("walkTheGates()", () => {
 
   it("should carry on past a red gate, so one run reports every gate", async () => {
     runGateSpy.mockImplementation((gate: GateVerdict["gate"]) =>
-      Promise.resolve(verdictFor(gate, gate !== "lint"))
+      Promise.resolve(verdictFor(gate, gate !== GATE.lint))
     );
 
-    const verdicts = await walkTheGates(["lint", "typecheck", "e2e:changed"], runGateSpy, skip);
+    const verdicts = await walkTheGates([GATE.lint, GATE.typecheck, GATE.e2eChanged], runGateSpy, skip);
 
     expect(verdicts.map((verdict) => verdict.ok)).toEqual([false, true, true]);
   });
 
   it("should skip a mutation run after a red suite, through the skip it was handed, instead of running it", async () => {
     runGateSpy.mockImplementation((gate: GateVerdict["gate"]) =>
-      Promise.resolve(verdictFor(gate, gate !== "test:coverage"))
+      Promise.resolve(verdictFor(gate, gate !== GATE.coverage))
     );
 
     const verdicts = await walkTheGates(
-      ["test:coverage", "test:mutation:changed", "e2e:changed"],
+      [GATE.coverage, GATE.mutationChanged, GATE.e2eChanged],
       runGateSpy,
       skip
     );
 
-    expect(skip).toHaveBeenCalledWith("test:mutation:changed", "test:coverage");
-    expect(runGateSpy.mock.calls.map((call) => call[FIRST])).toEqual(["test:coverage", "e2e:changed"]);
+    expect(skip).toHaveBeenCalledWith(GATE.mutationChanged, GATE.coverage);
+    expect(runGateSpy.mock.calls.map((call) => call[FIRST])).toEqual([GATE.coverage, GATE.e2eChanged]);
     expect(verdicts[SECOND]).toBe(SKIPPED);
   });
 
   it("should still play the scenarios after a red suite — they drive a real bot, not the units", async () => {
     runGateSpy.mockImplementation((gate: GateVerdict["gate"]) =>
-      Promise.resolve(verdictFor(gate, gate !== "test:coverage"))
+      Promise.resolve(verdictFor(gate, gate !== GATE.coverage))
     );
 
-    await walkTheGates(["test:coverage", "e2e"], runGateSpy, skip);
+    await walkTheGates([GATE.coverage, GATE.e2e], runGateSpy, skip);
 
-    expect(runGateSpy).toHaveBeenCalledWith("e2e");
+    expect(runGateSpy).toHaveBeenCalledWith(GATE.e2e);
     expect(skip).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should look for the suite itself, not for whichever gate was red first", async () => {
     runGateSpy.mockImplementation((gate: GateVerdict["gate"]) =>
-      Promise.resolve(verdictFor(gate, gate !== "lint"))
+      Promise.resolve(verdictFor(gate, gate !== GATE.lint))
     );
 
-    await walkTheGates(["lint", "test:coverage", "test:mutation:changed"], runGateSpy, skip);
+    await walkTheGates([GATE.lint, GATE.coverage, GATE.mutationChanged], runGateSpy, skip);
 
-    expect(runGateSpy).toHaveBeenCalledWith("test:mutation:changed");
+    expect(runGateSpy).toHaveBeenCalledWith(GATE.mutationChanged);
     expect(skip).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should not skip a mutation run when the suite was never in the list", async () => {
-    await walkTheGates(["test:mutation"], runGateSpy, skip);
+    await walkTheGates([GATE.mutation], runGateSpy, skip);
 
-    expect(runGateSpy).toHaveBeenCalledWith("test:mutation");
+    expect(runGateSpy).toHaveBeenCalledWith(GATE.mutation);
   });
 });
 
@@ -238,11 +239,11 @@ describe("gitLine() and baselineFromGit()", () => {
 
 describe("whatToSay()", () => {
   it("should give the summary, a blank line, then the paragraph a commit message pastes", () => {
-    const verdicts = [verdictFor("lint", true)];
+    const verdicts = [verdictFor(GATE.lint, true)];
 
-    expect(whatToSay(verdicts, "check:phase", ROOT)).toEqual(["a summary line", "", "Gates: a paragraph."]);
+    expect(whatToSay(verdicts, BATTERY.phase, ROOT)).toEqual(["a summary line", "", "Gates: a paragraph."]);
     expect(summaryLinesSpy).toHaveBeenCalledWith(verdicts, ROOT);
-    expect(gatesParagraphSpy).toHaveBeenCalledWith(verdicts, "check:phase");
+    expect(gatesParagraphSpy).toHaveBeenCalledWith(verdicts, BATTERY.phase);
   });
 });
 
@@ -259,9 +260,9 @@ describe("runBattery()", () => {
   });
 
   it("should forget its gates' old verdicts and write its name down before the first gate runs", async () => {
-    await runBattery(["node", "run-battery.ts", "check:push"], say, ROOT);
+    await runBattery(["node", "run-battery.ts", BATTERY.push], say, ROOT);
 
-    expect(forgetVerdictsSpy).toHaveBeenCalledWith(["lint", "typecheck", "e2e:typecheck", "test:e2e-harness", "docs-check"]);
+    expect(forgetVerdictsSpy).toHaveBeenCalledWith([GATE.lint, GATE.typecheck, GATE.e2eTypecheck, GATE.harness, GATE.docsCheck]);
     expect(mkdirSyncSpy).toHaveBeenCalledWith("reports/gates", { recursive: true });
     expect(writeFileSyncSpy).toHaveBeenNthCalledWith(ONCE, "reports/gates/battery.txt", "check:push\n");
     expect(forgetVerdictsSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
@@ -270,54 +271,54 @@ describe("runBattery()", () => {
   });
 
   it("should walk the named battery with no baseline and exit green when every gate is", async () => {
-    const status = await runBattery(["node", "run-battery.ts", "check:push"], say, ROOT);
+    const status = await runBattery(["node", "run-battery.ts", BATTERY.push], say, ROOT);
 
     expect(status).toBe(GREEN);
     expect(runGateSpy.mock.calls.map((call) => call[FIRST])).toEqual([
-      "lint",
-      "typecheck",
-      "e2e:typecheck",
-      "test:e2e-harness",
-      "docs-check",
+      GATE.lint,
+      GATE.typecheck,
+      GATE.e2eTypecheck,
+      GATE.harness,
+      GATE.docsCheck,
     ]);
-    expect(runGateSpy).toHaveBeenCalledWith("lint", undefined, COMMANDS.lint.steps);
+    expect(runGateSpy).toHaveBeenCalledWith(GATE.lint, undefined, COMMANDS[GATE.lint].steps);
     expect(execFileSyncSpy).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should write a skipped gate's verdict to disk too, so a single re-run reads the whole battery", async () => {
     runGateSpy.mockImplementation((gate: GateVerdict["gate"]) =>
-      Promise.resolve(verdictFor(gate, gate !== "test:coverage"))
+      Promise.resolve(verdictFor(gate, gate !== GATE.coverage))
     );
 
-    await runBattery(["node", "run-battery.ts", "check:phase"], say, ROOT);
+    await runBattery(["node", "run-battery.ts", BATTERY.phase], say, ROOT);
 
-    expect(skippedVerdictSpy).toHaveBeenCalledWith("test:mutation:changed", "test:coverage", expect.any(Date));
+    expect(skippedVerdictSpy).toHaveBeenCalledWith(GATE.mutationChanged, GATE.coverage, expect.any(Date));
     expect(writeVerdictSpy).toHaveBeenCalledWith(SKIPPED);
   });
 
   it("should walk the release gates against the previous tag when the battery is the release", async () => {
     tagOnHead("v1.21.0\n", "v1.20.1\n");
 
-    await runBattery(["node", "run-battery.ts", "check:release"], say, ROOT);
+    await runBattery(["node", "run-battery.ts", BATTERY.release], say, ROOT);
 
     expect(runGateSpy.mock.calls.map((call) => call[FIRST])).toEqual([
-      "lint",
-      "typecheck",
-      "e2e:typecheck",
-      "test:e2e-harness",
-      "docs-check",
-      "test:coverage",
-      "test:mutation:changed",
-      "e2e",
+      GATE.lint,
+      GATE.typecheck,
+      GATE.e2eTypecheck,
+      GATE.harness,
+      GATE.docsCheck,
+      GATE.coverage,
+      GATE.mutationChanged,
+      GATE.e2e,
     ]);
-    expect(runGateSpy).toHaveBeenCalledWith("test:mutation:changed", "v1.20.1", COMMANDS["test:mutation:changed"].steps);
-    expect(gatesParagraphSpy).toHaveBeenCalledWith(expect.anything(), "check:release");
+    expect(runGateSpy).toHaveBeenCalledWith(GATE.mutationChanged, "v1.20.1", COMMANDS[GATE.mutationChanged].steps);
+    expect(gatesParagraphSpy).toHaveBeenCalledWith(expect.anything(), BATTERY.release);
   });
 
   it("should refuse a release with no tag on HEAD before touching the folder", async () => {
     tagOnHead("\n", "v1.20.1\n");
 
-    const status = await runBattery(["node", "run-battery.ts", "check:release"], say, ROOT);
+    const status = await runBattery(["node", "run-battery.ts", BATTERY.release], say, ROOT);
 
     expect(status).toBe(RED);
     expect(say.mock.calls[FIRST]?.[FIRST]).toContain("HEAD carries no v* tag");
@@ -327,10 +328,10 @@ describe("runBattery()", () => {
 
   it("should write the paragraph last and say the summary, then exit red on any red gate", async () => {
     runGateSpy.mockImplementation((gate: GateVerdict["gate"]) =>
-      Promise.resolve(verdictFor(gate, gate !== "typecheck"))
+      Promise.resolve(verdictFor(gate, gate !== GATE.typecheck))
     );
 
-    const status = await runBattery(["node", "run-battery.ts", "check:phase"], say, ROOT);
+    const status = await runBattery(["node", "run-battery.ts", BATTERY.phase], say, ROOT);
 
     expect(status).toBe(RED);
     expect(writeFileSyncSpy).toHaveBeenLastCalledWith("reports/gates/gates-paragraph.txt", "Gates: a paragraph.\n");

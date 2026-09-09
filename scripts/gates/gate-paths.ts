@@ -1,4 +1,4 @@
-import type { Gate } from "./gate-list.ts";
+import type { Gate } from "./gate-names.ts";
 
 
 export const GATES_DIR = "reports/gates";

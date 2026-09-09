@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { GATE } from "./gate-names.ts";
 import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH, fileStemOf, logPathOf, verdictPathOf } from "./gate-paths.ts";
 
 
@@ -15,22 +16,22 @@ describe("the folder", () => {
 
 describe("fileStemOf()", () => {
   it("should turn the colons a file name may not carry into dashes", () => {
-    expect(fileStemOf("test:mutation:changed")).toBe("test-mutation-changed");
+    expect(fileStemOf(GATE.mutationChanged)).toBe("test-mutation-changed");
   });
 });
 
 describe("a gate's own files", () => {
   it("should put a gate's log and verdict side by side, named after it", () => {
-    expect(logPathOf("e2e:changed")).toBe("reports/gates/e2e-changed.log");
-    expect(verdictPathOf("e2e:changed")).toBe("reports/gates/e2e-changed.json");
+    expect(logPathOf(GATE.e2eChanged)).toBe("reports/gates/e2e-changed.log");
+    expect(verdictPathOf(GATE.e2eChanged)).toBe("reports/gates/e2e-changed.json");
   });
 });
 
 
 describe("a named run's own files", () => {
   it("should sit beside the bare gate's, marked named, so neither overwrites the other", () => {
-    expect(fileStemOf("test", true)).toBe("test.named");
-    expect(logPathOf("test:mutation:changed", true)).toBe("reports/gates/test-mutation-changed.named.log");
-    expect(verdictPathOf("test", true)).toBe("reports/gates/test.named.json");
+    expect(fileStemOf(GATE.test, true)).toBe("test.named");
+    expect(logPathOf(GATE.mutationChanged, true)).toBe("reports/gates/test-mutation-changed.named.log");
+    expect(verdictPathOf(GATE.test, true)).toBe("reports/gates/test.named.json");
   });
 });

@@ -1,5 +1,5 @@
 import { calculateMetrics } from "mutation-testing-metrics";
-import type { Gate } from "./gate-list.ts";
+import { GATE, type Gate } from "./gate-names.ts";
 import { FAMILIES, type Family, type FamilyName } from "./mutation-families.ts";
 import type { Finding } from "./finding.ts";
 import { lintFindingsIn } from "./lint-findings.ts";
@@ -175,29 +175,29 @@ const casesIn = (results: VitestResults, playsABot: boolean): CaseCount => ({
 
 export const outputsOf = (gate: Gate): readonly string[] => {
   switch (gate) {
-    case "typecheck":
-    case "docs-check":
-    case "e2e:typecheck":
+    case GATE.typecheck:
+    case GATE.docsCheck:
+    case GATE.e2eTypecheck:
       return [];
 
-    case "lint":
+    case GATE.lint:
       return [LINT_FINDINGS];
 
-    case "test:e2e-harness":
+    case GATE.harness:
       return [HARNESS_RESULTS];
 
-    case "test":
+    case GATE.test:
       return [TESTS_RESULTS];
 
-    case "test:coverage":
+    case GATE.coverage:
       return [TESTS_RESULTS, COVERAGE_SUMMARY];
 
-    case "test:mutation:changed":
-    case "test:mutation":
+    case GATE.mutationChanged:
+    case GATE.mutation:
       return FAMILIES.map((family) => family.report);
 
-    case "e2e":
-    case "e2e:changed":
+    case GATE.e2e:
+    case GATE.e2eChanged:
       return [E2E_RESULTS];
   }
 };
@@ -207,7 +207,7 @@ export const scopeOf = (
   mutateAgainst: string | undefined,
   args: readonly string[] = []
 ): MutationScope => {
-  if (gate === "test:mutation") {
+  if (gate === GATE.mutation) {
     return "everything";
   }
 
@@ -283,27 +283,27 @@ export const numbersFor = (
   output: readonly string[]
 ): GateNumbers => {
   switch (gate) {
-    case "docs-check":
+    case GATE.docsCheck:
       return { kind: "none" };
 
-    case "lint":
+    case GATE.lint:
       return lintNumbers(read);
 
-    case "typecheck":
-    case "e2e:typecheck":
+    case GATE.typecheck:
+    case GATE.e2eTypecheck:
       return { kind: "findings", findings: typecheckFindingsIn(output) };
 
-    case "test:e2e-harness":
+    case GATE.harness:
       return testNumbers(read, "harness", HARNESS_RESULTS);
 
-    case "test":
+    case GATE.test:
       return testNumbers(read, "tests", TESTS_RESULTS);
 
-    case "test:coverage":
+    case GATE.coverage:
       return coverageNumbers(read);
 
-    case "test:mutation:changed":
-    case "test:mutation":
+    case GATE.mutationChanged:
+    case GATE.mutation:
       return {
         kind: "mutation",
         scope,
@@ -314,10 +314,10 @@ export const numbersFor = (
         }),
       };
 
-    case "e2e":
+    case GATE.e2e:
       return testNumbers(read, "e2e", E2E_RESULTS);
 
-    case "e2e:changed":
+    case GATE.e2eChanged:
       return read(E2E_RESULTS) === null ? { kind: "none" } : testNumbers(read, "e2e", E2E_RESULTS);
   }
 };
