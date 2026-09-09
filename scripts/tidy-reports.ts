@@ -7,6 +7,8 @@ export const REPORTS_DIR = "reports";
 
 export const OWNER_FILES: readonly string[] = [
   "vitest.config.ts",
+  "e2e/vitest.e2e.config.ts",
+  "scripts/gate-paths.ts",
   "stryker.config.json",
   "stryker.scripts.json",
   "scripts/drawn-into.ts",

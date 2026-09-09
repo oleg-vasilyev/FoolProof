@@ -542,13 +542,13 @@ sheet following it, and the contract says whether it is *drawings plus a passeng
 toss. A third name was on this list — the phase-log field parsers living under a
 *paths* name — and its second example arrived: they are `phase-log-fields.ts` now.
 
-## Three corners of the tooling the mutation gate still cannot see
+## Two corners of the tooling the mutation gate still cannot see
 
 `scripts/docs-check/` and `scripts/hooks/` are mutated at 80% now — 83.79% over the
-whole folder, measured 28 August 2026 — and three things that reason sit outside both families:
-`design-page.ts`, whose `refuse()` branches have no spec; `e2e-changed.ts`, which
-decides which scenarios a diff can reach; and `mutate-changed.ts`, which routes a
-changed file to one of the two runs and is scored by neither.
+whole folder, measured 28 August 2026 — and two things that reason sit outside both families:
+`design-page.ts`, whose `refuse()` branches have no spec, and `e2e-changed.ts`, which
+decides which scenarios a diff can reach. `mutate-changed.ts` was the third and joined
+the tooling family on 9 September 2026, at 97.03% on its first run.
 
 One module also passes only on the average — `source/env-keys.ts` at 78.02% the same
 day, short by its readers. Those are reachable: mocking `node:fs` lifted
@@ -567,6 +567,27 @@ sits on a page beside `finish-phase`, the measuring one-liner is written where i
 needed rather than pointed at, and one real picture phase has proven the handoff** — a
 fork that cannot reach the `poster-reader` would read pictures its own run drew, and
 that returns looking exactly like success.
+
+## Stryker's incremental mode has never been measured here
+
+A tag mutates only what changed since the previous tag, and the full run is the
+weekly checkup's, 26 minutes at v1.20.1. Stryker also has `--incremental`, which
+keeps the last report and re-tests only mutants whose code or tests moved — the
+same idea one level down, and it might make the full run cheap enough to sit in
+`check:release` again. Nothing here has measured it. **Worth one run with the next
+checkup that has two full reports to compare, or the next time a tag's since-tag
+mutation crosses ten minutes.**
+
+## The other scripts still report to a console nobody reads
+
+The four batteries now leave a log, a JSON verdict and the `Gates:` paragraph under
+`reports/gates/`, and the agent reads those instead of a stream it only sees the tail of.
+Everything else in `package.json` and `scripts/tools.ts` still talks to a terminal:
+`docs:check`, the site and picture generators, `design-page.ts`, the backup, the hooks.
+The owner asked for the same treatment there, and for every script nobody runs to go —
+only what the agent actually uses stays. **Worth doing with the next phase that touches
+`scripts/`, which the owner asked for on 9 September 2026; start by counting which
+scripts the last month's transcripts and logbook actually invoked.**
 
 ## Not debt, deliberately
 

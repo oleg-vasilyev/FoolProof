@@ -1,7 +1,9 @@
-# The full battery on every release tag: check:push, coverage, every mutant,
-# every e2e scenario. The server pulls the newest tag on its own five-minute
-# timer and does not wait for this run — a red result here cannot hold a
-# release back, it is the alarm that says push a fixed tag now.
+# The release battery on every release tag: check:push's gates, coverage, the
+# mutants in what changed since the previous tag, every e2e scenario. The server
+# pulls the newest tag on its own five-minute timer and does not wait for this
+# run — a red result here cannot hold a release back, it is the alarm that says
+# push a fixed tag now. The full history and the tags are fetched because the
+# battery measures the diff against the previous tag.
 name: release-check
 
 on:
@@ -17,6 +19,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - uses: actions/setup-node@v4
         with:

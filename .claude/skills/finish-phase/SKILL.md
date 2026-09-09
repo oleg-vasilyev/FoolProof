@@ -23,7 +23,10 @@ green. Say which of the two happened in the closing message.
 
 Gates 1–4 are one command: **`npm run check:phase`** — lint, types, the suite
 under coverage, mutation over the diff, e2e over the diff, with the tests
-counted once. A red gate is then re-run **alone** after the fix, never by
+counted once. Every gate runs (only mutation waits for a green suite); each leaves
+`reports/gates/<gate>.log` and `.json`, and the run ends with the `Gates:` paragraph
+the commit pastes, in `reports/gates/gates-paragraph.txt`. A red gate is re-run
+**alone** after the fix — `node scripts/gate-runner.ts <gate>` — never by
 repeating the whole chain; gate 3's rules about re-runs still apply.
 **`docs:check` is deliberately not in it**: documents and pictures are finished
 after the review, in their own stages, so checking them here fails on work not
@@ -34,8 +37,7 @@ Sweep `reports/` first: `node scripts/tools.ts tidy-reports` drops what nothing 
 
 ## 1. Lint and types
 
-Zero errors, no exceptions. (`npm run check` is the standalone everything command; the
-phase loop reaches lint and types through `check:phase`, without `docs:check`.)
+Zero errors, no exceptions.
 
 **A changed signature has callers no gate can see.** `grep` the whole repository
 for the changed name, not just `src/` — `.claude/skills/` and `README.md` hold
@@ -88,12 +90,12 @@ a reader who looks at the number rather than the verdict sees it at all.
 
 ## 3. `npm run test:mutation:changed`
 
-Stryker over the files this phase touched — about a minute. The **full**
-`npm run test:mutation` runs once, before a tag, not during a phase: a mutant in a
-file the phase never opened was already killed in the phase that wrote it, and
-re-proving it costs ten minutes of every phase. The pre-push hook enforces the
-before-a-tag half — pushing a `v*` tag runs `check:release`, full mutation
-included, and a red battery keeps the tag on the machine.
+Stryker over the files this phase touched — about a minute. A mutant in a file the
+phase never opened was killed in the phase that wrote it. A tag re-mutates only what
+changed since the previous tag (`check:release`, in the pre-push hook): a guard
+against a phase that skipped this gate, not against a weakened spec, a changed stub or a
+shared helper over an untouched subject — that gap, and the **full** `npm run test:mutation` (26 minutes at v1.20.1),
+belong to the weekly `deep-checkup`.
 Coverage says a line ran; this says a test would have noticed it break.
 
 **Two families, two runs, two bars, and both must pass.** The bot breaks below 85%
@@ -177,11 +179,9 @@ so everything runs rather than nothing.
 
 This is a real gate rather than a smoke test, and it is cheap because it is
 selective: a phase inside one feature usually plays two or three files in about
-fifteen seconds. The full `npm run e2e` runs before a tag — enforced by the
-same pre-push hook that runs the rest of `check:release`.
+fifteen seconds. The full `npm run e2e` runs at a tag, inside `check:release`.
 
-`npm run test:e2e-harness` covers the harness's own pure parts and takes under a second; it
-is not part of `npm run check` because it belongs to `e2e/`, not to the app.
+`npm run test:e2e-harness` is the harness's own units, under a second, and belongs to `e2e/`.
 
 ## 5. A review pass over the phase's whole diff
 

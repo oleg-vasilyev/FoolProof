@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Refuse to push a release tag from a machine where the full battery is red.
+# Refuse to push a release tag from a machine where the release battery is red.
 # The deploy server pulls whatever tag appears on its own timer and does not
 # wait for CI, so this hook is the only gate that actually stands between a
 # red suite and production — CI's release-check is the second opinion on a
@@ -8,6 +8,10 @@
 # points core.hooksPath at this folder.
 #
 # git feeds one line per ref being pushed: <local ref> <sha> <remote ref> <sha>.
+#
+# The battery runs behind this push, so its console is not yours to watch: each
+# gate streams its log to reports/gates/<gate>.log as it runs, and leaves its
+# verdict beside it when it ends.
 
 releasing=0
 
@@ -18,7 +22,7 @@ while read -r _local_ref _local_sha remote_ref _remote_sha; do
 done
 
 if [ "$releasing" = 1 ]; then
-  echo "pre-push: a release tag is leaving — running the full battery first"
+  echo "pre-push: a release tag is leaving — running the release battery first"
   npm run check:release || {
     echo "pre-push: red. The tag stays here until the battery is green."
     exit 1

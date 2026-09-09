@@ -171,21 +171,18 @@ runs the bot, the gates, their parts, then the two test families.
 | `npm start` | The same bot in a browser against a fake Telegram — no token, no network, and the one to run here |
 | `npm run check` | Lint, types, documents and tests — the everyday gate to keep at zero |
 | `npm run check:push` | What a push to `main` must not break — lint, types (app and harness), the harness's own tests, documents; the website ships from `main`, the app's tests wait for the tag. **CI runs this on every push** |
-| `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — each test run exactly once, stopping at the first red gate and naming the one command that re-runs just it; a green run ends with the same five commands, because an edit re-runs only the gate it touches. No `docs:check`: documents and pictures are finished after the review, in their own stages |
-| `npm run check:release` | The full battery: `check:push`, then coverage, all mutants, every scenario. **CI runs this on every release tag** |
-| `npm run lint` / `lint:fix` | ESLint, which enforces this project's conventions |
+| `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — every gate runs (only mutation waits for a green suite), each leaves its log and a JSON verdict under `reports/gates/`, and the run ends with one line per gate and the `Gates:` paragraph the commit message pastes, also written to `reports/gates/gates-paragraph.txt`. A red gate is re-run alone with `node scripts/gate-runner.ts <gate>`. No `docs:check`: documents and pictures are finished after the review, in their own stages |
+| `npm run check:release` | The same walker over the release list: `check:push`'s gates, coverage, mutation over what changed since the previous tag, every scenario. Refuses unless HEAD carries the new `v*` tag. **CI runs this on every release tag** |
+| `npm run lint` | ESLint, which enforces this project's conventions |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run docs:check` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists |
 | `npm test` | Vitest, once — units and integration together |
-| `npm run test:unit` | Only the unit specs, where everything outside the file is mocked |
-| `npm run test:integration` | Only `*.integration.spec.ts` — the seams where third-party code runs for real |
-| `npm run test:watch` | Vitest left running while you edit |
 | `npm run test:coverage` | Vitest with coverage; fails below 70% on any metric |
-| `npm run test:mutation:changed` | Stryker over the files that differ from `origin/main`, about a minute |
-| `npm run test:mutation` | Stryker over everything, about twenty minutes; two runs, the bot at 85% and the tooling at 80% |
+| `npm run test:mutation:changed` | Stryker over the files that differ from `origin/main` (or from `MUTATE_AGAINST`), about a minute |
+| `npm run test:mutation` | Stryker over everything, 26 minutes measured at v1.20.1; two runs, the bot at 85% and the tooling at 80%. The weekly checkup's, not a release's |
 | `npm run e2e` | Whole scenarios against the real bot and a fake Telegram |
 | `npm run e2e:changed` | Only the scenarios the diff against `origin/main` can reach |
-| `npm run e2e:watch` | The same run, slowed down, in one browser tab |
+| `npm run e2e:watch` | The same run, slowed down, in one browser tab; `E2E_VERBOSE=1` brings the per-case output back on any e2e run |
 | `npm run test:e2e-harness` | Units for the harness's own pure parts |
 | `npm run e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
 | `npm run prepare` | Run by `npm install` itself: points git at `.githooks/`, where the pre-push tag gate and the commit-msg flow gate live |

@@ -2,7 +2,8 @@
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "packageManager": "npm",
   "testRunner": "vitest",
-  "reporters": ["html", "json", "clear-text", "progress"],
+  "reporters": ["html", "json", "clear-text"],
+  "clearTextReporter": { "skipFull": true },
   "jsonReporter": {
     "fileName": "reports/mutation-scripts/mutation.json"
   },
@@ -17,7 +18,15 @@
   "mutate": [
     "scripts/docs-check/**/*.ts",
     "scripts/hooks/**/*.ts",
-    "scripts/check-phase.ts",
+    "scripts/run-battery.ts",
+    "scripts/gate-list.ts",
+    "scripts/gate-paths.ts",
+    "scripts/gate-numbers.ts",
+    "scripts/gate-verdict.ts",
+    "scripts/gate-runner.ts",
+    "scripts/gate-summary.ts",
+    "scripts/mutate-changed.ts",
+    "scripts/mutation-families.ts",
     "!scripts/**/*.spec.ts",
     "!scripts/**/*.stub.ts",
     "!scripts/docs-check/source-files.ts",

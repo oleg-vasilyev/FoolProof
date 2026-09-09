@@ -269,9 +269,9 @@ snapshot is opened and counted rather than merely written.
 
 The gate that actually stands before a release is local: a **pre-push hook**
 (installed by `npm install`, which points git at [`.githooks/`](../.githooks/))
-runs the full `check:release` before any `v*` tag leaves the machine — every
-scenario, every mutant. It has to be local, because the server pulls whatever
-tag appears and waits for nobody.
+runs `check:release` before any `v*` tag leaves the machine — every scenario, and
+every mutant in what changed since the previous tag. It has to be local, because
+the server pulls whatever tag appears and waits for nobody.
 
 The same folder holds a **commit-msg hook** guarding one file. The bot is
 developed by an agent that is also allowed to improve its own process, and

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { namedIn, ownedOrRefuse, strayIn } from "./tidy-reports.ts";
+import { OWNER_FILES, namedIn, ownedOrRefuse, strayIn } from "./tidy-reports.ts";
 
 
 const A_CONFIG = 'reportsDirectory: "reports/coverage",';
@@ -60,5 +60,12 @@ describe("strayIn()", () => {
 
   it("should sweep everything when nothing is owned", () => {
     expect(strayIn(["coverage", "gallery"], [])).toEqual(["coverage", "gallery"]);
+  });
+});
+
+describe("OWNER_FILES", () => {
+  it("should count the gate paths module and the e2e config as owners, so their folders survive the sweep", () => {
+    expect(OWNER_FILES).toContain("scripts/gate-paths.ts");
+    expect(OWNER_FILES).toContain("e2e/vitest.e2e.config.ts");
   });
 });

@@ -298,7 +298,12 @@ a look on its own.
 ## Phase 5 — are the tests honest
 
 Coverage means nothing by itself; this project's real honesty gate is Stryker,
-so audit the gate itself: what `stryker.config` excludes or ignores from
+and the **full** run is yours: nothing else runs `npm run test:mutation` any more
+(a phase mutates its diff, a tag what changed since the previous tag), so run it
+here, read both families' scores off `reports/mutation/` and
+`reports/mutation-scripts/`, and put them in the report as two measurement rows —
+the trend between checkups is the only place a weakened spec over an untouched
+subject can show. Then audit the gate itself: what `stryker.config` excludes or ignores from
 mutation — confirm the game rules, transition logic and lineup parsing are
 *inside* the mutated set; which mutators are disabled and why; whether the
 score gates anything (`check:release`, the pre-push hook) or is only reported;

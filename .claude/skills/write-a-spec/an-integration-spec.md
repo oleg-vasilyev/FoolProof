@@ -18,8 +18,7 @@ unit that has not been written properly:
 What does not earn one: mocking was inconvenient, or a scenario already plays it.
 
 Name it `*.integration.spec.ts`, so nobody mistakes it for the default, and put
-it beside the code like every other spec. `npm run test:unit` and
-`npm run test:integration` run them separately; `npm test` runs both.
+it beside the code like every other spec. `npm test` runs both kinds together; `npx vitest run integration.spec` picks the integration ones out.
 
 Eight exist. Four cover the contracts:
 
