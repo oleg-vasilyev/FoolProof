@@ -23,6 +23,8 @@ export const THE_RELEASE_GATES = [
   "e2e",
 ] as const;
 
+export const THE_SINGLE_GATES = ["test"] as const;
+
 export const THE_FULL_MUTATION = "test:mutation";
 
 export type Gate =
@@ -30,6 +32,7 @@ export type Gate =
   | (typeof THE_PUSH_GATES)[number]
   | (typeof THE_PHASE_GATES)[number]
   | (typeof THE_RELEASE_GATES)[number]
+  | (typeof THE_SINGLE_GATES)[number]
   | typeof THE_FULL_MUTATION;
 
 export const ALL_GATES: readonly Gate[] = [
@@ -38,6 +41,7 @@ export const ALL_GATES: readonly Gate[] = [
     ...THE_PUSH_GATES,
     ...THE_PHASE_GATES,
     ...THE_RELEASE_GATES,
+    ...THE_SINGLE_GATES,
     THE_FULL_MUTATION,
   ]),
 ];
@@ -59,7 +63,10 @@ export const isBattery = (name: string | undefined): name is Battery =>
 
 export const NPM = "npm";
 
-export const commandFor = (gate: Gate): string => `${NPM} run ${gate}`;
+const NO_ARGUMENTS = 0;
+
+export const commandFor = (gate: Gate, args: readonly string[] = []): string =>
+  args.length === NO_ARGUMENTS ? `${NPM} run ${gate}` : `${NPM} run ${gate} -- ${args.join(" ")}`;
 
 export const GATE_RUNNER = "scripts/gate-runner.ts";
 

@@ -7,6 +7,7 @@ import {
   THE_PHASE_GATES,
   THE_PUSH_GATES,
   THE_RELEASE_GATES,
+  THE_SINGLE_GATES,
   commandFor,
   isBattery,
   isGate,
@@ -57,7 +58,7 @@ describe("the four batteries", () => {
 
 describe("ALL_GATES, isGate() and isBattery()", () => {
   it("should know every gate of every battery and the full mutation, each once", () => {
-    const expected = new Set([...Object.values(BATTERIES).flat(), THE_FULL_MUTATION]);
+    const expected = new Set([...Object.values(BATTERIES).flat(), ...THE_SINGLE_GATES, THE_FULL_MUTATION]);
 
     expect([...ALL_GATES].sort()).toEqual([...expected].sort());
     expect(new Set(ALL_GATES).size).toBe(ALL_GATES.length);
@@ -85,5 +86,23 @@ describe("commandFor() and rerunCommandFor()", () => {
 
   it("should re-run one gate through the gate runner, never through an npm battery", () => {
     expect(rerunCommandFor("e2e:changed")).toBe("node scripts/gate-runner.ts e2e:changed");
+  });
+});
+
+describe("the single gates", () => {
+  it("should offer test as a gate the runner knows and no battery walks", () => {
+    expect(THE_SINGLE_GATES).toEqual(["test"]);
+    expect(isGate("test")).toBe(true);
+
+    for (const gates of Object.values(BATTERIES)) {
+      expect(gates).not.toContain("test");
+    }
+  });
+});
+
+describe("commandFor(), with arguments", () => {
+  it("should pass arguments to the npm script after the double dash, and none when there are none", () => {
+    expect(commandFor("test", ["src/a.spec.ts", "src/b.spec.ts"])).toBe("npm run test -- src/a.spec.ts src/b.spec.ts");
+    expect(commandFor("test", [])).toBe("npm run test");
   });
 });

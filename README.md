@@ -175,8 +175,8 @@ runs the bot, the gates, their parts, then the two test families.
 | `npm run check:release` | The same walker over the release list: `check:push`'s gates, coverage, mutation over what changed since the previous tag, every scenario. Refuses unless HEAD carries the new `v*` tag. **CI runs this on every release tag** |
 | `npm run lint` | ESLint, which enforces this project's conventions |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run docs:check` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists |
-| `npm test` | Vitest, once — units and integration together |
+| `npm run docs:check` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists. Run it as `node scripts/gate-runner.ts docs:check` and the complaints come back under one red line, with the log and the verdict under `reports/gates/` |
+| `npm test` | Vitest, once — units and integration together. One spec is `node scripts/gate-runner.ts test <file>`: a red run prints each failed assertion with its file and message, and leaves `reports/gates/test.named.json` without touching the battery's paragraph |
 | `npm run test:coverage` | Vitest with coverage; fails below 70% on any metric |
 | `npm run test:mutation:changed` | Stryker over the files that differ from `origin/main` (or from `MUTATE_AGAINST`), about a minute |
 | `npm run test:mutation` | Stryker over everything, 26 minutes measured at v1.20.1; two runs, the bot at 85% and the tooling at 80%. The weekly checkup's, not a release's |

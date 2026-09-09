@@ -305,6 +305,13 @@ because whether a tap reaches the feature owning it is a fact about real grammY.
 
 ## Checks
 
+**This project is written by an agent, and the agent is the harness's only user.** Every
+script, gate, hook and report is designed for it first: a result is a file it can open
+(`reports/gates/`, `reports/tools/`), never a stream it sees only the tail of; a red gate
+names its reasons and the one command that re-runs it; nothing waits on a terminal. A
+person's convenience is second and is never the reason a script exists — the owner said
+so on 9 September 2026, after a month of gates read through `grep`.
+
 `README.md` lists what each npm script runs, and the rules that list obeys live in
 the `write-a-doc` skill, which is where a script is added from.
 

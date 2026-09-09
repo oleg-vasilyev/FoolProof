@@ -6,6 +6,7 @@ import type { GateNumbers } from "./gate-numbers.ts";
 export interface RanVerdict {
   readonly kind: "ran";
   readonly gate: Gate;
+  readonly named: boolean;
   readonly ok: boolean;
   readonly exitCode: number;
   readonly startedAt: string;
@@ -36,6 +37,7 @@ const ONE_DECIMAL = 1;
 
 export const verdictOf = (
   gate: Gate,
+  named: boolean,
   exitCode: number,
   startedAt: Date,
   endedAt: Date,
@@ -47,6 +49,7 @@ export const verdictOf = (
   return {
     kind: "ran",
     gate,
+    named,
     ok,
     exitCode,
     startedAt: startedAt.toISOString(),
@@ -64,8 +67,8 @@ export const skippedVerdict = (gate: Gate, because: Gate, startedAt: Date): Skip
   startedAt: startedAt.toISOString(),
 });
 
-export const secondsOf = (verdict: RanVerdict): string =>
-  `${(verdict.durationMs / MS_IN_A_SECOND).toFixed(ONE_DECIMAL)}s`;
+export const secondsOf = (durationMs: number): string =>
+  `${(durationMs / MS_IN_A_SECOND).toFixed(ONE_DECIMAL)}s`;
 
 export const lineFor = (verdict: GateVerdict): string => {
   switch (verdict.kind) {
@@ -74,7 +77,7 @@ export const lineFor = (verdict: GateVerdict): string => {
 
     case "ran":
       return verdict.ok
-        ? `${verdict.gate}: green in ${secondsOf(verdict)}`
-        : `${verdict.gate}: RED in ${secondsOf(verdict)} — ${logPathOf(verdict.gate)}`;
+        ? `${verdict.gate}: green in ${secondsOf(verdict.durationMs)}`
+        : `${verdict.gate}: RED in ${secondsOf(verdict.durationMs)} — ${logPathOf(verdict.gate, verdict.named)}`;
   }
 };

@@ -42,7 +42,7 @@ vi.mock("node:fs", () => ({
 vi.mock("./gate-numbers.ts", () => ({
   numbersFor: (gate: unknown, scope: unknown, read: unknown) => numbersForSpy(gate, scope, read),
   outputsOf: (gate: unknown) => outputsOfSpy(gate),
-  scopeOf: (gate: unknown, against: unknown) => scopeOfSpy(gate, against),
+  scopeOf: (gate: unknown, against: unknown, args: unknown) => scopeOfSpy(gate, against, args),
 }));
 
 vi.mock("./gate-verdict.ts", () => ({
@@ -51,8 +51,11 @@ vi.mock("./gate-verdict.ts", () => ({
   lineFor: () => "a line",
 }));
 
+const reasonLinesSpy = vi.fn();
+
 vi.mock("./gate-summary.ts", () => ({
   gatesParagraph: (verdicts: unknown, battery: unknown) => gatesParagraphSpy(verdicts, battery),
+  reasonLines: (verdict: unknown, root: unknown) => reasonLinesSpy(verdict, root),
 }));
 
 const {
@@ -80,9 +83,11 @@ const FIRST = 0;
 
 const SECOND = 1;
 
+const THIRD = 2;
+
 const THE_NUMBERS = { kind: "none" } as const;
 
-const THE_VERDICT = { kind: "ran", gate: "lint", ok: true, exitCode: PASSED } as unknown as GateVerdict;
+const THE_VERDICT = { kind: "ran", gate: "lint", named: false, ok: true, exitCode: PASSED } as unknown as GateVerdict;
 
 const A_SCOPE = "since v1.20.0";
 
@@ -133,6 +138,7 @@ beforeEach(() => {
   numbersForSpy.mockReturnValue(THE_NUMBERS);
   verdictOfSpy.mockReturnValue(THE_VERDICT);
   gatesParagraphSpy.mockReturnValue("Gates: a paragraph.");
+  reasonLinesSpy.mockReturnValue([]);
   filesOnDisk({});
 });
 
@@ -286,7 +292,7 @@ describe("runGate()", () => {
   it("should read the numbers for the gate's scope once it has closed", async () => {
     await runAndClose(PASSED, "v1.20.0");
 
-    expect(scopeOfSpy).toHaveBeenCalledWith("lint", "v1.20.0");
+    expect(scopeOfSpy).toHaveBeenCalledWith("lint", "v1.20.0", []);
     expect(numbersForSpy).toHaveBeenCalledWith("lint", A_SCOPE, readOrNull);
   });
 
@@ -296,6 +302,7 @@ describe("runGate()", () => {
     expect(verdict).toBe(THE_VERDICT);
     expect(verdictOfSpy).toHaveBeenCalledWith(
       "lint",
+      false,
       RED,
       expect.any(Date),
       expect.any(Date),
@@ -307,7 +314,7 @@ describe("runGate()", () => {
   it("should read a gate killed by a signal, which has no code, as failed", async () => {
     await runAndClose(null);
 
-    expect(verdictOfSpy.mock.calls[FIRST]?.[SECOND]).toBe(FAILED);
+    expect(verdictOfSpy.mock.calls[FIRST]?.[THIRD]).toBe(FAILED);
   });
 
   it("should settle red when the gate could not even be started, with the reason in the log", async () => {
@@ -317,7 +324,7 @@ describe("runGate()", () => {
 
     await pending;
 
-    expect(verdictOfSpy.mock.calls[FIRST]?.[SECOND]).toBe(FAILED);
+    expect(verdictOfSpy.mock.calls[FIRST]?.[THIRD]).toBe(FAILED);
     expect(logWriteSpy.mock.calls[FIRST]?.[FIRST]).toContain("could not run npm run lint: Error: spawn ENOENT");
   });
 
@@ -351,7 +358,7 @@ describe("main()", () => {
   const say = vi.fn();
 
   it("should refuse a name that is no gate, without running anything", async () => {
-    const status = await main(["node", "gate-runner.ts", "nonsense"], {}, say);
+    const status = await main(["node", "gate-runner.ts", "nonsense"], {}, say, "D:/Temp/FoolProof");
 
     expect(status).toBe(FAILED);
     expect(say.mock.calls[FIRST]?.[FIRST]).toContain('"nonsense" is not a gate');
@@ -360,12 +367,96 @@ describe("main()", () => {
 
   it("should run the named gate with the baseline from the environment, say its line and pass its exit code on", async () => {
     verdictOfSpy.mockReturnValue({ ...THE_VERDICT, exitCode: RED });
-    const pending = main(["node", "gate-runner.ts", "lint"], { MUTATE_AGAINST: "v1.20.0" }, say);
+    const pending = main(["node", "gate-runner.ts", "lint"], { MUTATE_AGAINST: "v1.20.0" }, say, "D:/Temp/FoolProof");
 
     child.close(RED);
 
     expect(await pending).toBe(RED);
     expect(spawnSpy.mock.calls[FIRST]?.[SECOND]).toMatchObject({ env: { MUTATE_AGAINST: "v1.20.0" } });
     expect(say).toHaveBeenCalledWith("a line");
+  });
+});
+
+const ROOT = "D:/Temp/FoolProof";
+
+describe("runGate(), with arguments", () => {
+  const runNamed = async () => {
+    verdictOfSpy.mockReturnValue({ ...THE_VERDICT, gate: "test" });
+    const pending = runGate("test", undefined, ["src/a.spec.ts", "src/b.spec.ts"]);
+
+    child.close(PASSED);
+
+    return pending;
+  };
+
+  it("should hand the arguments to the npm script after the double dash", async () => {
+    await runNamed();
+
+    expect(spawnSpy.mock.calls[FIRST]?.[FIRST]).toBe("npm run test -- src/a.spec.ts src/b.spec.ts");
+  });
+
+  it("should write a named log and verdict, leaving the bare gate's files alone", async () => {
+    await runNamed();
+
+    expect(writeFileSyncSpy).toHaveBeenCalledWith("reports/gates/test.named.json", expect.any(String));
+    expect(writeFileSyncSpy).not.toHaveBeenCalledWith("reports/gates/test.json", expect.any(String));
+  });
+
+  it("should never rebuild the paragraph after a named run, whatever battery is on disk", async () => {
+    filesOnDisk({ "reports/gates/battery.txt": "check:phase\n" });
+
+    await runNamed();
+
+    expect(gatesParagraphSpy).not.toHaveBeenCalled();
+    expect(writeFileSyncSpy).not.toHaveBeenCalledWith("reports/gates/gates-paragraph.txt", expect.any(String));
+  });
+
+  it("should read the scope with the arguments, so a named mutation says so", async () => {
+    const pending = runGate("test:mutation:changed", "v1.20.0", ["scripts/a.ts"]);
+
+    child.close(PASSED);
+    await pending;
+
+    expect(scopeOfSpy).toHaveBeenCalledWith("test:mutation:changed", "v1.20.0", ["scripts/a.ts"]);
+  });
+});
+
+describe("main(), the reasons under a red line", () => {
+  const say = vi.fn();
+
+  it("should take the gate from the first argument and pass the rest on", async () => {
+    const pending = main(["node", "gate-runner.ts", "test", "src/a.spec.ts"], {}, say, ROOT);
+
+    child.close(PASSED);
+    await pending;
+
+    expect(spawnSpy.mock.calls[FIRST]?.[FIRST]).toBe("npm run test -- src/a.spec.ts");
+  });
+
+  it("should print the reasons the summary gives for a red verdict, after its line", async () => {
+    verdictOfSpy.mockReturnValue({ ...THE_VERDICT, ok: false, exitCode: RED });
+    reasonLinesSpy.mockReturnValue(["  ✗ a failure"]);
+    const pending = main(["node", "gate-runner.ts", "lint"], {}, say, ROOT);
+
+    child.close(RED);
+    await pending;
+
+    expect(reasonLinesSpy).toHaveBeenCalledWith({ ...THE_VERDICT, ok: false, exitCode: RED }, ROOT);
+    expect(say.mock.calls.map((call) => call[FIRST])).toEqual(["a line", "  ✗ a failure"]);
+  });
+});
+
+describe("runGate(), what the verdict is told about naming", () => {
+  it("should mark a run with arguments as named and a bare one as not", async () => {
+    await runAndClose(PASSED);
+
+    expect(verdictOfSpy.mock.calls[FIRST]?.[SECOND]).toBe(false);
+
+    const pending = runGate("test", undefined, ["src/a.spec.ts"]);
+
+    child.close(PASSED);
+    await pending;
+
+    expect(verdictOfSpy.mock.calls[SECOND]?.[SECOND]).toBe(true);
   });
 });

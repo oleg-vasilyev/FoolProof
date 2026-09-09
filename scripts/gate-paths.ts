@@ -7,8 +7,13 @@ export const PARAGRAPH_PATH = `${GATES_DIR}/gates-paragraph.txt`;
 
 export const BATTERY_PATH = `${GATES_DIR}/battery.txt`;
 
-export const fileStemOf = (gate: Gate): string => gate.replaceAll(":", "-");
+const NAMED = ".named";
 
-export const logPathOf = (gate: Gate): string => `${GATES_DIR}/${fileStemOf(gate)}.log`;
+export const fileStemOf = (gate: Gate, named = false): string =>
+  `${gate.replaceAll(":", "-")}${named ? NAMED : ""}`;
 
-export const verdictPathOf = (gate: Gate): string => `${GATES_DIR}/${fileStemOf(gate)}.json`;
+export const logPathOf = (gate: Gate, named = false): string =>
+  `${GATES_DIR}/${fileStemOf(gate, named)}.log`;
+
+export const verdictPathOf = (gate: Gate, named = false): string =>
+  `${GATES_DIR}/${fileStemOf(gate, named)}.json`;

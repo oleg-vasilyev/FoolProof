@@ -26,3 +26,11 @@ describe("a gate's own files", () => {
   });
 });
 
+
+describe("a named run's own files", () => {
+  it("should sit beside the bare gate's, marked named, so neither overwrites the other", () => {
+    expect(fileStemOf("test", true)).toBe("test.named");
+    expect(logPathOf("test:mutation:changed", true)).toBe("reports/gates/test-mutation-changed.named.log");
+    expect(verdictPathOf("test", true)).toBe("reports/gates/test.named.json");
+  });
+});

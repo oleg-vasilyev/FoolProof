@@ -10,6 +10,15 @@ import { drawnByName, everyDrawing, featuresThatDraw } from "./feature-drawings.
 import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
 import { siteImageOf } from "./site-images.ts";
 import { REPORTS_DIR, tidyReports } from "./tidy-reports.ts";
+import {
+  TOOLS_DIR,
+  type Say,
+  closingLine,
+  toolLogPathOf,
+  toolVerdictPathOf,
+  verdictOfRun,
+  type ToolVerdict,
+} from "./tool-verdict.ts";
 
 
 const AFTER_NODE_AND_SCRIPT = 2;
@@ -24,13 +33,19 @@ const CHAT_TO_FORGET = 1;
 
 const FAILED = 1;
 
+const PASSED = 0;
+
+const JSON_INDENT = 2;
+
+const TOOLS_TRACE = "TOOLS_TRACE";
+
 interface Tool {
   readonly does: string;
   readonly usage: string;
-  run(args: readonly string[]): void | Promise<void>;
+  run(args: readonly string[], say: Say): void | Promise<void>;
 }
 
-const writePosters = async (): Promise<void> => {
+const writePosters = async (_args: readonly string[], say: Say): Promise<void> => {
   const directory = resolve(rootDir, POSTER_DIR);
 
   mkdirSync(directory, { recursive: true });
@@ -43,11 +58,11 @@ const writePosters = async (): Promise<void> => {
       writeFileSync(resolve(directory, `${name}.png`), await rasterize(svg));
     }
 
-    console.log(`${POSTER_DIR}/${name}`);
+    say(`${POSTER_DIR}/${name}`);
   }
 };
 
-const drawGallery = async (): Promise<void> => {
+const drawGallery = async (_args: readonly string[], say: Say): Promise<void> => {
   const directory = resolve(rootDir, GALLERY_DIR);
   const drawings = await everyDrawing((offered) => offered.gallery());
 
@@ -55,14 +70,13 @@ const drawGallery = async (): Promise<void> => {
 
   for (const drawing of drawings) {
     writeFileSync(resolve(directory, `${drawing.file}.png`), await rasterize(drawing.svg));
-    console.log(`${GALLERY_DIR}/${drawing.file}.png — ${drawing.asks}`);
+    say(`${GALLERY_DIR}/${drawing.file}.png — ${drawing.asks}`);
   }
-
 };
 
 const A_WHOLE_NUMBER = /^-?\d+$/;
 
-const forgetChat = (args: readonly string[]): void => {
+const forgetChat = (args: readonly string[], say: Say): void => {
   const asked = args[CHAT_TO_FORGET];
 
   if (asked === undefined || !A_WHOLE_NUMBER.test(asked)) {
@@ -71,23 +85,23 @@ const forgetChat = (args: readonly string[]): void => {
 
   const gone = repository.forgetChat(Number(asked));
 
-  console.log(`chat ${asked}: forgot ${String(gone.games)} games and ${String(gone.players)} players`);
+  say(`chat ${asked}: forgot ${String(gone.games)} games and ${String(gone.players)} players`);
 };
 
 const TOOLS: Readonly<Record<string, Tool>> = {
   posters: {
     does:
       `draw the sample evening into ${POSTER_DIR}/ in every language — SVG and WebP for ` +
-      `each, and a PNG of the English set at the width the bot itself sends`,
+      "the site, PNG for the README",
     usage: "node scripts/tools.ts posters",
     run: writePosters,
   },
   "site-css": {
     does: `rebuild ${SITE_CSS} from ${SITE_CSS_SOURCE} and the classes the pages use`,
     usage: "node scripts/tools.ts site-css",
-    run: () => {
+    run: (_args, say) => {
       buildSiteCss();
-      console.log(SITE_CSS);
+      say(`${SITE_CSS} — rebuilt`);
     },
   },
   gallery: {
@@ -98,12 +112,14 @@ const TOOLS: Readonly<Record<string, Tool>> = {
   "tidy-reports": {
     does: `delete everything under ${REPORTS_DIR}/ that no config, script or agent names`,
     usage: "node scripts/tools.ts tidy-reports",
-    run: tidyReports,
+    run: (_args, say) => {
+      tidyReports(say);
+    },
   },
   advances: {
     does: "measure every glyph a name can carry against the shipped bold face, so text is fitted rather than guessed at",
     usage: "node scripts/tools.ts advances",
-    run: measureAdvances,
+    run: (_args, say) => measureAdvances(say),
   },
   "forget-chat": {
     does: "delete one chat's games, players and language choice, leaving every other chat alone",
@@ -113,7 +129,7 @@ const TOOLS: Readonly<Record<string, Tool>> = {
   "design-page": {
     does: "redraw every mockup on a Claude Design page, leaving its prose alone",
     usage: "node scripts/tools.ts design-page <page.html> <out.html>",
-    run: async (args) => {
+    run: async (args, say) => {
       const from = args[PAGE_TO_READ];
       const to = args[FILE_TO_WRITE];
 
@@ -121,7 +137,7 @@ const TOOLS: Readonly<Record<string, Tool>> = {
         throw new Error("design-page needs the page to read and the file to write");
       }
 
-      await refreshDesignPage(from, to);
+      await refreshDesignPage(from, to, say);
     },
   },
 };
@@ -135,9 +151,9 @@ const offeredByFeatures = async (): Promise<readonly (readonly [string, Tool])[]
           {
             does: tool.does,
             usage: tool.usage,
-            run: (args: readonly string[]) => {
+            run: (args: readonly string[], say: Say) => {
               for (const line of tool.say(args)) {
-                console.log(line);
+                say(line);
               }
             },
           },
@@ -174,6 +190,40 @@ const listItself = (): void => {
   }
 };
 
+const recorded = async (verb: string, tool: Tool, args: readonly string[]): Promise<ToolVerdict> => {
+  const startedAt = new Date();
+  const said: string[] = [];
+  const say: Say = (line) => {
+    said.push(line);
+    console.log(line);
+  };
+  let error: unknown = null;
+
+  try {
+    await tool.run(args, say);
+  } catch (thrown) {
+    error = thrown;
+  }
+
+  const verdict = verdictOfRun(verb, args.slice(TOOL_NAME + 1), startedAt, new Date(), said, error);
+
+  mkdirSync(resolve(rootDir, TOOLS_DIR), { recursive: true });
+  writeFileSync(resolve(rootDir, toolLogPathOf(verb)), `${said.join("\n")}\n`, "utf8");
+  writeFileSync(
+    resolve(rootDir, toolVerdictPathOf(verb)),
+    JSON.stringify(verdict, null, JSON_INDENT),
+    "utf8"
+  );
+
+  if (error !== null && process.env[TOOLS_TRACE] !== undefined) {
+    console.error(error);
+  }
+
+  console.log(closingLine(verdict));
+
+  return verdict;
+};
+
 const args = process.argv.slice(AFTER_NODE_AND_SCRIPT);
 const asked = args[TOOL_NAME];
 const tool = asked === undefined ? undefined : everyTool[asked];
@@ -185,5 +235,5 @@ if (asked === undefined) {
   listItself();
   process.exit(FAILED);
 } else {
-  await tool.run(args);
+  process.exit((await recorded(asked, tool, args)).ok ? PASSED : FAILED);
 }

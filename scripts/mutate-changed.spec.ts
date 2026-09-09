@@ -29,6 +29,7 @@ const {
   planFor,
   mutateChanged,
   runStryker,
+  strayAmong,
   subjectsOf,
   planLines,
   worstOf,
@@ -284,5 +285,71 @@ describe("mutateChanged()", () => {
     spawnSyncSpy.mockReturnValue({ status: RED });
 
     expect(mutateChanged({}, say)).toBe(RED);
+  });
+});
+
+describe("mutateChanged(), with named files", () => {
+  const say = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    readFileSyncSpy.mockImplementation((config: string) => JSON.stringify({ mutate: patternsOf(config) }));
+    spawnSyncSpy.mockReturnValue({ status: GREEN });
+  });
+
+  it("should mutate exactly the files named, never asking git what changed", () => {
+    mutateChanged({}, say, ["src/a.ts", "scripts/run-battery.ts"]);
+
+    expect(execFileSyncSpy).not.toHaveBeenCalled();
+    expect(spawnSyncSpy.mock.calls.map((call) => call[SECOND])).toEqual([
+      expect.arrayContaining(["stryker.config.json", "src/a.ts,!src/**/*.spec.ts,!src/**/*.stub.ts"]),
+      expect.arrayContaining(["stryker.scripts.json", "scripts/run-battery.ts,!scripts/**/*.spec.ts"]),
+    ]);
+  });
+
+  it("should say the plan against the named files rather than a baseline", () => {
+    mutateChanged({ MUTATE_AGAINST: "v1.20.1" }, say, ["src/a.ts"]);
+
+    expect(say.mock.calls.map((call) => call[FIRST])).toEqual([
+      "mutating 1 changed source file(s):",
+      "  src/a.ts",
+      "no tooling changed against the named files — nothing to mutate there",
+    ]);
+  });
+});
+
+describe("strayAmong() and a named run over files no family holds", () => {
+  const say = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    readFileSyncSpy.mockImplementation((config: string) => JSON.stringify({ mutate: patternsOf(config) }));
+    spawnSyncSpy.mockReturnValue({ status: GREEN });
+  });
+
+  it("should name every file that landed in no plan, a typo and a spec included", () => {
+    const plans = planFor(["src/a.ts", "scripts/gate-runer.ts", "src/a.spec.ts"], patternsOf);
+
+    expect(strayAmong(["src/a.ts", "scripts/gate-runer.ts", "src/a.spec.ts"], plans)).toEqual([
+      "scripts/gate-runer.ts",
+      "src/a.spec.ts",
+    ]);
+  });
+
+  it("should refuse, red, without running Stryker, naming the stray file and what to name instead", () => {
+    const status = mutateChanged({}, say, ["src/a.ts", "e2e/anything.ts"]);
+
+    expect(status).toBe(KILLED);
+    expect(spawnSyncSpy).not.toHaveBeenCalled();
+    expect(say.mock.calls[FIRST]?.[FIRST]).toContain("no family holds e2e/anything.ts");
+    expect(say.mock.calls[FIRST]?.[FIRST]).toContain("name the subject, not its spec");
+  });
+
+  it("should never refuse a diff run, where a family with nothing changed is ordinary", () => {
+    execFileSyncSpy.mockReturnValueOnce("README.md\n").mockReturnValueOnce("");
+
+    expect(mutateChanged({}, say)).toBe(GREEN);
   });
 });

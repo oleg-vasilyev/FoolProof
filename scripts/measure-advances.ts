@@ -6,6 +6,7 @@ import { rootDir } from "#shared/config/env.ts";
 import { FONT_FILES } from "#shared/fonts/font-files.ts";
 import { FONT_FAMILY } from "#shared/fonts/font-family.ts";
 import { escapeHtml } from "#shared/text/html-escape.ts";
+import type { Say } from "./tool-verdict.ts";
 
 
 const WRITTEN_TO = "src/shared/fonts/glyph-advances.ts";
@@ -110,12 +111,10 @@ const asModule = (table: Readonly<Record<string, number>>, stamp: string): strin
     "",
   ].join("\n");
 
-export const measureAdvances = async (): Promise<void> => {
+export const measureAdvances = async (say: Say): Promise<void> => {
   const table = await measured();
 
   writeFileSync(writtenTo, asModule(table, fingerprint()), "utf8");
 
-  console.log(
-    `${WRITTEN_TO} — ${String(Object.keys(table).length)} glyphs measured against the shipped bold face`
-  );
+  say(`${WRITTEN_TO} — ${String(Object.keys(table).length)} glyphs measured against the shipped bold face`);
 };

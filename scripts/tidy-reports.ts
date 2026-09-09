@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 import { rootDir } from "#shared/config/env.ts";
+import type { Say } from "./tool-verdict.ts";
 
 
 export const REPORTS_DIR = "reports";
@@ -9,6 +10,7 @@ export const OWNER_FILES: readonly string[] = [
   "vitest.config.ts",
   "e2e/vitest.e2e.config.ts",
   "scripts/gate-paths.ts",
+  "scripts/tool-verdict.ts",
   "stryker.config.json",
   "stryker.scripts.json",
   "scripts/drawn-into.ts",
@@ -41,15 +43,15 @@ export const ownedOrRefuse = (file: string, named: readonly string[]): readonly 
 const ownedBy = (file: string): readonly string[] =>
   ownedOrRefuse(file, namedIn(readFileSync(resolve(rootDir, file), "utf8")));
 
-export const tidyReports = (): void => {
+export const tidyReports = (say: Say): void => {
   const owned = [...new Set(OWNER_FILES.flatMap(ownedBy))];
   const directory = resolve(rootDir, REPORTS_DIR);
   const stray = strayIn(readdirSync(directory), owned);
 
   for (const entry of stray) {
     rmSync(resolve(directory, entry), { recursive: true, force: true });
-    console.log(`removed ${REPORTS_DIR}/${entry}`);
+    say(`removed ${REPORTS_DIR}/${entry}`);
   }
 
-  console.log(`${REPORTS_DIR}/: ${String(stray.length)} removed, ${String(owned.length)} owned`);
+  say(`${REPORTS_DIR}/: ${String(stray.length)} removed, ${String(owned.length)} owned`);
 };

@@ -81,7 +81,7 @@ an icon in a browser tab, not in an image viewer at full width.
 to survive — one game, two players, ten long names, more games than the sheet holds,
 an evening nobody lost, arrivals and departures, a career one evening old, a career
 too long for the sheet, the longest name a player may have — into `reports/gallery/`,
-and lays all of them into `contact-sheet.png`. Nothing before this point can see a
+lays all into `contact-sheet.png`, and leaves its verdict in `reports/tools/gallery.json`. Nothing before this point can see a
 poster that has started drawing nonsense: the SVG matches the renderer, the tests
 match the SVG, and all of it stays green while a line runs off the card.
 

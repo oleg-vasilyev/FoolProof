@@ -578,17 +578,6 @@ same idea one level down, and it might make the full run cheap enough to sit in
 checkup that has two full reports to compare, or the next time a tag's since-tag
 mutation crosses ten minutes.**
 
-## The other scripts still report to a console nobody reads
-
-The four batteries now leave a log, a JSON verdict and the `Gates:` paragraph under
-`reports/gates/`, and the agent reads those instead of a stream it only sees the tail of.
-Everything else in `package.json` and `scripts/tools.ts` still talks to a terminal:
-`docs:check`, the site and picture generators, `design-page.ts`, the backup, the hooks.
-The owner asked for the same treatment there, and for every script nobody runs to go —
-only what the agent actually uses stays. **Worth doing with the next phase that touches
-`scripts/`, which the owner asked for on 9 September 2026; start by counting which
-scripts the last month's transcripts and logbook actually invoked.**
-
 ## Not debt, deliberately
 
 Listed so nobody "fixes" them:

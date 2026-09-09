@@ -10,9 +10,21 @@ const TWO_DECIMALS = 2;
 
 const INDENTED = "  ";
 
+const ONE_FILE = "1";
+
+const A_NAMED_SCOPE = /^named (\d+)$/;
+
 const percent = (value: number): string => String(Number(value.toFixed(TWO_DECIMALS)));
 
 const scopedOver = (scope: MutationScope, family: FamilyName): string => {
+  const named = A_NAMED_SCOPE.exec(scope);
+
+  if (named !== null) {
+    const count = named[1] ?? ONE_FILE;
+
+    return `over ${count} named ${family} file${count === ONE_FILE ? "" : "s"}`;
+  }
+
   switch (scope) {
     case "the diff":
       return `over the changed ${family}`;
@@ -124,4 +136,40 @@ export const summaryLines = (verdicts: readonly GateVerdict[]): readonly string[
           ...red.map((verdict) => `${INDENTED}${rerunCommandFor(verdict.gate)}`),
         ]),
   ];
+};
+
+export const relativeTo = (root: string, file: string): string => {
+  const slashed = file.replaceAll("\\", "/");
+  const prefix = `${root.replaceAll("\\", "/").replace(/\/$/, "")}/`;
+
+  return slashed.startsWith(prefix) ? slashed.slice(prefix.length) : slashed;
+};
+
+const failureLines = (numbers: GateNumbers, root: string): readonly string[] => {
+  switch (numbers.kind) {
+    case "harness":
+    case "tests":
+    case "coverage":
+    case "e2e":
+      return numbers.failures.map(
+        (failure) => `${INDENTED}✗ ${relativeTo(root, failure.file)} › ${failure.name}: ${failure.message}`
+      );
+
+    case "none":
+    case "mutation":
+    case "missing":
+      return [];
+  }
+};
+
+export const reasonLines = (verdict: GateVerdict, root: string): readonly string[] => {
+  if (verdict.kind !== "ran" || verdict.ok) {
+    return [];
+  }
+
+  const failures = failureLines(verdict.numbers, root);
+
+  return failures.length === NO_FAILURES
+    ? verdict.tail.map((line) => `${INDENTED}${line}`)
+    : failures;
 };

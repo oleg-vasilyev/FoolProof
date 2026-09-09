@@ -4,7 +4,7 @@ import { BATTERIES, commandFor, isBattery, isGate, type Battery, type Gate } fro
 import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH, logPathOf, verdictPathOf } from "./gate-paths.ts";
 import { numbersFor, outputsOf, scopeOf, type MutationScope } from "./gate-numbers.ts";
 import { FAILED, lineFor, verdictOf, type GateVerdict, type RanVerdict } from "./gate-verdict.ts";
-import { gatesParagraph } from "./gate-summary.ts";
+import { gatesParagraph, reasonLines } from "./gate-summary.ts";
 
 
 const JSON_INDENT = 2;
@@ -12,6 +12,10 @@ const JSON_INDENT = 2;
 const MUTATE_AGAINST = "MUTATE_AGAINST";
 
 const NO_COLOR = "NO_COLOR";
+
+const AFTER_NODE_AND_SCRIPT = 2;
+
+const NO_ARGUMENTS = 0;
 
 export const readOrNull = (path: string): string | null => {
   try {
@@ -42,8 +46,8 @@ export const childEnvironment = (
   ...(mutateAgainst === undefined ? {} : { [MUTATE_AGAINST]: mutateAgainst }),
 });
 
-export const writeVerdict = (verdict: GateVerdict): void => {
-  writeFileSync(verdictPathOf(verdict.gate), JSON.stringify(verdict, null, JSON_INDENT));
+export const writeVerdict = (verdict: GateVerdict, named = false): void => {
+  writeFileSync(verdictPathOf(verdict.gate, named), JSON.stringify(verdict, null, JSON_INDENT));
 };
 
 export const forgetVerdicts = (gates: readonly Gate[]): void => {
@@ -77,9 +81,14 @@ export const rewriteParagraph = (): void => {
 
 const linesOf = (chunks: readonly string[]): readonly string[] => chunks.join("").split(/\r?\n/);
 
-export const runGate = (gate: Gate, mutateAgainst: string | undefined): Promise<RanVerdict> =>
+export const runGate = (
+  gate: Gate,
+  mutateAgainst: string | undefined,
+  args: readonly string[] = []
+): Promise<RanVerdict> =>
   new Promise((resolve) => {
-    const scope: MutationScope = scopeOf(gate, mutateAgainst);
+    const named = args.length > NO_ARGUMENTS;
+    const scope: MutationScope = scopeOf(gate, mutateAgainst, args);
     const startedAt = new Date();
     const chunks: string[] = [];
     let settled = false;
@@ -89,9 +98,9 @@ export const runGate = (gate: Gate, mutateAgainst: string | undefined): Promise<
     }
 
     mkdirSync(GATES_DIR, { recursive: true });
-    const log = createWriteStream(logPathOf(gate));
+    const log = createWriteStream(logPathOf(gate, named));
 
-    const child = spawn(commandFor(gate), {
+    const child = spawn(commandFor(gate, args), {
       shell: true,
       stdio: ["ignore", "pipe", "pipe"],
       env: childEnvironment(process.env, mutateAgainst),
@@ -111,6 +120,7 @@ export const runGate = (gate: Gate, mutateAgainst: string | undefined): Promise<
       log.end();
       const verdict = verdictOf(
         gate,
+        named,
         code,
         startedAt,
         new Date(),
@@ -118,8 +128,12 @@ export const runGate = (gate: Gate, mutateAgainst: string | undefined): Promise<
         linesOf(chunks)
       );
 
-      writeVerdict(verdict);
-      rewriteParagraph();
+      writeVerdict(verdict, named);
+
+      if (!named) {
+        rewriteParagraph();
+      }
+
       resolve(verdict);
     };
 
@@ -128,7 +142,7 @@ export const runGate = (gate: Gate, mutateAgainst: string | undefined): Promise<
     child.stdout.on("data", keep);
     child.stderr.on("data", keep);
     child.on("error", (error) => {
-      keep(`gate-runner: could not run ${commandFor(gate)}: ${String(error)}\n`);
+      keep(`gate-runner: could not run ${commandFor(gate, args)}: ${String(error)}\n`);
       settle(FAILED);
     });
     child.on("close", (code) => {
@@ -139,9 +153,10 @@ export const runGate = (gate: Gate, mutateAgainst: string | undefined): Promise<
 export const main = async (
   argv: readonly string[],
   env: Readonly<Record<string, string | undefined>>,
-  say: (line: string) => void
+  say: (line: string) => void,
+  root: string
 ): Promise<number> => {
-  const gate = argv.at(-1);
+  const [gate, ...args] = argv.slice(AFTER_NODE_AND_SCRIPT);
 
   if (!isGate(gate)) {
     say(`gate-runner: "${gate ?? ""}" is not a gate this runner knows`);
@@ -149,13 +164,15 @@ export const main = async (
     return FAILED;
   }
 
-  const verdict = await runGate(gate, env[MUTATE_AGAINST]);
+  const verdict = await runGate(gate, env[MUTATE_AGAINST], args);
 
-  say(lineFor(verdict));
+  for (const line of [lineFor(verdict), ...reasonLines(verdict, root)]) {
+    say(line);
+  }
 
   return verdict.exitCode;
 };
 
 if (import.meta.main) {
-  process.exit(await main(process.argv, process.env, console.log));
+  process.exit(await main(process.argv, process.env, console.log, process.cwd()));
 }

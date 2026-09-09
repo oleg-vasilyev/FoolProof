@@ -1,15 +1,20 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { FAMILIES, type Family } from "./mutation-families.ts";
+import type { Say } from "./tool-verdict.ts";
 
 
 export const DEFAULT_BASELINE = "origin/main";
+
+export const THE_NAMED_FILES = "the named files";
 
 const STRYKER = "node_modules/@stryker-mutator/core/bin/stryker.js";
 
 const NOTHING = 0;
 
 const KILLED = 1;
+
+const AFTER_NODE_AND_SCRIPT = 2;
 
 const A_TEST_FILE = /\.(spec|stub)\.ts$/;
 
@@ -52,9 +57,9 @@ export const planFor = (changed: readonly string[], patterns: Patterns): readonl
     files: subjectsOf(changed).filter((file) => held(patterns(family.config), file)),
   }));
 
-export const planLines = (plan: Plan, baseline: string): readonly string[] =>
+export const planLines = (plan: Plan, against: string): readonly string[] =>
   plan.files.length === NOTHING
-    ? [`no ${plan.family.family} changed against ${baseline} — nothing to mutate there`]
+    ? [`no ${plan.family.family} changed against ${against} — nothing to mutate there`]
     : [
         `mutating ${String(plan.files.length)} changed ${plan.family.family} file(s):`,
         ...plan.files.map((file) => `  ${file}`),
@@ -81,14 +86,32 @@ export const runStryker = (plan: Plan, patterns: readonly string[]): number =>
     { stdio: "inherit" }
   ).status ?? KILLED;
 
+export const strayAmong = (named: readonly string[], plans: readonly Plan[]): readonly string[] =>
+  named.filter((file) => !plans.some((plan) => plan.files.includes(file)));
+
 export const mutateChanged = (
   env: Readonly<Record<string, string | undefined>>,
-  say: (line: string) => void
+  say: Say,
+  named: readonly string[] = []
 ): number => {
   const baseline = env.MUTATE_AGAINST ?? DEFAULT_BASELINE;
+  const against = named.length === NOTHING ? baseline : THE_NAMED_FILES;
+  const changed = named.length === NOTHING ? changedFiles(baseline) : named;
   const patterns: Patterns = (config) => patternsIn(readFileSync(config, "utf8"));
-  const statuses = planFor(changedFiles(baseline), patterns).map((plan) => {
-    for (const line of planLines(plan, baseline)) {
+  const plans = planFor(changed, patterns);
+  const stray = strayAmong(named, plans);
+
+  if (stray.length > NOTHING) {
+    say(
+      `mutate-changed: no family holds ${stray.join(", ")} — name the subject, not its spec, ` +
+        "under src/ or a folder stryker.scripts.json lists"
+    );
+
+    return KILLED;
+  }
+
+  const statuses = plans.map((plan) => {
+    for (const line of planLines(plan, against)) {
       say(line);
     }
 
@@ -99,5 +122,5 @@ export const mutateChanged = (
 };
 
 if (import.meta.main) {
-  process.exit(mutateChanged(process.env, console.log));
+  process.exit(mutateChanged(process.env, console.log, process.argv.slice(AFTER_NODE_AND_SCRIPT)));
 }

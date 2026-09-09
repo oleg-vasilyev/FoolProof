@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { drawnByName } from "./feature-drawings.ts";
 import { POSTER_DIR } from "./drawn-into.ts";
 import { Locale } from "#shared/locale/locales.ts";
+import type { Say } from "./tool-verdict.ts";
 
 
 export const ENGLISH_SUFFIX = `-${Locale.En}`;
@@ -67,7 +68,11 @@ export const fingerprintOf = (drawn: Readonly<Record<string, string>>): string =
     )
     .digest("hex");
 
-export const refreshDesignPage = async (from: string, to: string): Promise<void> => {
+export const refreshDesignPage = async (
+  from: string,
+  to: string,
+  say: Say
+): Promise<void> => {
   const drawn = inSlotNames(await drawnByName((offered) => offered.posters()));
   const spliced = withFreshPosters(readFileSync(from, "utf8"), drawn);
 
@@ -78,6 +83,6 @@ export const refreshDesignPage = async (from: string, to: string): Promise<void>
     "utf8"
   );
 
-  console.log(`${to} — every named slot redrawn, every other line left alone`);
-  console.log(`${DESIGN_PAGE_SYNC} — the fingerprint of what was spliced in`);
+  say(`${to} — every named slot redrawn, every other line left alone`);
+  say(`${DESIGN_PAGE_SYNC} — the fingerprint of what was spliced in`);
 };

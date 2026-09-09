@@ -25,9 +25,9 @@ Gates 1–4 are one command: **`npm run check:phase`** — lint, types, the suit
 under coverage, mutation over the diff, e2e over the diff, with the tests
 counted once. Every gate runs (only mutation waits for a green suite); each leaves
 `reports/gates/<gate>.log` and `.json`, and the run ends with the `Gates:` paragraph
-the commit pastes, in `reports/gates/gates-paragraph.txt`. A red gate is re-run
-**alone** after the fix — `node scripts/gate-runner.ts <gate>` — never by
-repeating the whole chain; gate 3's rules about re-runs still apply.
+the commit pastes, in `reports/gates/gates-paragraph.txt`. A red gate prints its
+reasons under its line and is re-run **alone** — `node scripts/gate-runner.ts <gate>`,
+or one spec as `… test <file>` — never by repeating the chain; gate 3's rules still apply.
 **`docs:check` is deliberately not in it**: documents and pictures are finished
 after the review, in their own stages, so checking them here fails on work not
 yet due — and a review finding would force an expensive redraw twice. The line
@@ -134,7 +134,8 @@ the nearest assertion that turns the mutant red.
 
 **Run gate 5's review pass before this one. Always.** Review findings edit code, and
 this is the costliest gate to repeat; an edit made after the run re-checks with
-`--mutate <file>` alone, never a full re-run. Size is not the test and neither is
+`node scripts/gate-runner.ts test:mutation:changed <file>` alone, which leaves the
+paragraph untouched, never a full re-run. Size is not the test and neither is
 subject matter — a phase of 671 lines, 74% specs, ran the battery, took five
 findings, and ran it again: twenty-seven minutes of Stryker to learn the same thing
 twice; a phase touching no code at all looked immune until the review's best finding
@@ -181,7 +182,6 @@ This is a real gate rather than a smoke test, and it is cheap because it is
 selective: a phase inside one feature usually plays two or three files in about
 fifteen seconds. The full `npm run e2e` runs at a tag, inside `check:release`.
 
-`npm run test:e2e-harness` is the harness's own units, under a second, and belongs to `e2e/`.
 
 ## 5. A review pass over the phase's whole diff
 

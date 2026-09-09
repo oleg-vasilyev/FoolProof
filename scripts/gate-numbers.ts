@@ -3,7 +3,7 @@ import type { Gate } from "./gate-list.ts";
 import { FAMILIES, type Family, type FamilyName } from "./mutation-families.ts";
 
 
-export type MutationScope = "the diff" | "everything" | `since ${string}`;
+export type MutationScope = "the diff" | "everything" | `since ${string}` | `named ${string}`;
 
 export interface FamilyScore {
   readonly family: FamilyName;
@@ -15,10 +15,17 @@ export interface FamilyScore {
   readonly timeout: number;
 }
 
+export interface Failure {
+  readonly file: string;
+  readonly name: string;
+  readonly message: string;
+}
+
 export interface CaseCount {
   readonly cases: number;
   readonly files: number;
   readonly failed: number;
+  readonly failures: readonly Failure[];
 }
 
 export interface CoverageRates {
@@ -47,10 +54,29 @@ export const COVERAGE_SUMMARY = "reports/coverage/coverage-summary.json";
 
 export const E2E_RESULTS = "reports/e2e/results.json";
 
+export const MOST_FAILURES = 10;
+
+const NO_ARGUMENTS = 0;
+
+const FIRST_LINE = 0;
+
+const FAILED = "failed";
+
+interface AssertionResult {
+  readonly fullName: string;
+  readonly status: string;
+  readonly failureMessages: readonly string[];
+}
+
+interface FileResult {
+  readonly name: string;
+  readonly assertionResults: readonly AssertionResult[];
+}
+
 interface VitestResults {
   readonly numTotalTests: number;
   readonly numFailedTests: number;
-  readonly testResults: readonly unknown[];
+  readonly testResults: readonly FileResult[];
 }
 
 interface CoverageSummary {
@@ -75,10 +101,27 @@ const parse = <T>(read: Reader, path: string): T | null => {
   return JSON.parse(text) as T;
 };
 
+const firstLineOf = (message: string | undefined): string =>
+  (message ?? "").split("\n")[FIRST_LINE] ?? "";
+
+export const failuresIn = (results: VitestResults): readonly Failure[] =>
+  results.testResults
+    .flatMap((file) =>
+      file.assertionResults
+        .filter((assertion) => assertion.status === FAILED)
+        .map((assertion) => ({
+          file: file.name,
+          name: assertion.fullName,
+          message: firstLineOf(assertion.failureMessages[FIRST_LINE]),
+        }))
+    )
+    .slice(NO_ARGUMENTS, MOST_FAILURES);
+
 const casesIn = (results: VitestResults): CaseCount => ({
   cases: results.numTotalTests,
   files: results.testResults.length,
   failed: results.numFailedTests,
+  failures: failuresIn(results),
 });
 
 export const outputsOf = (gate: Gate): readonly string[] => {
@@ -91,6 +134,9 @@ export const outputsOf = (gate: Gate): readonly string[] => {
 
     case "test:e2e-harness":
       return [HARNESS_RESULTS];
+
+    case "test":
+      return [TESTS_RESULTS];
 
     case "test:coverage":
       return [TESTS_RESULTS, COVERAGE_SUMMARY];
@@ -105,9 +151,17 @@ export const outputsOf = (gate: Gate): readonly string[] => {
   }
 };
 
-export const scopeOf = (gate: Gate, mutateAgainst: string | undefined): MutationScope => {
+export const scopeOf = (
+  gate: Gate,
+  mutateAgainst: string | undefined,
+  args: readonly string[] = []
+): MutationScope => {
   if (gate === "test:mutation") {
     return "everything";
+  }
+
+  if (args.length > NO_ARGUMENTS) {
+    return `named ${String(args.length)}`;
   }
 
   return mutateAgainst === undefined ? "the diff" : `since ${mutateAgainst}`;
@@ -134,7 +188,7 @@ const familyScore = (read: Reader, family: Family): FamilyScore | null => {
   };
 };
 
-const testNumbers = (read: Reader, kind: "harness" | "e2e", path: string): GateNumbers => {
+const testNumbers = (read: Reader, kind: "harness" | "tests" | "e2e", path: string): GateNumbers => {
   const results = parse<VitestResults>(read, path);
 
   return results === null ? { kind: "missing", expected: path } : { kind, ...casesIn(results) };
@@ -173,6 +227,9 @@ export const numbersFor = (gate: Gate, scope: MutationScope, read: Reader): Gate
     case "test:e2e-harness":
       return testNumbers(read, "harness", HARNESS_RESULTS);
 
+    case "test":
+      return testNumbers(read, "tests", TESTS_RESULTS);
+
     case "test:coverage":
       return coverageNumbers(read);
 
@@ -189,7 +246,9 @@ export const numbersFor = (gate: Gate, scope: MutationScope, read: Reader): Gate
       };
 
     case "e2e":
-    case "e2e:changed":
       return testNumbers(read, "e2e", E2E_RESULTS);
+
+    case "e2e:changed":
+      return read(E2E_RESULTS) === null ? { kind: "none" } : testNumbers(read, "e2e", E2E_RESULTS);
   }
 };

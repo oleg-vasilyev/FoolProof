@@ -43,7 +43,7 @@ Two directions lead here:
    context.
 2. **Splice, do not regenerate.**
    `node scripts/tools.ts design-page <page.html> <out.html>` replaces the body
-   of every `<div class="poster" data-poster="…">` and touches nothing else.
+   of every `<div class="poster" data-poster="…">` and touches nothing else; its verdict is `reports/tools/design-page.json`.
    Slots are matched **by name, not by position**, so reordering the page
    cannot swap two drawings; a slot naming a poster nothing draws, a poster
    with no slot, or a slot holding nested markup all refuse by name.

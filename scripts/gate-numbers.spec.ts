@@ -7,8 +7,16 @@ vi.mock("mutation-testing-metrics", () => ({
   calculateMetrics: (files: unknown) => calculateMetricsSpy(files),
 }));
 
-const { COVERAGE_SUMMARY, E2E_RESULTS, HARNESS_RESULTS, TESTS_RESULTS, numbersFor, outputsOf, scopeOf } =
-  await import("./gate-numbers.ts");
+const {
+  COVERAGE_SUMMARY,
+  E2E_RESULTS,
+  HARNESS_RESULTS,
+  MOST_FAILURES,
+  TESTS_RESULTS,
+  numbersFor,
+  outputsOf,
+  scopeOf,
+} = await import("./gate-numbers.ts");
 
 
 const CASES = 4651;
@@ -53,7 +61,7 @@ const vitestJson = (cases: number, failed: number, files: number): string =>
   JSON.stringify({
     numTotalTests: cases,
     numFailedTests: failed,
-    testResults: Array.from({ length: files }, () => ({})),
+    testResults: Array.from({ length: files }, () => ({ name: "a.spec.ts", assertionResults: [] })),
   });
 
 const coverageJson = (): string =>
@@ -169,6 +177,7 @@ describe("numbersFor()", () => {
       cases: CASES,
       files: FILES,
       failed: FAILED,
+      failures: [],
     });
     expect(numbersFor("test:e2e-harness", "the diff", nothing)).toEqual({
       kind: "missing",
@@ -182,6 +191,7 @@ describe("numbersFor()", () => {
       cases: CASES,
       files: FILES,
       failed: FAILED,
+      failures: [],
       statements: STATEMENTS,
       branches: BRANCHES,
       functions: FUNCTIONS,
@@ -204,6 +214,7 @@ describe("numbersFor()", () => {
       cases: CASES,
       files: FILES,
       failed: FAILED,
+      failures: [],
     });
   });
 
@@ -275,6 +286,7 @@ describe("numbersFor()", () => {
       cases: CASES,
       files: FILES,
       failed: FAILED,
+      failures: [],
     });
     expect(numbersFor("e2e:changed", "the diff", everything)).toEqual(
       numbersFor("e2e", "the diff", everything)
@@ -282,6 +294,80 @@ describe("numbersFor()", () => {
   });
 
   it("should say which file an e2e run failed to write", () => {
+    expect(numbersFor("e2e", "the diff", nothing)).toEqual({ kind: "missing", expected: E2E_RESULTS });
+  });
+});
+
+const A_FAILED_FILE = "D:/Temp/FoolProof/scripts/gate-paths.spec.ts";
+
+const A_FAILED_NAME = "fileStemOf() should turn the colons a file name may not carry into dashes";
+
+const A_FAILED_MESSAGE =
+  "AssertionError: expected 'test-mutation-changed' to be 'PROBE-this-must-fail' // Object.is equality";
+
+const ELEVEN = 11;
+
+const redJson = (failed: number): string =>
+  JSON.stringify({
+    numTotalTests: failed + 1,
+    numFailedTests: failed,
+    testResults: [
+      {
+        name: A_FAILED_FILE,
+        assertionResults: [
+          { fullName: "a green one", status: "passed", failureMessages: [] },
+          ...Array.from({ length: failed }, (_, index) => ({
+            fullName: `${A_FAILED_NAME} ${String(index)}`,
+            status: "failed",
+            failureMessages: [`${A_FAILED_MESSAGE}\n    at ${A_FAILED_FILE}:18:49\n    at runner.js:302:11`],
+          })),
+        ],
+      },
+    ],
+  });
+
+describe("failuresIn(), read off the reporter's real shape", () => {
+  it("should name each failed assertion by file, full name and the first line of its stack", () => {
+    const numbers = numbersFor("test", "the diff", readerOver({ [TESTS_RESULTS]: redJson(1) }));
+
+    expect(numbers).toMatchObject({
+      kind: "tests",
+      failed: 1,
+      failures: [{ file: A_FAILED_FILE, name: `${A_FAILED_NAME} 0`, message: A_FAILED_MESSAGE }],
+    });
+  });
+
+  it("should keep at most ten failures, the rest being in the log", () => {
+    const numbers = numbersFor("test", "the diff", readerOver({ [TESTS_RESULTS]: redJson(ELEVEN) }));
+
+    expect(numbers.kind === "tests" ? numbers.failures : []).toHaveLength(MOST_FAILURES);
+  });
+
+  it("should carry no failures for a green run, on every reporter-backed kind", () => {
+    for (const gate of ["test", "test:coverage", "test:e2e-harness", "e2e"] as const) {
+      expect(numbersFor(gate, "the diff", everything)).toMatchObject({ failures: [] });
+    }
+  });
+
+  it("should name the suite's results file as what a bare test run writes and reads", () => {
+    expect(outputsOf("test")).toEqual([TESTS_RESULTS]);
+    expect(numbersFor("test", "the diff", nothing)).toEqual({ kind: "missing", expected: TESTS_RESULTS });
+  });
+});
+
+describe("scopeOf(), with named files", () => {
+  it("should name the count of files when the run was given some, whatever the baseline", () => {
+    expect(scopeOf("test:mutation:changed", "v1.20.0", ["a.ts", "b.ts"])).toBe("named 2");
+  });
+
+  it("should still call the full run everything", () => {
+    expect(scopeOf("test:mutation", undefined, ["a.ts"])).toBe("everything");
+  });
+});
+
+describe("numbersFor(), an e2e run over the diff with nothing to play", () => {
+  it("should carry no numbers rather than complain, since playing nothing writes nothing", () => {
+    expect(numbersFor("e2e:changed", "the diff", nothing)).toEqual({ kind: "none" });
     expect(numbersFor("e2e", "the diff", nothing)).toEqual({ kind: "missing", expected: E2E_RESULTS });
   });
 });

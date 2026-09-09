@@ -27,6 +27,7 @@
     "scripts/gate-summary.ts",
     "scripts/mutate-changed.ts",
     "scripts/mutation-families.ts",
+    "scripts/tool-verdict.ts",
     "!scripts/**/*.spec.ts",
     "!scripts/**/*.stub.ts",
     "!scripts/docs-check/source-files.ts",

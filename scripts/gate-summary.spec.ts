@@ -15,7 +15,7 @@ vi.mock("./gate-list.ts", () => ({
   rerunCommandFor: (gate: unknown) => rerunCommandForSpy(gate),
 }));
 
-const { gatesParagraph, summaryLines } = await import("./gate-summary.ts");
+const { gatesParagraph, reasonLines, relativeTo, summaryLines } = await import("./gate-summary.ts");
 
 
 const PASSED = 0;
@@ -31,6 +31,7 @@ const ONCE = 1;
 const verdictWith = (gate: RanVerdict["gate"], ok: boolean, numbers: GateNumbers): RanVerdict => ({
   kind: "ran",
   gate,
+  named: false,
   ok,
   exitCode: ok ? PASSED : RED,
   startedAt: "2026-09-09T10:00:00.000Z",
@@ -54,6 +55,7 @@ const COVERAGE: GateNumbers = {
   cases: 4651,
   files: 199,
   failed: NO_FAILURES,
+  failures: [],
   statements: 99.84,
   branches: 97.61,
   functions: 100,
@@ -72,7 +74,7 @@ const SOURCE_SCORED = {
 
 const TOOLING_SCORED = { ...SOURCE_SCORED, family: "tooling", score: 84.02 } as const;
 
-const E2E: GateNumbers = { kind: "e2e", cases: 205, files: 17, failed: NO_FAILURES };
+const E2E: GateNumbers = { kind: "e2e", cases: 205, files: 17, failed: NO_FAILURES, failures: [] };
 
 const aGreenPhase = (): readonly GateVerdict[] => [
   verdictWith("lint", true, NONE),
@@ -126,7 +128,7 @@ describe("gatesParagraph()", () => {
 
   it("should count the harness units apart from the suite", () => {
     const verdicts = [
-      verdictWith("test:e2e-harness", true, { kind: "harness", cases: 75, files: 9, failed: NO_FAILURES }),
+      verdictWith("test:e2e-harness", true, { kind: "harness", cases: 75, files: 9, failed: NO_FAILURES, failures: [] }),
     ];
 
     expect(gatesParagraph(verdicts, "check:push")).toBe(
@@ -136,7 +138,7 @@ describe("gatesParagraph()", () => {
 
   it("should say a suite that wrote no coverage as tests without coverage, never as harness units", () => {
     const verdicts = [
-      verdictWith("test:coverage", true, { kind: "tests", cases: 4771, files: 207, failed: NO_FAILURES }),
+      verdictWith("test:coverage", true, { kind: "tests", cases: 4771, files: 207, failed: NO_FAILURES, failures: [] }),
     ];
 
     expect(gatesParagraph(verdicts, "check")).toBe(
@@ -235,5 +237,65 @@ describe("summaryLines()", () => {
 
   it("should add no advice to a green run", () => {
     expect(summaryLines(aGreenPhase()).join("\n")).not.toContain("Re-run");
+  });
+});
+
+const ROOT = "D:\\Temp\\FoolProof";
+
+const A_FAILURE = {
+  file: "D:/Temp/FoolProof/scripts/gate-paths.spec.ts",
+  name: "fileStemOf() should turn the colons into dashes",
+  message: "AssertionError: expected 'a' to be 'b'",
+};
+
+describe("gatesParagraph(), a run over named files", () => {
+  it("should say how many named files a family's score covers, singular and plural", () => {
+    const one = [
+      verdictWith("test:mutation:changed", true, { kind: "mutation", scope: "named 1", families: [TOOLING_SCORED] }),
+    ];
+    const two = [
+      verdictWith("test:mutation:changed", true, { kind: "mutation", scope: "named 2", families: [SOURCE_SCORED] }),
+    ];
+
+    expect(gatesParagraph(one, "check:phase")).toContain("84.02% over 1 named tooling file");
+    expect(gatesParagraph(two, "check:phase")).toContain("99.52% over 2 named source files");
+  });
+});
+
+describe("relativeTo()", () => {
+  it("should strip the root, whichever slashes either side uses", () => {
+    expect(relativeTo(ROOT, A_FAILURE.file)).toBe("scripts/gate-paths.spec.ts");
+    expect(relativeTo("D:/Temp/FoolProof/", "D:\\Temp\\FoolProof\\src\\a.ts")).toBe("src/a.ts");
+  });
+
+  it("should leave a path outside the root alone, slashed forward", () => {
+    expect(relativeTo(ROOT, "C:\\elsewhere\\a.ts")).toBe("C:/elsewhere/a.ts");
+  });
+});
+
+describe("reasonLines()", () => {
+  it("should say nothing for a green gate or a skipped one", () => {
+    expect(reasonLines(verdictWith("lint", true, NONE), ROOT)).toEqual([]);
+    expect(reasonLines(SKIPPED, ROOT)).toEqual([]);
+  });
+
+  it("should list each failed assertion with its file made relative, its name and its message", () => {
+    const red = verdictWith("test", false, { kind: "tests", cases: 2, files: 1, failed: 1, failures: [A_FAILURE] });
+
+    expect(reasonLines(red, ROOT)).toEqual([
+      "  ✗ scripts/gate-paths.spec.ts › fileStemOf() should turn the colons into dashes: AssertionError: expected 'a' to be 'b'",
+    ]);
+  });
+
+  it("should fall back to the verdict's tail, indented, when the kind carries no failures", () => {
+    const red = { ...verdictWith("docs:check", false, NONE), tail: ["README.md: a complaint", "1 problem(s)"] };
+
+    expect(reasonLines(red, ROOT)).toEqual(["  README.md: a complaint", "  1 problem(s)"]);
+  });
+
+  it("should fall back to the tail when a reporter-backed gate died before writing any failure", () => {
+    const red = { ...verdictWith("e2e", false, { kind: "e2e", cases: 0, files: 0, failed: 0, failures: [] }), tail: ["killed"] };
+
+    expect(reasonLines(red, ROOT)).toEqual(["  killed"]);
   });
 });
