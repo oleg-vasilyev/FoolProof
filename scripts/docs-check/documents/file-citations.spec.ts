@@ -64,7 +64,7 @@ describe("citedPathsIn", () => {
   });
 
   it("should name a path only once however often it is cited", () => {
-    const found = citedPathsIn("scripts/tools.ts and again scripts/tools.ts", UNDER_THE_SOURCE);
+    const found = citedPathsIn("scripts/tools/tools.ts and again scripts/tools/tools.ts", UNDER_THE_SOURCE);
 
     expect(found).toHaveLength(ONE_PATH);
   });

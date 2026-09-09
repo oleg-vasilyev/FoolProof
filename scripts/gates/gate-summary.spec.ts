@@ -126,6 +126,15 @@ describe("gatesParagraph()", () => {
     );
   });
 
+  it("should say a family the full run never reached was not run, rather than that it had nothing", () => {
+    const verdicts = [
+      verdictWith("test:mutation", false, { kind: "mutation", scope: "everything", families: [SOURCE_SCORED] }),
+    ];
+
+    expect(gatesParagraph(verdicts, "check:release")).toContain("tooling not run");
+    expect(gatesParagraph(verdicts, "check:release")).not.toContain("nothing to run over the tooling");
+  });
+
   it("should count the harness units apart from the suite", () => {
     const verdicts = [
       verdictWith("test:e2e-harness", true, { kind: "harness", cases: 75, files: 9, failed: NO_FAILURES, failures: [] }),
@@ -141,8 +150,8 @@ describe("gatesParagraph()", () => {
       verdictWith("test:coverage", true, { kind: "tests", cases: 4771, files: 207, failed: NO_FAILURES, failures: [] }),
     ];
 
-    expect(gatesParagraph(verdicts, "check")).toBe(
-      "Gates: check green — 4771 tests in 207 files, no coverage written."
+    expect(gatesParagraph(verdicts, "check:quick")).toBe(
+      "Gates: check:quick green — 4771 tests in 207 files, no coverage written."
     );
   });
 
@@ -193,7 +202,7 @@ describe("gatesParagraph()", () => {
   });
 
   it("should end after the verdict when no gate carries numbers", () => {
-    expect(gatesParagraph([verdictWith("lint", true, NONE)], "check")).toBe("Gates: check green.");
+    expect(gatesParagraph([verdictWith("lint", true, NONE)], "check:quick")).toBe("Gates: check:quick green.");
   });
 });
 
@@ -288,7 +297,7 @@ describe("reasonLines()", () => {
   });
 
   it("should fall back to the verdict's tail, indented, when the kind carries no failures", () => {
-    const red = { ...verdictWith("docs:check", false, NONE), tail: ["README.md: a complaint", "1 problem(s)"] };
+    const red = { ...verdictWith("docs-check", false, NONE), tail: ["README.md: a complaint", "1 problem(s)"] };
 
     expect(reasonLines(red, ROOT)).toEqual(["  README.md: a complaint", "  1 problem(s)"]);
   });

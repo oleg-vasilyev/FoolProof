@@ -133,7 +133,7 @@ Reading: `chat.captions()`, `chat.cardText()`, `chat.lastText()`, `chat.lastAnsw
 
 ## Running it
 
-`npm run e2e` for the whole suite, `npm run e2e:watch` to watch it play in the
+`node scripts/gates/gate-runner.ts e2e` for the whole suite, `npm run e2e:watch` to watch it play in the
 browser — the hub lists every scenario by name down the left, and picking one fills
 the page with that chat alone. The watch run paces every action, so use it to read a
 scenario you are writing rather than to debug a failure.

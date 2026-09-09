@@ -7,13 +7,13 @@ import type { Say } from "./tool-verdict.ts";
 export const REPORTS_DIR = "reports";
 
 export const OWNER_FILES: readonly string[] = [
-  "vitest.config.ts",
+  "scripts/gates/config/vitest.config.ts",
   "e2e/vitest.e2e.config.ts",
-  "scripts/gate-paths.ts",
-  "scripts/tool-verdict.ts",
-  "stryker.config.json",
-  "stryker.scripts.json",
-  "scripts/drawn-into.ts",
+  "scripts/gates/gate-paths.ts",
+  "scripts/tools/tool-verdict.ts",
+  "scripts/gates/config/stryker.config.json",
+  "scripts/gates/config/stryker.scripts.json",
+  "scripts/drawings/drawn-into.ts",
   ".claude/agents/deep-checkup.md",
 ];
 

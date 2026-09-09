@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { BATTERIES, isBattery, type Battery, type Gate } from "./gate-list.ts";
+import { BATTERIES, COMMANDS, isBattery, type Battery, type Gate } from "./gate-list.ts";
 import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH } from "./gate-paths.ts";
 import { forgetVerdicts, runGate, writeVerdict } from "./gate-runner.ts";
 import { FAILED, PASSED, skippedVerdict, type GateVerdict } from "./gate-verdict.ts";
@@ -110,7 +110,7 @@ export const runBattery = async (
   const mutateAgainst = baseline?.ok === true ? baseline.tag : undefined;
   const verdicts = await walkTheGates(
     BATTERIES[battery],
-    (gate) => runGate(gate, mutateAgainst),
+    (gate) => runGate(gate, mutateAgainst, COMMANDS[gate].steps),
     skipOnDisk
   );
 

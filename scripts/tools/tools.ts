@@ -5,8 +5,8 @@ import { rootDir } from "#shared/config/env.ts";
 import { repository } from "#shared/repository/repository-instance.ts";
 import { measureAdvances } from "./measure-advances.ts";
 import { ENGLISH_SUFFIX, refreshDesignPage } from "./design-page.ts";
-import { GALLERY_DIR, POSTER_DIR } from "./drawn-into.ts";
-import { drawnByName, everyDrawing, featuresThatDraw } from "./feature-drawings.ts";
+import { GALLERY_DIR, POSTER_DIR } from "../drawings/drawn-into.ts";
+import { drawnByName, everyDrawing, featuresThatDraw } from "../drawings/feature-drawings.ts";
 import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
 import { siteImageOf } from "./site-images.ts";
 import { REPORTS_DIR, tidyReports } from "./tidy-reports.ts";
@@ -93,12 +93,12 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     does:
       `draw the sample evening into ${POSTER_DIR}/ in every language — SVG and WebP for ` +
       "the site, PNG for the README",
-    usage: "node scripts/tools.ts posters",
+    usage: "node scripts/tools/tools.ts posters",
     run: writePosters,
   },
   "site-css": {
     does: `rebuild ${SITE_CSS} from ${SITE_CSS_SOURCE} and the classes the pages use`,
-    usage: "node scripts/tools.ts site-css",
+    usage: "node scripts/tools/tools.ts site-css",
     run: (_args, say) => {
       buildSiteCss();
       say(`${SITE_CSS} — rebuilt`);
@@ -106,29 +106,29 @@ const TOOLS: Readonly<Record<string, Tool>> = {
   },
   gallery: {
     does: `draw every edge of every poster into ${GALLERY_DIR}/ for a human or an agent to look at`,
-    usage: "node scripts/tools.ts gallery",
+    usage: "node scripts/tools/tools.ts gallery",
     run: drawGallery,
   },
   "tidy-reports": {
     does: `delete everything under ${REPORTS_DIR}/ that no config, script or agent names`,
-    usage: "node scripts/tools.ts tidy-reports",
+    usage: "node scripts/tools/tools.ts tidy-reports",
     run: (_args, say) => {
       tidyReports(say);
     },
   },
   advances: {
     does: "measure every glyph a name can carry against the shipped bold face, so text is fitted rather than guessed at",
-    usage: "node scripts/tools.ts advances",
+    usage: "node scripts/tools/tools.ts advances",
     run: (_args, say) => measureAdvances(say),
   },
   "forget-chat": {
     does: "delete one chat's games, players and language choice, leaving every other chat alone",
-    usage: "node scripts/tools.ts forget-chat <chat id>",
+    usage: "node scripts/tools/tools.ts forget-chat <chat id>",
     run: forgetChat,
   },
   "design-page": {
     does: "redraw every mockup on a Claude Design page, leaving its prose alone",
-    usage: "node scripts/tools.ts design-page <page.html> <out.html>",
+    usage: "node scripts/tools/tools.ts design-page <page.html> <out.html>",
     run: async (args, say) => {
       const from = args[PAGE_TO_READ];
       const to = args[FILE_TO_WRITE];

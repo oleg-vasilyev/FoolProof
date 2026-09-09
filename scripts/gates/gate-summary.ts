@@ -37,13 +37,22 @@ const scopedOver = (scope: MutationScope, family: FamilyName): string => {
   }
 };
 
+const notRun = (scope: MutationScope, families: readonly FamilyScore[]): readonly string[] =>
+  scope === "everything"
+    ? FAMILY_NAMES.filter((name) => !families.some((scored) => scored.family === name)).map(
+        (name) => `${name} not run`
+      )
+    : [];
+
 const mutationPhrase = (scope: MutationScope, families: readonly FamilyScore[]): string =>
   FAMILY_NAMES.map((name) => {
     const family = families.find((scored) => scored.family === name);
 
-    return family === undefined
-      ? `nothing to run over the ${name}`
-      : `${percent(family.score)}% ${scopedOver(scope, name)}`;
+    if (family !== undefined) {
+      return `${percent(family.score)}% ${scopedOver(scope, name)}`;
+    }
+
+    return scope === "everything" ? `${name} not run` : `nothing to run over the ${name}`;
   }).join(" and ");
 
 const counted = (cases: number, files: number): string =>
@@ -93,10 +102,12 @@ const redDetail = (numbers: GateNumbers): string => {
       return failedPhrase(numbers.failed);
 
     case "mutation":
-      return numbers.families
-        .filter((family) => family.score < family.bar)
-        .map((family) => `${percent(family.score)}% ${family.family} under the ${String(family.bar)}% bar`)
-        .join(", ");
+      return [
+        ...numbers.families
+          .filter((family) => family.score < family.bar)
+          .map((family) => `${percent(family.score)}% ${family.family} under the ${String(family.bar)}% bar`),
+        ...notRun(numbers.scope, numbers.families),
+      ].join(", ");
   }
 };
 

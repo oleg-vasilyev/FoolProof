@@ -49,7 +49,7 @@ whoever has just split the folder and tells everybody else nothing, because open
 is not something the player ends up holding. Name it after the thing they do hold —
 a picture, a screen, an entity the commands are about.
 
-**`docs:check` fails a layer root above nine files**, which is unambiguous crowding
+**`docs-check` fails a layer root above nine files**, which is unambiguous crowding
 rather than a real limit — the fix is always a named subfolder, never a bigger
 number. It is a late alarm on purpose: seven fired on a folder that needed no split,
 so the question is the rule and the count only makes somebody ask it.
@@ -106,7 +106,7 @@ framework or reach upward, and none may reach into another feature or `#app/`.
 
 **A zone is not finished until a deliberate violation has been shown to fail the
 lint.** Write a throwaway file in each new zone that imports something banned, run
-`npx eslint` on it, see it fail, delete it. Zones have shipped here that never fired,
+the lint gate on it, see it fail, delete it. Zones have shipped here that never fired,
 every one of them silently:
 
 - a later flat-config block **replaces** an earlier one for a file matched by both,
@@ -156,7 +156,7 @@ survived into review — an axis with a single label, and a sheet 36px past
 The feature's defining property is mechanical, so test it rather than reading for
 it. Ask in this order — the first is worth the other five:
 
-1. **Delete the folder and run `npx tsc --noEmit`.** Anything that stops compiling
+1. **Delete the folder and run `node scripts/gates/gate-runner.ts typecheck`.** Anything that stops compiling
    outside `src/main.ts` and `src/main.spec.ts` is the finding, and its path names
    the coupling. Restore afterwards; the probe is the point, not the deletion.
 2. Does the folder name say what the player gets, or an internal noun?

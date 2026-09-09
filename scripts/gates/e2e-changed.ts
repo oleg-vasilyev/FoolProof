@@ -1,9 +1,8 @@
 import { execFileSync, spawnSync } from "node:child_process";
+import { VITEST } from "./tool-binaries.ts";
 
 
 const BASELINE = process.env.E2E_AGAINST ?? "origin/main";
-
-const VITEST = "node_modules/vitest/vitest.mjs";
 
 const NOTHING = 0;
 

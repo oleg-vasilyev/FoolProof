@@ -8,7 +8,7 @@ const THE_TABLE = "src/shared/fonts/glyph-advances.ts";
 
 const THE_ROSTER = "src/shared/fonts/font-files.ts";
 
-const THE_GENERATOR = "node scripts/tools.ts advances";
+const THE_GENERATOR = "node scripts/tools/tools.ts advances";
 
 const FONT_DIRECTORY = "assets/fonts";
 

@@ -42,7 +42,7 @@ Two directions lead here:
    result persist to disk and work from there rather than reading it into
    context.
 2. **Splice, do not regenerate.**
-   `node scripts/tools.ts design-page <page.html> <out.html>` replaces the body
+   `node scripts/tools/tools.ts design-page <page.html> <out.html>` replaces the body
    of every `<div class="poster" data-poster="…">` and touches nothing else; its verdict is `reports/tools/design-page.json`.
    Slots are matched **by name, not by position**, so reordering the page
    cannot swap two drawings; a slot naming a poster nothing draws, a poster
@@ -54,7 +54,7 @@ Two directions lead here:
    even empty), then `write_files` with `localPath`. Read it back and compare
    against the local file — the write is done only when they are byte-identical.
 5. **The splice already wrote `docs/posters/design-page.sync`**, which holds the
-   fingerprint of the drawings it put on the page, and `docs:check` fails while
+   fingerprint of the drawings it put on the page, and `docs-check` fails while
    that fingerprint and the English posters disagree. Commit it with the phase — but only
    after step 4 passed, because until then it claims a sync that did not happen.
    That file is the whole reason this skill can no longer be forgotten: the page

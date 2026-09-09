@@ -43,7 +43,7 @@ export const drawings: FeatureDrawings = {
   tools: {
     evening: {
       does: "print the awards a real chat's newest evening would carry, in that chat's own language",
-      usage: "node scripts/tools.ts evening <chat id>",
+      usage: "node scripts/tools/tools.ts evening <chat id>",
       say: theNewestEvening,
     },
   },

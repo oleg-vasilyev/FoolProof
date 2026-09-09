@@ -3,7 +3,7 @@ import { defineConfig } from "vitest/config";
 
 
 // The harness has pure parts of its own — a chat log, a cache, a port table — and
-// they had no tests because there was nowhere to put them: `npm test` must not see
+// they had no tests because there was nowhere to put them: the unit suite must not see
 // `e2e/`, and the scenario config starts a bot process for every file it loads.
 // This third configuration runs those units and nothing else, with no world behind
 // them.

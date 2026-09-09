@@ -1,14 +1,13 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { matchesGlob } from "node:path";
 import { FAMILIES, type Family } from "./mutation-families.ts";
-import type { Say } from "./tool-verdict.ts";
+import { STRYKER } from "./tool-binaries.ts";
 
 
 export const DEFAULT_BASELINE = "origin/main";
 
 export const THE_NAMED_FILES = "the named files";
-
-const STRYKER = "node_modules/@stryker-mutator/core/bin/stryker.js";
 
 const NOTHING = 0;
 
@@ -37,8 +36,13 @@ export const foldersOf = (patterns: readonly string[]): readonly string[] =>
     .filter((pattern) => !pattern.startsWith(AN_EXCLUSION))
     .map((pattern) => pattern.replace(A_GLOBBED_FOLDER, ""));
 
+export const excluded = (patterns: readonly string[], file: string): boolean =>
+  exclusionsOf(patterns).some((pattern) => matchesGlob(file, pattern.slice(AN_EXCLUSION.length)));
+
 export const held = (patterns: readonly string[], file: string): boolean =>
-  file.endsWith(A_TYPESCRIPT_FILE) && foldersOf(patterns).some((folder) => file.startsWith(folder));
+  file.endsWith(A_TYPESCRIPT_FILE) &&
+  foldersOf(patterns).some((folder) => file.startsWith(folder)) &&
+  !excluded(patterns, file);
 
 export const subjectsOf = (changed: readonly string[]): readonly string[] =>
   [...new Set(changed)].filter((file) => !A_TEST_FILE.test(file));
@@ -91,7 +95,7 @@ export const strayAmong = (named: readonly string[], plans: readonly Plan[]): re
 
 export const mutateChanged = (
   env: Readonly<Record<string, string | undefined>>,
-  say: Say,
+  say: (line: string) => void,
   named: readonly string[] = []
 ): number => {
   const baseline = env.MUTATE_AGAINST ?? DEFAULT_BASELINE;

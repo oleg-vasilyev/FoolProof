@@ -52,7 +52,7 @@ apart from a pass that looked at nothing.
 ## Then, what to look for
 
 Most style rules are enforced by ESLint now, so do not spend the pass on them —
-run `npm run check` and trust it. Spend the pass on what no rule can check:
+run `npm run check:quick` and trust it. Spend the pass on what no rule can check:
 
 - **Shape.** Does each touched file open with its idea, or with its
   implementation? Is the exported factory a table of contents that delegates?

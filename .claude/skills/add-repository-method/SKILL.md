@@ -69,5 +69,5 @@ constraint actually rejects the bad case.
 ## What not to do
 
 Do not add an npm script for a one-off query. Occasional work (backfills, merging
-duplicate players) goes behind `scripts/tools.ts`, which lists itself when run
+duplicate players) goes behind `scripts/tools/tools.ts`, which lists itself when run
 with no argument; adding a tool is one line in its table.

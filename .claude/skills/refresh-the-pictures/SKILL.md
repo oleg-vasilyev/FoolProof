@@ -1,6 +1,6 @@
 ---
 name: refresh-the-pictures
-description: Everything the picture gate needs once it opens — the checklist of committed pictures to regenerate (the posters, in every language and every format, the Claude Design page, the OG previews, the icons), the gallery of edge cases and how to build one that presses a real edge, how the poster-reader is briefed, and how to triage what it reports. Stage 5, so use after the diff review, when a design change has landed in code, when docs:check reports the posters out of step, or whenever a committed picture might no longer match what the product draws.
+description: Everything the picture gate needs once it opens — the checklist of committed pictures to regenerate (the posters, in every language and every format, the Claude Design page, the OG previews, the icons), the gallery of edge cases and how to build one that presses a real edge, how the poster-reader is briefed, and how to triage what it reports. Stage 5, so use after the diff review, when a design change has landed in code, when docs-check reports the posters out of step, or whenever a committed picture might no longer match what the product draws.
 ---
 
 # Refreshing the pictures, and reading them
@@ -22,15 +22,15 @@ redrawing. Skipping a row silently is how an icon ships in last year's colour.
 
 | Picture | Drawn by | What catches it going stale |
 |---|---|---|
-| `docs/posters/*-{en,ru}.svg` + `.webp` | `node scripts/tools.ts posters` | `docs:check` compares the SVG, and weighs and measures the WebP the pages carry |
+| `docs/posters/*-{en,ru}.svg` + `.webp` | `node scripts/tools/tools.ts posters` | `docs-check` compares the SVG, and weighs and measures the WebP the pages carry |
 | `docs/posters/*-en.png` — what README shows, at the width the bot sends | the same command | nothing — this row |
 | `docs/previews/og-cover*.png` | by hand, from the site's own look | nothing — this row |
 | `docs/favicon.png`, `docs/apple-touch-icon.png` | by hand, from the bot's avatar | nothing — this row |
-| the Claude Design page | the `update-the-design-page` skill, end to end | `docs:check` compares `design-page.sync` |
+| the Claude Design page | the `update-the-design-page` skill, end to end | `docs-check` compares `design-page.sync` |
 
 The gate deliberately compares **SVG, never the raster** — rasterizing would drag
 the native resvg binary into a documentation gate. So a resvg upgrade can change
-every shipped picture while `docs:check` stays green, and the hand-made rows have
+every shipped picture while `docs-check` stays green, and the hand-made rows have
 no generator at all: for those, the walk through this table is the whole
 mechanism.
 
@@ -44,7 +44,7 @@ poster can still be redrawn wrongly and pass, which is what the reader below is 
 
 1. **Redraw after the review, before the final commit.** The pictures stage
    sits between the diff review and the retrospective so that a review finding
-   cannot force a second redraw — `docs:check` was taken out of `check:phase`
+   cannot force a second redraw — `docs-check` was taken out of `check:phase`
    for exactly that reason. It still compares the SVGs in CI (`check:push`) and
    before a tag (`check:release`), so a stale mockup that reaches the push is a
    red check. **Commit both halves.** The SVG is the reviewable one: a
@@ -65,7 +65,7 @@ poster can still be redrawn wrongly and pass, which is what the reader below is 
    Measure before `e2e:changed`, so a red suite means the bot, not the harness:
 
    ```
-   node -e "import('./scripts/feature-drawings.ts').then(async ({everyDrawing})=>{const {rasterize}=await import('./src/shared/drawing/rasterize.ts');for(const d of await everyDrawing(o=>o.posters())){await rasterize(d.svg);const t=performance.now();await rasterize(d.svg);console.log(d.file,(performance.now()-t).toFixed(0)+'ms');}})"
+   node -e "import('./scripts/drawings/feature-drawings.ts').then(async ({everyDrawing})=>{const {rasterize}=await import('./src/shared/drawing/rasterize.ts');for(const d of await everyDrawing(o=>o.posters())){await rasterize(d.svg);const t=performance.now();await rasterize(d.svg);console.log(d.file,(performance.now()-t).toFixed(0)+'ms');}})"
    ```
 
 ## The hand-made rows
@@ -77,7 +77,7 @@ an icon in a browser tab, not in an image viewer at full width.
 
 ## The gallery, and the cases it draws
 
-`node scripts/tools.ts gallery` draws every poster across every edge the product has
+`node scripts/tools/tools.ts gallery` draws every poster across every edge the product has
 to survive — one game, two players, ten long names, more games than the sheet holds,
 an evening nobody lost, arrivals and departures, a career one evening old, a career
 too long for the sheet, the longest name a player may have — into `reports/gallery/`,
@@ -89,13 +89,13 @@ match the SVG, and all of it stays green while a line runs off the card.
 `/personal` shipped in two releases without a single gallery case, and the gate ran
 green over both — then the first case written for it found a name running off the
 card and through the counter beside it, in the one place the bot prints user data at
-126px. So `docs:check` now fails when a poster exists that no `samples/*-edges.ts` draws a
+126px. So `docs-check` now fails when a poster exists that no `samples/*-edges.ts` draws a
 case through; a phase that adds a poster owes it cases in the same phase.
 
 **The cases are not invented here.** They were named at stage 1, before the mockup was
 drawn, and the owner approved a picture of each one — so this step copies that list
 into the gallery and draws it against the real renderer. The list is a committed file,
-`docs/posters/<edges module>.cases.txt`, and `docs:check` fails **both** directions —
+`docs/posters/<edges module>.cases.txt`, and `docs-check` fails **both** directions —
 a held case the gallery stopped drawing, and a drawn case the list does not hold — so
 keeping the two in step needs no vigilance. What is still yours is that the gate
 polices consistency and not approval: writing the new edge into the list yourself

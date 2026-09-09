@@ -18,7 +18,7 @@ WorkingDirectory=/home/ubuntu/FoolProof
 # --env-file, the same way start:prod reads its configuration: the token that
 # sends the copy and the path of the database both live in .env.production, and
 # neither is repeated here.
-ExecStart=/usr/local/bin/node --env-file=/home/ubuntu/FoolProof/.env.production scripts/backup-database.ts
+ExecStart=/usr/local/bin/node --env-file=/home/ubuntu/FoolProof/.env.production scripts/backup/backup-database.ts
 # Outside the clone, for the reason DB_PATH is: a deploy checks this directory's
 # parent out at a different tag, and backups are not part of any release.
 Environment=BACKUP_DIR=/home/ubuntu/backups

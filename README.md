@@ -61,7 +61,7 @@ game is real; [PLAN.md](PLAN.md#reopening-the-last-game) says what else is diffe
 
 `/stats` answers with two PNGs: the chronology of the evening, then the awards.
 Both are below at the size a phone gets them, and both were drawn by the bot's own
-renderer over a sample evening rather than by hand — `node scripts/tools.ts posters`
+renderer over a sample evening rather than by hand — `node scripts/tools/tools.ts posters`
 redraws them whenever the drawing code changes.
 
 | The chronology — a row per game, a column per player | The awards — at most nine, and the fool last |
@@ -90,7 +90,7 @@ Every colour, size and rule behind the two is specified in the [poster design
 system](https://claude.ai/design/p/dfdd20cb-3609-4baa-935d-eb20b8257c2c?file=Durak+Stats+Poster+System.dc.html),
 which lives in Claude Design rather than here and opens only for somebody with
 access to that project. It is not decoration: the two mockups on it are the same
-SVG committed under `docs/posters/`, and `npm run check` fails when either stops
+SVG committed under `docs/posters/`, and `npm run check:quick` fails when either stops
 matching what the renderer draws. Two skills keep the three in step:
 `refresh-the-pictures` redraws what the repository holds, and
 `update-the-design-page` carries the result back to the page.
@@ -162,48 +162,56 @@ and needed by nobody who only wants to run the bot here or change the code.
 
 ## Scripts
 
-They are listed in `package.json` in the order you reach for them: the one that
-runs the bot, the gates, their parts, then the two test families.
+`package.json` holds eight scripts and no more: the two that start the bot, the four
+batteries, the watcher and `prepare`. Every gate is a row in
+`scripts/gates/gate-list.ts` and runs through one runner, `node scripts/gates/gate-runner.ts <gate>`,
+which leaves its log and its JSON verdict under `reports/gates/` — so the table names
+the gates by that line, and nothing in the repository tells a reader to type a tool's
+name by hand.
 
 | Script | What it runs |
 |---|---|
 | `npm run start:prod` | The bot for real, under the supervisor. **This is what the server runs** — [`deploy/foolproof.service`](deploy/foolproof.service) calls this line, so it cannot drift from it |
 | `npm start` | The same bot in a browser against a fake Telegram — no token, no network, and the one to run here |
-| `npm run check` | Lint, types, documents and tests — the everyday gate to keep at zero |
+| `npm run check:quick` | Lint, types, documents and tests — the everyday gate to keep at zero |
 | `npm run check:push` | What a push to `main` must not break — lint, types (app and harness), the harness's own tests, documents; the website ships from `main`, the app's tests wait for the tag. **CI runs this on every push** |
-| `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — every gate runs (only mutation waits for a green suite), each leaves its log and a JSON verdict under `reports/gates/`, and the run ends with one line per gate and the `Gates:` paragraph the commit message pastes, also written to `reports/gates/gates-paragraph.txt`. A red gate is re-run alone with `node scripts/gate-runner.ts <gate>`. No `docs:check`: documents and pictures are finished after the review, in their own stages |
+| `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — every gate runs (only mutation waits for a green suite), each leaves its log and a JSON verdict under `reports/gates/`, and the run ends with one line per gate and the `Gates:` paragraph the commit message pastes, also written to `reports/gates/gates-paragraph.txt`. A red gate is re-run alone with `node scripts/gates/gate-runner.ts <gate>`. No `docs-check`: documents and pictures are finished after the review, in their own stages |
 | `npm run check:release` | The same walker over the release list: `check:push`'s gates, coverage, mutation over what changed since the previous tag, every scenario. Refuses unless HEAD carries the new `v*` tag. **CI runs this on every release tag** |
-| `npm run lint` | ESLint, which enforces this project's conventions |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run docs:check` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists. Run it as `node scripts/gate-runner.ts docs:check` and the complaints come back under one red line, with the log and the verdict under `reports/gates/` |
-| `npm test` | Vitest, once — units and integration together. One spec is `node scripts/gate-runner.ts test <file>`: a red run prints each failed assertion with its file and message, and leaves `reports/gates/test.named.json` without touching the battery's paragraph |
-| `npm run test:coverage` | Vitest with coverage; fails below 70% on any metric |
-| `npm run test:mutation:changed` | Stryker over the files that differ from `origin/main` (or from `MUTATE_AGAINST`), about a minute |
-| `npm run test:mutation` | Stryker over everything, 26 minutes measured at v1.20.1; two runs, the bot at 85% and the tooling at 80%. The weekly checkup's, not a release's |
-| `npm run e2e` | Whole scenarios against the real bot and a fake Telegram |
-| `npm run e2e:changed` | Only the scenarios the diff against `origin/main` can reach |
+| `node scripts/gates/gate-runner.ts lint` | ESLint over `src/`, `scripts/` and `e2e/`, which enforces this project's conventions |
+| `node scripts/gates/gate-runner.ts typecheck` | `tsc --noEmit` over `src/` and `scripts/`, from the root `tsconfig.json` |
+| `node scripts/gates/gate-runner.ts docs-check` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists — an `npm run` script, a gate the runner knows, a `tools.ts` verb; a tool run by hand is a complaint too. The complaints come back under one red line |
+| `node scripts/gates/gate-runner.ts test` | Vitest, once — units and integration together. One spec is `node scripts/gates/gate-runner.ts test <file>`: a red run prints each failed assertion with its file and message, and leaves `reports/gates/test.named.json` without touching the battery's paragraph |
+| `node scripts/gates/gate-runner.ts test:coverage` | Vitest with coverage; fails below 70% on any metric |
+| `node scripts/gates/gate-runner.ts test:mutation:changed` | Stryker over the files that differ from `origin/main` (or from `MUTATE_AGAINST`), about a minute |
+| `node scripts/gates/gate-runner.ts test:mutation` | Stryker over everything, 26 minutes measured at v1.20.1; two runs, the bot at 85% and the tooling at 80%. The weekly checkup's, not a release's |
+| `node scripts/gates/gate-runner.ts e2e` | Whole scenarios against the real bot and a fake Telegram |
+| `node scripts/gates/gate-runner.ts e2e:changed` | Only the scenarios the diff against `origin/main` can reach |
 | `npm run e2e:watch` | The same run, slowed down, in one browser tab; `E2E_VERBOSE=1` brings the per-case output back on any e2e run |
-| `npm run test:e2e-harness` | Units for the harness's own pure parts |
-| `npm run e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
+| `node scripts/gates/gate-runner.ts test:e2e-harness` | Units for the harness's own pure parts |
+| `node scripts/gates/gate-runner.ts e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
 | `npm run prepare` | Run by `npm install` itself: points git at `.githooks/`, where the pre-push tag gate and the commit-msg flow gate live |
 
 `start:prod` is the only one that reads an env file, and the only one that talks to
 Telegram. Everything else runs against the fake one in `e2e/`.
 
+The gates' configs — ESLint, Vitest, both Stryker families — live in
+`scripts/gates/config/` and are named by the runner and by the two Claude hooks that
+lint; `tsconfig.json` stays at the root, because Node and the editor read it there.
+
 Coverage and mutation write their reports into `reports/`, which is gitignored
 whole — nothing about testing lands next to the source. Anything else that ends up
-there is swept by `node scripts/tools.ts tidy-reports`.
+there is swept by `node scripts/tools/tools.ts tidy-reports`.
 
 Occasional jobs stay out of that table and live behind one script, which lists
 itself and what each one is for when run with no argument:
 
 ```bash
-node scripts/tools.ts
+node scripts/tools/tools.ts
 ```
 
 ## Watching it play
 
-`npm test` proves the pieces. `npm run e2e` proves the bot: it starts
+The unit suite proves the pieces. `node scripts/gates/gate-runner.ts e2e` proves the bot: it starts
 `src/main.ts` as a real process against a real SQLite file, and puts a **fake
 Telegram** on the other end of it — a small Bot API server that records the chat
 instead of sending it anywhere. A scenario then plays a whole evening the way a
@@ -211,7 +219,7 @@ person would: type `/game Oleg, Anya, Roma`, tap the names, tap Confirm, ask for
 `/stats`. No token, no network, no rate limits.
 
 ```bash
-npm run e2e
+node scripts/gates/gate-runner.ts e2e
 ```
 
 Every scenario gets its own bot process, its own database and its own port, so
@@ -248,7 +256,7 @@ the buttons — it is the same fake Telegram, so the bot cannot tell the differe
 Add `--db=data/somewhere.db` to keep an experiment out of the dev database.
 
 The harness is deliberately walled off from the app, and it is **a release gate**:
-`npm run e2e:changed` plays the scenarios a diff can reach.
+`node scripts/gates/gate-runner.ts e2e:changed` plays the scenarios a diff can reach.
 [`e2e/README.md`](e2e/README.md) has its rules, `TECH-DEBT.md` has the one thing
 still wrong with it.
 
@@ -263,7 +271,7 @@ whole deploy: no workflow, no second branch, nothing to keep in step by hand.
 
 **[The case study](https://oleg-vasilyev.github.io/FoolProof/case-study/)** is the
 other thing the site says: how the harness around this bot — `CLAUDE.md`, the
-skills, the agents, the hooks, the lint rules and `docs:check` — was built, broken
+skills, the agents, the hooks, the lint rules and `docs-check` — was built, broken
 and rebuilt over the 274 commits between 28 July and 2 September 2026, told in six
 eras, with a strip of every commit and charts read from the tree at each one. It was
 written from the git history alone. Both languages share
@@ -275,10 +283,10 @@ Two parts of it are generated rather than written:
 
 | What | Rebuilt by |
 |---|---|
-| `docs/posters/` — every poster in both languages: SVG, the WebP the pages show at the width they are read at, and a PNG of the English three at the width the bot sends | `node scripts/tools.ts posters` |
-| `docs/styles.computed.css` — Tailwind, minified and committed | `node scripts/tools.ts site-css` |
+| `docs/posters/` — every poster in both languages: SVG, the WebP the pages show at the width they are read at, and a PNG of the English three at the width the bot sends | `node scripts/tools/tools.ts posters` |
+| `docs/styles.computed.css` — Tailwind, minified and committed | `node scripts/tools/tools.ts site-css` |
 
-**`npm run docs:check` fails on either being stale**, and that is the point: a push
+**`node scripts/gates/gate-runner.ts docs-check` fails on either being stale**, and that is the point: a push
 is the deploy, so a forgotten rebuild does not wait to be noticed — it ships. The
 posters are the bot's own renders of one sample evening — English copy with Latin
 names for one page, Russian for the other, and the English three are the very files
@@ -350,15 +358,19 @@ src/
                         a folder per subject
 assets/fonts/           the two faces the scoresheet is drawn with
 docs/                   the website GitHub Pages serves — everything in here is public
-docs/posters/           the posters this file shows, drawn by scripts/tools.ts,
+docs/posters/           the posters this file shows, drawn by scripts/tools/tools.ts,
                         served along with the site because they live inside it
 deploy/                 the systemd units a server is installed from, the scripts
                         that put the newest tag live and send the server its
                         configuration, and the runbook for all of it
 .github/workflows/      the checks that run on every push
-scripts/                dev utilities that are not part of the bot; docs-check/
-                        holds what `docs:check` asks — `documents/` what is read
-                        out of the documents, `source/` what they are held against
+scripts/                dev utilities that are not part of the bot, a folder per domain:
+                        gates/ the runner, the batteries and their configs; tools/ the
+                        occasional jobs behind tools.ts; drawings/ what the features
+                        offer to be drawn; docs-check/ what `docs-check` asks —
+                        `documents/` what is read out of the documents, `source/` what
+                        they are held against; hooks/ the pure halves of the Claude
+                        hooks; backup/ the snapshot the server's timer takes
 e2e/                    the fake Telegram and the scenarios played against it
 logbook/                no code — a dated log per phase and a report per checkup,
                         kept so that a habit spanning several of them is visible

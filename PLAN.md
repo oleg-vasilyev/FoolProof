@@ -17,7 +17,7 @@ belongs here as an edge case, or it belongs in a commit.
 ## What is in here
 
 Long enough that it is read by following a link rather than from the top.
-`docs:check` holds this list and the sections against each other, so neither can
+`docs-check` holds this list and the sections against each other, so neither can
 quietly lose the other.
 
 | Section | What it settles |
@@ -976,7 +976,7 @@ not enough to promise anything to somebody worried about the file itself.
 
 It is deliberately **not a command**. Nobody at the table should be one tap away
 from deleting the evening, and the case it exists for arrives out of band anyway.
-It lives in `scripts/tools.ts`, and [README.md](README.md#scripts) says how to run
+It lives in `scripts/tools/tools.ts`, and [README.md](README.md#scripts) says how to run
 the occasional tools.
 
 ### A live card is a row; a dead one is not
@@ -1690,8 +1690,8 @@ are what stops a young table's card from being empty.
 shares that band with the counter on the right**, so it is cut to fit rather than
 allowed to overrun — the same ellipsis the chronology's column heads use. **Fitting is
 by measurement, glyph by glyph**, against a table generated from the shipped bold face
-by `scripts/measure-advances.ts` and committed as `src/shared/fonts/glyph-advances.ts`;
-`docs:check` holds the table's recorded fingerprint against the faces in `assets/fonts/`,
+by `scripts/tools/measure-advances.ts` and committed as `src/shared/fonts/glyph-advances.ts`;
+`docs-check` holds the table's recorded fingerprint against the faces in `assets/fonts/`,
 so a changed face fails a gate rather than silently mis-fitting every poster.
 
 It used to be a character count against one assumed advance — about 0.58 of the size for

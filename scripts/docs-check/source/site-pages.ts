@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { SITE_CSS, SITE_PAGES } from "../../site-css.ts";
+import { SITE_CSS, SITE_PAGES } from "../../tools/site-css.ts";
 import { read } from "../document-files.ts";
 import { FIRST_GROUP } from "../markdown-text.ts";
 
@@ -63,7 +63,7 @@ export const cssComplaints = (
       .map(
         (token) =>
           `${SITE_CSS}: carries no rule for "${token}", which ${page} uses — ` +
-          `run "node scripts/tools.ts site-css"`
+          `run "node scripts/tools/tools.ts site-css"`
       )
   );
 
@@ -73,7 +73,7 @@ export const siteCssOutOfStep = (): readonly string[] =>
         read(SITE_CSS),
         SITE_PAGES.map((page) => [page, read(page)] as const)
       )
-    : [`${SITE_CSS}: never built — run "node scripts/tools.ts site-css"`];
+    : [`${SITE_CSS}: never built — run "node scripts/tools/tools.ts site-css"`];
 
 export const sizeOfDrawing = (bytes: Buffer): readonly [number, number] | null => {
   if (bytes.length < SHORTEST_HEADER) {

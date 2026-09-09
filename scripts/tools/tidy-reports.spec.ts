@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { OWNER_FILES, namedIn, ownedOrRefuse, strayIn } from "./tidy-reports.ts";
 
@@ -65,7 +66,13 @@ describe("strayIn()", () => {
 
 describe("OWNER_FILES", () => {
   it("should count the gate paths module and the e2e config as owners, so their folders survive the sweep", () => {
-    expect(OWNER_FILES).toContain("scripts/gate-paths.ts");
+    expect(OWNER_FILES).toContain("scripts/gates/gate-paths.ts");
     expect(OWNER_FILES).toContain("e2e/vitest.e2e.config.ts");
+  });
+
+  it("should name only files that are there, since a moved owner would make the sweep throw after the phase", () => {
+    for (const file of OWNER_FILES) {
+      expect(existsSync(file), file).toBe(true);
+    }
   });
 });

@@ -145,7 +145,7 @@ describe("cssComplaints", () => {
     expect(said).toHaveLength(ONE_COMPLAINT);
     expect(said[FIRST]).toContain('carries no rule for "card"');
     expect(said[FIRST]).toContain("docs/index.html uses");
-    expect(said[FIRST]).toContain("node scripts/tools.ts site-css");
+    expect(said[FIRST]).toContain("node scripts/tools/tools.ts site-css");
   });
 
   it("should read a class whose selector needs escaping against the escaped form", () => {

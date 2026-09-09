@@ -489,7 +489,7 @@ const project = {
 // walks the syntax tree and does see it — as `ImportExpression` for the runtime
 // form and `TSImportType` for `typeof import("…")`, which is a different node and
 // was blind for the same reason. What stays invisible to all of them is a computed
-// specifier, which is why `scripts/feature-drawings.ts` may build one from a
+// specifier, which is why `scripts/drawings/feature-drawings.ts` may build one from a
 // template literal to find features at run time.
 const A_REGEX_CHARACTER = /[.+?^${}()|[\]\\]/g;
 
@@ -609,7 +609,9 @@ const featureZones = (self) => [
 
 export default [
   {
-    ignores: ["node_modules/**", "data/**", "reports/**"],
+    // The gate configs sit under scripts/ and are config files, which CLAUDE.md
+    // exempts from the comment rule: a non-obvious flag has nowhere else to live.
+    ignores: ["node_modules/**", "data/**", "reports/**", "scripts/gates/config/**"],
   },
   {
     // scripts/ shares the style rules but not the app rules below: a dev utility
@@ -665,7 +667,7 @@ export default [
   {
     // The one generated file in src/. Its first two lines have to say so, because
     // the reader's next move is otherwise to edit it by hand and lose the edit to
-    // the next run of scripts/measure-advances.ts.
+    // the next run of scripts/tools/measure-advances.ts.
     files: ["src/shared/fonts/glyph-advances.ts"],
     rules: {
       "project/no-comments": "off",
@@ -707,7 +709,7 @@ export default [
   {
     // A feature is a folder you can delete, and for a while the tooling made that
     // false: eight scripts imported the scoresheet by name, so removing the folder
-    // broke the mockup tools, the site build and docs:check itself. The drawings a
+    // broke the mockup tools, the site build and docs-check itself. The drawings a
     // feature offers now arrive through #shared/drawings/drawings-contract.ts and
     // are discovered at runtime, so a deleted feature simply stops being listed.
     files: ["scripts/**/*.ts"],

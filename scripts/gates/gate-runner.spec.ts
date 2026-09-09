@@ -28,7 +28,7 @@ const verdictOfSpy = vi.fn();
 const gatesParagraphSpy = vi.fn();
 
 vi.mock("node:child_process", () => ({
-  spawn: (command: unknown, options: unknown) => spawnSpy(command, options),
+  spawn: (...args: readonly unknown[]) => spawnSpy(...args),
 }));
 
 vi.mock("node:fs", () => ({
@@ -47,6 +47,7 @@ vi.mock("./gate-numbers.ts", () => ({
 
 vi.mock("./gate-verdict.ts", () => ({
   FAILED: 1,
+  PASSED: 0,
   verdictOf: (...args: readonly unknown[]) => verdictOfSpy(...args),
   lineFor: () => "a line",
 }));
@@ -92,6 +93,15 @@ const THE_VERDICT = { kind: "ran", gate: "lint", named: false, ok: true, exitCod
 const A_SCOPE = "since v1.20.0";
 
 const AN_ENV = { PATH: "/bin", HOME: "/home" };
+
+const LINT_STEP = { bin: "node_modules/eslint/bin/eslint.js", args: ["--quiet", "src"] };
+
+const TEST_STEP = { bin: "node_modules/vitest/vitest.mjs", args: ["run"] };
+
+const TWO_STEPS = [
+  { bin: "node_modules/typescript/bin/tsc", args: ["-p", "e2e"] },
+  { bin: "node_modules/typescript/bin/tsc", args: ["-p", "e2e/pages"] },
+];
 
 class ChildStub extends EventEmitter {
   public stdout = Object.assign(new EventEmitter(), { setEncoding: vi.fn() });
@@ -143,7 +153,7 @@ beforeEach(() => {
 });
 
 const runAndClose = async (code: number | null, against?: string) => {
-  const pending = runGate("lint", against);
+  const pending = runGate("lint", against, [LINT_STEP]);
 
   child.say("first line\nsecond");
   child.complain(" line\n");
@@ -200,13 +210,13 @@ describe("verdictsOnDisk()", () => {
       "reports/gates/e2e.json": JSON.stringify({ gate: "e2e" }),
     });
 
-    expect(verdictsOnDisk("check")).toEqual([{ gate: "lint" }, { gate: "typecheck" }]);
+    expect(verdictsOnDisk("check:quick")).toEqual([{ gate: "lint" }, { gate: "typecheck" }]);
   });
 
   it("should leave out a verdict file that is not JSON, rather than throw inside a battery", () => {
     filesOnDisk({ "reports/gates/lint.json": "{ cut off" });
 
-    expect(verdictsOnDisk("check")).toEqual([]);
+    expect(verdictsOnDisk("check:quick")).toEqual([]);
   });
 });
 
@@ -259,14 +269,19 @@ describe("runGate()", () => {
     );
   });
 
-  it("should run the gate's npm script through a shell with both streams piped, in the child environment", async () => {
+  it("should run the step's entry file under this node with no shell, both streams piped, in the child environment", async () => {
     await runAndClose(PASSED, "v1.20.0");
 
-    expect(spawnSpy).toHaveBeenCalledWith("npm run lint", {
-      shell: true,
+    expect(spawnSpy).toHaveBeenCalledWith(process.execPath, [LINT_STEP.bin, ...LINT_STEP.args], {
       stdio: ["ignore", "pipe", "pipe"],
       env: childEnvironment(process.env, "v1.20.0"),
     });
+  });
+
+  it("should open the log with the command the step ran, so the log says what it is", async () => {
+    await runAndClose(PASSED);
+
+    expect(logWriteSpy.mock.calls[FIRST]?.[FIRST]).toBe("$ node node_modules/eslint/bin/eslint.js --quiet src\n");
   });
 
   it("should read both streams as text, so a multibyte character split across chunks survives", async () => {
@@ -279,7 +294,7 @@ describe("runGate()", () => {
   it("should stream every chunk of either stream into the log as it arrives", async () => {
     await runAndClose(PASSED);
 
-    expect(logWriteSpy.mock.calls.map((call) => call[FIRST])).toEqual(["first line\nsecond", " line\n"]);
+    expect(logWriteSpy.mock.calls.slice(SECOND).map((call) => call[FIRST])).toEqual(["first line\nsecond", " line\n"]);
     expect(logEndSpy).toHaveBeenCalledTimes(ONCE);
   });
 
@@ -307,7 +322,7 @@ describe("runGate()", () => {
       expect.any(Date),
       expect.any(Date),
       THE_NUMBERS,
-      ["first line", "second line", ""]
+      ["$ node node_modules/eslint/bin/eslint.js --quiet src", "first line", "second line", ""]
     );
   });
 
@@ -318,18 +333,20 @@ describe("runGate()", () => {
   });
 
   it("should settle red when the gate could not even be started, with the reason in the log", async () => {
-    const pending = runGate("lint", undefined);
+    const pending = runGate("lint", undefined, [LINT_STEP]);
 
     child.fail(new Error("spawn ENOENT"));
 
     await pending;
 
     expect(verdictOfSpy.mock.calls[FIRST]?.[THIRD]).toBe(FAILED);
-    expect(logWriteSpy.mock.calls[FIRST]?.[FIRST]).toContain("could not run npm run lint: Error: spawn ENOENT");
+    expect(logWriteSpy.mock.calls[SECOND]?.[FIRST]).toContain(
+      "could not run node node_modules/eslint/bin/eslint.js --quiet src: Error: spawn ENOENT"
+    );
   });
 
   it("should settle once when a failed start is followed by a close, as node does", async () => {
-    const pending = runGate("lint", undefined);
+    const pending = runGate("lint", undefined, [LINT_STEP]);
 
     child.fail(new Error("spawn ENOENT"));
     child.close(null);
@@ -342,7 +359,7 @@ describe("runGate()", () => {
 
   it("should leave the verdict beside the log, then rebuild the paragraph for the battery on disk", async () => {
     filesOnDisk({
-      "reports/gates/battery.txt": "check\n",
+      "reports/gates/battery.txt": "check:quick\n",
       "reports/gates/lint.json": JSON.stringify(THE_VERDICT),
     });
 
@@ -350,7 +367,38 @@ describe("runGate()", () => {
 
     expect(writeFileSyncSpy).toHaveBeenCalledWith("reports/gates/lint.json", JSON.stringify(THE_VERDICT, null, 2));
     expect(writeFileSyncSpy).toHaveBeenLastCalledWith("reports/gates/gates-paragraph.txt", "Gates: a paragraph.\n");
-    expect(gatesParagraphSpy).toHaveBeenCalledWith([THE_VERDICT], "check");
+    expect(gatesParagraphSpy).toHaveBeenCalledWith([THE_VERDICT], "check:quick");
+  });
+});
+
+describe("runGate(), a gate of two steps", () => {
+  it("should run the second step only after the first passed, each under its own line in one log", async () => {
+    const pending = runGate("e2e:typecheck", undefined, TWO_STEPS);
+
+    child.close(PASSED);
+    await new Promise((done) => setImmediate(done));
+    child.close(PASSED);
+    await pending;
+
+    expect(spawnSpy.mock.calls.map((call) => call[SECOND])).toEqual([
+      ["node_modules/typescript/bin/tsc", "-p", "e2e"],
+      ["node_modules/typescript/bin/tsc", "-p", "e2e/pages"],
+    ]);
+    expect(logWriteSpy.mock.calls.map((call) => call[FIRST])).toEqual([
+      "$ node node_modules/typescript/bin/tsc -p e2e\n",
+      "$ node node_modules/typescript/bin/tsc -p e2e/pages\n",
+    ]);
+    expect(logEndSpy).toHaveBeenCalledTimes(ONCE);
+  });
+
+  it("should stop at the first red step and carry its code, never starting the next", async () => {
+    const pending = runGate("e2e:typecheck", undefined, TWO_STEPS);
+
+    child.close(RED);
+    await pending;
+
+    expect(spawnSpy).toHaveBeenCalledTimes(ONCE);
+    expect(verdictOfSpy.mock.calls[FIRST]?.[THIRD]).toBe(RED);
   });
 });
 
@@ -372,8 +420,26 @@ describe("main()", () => {
     child.close(RED);
 
     expect(await pending).toBe(RED);
-    expect(spawnSpy.mock.calls[FIRST]?.[SECOND]).toMatchObject({ env: { MUTATE_AGAINST: "v1.20.0" } });
+    expect(spawnSpy.mock.calls[FIRST]?.[THIRD]).toMatchObject({ env: { MUTATE_AGAINST: "v1.20.0" } });
+    expect(spawnSpy.mock.calls[FIRST]?.[SECOND]).toEqual([
+      "node_modules/eslint/bin/eslint.js",
+      "--config",
+      "scripts/gates/config/eslint.config.js",
+      "--quiet",
+      "src",
+      "scripts",
+      "e2e",
+    ]);
     expect(say).toHaveBeenCalledWith("a line");
+  });
+
+  it("should refuse files for a gate that takes none before anything runs or is written", async () => {
+    const status = await main(["node", "gate-runner.ts", "lint", "src/a.ts"], {}, say, "D:/Temp/FoolProof");
+
+    expect(status).toBe(FAILED);
+    expect(say.mock.calls.at(-1)?.[FIRST]).toContain("lint takes no files");
+    expect(spawnSpy).not.toHaveBeenCalled();
+    expect(writeFileSyncSpy).not.toHaveBeenCalled();
   });
 });
 
@@ -382,17 +448,22 @@ const ROOT = "D:/Temp/FoolProof";
 describe("runGate(), with arguments", () => {
   const runNamed = async () => {
     verdictOfSpy.mockReturnValue({ ...THE_VERDICT, gate: "test" });
-    const pending = runGate("test", undefined, ["src/a.spec.ts", "src/b.spec.ts"]);
+    const pending = runGate(
+      "test",
+      undefined,
+      [{ bin: TEST_STEP.bin, args: [...TEST_STEP.args, "src/a.spec.ts", "src/b.spec.ts"] }],
+      ["src/a.spec.ts", "src/b.spec.ts"]
+    );
 
     child.close(PASSED);
 
     return pending;
   };
 
-  it("should hand the arguments to the npm script after the double dash", async () => {
+  it("should run the steps it was handed, files included", async () => {
     await runNamed();
 
-    expect(spawnSpy.mock.calls[FIRST]?.[FIRST]).toBe("npm run test -- src/a.spec.ts src/b.spec.ts");
+    expect(spawnSpy.mock.calls[FIRST]?.[SECOND]).toEqual([TEST_STEP.bin, "run", "src/a.spec.ts", "src/b.spec.ts"]);
   });
 
   it("should write a named log and verdict, leaving the bare gate's files alone", async () => {
@@ -412,7 +483,7 @@ describe("runGate(), with arguments", () => {
   });
 
   it("should read the scope with the arguments, so a named mutation says so", async () => {
-    const pending = runGate("test:mutation:changed", "v1.20.0", ["scripts/a.ts"]);
+    const pending = runGate("test:mutation:changed", "v1.20.0", [TEST_STEP], ["scripts/a.ts"]);
 
     child.close(PASSED);
     await pending;
@@ -430,7 +501,13 @@ describe("main(), the reasons under a red line", () => {
     child.close(PASSED);
     await pending;
 
-    expect(spawnSpy.mock.calls[FIRST]?.[FIRST]).toBe("npm run test -- src/a.spec.ts");
+    expect(spawnSpy.mock.calls[FIRST]?.[SECOND]).toEqual([
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "scripts/gates/config/vitest.config.ts",
+      "src/a.spec.ts",
+    ]);
   });
 
   it("should print the reasons the summary gives for a red verdict, after its line", async () => {
@@ -452,7 +529,7 @@ describe("runGate(), what the verdict is told about naming", () => {
 
     expect(verdictOfSpy.mock.calls[FIRST]?.[SECOND]).toBe(false);
 
-    const pending = runGate("test", undefined, ["src/a.spec.ts"]);
+    const pending = runGate("test", undefined, [TEST_STEP], ["src/a.spec.ts"]);
 
     child.close(PASSED);
     await pending;

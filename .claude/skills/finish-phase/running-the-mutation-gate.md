@@ -36,14 +36,14 @@ An exclusion added to the config is not in force until you have found everything
 else that decides the same thing; this one was silently ignored for a whole run:
 
 ```
-node scripts/gate-runner.ts test:mutation:changed src/features/<x>/a.ts src/features/<x>/b.ts
+node scripts/gates/gate-runner.ts test:mutation:changed src/features/<x>/a.ts src/features/<x>/b.ts
 ```
 
 It names files, never a glob, routes each to its family with that family's own
 exclusions, and writes `reports/gates/test-mutation-changed.named.json` beside the log
 without touching the battery's verdict or the paragraph — though it does rewrite
-`reports/mutation*/mutation.json` for the family it ran and deletes the other's first. If you ever reach for
-`npx stryker run` by hand, keep `json` in `--reporters`: with `clear-text` alone the `mutation.json` on disk is the
+`reports/mutation*/mutation.json` for the family it ran and deletes the other's first. If you ever run
+Stryker outside the runner, keep `json` in `--reporters`: with `clear-text` alone the `mutation.json` on disk is the
 *previous* run's, and a survivor triaged off it reads tests that no longer exist. One
 phase paid a whole extra Stryker run to learn that its new cases had been counted.
 

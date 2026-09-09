@@ -97,8 +97,8 @@ Strict order, each step pass/fail with a log, all in the fresh clone:
 
 1. `npm ci` strictly from the lock file. This is where hallucinated or
    unresolvable dependencies surface.
-2. `npx tsc --noEmit` — the project is strict already; confirm it truly is.
-3. `npm run e2e` — the full suite against the fake Telegram is the trusted
+2. `node scripts/gates/gate-runner.ts typecheck` — the project is strict already; confirm it truly is.
+3. `node scripts/gates/gate-runner.ts e2e` — the full suite against the fake Telegram is the trusted
    execution environment of this audit. From its output build the **liveness
    map**: every command the bot declares (enumerate them from `src/main.ts` and
    the feature entry points, not from README), each with a verdict —
@@ -117,7 +117,7 @@ Extract every checkable claim from `README.md`, `PLAN.md`, `CLAUDE.md`,
 `TECH-DEBT.md`, `DEVELOPMENT-FLOW.md`, `e2e/README.md`, `deploy/README.md` and every
 skill in `.claude/skills/` into a claims table: command X does Y, the schema is Z, gate
 W refuses V. Judge each against phases 0–2: `accurate` / `stale` / `wrong` /
-`unverifiable`. Note that `npm run docs:check` already enforces a slice of this
+`unverifiable`. Note that `node scripts/gates/gate-runner.ts docs-check` already enforces a slice of this
 mechanically — do not re-litigate what it proves; audit what it cannot see.
 Then audit the rules *as rules*: do any two contradict; does the code visibly
 violate one (a dead rule taxes trust in the living ones); does any rule
@@ -138,7 +138,7 @@ So the standing preference: **where a count does not change what anyone does, sa
 thing without the number** — *several*, *every failure it can see*, *open it and count*
 — and where it does change something, date the measurement or name the check that
 holds it. Two kinds are exempt because a machine already fails on them: a line budget,
-and anything `docs:check` reads.
+and anything `docs-check` reads.
 
 **Report every one in a single list, and fix none.** They are cheap to correct
 together and expensive to correct one at a time, and a checkup that edits as it walks
@@ -148,7 +148,7 @@ actually is, and a verdict of *drop the number* / *date it* / *it earns its plac
 **Then audit every skill and agent `description:` as a trigger rather than as a
 summary.** That line is not documentation about the file — it is what decides
 whether the file is ever opened, so a wrong one is worse than wrong prose: the
-corrected body is never read because nothing loads it. `docs:check` now proves
+corrected body is never read because nothing loads it. `docs-check` now proves
 the flow drawing reaches every skill and agent and that each description names its
 own stage; whether it fires at the right **moment** is yours. For every skill and
 agent, lay two things side by side — the `description:` and the step in
@@ -162,7 +162,7 @@ agent, lay two things side by side — the `description:` and the step in
   falls *before* the release; `write-a-spec` triggered on writing a spec though the
   flow consults it a stage earlier, while interfaces are still being frozen.
 - **Does it name a command or a gate that still exists?** `refresh-the-pictures`
-  pointed at a report `npm run check` produced and the phase loop no longer does.
+  pointed at a report `npm run check:quick` produced and the phase loop no longer does.
 - **Does the step promise what the description delivers?** A step saying
   "closing a phase" and a description saying "any list of changes" are two rules,
   and a reader gets whichever they opened first.
@@ -183,7 +183,7 @@ reaches for them, continuing after the one the previous report names. When the n
 one has been deleted, take the next the drawing reaches for after where it stood, and
 let a file added mid-cycle wait for the next lap. Rule by rule:
 
-- **Is a machine already enforcing it?** A lint rule, a `docs:check` complaint or a
+- **Is a machine already enforcing it?** A lint rule, a `docs-check` complaint or a
   gate that fires on the same fault makes the paragraph a second copy — and a reader
   obeying the prose is obeying something that now fails on its own.
 - **Could one, and does none?** The same question backwards, and the more valuable of
@@ -192,7 +192,7 @@ let a file added mid-cycle wait for the next lap. Rule by rule:
   `sqlite-repository.ts` may import the connection* held by prose and a reviewer, and
   that is now `project/one-door-to-the-database`. So the answer is a proposed rule and
   what it would have to exempt — never one you write yourself.
-- **Does its subject still exist?** `docs:check` catches a dead *path*. A dead
+- **Does its subject still exist?** `docs-check` catches a dead *path*. A dead
   command, folder, threshold or shape is invisible to it.
 - **Has a later rule absorbed it?** Not contradiction — the breadth audit above owns
   that — but a rule a later one now says better, so the older costs a reader and
@@ -215,11 +215,11 @@ files that machine actually applies to. A skill needing more than this pass can 
 is itself a finding, naming the `skill-auditor` agent and what warranted it.
 
 **One section of `PLAN.md` is read line by line, all the way, and a different one
-each time.** The spec is 1600 lines and no gate reads most of it: `docs:check`
+each time.** The spec is 1600 lines and no gate reads most of it: `docs-check`
 compares the schema block and the contents list and nothing else, so a paragraph that
 stopped being true can sit there for a year looking exactly like one that is. Take the
 section after the one the previous checkup took — its report says which, and the order
-is the file's own contents list, which `docs:check` holds against the headings, so
+is the file's own contents list, which `docs-check` holds against the headings, so
 there is no second copy of it here to go stale. Check every claim in that section
 against the code that would have to implement it. `Data model` is long enough for two
 turns; say in the report which half was read.
@@ -298,7 +298,7 @@ a look on its own.
 ## Phase 5 — are the tests honest
 
 Coverage means nothing by itself; this project's real honesty gate is Stryker,
-and the **full** run is yours: nothing else runs `npm run test:mutation` any more
+and the **full** run is yours: nothing else runs `node scripts/gates/gate-runner.ts test:mutation` any more
 (a phase mutates its diff, a tag what changed since the previous tag), so run it
 here, read both families' scores off `reports/mutation/` and
 `reports/mutation-scripts/`, and put them in the report as two measurement rows —
@@ -352,8 +352,8 @@ assumption and say what a rehearsal would need.
 ## Phase 8 — design versus implementation
 
 Compare the committed posters (`docs/posters/`, every language)
-with what the code draws now — `docs:check` compares SVGs, so your work is the
-rest: run the gallery (`node scripts/tools.ts gallery` in the clone), open the
+with what the code draws now — `docs-check` compares SVGs, so your work is the
+rest: run the gallery (`node scripts/tools/tools.ts gallery` in the clone), open the
 edges, and judge implemented / partial / drifted / missing per screen. Check
 the token discipline: colours, spacing and type set centrally
 (`card-metrics.ts`, `chronology-layout.ts`, `svg-tags.ts`) or hardcoded and
@@ -366,7 +366,7 @@ mobile preview sizes — flag any picture that depends on what they hide.
 The schema is created by the code on startup, so replay it: a fresh database
 from zero in the clone (the integration spec does this — confirm it covers
 every table `PLAN.md` claims). Schema-versus-code drift is gated by
-`docs:check`; audit what it skips. Indexes versus the real queries in
+`docs-check`; audit what it skips. Indexes versus the real queries in
 `sqlite-repository.ts`; hot paths that rebuild a whole card per tap are by
 design — confirm the queries behind them are indexed accordingly. Backups: the
 data directory on the server is one SQLite file — is any backup taken at all,
@@ -407,7 +407,7 @@ reports its own price alongside its findings.
 directory before phase 0 and again after phase 10 (`node -e "console.log(new
 Date().toISOString())"` works everywhere), and stamp each phase boundary as you
 cross it. The report opens with the total and a per-phase breakdown — coarse is
-fine, honest is not optional. The full `npm run e2e` and the mutation reading
+fine, honest is not optional. The full `node scripts/gates/gate-runner.ts e2e` and the mutation reading
 usually dominate; if something else did, that is itself worth a sentence.
 
 **Tokens.** Report what the run consumed. If you cannot observe your own usage

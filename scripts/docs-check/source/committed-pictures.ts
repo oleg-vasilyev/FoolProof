@@ -1,7 +1,7 @@
 import { existsSync, readdirSync } from "node:fs";
 import { basename, join, normalize } from "node:path";
-import { DESIGN_PAGE_SYNC, fingerprintOf, inSlotNames } from "../../design-page.ts";
-import { POSTER_DIR } from "../../drawn-into.ts";
+import { DESIGN_PAGE_SYNC, fingerprintOf, inSlotNames } from "../../tools/design-page.ts";
+import { POSTER_DIR } from "../../drawings/drawn-into.ts";
 import { read } from "../document-files.ts";
 import { A_LINE, FIRST_GROUP } from "../markdown-text.ts";
 import {
@@ -42,7 +42,7 @@ const drawingsOutOfStepComplaints = (
     const onDisk = committed[name];
 
     if (onDisk === undefined) {
-      return [`${committedPath}: never drawn — run "node scripts/tools.ts ${tool}"`];
+      return [`${committedPath}: never drawn — run "node scripts/tools/tools.ts ${tool}"`];
     }
 
     return onDisk === svg

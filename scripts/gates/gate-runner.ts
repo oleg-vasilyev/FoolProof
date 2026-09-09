@@ -1,9 +1,19 @@
 import { spawn } from "node:child_process";
 import { createWriteStream, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { BATTERIES, commandFor, isBattery, isGate, type Battery, type Gate } from "./gate-list.ts";
+import type { WriteStream } from "node:fs";
+import {
+  BATTERIES,
+  describeStep,
+  isBattery,
+  isGate,
+  stepsFor,
+  type Battery,
+  type Gate,
+  type Step,
+} from "./gate-list.ts";
 import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH, logPathOf, verdictPathOf } from "./gate-paths.ts";
 import { numbersFor, outputsOf, scopeOf, type MutationScope } from "./gate-numbers.ts";
-import { FAILED, lineFor, verdictOf, type GateVerdict, type RanVerdict } from "./gate-verdict.ts";
+import { FAILED, PASSED, lineFor, verdictOf, type GateVerdict, type RanVerdict } from "./gate-verdict.ts";
 import { gatesParagraph, reasonLines } from "./gate-summary.ts";
 
 
@@ -81,35 +91,20 @@ export const rewriteParagraph = (): void => {
 
 const linesOf = (chunks: readonly string[]): readonly string[] => chunks.join("").split(/\r?\n/);
 
-export const runGate = (
-  gate: Gate,
-  mutateAgainst: string | undefined,
-  args: readonly string[] = []
-): Promise<RanVerdict> =>
+interface Capture {
+  readonly log: WriteStream;
+  readonly chunks: string[];
+  readonly env: Readonly<Record<string, string | undefined>>;
+}
+
+const keepIn = (capture: Capture, text: string): void => {
+  capture.chunks.push(text);
+  capture.log.write(text);
+};
+
+export const runStep = (step: Step, capture: Capture): Promise<number> =>
   new Promise((resolve) => {
-    const named = args.length > NO_ARGUMENTS;
-    const scope: MutationScope = scopeOf(gate, mutateAgainst, args);
-    const startedAt = new Date();
-    const chunks: string[] = [];
     let settled = false;
-
-    for (const path of outputsOf(gate)) {
-      rmSync(path, { force: true });
-    }
-
-    mkdirSync(GATES_DIR, { recursive: true });
-    const log = createWriteStream(logPathOf(gate, named));
-
-    const child = spawn(commandFor(gate, args), {
-      shell: true,
-      stdio: ["ignore", "pipe", "pipe"],
-      env: childEnvironment(process.env, mutateAgainst),
-    });
-
-    const keep = (text: string): void => {
-      chunks.push(text);
-      log.write(text);
-    };
 
     const settle = (code: number): void => {
       if (settled) {
@@ -117,38 +112,88 @@ export const runGate = (
       }
 
       settled = true;
-      log.end();
-      const verdict = verdictOf(
-        gate,
-        named,
-        code,
-        startedAt,
-        new Date(),
-        numbersFor(gate, scope, readOrNull),
-        linesOf(chunks)
-      );
-
-      writeVerdict(verdict, named);
-
-      if (!named) {
-        rewriteParagraph();
-      }
-
-      resolve(verdict);
+      resolve(code);
     };
+
+    keepIn(capture, `$ ${describeStep(step)}\n`);
+
+    const child = spawn(process.execPath, [step.bin, ...step.args], {
+      stdio: ["ignore", "pipe", "pipe"],
+      env: capture.env,
+    });
 
     child.stdout.setEncoding("utf8");
     child.stderr.setEncoding("utf8");
-    child.stdout.on("data", keep);
-    child.stderr.on("data", keep);
+    child.stdout.on("data", (text: string) => {
+      keepIn(capture, text);
+    });
+    child.stderr.on("data", (text: string) => {
+      keepIn(capture, text);
+    });
     child.on("error", (error) => {
-      keep(`gate-runner: could not run ${commandFor(gate, args)}: ${String(error)}\n`);
+      keepIn(capture, `gate-runner: could not run ${describeStep(step)}: ${String(error)}\n`);
       settle(FAILED);
     });
     child.on("close", (code) => {
       settle(code ?? FAILED);
     });
   });
+
+export const runSteps = async (steps: readonly Step[], capture: Capture): Promise<number> => {
+  for (const step of steps) {
+    const code = await runStep(step, capture);
+
+    if (code !== PASSED) {
+      return code;
+    }
+  }
+
+  return PASSED;
+};
+
+export const runGate = async (
+  gate: Gate,
+  mutateAgainst: string | undefined,
+  steps: readonly Step[],
+  args: readonly string[] = []
+): Promise<RanVerdict> => {
+  const named = args.length > NO_ARGUMENTS;
+  const scope: MutationScope = scopeOf(gate, mutateAgainst, args);
+  const startedAt = new Date();
+
+  for (const path of outputsOf(gate)) {
+    rmSync(path, { force: true });
+  }
+
+  mkdirSync(GATES_DIR, { recursive: true });
+
+  const capture: Capture = {
+    log: createWriteStream(logPathOf(gate, named)),
+    chunks: [],
+    env: childEnvironment(process.env, mutateAgainst),
+  };
+  const code = await runSteps(steps, capture);
+
+  capture.log.end();
+
+  const verdict = verdictOf(
+    gate,
+    named,
+    code,
+    startedAt,
+    new Date(),
+    numbersFor(gate, scope, readOrNull),
+    linesOf(capture.chunks)
+  );
+
+  writeVerdict(verdict, named);
+
+  if (!named) {
+    rewriteParagraph();
+  }
+
+  return verdict;
+};
 
 export const main = async (
   argv: readonly string[],
@@ -164,7 +209,15 @@ export const main = async (
     return FAILED;
   }
 
-  const verdict = await runGate(gate, env[MUTATE_AGAINST], args);
+  const steps = stepsFor(gate, args);
+
+  if (!steps.ok) {
+    say(steps.notice);
+
+    return FAILED;
+  }
+
+  const verdict = await runGate(gate, env[MUTATE_AGAINST], steps.steps, args);
 
   for (const line of [lineFor(verdict), ...reasonLines(verdict, root)]) {
     say(line);

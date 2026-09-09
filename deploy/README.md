@@ -225,7 +225,12 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now foolproof-backup.timer
 ```
 
-[`scripts/backup-database.ts`](../scripts/backup-database.ts) takes the snapshot
+The unit names `scripts/backup/backup-database.ts` by path, and the file moved there on
+9 September 2026: a server installed before that day runs the two `install` lines and
+the `daemon-reload` above again, or the timer fires against a path that is gone and the
+backup stops making a sound.
+
+[`scripts/backup/backup-database.ts`](../scripts/backup/backup-database.ts) takes the snapshot
 with `VACUUM INTO` rather than copying the file. That matters: the database runs
 in WAL mode, so the newest games are in `foolproof.db-wal` and not in
 `foolproof.db` at all — a copied file is a backup of everything except what

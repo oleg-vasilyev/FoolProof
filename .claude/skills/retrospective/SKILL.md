@@ -71,7 +71,7 @@ backlog is `deep-checkup`'s. Two tests answer it, both facts rather than taste:
   anything checkable is a lint rule and not a paragraph, and nothing enforces it — so
   a new gate and the sentence that used to ask for it sit side by side. A phase that
   adds a gate deletes that sentence in the same commit.
-- **A rule whose subject is gone is already dead.** `docs:check` fails a document
+- **A rule whose subject is gone is already dead.** `docs-check` fails a document
   naming a file this repository does not have, so the ones citing a path surface by
   themselves. One naming a folder, a command or a threshold that no longer exists is
   yours to notice, and a phase that renamed anything is likeliest to be holding one.
@@ -115,19 +115,19 @@ because no rule was ever what it described.
 **Generalising a participant moves every arrow in its scenes, not the ones that
 name it.** One phase widened the reviewer's lane, moved the arrows naming agents and
 left the replies in the old lane — a request going to one participant and the answer
-returning from another. `docs:check` now follows each errand to whoever answers.
+returning from another. `docs-check` now follows each errand to whoever answers.
 
 Both halves are enforced, because the phase that most needs them would forget them: a
 `PostToolUse` hook says the obligation aloud as the file is edited, `.githooks/commit-msg`
 refuses a message lacking the `Flow:` paragraph or a diff that moves a step while
-carrying nothing it stands on, and `npm run docs:check` holds the drawing to what the
+carrying nothing it stands on, and `node scripts/gates/gate-runner.ts docs-check` holds the drawing to what the
 repository contains. Each explains itself when it fires, so none is explained here.
 
 ## Every lesson landed displaces one
 
-The line budgets in `docs:check` supply the pressure; they cannot say what goes. Three
+The line budgets in `docs-check` supply the pressure; they cannot say what goes. Three
 kinds are safe to drop, and only these: a rule that has since become a lint rule or a
-`docs:check`, because the failure message carries it now and prose beside a check is a
+`docs-check`, because the failure message carries it now and prose beside a check is a
 second copy that will drift; a rule about a situation that can no longer arise, proved
 by a grep rather than remembered; and two rules with one cause, merged into the general
 one with the sharper incident kept as its proof. **Never drop a rule for being quiet.**

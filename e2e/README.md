@@ -10,10 +10,10 @@ How to run it is in the root [README](../README.md#watching-it-play). It used to
 parked — not a gate, nothing depending on it — because seven honest problems stood
 between it and being trusted. Six are closed and the seventh is in
 [TECH-DEBT.md](../TECH-DEBT.md): a graceful shutdown cannot be played on Windows.
-So it is **a gate now**, and `npm run e2e:changed` plays only what a diff can reach.
+So it is **a gate now**, and `node scripts/gates/gate-runner.ts e2e:changed` plays only what a diff can reach.
 
 Which means the reach has to be kept honest. `EVERYTHING` in
-[`scripts/e2e-changed.ts`](../scripts/e2e-changed.ts) lists the paths that force
+[`scripts/gates/e2e-changed.ts`](../scripts/gates/e2e-changed.ts) lists the paths that force
 every scenario to play, and a file missing from it is a hole rather than a
 saving: `vitest.e2e.config.ts` was absent, so a change to how the whole suite
 runs — worker count included — reported "nothing a scenario covers changed" and
@@ -35,8 +35,8 @@ owns the judgement and says why.
 ## The separation is structural, not a convention to remember
 
 - It lives at the repository root — not in `src/`, not in `scripts/`. It has its own
-  `tsconfig.json` and its own `vitest.e2e.config.ts`, so `npm test`, coverage and
-  mutation cannot pick it up. `npm run e2e` is the only way in.
+  `tsconfig.json` and its own `vitest.e2e.config.ts`, so the unit suite, coverage and
+  mutation cannot pick it up. `node scripts/gates/gate-runner.ts e2e` is the only way in.
 - **It imports nothing from `src/`.** Not a type, not a constant, not `copy.en.ts`.
   It knows the bot the way Telegram knows it: commands in, Bot API calls out. A
   harness that imported the copy table would assert a constant against itself.
@@ -123,7 +123,7 @@ to escape shows up as markup on the page instead of hiding in a string compariso
 ## The one seam in `src/`
 
 `BOT_API_ROOT`, read in `shared/telegram/bot-client-options.ts` and handed to
-grammY as `apiRoot`. It is absent from both env files, `npm run e2e` sets it only on
+grammY as `apiRoot`. It is absent from both env files, `node scripts/gates/gate-runner.ts e2e` sets it only on
 the process it spawns, and a run pointed anywhere but Telegram **warns on startup**
 — which `/status` then reports, so a misdirected bot cannot hide.
 

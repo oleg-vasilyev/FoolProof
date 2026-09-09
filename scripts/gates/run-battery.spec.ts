@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { COMMANDS } from "./gate-list.ts";
 import type { GateVerdict } from "./gate-verdict.ts";
 
 
@@ -21,7 +22,7 @@ const mkdirSyncSpy = vi.fn();
 const writeFileSyncSpy = vi.fn();
 
 vi.mock("./gate-runner.ts", () => ({
-  runGate: (gate: unknown, mutateAgainst: unknown) => runGateSpy(gate, mutateAgainst),
+  runGate: (gate: unknown, mutateAgainst: unknown, steps: unknown) => runGateSpy(gate, mutateAgainst, steps),
   forgetVerdicts: (gates: unknown) => forgetVerdictsSpy(gates),
   writeVerdict: (verdict: unknown) => writeVerdictSpy(verdict),
 }));
@@ -250,7 +251,7 @@ describe("runBattery()", () => {
     const status = await runBattery(["node", "run-battery.ts", "nonsense"], say);
 
     expect(status).toBe(RED);
-    expect(say.mock.calls[FIRST]?.[FIRST]).toContain("check, check:push, check:phase, check:release");
+    expect(say.mock.calls[FIRST]?.[FIRST]).toContain("check:quick, check:push, check:phase, check:release");
     expect(runGateSpy).toHaveBeenCalledTimes(NEVER);
     expect(forgetVerdictsSpy).toHaveBeenCalledTimes(NEVER);
   });
@@ -258,7 +259,7 @@ describe("runBattery()", () => {
   it("should forget its gates' old verdicts and write its name down before the first gate runs", async () => {
     await runBattery(["node", "run-battery.ts", "check:push"], say);
 
-    expect(forgetVerdictsSpy).toHaveBeenCalledWith(["lint", "typecheck", "e2e:typecheck", "test:e2e-harness", "docs:check"]);
+    expect(forgetVerdictsSpy).toHaveBeenCalledWith(["lint", "typecheck", "e2e:typecheck", "test:e2e-harness", "docs-check"]);
     expect(mkdirSyncSpy).toHaveBeenCalledWith("reports/gates", { recursive: true });
     expect(writeFileSyncSpy).toHaveBeenNthCalledWith(ONCE, "reports/gates/battery.txt", "check:push\n");
     expect(forgetVerdictsSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
@@ -275,9 +276,9 @@ describe("runBattery()", () => {
       "typecheck",
       "e2e:typecheck",
       "test:e2e-harness",
-      "docs:check",
+      "docs-check",
     ]);
-    expect(runGateSpy).toHaveBeenCalledWith("lint", undefined);
+    expect(runGateSpy).toHaveBeenCalledWith("lint", undefined, COMMANDS.lint.steps);
     expect(execFileSyncSpy).toHaveBeenCalledTimes(NEVER);
   });
 
@@ -302,12 +303,12 @@ describe("runBattery()", () => {
       "typecheck",
       "e2e:typecheck",
       "test:e2e-harness",
-      "docs:check",
+      "docs-check",
       "test:coverage",
       "test:mutation:changed",
       "e2e",
     ]);
-    expect(runGateSpy).toHaveBeenCalledWith("test:mutation:changed", "v1.20.1");
+    expect(runGateSpy).toHaveBeenCalledWith("test:mutation:changed", "v1.20.1", COMMANDS["test:mutation:changed"].steps);
     expect(gatesParagraphSpy).toHaveBeenCalledWith(expect.anything(), "check:release");
   });
 

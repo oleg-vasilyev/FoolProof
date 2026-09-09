@@ -60,7 +60,7 @@ first gate over one, which is a two-minute answer to a two-second question.
 **Iterate against the number, not against the gate.** A budget names the count it wants
 in its own message, so `wc -l` answers the next attempt — in the same call as the edit,
 costing nothing. One phase ran the whole documents check twenty-three times, ten of them
-over a single page, to learn what one command tells it. `docs:check` takes under a
+over a single page, to learn what one command tells it. `docs-check` takes under a
 second, so the waste is never the machine: it is a round trip per attempt, and a round
 trip carries the whole conversation with it. The same arithmetic decides every "just run
 it again" in a phase.

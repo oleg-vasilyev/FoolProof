@@ -154,7 +154,7 @@ to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
 
 ---
 
-## Half of `docs:check` is proven once, by hand, and never again
+## Half of `docs-check` is proven once, by hand, and never again
 
 The failure these rules have is peculiar to them: a rule that runs, reports nothing,
 and would report nothing whatever the repository looked like. It has shipped three
@@ -181,7 +181,7 @@ fixture, and the rules that could be tested without one already are.
 ## The design page's sync marker proves the splice, not the push
 
 `docs/posters/design-page.sync` holds the fingerprint of the drawings
-`node scripts/tools.ts design-page` put into the page, and `docs:check` fails while
+`node scripts/tools/tools.ts design-page` put into the page, and `docs-check` fails while
 that fingerprint and the mockups disagree — which is what stopped the page falling
 two releases behind again. But the splice writes the marker locally and the push
 happens afterwards, by hand, over the MCP. So a phase that sees the gate red and
@@ -243,7 +243,7 @@ name in any script, and `shared/table/name-list.ts` deliberately does not assume
 
 The hole is far narrower than the one it replaced, and it fails in the safe direction for
 `USUAL_FALLBACK` callers and the unsafe one for `WIDEST_FALLBACK` callers. Widening the
-table is one line in `scripts/measure-advances.ts` and a rerun; the reason not to do it
+table is one line in `scripts/tools/measure-advances.ts` and a rerun; the reason not to do it
 blind is that every added range costs a resvg render at generation time and bytes in a
 file every poster imports.
 
@@ -346,7 +346,7 @@ their space**, which opens the same three files anyway.
 
 ## The design-page gate assumes one account owns both the repository and the page
 
-`docs:check` compares `docs/posters/design-page.sync` against the drawings the code
+`docs-check` compares `docs/posters/design-page.sync` against the drawings the code
 produces, and that is the only thing in the repository that can notice the Claude
 Design page has gone stale — the page lives behind a login, so nothing else can see
 it. The gate is right to exist. What it silently assumes is that whoever can commit
@@ -544,11 +544,12 @@ toss. A third name was on this list — the phase-log field parsers living under
 
 ## Two corners of the tooling the mutation gate still cannot see
 
-`scripts/docs-check/` and `scripts/hooks/` are mutated at 80% now — 83.79% over the
-whole folder, measured 28 August 2026 — and two things that reason sit outside both families:
-`design-page.ts`, whose `refuse()` branches have no spec, and `e2e-changed.ts`, which
-decides which scenarios a diff can reach. `mutate-changed.ts` was the third and joined
-the tooling family on 9 September 2026, at 97.03% on its first run.
+`scripts/docs-check/`, `scripts/hooks/` and all of `scripts/gates/` are mutated at 80%
+now — the gates folder by glob since 9 September 2026, so a file added there joins the
+family on arrival — and two things that reason sit outside on the gates' side:
+`tools/design-page.ts`,
+whose `refuse()` branches have no spec, and `gates/e2e-changed.ts`, kept out of the glob
+by name because it decides which scenarios a diff can reach with no spec behind it.
 
 One module also passes only on the average — `source/env-keys.ts` at 78.02% the same
 day, short by its readers. Those are reachable: mocking `node:fs` lifted
@@ -557,7 +558,8 @@ day, short by its readers. Those are reachable: mocking `node:fs` lifted
 left it alone with nowhere to hide.
 
 **Worth doing with the next phase that changes what one of these files decides, or
-that opens the mutation gate** — "touches `scripts/`" fired on one that only moved them.
+that opens the mutation gate** — "touches `scripts/`" fired on one that only moved them,
+and the move of 9 September re-mutated every gates file for the same reason.
 
 ## The picture gate cannot fork until its triage half moves out
 
@@ -587,7 +589,7 @@ Listed so nobody "fixes" them:
 - **`diagnostics/` has no `domain/`.** There is nothing to decide there.
 - **The same product constraint opens `README.md` and `PLAN.md`.** A visitor must
   not have to open the spec to learn why the bot is a keyboard. It is the one
-  overlap `docs:check` and the `write-a-doc` skill deliberately allow.
+  overlap `docs-check` and the `write-a-doc` skill deliberately allow.
 - **`percent-label.ts` puts the `%` outside `copy.en.ts`, and `chronology-layout.ts`
   the truncation `…`.** Both mark something about a number or a column rather than
   saying anything, the way `svg-tags.ts` rounds a coordinate, and no language spells

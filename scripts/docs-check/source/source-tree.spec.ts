@@ -140,15 +140,15 @@ describe("scriptsOutOfStepComplaints", () => {
   it("should name a script that is not documented, and say where it belongs", () => {
     const complaints = scriptsOutOfStepComplaints(
       new Set(["build"]),
-      new Set(["build", "docs:check"])
+      new Set(["build", "docs-check"])
     );
 
-    expect(complaints).toEqual([`${README}: does not list the "docs:check" script`]);
+    expect(complaints).toEqual([`${README}: does not list the "docs-check" script`]);
   });
 
   it("should say nothing about a documented word that names no actual script", () => {
     expect(
-      scriptsOutOfStepComplaints(new Set(["build", "docs:check", "ghost"]), new Set(["build"]))
+      scriptsOutOfStepComplaints(new Set(["build", "docs-check", "ghost"]), new Set(["build"]))
     ).toEqual([]);
   });
 });

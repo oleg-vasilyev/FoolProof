@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
-import { drawnByName } from "./feature-drawings.ts";
-import { POSTER_DIR } from "./drawn-into.ts";
+import { drawnByName } from "../drawings/feature-drawings.ts";
+import { POSTER_DIR } from "../drawings/drawn-into.ts";
 import { Locale } from "#shared/locale/locales.ts";
 import type { Say } from "./tool-verdict.ts";
 

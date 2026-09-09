@@ -1,44 +1,45 @@
-import { drawnByName, featuresThatDraw } from "./feature-drawings.ts";
+import { drawnByName, featuresThatDraw } from "../drawings/feature-drawings.ts";
 import {
   flowWouldNotRender,
   mermaidLinesCarryingASeparator,
-} from "./docs-check/documents/mermaid-rendering.ts";
-import { agentsWithoutAContract } from "./docs-check/documents/agent-contracts.ts";
-import { frontmatterThatWillNotParse } from "./docs-check/documents/frontmatter-yaml.ts";
-import { brokenLinks, specContentsOutOfStep } from "./docs-check/documents/document-references.ts";
-import { overBudget, pagesOverBudget, skillsOverBudget } from "./docs-check/documents/reading-budgets.ts";
-import { citationsWithNoFile, pagesNobodyOpens } from "./docs-check/documents/file-citations.ts";
-import { envTemplateOutOfStep, requiredKeysOutOfStep } from "./docs-check/source/env-keys.ts";
+} from "./documents/mermaid-rendering.ts";
+import { agentsWithoutAContract } from "./documents/agent-contracts.ts";
+import { frontmatterThatWillNotParse } from "./documents/frontmatter-yaml.ts";
+import { brokenLinks, specContentsOutOfStep } from "./documents/document-references.ts";
+import { overBudget, pagesOverBudget, skillsOverBudget } from "./documents/reading-budgets.ts";
+import { citationsWithNoFile, pagesNobodyOpens } from "./documents/file-citations.ts";
+import { envTemplateOutOfStep, requiredKeysOutOfStep } from "./source/env-keys.ts";
 import {
   casesOutOfStep,
   designPageOutOfStep,
   postersOutOfStep,
   postersOutOfTheGallery,
-} from "./docs-check/source/committed-pictures.ts";
-import { formsBakedIntoCopy } from "./docs-check/source/copy-word-forms.ts";
-import { advancesOutOfStep } from "./docs-check/source/glyph-advances.ts";
-import { debtWithoutATrigger } from "./docs-check/documents/debt-entry-triggers.ts";
-import { DOCUMENTS, read } from "./docs-check/document-files.ts";
+} from "./source/committed-pictures.ts";
+import { formsBakedIntoCopy } from "./source/copy-word-forms.ts";
+import { advancesOutOfStep } from "./source/glyph-advances.ts";
+import { debtWithoutATrigger } from "./documents/debt-entry-triggers.ts";
+import { DOCUMENTS, read } from "./document-files.ts";
 import {
   descriptionsOffTheirStage,
   flowOutOfStep,
   flowRepliesLeaveTheLaneTheyWereAskedOf,
   stagesOutOfStep,
-} from "./docs-check/documents/flow-drawing.ts";
+} from "./documents/flow-drawing.ts";
 import {
   TOOLS_SCRIPT,
   commandsNobodyHas,
   toolVerbsIn,
-} from "./docs-check/documents/named-commands.ts";
-import { phaseLogsOffTheMap } from "./docs-check/documents/phase-log-paths.ts";
-import { schemaOutOfStep } from "./docs-check/source/running-schema.ts";
+} from "./documents/named-commands.ts";
+import { phaseLogsOffTheMap } from "./documents/phase-log-paths.ts";
+import { schemaOutOfStep } from "./source/running-schema.ts";
 import {
   crowdedLayers,
   foldersMissingFromTheTree,
   scriptsOutOfStep,
-} from "./docs-check/source/source-tree.ts";
-import { imagesOutOfStep, siteCssOutOfStep } from "./docs-check/source/site-pages.ts";
-import { lineEndingsOutOfStep } from "./docs-check/source/line-endings.ts";
+} from "./source/source-tree.ts";
+import { imagesOutOfStep, siteCssOutOfStep } from "./source/site-pages.ts";
+import { lineEndingsOutOfStep } from "./source/line-endings.ts";
+import { ALL_GATES } from "../gates/gate-list.ts";
 
 
 const NOTHING = 0;
@@ -65,7 +66,7 @@ const complaints = [
   ...frontmatterThatWillNotParse(),
   ...debtWithoutATrigger(),
   ...flowOutOfStep(),
-  ...commandsNobodyHas(theToolVerbs),
+  ...commandsNobodyHas(theToolVerbs, new Set(ALL_GATES)),
   ...flowRepliesLeaveTheLaneTheyWereAskedOf(),
   ...flowWouldNotRender(),
   ...mermaidLinesCarryingASeparator(),

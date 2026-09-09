@@ -20,6 +20,7 @@ vi.mock("node:fs", () => ({
 const {
   DEFAULT_BASELINE,
   changedFiles,
+  excluded,
   exclusionsOf,
   foldersOf,
   gitLines,
@@ -38,14 +39,21 @@ const {
 
 const SOURCE_PATTERNS = ["src/**/*.ts", "!src/**/*.spec.ts", "!src/**/*.stub.ts"];
 
-const TOOLING_PATTERNS = ["scripts/docs-check/**/*.ts", "scripts/run-battery.ts", "!scripts/**/*.spec.ts"];
-
-const patternsOf = (config: string): readonly string[] =>
-  config === "stryker.config.json" ? SOURCE_PATTERNS : TOOLING_PATTERNS;
+const TOOLING_PATTERNS = [
+  "scripts/docs-check/**/*.ts",
+  "scripts/gates/**/*.ts",
+  "scripts/run-battery.ts",
+  "!scripts/**/*.spec.ts",
+  "!scripts/gates/config/**",
+  "!scripts/gates/e2e-changed.ts",
+];
 
 const SOURCE = FAMILIES[0] ?? { family: "source", config: "", report: "" };
 
 const TOOLING = FAMILIES[1] ?? { family: "tooling", config: "", report: "" };
+
+const patternsOf = (config: string): readonly string[] =>
+  config === SOURCE.config ? SOURCE_PATTERNS : TOOLING_PATTERNS;
 
 const GREEN = 0;
 
@@ -84,7 +92,7 @@ describe("exclusionsOf() and foldersOf()", () => {
   });
 
   it("should turn each positive glob into the folder it covers, and leave a single file as it is", () => {
-    expect(foldersOf(TOOLING_PATTERNS)).toEqual(["scripts/docs-check/", "scripts/run-battery.ts"]);
+    expect(foldersOf(TOOLING_PATTERNS)).toEqual(["scripts/docs-check/", "scripts/gates/", "scripts/run-battery.ts"]);
   });
 
   it("should strip only a trailing recursive glob, leaving a deeper literal path alone", () => {
@@ -104,6 +112,18 @@ describe("held()", () => {
   it("should not hold a file from another folder, nor a document under the right one", () => {
     expect(held(SOURCE_PATTERNS, "scripts/run-battery.ts")).toBe(false);
     expect(held(SOURCE_PATTERNS, "src/README.md")).toBe(false);
+  });
+
+  it("should not hold a file under a held folder that an exclusion names, by file or by folder", () => {
+    expect(held(TOOLING_PATTERNS, "scripts/gates/e2e-changed.ts")).toBe(false);
+    expect(held(TOOLING_PATTERNS, "scripts/gates/config/vitest.config.ts")).toBe(false);
+    expect(held(TOOLING_PATTERNS, "scripts/gates/gate-list.ts")).toBe(true);
+  });
+
+  it("should read an exclusion as a glob, so a basename pattern reaches into every folder", () => {
+    expect(excluded(SOURCE_PATTERNS, "src/features/a/b.spec.ts")).toBe(true);
+    expect(excluded(["!src/**/sqlite-connection.ts"], "src/shared/repository/sqlite-connection.ts")).toBe(true);
+    expect(excluded(SOURCE_PATTERNS, "src/main.ts")).toBe(false);
   });
 });
 
@@ -149,8 +169,8 @@ describe("planFor()", () => {
 
     planFor(["src/a.ts"], patterns);
 
-    expect(patterns).toHaveBeenCalledWith("stryker.config.json");
-    expect(patterns).toHaveBeenCalledWith("stryker.scripts.json");
+    expect(patterns).toHaveBeenCalledWith(SOURCE.config);
+    expect(patterns).toHaveBeenCalledWith(TOOLING.config);
   });
 });
 
@@ -220,7 +240,7 @@ describe("runStryker()", () => {
       [
         "node_modules/@stryker-mutator/core/bin/stryker.js",
         "run",
-        "stryker.config.json",
+        "scripts/gates/config/stryker.config.json",
         "--mutate",
         "src/a.ts,!src/**/*.spec.ts,!src/**/*.stub.ts",
       ],
@@ -268,7 +288,7 @@ describe("mutateChanged()", () => {
       "no tooling changed against origin/main — nothing to mutate there",
     ]);
     expect(spawnSyncSpy).toHaveBeenCalledTimes(ONCE);
-    expect(spawnSyncSpy.mock.calls[FIRST]?.[SECOND]).toContain("stryker.config.json");
+    expect(spawnSyncSpy.mock.calls[FIRST]?.[SECOND]).toContain(SOURCE.config);
   });
 
   it("should read each family's patterns from its own config file", () => {
@@ -276,8 +296,8 @@ describe("mutateChanged()", () => {
 
     mutateChanged({}, say);
 
-    expect(readFileSyncSpy).toHaveBeenCalledWith("stryker.config.json", "utf8");
-    expect(readFileSyncSpy).toHaveBeenCalledWith("stryker.scripts.json", "utf8");
+    expect(readFileSyncSpy).toHaveBeenCalledWith(SOURCE.config, "utf8");
+    expect(readFileSyncSpy).toHaveBeenCalledWith(TOOLING.config, "utf8");
   });
 
   it("should answer red when a family's run was", () => {
@@ -303,8 +323,11 @@ describe("mutateChanged(), with named files", () => {
 
     expect(execFileSyncSpy).not.toHaveBeenCalled();
     expect(spawnSyncSpy.mock.calls.map((call) => call[SECOND])).toEqual([
-      expect.arrayContaining(["stryker.config.json", "src/a.ts,!src/**/*.spec.ts,!src/**/*.stub.ts"]),
-      expect.arrayContaining(["stryker.scripts.json", "scripts/run-battery.ts,!scripts/**/*.spec.ts"]),
+      expect.arrayContaining([SOURCE.config, "src/a.ts,!src/**/*.spec.ts,!src/**/*.stub.ts"]),
+      expect.arrayContaining([
+        TOOLING.config,
+        "scripts/run-battery.ts,!scripts/**/*.spec.ts,!scripts/gates/config/**,!scripts/gates/e2e-changed.ts",
+      ]),
     ]);
   });
 
@@ -336,6 +359,14 @@ describe("strayAmong() and a named run over files no family holds", () => {
       "scripts/gate-runer.ts",
       "src/a.spec.ts",
     ]);
+  });
+
+  it("should refuse a named file a folder holds but an exclusion drops, rather than pass on an empty run", () => {
+    const status = mutateChanged({}, say, ["scripts/gates/e2e-changed.ts"]);
+
+    expect(status).toBe(KILLED);
+    expect(spawnSyncSpy).not.toHaveBeenCalled();
+    expect(say.mock.calls[FIRST]?.[FIRST]).toContain("no family holds scripts/gates/e2e-changed.ts");
   });
 
   it("should refuse, red, without running Stryker, naming the stray file and what to name instead", () => {

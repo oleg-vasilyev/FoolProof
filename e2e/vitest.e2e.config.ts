@@ -3,9 +3,10 @@ import { resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 
 
-// The e2e run is deliberately a separate configuration from vitest.config.ts:
-// these specs start a real bot process and a real database, so they must never
-// be picked up by `npm test`, by coverage, or by Stryker. The only overlap is
+// The e2e run is deliberately a separate configuration from the unit suite's
+// (scripts/gates/config/vitest.config.ts): these specs start a real bot process
+// and a real database, so they must never be picked up by the test gate, by
+// coverage, or by Stryker. The only overlap is
 // the runner itself, which the project already depends on.
 //
 // One world per worker: each worker owns a port, a bot process and a database

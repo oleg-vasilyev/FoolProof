@@ -42,7 +42,7 @@ treating the local run as one.
 never a licence to fix the most suspicious-looking line: a fix with no reproduction
 behind it cannot be shown to have worked, so it buys nothing but the feeling of
 having acted. If the report came from a real chat, the evening it happened in can
-be read back — `node scripts/tools.ts evening <chat id>`, under gate 3a of
+be read back — `node scripts/tools/tools.ts evening <chat id>`, under gate 3a of
 `finish-phase`, which is also where the rule about snapshotting the database lives.
 
 ## The failing test is the reproduction, made permanent
@@ -107,9 +107,9 @@ it runs, not recovered by running it again.
 
 A fault almost never has exactly one site, because it came from a habit rather than
 a typo. The same lost backslash has reached this repository twice — once inside a
-`docs:check` rule whose path split then could not do its job and reported nothing
+`docs-check` rule whose path split then could not do its job and reported nothing
 forever, and once more caught a substring from shipping. `TECH-DEBT.md`, under *Half
-of `docs:check` is proven once*, has both and a third of the same shape. Copying a
+of `docs-check` is proven once*, has both and a third of the same shape. Copying a
 render call to a second module left its font guard behind, and `CLAUDE.md` has what
 that would have committed, beside the rule about refusing at construction.
 
@@ -120,8 +120,8 @@ symptom** — the wrong call, the missing guard, the assumption — across `src/
 - **`\b` is ASCII-only**, and `project/no-ascii-word-boundary` refuses a pattern that
   carries both; a search typed by hand still has to spell the boundary as
   `(?<![\p{L}\p{N}])`.
-- **A name that changed has callers no compiler sees.** `docs:check` fails a document
-  naming a path, an `npm run` script or a `scripts/tools.ts` verb that does not exist;
+- **A name that changed has callers no compiler sees.** `docs-check` fails a document
+  naming a path, an `npm run` script or a `scripts/tools/tools.ts` verb that does not exist;
   a changed *function* name still rots in silence.
 
 What the sweep finds goes into the phase's size before any of it is fixed.

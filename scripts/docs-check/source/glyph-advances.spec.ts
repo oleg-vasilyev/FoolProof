@@ -90,7 +90,7 @@ describe("advanceComplaints()", () => {
 
   it("should name the generator, so the fix does not have to be remembered", () => {
     expect(advanceComplaints(A_STAMP, ANOTHER_STAMP)[NOTHING]).toContain(
-      "scripts/tools.ts advances"
+      "scripts/tools/tools.ts advances"
     );
   });
 

@@ -95,8 +95,8 @@ const everything = readerOver({
   [HARNESS_RESULTS]: vitestJson(CASES, FAILED, FILES),
   [COVERAGE_SUMMARY]: coverageJson(),
   [E2E_RESULTS]: vitestJson(CASES, FAILED, FILES),
-  "stryker.config.json": SOURCE_CONFIG,
-  "stryker.scripts.json": JSON.stringify({ thresholds: { break: TOOLING_BAR } }),
+  "scripts/gates/config/stryker.config.json": SOURCE_CONFIG,
+  "scripts/gates/config/stryker.scripts.json": JSON.stringify({ thresholds: { break: TOOLING_BAR } }),
   "reports/mutation/mutation.json": SOURCE_REPORT,
   "reports/mutation-scripts/mutation.json": JSON.stringify({ files: TOOLING_FILES }),
 });
@@ -116,7 +116,7 @@ describe("outputsOf()", () => {
   it("should name nothing for a gate whose tool writes no report", () => {
     expect(outputsOf("lint")).toEqual([]);
     expect(outputsOf("typecheck")).toEqual([]);
-    expect(outputsOf("docs:check")).toEqual([]);
+    expect(outputsOf("docs-check")).toEqual([]);
     expect(outputsOf("e2e:typecheck")).toEqual([]);
   });
 
@@ -166,7 +166,7 @@ describe("numbersFor()", () => {
   });
 
   it("should carry no numbers for lint, types, docs and the e2e types", () => {
-    for (const gate of ["lint", "typecheck", "docs:check", "e2e:typecheck"] as const) {
+    for (const gate of ["lint", "typecheck", "docs-check", "e2e:typecheck"] as const) {
       expect(numbersFor(gate, "the diff", everything)).toEqual({ kind: "none" });
     }
   });
@@ -254,7 +254,7 @@ describe("numbersFor()", () => {
 
   it("should leave out a family whose run wrote nothing, rather than read a stale score", () => {
     const sourceOnly = readerOver({
-      "stryker.config.json": SOURCE_CONFIG,
+      "scripts/gates/config/stryker.config.json": SOURCE_CONFIG,
       "reports/mutation/mutation.json": SOURCE_REPORT,
     });
 
@@ -266,7 +266,7 @@ describe("numbersFor()", () => {
 
   it("should leave out a family whose report is there but whose config is not, and the other way round", () => {
     const reportOnly = readerOver({ "reports/mutation/mutation.json": SOURCE_REPORT });
-    const configOnly = readerOver({ "stryker.config.json": SOURCE_CONFIG });
+    const configOnly = readerOver({ "scripts/gates/config/stryker.config.json": SOURCE_CONFIG });
 
     expect(numbersFor("test:mutation", "everything", reportOnly)).toMatchObject({ families: [] });
     expect(numbersFor("test:mutation", "everything", configOnly)).toMatchObject({ families: [] });

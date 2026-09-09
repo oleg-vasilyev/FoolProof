@@ -1,4 +1,4 @@
-import { secondsOf } from "./gate-verdict.ts";
+import { secondsOf } from "../gates/gate-verdict.ts";
 
 
 export type Say = (line: string) => void;

@@ -65,7 +65,7 @@ Two consequences worth spelling out, because both have been got wrong:
    "a keyboard whose buttons carry `callback_data`", changed it in two files, and
    left it stale in three — including `write-an-e2e-scenario`, the skill that owns
    the judgement, so the document a reader would consult gave the wrong answer.
-   `docs:check` cannot see this: a rule restated in prose is not a link.
+   `docs-check` cannot see this: a rule restated in prose is not a link.
 
    **Grep the frontmatter too, and grep it first.** A skill's `description:` is not
    documentation about the skill — it is the trigger that decides whether the skill
@@ -78,14 +78,14 @@ Two consequences worth spelling out, because both have been got wrong:
 3. **Write it once, in the home the table names.** If you find yourself explaining
    the same thing in a second file "briefly", stop: that is the duplication being
    born. A link is shorter and cannot drift.
-4. **Run `npm run docs:check`.** It catches most of what this file asks for, and it
+4. **Run `node scripts/gates/gate-runner.ts docs-check`.** It catches most of what this file asks for, and it
    grows. No file lists the checks themselves: every complaint carries its own reason,
    so read the complaint rather than guess which check fired.
 
 ## A drawing is prose that can fail to be a drawing
 
 A mermaid fence either renders or it does not, and a broken one shows a parse error
-where the picture was — less than if the fence had never been written. `docs:check`
+where the picture was — less than if the fence had never been written. `docs-check`
 refuses every failure it can see, and each complaint carries its own reason — so the
 complaints are the list, and keeping a second one here is what let this sentence rot.
 
@@ -96,7 +96,7 @@ exotic, and the exotic part is usually fine.
 
 ## The script table in `README.md`
 
-`docs:check` fails a `package.json` script this table omits — the other direction, a
+`docs-check` fails a `package.json` script this table omits — the other direction, a
 row naming a script that has gone, is yours. Three things about it are judgement, and
 they arrived here from `CLAUDE.md` when a new rule pushed that file over its budget:
 
@@ -105,7 +105,7 @@ they arrived here from `CLAUDE.md` when a new rule pushed that file over its bud
 - **Keep the table short.** It is the first thing a new reader sees, and a reader
   who has to scan twenty rows to find `npm start` has been told the project is
   complicated before learning anything about it.
-- **Anything occasional goes behind `scripts/tools.ts`**, which lists itself when
+- **Anything occasional goes behind `scripts/tools/tools.ts`**, which lists itself when
   run with no argument, so a one-off never earns a permanent row.
 
 ## When the document argues for something you want
@@ -153,7 +153,7 @@ the second list is the one a reviewer can check.
 
 ## The budget is the point
 
-`CLAUDE.md` **and every skill** carry a line budget, enforced by `docs:check`; a skill
+`CLAUDE.md` **and every skill** carry a line budget, enforced by `docs-check`; a skill
 with no row in the table fails the gate too. They exist so that adding costs
 something, and the two differ in what it buys. **`CLAUDE.md`'s number never rises** —
 it is read before every session, so a new rule displaces an older one into the file

@@ -19,7 +19,7 @@ the last lock CI accepted rather than regenerating — `npm install --package-lo
 prunes them again, because it resolves for this machine too.
 
 **A phase that touched `package.json` runs `npm ci --dry-run` before committing.**
-`npm run check` uses the `node_modules/` already on this machine, so it cannot see
+`npm run check:quick` uses the `node_modules/` already on this machine, so it cannot see
 that the lock file it produced is unsatisfiable somewhere else. Adding
 `@tailwindcss/cli` on Windows wrote a lock whose wasm fallback conflicted with the
 one vitest brings; every local gate stayed green and GitHub Actions failed on

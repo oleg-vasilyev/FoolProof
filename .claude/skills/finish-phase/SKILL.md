@@ -26,14 +26,14 @@ under coverage, mutation over the diff, e2e over the diff, with the tests
 counted once. Every gate runs (only mutation waits for a green suite); each leaves
 `reports/gates/<gate>.log` and `.json`, and the run ends with the `Gates:` paragraph
 the commit pastes, in `reports/gates/gates-paragraph.txt`. A red gate prints its
-reasons under its line and is re-run **alone** — `node scripts/gate-runner.ts <gate>`,
+reasons under its line and is re-run **alone** — `node scripts/gates/gate-runner.ts <gate>`,
 or one spec as `… test <file>` — never by repeating the chain; gate 3's rules still apply.
-**`docs:check` is deliberately not in it**: documents and pictures are finished
+**`docs-check` is deliberately not in it**: documents and pictures are finished
 after the review, in their own stages, so checking them here fails on work not
 yet due — and a review finding would force an expensive redraw twice. The line
 still holds where it matters: `check:push` in CI and `check:release` at the tag
-both run `docs:check`.
-Sweep `reports/` first: `node scripts/tools.ts tidy-reports` drops what nothing owns.
+both run `docs-check`.
+Sweep `reports/` first: `node scripts/tools/tools.ts tidy-reports` drops what nothing owns.
 
 ## 1. Lint and types
 
@@ -47,12 +47,12 @@ they rot. Making `rasterize()` asynchronous left a one-liner in
 every poster, in the step whose whole job is catching a render that grew. Green
 gates, a lie in a document.
 
-**A renamed file is the same fault, and half of it is now mechanical**: `docs:check`
-fails a document naming a path under a folder it tracks and cannot find, which is what a phase
-that moved 29 files needed and did not get. The grep is still owed for everything
-that is not a path — a command, a folder, a threshold, a shape — and it is owed
-before the review launches rather than after, which is how the hold-still rule below
-gets broken by something that felt like tidying.
+**A renamed file is the same fault, and most of it is now mechanical**: `docs-check`
+fails a document naming a path it cannot find (what a phase that moved 29 files needed
+and did not get), an `npm run` script, a runner gate or a `tools.ts` verb that does not
+exist. The grep is still owed for everything else — a folder, a threshold, a shape — and
+it is owed before the review launches rather than after, which is how the hold-still
+rule below gets broken by something that felt like tidying.
 
 Most style rules are ESLint rules now (`eslint.config.js`), so a lint failure is
 a convention violation, not a nit — read the message before reaching for a
@@ -73,11 +73,11 @@ phrase for it was *the duplication rule wearing a gate's clothes*. So before pay
 to fit something in, ask what already covers it: **read the neighbour before
 displacing it**, and before adding a check, read every check over the same subject.
 
-**A phase that touched `package.json` has a gate `npm run check` cannot see.** It
+**A phase that touched `package.json` has a gate `npm run check:quick` cannot see.** It
 resolves against this machine, so a lock file written here can be unsatisfiable on
 the runner: [changing a dependency](changing-a-dependency.md).
 
-## 2. `npm run test:coverage`
+## 2. `node scripts/gates/gate-runner.ts test:coverage`
 
 70% floor on every metric. A file that dropped is a file whose new branches
 nobody exercised. Find the branch, not a way to reach the number.
@@ -88,13 +88,13 @@ run to learn what its author already knew, and this gate is the one that notices
 last: coverage falls by a hundredth of a percent, well clear of the floor, and only
 a reader who looks at the number rather than the verdict sees it at all.
 
-## 3. `npm run test:mutation:changed`
+## 3. `node scripts/gates/gate-runner.ts test:mutation:changed`
 
 Stryker over the files this phase touched — about a minute. A mutant in a file the
 phase never opened was killed in the phase that wrote it. A tag re-mutates only what
 changed since the previous tag (`check:release`, in the pre-push hook): a guard
 against a phase that skipped this gate, not against a weakened spec, a changed stub or a
-shared helper over an untouched subject — that gap, and the **full** `npm run test:mutation` (26 minutes at v1.20.1),
+shared helper over an untouched subject — that gap, and the **full** `node scripts/gates/gate-runner.ts test:mutation` (26 minutes at v1.20.1),
 belong to the weekly `deep-checkup`.
 Coverage says a line ran; this says a test would have noticed it break.
 
@@ -134,12 +134,12 @@ the nearest assertion that turns the mutant red.
 
 **Run gate 5's review pass before this one. Always.** Review findings edit code, and
 this is the costliest gate to repeat; an edit made after the run re-checks with
-`node scripts/gate-runner.ts test:mutation:changed <file>` alone, which leaves the
+`node scripts/gates/gate-runner.ts test:mutation:changed <file>` alone, which leaves the
 paragraph untouched, never a full re-run. Size is not the test and neither is
 subject matter — a phase of 671 lines, 74% specs, ran the battery, took five
 findings, and ran it again: twenty-seven minutes of Stryker to learn the same thing
 twice; a phase touching no code at all looked immune until the review's best finding
-became a new rule in `scripts/check-docs.ts`. Judge the diff the review will *leave
+became a new rule in `scripts/docs-check/check-docs.ts`. Judge the diff the review will *leave
 behind*, not the one you have — prose turns into code, and that is what a good
 finding does. Running the two in parallel needs a reason you can say out loud.
 
@@ -156,7 +156,7 @@ cases are built to stress the drawing (widest name, most awards, tallest sheet),
 selection rule that quietly hands one player four of nine rows passes every one of them.
 
 ```bash
-node scripts/tools.ts evening <chat id>
+node scripts/tools/tools.ts evening <chat id>
 ```
 
 It prints the awards a real chat's newest evening would carry, in that chat's own
@@ -170,17 +170,17 @@ unnamed, a "curse" that was below chance, one rival called both easy prey and a 
 opponent, and three sentences that said things the picture did not. Every one of them
 had shipped through green gates.
 
-## 4. `npm run e2e:changed`
+## 4. `node scripts/gates/gate-runner.ts e2e:changed`
 
 Plays the scenarios the diff can reach: a change under `src/features/<X>/` plays
-what `scripts/e2e-changed.ts` lists for `<X>`, a change under `shared/`, `main.ts`
+what `scripts/gates/e2e-changed.ts` lists for `<X>`, a change under `shared/`, `main.ts`
 or the harness plays everything, and a changed scenario file plays itself. It errs
 towards playing too much — an unknown feature folder means the map is out of date,
 so everything runs rather than nothing.
 
 This is a real gate rather than a smoke test, and it is cheap because it is
 selective: a phase inside one feature usually plays two or three files in about
-fifteen seconds. The full `npm run e2e` runs at a tag, inside `check:release`.
+fifteen seconds. The full `node scripts/gates/gate-runner.ts e2e` runs at a tag, inside `check:release`.
 
 
 ## 5. A review pass over the phase's whole diff
@@ -203,7 +203,7 @@ ran the reviewer while its own mutation fixes were still landing; the report ope
 by saying so, and every finding then needed confirming twice. **A defect you already
 know about is landed before the launch, never deferred until the report is back** — a
 reading of a tree you knew was wrong is a reading you have to take twice. Land the
-fixes, get `npm run check` green, *then* review.
+fixes, get `npm run check:quick` green, *then* review.
 
 **Spend the waiting on read-only work** — a control run, a report, the
 retrospective's counting. It has been broken repeatedly and never by a decision:
@@ -219,7 +219,7 @@ reviewer is out is scope, landed after the report even outside the reviewer's pa
 The three breaks had one shape, so the fix is a question asked **before** launching,
 not more resolve afterwards: **what does this phase change outside `src/`?** Deploy
 scripts, the unit file, the server's env file, the CI workflow — almost nothing
-there has an automatic check (`docs:check` does compare `configure-server.sh`'s
+there has an automatic check (`docs-check` does compare `configure-server.sh`'s
 `REQUIRED_KEYS` against `main.ts`, and nothing else), so it surfaces late, feels
 urgent, and lands under a running agent. The third time, `OPERATOR_TG_ID` became required in `main.ts` and
 `deploy/configure-server.sh` still guarded only `BOT_TOKEN`, which would have shipped
@@ -320,7 +320,7 @@ Three things decide whether this is a gate at all, so they are known before it o
 
 **A gate that covers part of a checklist replaces that part, never the list.** Two
 phases in a row redrew the mockups here without ever loading `refresh-the-pictures`,
-because `docs:check` had already named which pictures were stale — so the loop ran
+because `docs-check` had already named which pictures were stale — so the loop ran
 off the failing gate, and the rows that had no gate were never walked. The Claude
 Design page was one of them, and it went two releases without a poster that had been
 shipping all along. It has a gate now; the half that generalises is the other one — when
@@ -352,12 +352,12 @@ Load the **`write-a-doc`** skill before touching any of them: it routes a fact t
 one file and says how to add it without creating the second copy that will drift.
 Two steps from it matter most at the end of a phase — search the other documents for
 what you are about to write, and search for the sentence the phase just made false.
-Run `npm run docs:check` once the documents are updated — it is the last step of
+Run `node scripts/gates/gate-runner.ts docs-check` once the documents are updated — it is the last step of
 the retrospective stage, and CI's `check:push` holds the same line after the push.
 
 ## A tool that refuses is a decision to re-open
 
-`node scripts/tools.ts site-css` stopped running mid-phase, and the fastest fix —
+`node scripts/tools/tools.ts site-css` stopped running mid-phase, and the fastest fix —
 install the missing package — silently reversed a decision taken ten days earlier and
 argued in `README.md`, in the same paragraph that gave its reason: the server runs
 `npm ci` on every deploy, so a compiler in the manifest is installed onto the machine

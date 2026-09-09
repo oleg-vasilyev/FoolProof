@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DESIGN_PAGE_SYNC } from "../../design-page.ts";
+import { DESIGN_PAGE_SYNC } from "../../tools/design-page.ts";
 
 
 const readdirSyncSpy = vi.fn();
@@ -219,7 +219,7 @@ describe("postersOutOfStepComplaints", () => {
     expect(complaints).toHaveLength(ONE_COMPLAINT);
     expect(complaints[FIRST]).toContain(`docs/posters/${CARD}.svg`);
     expect(complaints[FIRST]).toContain("never drawn");
-    expect(complaints[FIRST]).toContain('node scripts/tools.ts posters');
+    expect(complaints[FIRST]).toContain('node scripts/tools/tools.ts posters');
   });
 
   it("should say the renderer draws something else now when the committed picture differs", () => {

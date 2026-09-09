@@ -167,7 +167,7 @@ exists — `career-edges.cases.txt` for `samples/career-edges.ts` — because a 
 is a set of data, and one case can feed more than one poster: every case in
 `samples/gallery-edges.ts` draws both the chronology and the awards.
 
-`npm run docs:check` then holds three things together, and each of the three has been
+`node scripts/gates/gate-runner.ts docs-check` then holds three things together, and each of the three has been
 watched to fail: a case in the list that the script does not draw, a list naming a
 script nobody wrote, and a script whose cases no list ever approved. So an edge the
 owner looked at cannot quietly stop being drawn.

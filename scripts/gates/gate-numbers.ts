@@ -128,7 +128,7 @@ export const outputsOf = (gate: Gate): readonly string[] => {
   switch (gate) {
     case "lint":
     case "typecheck":
-    case "docs:check":
+    case "docs-check":
     case "e2e:typecheck":
       return [];
 
@@ -220,7 +220,7 @@ export const numbersFor = (gate: Gate, scope: MutationScope, read: Reader): Gate
   switch (gate) {
     case "lint":
     case "typecheck":
-    case "docs:check":
+    case "docs-check":
     case "e2e:typecheck":
       return { kind: "none" };
 
