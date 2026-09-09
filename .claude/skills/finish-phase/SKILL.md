@@ -180,7 +180,7 @@ selective: a phase inside one feature usually plays two or three files in about
 fifteen seconds. The full `npm run e2e` runs before a tag — enforced by the
 same pre-push hook that runs the rest of `check:release`.
 
-`npm run e2e:test` covers the harness's own pure parts and takes under a second; it
+`npm run test:e2e-harness` covers the harness's own pure parts and takes under a second; it
 is not part of `npm run check` because it belongs to `e2e/`, not to the app.
 
 ## 5. A review pass over the phase's whole diff

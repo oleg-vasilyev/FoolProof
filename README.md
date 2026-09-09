@@ -186,7 +186,7 @@ runs the bot, the gates, their parts, then the two test families.
 | `npm run e2e` | Whole scenarios against the real bot and a fake Telegram |
 | `npm run e2e:changed` | Only the scenarios the diff against `origin/main` can reach |
 | `npm run e2e:watch` | The same run, slowed down, in one browser tab |
-| `npm run e2e:test` | Units for the harness's own pure parts |
+| `npm run test:e2e-harness` | Units for the harness's own pure parts |
 | `npm run e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
 | `npm run prepare` | Run by `npm install` itself: points git at `.githooks/`, where the pre-push tag gate and the commit-msg flow gate live |
 
