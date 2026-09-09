@@ -339,9 +339,11 @@ judgement. `eslint.config.js` holds the checkable ones, several with no core equ
 | Imports point downward, features stay independent, `e2e/` stays outside | `no-restricted-imports`, one zone per layer |
 | An alias ban (`#live-game/**`) fires, and survives `await import(…)` | a `regex` pattern, and the same bans as `no-restricted-syntax` |
 
-The zones are the valuable ones, and a new one is not finished until a deliberate
-violation has been shown to fail the lint — the ones that never fired, and how to
-prove a new zone, are the `add-a-feature` skill's.
+**Nothing that refuses is finished until it has been seen refusing**: a lint zone, a
+`docs-check` rule, a hook, a gate, a config a gate reads — break its subject on purpose,
+watch the red, then move to the next file; the break is chosen from the rule's own scope,
+because four probes in one phase hit nothing the rule watched and read as broken gates.
+The zones that never fired, and how to prove one, are the `add-a-feature` skill's.
 
 A `PostToolUse` hook lints each file as it is written, so a violation surfaces at
 the edit instead of at the end of the turn; a `PreToolUse` hook refuses a shell command

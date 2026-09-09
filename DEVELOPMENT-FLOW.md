@@ -135,6 +135,9 @@ sequenceDiagram
             C->>C: fix now, before the next file
         end
         C->>C: write the unit tests: everything around the file replaced with stubs
+        opt the file is a rule, a gate, a hook or a config a gate reads
+            C->>C: break its subject on purpose and watch it go red before the next file — a rule proven only green has never been shown to fire
+        end
     end
     opt a fault turns up that this phase did not come for
         C->>K: the fix-a-bug skill
