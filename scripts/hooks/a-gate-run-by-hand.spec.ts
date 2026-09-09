@@ -23,6 +23,13 @@ describe("toolsRunByHandIn()", () => {
     expect(toolsRunByHandIn("npm test:coverage")).toEqual([]);
   });
 
+  it("should read the command through any run of spaces, and only at a word's start", () => {
+    expect(toolsRunByHandIn("npm   test")).toEqual(["npm   test"]);
+    expect(toolsRunByHandIn("cd x;  npx  --no-install  eslint src")).toEqual(["npx  --no-install  eslint"]);
+    expect(toolsRunByHandIn("xnpm test; snpx tsc")).toEqual([]);
+    expect(toolsRunByHandIn("npm testing")).toEqual([]);
+  });
+
   it("should leave a tool's name in prose and a different package alone", () => {
     expect(toolsRunByHandIn('echo "eslint and vitest are the tools"; npx tsc-files a.ts')).toEqual([]);
     expect(toolsRunByHandIn("node node_modules/eslint/lib/api.js")).toEqual([]);
@@ -41,9 +48,13 @@ describe("gateRunByHand()", () => {
   it("should refuse a tool run by hand, naming it and every gate the runner offers instead", () => {
     const refusal = gateRunByHand("npx tsc --noEmit && node node_modules/vitest/vitest.mjs run");
 
-    expect(refusal).toContain("Refused: npx tsc, node_modules/vitest/vitest.mjs runs a gate by hand.");
-    expect(refusal).toContain(`node ${GATE_RUNNER} <gate>`);
-    expect(refusal).toContain("test:mutation:changed [files]");
-    expect(refusal).toContain("scripts/gates/config/");
+    expect(refusal?.split("\n")).toEqual([
+      "Refused: npx tsc, node_modules/vitest/vitest.mjs runs a gate by hand.",
+      `Every gate runs through node ${GATE_RUNNER} <gate> — lint, typecheck, e2e:typecheck,`,
+      "docs-check, test [files], test:coverage, test:mutation:changed [files], test:mutation,",
+      "e2e, e2e:changed, test:e2e-harness — which leaves the log and the verdict under",
+      "reports/gates/ and names the config, now that the configs live in scripts/gates/config/",
+      "and the tool's bare name finds none.",
+    ]);
   });
 });

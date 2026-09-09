@@ -1,6 +1,7 @@
 import { createFakeTelegram, type FakeTelegram } from "./fake-telegram.ts";
 import { startBot, type BotOptions, type BotProcess } from "../bot-process.ts";
 import { resetDatabase } from "../scratch-database.ts";
+import type { KeepBotOutput } from "../bot-log.ts";
 
 
 export type Verdict = "waiting" | "running" | "passed" | "failed";
@@ -29,7 +30,10 @@ export interface ChatWorld {
 
 const IDLE: Banner = { scenario: "nothing running", step: "", verdict: "waiting", detail: null };
 
-export const createChatWorld = (botOptions: BotOptions): ChatWorld => {
+export const createChatWorld = (
+  botOptions: BotOptions,
+  keepBotOutput: KeepBotOutput | null = null
+): ChatWorld => {
   const telegram = createFakeTelegram();
   let bot: BotProcess | null = null;
   let banner: Banner = IDLE;
@@ -38,7 +42,16 @@ export const createChatWorld = (botOptions: BotOptions): ChatWorld => {
   // scenario this world has played went, which is what the hub lists.
   let verdicts: readonly Verdict[] = [];
 
+  // Everything every bot of the scenario running now has said, so a restart
+  // mid-scenario loses nothing and the log written is the whole scenario's.
+  let scenarioOutput = "";
+
   const stopBot = async (): Promise<void> => {
+    if (bot !== null && banner.verdict !== IDLE.verdict) {
+      scenarioOutput += bot.output();
+      keepBotOutput?.(banner.scenario, scenarioOutput);
+    }
+
     await bot?.stop();
     bot = null;
   };
@@ -65,6 +78,7 @@ export const createChatWorld = (botOptions: BotOptions): ChatWorld => {
       resetDatabase(botOptions.dbPath);
 
       telegram.beginScenario(scenario);
+      scenarioOutput = "";
       banner = { scenario, step: "starting the bot", verdict: "running", detail: null };
       verdicts = [...verdicts, "running"];
       bot = startBot(botOptions);

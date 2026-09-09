@@ -1,5 +1,6 @@
 import { FAMILIES } from "./mutation-families.ts";
 import { ESLINT, STRYKER, TSC, VITEST } from "./tool-binaries.ts";
+import { LINT_FINDINGS } from "./gate-numbers.ts";
 
 
 export const THE_CHECK_GATES = ["lint", "typecheck", "docs-check", "test:coverage"] as const;
@@ -93,12 +94,22 @@ const oneStep = (bin: string, ...args: readonly string[]): GateCommand => ({
 });
 
 export const COMMANDS: Readonly<Record<Gate, GateCommand>> = {
-  lint: oneStep(ESLINT, "--config", ESLINT_CONFIG, "--quiet", ...LINTED_FOLDERS),
-  typecheck: oneStep(TSC, "--noEmit"),
+  lint: oneStep(
+    ESLINT,
+    "--config",
+    ESLINT_CONFIG,
+    "--quiet",
+    "--format",
+    "json",
+    "--output-file",
+    LINT_FINDINGS,
+    ...LINTED_FOLDERS
+  ),
+  typecheck: oneStep(TSC, "--noEmit", "--pretty", "false"),
   "e2e:typecheck": {
     steps: [
-      { bin: TSC, args: ["-p", "e2e", "--noEmit"] },
-      { bin: TSC, args: ["-p", "e2e/pages", "--noEmit"] },
+      { bin: TSC, args: ["-p", "e2e", "--noEmit", "--pretty", "false"] },
+      { bin: TSC, args: ["-p", "e2e/pages", "--noEmit", "--pretty", "false"] },
     ],
     takesFiles: false,
   },

@@ -5,6 +5,7 @@ import type { Banner, Verdict } from "../fake-telegram/chat-world.ts";
 import type { ChatMessage } from "../fake-telegram/chat-log.ts";
 import type { Person, PublishedCommand, Prompt } from "../fake-telegram/fake-telegram.ts";
 import { databaseForWorker, portForWorker } from "../world-ports.ts";
+import { writeBotLog } from "../bot-log.ts";
 import { claimWorld } from "./world-claim.ts";
 import { announceTo } from "./hub-announce.ts";
 import { QUIET_MS, lateEffectComplaint, workedOnAfterSettling } from "./settling.ts";
@@ -92,13 +93,16 @@ const origin = `http://127.0.0.1:${String(port)}`;
 // itself. So the second evaluation says so.
 claimWorld(port);
 
-const world = createChatWorld({
-  apiRoot: origin,
-  dbPath: databaseForWorker(worker),
-  logLevel: LOG_LEVEL,
-  operatorTgId: OPERATOR_TG_ID,
-  echo: false,
-});
+const world = createChatWorld(
+  {
+    apiRoot: origin,
+    dbPath: databaseForWorker(worker),
+    logLevel: LOG_LEVEL,
+    operatorTgId: OPERATOR_TG_ID,
+    echo: false,
+  },
+  writeBotLog
+);
 
 let server: Server | null = null;
 

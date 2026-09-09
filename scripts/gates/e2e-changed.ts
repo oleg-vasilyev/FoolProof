@@ -8,7 +8,7 @@ const NOTHING = 0;
 
 const FEATURE = /^src\/features\/([^/]+)\//;
 
-const EVERYTHING = /^(src\/(shared|main|supervisor|feature-installer)|e2e\/(harness|hub|fake-telegram|pages|bot-process|scratch-database|world-ports|vitest\.e2e\.config))/;
+const EVERYTHING = /^(src\/(shared|main|supervisor|feature-installer)|e2e\/(harness|hub|fake-telegram|pages|bot-process|bot-log|scratch-database|world-ports|vitest\.e2e\.config))/;
 
 const SCENARIO_DIR = "e2e/scenarios";
 

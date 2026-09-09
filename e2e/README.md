@@ -56,6 +56,13 @@ on and each message is stamped with the scenario that produced it — so the pag
 reads as one long conversation with a divider per scenario, the way Telegram does,
 while a query still only sees the scenario running now.
 
+**What the bot printed during a scenario is written to `reports/e2e/bot/<scenario>.log`**
+whenever its process stops — at the next scenario, at a restart mid-scenario, at the end
+of the run — the whole scenario's output in one file, rewritten by the next run of that
+scenario. A red e2e line from the gate runner names that file under the failed case, so a
+failure is read without playing it again; [`bot-log.ts`](bot-log.ts) owns the shape of
+the name, and the runner's side repeats it.
+
 **`isolate: false` in the Vitest config is load-bearing.** With isolation the
 module registry is rebuilt per file, so the world would be recreated per scenario
 file — losing the history and racing itself for the port.

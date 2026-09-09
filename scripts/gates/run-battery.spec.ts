@@ -3,6 +3,8 @@ import { COMMANDS } from "./gate-list.ts";
 import type { GateVerdict } from "./gate-verdict.ts";
 
 
+const ROOT = "D:/Temp/FoolProof";
+
 const runGateSpy = vi.fn();
 
 const forgetVerdictsSpy = vi.fn();
@@ -34,7 +36,7 @@ vi.mock("./gate-verdict.ts", () => ({
 }));
 
 vi.mock("./gate-summary.ts", () => ({
-  summaryLines: (verdicts: unknown) => summaryLinesSpy(verdicts),
+  summaryLines: (verdicts: unknown, root: unknown) => summaryLinesSpy(verdicts, root),
   gatesParagraph: (verdicts: unknown, battery: unknown) => gatesParagraphSpy(verdicts, battery),
 }));
 
@@ -238,8 +240,8 @@ describe("whatToSay()", () => {
   it("should give the summary, a blank line, then the paragraph a commit message pastes", () => {
     const verdicts = [verdictFor("lint", true)];
 
-    expect(whatToSay(verdicts, "check:phase")).toEqual(["a summary line", "", "Gates: a paragraph."]);
-    expect(summaryLinesSpy).toHaveBeenCalledWith(verdicts);
+    expect(whatToSay(verdicts, "check:phase", ROOT)).toEqual(["a summary line", "", "Gates: a paragraph."]);
+    expect(summaryLinesSpy).toHaveBeenCalledWith(verdicts, ROOT);
     expect(gatesParagraphSpy).toHaveBeenCalledWith(verdicts, "check:phase");
   });
 });
@@ -248,7 +250,7 @@ describe("runBattery()", () => {
   const say = vi.fn();
 
   it("should refuse a name that is no battery, listing the four, before running anything", async () => {
-    const status = await runBattery(["node", "run-battery.ts", "nonsense"], say);
+    const status = await runBattery(["node", "run-battery.ts", "nonsense"], say, ROOT);
 
     expect(status).toBe(RED);
     expect(say.mock.calls[FIRST]?.[FIRST]).toContain("check:quick, check:push, check:phase, check:release");
@@ -257,7 +259,7 @@ describe("runBattery()", () => {
   });
 
   it("should forget its gates' old verdicts and write its name down before the first gate runs", async () => {
-    await runBattery(["node", "run-battery.ts", "check:push"], say);
+    await runBattery(["node", "run-battery.ts", "check:push"], say, ROOT);
 
     expect(forgetVerdictsSpy).toHaveBeenCalledWith(["lint", "typecheck", "e2e:typecheck", "test:e2e-harness", "docs-check"]);
     expect(mkdirSyncSpy).toHaveBeenCalledWith("reports/gates", { recursive: true });
@@ -268,7 +270,7 @@ describe("runBattery()", () => {
   });
 
   it("should walk the named battery with no baseline and exit green when every gate is", async () => {
-    const status = await runBattery(["node", "run-battery.ts", "check:push"], say);
+    const status = await runBattery(["node", "run-battery.ts", "check:push"], say, ROOT);
 
     expect(status).toBe(GREEN);
     expect(runGateSpy.mock.calls.map((call) => call[FIRST])).toEqual([
@@ -287,7 +289,7 @@ describe("runBattery()", () => {
       Promise.resolve(verdictFor(gate, gate !== "test:coverage"))
     );
 
-    await runBattery(["node", "run-battery.ts", "check:phase"], say);
+    await runBattery(["node", "run-battery.ts", "check:phase"], say, ROOT);
 
     expect(skippedVerdictSpy).toHaveBeenCalledWith("test:mutation:changed", "test:coverage", expect.any(Date));
     expect(writeVerdictSpy).toHaveBeenCalledWith(SKIPPED);
@@ -296,7 +298,7 @@ describe("runBattery()", () => {
   it("should walk the release gates against the previous tag when the battery is the release", async () => {
     tagOnHead("v1.21.0\n", "v1.20.1\n");
 
-    await runBattery(["node", "run-battery.ts", "check:release"], say);
+    await runBattery(["node", "run-battery.ts", "check:release"], say, ROOT);
 
     expect(runGateSpy.mock.calls.map((call) => call[FIRST])).toEqual([
       "lint",
@@ -315,7 +317,7 @@ describe("runBattery()", () => {
   it("should refuse a release with no tag on HEAD before touching the folder", async () => {
     tagOnHead("\n", "v1.20.1\n");
 
-    const status = await runBattery(["node", "run-battery.ts", "check:release"], say);
+    const status = await runBattery(["node", "run-battery.ts", "check:release"], say, ROOT);
 
     expect(status).toBe(RED);
     expect(say.mock.calls[FIRST]?.[FIRST]).toContain("HEAD carries no v* tag");
@@ -328,7 +330,7 @@ describe("runBattery()", () => {
       Promise.resolve(verdictFor(gate, gate !== "typecheck"))
     );
 
-    const status = await runBattery(["node", "run-battery.ts", "check:phase"], say);
+    const status = await runBattery(["node", "run-battery.ts", "check:phase"], say, ROOT);
 
     expect(status).toBe(RED);
     expect(writeFileSyncSpy).toHaveBeenLastCalledWith("reports/gates/gates-paragraph.txt", "Gates: a paragraph.\n");

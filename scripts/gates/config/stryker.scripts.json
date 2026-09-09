@@ -24,6 +24,7 @@
     "!scripts/gates/e2e-changed.ts",
     "!scripts/**/*.spec.ts",
     "!scripts/**/*.stub.ts",
+    "!scripts/docs-check/check-docs.ts",
     "!scripts/docs-check/source-files.ts",
     "!scripts/docs-check/document-files.ts"
   ],

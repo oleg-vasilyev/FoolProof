@@ -50,6 +50,8 @@ const SKIPPED: GateVerdict = {
 
 const NONE: GateNumbers = { kind: "none" };
 
+const NO_SURVIVORS = { named: [], total: 0 };
+
 const COVERAGE: GateNumbers = {
   kind: "coverage",
   cases: 4651,
@@ -70,6 +72,7 @@ const SOURCE_SCORED = {
   survived: 1,
   noCoverage: 0,
   timeout: 0,
+  survivors: NO_SURVIVORS,
 } as const;
 
 const TOOLING_SCORED = { ...SOURCE_SCORED, family: "tooling", score: 84.02 } as const;
@@ -173,6 +176,20 @@ describe("gatesParagraph()", () => {
     );
   });
 
+  it("should count a red lint's or typecheck's findings in the paragraph, and say nothing at zero", () => {
+    const finding = { file: "src/a.ts", line: 1, column: 1, rule: "x", message: "m" };
+
+    expect(gatesParagraph([verdictWith("lint", false, { kind: "findings", findings: [finding, finding] })], "check:quick")).toBe(
+      "Gates: check:quick RED (lint red (2 findings))."
+    );
+    expect(gatesParagraph([verdictWith("typecheck", false, { kind: "findings", findings: [finding] })], "check:quick")).toBe(
+      "Gates: check:quick RED (typecheck red (1 finding))."
+    );
+    expect(gatesParagraph([verdictWith("lint", false, { kind: "findings", findings: [] })], "check:quick")).toBe(
+      "Gates: check:quick RED (lint red)."
+    );
+  });
+
   it("should name the family under its bar when a mutation gate is red", () => {
     const verdicts = [
       verdictWith("test:mutation:changed", false, {
@@ -215,7 +232,7 @@ describe("summaryLines()", () => {
   });
 
   it("should give one line per gate, from the verdict's own line", () => {
-    const lines = summaryLines(aGreenPhase());
+    const lines = summaryLines(aGreenPhase(), ROOT);
 
     expect(lines).toEqual([
       "lint: a line",
@@ -228,7 +245,7 @@ describe("summaryLines()", () => {
   });
 
   it("should end a red run with the command that re-runs each red gate alone", () => {
-    const lines = summaryLines([verdictWith("lint", false, NONE), verdictWith("e2e", false, NONE)]);
+    const lines = summaryLines([verdictWith("lint", false, NONE), verdictWith("e2e", false, NONE)], ROOT);
 
     expect(lines.slice(-THREE_FAILED)).toEqual([
       "Re-run a red gate alone, not the whole battery:",
@@ -238,20 +255,28 @@ describe("summaryLines()", () => {
   });
 
   it("should count a skipped gate among the red ones to re-run", () => {
-    const lines = summaryLines([SKIPPED]);
+    const lines = summaryLines([SKIPPED], ROOT);
 
     expect(rerunCommandForSpy).toHaveBeenCalledTimes(ONCE);
     expect(lines.at(-1)).toBe("  rerun test:mutation:changed");
   });
 
   it("should add no advice to a green run", () => {
-    expect(summaryLines(aGreenPhase()).join("\n")).not.toContain("Re-run");
+    expect(summaryLines(aGreenPhase(), ROOT).join("\n")).not.toContain("Re-run");
+  });
+
+  it("should print a gate's reasons under its line, so a battery says what a single run would", () => {
+    const finding = { file: "src/a.ts", line: 8, column: 1, rule: "project/no-comments", message: "No comments" };
+    const lines = summaryLines([verdictWith("lint", false, { kind: "findings", findings: [finding] })], ROOT);
+
+    expect(lines.slice(0, 2)).toEqual(["lint: a line", "  ✗ src/a.ts:8:1 project/no-comments — No comments"]);
   });
 });
 
 const ROOT = "D:\\Temp\\FoolProof";
 
 const A_FAILURE = {
+  botLog: null,
   file: "D:/Temp/FoolProof/scripts/gate-paths.spec.ts",
   name: "fileStemOf() should turn the colons into dashes",
   message: "AssertionError: expected 'a' to be 'b'",
@@ -286,6 +311,54 @@ describe("reasonLines()", () => {
   it("should say nothing for a green gate or a skipped one", () => {
     expect(reasonLines(verdictWith("lint", true, NONE), ROOT)).toEqual([]);
     expect(reasonLines(SKIPPED, ROOT)).toEqual([]);
+  });
+
+  it("should list each finding as file:line:col rule — message, the file made relative", () => {
+    const red = verdictWith("lint", false, {
+      kind: "findings",
+      findings: [
+        { file: "D:\\Temp\\FoolProof\\src\\a.ts", line: 8, column: 1, rule: "project/no-comments", message: "No comments" },
+        { file: "src/b.ts", line: 1, column: 14, rule: "TS2322", message: "Type 'string' is not\nassignable" },
+      ],
+    });
+
+    expect(reasonLines(red, ROOT)).toEqual([
+      "  ✗ src/a.ts:8:1 project/no-comments — No comments",
+      "  ✗ src/b.ts:1:14 TS2322 — Type 'string' is not\n    assignable",
+    ]);
+  });
+
+  it("should point an e2e failure at the bot log of its scenario, under the message", () => {
+    const red = verdictWith("e2e", false, {
+      kind: "e2e", cases: 1, files: 1, failed: 1,
+      failures: [{ ...A_FAILURE, message: "expected\nreceived", botLog: "reports/e2e/bot/whole-game.log" }],
+    });
+
+    expect(reasonLines(red, ROOT)).toEqual([
+      "  ✗ scripts/gate-paths.spec.ts › fileStemOf() should turn the colons into dashes: expected\n    received",
+      "    bot output: reports/e2e/bot/whole-game.log",
+    ]);
+  });
+
+  it("should list the mutants still alive under a mutation gate, red or green, with a ceiling said aloud", () => {
+    const survivors = {
+      named: [
+        { file: "scripts/gates/a.ts", line: 12, replacement: "\"\"", status: "Survived" as const },
+        { file: "scripts/gates/b.ts", line: 3, replacement: "true", status: "NoCoverage" as const },
+      ],
+      total: 5,
+    };
+    const green = verdictWith("test:mutation:changed", true, {
+      kind: "mutation", scope: "the diff", families: [{ ...TOOLING_SCORED, survivors }],
+    });
+
+    expect(reasonLines(green, ROOT)).toEqual([
+      "  tooling: 5 mutants alive",
+      "    ✗ scripts/gates/a.ts:12 Survived «\"\"»",
+      "    ✗ scripts/gates/b.ts:3 NoCoverage «true»",
+      "    and 3 more in tooling's report",
+    ]);
+    expect(reasonLines(verdictWith("test:mutation:changed", true, { kind: "mutation", scope: "the diff", families: [SOURCE_SCORED] }), ROOT)).toEqual([]);
   });
 
   it("should list each failed assertion with its file made relative, its name and its message", () => {

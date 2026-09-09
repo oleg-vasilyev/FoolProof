@@ -40,7 +40,8 @@ vi.mock("node:fs", () => ({
 }));
 
 vi.mock("./gate-numbers.ts", () => ({
-  numbersFor: (gate: unknown, scope: unknown, read: unknown) => numbersForSpy(gate, scope, read),
+  LINT_FINDINGS: "reports/lint/findings.json",
+  numbersFor: (gate: unknown, scope: unknown, read: unknown, output: unknown) => numbersForSpy(gate, scope, read, output),
   outputsOf: (gate: unknown) => outputsOfSpy(gate),
   scopeOf: (gate: unknown, against: unknown, args: unknown) => scopeOfSpy(gate, against, args),
 }));
@@ -308,7 +309,12 @@ describe("runGate()", () => {
     await runAndClose(PASSED, "v1.20.0");
 
     expect(scopeOfSpy).toHaveBeenCalledWith("lint", "v1.20.0", []);
-    expect(numbersForSpy).toHaveBeenCalledWith("lint", A_SCOPE, readOrNull);
+    expect(numbersForSpy).toHaveBeenCalledWith("lint", A_SCOPE, readOrNull, [
+      "$ node node_modules/eslint/bin/eslint.js --quiet src",
+      "first line",
+      "second line",
+      "",
+    ]);
   });
 
   it("should build the verdict from the exit code, the clock and the output split into lines", async () => {
@@ -426,6 +432,10 @@ describe("main()", () => {
       "--config",
       "scripts/gates/config/eslint.config.js",
       "--quiet",
+      "--format",
+      "json",
+      "--output-file",
+      "reports/lint/findings.json",
       "src",
       "scripts",
       "e2e",

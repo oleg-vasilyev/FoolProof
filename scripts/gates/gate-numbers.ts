@@ -1,6 +1,10 @@
 import { calculateMetrics } from "mutation-testing-metrics";
 import type { Gate } from "./gate-list.ts";
 import { FAMILIES, type Family, type FamilyName } from "./mutation-families.ts";
+import type { Finding } from "./finding.ts";
+import { lintFindingsIn } from "./lint-findings.ts";
+import { typecheckFindingsIn } from "./typecheck-findings.ts";
+import { survivorsIn, type ReportedFiles, type Survivors } from "./surviving-mutants.ts";
 
 
 export type MutationScope = "the diff" | "everything" | `since ${string}` | `named ${string}`;
@@ -13,12 +17,14 @@ export interface FamilyScore {
   readonly survived: number;
   readonly noCoverage: number;
   readonly timeout: number;
+  readonly survivors: Survivors;
 }
 
 export interface Failure {
   readonly file: string;
   readonly name: string;
   readonly message: string;
+  readonly botLog: string | null;
 }
 
 export interface CaseCount {
@@ -37,6 +43,7 @@ export interface CoverageRates {
 
 export type GateNumbers =
   | { readonly kind: "none" }
+  | { readonly kind: "findings"; readonly findings: readonly Finding[] }
   | ({ readonly kind: "harness" } & CaseCount)
   | ({ readonly kind: "tests" } & CaseCount)
   | ({ readonly kind: "coverage" } & CaseCount & CoverageRates)
@@ -54,22 +61,37 @@ export const COVERAGE_SUMMARY = "reports/coverage/coverage-summary.json";
 
 export const E2E_RESULTS = "reports/e2e/results.json";
 
+export const LINT_FINDINGS = "reports/lint/findings.json";
+
+export const BOT_LOGS = "reports/e2e/bot";
+
 export const MOST_FAILURES = 10;
+
+export const MOST_MESSAGE_LINES = 3;
 
 const NO_ARGUMENTS = 0;
 
-const FIRST_LINE = 0;
+const FIRST = 0;
 
 const FAILED = "failed";
 
+const A_STACK_FRAME = /^\s+at /;
+
+const NOT_A_FILE_NAME = /[^a-z0-9]+/g;
+
+const A_DASH_AT_AN_END = /^-|-$/g;
+
 interface AssertionResult {
   readonly fullName: string;
+  readonly ancestorTitles?: readonly string[];
   readonly status: string;
   readonly failureMessages: readonly string[];
 }
 
 interface FileResult {
   readonly name: string;
+  readonly status?: string;
+  readonly message?: string;
   readonly assertionResults: readonly AssertionResult[];
 }
 
@@ -84,7 +106,7 @@ interface CoverageSummary {
 }
 
 interface MutationReport {
-  readonly files: Parameters<typeof calculateMetrics>[0];
+  readonly files: Parameters<typeof calculateMetrics>[0] & ReportedFiles;
 }
 
 interface StrykerConfig {
@@ -101,36 +123,65 @@ const parse = <T>(read: Reader, path: string): T | null => {
   return JSON.parse(text) as T;
 };
 
-const firstLineOf = (message: string | undefined): string =>
-  (message ?? "").split("\n")[FIRST_LINE] ?? "";
+export const botLogPathOf = (scenario: string): string =>
+  `${BOT_LOGS}/${scenario.toLowerCase().replace(NOT_A_FILE_NAME, "-").replace(A_DASH_AT_AN_END, "")}.log`;
 
-export const failuresIn = (results: VitestResults): readonly Failure[] =>
-  results.testResults
-    .flatMap((file) =>
-      file.assertionResults
-        .filter((assertion) => assertion.status === FAILED)
-        .map((assertion) => ({
-          file: file.name,
-          name: assertion.fullName,
-          message: firstLineOf(assertion.failureMessages[FIRST_LINE]),
-        }))
-    )
-    .slice(NO_ARGUMENTS, MOST_FAILURES);
+export const messageOf = (stack: string | undefined): string => {
+  const lines = (stack ?? "").split("\n");
+  const firstFrame = lines.findIndex((line) => A_STACK_FRAME.test(line));
 
-const casesIn = (results: VitestResults): CaseCount => ({
+  return lines
+    .slice(NO_ARGUMENTS, firstFrame === -1 ? lines.length : firstFrame)
+    .slice(NO_ARGUMENTS, MOST_MESSAGE_LINES)
+    .join("\n")
+    .trimEnd();
+};
+
+export const THE_FILE_DID_NOT_LOAD = "the file did not load";
+
+const failedAssertionsIn = (file: FileResult, playsABot: boolean): readonly Failure[] =>
+  file.assertionResults
+    .filter((assertion) => assertion.status === FAILED)
+    .map((assertion) => {
+      const scenario = assertion.ancestorTitles?.[FIRST];
+
+      return {
+        file: file.name,
+        name: assertion.fullName,
+        message: messageOf(assertion.failureMessages[FIRST]),
+        botLog: playsABot && scenario !== undefined ? botLogPathOf(scenario) : null,
+      };
+    });
+
+const failuresOf = (file: FileResult, playsABot: boolean): readonly Failure[] => {
+  const failed = failedAssertionsIn(file, playsABot);
+
+  if (failed.length === NO_ARGUMENTS && file.status === FAILED) {
+    return [{ file: file.name, name: THE_FILE_DID_NOT_LOAD, message: messageOf(file.message), botLog: null }];
+  }
+
+  return failed;
+};
+
+export const failuresIn = (results: VitestResults, playsABot: boolean): readonly Failure[] =>
+  results.testResults.flatMap((file) => failuresOf(file, playsABot)).slice(NO_ARGUMENTS, MOST_FAILURES);
+
+const casesIn = (results: VitestResults, playsABot: boolean): CaseCount => ({
   cases: results.numTotalTests,
   files: results.testResults.length,
   failed: results.numFailedTests,
-  failures: failuresIn(results),
+  failures: failuresIn(results, playsABot),
 });
 
 export const outputsOf = (gate: Gate): readonly string[] => {
   switch (gate) {
-    case "lint":
     case "typecheck":
     case "docs-check":
     case "e2e:typecheck":
       return [];
+
+    case "lint":
+      return [LINT_FINDINGS];
 
     case "test:e2e-harness":
       return [HARNESS_RESULTS];
@@ -185,13 +236,16 @@ const familyScore = (read: Reader, family: Family): FamilyScore | null => {
     survived: metrics.survived,
     noCoverage: metrics.noCoverage,
     timeout: metrics.timeout,
+    survivors: survivorsIn(report.files),
   };
 };
 
 const testNumbers = (read: Reader, kind: "harness" | "tests" | "e2e", path: string): GateNumbers => {
   const results = parse<VitestResults>(read, path);
 
-  return results === null ? { kind: "missing", expected: path } : { kind, ...casesIn(results) };
+  return results === null
+    ? { kind: "missing", expected: path }
+    : { kind, ...casesIn(results, kind === "e2e") };
 };
 
 const coverageNumbers = (read: Reader): GateNumbers => {
@@ -203,12 +257,12 @@ const coverageNumbers = (read: Reader): GateNumbers => {
   }
 
   if (summary === null) {
-    return { kind: "tests", ...casesIn(results) };
+    return { kind: "tests", ...casesIn(results, false) };
   }
 
   return {
     kind: "coverage",
-    ...casesIn(results),
+    ...casesIn(results, false),
     statements: summary.total.statements.pct,
     branches: summary.total.branches.pct,
     functions: summary.total.functions.pct,
@@ -216,13 +270,28 @@ const coverageNumbers = (read: Reader): GateNumbers => {
   };
 };
 
-export const numbersFor = (gate: Gate, scope: MutationScope, read: Reader): GateNumbers => {
+const lintNumbers = (read: Reader): GateNumbers => {
+  const json = read(LINT_FINDINGS);
+
+  return json === null ? { kind: "missing", expected: LINT_FINDINGS } : { kind: "findings", findings: lintFindingsIn(json) };
+};
+
+export const numbersFor = (
+  gate: Gate,
+  scope: MutationScope,
+  read: Reader,
+  output: readonly string[]
+): GateNumbers => {
   switch (gate) {
-    case "lint":
-    case "typecheck":
     case "docs-check":
-    case "e2e:typecheck":
       return { kind: "none" };
+
+    case "lint":
+      return lintNumbers(read);
+
+    case "typecheck":
+    case "e2e:typecheck":
+      return { kind: "findings", findings: typecheckFindingsIn(output) };
 
     case "test:e2e-harness":
       return testNumbers(read, "harness", HARNESS_RESULTS);

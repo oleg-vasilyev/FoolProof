@@ -10,6 +10,7 @@ export const OWNER_FILES: readonly string[] = [
   "scripts/gates/config/vitest.config.ts",
   "e2e/vitest.e2e.config.ts",
   "scripts/gates/gate-paths.ts",
+  "scripts/gates/gate-numbers.ts",
   "scripts/tools/tool-verdict.ts",
   "scripts/gates/config/stryker.config.json",
   "scripts/gates/config/stryker.scripts.json",

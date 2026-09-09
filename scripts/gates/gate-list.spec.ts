@@ -90,11 +90,22 @@ describe("COMMANDS", () => {
     }
   });
 
-  it("should lint the three linted roots quietly, through the config under scripts/gates/config/", () => {
+  it("should lint the three linted roots quietly, through the moved config, into the findings file", () => {
     expect(COMMANDS.lint.steps).toEqual([
       {
         bin: "node_modules/eslint/bin/eslint.js",
-        args: ["--config", "scripts/gates/config/eslint.config.js", "--quiet", "src", "scripts", "e2e"],
+        args: [
+          "--config",
+          "scripts/gates/config/eslint.config.js",
+          "--quiet",
+          "--format",
+          "json",
+          "--output-file",
+          "reports/lint/findings.json",
+          "src",
+          "scripts",
+          "e2e",
+        ],
       },
     ]);
   });
@@ -118,8 +129,8 @@ describe("COMMANDS", () => {
 
   it("should make e2e:typecheck two tsc steps, the harness then its pages, and the full mutation one Stryker step per family", () => {
     expect(COMMANDS["e2e:typecheck"].steps.map((step) => step.args)).toEqual([
-      ["-p", "e2e", "--noEmit"],
-      ["-p", "e2e/pages", "--noEmit"],
+      ["-p", "e2e", "--noEmit", "--pretty", "false"],
+      ["-p", "e2e/pages", "--noEmit", "--pretty", "false"],
     ]);
     expect(COMMANDS["test:mutation"].steps.map((step) => step.args)).toEqual([
       ["run", "scripts/gates/config/stryker.config.json"],

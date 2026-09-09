@@ -176,14 +176,15 @@ export const runGate = async (
 
   capture.log.end();
 
+  const output = linesOf(capture.chunks);
   const verdict = verdictOf(
     gate,
     named,
     code,
     startedAt,
     new Date(),
-    numbersFor(gate, scope, readOrNull),
-    linesOf(capture.chunks)
+    numbersFor(gate, scope, readOrNull, output),
+    output
   );
 
   writeVerdict(verdict, named);

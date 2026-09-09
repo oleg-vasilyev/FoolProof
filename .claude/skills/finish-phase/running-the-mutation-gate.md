@@ -66,8 +66,9 @@ Rules about *running* it, learned by burning most of a phase's budget on them:
   line, throws away the coverage table and the mutation score the commit message
   then needs, and the cheapest way back is running the thing again — which is the
   rule this one protects. Send the whole run to a file and grep the file. Every
-  run also writes `reports/mutation/mutation.json` and `reports/mutation/index.html`,
-  and a backgrounded run keeps its own log — read those. `/merge` was closed with eight
+  run through the runner prints every mutant still alive under its line — file, line,
+  status, replacement, twenty per family — and writes `reports/mutation/mutation.json`
+  and `reports/mutation/index.html` for the rest; read those. `/merge` was closed with eight
   Stryker invocations where two would have done, three of them the same full run
   repeated to look at three slices of one table.
 - **Moving code moves its mutants — re-run the gate after a split or a rename.**

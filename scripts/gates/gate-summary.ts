@@ -1,10 +1,17 @@
 import { rerunCommandFor, type Battery } from "./gate-list.ts";
 import { lineFor, type GateVerdict } from "./gate-verdict.ts";
-import type { FamilyScore, GateNumbers, MutationScope } from "./gate-numbers.ts";
+import type { Failure, FamilyScore, GateNumbers, MutationScope } from "./gate-numbers.ts";
+import type { Finding } from "./finding.ts";
+import type { Mutant } from "./surviving-mutants.ts";
 import { FAMILY_NAMES, type FamilyName } from "./mutation-families.ts";
 
 
 const NO_FAILURES = 0;
+
+const A_SINGLE = 1;
+
+const plural = (count: number, noun: string): string =>
+  `${String(count)} ${noun}${count === A_SINGLE ? "" : "s"}`;
 
 const TWO_DECIMALS = 2;
 
@@ -61,6 +68,7 @@ const counted = (cases: number, files: number): string =>
 const numbersPhrase = (numbers: GateNumbers): string | null => {
   switch (numbers.kind) {
     case "none":
+    case "findings":
       return null;
 
     case "harness":
@@ -89,11 +97,16 @@ const numbersPhrase = (numbers: GateNumbers): string | null => {
 const failedPhrase = (failed: number): string =>
   failed > NO_FAILURES ? `${String(failed)} failed` : "";
 
+const findingsPhrase = (count: number): string => (count > NO_FAILURES ? plural(count, "finding") : "");
+
 const redDetail = (numbers: GateNumbers): string => {
   switch (numbers.kind) {
     case "none":
     case "missing":
       return "";
+
+    case "findings":
+      return findingsPhrase(numbers.findings.length);
 
     case "harness":
     case "tests":
@@ -135,11 +148,11 @@ export const gatesParagraph = (verdicts: readonly GateVerdict[], battery: Batter
   return phrases.length === NO_FAILURES ? `${opening}.` : `${opening} — ${phrases.join(", ")}.`;
 };
 
-export const summaryLines = (verdicts: readonly GateVerdict[]): readonly string[] => {
+export const summaryLines = (verdicts: readonly GateVerdict[], root: string): readonly string[] => {
   const red = verdicts.filter((verdict) => !verdict.ok);
 
   return [
-    ...verdicts.map(lineFor),
+    ...verdicts.flatMap((verdict) => [lineFor(verdict), ...reasonLines(verdict, root)]),
     ...(red.length === NO_FAILURES
       ? []
       : [
@@ -156,31 +169,67 @@ export const relativeTo = (root: string, file: string): string => {
   return slashed.startsWith(prefix) ? slashed.slice(prefix.length) : slashed;
 };
 
-const failureLines = (numbers: GateNumbers, root: string): readonly string[] => {
+const indentedLines = (text: string): string => text.split("\n").join(`\n${INDENTED}${INDENTED}`);
+
+const failureLine = (failure: Failure, root: string): readonly string[] => [
+  `${INDENTED}✗ ${relativeTo(root, failure.file)} › ${failure.name}: ${indentedLines(failure.message)}`,
+  ...(failure.botLog === null ? [] : [`${INDENTED}${INDENTED}bot output: ${failure.botLog}`]),
+];
+
+const findingLine = (finding: Finding, root: string): string =>
+  `${INDENTED}✗ ${relativeTo(root, finding.file)}:${String(finding.line)}:${String(finding.column)} ` +
+  `${finding.rule} — ${indentedLines(finding.message)}`;
+
+const mutantLine = (mutant: Mutant): string =>
+  `${INDENTED}${INDENTED}✗ ${mutant.file}:${String(mutant.line)} ${mutant.status} «${mutant.replacement}»`;
+
+const survivorLines = (families: readonly FamilyScore[]): readonly string[] =>
+  families.flatMap((family) => {
+    const { named, total } = family.survivors;
+
+    if (total === NO_FAILURES) {
+      return [];
+    }
+
+    const more = total - named.length;
+
+    return [
+      `${INDENTED}${family.family}: ${plural(total, "mutant")} alive`,
+      ...named.map(mutantLine),
+      ...(more > NO_FAILURES ? [`${INDENTED}${INDENTED}and ${String(more)} more in ${family.family}'s report`] : []),
+    ];
+  });
+
+const detailLines = (numbers: GateNumbers, root: string): readonly string[] => {
   switch (numbers.kind) {
     case "harness":
     case "tests":
     case "coverage":
     case "e2e":
-      return numbers.failures.map(
-        (failure) => `${INDENTED}✗ ${relativeTo(root, failure.file)} › ${failure.name}: ${failure.message}`
-      );
+      return numbers.failures.flatMap((failure) => failureLine(failure, root));
+
+    case "findings":
+      return numbers.findings.map((finding) => findingLine(finding, root));
+
+    case "mutation":
+      return survivorLines(numbers.families);
 
     case "none":
-    case "mutation":
     case "missing":
       return [];
   }
 };
 
 export const reasonLines = (verdict: GateVerdict, root: string): readonly string[] => {
-  if (verdict.kind !== "ran" || verdict.ok) {
+  if (verdict.kind !== "ran") {
     return [];
   }
 
-  const failures = failureLines(verdict.numbers, root);
+  if (verdict.ok) {
+    return verdict.numbers.kind === "mutation" ? survivorLines(verdict.numbers.families) : [];
+  }
 
-  return failures.length === NO_FAILURES
-    ? verdict.tail.map((line) => `${INDENTED}${line}`)
-    : failures;
+  const details = detailLines(verdict.numbers, root);
+
+  return details.length === NO_FAILURES ? verdict.tail.map((line) => `${INDENTED}${line}`) : details;
 };

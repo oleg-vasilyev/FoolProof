@@ -55,8 +55,12 @@ export const walkTheGates = async (
   return verdicts;
 };
 
-export const whatToSay = (verdicts: readonly GateVerdict[], battery: Battery): readonly string[] => [
-  ...summaryLines(verdicts),
+export const whatToSay = (
+  verdicts: readonly GateVerdict[],
+  battery: Battery,
+  root: string
+): readonly string[] => [
+  ...summaryLines(verdicts, root),
   "",
   gatesParagraph(verdicts, battery),
 ];
@@ -85,7 +89,8 @@ const skipOnDisk = (gate: Gate, because: Gate): GateVerdict => {
 
 export const runBattery = async (
   argv: readonly string[],
-  say: (line: string) => void
+  say: (line: string) => void,
+  root: string
 ): Promise<number> => {
   const battery = argv.at(-1);
 
@@ -116,7 +121,7 @@ export const runBattery = async (
 
   writeFileSync(PARAGRAPH_PATH, `${gatesParagraph(verdicts, battery)}\n`);
 
-  for (const line of whatToSay(verdicts, battery)) {
+  for (const line of whatToSay(verdicts, battery, root)) {
     say(line);
   }
 
@@ -124,5 +129,5 @@ export const runBattery = async (
 };
 
 if (import.meta.main) {
-  process.exit(await runBattery(process.argv, console.log));
+  process.exit(await runBattery(process.argv, console.log, process.cwd()));
 }
