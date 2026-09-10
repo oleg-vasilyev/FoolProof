@@ -1,0 +1,92 @@
+{
+  "task": "flying-start",
+  "taskVersion": 1,
+  "snapshot": "9c605fc",
+  "model": "claude-sonnet-5",
+  "effort": "high",
+  "startedAt": "2026-09-10T15:14:43.806Z",
+  "clone": "C:\\Users\\thisO\\AppData\\Local\\Temp\\foolproof-benchmark\\20260910T151443-flying-start\\clone",
+  "transcript": "D:\\Temp\\FoolProof\\reports\\benchmark\\20260910T151443-flying-start\\transcript.jsonl",
+  "agent": {
+    "finished": true,
+    "turns": 29,
+    "costUsd": 11.456079,
+    "inputTokens": 7681473,
+    "outputTokens": 25861,
+    "durationMs": 791961,
+    "closing": "Waiting on `npm run check:phase` to finish so I can paste the canonical gates paragraph into the commit message.",
+    "sessionId": "5da7add0-89a3-4d40-87c5-8cfe3c20a202"
+  },
+  "acceptance": {
+    "passed": 11,
+    "total": 11
+  },
+  "gates": [
+    {
+      "gate": "lint",
+      "ok": true
+    },
+    {
+      "gate": "typecheck",
+      "ok": true
+    },
+    {
+      "gate": "docs-check",
+      "ok": true
+    },
+    {
+      "gate": "test:coverage",
+      "ok": true
+    }
+  ],
+  "obligations": [
+    {
+      "name": "printed right after HAT TRICK",
+      "met": false
+    },
+    {
+      "name": "overshadowed by HAT TRICK",
+      "met": true
+    },
+    {
+      "name": "Russian title",
+      "met": true
+    },
+    {
+      "name": "PLAN catalogue row after HAT TRICK",
+      "met": false
+    },
+    {
+      "name": "PLAN nested-pairs row",
+      "met": true
+    },
+    {
+      "name": "gallery case in the owner's list",
+      "met": true
+    },
+    {
+      "name": "render spec samples the new award",
+      "met": true
+    },
+    {
+      "name": "copy spec measures the new reason",
+      "met": true
+    },
+    {
+      "name": "rule spec at the boundary",
+      "met": true
+    },
+    {
+      "name": "last commit is phase-final",
+      "met": false
+    },
+    {
+      "name": "closing message says what was decided",
+      "met": true
+    }
+  ],
+  "fenceHits": 2,
+  "commits": 0,
+  "treeClean": false,
+  "debtNamed": false
+}
