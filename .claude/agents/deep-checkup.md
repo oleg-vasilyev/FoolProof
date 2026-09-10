@@ -283,6 +283,18 @@ rather than a year. Doing it here instead would let a run that dies before phase
 eat the input and leave no output. A log you could not use stays where it is, with
 the reason you could not.
 
+## Phase 3⅞ — the harness, measured on a pinned model
+
+Every phase above judges the harness by reading it. This one runs it: one benchmark task,
+headless, in a fresh clone, on the model `benchmark/benchmark.json` pins — never the model of
+the day, because a checkup asks whether the *harness* moved, and a moving model would
+answer for it. `node scripts/tools/tools.ts benchmark` with no arguments runs exactly that
+cell and appends a row to `benchmark/RUNS.md`; read the new row against the previous
+checkup's, column by column, and report which columns moved and by how much. A row
+that cannot be compared — a task retired, a model no longer offered — is a finding
+about the benchmark, not a skipped phase. The run costs real dollars and half an hour of
+wall clock; it is on the cut list below, and when cut it is reported as cut.
+
 ## Phase 4 — generation-pattern hunt in the code
 
 Beyond the linters (which run in CI and are not re-audited): silent fallbacks
@@ -500,7 +512,7 @@ that verdict belongs in its report.
 
 ## If time runs short
 
-Value order: phase 2 → 7 → 6 → 3 and 3½ → 5 → the rest. Liveness, deploy and
+Value order: phase 2 → 7 → 6 → 3 and 3½ → 5 → 3⅞ → the rest. Liveness, deploy and
 security decide whether the project survives the month; documents and tests
 decide whether it survives the year. Cut whole phases from the tail, never the
 evidence discipline from the ones you run.

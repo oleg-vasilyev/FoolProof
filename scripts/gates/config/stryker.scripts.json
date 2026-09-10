@@ -20,6 +20,7 @@
     "scripts/hooks/**/*.ts",
     "scripts/gates/**/*.ts",
     "scripts/tools/tool-verdict.ts",
+    "scripts/benchmark/**/*.ts",
     "!scripts/gates/config/**",
     "!scripts/gates/e2e-changed.ts",
     "!scripts/**/*.spec.ts",

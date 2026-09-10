@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "acceptance": {
+    "into": "src/features/scoresheet/domain/awards/flying-start.acceptance.spec.ts",
+    "cases": 11
+  },
+  "debtPattern": "TECH-DEBT|simulator|симулятор",
+  "obligations": [
+    {
+      "name": "printed right after HAT TRICK",
+      "file": "src/features/scoresheet/domain/awards/awards.ts",
+      "pattern": "^  hatTrick,\\n  flyingStart,$"
+    },
+    {
+      "name": "overshadowed by HAT TRICK",
+      "file": "src/features/scoresheet/domain/awards/awards.ts",
+      "pattern": "\\[AwardName\\.FlyingStart, AwardName\\.HatTrick\\]"
+    },
+    {
+      "name": "Russian title",
+      "file": "src/features/scoresheet/copy.ru.ts",
+      "pattern": "^    flyingStart: \"[^\"]+\",$"
+    },
+    {
+      "name": "PLAN catalogue row after HAT TRICK",
+      "file": "PLAN.md",
+      "pattern": "^\\| HAT TRICK \\|.*\\n\\| FLYING START \\|.*\\| 4% \\|$"
+    },
+    {
+      "name": "PLAN nested-pairs row",
+      "file": "PLAN.md",
+      "pattern": "^\\| FLYING START \\| HAT TRICK names the same player \\|"
+    },
+    {
+      "name": "gallery case in the owner's list",
+      "file": "docs/posters/gallery-edges.cases.txt",
+      "pattern": "^flying-start — "
+    },
+    {
+      "name": "render spec samples the new award",
+      "file": "src/features/scoresheet/render/awards/award-lines.spec.ts",
+      "pattern": "AwardName\\.FlyingStart"
+    },
+    {
+      "name": "copy spec measures the new reason",
+      "file": "src/features/scoresheet/copy.spec.ts",
+      "pattern": "flyingStartReason"
+    },
+    {
+      "name": "rule spec at the boundary",
+      "file": "src/features/scoresheet/domain/awards/run-awards.spec.ts",
+      "pattern": "flyingStart\\("
+    },
+    {
+      "name": "last commit is phase-final",
+      "file": "@commit",
+      "pattern": "^Gates: check:phase green"
+    },
+    {
+      "name": "closing message says what was decided",
+      "file": "@closing",
+      "pattern": "\\S"
+    }
+  ]
+}

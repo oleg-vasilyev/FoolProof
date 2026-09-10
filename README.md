@@ -370,8 +370,11 @@ scripts/                dev utilities that are not part of the bot, a folder per
                         offer to be drawn; docs-check/ what `docs-check` asks —
                         `documents/` what is read out of the documents, `source/` what
                         they are held against; hooks/ the pure halves of the Claude
-                        hooks; backup/ the snapshot the server's timer takes
+                        hooks; backup/ the snapshot the server's timer takes; benchmark/
+                        the runner behind `tools.ts benchmark`
 e2e/                    the fake Telegram and the scenarios played against it
+benchmark/                  frozen tasks an agent is given cold in a fresh clone, the
+                        hidden acceptance each is scored by, and the log of every run
 logbook/                no code — a dated log per phase and a report per checkup,
                         kept so that a habit spanning several of them is visible
 ```

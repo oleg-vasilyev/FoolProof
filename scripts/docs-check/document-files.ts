@@ -10,6 +10,7 @@ export const DOCUMENTS = [
   "TECH-DEBT.md",
   "e2e/README.md",
   "deploy/README.md",
+  "benchmark/README.md",
 ];
 
 export const SESSION_DOCUMENT = "CLAUDE.md";

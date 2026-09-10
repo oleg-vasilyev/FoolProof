@@ -1,0 +1,402 @@
+diff --git a/PLAN.md b/PLAN.md
+index 5d4c253..c5cfe26 100644
+--- a/PLAN.md
++++ b/PLAN.md
+@@ -1325,6 +1325,7 @@ rule finds a winner at all — the number `RAREST_FIRST` is ordered by.
+ | THE FAVOURITE | going out first more often than not | ≥ 50%, ≥ 8 games | 61% |
+ | THE VICEROY | the best total behind the king, fool excluded | ≥ 5 games | 97% |
+ | HAT TRICK | going out first in four games running | run ≥ 4 | 54% |
++| FLYING START | out first in every game from the first, three at least | run ≥ 3 from the off | 4% |
+ | FROM THE OFF | opening a game and going out of it first | ≥ 3 times | 46% |
+ | UNTOUCHABLE | never the fool all evening | ≥ 8 games | 62% |
+ | PERSONAL BEST | a share beating every earlier evening of their own | ≥ 5 games, ≥ 1 evening behind | 70% |
+@@ -1366,7 +1367,7 @@ rule finds a winner at all — the number `RAREST_FIRST` is ordered by.
+ | FIRST BLOOD | the fool of the very first game | never the same person as FOOL |  92% |
+ | FOOL OF THE NIGHT | losing the most games, the rate breaking ties | ≥ 5 games | 91% |
+ 
+-The percentages are **modelled, not observed**. Four thousand synthetic evenings —
++The percentages are **modelled, not observed** — all but FLYING START, whose 4% is the owner's estimate until the simulator `TECH-DEBT.md` asks for is committed. Four thousand synthetic evenings —
+ four to six players, five to twenty games, with arrivals, departures, missed games,
+ draws and the house rule for who opens — scored through the real `scoreSeries` and
+ put to each rule. That is enough to rank the catalogue and to catch a rule that fires
+@@ -1380,7 +1381,7 @@ once.
+ 
+ #### When an award would say nothing the card has not said
+ 
+-Nine pairs are nested. The lesser is dropped when the greater names the same player,
++Ten pairs are nested. The lesser is dropped when the greater names the same player,
+ and it is dropped **before** the free slots are handed out, so it cannot cost a rarer
+ award its place:
+ 
+@@ -1388,6 +1389,7 @@ award its place:
+ |---|---|---|
+ | FIRST BLOOD | FOOL OF THE NIGHT names the same player | one person, burned twice on one card |
+ | HOT SEAT | FROM THE OFF names the same player | winning every game you opened already says you lost none of them |
++| FLYING START | HAT TRICK names the same player | four running already says more than three from the off |
+ | THE FAVOURITE | KING OF THE TABLE names the same player | sitting highest and going out first most often is one story told twice |
+ | THE INVISIBLE | KING OF THE TABLE names the same player | the owner read "king of the table" beside "neither top nor bottom" as a contradiction |
+ | THE CLIMB | THE COMEBACK names the same player | climbing out of the bottom and improving game on game read as one fact twice |
+diff --git a/docs/posters/gallery-edges.cases.txt b/docs/posters/gallery-edges.cases.txt
+index b8fe360..e5e05d9 100644
+--- a/docs/posters/gallery-edges.cases.txt
++++ b/docs/posters/gallery-edges.cases.txt
+@@ -11,4 +11,5 @@ coming-and-going — arrivals, departures and a gap in the middle — dashed str
+ everybody-burned — whoever opened was left the fool, every game — the table curse at its worst, and the awards it draws onto whoever opened first
+ widest-handle — the widest handle Telegram allows — a full-width baseboard takes all 33 characters at full size, with nothing scaled to fit
+ personal-records — the awards that read a player's own history — a first win, a first clean night and a newcomer at once, beside a king whose own past was better than tonight
++flying-start — three firsts from the very first game and none after — the opening run on its own row, one game short of the hat trick that would have swallowed it
+ shortest-handle — the shortest handle Telegram allows — still the sheet's own mark rather than a stray word
+diff --git a/src/features/scoresheet/copy.en.ts b/src/features/scoresheet/copy.en.ts
+index 5472aa6..260337d 100644
+--- a/src/features/scoresheet/copy.en.ts
++++ b/src/features/scoresheet/copy.en.ts
+@@ -26,6 +26,7 @@ export const copy = {
+     wireToWire: "AHEAD ALL NIGHT",
+     theFavourite: "THE FAVOURITE",
+     hatTrick: "HAT TRICK",
++    flyingStart: "FLYING START",
+     homeAdvantage: "FROM THE OFF",
+     untouchable: "UNTOUCHABLE",
+     teflon: "TEFLON",
+@@ -76,6 +77,8 @@ export const copy = {
+   favouriteReason: (firsts: number, games: string) =>
+     `Out first in ${firsts} of ${games}. The rest played for second.`,
+   hatTrickReason: (games: string) => `${games} running, out first every single time.`,
++  flyingStartReason: (games: string) =>
++    `Out first in each of the first ${games} of the night.`,
+   homeAdvantageReason: (wins: number, opens: number) =>
+     `Opened ${opens} of the games and went out first in ${wins} of them.`,
+   untouchableReason: (games: string) => `${games}, never the fool. Untouched all evening.`,
+diff --git a/src/features/scoresheet/copy.ru.ts b/src/features/scoresheet/copy.ru.ts
+index 5820c77..963907e 100644
+--- a/src/features/scoresheet/copy.ru.ts
++++ b/src/features/scoresheet/copy.ru.ts
+@@ -27,6 +27,7 @@ export const copy: Copy = {
+     wireToWire: "ВПЕРЕДИ ВЕСЬ ВЕЧЕР",
+     theFavourite: "ФАВОРИТ",
+     hatTrick: "ХЕТ-ТРИК",
++    flyingStart: "С МЕСТА В КАРЬЕР",
+     homeAdvantage: "С ПЕРВОГО ХОДА",
+     untouchable: "ЧИСТЫЙ ЛИСТ",
+     teflon: "ДУРАК НЕ ЛИПНЕТ",
+@@ -77,6 +78,8 @@ export const copy: Copy = {
+   favouriteReason: (firsts: number, games: string) =>
+     `Первое место в ${firsts} из ${games}. Остальные играли за второе.`,
+   hatTrickReason: (games: string) => `${games} подряд — и каждый раз первое место.`,
++  flyingStartReason: (games: string) =>
++    `С самой первой партии — и первое место в каждой из первых ${games}.`,
+   homeAdvantageReason: (wins: number, opens: number) =>
+     `Первых ходов — ${opens}, и в ${wins} из них первое место.`,
+   untouchableReason: (games: string) => `${games} — и ни разу дураком.`,
+diff --git a/src/features/scoresheet/copy.spec.ts b/src/features/scoresheet/copy.spec.ts
+index 8990f0e..8c830a5 100644
+--- a/src/features/scoresheet/copy.spec.ts
++++ b/src/features/scoresheet/copy.spec.ts
+@@ -57,6 +57,7 @@ const reasonsOf = (copy: Copy, tally: string): readonly (readonly [string, strin
+     ["wireToWire", copy.wireToWireReason(tally)],
+     ["theFavourite", copy.favouriteReason(EIGHT, tally)],
+     ["hatTrick", copy.hatTrickReason(tally)],
++    ["flyingStart", copy.flyingStartReason(tally)],
+     ["homeAdvantage", copy.homeAdvantageReason(EIGHT, TWO)],
+     ["untouchable", copy.untouchableReason(tally)],
+     ["teflon", copy.teflonReason(tally)],
+diff --git a/src/features/scoresheet/domain/awards/award-catalogue.ts b/src/features/scoresheet/domain/awards/award-catalogue.ts
+index 702797a..dca3c2c 100644
+--- a/src/features/scoresheet/domain/awards/award-catalogue.ts
++++ b/src/features/scoresheet/domain/awards/award-catalogue.ts
+@@ -9,6 +9,7 @@ export const AwardName = {
+   WireToWire: "wireToWire",
+   TheFavourite: "theFavourite",
+   HatTrick: "hatTrick",
++  FlyingStart: "flyingStart",
+   HomeAdvantage: "homeAdvantage",
+   Untouchable: "untouchable",
+   Teflon: "teflon",
+@@ -67,6 +68,7 @@ export type Award =
+   | Earned<typeof AwardName.WireToWire, { readonly games: number }>
+   | Earned<typeof AwardName.TheFavourite, { readonly firsts: number; readonly games: number }>
+   | Earned<typeof AwardName.HatTrick, { readonly run: number }>
++  | Earned<typeof AwardName.FlyingStart, { readonly run: number }>
+   | Earned<typeof AwardName.HomeAdvantage, { readonly wins: number; readonly opens: number }>
+   | Earned<typeof AwardName.Untouchable, { readonly games: number }>
+   | Earned<typeof AwardName.Teflon, { readonly streak: number }>
+@@ -116,6 +118,7 @@ export const RAREST_FIRST: readonly AwardName[] = [
+   AwardName.NewAtTheTable,
+   AwardName.TheHalfNight,
+   AwardName.FalseDawn,
++  AwardName.FlyingStart,
+   AwardName.FirstWin,
+   AwardName.TheFlatline,
+   AwardName.TheComeback,
+diff --git a/src/features/scoresheet/domain/awards/awards.spec.ts b/src/features/scoresheet/domain/awards/awards.spec.ts
+index 0502b58..c15b0e8 100644
+--- a/src/features/scoresheet/domain/awards/awards.spec.ts
++++ b/src/features/scoresheet/domain/awards/awards.spec.ts
+@@ -69,6 +69,7 @@ vi.mock("#scoresheet/domain/awards/opener-awards.ts", () => ({
+ 
+ vi.mock("#scoresheet/domain/awards/run-awards.ts", () => ({
+   hatTrick: ruleFor(AwardName.HatTrick),
++  flyingStart: ruleFor(AwardName.FlyingStart),
+   theLadder: ruleFor(AwardName.TheLadder),
+   theSlide: ruleFor(AwardName.TheSlide),
+   thePendulum: ruleFor(AwardName.ThePendulum),
+@@ -462,6 +463,19 @@ describe("honoursFor()", () => {
+   });
+ 
+   describe("an award that says nothing the card does not already say", () => {
++    it("should drop the flying start when the same player's hat trick already told it", () => {
++      fires(AwardName.FlyingStart, AwardName.HatTrick);
++
++      expect(namesOf()).toEqual([AwardName.HatTrick]);
++    });
++
++    it("should keep the flying start when the hat trick belongs to somebody else", () => {
++      firesFor(AwardName.FlyingStart, OLEG);
++      firesFor(AwardName.HatTrick, ROMANI);
++
++      expect(namesOf()).toEqual([AwardName.HatTrick, AwardName.FlyingStart]);
++    });
++
+     it("should drop the hot seat when the same player also took home advantage", () => {
+       fires(AwardName.HotSeat, AwardName.HomeAdvantage);
+ 
+diff --git a/src/features/scoresheet/domain/awards/awards.ts b/src/features/scoresheet/domain/awards/awards.ts
+index 9742bc1..b436376 100644
+--- a/src/features/scoresheet/domain/awards/awards.ts
++++ b/src/features/scoresheet/domain/awards/awards.ts
+@@ -40,6 +40,7 @@ import {
+ import {
+   groundhogDay,
+   hatTrick,
++  flyingStart,
+   thePendulum,
+   theLadder,
+   theSlide,
+@@ -84,6 +85,7 @@ const RULES_IN_ORDER: readonly PastRule[] = [
+   theFavourite,
+   theViceroy,
+   hatTrick,
++  flyingStart,
+   homeAdvantage,
+   untouchable,
+   personalBest,
+@@ -136,6 +138,7 @@ const OVERSHADOWED: readonly (readonly [AwardName, AwardName])[] = [
+   [AwardName.FirstBlood, AwardName.FoolOfTheNight],
+   [AwardName.FirstBlood, AwardName.SecondWind],
+   [AwardName.HotSeat, AwardName.HomeAdvantage],
++  [AwardName.FlyingStart, AwardName.HatTrick],
+   [AwardName.TheFavourite, AwardName.King],
+   [AwardName.TheInvisible, AwardName.King],
+   [AwardName.TheLadder, AwardName.TheComeback],
+diff --git a/src/features/scoresheet/domain/awards/run-awards.spec.ts b/src/features/scoresheet/domain/awards/run-awards.spec.ts
+index 55662f9..8a40771 100644
+--- a/src/features/scoresheet/domain/awards/run-awards.spec.ts
++++ b/src/features/scoresheet/domain/awards/run-awards.spec.ts
+@@ -32,7 +32,7 @@ vi.mock("#scoresheet/domain/awards/appearance-runs.ts", () => ({
+   longestChain: (player: unknown, links: unknown) => longestChainSpy(player, links),
+ }));
+ 
+-const { groundhogDay, hatTrick, thePendulum, theLadder, theSlide } = await import(
++const { flyingStart, groundhogDay, hatTrick, thePendulum, theLadder, theSlide } = await import(
+   "#scoresheet/domain/awards/run-awards.ts"
+ );
+ 
+@@ -54,6 +54,8 @@ const SWINGING_RUN = 6;
+ 
+ const SAME_SPOT_RUN = 5;
+ 
++const OPENING_RUN = 3;
++
+ const ROMANI = 6;
+ 
+ const meritGiven = (): Merit => bestBySpy.mock.calls[NOTHING]?.[ONCE] as Merit;
+@@ -84,6 +86,77 @@ beforeEach(() => {
+   longestChainSpy.mockReturnValue(MOVING_RUN);
+ });
+ 
++describe("flyingStart()", () => {
++  const FROM_THE_OFF = appearingAs(ROMANI, Finish.First, Finish.First, Finish.First, Finish.Middle);
++
++  const LONGER_FROM_THE_OFF = appearingAs(
++    ROMANI,
++    Finish.First,
++    Finish.First,
++    Finish.First,
++    Finish.First,
++    Finish.Fool
++  );
++
++  const ONE_SHORT = appearingAs(ROMANI, Finish.First, Finish.First, Finish.Middle, Finish.First);
++
++  const ARRIVED_LATE = playerAppearing(ROMANI, [
++    appearanceOf(ONCE, Finish.First),
++    appearanceOf(TWICE, Finish.First),
++    appearanceOf(THRICE, Finish.First),
++  ]);
++
++  const SAT_ONE_OUT = playerAppearing(ROMANI, [
++    appearanceOf(NOTHING, Finish.First),
++    appearanceOf(ONCE, Finish.First),
++    appearanceOf(THRICE, Finish.First),
++    appearanceOf(FOUR, Finish.First),
++  ]);
++
++  it("should award nothing when the ranking found nobody", () => {
++    expect(flyingStart(eveningFor(FROM_THE_OFF))).toBeNull();
++  });
++
++  it("should report how long the opening run went on", () => {
++    bestBySpy.mockReturnValue(LONGER_FROM_THE_OFF);
++    const award = flyingStart(eveningFor(LONGER_FROM_THE_OFF));
++
++    expect(award?.name === AwardName.FlyingStart ? award.run : NOTHING).toBe(FOUR);
++  });
++
++  it("should name the player who opened the evening winning", () => {
++    bestBySpy.mockReturnValue(FROM_THE_OFF);
++
++    expect(flyingStart(eveningFor(FROM_THE_OFF))?.winners).toEqual([ROMANI]);
++  });
++
++  describe("what it measures", () => {
++    it("should count three firsts from the first game as the run", () => {
++      flyingStart(eveningFor(FROM_THE_OFF));
++
++      expect(meritGiven()(FROM_THE_OFF)).toBe(OPENING_RUN);
++    });
++
++    it("should refuse a run one game short", () => {
++      flyingStart(eveningFor(ONE_SHORT));
++
++      expect(meritGiven()(ONE_SHORT)).toBeNull();
++    });
++
++    it("should refuse a run that did not start with the evening's first game", () => {
++      flyingStart(eveningFor(ARRIVED_LATE));
++
++      expect(meritGiven()(ARRIVED_LATE)).toBeNull();
++    });
++
++    it("should stop counting at a game the player sat out", () => {
++      flyingStart(eveningFor(SAT_ONE_OUT));
++
++      expect(meritGiven()(SAT_ONE_OUT)).toBeNull();
++    });
++  });
++});
++
+ describe("hatTrick()", () => {
+   it("should award nothing when the ranking found nobody", () => {
+     expect(hatTrick(eveningFor(A_PLAYER))).toBeNull();
+diff --git a/src/features/scoresheet/domain/awards/run-awards.ts b/src/features/scoresheet/domain/awards/run-awards.ts
+index 9696b1b..9836ab9 100644
+--- a/src/features/scoresheet/domain/awards/run-awards.ts
++++ b/src/features/scoresheet/domain/awards/run-awards.ts
+@@ -12,6 +12,8 @@ import { longestChain, longestRun } from "#scoresheet/domain/awards/appearance-r
+ 
+ const WINNING_RUN = 4;
+ 
++const OPENING_RUN = 3;
++
+ const MOVING_RUN = 4;
+ 
+ const SWINGING_RUN = 6;
+@@ -26,6 +28,8 @@ const NEXT = 1;
+ 
+ const NOWHERE = 0;
+ 
++const UNBROKEN = -1;
++
+ interface Spot {
+   readonly place: number;
+   readonly run: number;
+@@ -60,6 +64,14 @@ const longestSpot = (player: PlayerAppearances): Spot =>
+     { best: { place: NOWHERE, run: NONE }, current: { place: NOWHERE, run: NONE } }
+   ).best;
+ 
++const openingStreak = (player: PlayerAppearances): number => {
++  const broken = player.appearances.findIndex(
++    (appearance, at) => appearance.round !== at || appearance.finish !== Finish.First
++  );
++
++  return broken === UNBROKEN ? player.appearances.length : broken;
++};
++
+ export const hatTrick = (evening: SessionAppearances): Award | null => {
+   const winner = bestBy(evening.players, (player) => {
+     const run = winningStreak(player);
+@@ -72,6 +84,18 @@ export const hatTrick = (evening: SessionAppearances): Award | null => {
+     : { name: AwardName.HatTrick, winners: [winner.playerId], run: winningStreak(winner) };
+ };
+ 
++export const flyingStart = (evening: SessionAppearances): Award | null => {
++  const winner = bestBy(evening.players, (player) => {
++    const run = openingStreak(player);
++
++    return run >= OPENING_RUN ? run : null;
++  });
++
++  return winner === null
++    ? null
++    : { name: AwardName.FlyingStart, winners: [winner.playerId], run: openingStreak(winner) };
++};
++
+ export const theLadder = (evening: SessionAppearances): Award | null => {
+   const winner = bestBy(evening.players, (player) => {
+     const run = climbingStreak(player);
+diff --git a/src/features/scoresheet/render/awards/award-lines.spec.ts b/src/features/scoresheet/render/awards/award-lines.spec.ts
+index 8f673c5..17150cd 100644
+--- a/src/features/scoresheet/render/awards/award-lines.spec.ts
++++ b/src/features/scoresheet/render/awards/award-lines.spec.ts
+@@ -59,6 +59,7 @@ const SAMPLES: readonly Award[] = [
+   { name: AwardName.WireToWire, winners: [WINNER], games: oneOf(AwardName.WireToWire) },
+   { name: AwardName.TheFavourite, winners: [WINNER], firsts: oneOf(AwardName.TheFavourite), games: twoOf(AwardName.TheFavourite) },
+   { name: AwardName.HatTrick, winners: [WINNER], run: oneOf(AwardName.HatTrick) },
++  { name: AwardName.FlyingStart, winners: [WINNER], run: oneOf(AwardName.FlyingStart) },
+   { name: AwardName.HomeAdvantage, winners: [WINNER], wins: oneOf(AwardName.HomeAdvantage), opens: twoOf(AwardName.HomeAdvantage) },
+   { name: AwardName.Untouchable, winners: [WINNER], games: oneOf(AwardName.Untouchable) },
+   { name: AwardName.Teflon, winners: [WINNER], streak: oneOf(AwardName.Teflon) },
+diff --git a/src/features/scoresheet/render/awards/award-lines.ts b/src/features/scoresheet/render/awards/award-lines.ts
+index f145dc2..192d892 100644
+--- a/src/features/scoresheet/render/awards/award-lines.ts
++++ b/src/features/scoresheet/render/awards/award-lines.ts
+@@ -29,6 +29,9 @@ export const awardReason = (copy: Copy, award: Award): string => {
+     case AwardName.HatTrick:
+       return copy.hatTrickReason(gameTally(copy, award.run));
+ 
++    case AwardName.FlyingStart:
++      return copy.flyingStartReason(gamesOf(copy, award.run));
++
+     case AwardName.HomeAdvantage:
+       return copy.homeAdvantageReason(award.wins, award.opens);
+ 
+diff --git a/src/features/scoresheet/samples/gallery-edges.ts b/src/features/scoresheet/samples/gallery-edges.ts
+index e310d98..299b546 100644
+--- a/src/features/scoresheet/samples/gallery-edges.ts
++++ b/src/features/scoresheet/samples/gallery-edges.ts
+@@ -22,6 +22,8 @@ const LEADER_FIRST: Round = { order: [0, 1, 2, 3], drawn: false, burned: false }
+ 
+ const LEADER_FIRST_SWAPPED: Round = { order: [0, 2, 1, 3], drawn: false, burned: false };
+ 
++const LEADER_SECOND: Round = { order: [1, 0, 2, 3], drawn: false, burned: false };
++
+ const RECORDS_BEHIND: EveningPast = {
+   players: [
+     { playerId: 1, evenings: [{ share: 0.95, fools: 0, firsts: 0, games: 8 }] },
+@@ -306,6 +308,16 @@ const GALLERY: readonly Case[] = [
+     ],
+     past: RECORDS_BEHIND,
+   },
++  {
++    name: "flying-start",
++    locale: Locale.En,
++    asks: "three firsts from the very first game and none after — the opening run on its own row, one game short of the hat trick that would have swallowed it",
++    players: SHORT_NAMES.slice(NOBODY, FOUR_AT_THE_TABLE),
++    rounds: [
++      ...Array.from({ length: THREE_ROUNDS }, () => LEADER_FIRST),
++      ...Array.from({ length: THREE_ROUNDS }, () => LEADER_SECOND),
++    ],
++  },
+   {
+     name: "shortest-handle",
+     locale: Locale.Ru,

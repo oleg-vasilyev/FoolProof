@@ -580,6 +580,20 @@ same idea one level down, and it might make the full run cheap enough to sit in
 checkup that has two full reports to compare, or the next time a tag's since-tag
 mutation crosses ten minutes.**
 
+## A benchmark run measures the harness and the code at one commit, never apart
+
+`benchmark/` cuts its clone from `HEAD`, so a run two weeks from now compares today's
+harness *and* today's code against that day's. That is the comparison the owner asked
+for first, and it is honest as long as the task's award machinery holds still. What it
+cannot do is put an old harness on a new snapshot, or the reverse, to say which of the
+two moved a number. The overlay is mechanical — `.claude/`, `CLAUDE.md`,
+`DEVELOPMENT-FLOW.md` from one commit over the tree of another — but the gates under
+`scripts/` are coupled to the code and would have to stay with the snapshot.
+
+**Add the overlay when two runs disagree and nobody can say whether the harness or the
+code did it.** Until then every row in `benchmark/RUNS.md` carries the one commit both came
+from, which is enough to go back and find out by hand.
+
 ## Not debt, deliberately
 
 Listed so nobody "fixes" them:

@@ -1,0 +1,7 @@
+{
+  "checkupModel": "claude-opus-5",
+  "checkupEffort": "high",
+  "checkupTask": "flying-start",
+  "maxTurns": 400,
+  "maxBudgetUsd": 40
+}
