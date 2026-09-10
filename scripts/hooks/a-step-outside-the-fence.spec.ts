@@ -26,6 +26,13 @@ describe("stepOutsideTheFence()", () => {
       expect(stepOutsideTheFence(FENCES, CWD, read("D:\\tmp\\claude\\session\\scratch.txt"))).toBeNull();
     });
 
+    it("should let the clone's own memory folder through when the runner names it as a root", () => {
+      const memory = "C:\\Users\\x\\.claude\\projects\\D--tmp-benchmark-clone";
+
+      expect(stepOutsideTheFence([...FENCES, memory], CWD, read(`${memory}\\memory\\MEMORY.md`))).toBeNull();
+      expect(stepOutsideTheFence(FENCES, CWD, read(`${memory}\\memory\\MEMORY.md`))).toContain("outside");
+    });
+
     it("should refuse an absolute file outside every fence", () => {
       expect(stepOutsideTheFence(FENCES, CWD, read("D:\\Temp\\FoolProof\\benchmark\\task.json"))).toContain(
         "Refused: Read reaches D:\\Temp\\FoolProof\\benchmark\\task.json"
@@ -104,6 +111,27 @@ describe("stepOutsideTheFence()", () => {
     it("should not mistake a URL or a regex for a path", () => {
       expect(stepOutsideTheFence(FENCES, CWD, shell("curl https://example.com/a/b"))).toBeNull();
       expect(stepOutsideTheFence(FENCES, CWD, shell("grep -E 'a|b/c' x.ts"))).toBeNull();
+    });
+
+    it("should not read the seven fragments the first calibration refused as paths: pattern pieces, bare punctuation, quoted prose", () => {
+      expect(stepOutsideTheFence(FENCES, CWD, shell("grep -n 'HAT TRICK\\|FIRST' src/awards.ts"))).toBeNull();
+      expect(stepOutsideTheFence(FENCES, CWD, shell("grep -rn /awards.ts: reports"))).toBeNull();
+      expect(stepOutsideTheFence(FENCES, CWD, shell("sed -n '/stats_awards,/p' PLAN.md"))).toBeNull();
+      expect(stepOutsideTheFence(FENCES, CWD, shell("git grep -n `Первое, /, /, /` -- src"))).toBeNull();
+      expect(stepOutsideTheFence(FENCES, CWD, shell("printf '\\ / / / \\n' >> notes.md"))).toBeNull();
+      expect(
+        stepOutsideTheFence(FENCES, CWD, shell("grep -l x /src/features/scoresheet/samples/gallery-edges.ts"))
+      ).toBeNull();
+    });
+
+    it("should still refuse a real path when it ends in a stop or sits in backticks", () => {
+      expect(stepOutsideTheFence(FENCES, CWD, shell("cat D:\\Temp\\FoolProof\\PLAN.md, D:\\x"))).toContain("outside");
+      expect(stepOutsideTheFence(FENCES, CWD, shell("echo `cat /d/Temp/FoolProof/PLAN.md`"))).toContain("outside");
+    });
+
+    it("should let a root-relative path pass on Windows, where it is a pattern far more often than a drive-relative file", () => {
+      expect(stepOutsideTheFence(FENCES, CWD, shell("cat /etc/passwd"))).toBeNull();
+      expect(stepOutsideTheFence(FENCES, CWD, shell("type \\Windows\\win.ini"))).toBeNull();
     });
 
     it("should name every path that leaves, not just the first", () => {

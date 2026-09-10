@@ -141,7 +141,11 @@ export const projectSlugOf = (path: string): string => path.replaceAll(NOT_A_SLU
 
 const forwardSlashed = (path: string): string => path.replaceAll("\\", "/");
 
-export const fenceSettingsFor = (clone: string, scratchpads: string): string =>
+const quotedRoot = (root: string): string => `"${forwardSlashed(root)}"`;
+
+const memoryOf = (home: string, clone: string): string => join(home, ".claude", "projects", projectSlugOf(clone));
+
+export const fenceSettingsFor = (clone: string, scratchpads: string, memory: string): string =>
   `${JSON.stringify(
     {
       hooks: {
@@ -151,7 +155,7 @@ export const fenceSettingsFor = (clone: string, scratchpads: string): string =>
             hooks: [
               {
                 type: "command",
-                command: `node ${FENCE_HOOK} "${forwardSlashed(clone)}" "${forwardSlashed(scratchpads)}"`,
+                command: `node ${FENCE_HOOK} ${[clone, scratchpads, memory].map(quotedRoot).join(" ")}`,
                 timeout: HOOK_TIMEOUT_S,
                 statusMessage: "Checking the call stays inside the clone…",
               },
@@ -193,7 +197,10 @@ const prepareClone = (space: Workspace): void => {
     throw new Error(`${FENCE_HOOK} is not in the clone, so the fence would be missing silently`);
   }
 
-  run.files.write(join(clone, CLONE_SETTINGS), fenceSettingsFor(clone, join(run.tmp, SCRATCHPADS_FOLDER)));
+  run.files.write(
+    join(clone, CLONE_SETTINGS),
+    fenceSettingsFor(clone, join(run.tmp, SCRATCHPADS_FOLDER), memoryOf(run.home, clone))
+  );
   run.say(`clone: ${clone}`);
 };
 
@@ -214,6 +221,14 @@ const agentCommandOf = (space: Workspace): string => {
   );
 };
 
+const agentEndOf = (outcome: AgentOutcome): string => {
+  if (outcome.aborted !== null) {
+    return `VOID, ${outcome.aborted}, cut off`;
+  }
+
+  return outcome.finished ? "finished" : "did not finish";
+};
+
 const runAgent = (space: Workspace): AgentOutcome => {
   const { run, task, reportDir, clone } = space;
   const began = run.now().getTime();
@@ -223,8 +238,7 @@ const runAgent = (space: Workspace): AgentOutcome => {
   run.files.write(join(reportDir, AGENT_OUTPUT), result.stdout);
   run.files.write(join(reportDir, CLOSING_FILE), outcome.closing);
   run.say(
-    `agent: ${outcome.finished ? "finished" : "did not finish"} in ${String(outcome.turns)} turns, ` +
-      `$${outcome.costUsd.toFixed(2)}`
+    `agent: ${agentEndOf(outcome)} in ${String(outcome.turns)} turns, $${outcome.costUsd.toFixed(2)}`
   );
 
   return outcome;
@@ -237,9 +251,7 @@ const keepTranscript = (space: Workspace, agent: AgentOutcome): string | null =>
     return null;
   }
 
-  const kept = run.files.read(
-    join(run.home, ".claude", "projects", projectSlugOf(clone), `${agent.sessionId}.jsonl`)
-  );
+  const kept = run.files.read(join(memoryOf(run.home, clone), `${agent.sessionId}.jsonl`));
 
   if (kept === null) {
     return null;

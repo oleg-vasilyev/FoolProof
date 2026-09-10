@@ -40,9 +40,10 @@ running without permission prompts has nothing else between it and them. So the 
 writes one hook into `settings.local.json` inside the clone's own `.claude/`, the file git ignores — never into the
 shared settings — that refuses any Read, Edit, Write, MultiEdit, NotebookEdit, Glob, Grep or Bash naming a path
 outside the clone: an absolute path elsewhere, a `..` that climbs out, the home folder
-in any spelling. The one other place it allows is the scratchpad Claude Code gives every
-session under the temp folder, because the session is told to put its temporary files
-there and a refusal for obeying would be noise. The detection is
+in any spelling. Two other places it allows, because the session is told to use both and
+a refusal for obeying would be noise: the scratchpad Claude Code gives every session
+under the temp folder, and the memory folder it keeps for the clone under
+`~/.claude/projects/`, which the global instructions tell every session to read first. The detection is
 `scripts/hooks/a-step-outside-the-fence.ts`, with its spec; the entry is
 `.claude/hooks/refuse-a-step-outside-the-fence.mjs`, and the runner refuses to start an
 agent in a clone that lacks it, because a missing hook and a fence that held read alike.
@@ -51,8 +52,12 @@ agent in a clone that lacks it, because a missing hook and a fence that held rea
 `reports/benchmark-fence.log` in the clone, and the run's record carries the count as
 `fence hits` — zero is the expected value, and anything else is a finding about the
 model or the brief, read from the transcript the record also names. The fence reads
-the text of a command, so a determined agent can go round it; cutting the clone under
-temp, where nothing of value is a `..` away, is the half that does not depend on text.
+the text of a command, so it errs on the side of the model: a token with no letter in
+it, one carrying a regex or glob character, a fragment in backticks, and on Windows a
+path that starts at the root with no drive are all read as pattern rather than path,
+because the first calibration counted seven such fragments and not one real step out.
+A determined agent can go round it; cutting the clone under temp, where nothing of
+value is a `..` away, is the half that does not depend on text.
 
 ## What is scored, and by what
 
@@ -65,7 +70,9 @@ Deterministic first; a judging model only where nothing else can see.
 | obligations | `task.json`'s list of regular expressions, each against one file — or `@commit` for the last commit message and `@closing` for the agent's final message |
 | debt named | the task's `debtPattern` found in the closing message or the commit |
 | fence hits | lines in the fence log the hook wrote inside the clone |
-| turns, minutes, cost | the headless CLI's own JSON |
+| finished | the CLI's own verdict; `void (api error 429)` when the API cut the run short, and such a row is not a result — it is kept so the gap is visible, and never compared |
+| turns, cost | the headless CLI's own JSON |
+| minutes | the runner's clock around the agent, wall to wall; the CLI's own duration leaves the tools out and read eleven minutes for a forty-six minute run |
 
 Beside the row, `reports/benchmark/<run>/` keeps the CLI's raw JSON, the closing
 message, the fence log and a copy of the session's transcript, and the record names

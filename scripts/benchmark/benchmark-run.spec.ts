@@ -99,7 +99,7 @@ const TASK: Task = {
 
 const CONFIG = { checkupModel: A_MODEL, checkupEffort: null, checkupTask: "flying-start", maxTurns: 5, maxBudgetUsd: 2 };
 
-const AGENT = { finished: true, turns: 3, costUsd: 1, inputTokens: 1, outputTokens: 1, durationMs: 1, closing: "Decided: nothing.", sessionId: "sess-1" };
+const AGENT = { finished: true, turns: 3, costUsd: 1, inputTokens: 1, outputTokens: 1, durationMs: 1, closing: "Decided: nothing.", sessionId: "sess-1", aborted: null };
 
 const testVerdict = (cases: number, failed: number): string =>
   JSON.stringify({ kind: "ran", gate: "test", ok: failed === NOTHING, numbers: { kind: "tests", cases, failed, files: ONCE, failures: [] } });
@@ -250,7 +250,7 @@ describe("runBenchmark()", () => {
       runBenchmark(runOf());
 
       expect(disk.onDisk.get(join(clone, ".claude/settings.local.json"))).toBe(
-        fenceSettingsFor(clone, join(TMP, "claude"))
+        fenceSettingsFor(clone, join(TMP, "claude"), join(HOME, ".claude", "projects", projectSlugOf(clone)))
       );
     });
 
@@ -348,6 +348,13 @@ describe("runBenchmark()", () => {
       expect(record.agent.finished).toBe(false);
       expect(said).toContain("agent: did not finish in 3 turns, $1.00");
       expect(commandsMatching("npm run check:quick")).toHaveLength(ONCE);
+    });
+
+    it("should say VOID with the reason when the API cut the agent short, so the row is never mistaken for a failure", () => {
+      agentOutcomeOfSpy.mockReturnValue({ ...AGENT, finished: false, aborted: "api error 429" });
+      runBenchmark(runOf());
+
+      expect(said).toContain("agent: VOID, api error 429, cut off in 3 turns, $1.00");
     });
   });
 
@@ -519,15 +526,16 @@ describe("runBenchmark()", () => {
 });
 
 describe("fenceSettingsFor()", () => {
-  it("should wire the fence hook on every tool that names a path or runs a shell, with the clone as its root", () => {
-    const settings = JSON.parse(fenceSettingsFor("C:\\tmp\\x\\clone", "C:\\tmp\\claude")) as {
+  it("should wire the fence hook on every tool that names a path or runs a shell, with the clone, the scratchpads and the clone's memory as its roots", () => {
+    const memory = "C:\\Users\\x\\.claude\\projects\\C--tmp-x-clone";
+    const settings = JSON.parse(fenceSettingsFor("C:\\tmp\\x\\clone", "C:\\tmp\\claude", memory)) as {
       hooks: { PreToolUse: { matcher: string; hooks: { command: string; timeout: number }[] }[] };
     };
     const [entry] = settings.hooks.PreToolUse;
 
     expect(entry?.matcher).toBe("Read|Edit|Write|MultiEdit|NotebookEdit|Glob|Grep|Bash");
     expect(entry?.hooks[NOTHING]?.command).toBe(
-      'node .claude/hooks/refuse-a-step-outside-the-fence.mjs "C:/tmp/x/clone" "C:/tmp/claude"'
+      'node .claude/hooks/refuse-a-step-outside-the-fence.mjs "C:/tmp/x/clone" "C:/tmp/claude" "C:/Users/x/.claude/projects/C--tmp-x-clone"'
     );
     expect(entry?.hooks[NOTHING]?.timeout).toBe(HOOK_TIMEOUT_S);
   });

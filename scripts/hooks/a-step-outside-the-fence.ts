@@ -7,7 +7,15 @@ const PATH_TOOLS = new Set(["Read", "Edit", "Write", "MultiEdit", "NotebookEdit"
 
 const SHELL_TOOL = "Bash";
 
-const A_QUOTE = /["']/g;
+const A_QUOTE = /["'`]/g;
+
+const A_TRAILING_STOP = /[:,;]+$/;
+
+const A_LETTER_OR_DIGIT = /[\p{L}\p{N}]/u;
+
+const A_PATTERN_CHARACTER = /[|*?()[\]{}^]/;
+
+const ROOT_RELATIVE = /^[/\\](?![/\\])/;
 
 const A_SPLIT_OPTION = /^--?[\w-]+=(.+)$/;
 
@@ -62,6 +70,10 @@ const leaves = (fences: readonly string[], cwd: string, token: string): boolean 
   const path = asLocalPath(token);
   const paths = pathsFor(cwd);
 
+  if (paths === win32 && ROOT_RELATIVE.test(path) && !A_WINDOWS_DRIVE.test(path)) {
+    return false;
+  }
+
   if (CLIMBS.test(path) || paths.isAbsolute(path)) {
     return !inside(fences, paths.isAbsolute(path) ? path : paths.resolve(cwd, path));
   }
@@ -74,7 +86,8 @@ const tokensOf = (command: string): readonly string[] =>
     .replaceAll(A_QUOTE, " ")
     .split(/\s+/)
     .filter((token) => token !== "")
-    .map((token) => A_SPLIT_OPTION.exec(token)?.[FIRST] ?? token)
+    .map((token) => (A_SPLIT_OPTION.exec(token)?.[FIRST] ?? token).replace(A_TRAILING_STOP, ""))
+    .filter((token) => (A_LETTER_OR_DIGIT.test(token) || CLIMBS.test(token)) && !A_PATTERN_CHARACTER.test(token))
     .filter((token) => !A_URL.test(token) && LOOKS_LIKE_A_PATH.test(token));
 
 const pathsNamedBy = (call: ToolCall): readonly string[] => {

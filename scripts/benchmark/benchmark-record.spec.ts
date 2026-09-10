@@ -13,7 +13,7 @@ import {
 
 const NOTHING = 0;
 
-const MEASURED_MS = 5000;
+const MEASURED_MS = 120_000;
 
 const TURNS = 42;
 
@@ -27,7 +27,9 @@ const CREATED = 30;
 
 const OUT = 7;
 
-const REPORTED_MS = 120_000;
+const REPORTED_MS = 5000;
+
+const RATE_LIMITED = 429;
 
 const STARTED = "2026-09-10T13:12:43.036Z";
 
@@ -80,9 +82,10 @@ describe("agentOutcomeOf()", () => {
       costUsd: COST,
       inputTokens: FRESH + CACHED + CREATED,
       outputTokens: OUT,
-      durationMs: REPORTED_MS,
+      durationMs: MEASURED_MS,
       closing: "All done.",
       sessionId: "abc",
+      aborted: null,
     });
   });
 
@@ -108,10 +111,9 @@ describe("agentOutcomeOf()", () => {
     expect(agentOutcomeOf(JSON.stringify({ num_turns: TURNS }), MEASURED_MS).closing).toBe("");
   });
 
-  it("should fall back to the measured duration when the JSON carries none", () => {
-    const withoutDuration = JSON.stringify({ result: "x" });
-
-    expect(agentOutcomeOf(withoutDuration, MEASURED_MS).durationMs).toBe(MEASURED_MS);
+  it("should take the runner's measured wall clock over the duration the JSON reports, which leaves out the tools", () => {
+    expect(agentOutcomeOf(headless, MEASURED_MS).durationMs).toBe(MEASURED_MS);
+    expect(agentOutcomeOf(JSON.stringify({ result: "x" }), MEASURED_MS).durationMs).toBe(MEASURED_MS);
   });
 
   it("should report a run that produced no JSON as not finished, keeping the raw output", () => {
@@ -124,11 +126,21 @@ describe("agentOutcomeOf()", () => {
       durationMs: MEASURED_MS,
       closing: "the CLI crashed",
       sessionId: null,
+      aborted: null,
     });
   });
 
   it("should report an errored run as not finished even when the JSON is complete", () => {
     expect(agentOutcomeOf(JSON.stringify({ is_error: true, result: "x" }), MEASURED_MS).finished).toBe(false);
+  });
+
+  it("should call a run the API cut short aborted, naming the status, and not aborted when it ran its course", () => {
+    const cut = JSON.stringify({ is_error: true, terminal_reason: "api_error", api_error_status: RATE_LIMITED, result: "limit" });
+
+    expect(agentOutcomeOf(cut, MEASURED_MS)).toEqual(expect.objectContaining({ finished: false, aborted: "api error 429" }));
+    expect(agentOutcomeOf(JSON.stringify({ is_error: true, terminal_reason: "api_error" }), MEASURED_MS).aborted).toBe("api error");
+    expect(agentOutcomeOf(JSON.stringify({ is_error: true, terminal_reason: "max_turns" }), MEASURED_MS).aborted).toBeNull();
+    expect(agentOutcomeOf(headless, MEASURED_MS).aborted).toBeNull();
   });
 });
 
@@ -193,6 +205,12 @@ describe("rowOf()", () => {
   it("should say green when every gate passed", () => {
     expect(rowOf({ ...RECORD, gates: [{ gate: "lint", ok: true }] })).toContain("| green |");
   });
+
+  it("should write void with the reason in the finished cell when the API cut the run short, so the row is never read as a result", () => {
+    const row = rowOf({ ...RECORD, agent: { ...RECORD.agent, finished: false, aborted: "api error 429" } });
+
+    expect(row).toContain("| default | void (api error 429) | 9/11 |");
+  });
 });
 
 describe("headlineOf() and recordJsonOf()", () => {
@@ -206,6 +224,12 @@ describe("headlineOf() and recordJsonOf()", () => {
   it("should say so when the agent did not finish", () => {
     expect(headlineOf({ ...RECORD, agent: { ...RECORD.agent, finished: false } })).toContain(
       "claude-sonnet-5: DID NOT FINISH, acceptance"
+    );
+  });
+
+  it("should shout VOID with the reason when the API cut the run short", () => {
+    expect(headlineOf({ ...RECORD, agent: { ...RECORD.agent, finished: false, aborted: "api error 429" } })).toContain(
+      "claude-sonnet-5: VOID, api error 429, acceptance"
     );
   });
 

@@ -292,7 +292,8 @@ answer for it. `node scripts/benchmark/run-benchmark.ts` with no arguments runs 
 that cell and appends a row to `benchmark/RUNS.md`; read the new row against the previous
 checkup's, column by column, and report which columns moved and by how much. A `fence
 hits` above zero is a finding of its own: the agent reached outside its clone, and the
-transcript the record names says what for. A row
+transcript the record names says what for. A row whose `finished` cell says `void` was
+cut short by the API and is compared with nothing; run the cell again. A row
 that cannot be compared — a task retired, a model no longer offered — is a finding
 about the benchmark, not a skipped phase. The run costs real dollars and half an hour of
 wall clock; it is on the cut list below, and when cut it is reported as cut.
