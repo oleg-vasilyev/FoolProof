@@ -126,6 +126,13 @@ describe("obligationsMet()", () => {
   it("should count a missing file as an obligation not met, never as an error", () => {
     expect(obligationsMet(TASK, () => null).filter((verdict) => verdict.met)).toHaveLength(NOTHING);
   });
+
+  it("should match a two-line pattern in a file the clone checked out with Windows line endings", () => {
+    const twoLines = { ...TASK, obligations: [{ name: "pair", file: "PLAN.md", pattern: "^\\| OTHER \\|\\n\\| ROW \\|" }] };
+
+    expect(obligationsMet(twoLines, () => "| OTHER |\r\n| ROW | text |\r\n")).toEqual([{ name: "pair", met: true }]);
+    expect(obligationsMet(twoLines, () => "| OTHER |\r\n\r\n| ROW | text |")).toEqual([{ name: "pair", met: false }]);
+  });
 });
 
 describe("the two places that are not files", () => {

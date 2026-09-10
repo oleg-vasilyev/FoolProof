@@ -67,10 +67,14 @@ export interface ObligationVerdict {
   readonly met: boolean;
 }
 
+const A_WINDOWS_LINE_END = /\r\n/g;
+
+const oneLineEnding = (text: string): string => text.replaceAll(A_WINDOWS_LINE_END, "\n");
+
 export const obligationsMet = (task: Task, look: Look): readonly ObligationVerdict[] =>
   task.obligations.map((obligation) => ({
     name: obligation.name,
-    met: new RegExp(obligation.pattern, "m").test(look(obligation.file) ?? ""),
+    met: new RegExp(obligation.pattern, "m").test(oneLineEnding(look(obligation.file) ?? "")),
   }));
 
 export const debtNamedIn = (task: Task, texts: readonly string[]): boolean =>

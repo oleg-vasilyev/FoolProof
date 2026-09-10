@@ -1,4 +1,4 @@
 | started | task | snapshot | model | effort | finished | acceptance | gates | obligations | debt named | fence hits | commits | turns | minutes | cost $ | record |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 2026-09-10T15:14:43.806Z | flying-start v1 | 9c605fc | claude-sonnet-5 | high | yes | 11/11 | green | 8/11 | no | 2 | 0 | 29 | 13.2 | 11.46 | 20260910T151443-flying-start-claude-sonnet-5.json |
-| 2026-09-10T15:14:40.704Z | flying-start v1 | 9c605fc | claude-fable-5-1 | low | yes | 11/11 | green | 9/11 | yes | 5 | 1 | 31 | 11.2 | 16.00 | 20260910T151440-flying-start-claude-fable-5-1.json |
+| 2026-09-10T21:22:23.199Z | flying-start v1 | 3328b6e | claude-haiku-4-5-20251001 | medium | yes | 11/11 | green | 8/11 | no | 0 | 1 | 79 | 6.1 | 1.02 | 20260910T212223-flying-start-claude-haiku-4-5-20251001.json |
+| 2026-09-10T21:22:26.280Z | flying-start v1 | 3328b6e | claude-opus-5 | medium | yes | 11/11 | green | 11/11 | yes | 0 | 1 | 171 | 36.1 | 21.86 | 20260910T212226-flying-start-claude-opus-5.json |
