@@ -37,7 +37,7 @@ Nothing stops a model from working out that it is being measured, and the brief'
 frozen names say as much. What can be stopped is reaching the answer: the hidden spec,
 the reference diff and the owner's memory all live outside the clone, and an agent
 running without permission prompts has nothing else between it and them. So the runner
-writes one hook into the clone's own `.claude/settings.local.json` — never into the
+writes one hook into `settings.local.json` inside the clone's own `.claude/`, the file git ignores — never into the
 shared settings — that refuses any Read, Edit, Write, MultiEdit, NotebookEdit, Glob, Grep or Bash naming a path
 outside the clone: an absolute path elsewhere, a `..` that climbs out, the home folder
 in any spelling. The one other place it allows is the scratchpad Claude Code gives every
