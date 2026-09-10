@@ -36,10 +36,13 @@ export interface RunRecord {
   readonly model: string;
   readonly effort: string | null;
   readonly startedAt: string;
+  readonly clone: string;
+  readonly transcript: string | null;
   readonly agent: AgentOutcome;
   readonly acceptance: { readonly passed: number; readonly total: number };
   readonly gates: readonly GateOutcome[];
   readonly obligations: readonly ObligationVerdict[];
+  readonly fenceHits: number;
   readonly commits: number;
   readonly treeClean: boolean;
   readonly debtNamed: boolean;
@@ -131,19 +134,21 @@ const yesOrNo = (fact: boolean): string => (fact ? "yes" : "no");
 
 export const RUNS_LOG_HEADER =
   "| started | task | snapshot | model | effort | finished | acceptance | gates | obligations " +
-  "| debt named | commits | turns | minutes | cost $ | record |\n" +
-  "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n";
+  "| debt named | fence hits | commits | turns | minutes | cost $ | record |\n" +
+  "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n";
 
 export const rowOf = (record: RunRecord): string =>
   `| ${record.startedAt} | ${record.task} v${String(record.taskVersion)} | ${record.snapshot} ` +
   `| ${record.model} | ${record.effort ?? "default"} | ${yesOrNo(record.agent.finished)} ` +
   `| ${String(record.acceptance.passed)}/${String(record.acceptance.total)} ` +
   `| ${gatesOf(record.gates)} | ${metOf(record.obligations)} | ${yesOrNo(record.debtNamed)} ` +
-  `| ${String(record.commits)} | ${String(record.agent.turns)} | ${minutesOf(record.agent.durationMs)} ` +
-  `| ${record.agent.costUsd.toFixed(JSON_INDENT)} | ${recordNameOf(record)}.json |\n`;
+  `| ${String(record.fenceHits)} | ${String(record.commits)} | ${String(record.agent.turns)} ` +
+  `| ${minutesOf(record.agent.durationMs)} | ${record.agent.costUsd.toFixed(JSON_INDENT)} ` +
+  `| ${recordNameOf(record)}.json |\n`;
 
 export const headlineOf = (record: RunRecord): string =>
   `${record.task} on ${record.model}: ${record.agent.finished ? "finished" : "DID NOT FINISH"}, ` +
   `acceptance ${String(record.acceptance.passed)}/${String(record.acceptance.total)}, ` +
   `gates ${gatesOf(record.gates)}, obligations ${metOf(record.obligations)}, ` +
+  `fence hits ${String(record.fenceHits)}, ` +
   `${String(record.agent.turns)} turns in ${minutesOf(record.agent.durationMs)} min`;

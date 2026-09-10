@@ -10,8 +10,6 @@ import { drawnByName, everyDrawing, featuresThatDraw } from "../drawings/feature
 import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
 import { siteImageOf } from "./site-images.ts";
 import { REPORTS_DIR, tidyReports } from "./tidy-reports.ts";
-import { realShell, runBenchmark } from "../benchmark/benchmark-run.ts";
-import { benchmarkConfigOf, realFiles } from "../benchmark/benchmark-config.ts";
 import {
   TOOLS_DIR,
   type Say,
@@ -32,12 +30,6 @@ const PAGE_TO_READ = 1;
 const FILE_TO_WRITE = 2;
 
 const CHAT_TO_FORGET = 1;
-
-const TASK_TO_RUN = 1;
-
-const MODEL_TO_RUN = 2;
-
-const EFFORT_TO_RUN = 3;
 
 const FAILED = 1;
 
@@ -133,27 +125,6 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     does: "delete one chat's games, players and language choice, leaving every other chat alone",
     usage: "node scripts/tools/tools.ts forget-chat <chat id>",
     run: forgetChat,
-  },
-  benchmark: {
-    does:
-      "run one benchmark task headless in a fresh clone on the model named, score it against the " +
-      "task's hidden acceptance, and log the run under benchmark/",
-    usage: "node scripts/tools/tools.ts benchmark <task> [model] [effort]",
-    run: (args, say) => {
-      const config = benchmarkConfigOf(rootDir);
-      const taskName = args[TASK_TO_RUN] ?? config.checkupTask;
-
-      runBenchmark({
-        root: rootDir,
-        taskName,
-        model: args[MODEL_TO_RUN] ?? config.checkupModel,
-        effort: args[EFFORT_TO_RUN] ?? config.checkupEffort,
-        shell: realShell,
-        files: realFiles,
-        say,
-        now: () => new Date(),
-      });
-    },
   },
   "design-page": {
     does: "redraw every mockup on a Claude Design page, leaving its prose alone",

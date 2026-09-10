@@ -288,9 +288,11 @@ the reason you could not.
 Every phase above judges the harness by reading it. This one runs it: one benchmark task,
 headless, in a fresh clone, on the model `benchmark/benchmark.json` pins — never the model of
 the day, because a checkup asks whether the *harness* moved, and a moving model would
-answer for it. `node scripts/tools/tools.ts benchmark` with no arguments runs exactly that
-cell and appends a row to `benchmark/RUNS.md`; read the new row against the previous
-checkup's, column by column, and report which columns moved and by how much. A row
+answer for it. `node scripts/benchmark/run-benchmark.ts` with no arguments runs exactly
+that cell and appends a row to `benchmark/RUNS.md`; read the new row against the previous
+checkup's, column by column, and report which columns moved and by how much. A `fence
+hits` above zero is a finding of its own: the agent reached outside its clone, and the
+transcript the record names says what for. A row
 that cannot be compared — a task retired, a model no longer offered — is a finding
 about the benchmark, not a skipped phase. The run costs real dollars and half an hour of
 wall clock; it is on the cut list below, and when cut it is reported as cut.

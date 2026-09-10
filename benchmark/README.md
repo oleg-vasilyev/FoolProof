@@ -7,8 +7,10 @@ way every time, so two runs weeks apart, or on two models, are comparable number
 rather than impressions.
 
 ```bash
-node scripts/tools/tools.ts benchmark flying-start claude-opus-5 high
+node scripts/benchmark/run-benchmark.ts flying-start claude-opus-5 high
 ```
+
+With no arguments it runs the cell [`benchmark.json`](benchmark.json) pins for the checkup.
 
 ## A run is one cell
 
@@ -18,14 +20,39 @@ code and harness together, because they live in one repository), the **model**, 
 **effort**, and the day. The runner records all five in `runs/<stamp>-<task>-<model>.json`
 and appends one row to [`RUNS.md`](RUNS.md).
 
-What the agent gets: the task's `brief.md` on stdin, in a clone of `HEAD` with the
-history and this folder removed, dependencies installed, web search and fetch off,
-no memory (a fresh path has none), permissions skipped because nobody is there to
-answer. The caps live in [`benchmark.json`](benchmark.json) — turns and dollars — and so does
-the **pinned model the checkup runs on**, so a checkup measures the harness and not
-a model that moved under it.
+What the agent gets: the task's `brief.md` on stdin, in a clone of `HEAD` cut under
+the system temp folder, with the history, this folder and `scripts/benchmark/` removed,
+dependencies installed, web search and fetch off, no memory (a fresh path has none),
+permissions skipped because nobody is there to answer. The caps live in
+[`benchmark.json`](benchmark.json) — turns and dollars — and so does the **pinned model
+the checkup runs on**, so a checkup measures the harness and not a model that moved
+under it.
 
-What the agent never sees: `task.json`, `acceptance.spec.ts`, and this file.
+What the agent never sees: `task.json`, `acceptance.spec.ts`, the reference diff, this
+file, and the runner itself.
+
+## The fence
+
+Nothing stops a model from working out that it is being measured, and the brief's
+frozen names say as much. What can be stopped is reaching the answer: the hidden spec,
+the reference diff and the owner's memory all live outside the clone, and an agent
+running without permission prompts has nothing else between it and them. So the runner
+writes one hook into the clone's own `.claude/settings.local.json` — never into the
+shared settings — that refuses any Read, Edit, Write, MultiEdit, NotebookEdit, Glob, Grep or Bash naming a path
+outside the clone: an absolute path elsewhere, a `..` that climbs out, the home folder
+in any spelling. The one other place it allows is the scratchpad Claude Code gives every
+session under the temp folder, because the session is told to put its temporary files
+there and a refusal for obeying would be noise. The detection is
+`scripts/hooks/a-step-outside-the-fence.ts`, with its spec; the entry is
+`.claude/hooks/refuse-a-step-outside-the-fence.mjs`, and the runner refuses to start an
+agent in a clone that lacks it, because a missing hook and a fence that held read alike.
+
+**A refusal is a measurement, not a wall that quietly held.** Every one is appended to
+`reports/benchmark-fence.log` in the clone, and the run's record carries the count as
+`fence hits` — zero is the expected value, and anything else is a finding about the
+model or the brief, read from the transcript the record also names. The fence reads
+the text of a command, so a determined agent can go round it; cutting the clone under
+temp, where nothing of value is a `..` away, is the half that does not depend on text.
 
 ## What is scored, and by what
 
@@ -37,7 +64,12 @@ Deterministic first; a judging model only where nothing else can see.
 | gates | `npm run check:quick` in the clone, each gate's own verdict file |
 | obligations | `task.json`'s list of regular expressions, each against one file — or `@commit` for the last commit message and `@closing` for the agent's final message |
 | debt named | the task's `debtPattern` found in the closing message or the commit |
+| fence hits | lines in the fence log the hook wrote inside the clone |
 | turns, minutes, cost | the headless CLI's own JSON |
+
+Beside the row, `reports/benchmark/<run>/` keeps the CLI's raw JSON, the closing
+message, the fence log and a copy of the session's transcript, and the record names
+the clone's path — so a perfect run in ten turns is explained by reading, not believed.
 
 There is no single score on purpose. Acceptance is the headline; the rest says how it
 was reached. A weighted number can be added once enough rows exist to know which

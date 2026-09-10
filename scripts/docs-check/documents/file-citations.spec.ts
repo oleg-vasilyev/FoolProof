@@ -13,6 +13,8 @@ const existsSyncSpy = vi.fn();
 
 const readdirSyncSpy = vi.fn();
 
+const insideAStrippedFolderSpy = vi.fn((_path: string) => false);
+
 vi.mock("../document-files.ts", () => ({
   DOCUMENTS: ["A-DOCUMENT.md"],
   FLOW_DOCUMENT: "THE-FLOW.md",
@@ -23,6 +25,7 @@ vi.mock("../document-files.ts", () => ({
   definedAgents: () => definedAgentsSpy(),
   skillPages: (skill: string) => skillPagesSpy(skill),
   skillFile: (skill: string) => `FILE-OF-${skill}`,
+  insideAStrippedFolder: (path: string) => insideAStrippedFolderSpy(path),
 }));
 
 vi.mock("node:fs", () => ({
@@ -277,6 +280,18 @@ describe("citationsWithNoFile", () => {
     expect(said.length).toBeGreaterThan(NOTHING);
     expect(said[FIRST]).toContain("src/gone.ts");
     expect(said[FIRST]).toContain("a rule whose subject has moved");
+  });
+
+  it("should not complain about a path inside a folder a benchmark clone strips, when it is stripped", () => {
+    readSpy.mockReturnValue("see scripts/benchmark/run-benchmark.ts and src/gone.ts");
+    existsSyncSpy.mockReturnValue(false);
+    insideAStrippedFolderSpy.mockImplementation((path: string) => path.startsWith("scripts/benchmark/"));
+
+    const said = citationsWithNoFile();
+
+    expect(said.some((line) => line.includes("src/gone.ts"))).toBe(true);
+    expect(said.some((line) => line.includes("scripts/benchmark/run-benchmark.ts"))).toBe(false);
+    expect(insideAStrippedFolderSpy).toHaveBeenCalledWith("scripts/benchmark/run-benchmark.ts");
   });
 
   it("should leave a skill folder with no SKILL.md to the budget check", () => {

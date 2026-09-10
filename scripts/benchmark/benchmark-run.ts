@@ -29,17 +29,39 @@ import {
 
 export const BENCHMARK_REPORTS = "reports/benchmark";
 
+export const CLONES_FOLDER = "foolproof-benchmark";
+
 export const CLONE_FOLDER = "clone";
 
 export const AGENT_OUTPUT = "agent.json";
 
 export const CLOSING_FILE = "closing.md";
 
+export const TRANSCRIPT_FILE = "transcript.jsonl";
+
+export const FENCE_LOG = "reports/benchmark-fence.log";
+
+export const FENCE_HOOK = ".claude/hooks/refuse-a-step-outside-the-fence.mjs";
+
+export const FENCE_REPORT = "fence.log";
+
+export const CLONE_SETTINGS = ".claude/settings.local.json";
+
+export const RUNNER_SOURCE = "scripts/benchmark";
+
+export const SCRATCHPADS_FOLDER = "claude";
+
+export const HOOK_TIMEOUT_S = 10;
+
+const FENCED_TOOLS = "Read|Edit|Write|MultiEdit|NotebookEdit|Glob|Grep|Bash";
+
 const A_PLAIN_TOKEN = /^[\w.[\]-]+$/;
 
 const A_PLAIN_PATH = /^[\w./-]+$/;
 
-const SNAPSHOT_COMMIT = "Snapshot for the benchmark, history and benchmark/ removed";
+const NOT_A_SLUG_CHARACTER = /[^A-Za-z0-9]/g;
+
+const SNAPSHOT_COMMIT = "Snapshot for the benchmark: history, benchmark/ and scripts/benchmark/ removed";
 
 const NAMED_RUN = true;
 
@@ -50,6 +72,8 @@ const NOTHING = 0;
 const PASSED = 0;
 
 const FAILED = 1;
+
+const JSON_INDENT = 2;
 
 const OUTPUT_LIMIT = 64 * 1024 * 1024;
 
@@ -65,6 +89,8 @@ export type Shell = (command: string, cwd: string, input?: string) => ShellResul
 
 export interface BenchmarkRun {
   readonly root: string;
+  readonly home: string;
+  readonly tmp: string;
   readonly taskName: string;
   readonly model: string;
   readonly effort: string | null;
@@ -79,7 +105,7 @@ interface Workspace {
   readonly task: Task;
   readonly config: BenchmarkConfig;
   readonly startedAt: Date;
-  readonly workDir: string;
+  readonly reportDir: string;
   readonly clone: string;
 }
 
@@ -111,20 +137,49 @@ const plain = (value: string, what: string, shape: RegExp): string => {
   return value;
 };
 
+export const projectSlugOf = (path: string): string => path.replaceAll(NOT_A_SLUG_CHARACTER, "-");
+
+const forwardSlashed = (path: string): string => path.replaceAll("\\", "/");
+
+export const fenceSettingsFor = (clone: string, scratchpads: string): string =>
+  `${JSON.stringify(
+    {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: FENCED_TOOLS,
+            hooks: [
+              {
+                type: "command",
+                command: `node ${FENCE_HOOK} "${forwardSlashed(clone)}" "${forwardSlashed(scratchpads)}"`,
+                timeout: HOOK_TIMEOUT_S,
+                statusMessage: "Checking the call stays inside the clone…",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    null,
+    JSON_INDENT
+  )}\n`;
+
 const snapshotOf = (space: Workspace): string =>
   checked(space.run.shell("git rev-parse --short HEAD", space.run.root), "reading HEAD").stdout.trim();
 
 const prepareClone = (space: Workspace): void => {
-  const { run, workDir, clone } = space;
+  const { run, clone } = space;
+  const around = join(clone, "..");
 
-  run.files.remove(workDir);
-  run.files.mkdir(workDir);
+  run.files.remove(around);
+  run.files.mkdir(around);
   checked(
-    run.shell(`git clone -q --depth 1 "${pathToFileURL(run.root).href}" ${CLONE_FOLDER}`, workDir),
+    run.shell(`git clone -q --depth 1 "${pathToFileURL(run.root).href}" ${CLONE_FOLDER}`, around),
     "cloning"
   );
   run.files.remove(join(clone, ".git"));
   run.files.remove(join(clone, BENCHMARK_DIR));
+  run.files.remove(join(clone, RUNNER_SOURCE));
   checked(run.shell("git init -q", clone), "git init");
   checked(run.shell("git add -A", clone), "git add");
   checked(
@@ -134,6 +189,11 @@ const prepareClone = (space: Workspace): void => {
     ),
     "the snapshot commit"
   );
+  if (run.files.read(join(clone, FENCE_HOOK)) === null) {
+    throw new Error(`${FENCE_HOOK} is not in the clone, so the fence would be missing silently`);
+  }
+
+  run.files.write(join(clone, CLONE_SETTINGS), fenceSettingsFor(clone, join(run.tmp, SCRATCHPADS_FOLDER)));
   run.say(`clone: ${clone}`);
 };
 
@@ -155,19 +215,41 @@ const agentCommandOf = (space: Workspace): string => {
 };
 
 const runAgent = (space: Workspace): AgentOutcome => {
-  const { run, task, workDir, clone } = space;
+  const { run, task, reportDir, clone } = space;
   const began = run.now().getTime();
   const result = run.shell(agentCommandOf(space), clone, task.brief);
   const outcome = agentOutcomeOf(result.stdout, run.now().getTime() - began);
 
-  run.files.write(join(workDir, AGENT_OUTPUT), result.stdout);
-  run.files.write(join(workDir, CLOSING_FILE), outcome.closing);
+  run.files.write(join(reportDir, AGENT_OUTPUT), result.stdout);
+  run.files.write(join(reportDir, CLOSING_FILE), outcome.closing);
   run.say(
     `agent: ${outcome.finished ? "finished" : "did not finish"} in ${String(outcome.turns)} turns, ` +
       `$${outcome.costUsd.toFixed(2)}`
   );
 
   return outcome;
+};
+
+const keepTranscript = (space: Workspace, agent: AgentOutcome): string | null => {
+  const { run, reportDir, clone } = space;
+
+  if (agent.sessionId === null) {
+    return null;
+  }
+
+  const kept = run.files.read(
+    join(run.home, ".claude", "projects", projectSlugOf(clone), `${agent.sessionId}.jsonl`)
+  );
+
+  if (kept === null) {
+    return null;
+  }
+
+  const copy = join(reportDir, TRANSCRIPT_FILE);
+
+  run.files.write(copy, kept);
+
+  return copy;
 };
 
 const gateVerdictIn = (space: Workspace, gate: GateVerdict["gate"], named = false): GateVerdict | null => {
@@ -210,6 +292,19 @@ const runQuickGates = (space: Workspace): readonly GateOutcome[] => {
   return gates;
 };
 
+const fenceHitsIn = (space: Workspace): number => {
+  const log = space.run.files.read(join(space.clone, FENCE_LOG));
+  const hits = log === null ? NOTHING : log.split("\n").filter((line) => line !== "").length;
+
+  if (log !== null) {
+    space.run.files.write(join(space.reportDir, FENCE_REPORT), log);
+  }
+
+  space.run.say(`fence: ${String(hits)} refusals`);
+
+  return hits;
+};
+
 const commitsMadeIn = (space: Workspace): number =>
   Number(checked(space.run.shell("git rev-list --count HEAD", space.clone), "counting commits").stdout) -
   ONE_COMMIT;
@@ -250,16 +345,21 @@ export const runBenchmark = (run: BenchmarkRun): RunRecord => {
   const startedAt = run.now();
   const config = benchmarkConfigOf(run.root, run.files);
   const task = taskOf(run.root, run.taskName, run.files);
-  const workDir = join(run.root, BENCHMARK_REPORTS, `${stampOf(startedAt.toISOString())}-${task.name}`);
-  const space: Workspace = { run, task, config, startedAt, workDir, clone: join(workDir, CLONE_FOLDER) };
+  const runName = `${stampOf(startedAt.toISOString())}-${task.name}`;
+  const reportDir = join(run.root, BENCHMARK_REPORTS, runName);
+  const clone = join(run.tmp, CLONES_FOLDER, runName, CLONE_FOLDER);
+  const space: Workspace = { run, task, config, startedAt, reportDir, clone };
   const snapshot = snapshotOf(space);
 
+  run.files.mkdir(reportDir);
   prepareClone(space);
   installDependencies(space);
 
   const agent = runAgent(space);
+  const transcript = keepTranscript(space, agent);
   const acceptance = runAcceptance(space);
   const gates = runQuickGates(space);
+  const fenceHits = fenceHitsIn(space);
   const commit = lastCommitIn(space);
   const record: RunRecord = {
     task: task.name,
@@ -268,10 +368,13 @@ export const runBenchmark = (run: BenchmarkRun): RunRecord => {
     model: run.model,
     effort: run.effort,
     startedAt: startedAt.toISOString(),
+    clone,
+    transcript,
     agent,
     acceptance,
     gates,
     obligations: obligationsMet(task, lookInto(space, agent.closing, commit)),
+    fenceHits,
     commits: commitsMadeIn(space),
     treeClean: treeCleanIn(space),
     debtNamed: debtNamedIn(task, [agent.closing, commit]),

@@ -1,17 +1,30 @@
 import { join } from "node:path";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { A_LINE } from "./markdown-text.ts";
 
 
-export const DOCUMENTS = [
+const ALWAYS_PRESENT = [
   "README.md",
   "PLAN.md",
   "CLAUDE.md",
   "TECH-DEBT.md",
   "e2e/README.md",
   "deploy/README.md",
-  "benchmark/README.md",
 ];
+
+export const STRIPPED_FROM_A_BENCHMARK_CLONE = ["benchmark", "scripts/benchmark"];
+
+const A_STRIPPED_DOCUMENT = "benchmark/README.md";
+
+export const DOCUMENTS = [
+  ...ALWAYS_PRESENT,
+  ...(existsSync(A_STRIPPED_DOCUMENT) ? [A_STRIPPED_DOCUMENT] : []),
+];
+
+export const insideAStrippedFolder = (path: string): boolean =>
+  STRIPPED_FROM_A_BENCHMARK_CLONE.some(
+    (folder) => !existsSync(folder) && (path === folder || path.startsWith(`${folder}/`))
+  );
 
 export const SESSION_DOCUMENT = "CLAUDE.md";
 

@@ -62,9 +62,15 @@ vi.mock("./benchmark-record.ts", () => ({
   stampOf: () => "STAMP",
 }));
 
-const { realShell, runBenchmark } = await import("./benchmark-run.ts");
+const { HOOK_TIMEOUT_S, fenceSettingsFor, projectSlugOf, realShell, runBenchmark } = await import(
+  "./benchmark-run.ts"
+);
 
 const ROOT = "D:/repo";
+
+const HOME = "C:/Users/someone";
+
+const TMP = "C:/tmp";
 
 const A_MODEL = "claude-opus-5";
 
@@ -93,7 +99,7 @@ const TASK: Task = {
 
 const CONFIG = { checkupModel: A_MODEL, checkupEffort: null, checkupTask: "flying-start", maxTurns: 5, maxBudgetUsd: 2 };
 
-const AGENT = { finished: true, turns: 3, costUsd: 1, inputTokens: 1, outputTokens: 1, durationMs: 1, closing: "Decided: nothing.", sessionId: "s" };
+const AGENT = { finished: true, turns: 3, costUsd: 1, inputTokens: 1, outputTokens: 1, durationMs: 1, closing: "Decided: nothing.", sessionId: "sess-1" };
 
 const testVerdict = (cases: number, failed: number): string =>
   JSON.stringify({ kind: "ran", gate: "test", ok: failed === NOTHING, numbers: { kind: "tests", cases, failed, files: ONCE, failures: [] } });
@@ -108,7 +114,9 @@ class FilesStub {
   public readonly made: string[] = [];
 
   public readonly files: Files = {
-    read: (file) => this.onDisk.get(file) ?? null,
+    read: (file) =>
+      this.onDisk.get(file) ??
+      (hookOnDisk && file === join(clone, ".claude/hooks/refuse-a-step-outside-the-fence.mjs") ? "hook" : null),
     write: (file, text) => {
       this.onDisk.set(file, text);
     },
@@ -122,9 +130,15 @@ class FilesStub {
   };
 }
 
-const workDir = join(ROOT, "reports/benchmark", "STAMP-flying-start");
+let hookOnDisk = true;
 
-const clone = join(workDir, "clone");
+const reportDir = join(ROOT, "reports/benchmark", "STAMP-flying-start");
+
+const around = join(TMP, "foolproof-benchmark", "STAMP-flying-start");
+
+const clone = join(around, "clone");
+
+const transcriptOnDisk = join(HOME, ".claude", "projects", projectSlugOf(clone), "sess-1.jsonl");
 
 const commandsRun: { command: string; cwd: string; input?: string }[] = [];
 
@@ -158,6 +172,8 @@ let disk: FilesStub;
 
 const runOf = (): BenchmarkRun => ({
   root: ROOT,
+  home: HOME,
+  tmp: TMP,
   taskName: TASK.name,
   model: A_MODEL,
   effort: null,
@@ -176,6 +192,7 @@ const verdictAt = (gate: string, named = false): string =>
 
 beforeEach(() => {
   vi.clearAllMocks();
+  hookOnDisk = true;
   shell.mockImplementation(answering);
   commandsRun.length = NOTHING;
   said.length = NOTHING;
@@ -201,44 +218,62 @@ describe("runBenchmark()", () => {
       expect(taskOfSpy).toHaveBeenCalledWith(ROOT, TASK.name, disk.files);
     });
 
-    it("should clone HEAD without history into the run's folder under reports/", () => {
+    it("should cut the clone under the system temp folder, away from the repository", () => {
       runBenchmark(runOf());
 
-      expect(commandsMatching("git clone")[NOTHING]).toEqual(
-        expect.objectContaining({ command: expect.stringContaining("--depth 1"), cwd: workDir })
-      );
-      expect(commandsMatching("git clone")[NOTHING]?.command).toContain("file:///D:/repo");
+      expect(commandsMatching("git clone")[NOTHING]).toEqual({
+        command: 'git clone -q --depth 1 "file:///D:/repo" clone',
+        cwd: around,
+        input: undefined,
+      });
+      expect(disk.removed[NOTHING]).toBe(around);
+      expect(disk.made).toContain(around);
+      expect(disk.made).toContain(reportDir);
     });
 
-    it("should run exactly the clone, init, add and commit commands, and say where the clone is", () => {
+    it("should strip the history, the benchmark folder and the runner's own source before the snapshot commit", () => {
       runBenchmark(runOf());
 
-      expect(commandsRun.slice(ONCE, ONCE + ONCE + ONCE + ONCE + ONCE).map((ran) => ran.command)).toEqual([
-        'git clone -q --depth 1 "file:///D:/repo" clone',
+      expect(disk.removed).toContain(join(clone, ".git"));
+      expect(disk.removed).toContain(join(clone, "benchmark"));
+      expect(disk.removed).toContain(join(clone, "scripts/benchmark"));
+      expect(commandsRun.slice(ONCE + ONCE, ONCE + ONCE + ONCE + ONCE + ONCE).map((ran) => ran.command)).toEqual([
         "git init -q",
         "git add -A",
         "git -c user.name=benchmark -c user.email=benchmark@local commit -q -m " +
-          '"Snapshot for the benchmark, history and benchmark/ removed"',
+          '"Snapshot for the benchmark: history, benchmark/ and scripts/benchmark/ removed"',
       ]);
-      expect(disk.made).toContain(workDir);
-      expect(disk.removed[NOTHING]).toBe(workDir);
+      expect(commandsMatching("git init")[NOTHING]?.cwd).toBe(clone);
+    });
+
+    it("should fence the clone with the hook, through the clone's own local settings", () => {
+      runBenchmark(runOf());
+
+      expect(disk.onDisk.get(join(clone, ".claude/settings.local.json"))).toBe(
+        fenceSettingsFor(clone, join(TMP, "claude"))
+      );
+    });
+
+    it("should stop when the fence hook is not in the clone, rather than run unfenced", () => {
+      disk.files.remove(join(clone, ".claude/hooks/refuse-a-step-outside-the-fence.mjs"));
+      disk.onDisk.delete(join(clone, ".claude/hooks/refuse-a-step-outside-the-fence.mjs"));
+      hookOnDisk = false;
+
+      expect(() => runBenchmark(runOf())).toThrow("is not in the clone, so the fence would be missing silently");
+    });
+
+    it("should say each step as it goes", () => {
+      runBenchmark(runOf());
+
       expect(said).toEqual([
         `clone: ${clone}`,
         "dependencies installed",
         "agent: finished in 3 turns, $1.00",
         "acceptance: 9/11",
         "gates: lint green, typecheck green, docs-check red, test:coverage green",
+        "fence: 0 refusals",
         "the headline",
       ]);
-    });
-
-    it("should strip the history and the benchmark folder before the snapshot commit", () => {
-      runBenchmark(runOf());
-
-      expect(disk.removed).toContain(join(clone, ".git"));
-      expect(disk.removed).toContain(join(clone, "benchmark"));
-      expect(commandsMatching("git init")[NOTHING]?.cwd).toBe(clone);
-      expect(commandsMatching("git -c user.name=benchmark")[NOTHING]?.command).toContain("commit");
     });
 
     it("should install the clone's dependencies before the agent starts", () => {
@@ -247,7 +282,7 @@ describe("runBenchmark()", () => {
       const order = commandsRun.map((ran) => ran.command.split(" ")[NOTHING]);
 
       expect(order.indexOf("npm")).toBeLessThan(order.indexOf("claude"));
-      expect(commandsMatching("npm ci")[NOTHING]?.cwd).toBe(clone);
+      expect(commandsMatching("npm ci")[NOTHING]).toEqual({ command: "npm ci --silent", cwd: clone, input: undefined });
     });
 
     it("should stop when the clone cannot be made", () => {
@@ -265,28 +300,16 @@ describe("runBenchmark()", () => {
 
       expect(ran?.cwd).toBe(clone);
       expect(ran?.input).toBe(TASK.brief);
-      expect(ran?.command).toContain(`--model ${A_MODEL}`);
-      expect(ran?.command).toContain("--output-format json");
-      expect(ran?.command).toContain("--dangerously-skip-permissions");
-      expect(ran?.command).toContain("--disallowedTools WebSearch WebFetch");
-      expect(ran?.command).toContain("--max-turns 5");
-      expect(ran?.command).toContain("--max-budget-usd 2");
-      expect(ran?.command).not.toContain("--effort");
-    });
-
-    it("should pass the effort through when one was asked for, in one exact command", () => {
-      runBenchmark({ ...runOf(), effort: "low" });
-
-      expect(commandsMatching("claude")[NOTHING]?.command).toBe(
-        `claude -p --model ${A_MODEL} --effort low --output-format json --dangerously-skip-permissions ` +
+      expect(ran?.command).toBe(
+        `claude -p --model ${A_MODEL} --output-format json --dangerously-skip-permissions ` +
           "--disallowedTools WebSearch WebFetch --max-turns 5 --max-budget-usd 2"
       );
     });
 
-    it("should install with npm ci, quietly", () => {
-      runBenchmark(runOf());
+    it("should pass the effort through when one was asked for", () => {
+      runBenchmark({ ...runOf(), effort: "low" });
 
-      expect(commandsMatching("npm ci")[NOTHING]?.command).toBe("npm ci --silent");
+      expect(commandsMatching("claude")[NOTHING]?.command).toContain(`--model ${A_MODEL} --effort low --output`);
     });
 
     it("should refuse a model or an effort that is not a plain token", () => {
@@ -294,12 +317,28 @@ describe("runBenchmark()", () => {
       expect(() => runBenchmark({ ...runOf(), effort: "$(x)" })).toThrow("not plain enough");
     });
 
-    it("should keep the raw output and the closing message beside the clone", () => {
+    it("should keep the raw output and the closing message under reports/, beside the record", () => {
       runBenchmark(runOf());
 
-      expect(disk.onDisk.get(join(workDir, "agent.json"))).toBe("{json}");
-      expect(disk.onDisk.get(join(workDir, "closing.md"))).toBe(AGENT.closing);
+      expect(disk.onDisk.get(join(reportDir, "agent.json"))).toBe("{json}");
+      expect(disk.onDisk.get(join(reportDir, "closing.md"))).toBe(AGENT.closing);
       expect(agentOutcomeOfSpy).toHaveBeenCalledWith("{json}", NOTHING);
+    });
+
+    it("should copy the session's transcript out of the home folder and name the copy", () => {
+      disk.onDisk.set(transcriptOnDisk, "{line}\n");
+      const record = runBenchmark(runOf());
+
+      expect(record.transcript).toBe(join(reportDir, "transcript.jsonl"));
+      expect(disk.onDisk.get(join(reportDir, "transcript.jsonl"))).toBe("{line}\n");
+    });
+
+    it("should record no transcript when the session left none, or had no id", () => {
+      expect(runBenchmark(runOf()).transcript).toBeNull();
+
+      agentOutcomeOfSpy.mockReturnValue({ ...AGENT, sessionId: null });
+
+      expect(runBenchmark(runOf()).transcript).toBeNull();
     });
 
     it("should carry on to the scoring when the agent did not finish, and say so", () => {
@@ -357,7 +396,7 @@ describe("runBenchmark()", () => {
     });
   });
 
-  describe("the gates and the record", () => {
+  describe("the gates, the fence and the record", () => {
     it("should run the quick battery in the clone and read each gate's own verdict", () => {
       const record = runBenchmark(runOf());
 
@@ -368,6 +407,20 @@ describe("runBenchmark()", () => {
         { gate: GATE.docsCheck, ok: false },
         { gate: GATE.coverage, ok: true },
       ]);
+    });
+
+    it("should count the fence's refusals off the log the hook wrote in the clone, and keep the log", () => {
+      disk.onDisk.set(join(clone, "reports/benchmark-fence.log"), "t1 Refused: a\nt2 Refused: b\n");
+      const record = runBenchmark(runOf());
+
+      expect(record.fenceHits).toBe(ONCE + ONCE);
+      expect(disk.onDisk.get(join(reportDir, "fence.log"))).toBe("t1 Refused: a\nt2 Refused: b\n");
+      expect(said).toContain("fence: 2 refusals");
+    });
+
+    it("should count no refusals when the hook never wrote", () => {
+      expect(runBenchmark(runOf()).fenceHits).toBe(NOTHING);
+      expect(disk.onDisk.has(join(reportDir, "fence.log"))).toBe(false);
     });
 
     it("should let the obligations look into the clone, the commit and the closing message", () => {
@@ -439,7 +492,7 @@ describe("runBenchmark()", () => {
       expect(disk.onDisk.get(join(ROOT, "benchmark/RUNS.md"))).toBe("| header |\n| old |\n| row |\n");
     });
 
-    it("should carry the snapshot, the model and the start into the record", () => {
+    it("should carry the snapshot, the model, the clone and the start into the record", () => {
       const record: RunRecord = runBenchmark(runOf());
 
       expect(record).toEqual(
@@ -450,6 +503,7 @@ describe("runBenchmark()", () => {
           model: A_MODEL,
           effort: null,
           startedAt: "2026-09-10T13:00:00.000Z",
+          clone,
           treeClean: true,
           debtNamed: true,
         })
@@ -461,6 +515,28 @@ describe("runBenchmark()", () => {
 
       expect(said.at(-ONCE)).toBe("the headline");
     });
+  });
+});
+
+describe("fenceSettingsFor()", () => {
+  it("should wire the fence hook on every tool that names a path or runs a shell, with the clone as its root", () => {
+    const settings = JSON.parse(fenceSettingsFor("C:\\tmp\\x\\clone", "C:\\tmp\\claude")) as {
+      hooks: { PreToolUse: { matcher: string; hooks: { command: string; timeout: number }[] }[] };
+    };
+    const [entry] = settings.hooks.PreToolUse;
+
+    expect(entry?.matcher).toBe("Read|Edit|Write|MultiEdit|NotebookEdit|Glob|Grep|Bash");
+    expect(entry?.hooks[NOTHING]?.command).toBe(
+      'node .claude/hooks/refuse-a-step-outside-the-fence.mjs "C:/tmp/x/clone" "C:/tmp/claude"'
+    );
+    expect(entry?.hooks[NOTHING]?.timeout).toBe(HOOK_TIMEOUT_S);
+  });
+});
+
+describe("projectSlugOf()", () => {
+  it("should spell a path the way Claude Code names its project folders", () => {
+    expect(projectSlugOf("D:\\Temp\\FoolProof")).toBe("D--Temp-FoolProof");
+    expect(projectSlugOf("C:/tmp/foolproof-benchmark/x/clone")).toBe("C--tmp-foolproof-benchmark-x-clone");
   });
 });
 

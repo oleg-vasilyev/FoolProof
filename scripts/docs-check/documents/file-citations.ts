@@ -6,6 +6,7 @@ import {
   FLOW_DOCUMENT,
   SKILLS_FOLDER,
   definedAgents,
+  insideAStrippedFolder,
   installedSkills,
   read,
   skillFile,
@@ -126,7 +127,12 @@ export const citationsWithNoFile = (): readonly string[] => {
   const prefixes = prefixesUnderTheSource(featuresOnDisk());
 
   return everythingThatCites().flatMap(([document, text]) =>
-    citationComplaints(document, text, prefixes, existsSync)
+    citationComplaints(
+      document,
+      text,
+      prefixes,
+      (path) => existsSync(path) || insideAStrippedFolder(path)
+    )
   );
 };
 

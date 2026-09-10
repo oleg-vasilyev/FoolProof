@@ -371,7 +371,7 @@ scripts/                dev utilities that are not part of the bot, a folder per
                         `documents/` what is read out of the documents, `source/` what
                         they are held against; hooks/ the pure halves of the Claude
                         hooks; backup/ the snapshot the server's timer takes; benchmark/
-                        the runner behind `tools.ts benchmark`
+                        the runner behind `run-benchmark.ts`, which a clone never carries
 e2e/                    the fake Telegram and the scenarios played against it
 benchmark/                  frozen tasks an agent is given cold in a fresh clone, the
                         hidden acceptance each is scored by, and the log of every run

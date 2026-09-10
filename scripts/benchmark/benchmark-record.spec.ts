@@ -53,6 +53,9 @@ const RECORD: RunRecord = {
   model: "claude-sonnet-5",
   effort: null,
   startedAt: STARTED,
+  clone: "C:/tmp/foolproof-benchmark/x/clone",
+  transcript: null,
+  fenceHits: 0,
   agent: agentOutcomeOf(headless, MEASURED_MS),
   acceptance: { passed: 9, total: 11 },
   gates: [
@@ -161,16 +164,23 @@ describe("rowOf()", () => {
   it("should write the row in the header's column order, cell by cell", () => {
     expect(rowOf(RECORD)).toBe(
       `| ${STARTED} | flying-start v1 | 9510df8 | claude-sonnet-5 | default | yes | 9/11 | red: docs-check ` +
-        "| 2/3 | yes | 1 | 42 | 2.0 | 3.46 | 20260910T131243-flying-start-claude-sonnet-5.json |\n"
+        "| 2/3 | yes | 0 | 1 | 42 | 2.0 | 3.46 | 20260910T131243-flying-start-claude-sonnet-5.json |\n"
     );
   });
 
   it("should name every column the row fills", () => {
     expect(RUNS_LOG_HEADER).toBe(
       "| started | task | snapshot | model | effort | finished | acceptance | gates | obligations " +
-        "| debt named | commits | turns | minutes | cost $ | record |\n" +
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
+        "| debt named | fence hits | commits | turns | minutes | cost $ | record |\n" +
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
     );
+  });
+
+  it("should carry the fence hits into the row and the headline", () => {
+    const fenced = { ...RECORD, fenceHits: 3 };
+
+    expect(rowOf(fenced)).toContain("| yes | 3 | 1 |");
+    expect(headlineOf(fenced)).toContain("fence hits 3,");
   });
 
   it("should say the effort when one was set, and no when the agent did not finish", () => {
@@ -188,7 +198,8 @@ describe("rowOf()", () => {
 describe("headlineOf() and recordJsonOf()", () => {
   it("should say the task, the model and the four numbers in one line", () => {
     expect(headlineOf(RECORD)).toBe(
-      "flying-start on claude-sonnet-5: finished, acceptance 9/11, gates red: docs-check, obligations 2/3, 42 turns in 2.0 min"
+      "flying-start on claude-sonnet-5: finished, acceptance 9/11, gates red: docs-check, obligations 2/3, " +
+        "fence hits 0, 42 turns in 2.0 min"
     );
   });
 
