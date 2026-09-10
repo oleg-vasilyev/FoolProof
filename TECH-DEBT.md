@@ -580,6 +580,18 @@ same idea one level down, and it might make the full run cheap enough to sit in
 checkup that has two full reports to compare, or the next time a tag's since-tag
 mutation crosses ten minutes.**
 
+## The checkup's phases are numbered in fractions
+
+`deep-checkup.md` has grown phases 3½, 3¾ and 3⅞ between 3 and 4, and 9½ between 9 and
+10 — each inserted where it belonged rather than renumbering the ones after it, because
+the cut list and the report cite phases by number. Fractions read badly and run out: the
+next insertion after 3⅞ has nowhere to go. The owner's preference is letters — 3A, 3B,
+3C — which insert without arithmetic.
+
+**Rename them the next time the brief is edited for another reason**, in one commit
+with the cut list and every citation in `logbook/checkups/` left as written, since a
+report is a record and not a document kept in step.
+
 ## A benchmark run measures the harness and the code at one commit, never apart
 
 `benchmark/` cuts its clone from `HEAD`, so a run two weeks from now compares today's
