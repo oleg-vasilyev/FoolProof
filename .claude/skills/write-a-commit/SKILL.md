@@ -33,10 +33,9 @@ number that was measured rather than guessed. Write it the way the README is
 written: plain claims, each carrying its reason.
 
 **A phase-final commit ends with the Gates paragraph**, in one fixed shape, so
-two phases can be compared without re-parsing prose. The first line is written by
-`check:phase` itself, into `reports/gates/gates-paragraph.txt` under a stamp of battery,
-HEAD and time the commit-msg hook checks against the parent — paste the `Gates:` line, never
-retype it; the history holds dozens of hand wordings of that line alone:
+two phases can be compared without re-parsing prose. `check:phase` writes the first
+line into `reports/gates/gates-paragraph.txt`, stamped for the commit-msg hook — paste
+it, never retype it; the history holds dozens of hand wordings of that line alone:
 
 ```
 Gates: check:phase green — <N> tests in <M> files, coverage <st>/<br>/<fn>/<ln>,
@@ -84,13 +83,13 @@ The model name in the trailer is whichever Claude actually wrote the commit.
 says no, the phase still ends in the working commit above; there is simply no `npm
 version` after it, and the `Tag:` line says which tag will carry the work instead.
 
-A release starts from a green `main`: after pushing the phase commits, wait for
-the push CI (`gh run watch --exit-status`, about a minute) and fix a red
-`check:push` before cutting anything — a tag must not point at a commit the
-site is already failing on.
+A release starts from a green `main`: after pushing the phase commits, wait for the
+push CI (`gh run watch --exit-status`, about a minute) and fix a red `check:push`
+before cutting anything — a tag must not point at a commit the site is failing on.
 
 A release is `npm version` with `-m`, so the commit and the tag carry the same
-message; `%s` becomes the version:
+message; `%s` becomes the version. `check:release` runs after the tag and before the
+push, detached — the pre-push hook reads its stamp, and a red run leaves the tag here:
 
 ```bash
 npm version minor -m "Release %s
@@ -99,6 +98,7 @@ A minor: <one paragraph — what this tag gives the player or the operator,
 in plain words, no gate numbers, no file names>.
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+npm run check:release
 git push --follow-tags
 ```
 

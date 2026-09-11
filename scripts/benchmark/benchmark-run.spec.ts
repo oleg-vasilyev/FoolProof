@@ -48,6 +48,8 @@ const agentOutcomeOfSpy = vi.fn();
 
 const rowOfSpy = vi.fn((_record: unknown) => "| row |\n");
 
+const transcriptTallyOfSpy = vi.fn();
+
 const headlineOfSpy = vi.fn((_record: unknown) => "the headline");
 
 const recordJsonOfSpy = vi.fn((_record: unknown) => "{record}\n");
@@ -60,6 +62,7 @@ vi.mock("./benchmark-record.ts", () => ({
   recordNameOf: () => "stamp-task-model",
   rowOf: (record: unknown) => rowOfSpy(record),
   stampOf: () => "STAMP",
+  transcriptTallyOf: (jsonl: unknown) => transcriptTallyOfSpy(jsonl),
 }));
 
 const { HOOK_TIMEOUT_S, fenceSettingsFor, projectSlugOf, realShell, runBenchmark } = await import(
@@ -97,7 +100,11 @@ const TASK: Task = {
   debtPattern: "TECH-DEBT",
 };
 
-const CONFIG = { checkupModel: A_MODEL, checkupEffort: null, checkupTask: "flying-start", maxTurns: 5, maxBudgetUsd: 2 };
+const BUDGET_USD = 2;
+
+const CONFIG = { checkupModel: A_MODEL, checkupEffort: null, checkupTask: "flying-start", maxTurns: 5, maxBudgetUsd: BUDGET_USD };
+
+const A_TALLY = { assistantMessages: 7, toolCalls: 4 };
 
 const AGENT = { finished: true, turns: 3, costUsd: 1, inputTokens: 1, outputTokens: 1, durationMs: 1, closing: "Decided: nothing.", sessionId: "sess-1", aborted: null };
 
@@ -333,8 +340,20 @@ describe("runBenchmark()", () => {
       expect(disk.onDisk.get(join(reportDir, "transcript.jsonl"))).toBe("{line}\n");
     });
 
-    it("should record no transcript when the session left none, or had no id", () => {
-      expect(runBenchmark(runOf()).transcript).toBeNull();
+    it("should tally the kept transcript and carry the tally and the budget into the record", () => {
+      disk.onDisk.set(transcriptOnDisk, "{line}\n");
+      transcriptTallyOfSpy.mockReturnValue(A_TALLY);
+
+      const record = runBenchmark(runOf());
+
+      expect(transcriptTallyOfSpy).toHaveBeenCalledWith("{line}\n");
+      expect(record.transcriptTally).toBe(A_TALLY);
+      expect(record.budgetUsd).toBe(BUDGET_USD);
+    });
+
+    it("should record no transcript and no tally when the session left none, or had no id", () => {
+      expect(runBenchmark(runOf())).toEqual(expect.objectContaining({ transcript: null, transcriptTally: null }));
+      expect(transcriptTallyOfSpy).not.toHaveBeenCalled();
 
       agentOutcomeOfSpy.mockReturnValue({ ...AGENT, sessionId: null });
 

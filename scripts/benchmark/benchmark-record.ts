@@ -5,6 +5,8 @@ const NOTHING = 0;
 
 const JSON_INDENT = 2;
 
+const TWO_DECIMALS = 2;
+
 const MS_IN_A_MINUTE = 60_000;
 
 const ONE_DECIMAL = 1;
@@ -17,6 +19,7 @@ export interface AgentOutcome {
   readonly finished: boolean;
   readonly turns: number;
   readonly costUsd: number;
+  readonly costByModel: Readonly<Record<string, number>>;
   readonly inputTokens: number;
   readonly outputTokens: number;
   readonly durationMs: number;
@@ -30,6 +33,11 @@ export interface GateOutcome {
   readonly ok: boolean;
 }
 
+export interface TranscriptTally {
+  readonly assistantMessages: number;
+  readonly toolCalls: number;
+}
+
 export interface RunRecord {
   readonly task: string;
   readonly taskVersion: number;
@@ -39,6 +47,8 @@ export interface RunRecord {
   readonly startedAt: string;
   readonly clone: string;
   readonly transcript: string | null;
+  readonly transcriptTally: TranscriptTally | null;
+  readonly budgetUsd: number;
   readonly agent: AgentOutcome;
   readonly acceptance: { readonly passed: number; readonly total: number };
   readonly gates: readonly GateOutcome[];
@@ -64,7 +74,56 @@ interface HeadlessOutput {
     readonly cache_read_input_tokens?: number;
     readonly output_tokens?: number;
   };
+  readonly modelUsage?: Readonly<Record<string, { readonly costUSD?: number }>>;
 }
+
+interface TranscriptEntry {
+  readonly type?: string;
+  readonly uuid?: string;
+  readonly message?: {
+    readonly id?: string;
+    readonly content?: readonly { readonly type?: string }[] | string;
+  };
+}
+
+const ASSISTANT = "assistant";
+
+const TOOL_USE = "tool_use";
+
+const entryOf = (line: string): TranscriptEntry | null => {
+  try {
+    return JSON.parse(line) as TranscriptEntry;
+  } catch {
+    return null;
+  }
+};
+
+const toolCallsIn = (entry: TranscriptEntry): number => {
+  const content = entry.message?.content;
+
+  return Array.isArray(content) ? content.filter((block) => block.type === TOOL_USE).length : NOTHING;
+};
+
+export const transcriptTallyOf = (jsonl: string | null): TranscriptTally | null => {
+  if (jsonl === null) {
+    return null;
+  }
+
+  const entries = jsonl
+    .split("\n")
+    .map(entryOf)
+    .filter((entry): entry is TranscriptEntry => entry !== null && entry.type === ASSISTANT);
+
+  return {
+    assistantMessages: new Set(entries.map((entry, index) => entry.message?.id ?? entry.uuid ?? String(index))).size,
+    toolCalls: entries.reduce((sum, entry) => sum + toolCallsIn(entry), NOTHING),
+  };
+};
+
+const costByModelOf = (parsed: HeadlessOutput): Readonly<Record<string, number>> =>
+  Object.fromEntries(
+    Object.entries(parsed.modelUsage ?? {}).map(([model, usage]) => [model, usage.costUSD ?? NOTHING])
+  );
 
 const lastJsonObjectIn = (text: string): HeadlessOutput | null => {
   const opens = text.lastIndexOf("\n{");
@@ -96,6 +155,7 @@ export const agentOutcomeOf = (stdout: string, durationMs: number): AgentOutcome
       finished: false,
       turns: NOTHING,
       costUsd: NOTHING,
+      costByModel: {},
       inputTokens: NOTHING,
       outputTokens: NOTHING,
       durationMs,
@@ -111,6 +171,7 @@ export const agentOutcomeOf = (stdout: string, durationMs: number): AgentOutcome
     finished: parsed.is_error !== true,
     turns: parsed.num_turns ?? NOTHING,
     costUsd: parsed.total_cost_usd ?? NOTHING,
+    costByModel: costByModelOf(parsed),
     inputTokens:
       (usage.input_tokens ?? NOTHING) +
       (usage.cache_creation_input_tokens ?? NOTHING) +
@@ -155,10 +216,28 @@ const headlineEndOf = (agent: AgentOutcome): string => {
   return agent.finished ? "finished" : "DID NOT FINISH";
 };
 
+const NOT_COUNTED = "n/a";
+
+const PERCENT = 100;
+
+const tallyOf = (tally: TranscriptTally | null, pick: (tally: TranscriptTally) => number): string =>
+  tally === null ? NOT_COUNTED : String(pick(tally));
+
+const costCellOf = (agent: AgentOutcome): string =>
+  Object.entries(agent.costByModel)
+    .map(([model, cost]) => `${model} ${cost.toFixed(TWO_DECIMALS)}`)
+    .join(", ") || NOT_COUNTED;
+
+const budgetShareOf = (record: RunRecord): string =>
+  record.budgetUsd > NOTHING
+    ? `${String(Math.round((record.agent.costUsd / record.budgetUsd) * PERCENT))}% of ${String(record.budgetUsd)}`
+    : NOT_COUNTED;
+
 export const RUNS_LOG_HEADER =
   "| started | task | snapshot | model | effort | finished | acceptance | gates | obligations " +
-  "| debt named | fence hits | commits | turns | minutes | cost $ | record |\n" +
-  "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n";
+  "| debt named | fence hits | commits | turns (CLI) | assistant messages | tool calls | minutes " +
+  "| cost $ | cost by model | budget | record |\n" +
+  "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n";
 
 export const rowOf = (record: RunRecord): string =>
   `| ${record.startedAt} | ${record.task} v${String(record.taskVersion)} | ${record.snapshot} ` +
@@ -166,7 +245,10 @@ export const rowOf = (record: RunRecord): string =>
   `| ${String(record.acceptance.passed)}/${String(record.acceptance.total)} ` +
   `| ${gatesOf(record.gates)} | ${metOf(record.obligations)} | ${yesOrNo(record.debtNamed)} ` +
   `| ${String(record.fenceHits)} | ${String(record.commits)} | ${String(record.agent.turns)} ` +
-  `| ${minutesOf(record.agent.durationMs)} | ${record.agent.costUsd.toFixed(JSON_INDENT)} ` +
+  `| ${tallyOf(record.transcriptTally, (tally) => tally.assistantMessages)} ` +
+  `| ${tallyOf(record.transcriptTally, (tally) => tally.toolCalls)} ` +
+  `| ${minutesOf(record.agent.durationMs)} | ${record.agent.costUsd.toFixed(TWO_DECIMALS)} ` +
+  `| ${costCellOf(record.agent)} | ${budgetShareOf(record)} ` +
   `| ${recordNameOf(record)}.json |\n`;
 
 export const headlineOf = (record: RunRecord): string =>

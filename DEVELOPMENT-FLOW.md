@@ -255,7 +255,8 @@ sequenceDiagram
         G-->>C: a green check on the commit
         alt the phase changed what a player or the operator gets
             C->>C: npm version with the release message
-            C->>C: the pre-push hook runs npm run check:release — a red tag cannot leave the machine
+            C->>C: npm run check:release at the tagged commit, detached — half an hour that no longer runs inside git push
+            C->>C: the pre-push hook reads the battery's stamp — a tag leaves only behind a green check:release at that commit
             C->>G: the tag is pushed
             C->>U: a chat message: the release is cut — the version, and what it changes
             G->>G: CI repeats the full battery on a clean clone — the second opinion

@@ -7,6 +7,7 @@ import {
   recordNameOf,
   rowOf,
   stampOf,
+  transcriptTallyOf,
   type RunRecord,
 } from "./benchmark-record.ts";
 
@@ -33,10 +34,24 @@ const RATE_LIMITED = 429;
 
 const STARTED = "2026-09-10T13:12:43.036Z";
 
+const ENTRIES = 302;
+
+const CALLS = 166;
+
+const BUDGET = 40;
+
+const OPUS_COST = 2.5;
+
+const FABLE_COST = 0.956;
+
 const headless = JSON.stringify({
   is_error: false,
   num_turns: TURNS,
   total_cost_usd: COST,
+  modelUsage: {
+    "claude-opus-5": { costUSD: OPUS_COST, inputTokens: 1 },
+    "claude-fable-5": { costUSD: FABLE_COST },
+  },
   duration_ms: REPORTED_MS,
   result: "All done.",
   session_id: "abc",
@@ -57,8 +72,21 @@ const RECORD: RunRecord = {
   startedAt: STARTED,
   clone: "C:/tmp/foolproof-benchmark/x/clone",
   transcript: null,
+  transcriptTally: { assistantMessages: ENTRIES, toolCalls: CALLS },
+  budgetUsd: BUDGET,
   fenceHits: 0,
-  agent: agentOutcomeOf(headless, MEASURED_MS),
+  agent: {
+    finished: true,
+    turns: TURNS,
+    costUsd: COST,
+    costByModel: { "claude-opus-5": OPUS_COST, "claude-fable-5": FABLE_COST },
+    inputTokens: FRESH + CACHED + CREATED,
+    outputTokens: OUT,
+    durationMs: MEASURED_MS,
+    closing: "All done.",
+    sessionId: "abc",
+    aborted: null,
+  },
   acceptance: { passed: 9, total: 11 },
   gates: [
     { gate: "lint", ok: true },
@@ -80,6 +108,7 @@ describe("agentOutcomeOf()", () => {
       finished: true,
       turns: TURNS,
       costUsd: COST,
+      costByModel: { "claude-opus-5": OPUS_COST, "claude-fable-5": FABLE_COST },
       inputTokens: FRESH + CACHED + CREATED,
       outputTokens: OUT,
       durationMs: MEASURED_MS,
@@ -121,6 +150,7 @@ describe("agentOutcomeOf()", () => {
       finished: false,
       turns: NOTHING,
       costUsd: NOTHING,
+      costByModel: {},
       inputTokens: NOTHING,
       outputTokens: NOTHING,
       durationMs: MEASURED_MS,
@@ -176,16 +206,89 @@ describe("rowOf()", () => {
   it("should write the row in the header's column order, cell by cell", () => {
     expect(rowOf(RECORD)).toBe(
       `| ${STARTED} | flying-start v1 | 9510df8 | claude-sonnet-5 | default | yes | 9/11 | red: docs-check ` +
-        "| 2/3 | yes | 0 | 1 | 42 | 2.0 | 3.46 | 20260910T131243-flying-start-claude-sonnet-5.json |\n"
+        "| 2/3 | yes | 0 | 1 | 42 | 302 | 166 | 2.0 | 3.46 | claude-opus-5 2.50, claude-fable-5 0.96 " +
+        "| 9% of 40 | 20260910T131243-flying-start-claude-sonnet-5.json |\n"
     );
   });
 
-  it("should name every column the row fills", () => {
+  it("should name every column the row fills, and call the CLI's turns what they are", () => {
     expect(RUNS_LOG_HEADER).toBe(
       "| started | task | snapshot | model | effort | finished | acceptance | gates | obligations " +
-        "| debt named | fence hits | commits | turns | minutes | cost $ | record |\n" +
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
+        "| debt named | fence hits | commits | turns (CLI) | assistant messages | tool calls | minutes " +
+        "| cost $ | cost by model | budget | record |\n" +
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
     );
+  });
+
+  it("should write n/a in the transcript columns and the cost column when nothing was counted, never a zero", () => {
+    const uncounted = {
+      ...RECORD,
+      transcriptTally: null,
+      budgetUsd: NOTHING,
+      agent: { ...RECORD.agent, costByModel: {} },
+    };
+
+    expect(rowOf(uncounted)).toContain("| 42 | n/a | n/a | 2.0 | 3.46 | n/a | n/a |");
+  });
+});
+
+describe("transcriptTallyOf()", () => {
+  const entry = (type: string, blocks: readonly string[]): string =>
+    JSON.stringify({ type, message: { content: blocks.map((kind) => ({ type: kind })) } });
+
+  const line = (type: string, id: string, blocks: readonly string[]): string =>
+    JSON.stringify({ type, message: { id, content: blocks.map((kind) => ({ type: kind })) } });
+
+  const transcript = [
+    line("user", "u1", ["text"]),
+    line("assistant", "m1", ["thinking"]),
+    line("assistant", "m1", ["text"]),
+    line("assistant", "m1", ["tool_use"]),
+    line("assistant", "m2", ["tool_use", "tool_use"]),
+    JSON.stringify({ type: "assistant", uuid: "no-message-id", message: { content: "a bare string" } }),
+    "not json at all",
+    "",
+  ].join("\n");
+
+  it("should count distinct assistant messages, since the CLI writes one line per content block, and every tool_use across them", () => {
+    expect(transcriptTallyOf(transcript)).toEqual({ assistantMessages: 3, toolCalls: 3 });
+  });
+
+  it("should tell two lines of one message apart from two messages by the message id, not by position", () => {
+    expect(transcriptTallyOf([line("assistant", "m1", ["text"]), line("assistant", "m1", ["text"])].join("\n"))).toEqual(
+      { assistantMessages: 1, toolCalls: 0 }
+    );
+    expect(transcriptTallyOf([line("assistant", "m1", ["text"]), line("assistant", "m2", ["text"])].join("\n"))).toEqual(
+      { assistantMessages: 2, toolCalls: 0 }
+    );
+  });
+
+  it("should count nothing at all when there is no transcript, so the row says n/a rather than zero", () => {
+    expect(transcriptTallyOf(null)).toBeNull();
+  });
+
+  it("should count an assistant line that carries no message as one message with no tool calls, rather than throw", () => {
+    expect(transcriptTallyOf(JSON.stringify({ type: "assistant" }))).toEqual({ assistantMessages: 1, toolCalls: 0 });
+  });
+
+  it("should count two id-less lines as two messages by their position, so a stripped transcript still counts", () => {
+    const stripped = [JSON.stringify({ type: "assistant" }), JSON.stringify({ type: "assistant" })].join("\n");
+
+    expect(transcriptTallyOf(stripped)).toEqual({ assistantMessages: 2, toolCalls: 0 });
+  });
+});
+
+describe("agentOutcomeOf(), the cost by model", () => {
+  it("should read each model's cost off modelUsage, so a subagent's model is not hidden under the orchestrator's", () => {
+    expect(agentOutcomeOf(headless, MEASURED_MS).costByModel).toEqual({
+      "claude-opus-5": OPUS_COST,
+      "claude-fable-5": FABLE_COST,
+    });
+  });
+
+  it("should carry no models when the JSON names none, or there was no JSON", () => {
+    expect(agentOutcomeOf(JSON.stringify({ num_turns: TURNS }), MEASURED_MS).costByModel).toEqual({});
+    expect(agentOutcomeOf("nothing", MEASURED_MS).costByModel).toEqual({});
   });
 
   it("should carry the fence hits into the row and the headline", () => {

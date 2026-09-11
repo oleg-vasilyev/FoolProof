@@ -74,7 +74,10 @@ Deterministic first; a judging model only where nothing else can see.
 | debt named | the task's `debtPattern` found in the closing message or the commit |
 | fence hits | lines in the fence log the hook wrote inside the clone |
 | finished | the CLI's own verdict; `void (api error 429)` when the API cut the run short, and such a row is not a result — it is kept so the gap is visible, and never compared |
-| turns, cost | the headless CLI's own JSON |
+| turns (CLI), cost | the headless CLI's own JSON — and its `num_turns` counts the last turn-group when the run ended on a subagent's report, so the pinned cell read 2 for a session of three hundred assistant lines; the two columns after it are counted, not reported |
+| assistant messages, tool calls | counted off the kept transcript: distinct `message.id` among the lines of type `assistant` (the CLI writes one line per content block, so lines overcount), and the `tool_use` blocks across them; `n/a` when no transcript was kept |
+| cost by model | the CLI's `modelUsage`, one cost per model, so a subagent's model shows beside the orchestrator's |
+| budget | the cost as a share of `maxBudgetUsd`, so a row one long turn from `void` reads as such |
 | minutes | the runner's clock around the agent, wall to wall; the CLI's own duration leaves the tools out and read eleven minutes for a forty-six minute run |
 
 Beside the row, `reports/benchmark/<run>/` keeps the CLI's raw JSON, the closing

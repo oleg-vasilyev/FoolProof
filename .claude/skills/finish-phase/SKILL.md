@@ -92,7 +92,7 @@ a reader who looks at the number rather than the verdict sees it at all.
 
 Stryker over the files this phase touched — about a minute. A mutant in a file the
 phase never opened was killed in the phase that wrote it. A tag re-mutates only what
-changed since the previous tag (`check:release`, in the pre-push hook): a guard
+changed since the previous tag (`check:release`, run before the push and read by the pre-push hook): a guard
 against a phase that skipped this gate, not against a weakened spec, a changed stub or a
 shared helper over an untouched subject — that gap, and the **full** `node scripts/gates/gate-runner.ts test:mutation` (26 minutes at v1.20.1),
 belong to the weekly `deep-checkup`.

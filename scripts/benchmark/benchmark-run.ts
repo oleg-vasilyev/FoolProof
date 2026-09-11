@@ -21,6 +21,7 @@ import {
   recordNameOf,
   rowOf,
   stampOf,
+  transcriptTallyOf,
   type AgentOutcome,
   type GateOutcome,
   type RunRecord,
@@ -369,6 +370,7 @@ export const runBenchmark = (run: BenchmarkRun): RunRecord => {
 
   const agent = runAgent(space);
   const transcript = keepTranscript(space, agent);
+  const transcriptTally = transcript === null ? null : transcriptTallyOf(run.files.read(transcript));
   const acceptance = runAcceptance(space);
   const gates = runQuickGates(space);
   const fenceHits = fenceHitsIn(space);
@@ -382,6 +384,8 @@ export const runBenchmark = (run: BenchmarkRun): RunRecord => {
     startedAt: startedAt.toISOString(),
     clone,
     transcript,
+    transcriptTally,
+    budgetUsd: config.maxBudgetUsd,
     agent,
     acceptance,
     gates,

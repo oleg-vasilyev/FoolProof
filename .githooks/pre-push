@@ -1,32 +1,69 @@
 #!/bin/sh
 #
-# Refuse to push a release tag from a machine where the release battery is red.
-# The deploy server pulls whatever tag appears on its own timer and does not
-# wait for CI, so this hook is the only gate that actually stands between a
-# red suite and production — CI's release-check is the second opinion on a
-# clean clone, not the gate. Installed by npm install: the prepare script
-# points core.hooksPath at this folder.
+# Refuse to push a release tag from a machine where the release battery has not
+# been seen green at that very commit. The deploy server pulls whatever tag
+# appears on its own timer and does not wait for CI, so this hook is the only gate
+# that actually stands between a red suite and production — CI's release-check is
+# the second opinion on a clean clone, not the gate. Installed by npm install: the
+# prepare script points core.hooksPath at this folder.
+#
+# The battery no longer runs inside the push. It used to, and a half-hour battery
+# behind `git push` outlived the agent's shell, read as an interrupted push, and
+# left a local tag to delete by hand when red. Now `npm run check:release` runs
+# before the push, on its own, and leaves reports/gates/gates-paragraph.txt under
+# a stamp of battery, HEAD and time; this hook only reads that stamp — a second's
+# work — and refuses unless the battery was check:release, ran at the commit the
+# tag points to, and came out green.
 #
 # git feeds one line per ref being pushed: <local ref> <sha> <remote ref> <sha>.
-#
-# The battery runs behind this push, so its console is not yours to watch: each
-# gate streams its log to reports/gates/<gate>.log as it runs, and leaves its
-# verdict beside it when it ends.
 
-releasing=0
+paragraph_file="reports/gates/gates-paragraph.txt"
 
-while read -r _local_ref _local_sha remote_ref _remote_sha; do
+refuse() {
+  echo "pre-push: $1"
+  echo
+  echo "A release tag leaves only behind a green check:release run at the tagged commit."
+  echo "Run it, then push again:"
+  echo
+  echo "  npm run check:release"
+  exit 1
+}
+
+deleting=$(printf '%040d' 0)
+
+while read -r _local_ref local_sha remote_ref _remote_sha; do
   case "$remote_ref" in
-    refs/tags/v*) releasing=1 ;;
+    refs/tags/v*)
+      if [ "$local_sha" = "$deleting" ]; then
+        continue
+      fi
+
+      if [ ! -f "$paragraph_file" ]; then
+        refuse "$paragraph_file is not there — no battery has run on this machine."
+      fi
+
+      tagged=$(git rev-parse "$local_sha^{commit}")
+      stamp=$(head -n 1 "$paragraph_file" 2>/dev/null)
+      verdict=$(sed -n 2p "$paragraph_file" 2>/dev/null)
+      stamped_battery=$(echo "$stamp" | cut -d' ' -f1)
+      stamped_head=$(echo "$stamp" | cut -d' ' -f3)
+
+      if [ "$stamped_battery" != "check:release" ]; then
+        refuse "$paragraph_file holds '$stamped_battery', not a check:release run."
+      fi
+
+      if [ "$stamped_head" != "$tagged" ]; then
+        refuse "the check:release on disk ran at $stamped_head; $remote_ref points at $tagged."
+      fi
+
+      case "$verdict" in
+        "Gates: check:release green"*) ;;
+        *) refuse "the check:release at $tagged is not green: $verdict" ;;
+      esac
+
+      echo "pre-push: check:release was green at $tagged — the tag may leave"
+      ;;
   esac
 done
-
-if [ "$releasing" = 1 ]; then
-  echo "pre-push: a release tag is leaving — running the release battery first"
-  npm run check:release || {
-    echo "pre-push: red. The tag stays here until the battery is green."
-    exit 1
-  }
-fi
 
 exit 0
