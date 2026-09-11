@@ -215,7 +215,7 @@ files that machine actually applies to. A skill needing more than this pass can 
 is itself a finding, naming the `skill-auditor` agent and what warranted it.
 
 **One section of `PLAN.md` is read line by line, all the way, and a different one
-each time.** The spec is 1600 lines and no gate reads most of it: `docs-check`
+each time.** The spec runs to two thousand lines and no gate reads most of it: `docs-check`
 compares the schema block and the contents list and nothing else, so a paragraph that
 stopped being true can sit there for a year looking exactly like one that is. Take the
 section after the one the previous checkup took — its report says which, and the order
@@ -438,10 +438,10 @@ the next reader to rediscover it.
 
 ## What comes back
 
-**The report is your final message, in full.** The harness refuses a subagent's
-attempt to write a report file, and the first run of this checkup lost its
-`REPORT.md` to exactly that — do not spend a turn retrying it. Evidence files go to
-disk as you go, that write is allowed, and every verdict cites one.
+**Write the report once to the path the brief names; if the harness refuses the
+write, the report is your final message, in full** — the first run lost its
+`REPORT.md` to a retry loop, and the run of 11 September 2026 wrote
+`logbook/checkups/2026-09-11.md` on the first try. Evidence files go to disk as you go, and every verdict cites one.
 
 One line first:
 

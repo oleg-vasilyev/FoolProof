@@ -17,7 +17,7 @@ committing.
 
 **A crash is not a red gate, and this one has a signature.** The run opens
 `max(1, round(cores × 0.75))` Node workers, each carrying a vitest instance — twelve
-on a sixteen-core machine, measured at about 200 MB of working set each and far more
+on a sixteen-core machine, measured on 25 August 2026 at about 200 MB of working set each and far more
 committed address space. Beside a loaded desktop that is enough to exhaust Windows'
 commit charge, and what comes back then is not a score: a hook panicking with `OOM`,
 `npx` failing to fork with `uv_spawn`, Stryker dying with `ERR_IPC_CHANNEL_CLOSED`,

@@ -15,7 +15,7 @@ before the final commit and act on what it says. None of them is advisory.
 **A phase ends in a tag only when it changed what a player or the operator gets.**
 Everything else — tooling, documents, this process, a gate — goes to `main` and rides
 the next tag, because a tag here restarts the bot and pays `check:release`: full
-mutation and full e2e, ten to fifteen minutes to re-prove files the phase never
+mutation and full e2e, half an hour (measured 9 September 2026) to re-prove files the phase never
 opened. Eight tags went out in four days once, several of them one-commit phases that
 changed nothing the table could see. The site is the exception that needs no rule: it
 ships from `main` on push, so a landing-page phase is already released when CI is
@@ -103,7 +103,7 @@ Coverage says a line ran; this says a test would have noticed it break.
 breaks below 80% (`stryker.scripts.json`). The bars differ because the failures do:
 a survivor in `src/` is a bot that misbehaves in front of a player, a survivor in a
 gate is a shape of input the gate will not notice. They are separate runs rather
-than one, because a single score would let 1400 tooling mutants hide inside 5600
+than one, because a single score would let 1400 tooling mutants (August 2026) hide inside 5600
 good ones — which is the aggregate-hides-a-family trap this project has paid for
 before. `mutate-changed.ts` routes a changed file to its own family.
 

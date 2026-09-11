@@ -365,11 +365,12 @@ The marks used to be a bitmask, which says who but not in what order, so Back ha
 nothing to pop. Ordering them costs a base-62 digit per mark, and at ten seats that
 is eight bytes more than the budget had spare — so the ids on this screen dropped
 their separators and are written at one fixed width instead, which buys nine. **A
-button drawn before that change still decodes**, by an upper-case screen letter on
-the new shape and the old lower-case one on the old: the wire format is the one thing
-in this bot that outlives a deploy, sitting in a chat with live buttons on it, and a
-screen whose Cancel silently routes nowhere is the failure the paragraph below exists
-to prevent.
+button drawn before that change no longer decodes** — the codec reads the new shape
+only, so a tap on an old screen matches no feature and falls to the installer's
+catch-all, which answers that the button is from an older version of the bot: the
+wire format is the one thing here that outlives a deploy, sitting in a chat with live
+buttons on it, and a screen whose Cancel silently does nothing is the failure the
+paragraph below exists to prevent.
 
 **Cancel is answered before that check**, because closing a screen changes nothing at
 the table. It is not a nicety: a stale screen whose Cancel was also refused could

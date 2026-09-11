@@ -2,13 +2,13 @@
 
 > Read before briefing any subagent, and before deciding not to. [Finishing a phase](SKILL.md) names which gates are delegated always — this says what a brief owes an agent, and what delegation does and does not buy.
 
-Measured rather than assumed: one phase spent 493k tokens across six agents and saved
+Measured rather than assumed: one phase in July 2026 spent 493k tokens across six agents and saved
 none. A cold agent re-reads the subject, the skill and the spec that are already in
 your context, so delegation never buys tokens. It buys two things — room in your own
 window, and wall-clock while you work on something disjoint.
 
 **The review, the readings and the checkup are delegated always.** Their whole value
-is that the reader did not write the thing: 89k tokens caught three things about to
+is that the reader did not write the thing: 89k tokens (July 2026) caught three things about to
 ship, including a false sentence written earlier in the same phase by the same person
 who then re-read it and approved it. Four phases in one night went four for four on
 real bugs rather than style, the sharpest a systemd unit that would have restarted the
@@ -30,7 +30,7 @@ to move the result back out of `flow-drawing.ts`.
 number weighs writing a brief against writing the code yourself; a read-only errand has
 no such arithmetic, because the alternative is reading the files in your own window and
 then carrying them for the rest of the phase. One brief sent cold to read the agent
-files against each other cost 149k tokens in a single call and returned three defects
+files against each other cost 149k tokens in a single call (26 August 2026) and returned three defects
 nothing else was looking for, the sharpest a *known asymmetry* in the deploy that had
 been fixed two commits earlier. Three conditions, every time: the question stands apart
 from what you are doing, it is answerable by opening files rather than by holding this
@@ -109,10 +109,10 @@ judgement:
 
 A **fork** inherits the whole conversation instead of starting cold, so it is priced by
 the *conversation* rather than the task — a one-line answer needing no tools measured
-391762 tokens here — and buys your own window back, nothing else. **Never fork a gate
+391762 tokens here on 28 August 2026 — and buys your own window back, nothing else. **Never fork a gate
 whose value is coldness**: forking the reviewer or either reader is re-reading your own
 work under a second name. The retrospective looked made for a fork and cost 313,321
-then 237,649 tokens for six lines back, so it runs in the conversation itself now.
+then 237,649 tokens for six lines back (7 September 2026), so it runs in the conversation itself now.
 
 `context: fork` is a *different* mechanism: an isolated subagent driven by the skill
 body, with no conversation. It reads as *always delegated* and writes on every

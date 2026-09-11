@@ -46,17 +46,13 @@ backup directory, red past forty days. It is deliberately not done yet, because 
 `/status` to read a path that is not the database — the first time that feature would
 touch the filesystem for a reason other than the one it was built for.
 
-Two snapshots exist — a hand-made one from 13 August, and the first the timer sent on
-schedule, 1 September (71 games, 16 players) — so the monthly path has fired once and
-is unwatched rather than untested.
-
 **Pick it up when the timer goes back to daily**, which is the same trigger as a
 second table starting to play — or sooner, the first time the answer to "when did
 this last run" is wanted while something is actually broken.
 
 ---
 
-## A graceful shutdown is the one path e2e cannot play
+## Two paths e2e cannot play: a graceful shutdown, and a tap from another chat
 
 `bot-process.ts` stops a bot by killing it, because a spawned parent on Windows
 cannot deliver `SIGINT` to its child. So the path a real `Ctrl+C` takes — the one
@@ -67,8 +63,13 @@ Closing it honestly would mean a shutdown channel in `src/` existing only for th
 harness, and this project puts no test hooks in the app: `BOT_API_ROOT` is there because
 a self-hosted Bot API server is a real Telegram feature, not because e2e wanted a seam.
 
-**Pick it up if a lost edit on shutdown ever reaches a real Friday** — that is the
-evidence that the gap costs more than the seam would.
+The harness also plays one chat per world, so the tap the card service refuses since
+11 September 2026 — `callback_data` sent from a chat that is not the card's — is pinned
+by a unit case and by nothing that drives real grammY.
+
+**Pick up the shutdown if a lost edit ever reaches a real Friday, and the tap when a
+scenario needs a second chat for a reason of its own** — that world gets two chats, and
+the refusal costs one `tapRaw` with the other chat's message id.
 
 ---
 
@@ -330,7 +331,7 @@ That reading produced seventeen. Twelve are fixed, one is the colour entry above
 these four were never opened — they are questions rather than tasks, and checking one
 can delete it:
 
-- a crown drawn with nothing keying it, on the one sheet of twenty-nine with a red
+- a crown drawn with nothing keying it, on the one sheet in the gallery with a red
   banner, and that banner never appears in the Russian set at all;
 - the card owner's name cut to nine characters while an opponent's is drawn whole;
 - one name cut to two different lengths on one sheet, the legend shorter than the
@@ -395,9 +396,6 @@ evidence the scaffolding is a thing rather than a coincidence.
 None of these is wrong. They are the places where the next change is most likely to
 be awkward, with the trigger that would make the split pay for itself.
 
-**The line counts this table used to carry are gone**: half were stale and no gate
-could have said so. The trigger decides a split, and `wc -l` answers the rest.
-
 | File | Why it is on the list | Split it when |
 |---|---|---|
 | `features/live-game/bot/card/card-service.ts` | The largest file in `src/`, and the only one doing four jobs: looking a card up, applying a tap, scheduling the debounced edit, and sweeping idle cards. It reads as a skeleton, which is why it has survived. | A fifth job arrives, or something other than the card service needs the debouncer |
@@ -438,21 +436,25 @@ fires nothing *because* another player took the only row their shared situation 
 
 ## Sixteen user-visible lines the gallery never draws
 
-A cold reader given the full list of award and fact titles found only twenty of them on
-any panel. Sixteen — six awards (ГОРЯЧИЙ СТУЛ, ПАЦИФИСТ, ЖЕЛЕЗНЫЙ СТУЛ, С ОПОЗДАНИЕМ,
+A cold reader given the full list of award and fact titles on 24 August 2026 found only
+twenty of them on any panel. Sixteen — six awards (ГОРЯЧИЙ СТУЛ, ПАЦИФИСТ, ЖЕЛЕЗНЫЙ СТУЛ, С ОПОЗДАНИЕМ,
 ТО ЕСТЬ ТО НЕТ, КАМЕО) and ten card facts (ВЫХОДИТ СУХИМ, СЧАСТЛИВЫЙ ТАЛИСМАН, ЧЁРНАЯ
 КОШКА, ЛЁГКАЯ ДОБЫЧА, ЕСТЬ ГДЕ РАЗВЕРНУТЬСЯ, ТЕРЯЕТСЯ В ТОЛПЕ, БЕЗ ПЕРВОГО ХОДА, ПЕРВЫЙ
 ХОД НЕ К ДОБРУ, СНОВА ЗА СТОЛОМ, ЧЁРНАЯ ПОЛОСА) — are drawn by no gallery case in either
 language, so the reading gate cannot see them and the width guard is all that can.
 
-The gallery's cases were built to stress the **drawing** — the widest name, the most
-awards, the tallest sheet — and a rule that fires on an ordinary evening is not an edge,
-so nothing pulled it in. The same blind spot the spread rule had.
+The gallery's cases were built to stress the **drawing**, and a rule that fires on an
+ordinary evening is not an edge, so nothing pulled it in — the spread rule's blind spot.
+
+Nor are the drawn ones all clean. The benchmark's copy-reader named six on 10 September
+2026: `teflonReason`, `kingReason` and `foolReason` claim a superlative wider than the
+field it was measured on; five Russian lines break on a count ending in 1 (*все 21
+партию*); `theirHourReason` prints a share with no unit; `lastStandReason` opens on a
+stump; `cleanRunHolder` says *начисто*, which nobody at this table says.
 
 **Pick it up when a case can cover several of them at once**, which is the only way this
 is worth the drawing time: one evening constructed so that the quiet awards fire together,
-rather than sixteen fixtures. Until then the width spec covers the mechanical half and
-nobody has read the other.
+rather than sixteen fixtures — and take the six sentences in the same redraw.
 
 ## An award names a rival it cannot print
 
@@ -547,8 +549,7 @@ toss. A third name was on this list — the phase-log field parsers living under
 `scripts/docs-check/`, `scripts/hooks/` and all of `scripts/gates/` are mutated at 80%
 now — the gates folder by glob since 9 September 2026, so a file added there joins the
 family on arrival — and two things that reason sit outside on the gates' side:
-`tools/design-page.ts`,
-whose `refuse()` branches have no spec, and `gates/e2e-changed.ts`, kept out of the glob
+`tools/design-page.ts`, whose `refuse()` branches have no spec, and `gates/e2e-changed.ts`, kept out of the glob
 by name because it decides which scenarios a diff can reach with no spec behind it.
 
 One module also passes only on the average — `source/env-keys.ts` at 78.02% the same

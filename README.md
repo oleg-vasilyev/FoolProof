@@ -71,7 +71,7 @@ redraws them whenever the drawing code changes.
 `/personal` answers with a third: one player's card for everything they have ever
 played here. Pick a name from the keyboard it offers and it draws the numbers, the
 share of the table evening by evening, what stuck, and who has been the worst news.
-Twenty facts can stick and a card prints at most four, so two players at the same
+More facts can stick than a card prints — at most four — so two players at the same
 table get two different cards.
 
 | The player card — six numbers, a career chart, and whichever facts this player earned |
@@ -182,7 +182,7 @@ name by hand.
 | `node scripts/gates/gate-runner.ts docs-check` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists — an `npm run` script, a gate the runner knows, a `tools.ts` verb; a tool run by hand is a complaint too. The complaints come back under one red line |
 | `node scripts/gates/gate-runner.ts test` | Vitest, once — units and integration together. One spec is `node scripts/gates/gate-runner.ts test <file>`: a red run prints each failed assertion with its file and message, and leaves `reports/gates/test.named.json` without touching the battery's paragraph |
 | `node scripts/gates/gate-runner.ts test:coverage` | Vitest with coverage; fails below 70% on any metric |
-| `node scripts/gates/gate-runner.ts test:mutation:changed` | Stryker over the files that differ from `origin/main` (or from `MUTATE_AGAINST`), about a minute. Under its line, red or green, every mutant still alive — file, line, status, the replacement — up to twenty per family, so a survivor is read off the run rather than out of the HTML report |
+| `node scripts/gates/gate-runner.ts test:mutation:changed` | Stryker over the files that differ from `origin/main` (or from `MUTATE_AGAINST`). Under its line, red or green, every mutant still alive — file, line, status, the replacement — up to twenty per family, so a survivor is read off the run rather than out of the HTML report |
 | `node scripts/gates/gate-runner.ts test:mutation` | Stryker over everything, 26 minutes measured at v1.20.1; two runs, the bot at 85% and the tooling at 80%. The weekly checkup's, not a release's |
 | `node scripts/gates/gate-runner.ts e2e` | Whole scenarios against the real bot and a fake Telegram. A failed case prints its message, up to three lines, and the path of the bot's log for that scenario under `reports/e2e/bot/` |
 | `node scripts/gates/gate-runner.ts e2e:changed` | Only the scenarios the diff against `origin/main` can reach |
@@ -305,11 +305,11 @@ a wasm fallback that once made `npm ci` refuse the lock file, and the server wou
 install all of it on every deploy to build a stylesheet it has no idea exists. The
 **framework** is one, and has to be: the CLI resolves `@import "tailwindcss"` from the
 folder the input sits in, so on a clean clone it finds nothing and the build fails
-outright. That is 821 KB of CSS and JavaScript with no dependencies of its own and
+outright. That was 821 KB of CSS and JavaScript on 22 August 2026, with no dependencies of its own and
 nothing to compile — the cheap half of the pair, and the half without which the tool
 does not run at all. Building the CSS rather than letting a script tag do it in the
-visitor's browser is what keeps the first screen at 44 KB with the posters below it
-lazy.
+visitor's browser is what kept the first screen at 44 KB that day, with the posters
+below it lazy.
 
 A page nobody links to is read by nobody, so two questions are worth asking of it:
 does anyone arrive, and does arriving lead anywhere. Each has its own dashboard, and
@@ -383,7 +383,7 @@ Inside every feature the same layers — `domain/` pure, `render/` pure, `sample
 the states worth drawing at, `bot/` the impure edge — with imports pointing only
 downward, and specs and stubs sitting next to the file they stand for. ESLint
 enforces it: a cross-feature import, a framework import in `domain/`, and a script
-that names a feature are all build errors.
+that imports a feature are all build errors.
 [CLAUDE.md](CLAUDE.md#layers-live-inside-a-feature) has the rest.
 
 ## The other documents

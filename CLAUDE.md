@@ -265,7 +265,7 @@ six blank posters passed every gate, the weight matching better. Import the guar
   `sqlite-repository.ts` is the only file allowed to contain SQL; the coercions
   (`column-values.ts`) and the row mappers (`row-records.ts`) stay out of it, because
   a file that imports the connection can only be tested against a real SQLite — and
-  that split took the layer's mutation score from 90.48% to 98.51%. Adding a query
+  that split took the layer's mutation score from 90.48% to 98.51% in July 2026. Adding a query
   has a procedure: the `add-repository-method` skill.
 
 ```ts
@@ -295,8 +295,8 @@ source tree, so they are here:
 
 - Specs sit next to the code as `*.spec.ts`, and **so do the stubs** — one for code
   we did not write (grammY's `Api`, a `Context`) sits beside its only consumer.
-- **Everything mockable has a stub, and specs use it instead of a hand-written
-  fake** — all of `shared/`, and every feature entry point.
+- **A spec mocks through a stub, never a hand-written fake** — every feature entry
+  point has one, and a `shared/` module mocked without one earns it in the same edit.
 
 `e2e/` is a different world with its own rules — the `write-an-e2e-scenario` skill
 and [`e2e/README.md`](e2e/README.md) — and a gate, not an experiment. One obligation

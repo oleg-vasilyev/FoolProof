@@ -715,7 +715,7 @@ export default [
     files: ["scripts/**/*.ts"],
     rules: forbid(
       [...FEATURES.map((name) => `#${name}/**`), "**/features/**"],
-      "scripts/ may not name a feature — ask for what features offer through #shared/drawings/drawings-contract.ts, so deleting a folder leaves the tooling running."
+      "scripts/ may not import a feature — ask for what features offer through #shared/drawings/drawings-contract.ts, so deleting a folder leaves the tooling running."
     ),
   },
 ];

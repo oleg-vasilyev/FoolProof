@@ -33,7 +33,7 @@ features/<name>/
 
 `bot` may reach `render` and `domain`; `render` and `samples` may reach `domain`;
 `domain` reaches nothing. **A feature that draws nothing has neither "only if"
-file**, and one that does may still not be named from `scripts/`: the tooling asks
+file**, and one that does may still not be imported from `scripts/`: the tooling asks
 through the contract and finds the module by its name at run time, which is what
 keeps the folder deletable. Skip a layer with nothing in it rather than leaving it
 empty — `diagnostics/` has no `domain/` because it decides nothing.
@@ -165,5 +165,5 @@ it. Ask in this order — the first is worth the other five:
 4. Was a deliberate violation shown to **fail** the lint for each new zone? A zone
    that never fires looks exactly like one with nothing to report.
 5. Can the pattern passed to `onTap` match another screen's `callback_data`?
-6. Does anything in `scripts/` now name this feature? It may not — the tooling asks
-   what features offer and finds them at run time.
+6. Does anything in `scripts/` now import this feature? It may not — the tooling asks
+   what features offer and finds them at run time; naming its folder is allowed.

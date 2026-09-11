@@ -126,7 +126,10 @@ nothing on the box that could write to the repository. What it costs is that a
 release takes up to five minutes rather than being instant, and that a deploy is
 reported in the server's journal rather than in a browser.
 
-The pull is signed with a **read-only deploy key**, and that is not a nicety: a
+The pull is signed with a **read-only deploy key** once `origin` is an SSH remote — the
+script branches on that scheme, takes the anonymous branch while it is `https`, and on
+11 September 2026 the server still had no key and an `https` origin — and that is not a
+nicety: a
 public repository can be fetched anonymously, but GitHub limits anonymous downloads
 and refuses one now and then, and git reports the refusal as a missing username. The
 journal showed 181 such refusals in four days of September 2026, and one release

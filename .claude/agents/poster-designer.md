@@ -97,23 +97,18 @@ promising a figure nothing computes is worse than no mockup.
 
 Write the SVG generator as a throwaway `.mjs` at the **repository root** (module
 resolution needs it inside the package) and delete it when you are done. Render
-through the project's own rasterizer so the fonts are the real ones:
+through the project's own rasterizer, never a hand-rolled `renderAsync` with font
+paths of its own, and call the font guard first: resvg draws a missing face as no
+text at all, and a copy without the guard once drew six blank posters that passed
+every gate.
 
 ```js
-import { renderAsync } from "@resvg/resvg-js";
 import { writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { requireFonts } from "#shared/fonts/font-files.ts";
+import { rasterize } from "#shared/drawing/rasterize.ts";
 
-const png = (await renderAsync(svg, {
-  font: {
-    fontFiles: [
-      resolve("assets/fonts/NotoSans-Regular.ttf"),
-      resolve("assets/fonts/NotoSans-Bold.ttf"),
-    ],
-    loadSystemFonts: false,
-    defaultFontFamily: "Noto Sans",
-  },
-})).asPng();
+requireFonts();
+const png = await rasterize(svg);
 ```
 
 Then **`Read` your own PNG and judge it as a reader.** This step is not optional
