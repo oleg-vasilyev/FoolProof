@@ -138,6 +138,25 @@ const greenPhrases = (verdicts: readonly GateVerdict[]): readonly string[] =>
     return phrase === null ? [] : [phrase];
   });
 
+const UNKNOWN_HEAD = "unknown";
+
+const STAMP_SEPARATOR = " · ";
+
+const A_STAMP = /^check:[a-z]+ · \S+ · \d{4}-\d\d-\d\dT[^\n]*$/;
+
+export const paragraphFileOf = (
+  battery: Battery,
+  head: string | null,
+  at: Date,
+  paragraph: string
+): string => `${[battery, head ?? UNKNOWN_HEAD, at.toISOString()].join(STAMP_SEPARATOR)}\n${paragraph}\n`;
+
+export const stampLineOf = (paragraphFile: string | null): string | null => {
+  const first = paragraphFile?.split("\n")[0] ?? "";
+
+  return A_STAMP.test(first) ? first : null;
+};
+
 export const gatesParagraph = (verdicts: readonly GateVerdict[], battery: Battery): string => {
   const red = verdicts.filter((verdict) => !verdict.ok);
   const phrases = greenPhrases(verdicts);

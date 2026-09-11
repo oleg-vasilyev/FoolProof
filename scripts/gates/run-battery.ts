@@ -5,7 +5,7 @@ import { BATTERY, GATE, type Battery, type Gate } from "./gate-names.ts";
 import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH } from "./gate-paths.ts";
 import { forgetVerdicts, runGate, writeVerdict } from "./gate-runner.ts";
 import { FAILED, PASSED, skippedVerdict, type GateVerdict } from "./gate-verdict.ts";
-import { gatesParagraph, summaryLines } from "./gate-summary.ts";
+import { gatesParagraph, paragraphFileOf, summaryLines } from "./gate-summary.ts";
 
 
 const NOTHING = 0;
@@ -120,7 +120,10 @@ export const runBattery = async (
     skipOnDisk
   );
 
-  writeFileSync(PARAGRAPH_PATH, `${gatesParagraph(verdicts, battery)}\n`);
+  writeFileSync(
+    PARAGRAPH_PATH,
+    paragraphFileOf(battery, gitLine("rev-parse", "HEAD"), new Date(), gatesParagraph(verdicts, battery))
+  );
 
   for (const line of whatToSay(verdicts, battery, root)) {
     say(line);

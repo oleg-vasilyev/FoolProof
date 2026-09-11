@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { COMMANDS } from "./gate-list.ts";
 import { BATTERY, GATE } from "./gate-names.ts";
 import type { GateVerdict } from "./gate-verdict.ts";
+import { PARAGRAPH_PATH } from "./gate-paths.ts";
 
 
 const ROOT = "D:/Temp/FoolProof";
@@ -36,9 +37,12 @@ vi.mock("./gate-verdict.ts", () => ({
   skippedVerdict: (gate: unknown, because: unknown, at: unknown) => skippedVerdictSpy(gate, because, at),
 }));
 
+const paragraphFileOfSpy = vi.fn();
+
 vi.mock("./gate-summary.ts", () => ({
   summaryLines: (verdicts: unknown, root: unknown) => summaryLinesSpy(verdicts, root),
   gatesParagraph: (verdicts: unknown, battery: unknown) => gatesParagraphSpy(verdicts, battery),
+  paragraphFileOf: (...args: readonly unknown[]) => paragraphFileOfSpy(...args),
 }));
 
 vi.mock("node:child_process", () => ({
@@ -282,7 +286,18 @@ describe("runBattery()", () => {
       GATE.docsCheck,
     ]);
     expect(runGateSpy).toHaveBeenCalledWith(GATE.lint, undefined, COMMANDS[GATE.lint].steps);
-    expect(execFileSyncSpy).toHaveBeenCalledTimes(NEVER);
+    expect(execFileSyncSpy).toHaveBeenCalledTimes(ONCE);
+    expect(execFileSyncSpy).toHaveBeenCalledWith("git", ["rev-parse", "HEAD"], GIT_OPTIONS);
+  });
+
+  it("should write the paragraph under a stamp of the battery, HEAD and the time, so a stale one can be told from a fresh one", async () => {
+    execFileSyncSpy.mockReturnValueOnce("abc1234\n");
+    paragraphFileOfSpy.mockReturnValue("a stamped file");
+
+    await runBattery(["node", "run-battery.ts", BATTERY.phase], say, ROOT);
+
+    expect(paragraphFileOfSpy).toHaveBeenCalledWith(BATTERY.phase, "abc1234", expect.any(Date), "Gates: a paragraph.");
+    expect(writeFileSyncSpy).toHaveBeenCalledWith(PARAGRAPH_PATH, "a stamped file");
   });
 
   it("should write a skipped gate's verdict to disk too, so a single re-run reads the whole battery", async () => {
@@ -334,7 +349,7 @@ describe("runBattery()", () => {
     const status = await runBattery(["node", "run-battery.ts", BATTERY.phase], say, ROOT);
 
     expect(status).toBe(RED);
-    expect(writeFileSyncSpy).toHaveBeenLastCalledWith("reports/gates/gates-paragraph.txt", "Gates: a paragraph.\n");
+    expect(writeFileSyncSpy).toHaveBeenLastCalledWith(PARAGRAPH_PATH, expect.any(String));
     expect(say.mock.calls.map((call) => call[FIRST])).toEqual(["a summary line", "", "Gates: a paragraph."]);
   });
 });

@@ -62,7 +62,7 @@ export default defineConfig({
     hookTimeout: caseTimeoutMs,
     reporters:
       process.env.E2E_VERBOSE === undefined
-        ? ["dot", ["json", { outputFile: "reports/e2e/results.json" }]]
+        ? [["json", { outputFile: "reports/e2e/results.json" }]]
         : ["verbose"],
   },
 });

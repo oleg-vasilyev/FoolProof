@@ -16,7 +16,8 @@ vi.mock("./gate-list.ts", () => ({
   rerunCommandFor: (gate: unknown) => rerunCommandForSpy(gate),
 }));
 
-const { gatesParagraph, reasonLines, relativeTo, summaryLines } = await import("./gate-summary.ts");
+const { gatesParagraph, paragraphFileOf, reasonLines, relativeTo, stampLineOf, summaryLines } =
+  await import("./gate-summary.ts");
 
 
 const PASSED = 0;
@@ -91,6 +92,33 @@ const aGreenPhase = (): readonly GateVerdict[] => [
   }),
   verdictWith(GATE.e2eChanged, true, E2E),
 ];
+
+describe("paragraphFileOf() and stampLineOf()", () => {
+  const AT = new Date("2026-09-11T12:00:00.000Z");
+
+  const A_STAMP = "check:release · abc1234 · 2026-09-11T12:00:00.000Z";
+
+  it("should put the battery, the HEAD and the ISO time on one line above the paragraph", () => {
+    expect(paragraphFileOf(BATTERY.release, "abc1234", AT, "Gates: check:release green.")).toBe(
+      `${A_STAMP}\nGates: check:release green.\n`
+    );
+  });
+
+  it("should say the HEAD is unknown rather than leave the slot empty when git answered nothing", () => {
+    expect(paragraphFileOf(BATTERY.phase, null, AT, "Gates: x.")).toBe(
+      "check:phase · unknown · 2026-09-11T12:00:00.000Z\nGates: x.\n"
+    );
+  });
+
+  it("should read its own stamp back off the file it wrote", () => {
+    expect(stampLineOf(paragraphFileOf(BATTERY.release, "abc1234", AT, "Gates: x."))).toBe(A_STAMP);
+  });
+
+  it("should see no stamp on a file that opens with the paragraph itself, or on no file", () => {
+    expect(stampLineOf("Gates: check:phase green.\n")).toBeNull();
+    expect(stampLineOf(null)).toBeNull();
+  });
+});
 
 describe("gatesParagraph()", () => {
   it("should write the green paragraph in the fixed shape the commit template asks for", () => {

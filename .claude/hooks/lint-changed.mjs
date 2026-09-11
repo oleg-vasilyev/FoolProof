@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
+import { lintFindingsIn } from "../../scripts/gates/lint-findings.ts";
 
 // PostToolUse hook: lint the single file that was just written, so a violation
 // of the conventions surfaces at the edit rather than at the end of the turn.
@@ -43,9 +44,21 @@ const eslint = resolve("node_modules", "eslint", "bin", "eslint.js");
 
 const config = "scripts/gates/config/eslint.config.js";
 
+// The findings are read from ESLint's JSON and printed in the one shape the lint
+// gate prints — file:line:col rule — message — so a violation reads the same at
+// the edit and at the end of the turn. A parse failure of that JSON prints ESLint's
+// raw output instead, which is the only other thing it could have said.
+const findingLine = (finding) =>
+  `${relative(process.cwd(), finding.file)}:${finding.line}:${finding.column} ${finding.rule} — ${finding.message}`;
+
 try {
-  execFileSync(process.execPath, [eslint, "--config", config, "--quiet", file], { stdio: "pipe" });
+  execFileSync(process.execPath, [eslint, "--config", config, "--quiet", "--format", "json", file], {
+    stdio: "pipe",
+  });
 } catch (failure) {
-  process.stderr.write(String(failure.stdout ?? failure.message));
+  const output = String(failure.stdout ?? failure.message);
+  const findings = lintFindingsIn(output);
+
+  process.stderr.write(findings.length === 0 ? output : `${findings.map(findingLine).join("\n")}\n`);
   process.exit(LINT_FAILED);
 }

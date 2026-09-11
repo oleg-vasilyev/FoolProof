@@ -175,7 +175,7 @@ name by hand.
 | `npm start` | The same bot in a browser against a fake Telegram — no token, no network, and the one to run here |
 | `npm run check:quick` | Lint, types, documents and tests — the everyday gate to keep at zero |
 | `npm run check:push` | What a push to `main` must not break — lint, types (app and harness), the harness's own tests, documents; the website ships from `main`, the app's tests wait for the tag. **CI runs this on every push** |
-| `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — every gate runs (only mutation waits for a green suite), each leaves its log and a JSON verdict under `reports/gates/`, and the run ends with one line per gate and the `Gates:` paragraph the commit message pastes, also written to `reports/gates/gates-paragraph.txt`. A red gate is re-run alone with `node scripts/gates/gate-runner.ts <gate>`. No `docs-check`: documents and pictures are finished after the review, in their own stages |
+| `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — every gate runs (only mutation waits for a green suite), each leaves its log and a JSON verdict under `reports/gates/`, and the run ends with one line per gate and the `Gates:` paragraph the commit message pastes, also written to `reports/gates/gates-paragraph.txt` under a stamp of battery, HEAD and time; the commit-msg hook refuses a `Gates:` line whose stamp names another HEAD than the commit's parent or another battery than the line claims. A red gate is re-run alone with `node scripts/gates/gate-runner.ts <gate>`. No `docs-check`: documents and pictures are finished after the review, in their own stages |
 | `npm run check:release` | The same walker over the release list: `check:push`'s gates, coverage, mutation over what changed since the previous tag, every scenario. Refuses unless HEAD carries the new `v*` tag. **CI runs this on every release tag** |
 | `node scripts/gates/gate-runner.ts lint` | ESLint over `src/`, `scripts/` and `e2e/`, which enforces this project's conventions. A red line lists each finding as `file:line:col rule — message`, read from the JSON ESLint writes to `reports/lint/findings.json` |
 | `node scripts/gates/gate-runner.ts typecheck` | `tsc --noEmit` over `src/` and `scripts/`, from the root `tsconfig.json`; a red line lists each error as `file:line:col TSnnnn — message` |
@@ -189,7 +189,7 @@ name by hand.
 | `npm run e2e:watch` | The same run, slowed down, in one browser tab; `E2E_VERBOSE=1` brings the per-case output back on any e2e run |
 | `node scripts/gates/gate-runner.ts test:e2e-harness` | Units for the harness's own pure parts |
 | `node scripts/gates/gate-runner.ts e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
-| `npm run prepare` | Run by `npm install` itself: points git at `.githooks/`, where the pre-push tag gate and the commit-msg flow gate live |
+| `npm run prepare` | Run by `npm install` itself: points git at `.githooks/`, where the pre-push tag gate and the commit-msg hook's four gates — the flow drawing, its backers, the phase log, the Gates paragraph's stamp — live |
 
 `start:prod` is the only one that reads an env file, and the only one that talks to
 Telegram. Everything else runs against the fake one in `e2e/`.

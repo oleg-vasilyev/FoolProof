@@ -13,7 +13,7 @@ import type { Battery, Gate } from "./gate-names.ts";
 import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH, logPathOf, verdictPathOf } from "./gate-paths.ts";
 import { numbersFor, outputsOf, scopeOf, type MutationScope } from "./gate-numbers.ts";
 import { FAILED, PASSED, lineFor, verdictOf, type GateVerdict, type RanVerdict } from "./gate-verdict.ts";
-import { gatesParagraph, reasonLines } from "./gate-summary.ts";
+import { gatesParagraph, paragraphFileOf, reasonLines, stampLineOf } from "./gate-summary.ts";
 
 
 const JSON_INDENT = 2;
@@ -25,6 +25,10 @@ const NO_COLOR = "NO_COLOR";
 const AFTER_NODE_AND_SCRIPT = 2;
 
 const NO_ARGUMENTS = 0;
+
+const NODE_OPTIONS = "NODE_OPTIONS";
+
+export const WITHOUT_EXPERIMENT_WARNINGS = "--disable-warning=ExperimentalWarning";
 
 export const readOrNull = (path: string): string | null => {
   try {
@@ -52,6 +56,7 @@ export const childEnvironment = (
 ): Readonly<Record<string, string | undefined>> => ({
   ...env,
   [NO_COLOR]: "1",
+  [NODE_OPTIONS]: [env[NODE_OPTIONS], WITHOUT_EXPERIMENT_WARNINGS].filter(Boolean).join(" "),
   ...(mutateAgainst === undefined ? {} : { [MUTATE_AGAINST]: mutateAgainst }),
 });
 
@@ -85,7 +90,13 @@ export const rewriteParagraph = (): void => {
     return;
   }
 
-  writeFileSync(PARAGRAPH_PATH, `${gatesParagraph(verdictsOnDisk(battery), battery)}\n`);
+  const paragraph = gatesParagraph(verdictsOnDisk(battery), battery);
+  const stamp = stampLineOf(readOrNull(PARAGRAPH_PATH));
+
+  writeFileSync(
+    PARAGRAPH_PATH,
+    stamp === null ? paragraphFileOf(battery, null, new Date(), paragraph) : `${stamp}\n${paragraph}\n`
+  );
 };
 
 const linesOf = (chunks: readonly string[]): readonly string[] => chunks.join("").split(/\r?\n/);

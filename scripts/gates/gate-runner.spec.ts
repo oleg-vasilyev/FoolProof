@@ -56,9 +56,15 @@ vi.mock("./gate-verdict.ts", () => ({
 
 const reasonLinesSpy = vi.fn();
 
+const paragraphFileOfSpy = vi.fn();
+
+const stampLineOfSpy = vi.fn();
+
 vi.mock("./gate-summary.ts", () => ({
   gatesParagraph: (verdicts: unknown, battery: unknown) => gatesParagraphSpy(verdicts, battery),
+  paragraphFileOf: (...args: readonly unknown[]) => paragraphFileOfSpy(...args),
   reasonLines: (verdict: unknown, root: unknown) => reasonLinesSpy(verdict, root),
+  stampLineOf: (text: unknown) => stampLineOfSpy(text),
 }));
 
 const {
@@ -71,6 +77,7 @@ const {
   runGate,
   verdictsOnDisk,
   writeVerdict,
+  WITHOUT_EXPERIMENT_WARNINGS,
 } = await import("./gate-runner.ts");
 
 
@@ -178,12 +185,28 @@ describe("readOrNull()", () => {
 });
 
 describe("childEnvironment()", () => {
-  it("should hand the child this environment with colour switched off, and nothing more without a baseline", () => {
-    expect(childEnvironment(AN_ENV, undefined)).toEqual({ ...AN_ENV, NO_COLOR: "1" });
+  it("should hand the child this environment with colour and experiment warnings switched off, and nothing more without a baseline", () => {
+    expect(childEnvironment(AN_ENV, undefined)).toEqual({
+      ...AN_ENV,
+      NO_COLOR: "1",
+      NODE_OPTIONS: WITHOUT_EXPERIMENT_WARNINGS,
+    });
+  });
+
+  it("should switch the warnings off through NODE_OPTIONS, since a flag on the tool would not reach the workers it forks", () => {
+    expect(WITHOUT_EXPERIMENT_WARNINGS).toBe("--disable-warning=ExperimentalWarning");
+    expect(childEnvironment({ ...AN_ENV, NODE_OPTIONS: "--max-old-space-size=4096" }, undefined)).toEqual(
+      expect.objectContaining({ NODE_OPTIONS: `--max-old-space-size=4096 ${WITHOUT_EXPERIMENT_WARNINGS}` })
+    );
   });
 
   it("should add the baseline as MUTATE_AGAINST when there is one", () => {
-    expect(childEnvironment(AN_ENV, "v1.20.0")).toEqual({ ...AN_ENV, NO_COLOR: "1", MUTATE_AGAINST: "v1.20.0" });
+    expect(childEnvironment(AN_ENV, "v1.20.0")).toEqual({
+      ...AN_ENV,
+      NO_COLOR: "1",
+      NODE_OPTIONS: WITHOUT_EXPERIMENT_WARNINGS,
+      MUTATE_AGAINST: "v1.20.0",
+    });
   });
 });
 
@@ -239,16 +262,37 @@ describe("batteryOnDisk()", () => {
 });
 
 describe("rewriteParagraph()", () => {
-  it("should rebuild the paragraph from the battery's verdicts on disk, under the battery on disk", () => {
+  it("should rebuild the paragraph from the battery's verdicts on disk, under the stamp the battery left", () => {
     filesOnDisk({
       "reports/gates/battery.txt": "check:push\n",
       "reports/gates/lint.json": JSON.stringify(THE_VERDICT),
+      "reports/gates/gates-paragraph.txt": "the old file",
     });
+    stampLineOfSpy.mockReturnValue("check:push · abc1234 · 2026-09-11T12:00:00.000Z");
 
     rewriteParagraph();
 
     expect(gatesParagraphSpy).toHaveBeenCalledWith([THE_VERDICT], BATTERY.push);
-    expect(writeFileSyncSpy).toHaveBeenCalledWith("reports/gates/gates-paragraph.txt", "Gates: a paragraph.\n");
+    expect(stampLineOfSpy).toHaveBeenCalledWith("the old file");
+    expect(writeFileSyncSpy).toHaveBeenCalledWith(
+      "reports/gates/gates-paragraph.txt",
+      "check:push · abc1234 · 2026-09-11T12:00:00.000Z\nGates: a paragraph.\n"
+    );
+  });
+
+  it("should stamp the paragraph with an unknown HEAD when the file on disk carried no stamp", () => {
+    filesOnDisk({
+      "reports/gates/battery.txt": "check:push\n",
+      "reports/gates/lint.json": JSON.stringify(THE_VERDICT),
+    });
+    stampLineOfSpy.mockReturnValue(null);
+    paragraphFileOfSpy.mockReturnValue("a stamped file");
+
+    rewriteParagraph();
+
+    expect(stampLineOfSpy).toHaveBeenCalledWith(null);
+    expect(paragraphFileOfSpy).toHaveBeenCalledWith(BATTERY.push, null, expect.any(Date), "Gates: a paragraph.");
+    expect(writeFileSyncSpy).toHaveBeenCalledWith("reports/gates/gates-paragraph.txt", "a stamped file");
   });
 
   it("should write no paragraph at all when no battery is on disk, rather than invent one", () => {
@@ -370,10 +414,12 @@ describe("runGate()", () => {
       "reports/gates/lint.json": JSON.stringify(THE_VERDICT),
     });
 
+    paragraphFileOfSpy.mockReturnValue("a stamped file");
+
     await runAndClose(PASSED);
 
     expect(writeFileSyncSpy).toHaveBeenCalledWith("reports/gates/lint.json", JSON.stringify(THE_VERDICT, null, 2));
-    expect(writeFileSyncSpy).toHaveBeenLastCalledWith("reports/gates/gates-paragraph.txt", "Gates: a paragraph.\n");
+    expect(writeFileSyncSpy).toHaveBeenLastCalledWith("reports/gates/gates-paragraph.txt", "a stamped file");
     expect(gatesParagraphSpy).toHaveBeenCalledWith([THE_VERDICT], BATTERY.quick);
   });
 });
@@ -474,7 +520,12 @@ describe("runGate(), with arguments", () => {
   it("should run the steps it was handed, files included", async () => {
     await runNamed();
 
-    expect(spawnSpy.mock.calls[FIRST]?.[SECOND]).toEqual([TEST_STEP.bin, "run", "src/a.spec.ts", "src/b.spec.ts"]);
+    expect(spawnSpy.mock.calls[FIRST]?.[SECOND]).toEqual([
+      TEST_STEP.bin,
+      "run",
+      "src/a.spec.ts",
+      "src/b.spec.ts",
+    ]);
   });
 
   it("should write a named log and verdict, leaving the bare gate's files alone", async () => {

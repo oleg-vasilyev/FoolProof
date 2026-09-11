@@ -20,7 +20,7 @@ export default defineConfig({
   test: {
     include: ["src/**/*.spec.ts", "scripts/**/*.spec.ts"],
     environment: "node",
-    reporters: ["dot", ["json", { outputFile: "reports/tests/results.json" }]],
+    reporters: [["json", { outputFile: "reports/tests/results.json" }]],
     coverage: {
       provider: "v8",
       reporter: ["text-summary", "html", "json-summary"],

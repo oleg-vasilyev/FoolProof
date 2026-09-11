@@ -34,7 +34,8 @@ written: plain claims, each carrying its reason.
 
 **A phase-final commit ends with the Gates paragraph**, in one fixed shape, so
 two phases can be compared without re-parsing prose. The first line is written by
-`check:phase` itself, into `reports/gates/gates-paragraph.txt` — paste it, never
+`check:phase` itself, into `reports/gates/gates-paragraph.txt` under a stamp of battery,
+HEAD and time the commit-msg hook checks against the parent — paste the `Gates:` line, never
 retype it; the history holds dozens of hand wordings of that line alone:
 
 ```

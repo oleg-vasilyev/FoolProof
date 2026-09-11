@@ -45,6 +45,34 @@ if grep -qE '^(Retro|Gates):' "$message_file"; then
   fi
 fi
 
+# The fourth gate is the paragraph itself. check:* writes it under a stamp naming
+# the battery, the HEAD it ran at and the time; a paragraph from an older HEAD, or
+# from a different battery than the message claims, once reached a commit reading as
+# fresh. The stamp's HEAD must be this commit's parent and its battery the one the
+# 'Gates:' line names. An amend is refused by the same rule — HEAD is then the
+# commit itself, not its parent — and that is meant: a phase-final commit is not
+# amended here, and a paragraph that passed once must not pass a second commit.
+# The stamp's grammar is written by paragraphFileOf in scripts/gates/gate-summary.ts
+# and read by the two cuts below; a probe in the phase that wrote them pinned both.
+if grep -qE '^Gates: check:' "$message_file"; then
+  paragraph_file="reports/gates/gates-paragraph.txt"
+  stamp=$(head -n 1 "$paragraph_file" 2>/dev/null)
+  stamped_battery=$(echo "$stamp" | cut -d' ' -f1)
+  stamped_head=$(echo "$stamp" | cut -d' ' -f3)
+  claimed_battery=$(grep -m1 -E '^Gates: check:' "$message_file" | cut -d' ' -f2)
+  head_now=$(git rev-parse HEAD)
+
+  if [ "$stamped_head" != "$head_now" ] || [ "$stamped_battery" != "$claimed_battery" ]; then
+    echo "commit-msg: the Gates paragraph on disk is not this commit's."
+    echo
+    echo "$paragraph_file is stamped '$stamp'; this commit's parent is $head_now and the"
+    echo "message claims $claimed_battery. A paragraph run at another HEAD or by another"
+    echo "battery reads as fresh and is not. Re-run the battery the message names —"
+    echo "npm run $claimed_battery — and paste its Gates line."
+    exit 1
+  fi
+fi
+
 if ! echo "$staged" | grep -q '^DEVELOPMENT-FLOW\.md$'; then
   exit 0
 fi

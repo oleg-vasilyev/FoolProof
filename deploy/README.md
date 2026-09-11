@@ -281,7 +281,7 @@ runs `check:release` before any `v*` tag leaves the machine — every scenario, 
 every mutant in what changed since the previous tag. It has to be local, because
 the server pulls whatever tag appears and waits for nobody.
 
-The same folder holds a **commit-msg hook** guarding one file. The bot is
+The same folder holds a **commit-msg hook** whose first gates guard one file. The bot is
 developed by an agent that is also allowed to improve its own process, and
 [DEVELOPMENT-FLOW.md](../DEVELOPMENT-FLOW.md) is where that process is written
 down — so a commit that moves an arrow on that drawing must say why in a
