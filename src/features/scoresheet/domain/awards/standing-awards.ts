@@ -79,7 +79,7 @@ export const theKingslayer = (evening: SessionAppearances): Award | null => {
   const winner = standoutBy(seated(evening), (player) => {
     const over = finishedAbove(player, crowned);
 
-    return player.playerId !== crowned.playerId && over >= ENOUGH_UPSETS ? over : null;
+    return over >= ENOUGH_UPSETS ? over : null;
   });
 
   return winner === null

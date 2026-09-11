@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Finish } from "#scoresheet/domain/game-outcomes.ts";
-import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
+import { AwardName, ENOUGH_GAMES } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { Award } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 import type { Merit } from "#scoresheet/domain/awards/pick-winner.ts";
@@ -56,6 +56,8 @@ const SECOND = 2;
 const THIRD = 3;
 
 const FOOL = 4;
+
+const THREE_TIMES = 3;
 
 const KINGS_SHARE = 0.9;
 
@@ -145,6 +147,27 @@ describe("standing awards", () => {
 
       expect(theViceroy(tableOf(seatOf(KING, KINGS_SHARE), seatOf(SECOND, SECONDS_SHARE)))).toBeNull();
     });
+
+    it("should seat a player with exactly enough games", () => {
+      playedGamesSpy.mockImplementation((player: PlayerAppearances) =>
+        player.playerId === KING ? ENOUGH_TO_QUALIFY : ENOUGH_GAMES
+      );
+
+      expect(theViceroy(tableOf(seatOf(KING, KINGS_SHARE), seatOf(SECOND, SECONDS_SHARE)))).toEqual({
+        name: AwardName.TheViceroy,
+        winners: [SECOND],
+        percent: SECONDS_PERCENT,
+        games: ENOUGH_GAMES,
+      });
+    });
+
+    it("should not seat a player one game short of enough", () => {
+      playedGamesSpy.mockImplementation((player: PlayerAppearances) =>
+        player.playerId === KING ? ENOUGH_TO_QUALIFY : ENOUGH_GAMES - ONCE
+      );
+
+      expect(theViceroy(tableOf(seatOf(KING, KINGS_SHARE), seatOf(SECOND, SECONDS_SHARE)))).toBeNull();
+    });
   });
 
   describe("theKingslayer", () => {
@@ -169,7 +192,7 @@ describe("standing awards", () => {
       expect(theKingslayer(evening)).toEqual({
         name: AwardName.TheKingslayer,
         winners: [SECOND],
-        over: THIRD,
+        over: THREE_TIMES,
         games: ENOUGH_TO_QUALIFY,
       });
     });
@@ -196,6 +219,40 @@ describe("standing awards", () => {
       const merit = standoutBySpy.mock.calls[NOTHING]?.[ONCE] as Merit;
 
       expect(merit(evening.players[NOTHING] as PlayerAppearances)).toBeNull();
+    });
+
+    it("should count exactly three games above the king as enough", () => {
+      const threeOver = above([NOTHING, ONCE, TOO_FEW], SECOND);
+
+      theKingslayer(tableOf(below([NOTHING, ONCE, TOO_FEW], KING), threeOver));
+
+      const merit = standoutBySpy.mock.calls[NOTHING]?.[ONCE] as Merit;
+
+      expect(merit(threeOver)).toBe(THREE_TIMES);
+    });
+
+    it("should refuse two games above the king as not enough", () => {
+      const twoOver = above([NOTHING, ONCE], SECOND);
+
+      theKingslayer(tableOf(below([NOTHING, ONCE, TOO_FEW], KING), twoOver));
+
+      const merit = standoutBySpy.mock.calls[NOTHING]?.[ONCE] as Merit;
+
+      expect(merit(twoOver)).toBeNull();
+    });
+
+    it("should not count a round finished level with the king as finished above", () => {
+      const levelOnce = playerAppearing(SECOND, [
+        appearanceOf(NOTHING, Finish.Middle, ONCE, FULL_TABLE),
+        appearanceOf(ONCE, Finish.Middle, ONCE, FULL_TABLE),
+        appearanceOf(TOO_FEW, Finish.Middle, FULL_TABLE, FULL_TABLE),
+      ]);
+
+      theKingslayer(tableOf(below([NOTHING, ONCE, TOO_FEW], KING), levelOnce));
+
+      const merit = standoutBySpy.mock.calls[NOTHING]?.[ONCE] as Merit;
+
+      expect(merit(levelOnce)).toBeNull();
     });
 
     it("should say nothing when nobody was crowned", () => {
@@ -232,6 +289,22 @@ describe("standing awards", () => {
       expect(merit(evening.players[NOTHING] as PlayerAppearances)).toBeNull();
     });
 
+    it("should not count a game left before the last pair, however many there were", () => {
+      const early = playerAppearing(
+        SECOND,
+        Array.from({ length: ENOUGH_TO_QUALIFY }, (_unused, round) =>
+          appearanceOf(round, Finish.Middle, ONCE, FULL_TABLE)
+        )
+      );
+      const evening = tableOf(early);
+
+      theLastStand(evening);
+
+      const merit = bestBySpy.mock.calls[NOTHING]?.[ONCE] as Merit;
+
+      expect(merit(early)).toBeNull();
+    });
+
     it("should count every last pair the player came out of", () => {
       const winner = duelling(SECOND, ENOUGH_TO_QUALIFY);
 
@@ -245,7 +318,17 @@ describe("standing awards", () => {
       });
     });
 
-    it("should hold out for three of them", () => {
+    it("should let exactly three last pairs count as holding out", () => {
+      const evening = tableOf(duelling(SECOND, THREE_TIMES));
+
+      theLastStand(evening);
+
+      const merit = bestBySpy.mock.calls[NOTHING]?.[ONCE] as Merit;
+
+      expect(merit(evening.players[NOTHING] as PlayerAppearances)).toBe(THREE_TIMES);
+    });
+
+    it("should refuse two last pairs as not holding out", () => {
       const evening = tableOf(duelling(SECOND, TOO_FEW));
 
       theLastStand(evening);
@@ -289,6 +372,16 @@ describe("standing awards", () => {
       expect(merit(evening.players[NOTHING] as PlayerAppearances)).toBeNull();
     });
 
+    it("should refuse a first place taken at exactly the table's average share", () => {
+      const evening = tableOf(winning(KING, SECONDS_SHARE, ONCE), winning(SECOND, SECONDS_SHARE, ONCE));
+
+      theirHour(evening);
+
+      const merit = bestBySpy.mock.calls[NOTHING]?.[ONCE] as Merit;
+
+      expect(merit(evening.players[ONCE] as PlayerAppearances)).toBeNull();
+    });
+
     it("should refuse a player who never went out first at all", () => {
       const evening = tableOf(seatOf(KING, KINGS_SHARE), seatOf(SECOND, THIRDS_SHARE));
 
@@ -317,14 +410,15 @@ describe("standing awards", () => {
       const visitor = seatOf(SECOND, SECONDS_SHARE);
 
       bestBySpy.mockReturnValue(visitor);
-      playedGamesSpy.mockReturnValue(ENOUGH_TO_QUALIFY);
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES);
 
       expect(theHalfNight(tableOf(seatOf(KING, THIRDS_SHARE), visitor))).toEqual({
         name: AwardName.TheHalfNight,
         winners: [SECOND],
-        games: ENOUGH_TO_QUALIFY,
+        games: ENOUGH_GAMES,
         rounds: A_LONG_EVENING,
       });
+      expect((bestBySpy.mock.calls[NOTHING]?.[ONCE] as Merit)(visitor)).toBe(SECONDS_SHARE);
     });
 
     it("should refuse a player who sat exactly two thirds of the evening", () => {
@@ -343,6 +437,18 @@ describe("standing awards", () => {
 
     it("should refuse a player who sat through more than half the evening", () => {
       const evening = tableOf(seatOf(KING, THIRDS_SHARE), seatOf(SECOND, SECONDS_SHARE));
+
+      theHalfNight(evening);
+
+      const merit = bestBySpy.mock.calls[NOTHING]?.[ONCE] as Merit;
+
+      expect(merit(evening.players[ONCE] as PlayerAppearances)).toBeNull();
+    });
+
+    it("should refuse a visitor sitting exactly at the table's average", () => {
+      playedGamesSpy.mockReturnValue(ONCE);
+
+      const evening = tableOf(seatOf(KING, SECONDS_SHARE), seatOf(SECOND, SECONDS_SHARE));
 
       theHalfNight(evening);
 

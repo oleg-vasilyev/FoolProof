@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Finish } from "#scoresheet/domain/game-outcomes.ts";
-import { AwardName } from "#scoresheet/domain/awards/award-catalogue.ts";
+import { AwardName, ENOUGH_GAMES } from "#scoresheet/domain/awards/award-catalogue.ts";
 import type { PlayerAppearances } from "#scoresheet/domain/session-appearances.ts";
 import type { Merit } from "#scoresheet/domain/awards/pick-winner.ts";
 import type { EveningPast, PastEvening } from "#scoresheet/domain/awards/evening-past.ts";
@@ -96,6 +96,7 @@ describe("past awards", () => {
         percent: TONIGHTS_PERCENT,
         evenings: TWICE,
       });
+      expect(meritFrom()(player)).toBeCloseTo(TONIGHTS_SHARE - A_WORSE_NIGHT);
     });
 
     it("should refuse a player whose best evening is still behind them", () => {
@@ -133,6 +134,26 @@ describe("past awards", () => {
 
       expect(meritFrom()(player)).toBeNull();
     });
+
+    it("should let exactly enough games tonight count", () => {
+      const player = tonight(PLAYER);
+
+      pastOfSpy.mockReturnValue([nightOf(A_WORSE_NIGHT, ONCE, ONCE)]);
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES);
+      personalBest(eveningOf(A_LONG_EVENING, [player]), NO_HISTORY);
+
+      expect(meritFrom()(player)).toBeGreaterThan(NOTHING);
+    });
+
+    it("should refuse a player one game short of enough", () => {
+      const player = tonight(PLAYER);
+
+      pastOfSpy.mockReturnValue([nightOf(A_WORSE_NIGHT, ONCE, ONCE)]);
+      playedGamesSpy.mockReturnValue(ENOUGH_GAMES - ONCE);
+      personalBest(eveningOf(A_LONG_EVENING, [player]), NO_HISTORY);
+
+      expect(meritFrom()(player)).toBeNull();
+    });
   });
 
   describe("firstCleanNight", () => {
@@ -148,6 +169,15 @@ describe("past awards", () => {
         games: ENOUGH_TO_QUALIFY,
         evenings: TWICE,
       });
+      expect(meritFrom()(player)).toBe(TWICE);
+    });
+
+    it("should refuse a clean evening with no evening behind it, since there was nothing to be clean after", () => {
+      const player = tonight(PLAYER);
+
+      firstCleanNight(eveningOf(A_LONG_EVENING, [player]), NO_HISTORY);
+
+      expect(meritFrom()(player)).toBeNull();
     });
 
     it("should refuse a player who was the fool tonight", () => {
@@ -182,6 +212,24 @@ describe("past awards", () => {
         winners: [PLAYER],
         evenings: TWICE,
       });
+      expect(meritFrom()(player)).toBe(TWICE);
+    });
+
+    it("should refuse a player who went out first on any earlier evening, even beside evenings they did not", () => {
+      const player = tonight(PLAYER, Finish.First);
+
+      pastOfSpy.mockReturnValue([nightOf(A_WORSE_NIGHT, ONCE, NOTHING), nightOf(A_WORSE_NIGHT, ONCE, ONCE)]);
+      firstWin(eveningOf(A_LONG_EVENING, [player]), NO_HISTORY);
+
+      expect(meritFrom()(player)).toBeNull();
+    });
+
+    it("should refuse a first win with no evening behind it, since a first evening is not a first win", () => {
+      const player = tonight(PLAYER, Finish.First);
+
+      firstWin(eveningOf(A_LONG_EVENING, [player]), NO_HISTORY);
+
+      expect(meritFrom()(player)).toBeNull();
     });
 
     it("should refuse a player who has gone out first before", () => {
@@ -218,6 +266,8 @@ describe("past awards", () => {
         winners: [NEWCOMER],
         games: ENOUGH_TO_QUALIFY,
       });
+      expect(meritFrom()(newcomer)).toBe(ENOUGH_TO_QUALIFY);
+      expect(meritFrom()(regular)).toBeNull();
     });
 
     it("should refuse every seat on a table where nobody has a past", () => {
