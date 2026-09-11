@@ -1,14 +1,17 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { rootDir } from "#shared/config/env.ts";
+import type { Logger } from "#shared/logging/logger.ts";
 
 
 const MANIFEST = "package.json";
 
-const manifestAt = (file: string): unknown => {
+const manifestAt = (file: string, log: Logger): unknown => {
   try {
     return JSON.parse(readFileSync(file, "utf8"));
-  } catch {
+  } catch (error) {
+    log.warn(`could not read the version from ${file}: ${String(error)}`);
+
     return null;
   }
 };
@@ -21,4 +24,5 @@ const versionIn = (manifest: unknown): string | null =>
     ? manifest.version
     : null;
 
-export const appVersion = (): string | null => versionIn(manifestAt(resolve(rootDir, MANIFEST)));
+export const appVersion = (log: Logger): string | null =>
+  versionIn(manifestAt(resolve(rootDir, MANIFEST), log));

@@ -21,6 +21,7 @@ export const createDiagnosticsFeature = (deps: DiagnosticsDeps): Feature => {
     takeSnapshot: () =>
       takeHealthSnapshot({
         repo: deps.repo,
+        log: deps.log,
         startAttempt: deps.startAttempt,
         previousExit: deps.previousExit,
       }),

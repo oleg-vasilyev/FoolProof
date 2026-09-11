@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
+import { LoggerStub } from "#shared/logging/logger.stub.ts";
 import { LogHistoryStub } from "#shared/logging/log-history.stub.ts";
 import { ApiCallTallyStub } from "#shared/telegram/api-call-tally.stub.ts";
 import { SlowestRenderStub } from "#shared/timing/slowest-render.stub.ts";
@@ -63,9 +64,12 @@ const SLOWEST_RENDER_MS = 2400;
 describe("takeHealthSnapshot()", () => {
   let repo: RepositoryStub;
 
+  let log: LoggerStub;
+
   const snapshot = () =>
     takeHealthSnapshot({
       repo,
+      log,
       startAttempt: START_ATTEMPT,
       previousExit: PREVIOUS_EXIT,
     });
@@ -74,6 +78,7 @@ describe("takeHealthSnapshot()", () => {
     vi.clearAllMocks();
 
     repo = new RepositoryStub();
+    log = new LoggerStub();
     repo.storageSummarySpy.mockReturnValue(STORAGE);
     repo.chatSummarySpy.mockReturnValue(CHATS);
     calls.callTallySpy.mockReturnValue(CALLS);
@@ -134,6 +139,12 @@ describe("takeHealthSnapshot()", () => {
 
   it("should carry the running version through", () => {
     expect(snapshot().version).toBe(version.version);
+  });
+
+  it("should read the version with the logger it was given, so a missing manifest is logged", () => {
+    snapshot();
+
+    expect(version.appVersionSpy).toHaveBeenCalledWith(log);
   });
 
   it("should read the version fresh on every call, so a deploy shows up", () => {

@@ -149,6 +149,10 @@ describe("createDiagnosticsFeature()", () => {
       expect(await snapshotDeps()).toEqual(expect.objectContaining({ repo }));
     });
 
+    it("should hand the snapshot the logger, so a missing version is logged rather than swallowed", async () => {
+      expect(await snapshotDeps()).toEqual(expect.objectContaining({ log }));
+    });
+
 
     it("should carry which start this is", async () => {
       expect(await snapshotDeps()).toEqual(

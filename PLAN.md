@@ -696,6 +696,12 @@ them.
   simultaneous taps from several people. The card is also redrawn, because the
   mismatch may mean the *message* is the stale one — see
   [What survives a failure](#what-survives-a-failure)
+- A tap is checked against the chat it arrives from before the version. The game
+  id in `callback_data` is a guessable `AUTOINCREMENT`, and a client may send any
+  data on any bot message, so a card looked up by id alone could be moved from a
+  chat the tapper is not in. A card from another chat answers as gone, exactly like
+  a confirmed one, and is never redrawn — the stale path would edit the other
+  chat's message. A tap arriving with no chat at all is answered the same way
 - Every accepted tap gets an `answerCallbackQuery` with a short text ("Oleg — 1").
   Without it, lag makes it look like the tap did not register and the person taps
   a second time

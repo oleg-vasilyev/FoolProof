@@ -4,7 +4,7 @@ import { ActionKind } from "#live-game/domain/card-states.ts";
 import { RepositoryStub } from "#shared/repository/repository-contract.stub.ts";
 import { copy } from "#live-game/copy.en.ts";
 import { CardServiceStub } from "#live-game/bot/card/card-service.stub.ts";
-import { ContextStub, USER_ID } from "#live-game/bot/grammy-context.stub.ts";
+import { CHAT_ID, ContextStub, USER_ID } from "#live-game/bot/grammy-context.stub.ts";
 import { PromptRegistryStub } from "#shared/telegram/prompt-registry.stub.ts";
 
 
@@ -53,10 +53,23 @@ describe("onTap()", () => {
   it("should attribute the tap to whoever pressed it", async () => {
     await onTap(context(), ctx.callbackTap("1:p:0:0"));
 
-    expect(cards.tapSpy).toHaveBeenCalledWith(copy, 
+    expect(cards.tapSpy).toHaveBeenCalledWith(copy,
+      CHAT_ID,
       { gameId: 1, action: ActionKind.Pick, slot: 0, version: 0 },
       USER_ID
     );
+  });
+
+  it("should say the card is gone for a tap that arrives from no chat", async () => {
+    await onTap(context(), ctx.chatlessTap("1:p:0:0"));
+
+    expect(ctx.answerCallbackQuerySpy).toHaveBeenCalledWith(copy.cardGone);
+  });
+
+  it("should not reach the card service for a tap from no chat", async () => {
+    await onTap(context(), ctx.chatlessTap("1:p:0:0"));
+
+    expect(cards.tapSpy).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should answer even when the data is unreadable", async () => {

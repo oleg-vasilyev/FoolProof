@@ -15,6 +15,6 @@ export class AppVersionStub {
   public constructor() {
     this.appVersionSpy.mockReturnValue(STUB_VERSION);
 
-    this.module = { appVersion: () => this.appVersionSpy() };
+    this.module = { appVersion: (log) => this.appVersionSpy(log) };
   }
 }

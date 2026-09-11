@@ -48,7 +48,7 @@ export const PICKED_BY_HAND = null;
 
 export interface CardService {
   open(copy: Copy, chatId: number, seats: readonly Seat[], starterSlot: number | null): Promise<void>;
-  tap(copy: Copy, payload: CallbackPayload, actorTgId: number): Promise<string>;
+  tap(copy: Copy, chatId: number, payload: CallbackPayload, actorTgId: number): Promise<string>;
   reopenLatest(copy: Copy, chatId: number, actorTgId: number): Promise<boolean>;
   redrawLive(): Promise<number>;
   sweepIdle(idleSeconds: number): Promise<number>;
@@ -123,10 +123,10 @@ const toAction = (payload: CallbackPayload): Action =>
     ? { kind: ActionKind.Pick, slot: payload.slot ?? NO_SLOT }
     : { kind: payload.action };
 
-const findTappableCard = (repo: CardRepository, payload: CallbackPayload): CardLookup => {
+const findTappableCard = (repo: CardRepository, chatId: number, payload: CallbackPayload): CardLookup => {
   const card = repo.cardById(payload.gameId);
 
-  if (card === null || card.game.confirmed_at !== null) {
+  if (card === null || card.game.chat_id !== chatId || card.game.confirmed_at !== null) {
     return { kind: TapTarget.Gone };
   }
 
@@ -350,10 +350,11 @@ const tapKnownCard = async (
 const tapCard = async (
   context: EditingContext,
   copy: Copy,
+  chatId: number,
   payload: CallbackPayload,
   actorTgId: number
 ): Promise<string> => {
-  const lookup = findTappableCard(context.repo, payload);
+  const lookup = findTappableCard(context.repo, chatId, payload);
 
   switch (lookup.kind) {
     case TapTarget.Gone:
@@ -471,7 +472,7 @@ export function createCardService(deps: CardServiceDeps): CardService {
 
   return {
     open: (copy, chatId, seats, starterSlot) => openCard(context, copy, chatId, seats, starterSlot),
-    tap: (copy, payload, actorTgId) => tapCard(context, copy, payload, actorTgId),
+    tap: (copy, chatId, payload, actorTgId) => tapCard(context, copy, chatId, payload, actorTgId),
     reopenLatest: (copy, chatId, actorTgId) => reopenLatestCard(context, copy, chatId, actorTgId),
     redrawLive: () => redrawLiveCards(context),
     sweepIdle: (idleSeconds) => sweepIdleCards(context, idleSeconds),

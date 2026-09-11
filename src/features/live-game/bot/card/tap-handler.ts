@@ -7,7 +7,14 @@ import { copyFor, type CardContext } from "#live-game/bot/card-context.ts";
 
 export const onTap = async (context: CardContext, ctx: CallbackTap): Promise<void> => {
   const chatId = ctx.chat?.id;
-  const copy = chatId === undefined ? copyIn(DEFAULT_LOCALE) : copyFor(context, chatId);
+
+  if (chatId === undefined) {
+    await ctx.answerCallbackQuery(copyIn(DEFAULT_LOCALE).cardGone);
+
+    return;
+  }
+
+  const copy = copyFor(context, chatId);
   const payload = decodeCallback(ctx.callbackQuery.data);
 
   if (payload === null) {
@@ -16,5 +23,5 @@ export const onTap = async (context: CardContext, ctx: CallbackTap): Promise<voi
     return;
   }
 
-  await ctx.answerCallbackQuery(await context.cards.tap(copy, payload, ctx.from.id));
+  await ctx.answerCallbackQuery(await context.cards.tap(copy, chatId, payload, ctx.from.id));
 };
