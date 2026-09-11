@@ -204,6 +204,29 @@ describe("shellPayloadThatBreaks", () => {
     expect(shellPayloadThatBreaks("node -e 'console.log(1 + 1)'")).toBeNull();
   });
 
+  it("should refuse a perl -e script carrying a backslash, since five phases broke on one", () => {
+    const said = shellPayloadThatBreaks("perl -e 's/a\\d/b/' x.txt");
+
+    expect(said).toContain("perl -e ' carries a backslash");
+  });
+
+  it("should refuse the in-place perl an agent actually types, whatever options come before -e", () => {
+    expect(shellPayloadThatBreaks("perl -pi -e 's/\\s+$//' x.txt")).toContain("perl -pi -e ' carries a backslash");
+    expect(shellPayloadThatBreaks("perl -0pi -E 's/\\n//' x.txt")).toContain("perl -0pi -E ' carries a backslash");
+  });
+
+  it("should refuse a sed script carrying a backslash, whichever options come before it", () => {
+    expect(shellPayloadThatBreaks("sed -i 's/a\\nb/c/' x.txt")).toContain("sed -i ' carries a backslash");
+    expect(shellPayloadThatBreaks("sed -i.bak -e 's/\\t/ /' x.txt")).toContain("sed -i.bak -e ' carries a backslash");
+    expect(shellPayloadThatBreaks("cat x | sed \"s/\\r//\"")).toContain('sed " carries a backslash');
+  });
+
+  it("should pass a sed or perl script of plain ASCII, and a sed with no quoted script at all", () => {
+    expect(shellPayloadThatBreaks("sed -i 's/old/new/' x.txt")).toBeNull();
+    expect(shellPayloadThatBreaks("perl -E 'say 1 + 1'")).toBeNull();
+    expect(shellPayloadThatBreaks("sed -n 2p x.txt")).toBeNull();
+  });
+
   it("should pass an ordinary commit message", () => {
     expect(shellPayloadThatBreaks("git commit -m \"it's done\"")).toBeNull();
   });
@@ -216,7 +239,7 @@ describe("shellPayloadThatBreaks", () => {
     const said = shellPayloadThatBreaks("python -c 'print(\"ё\")'") ?? "";
 
     expect(said.split("\n")[FIRST]).toBe("Refused: python -c ' carries a non-ASCII character.");
-    expect(said).toContain("inside an inline evaluator or an unquoted");
+    expect(said).toContain("inside an inline evaluator, the first sed or perl");
     expect(said).toContain("rewritten by the shell on the way in");
     expect(said).toContain("the loss is downstream of the shell. Use Edit or Write for");
     expect(said).toContain("write the payload to a file and run the file");

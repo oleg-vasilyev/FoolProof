@@ -66,6 +66,27 @@ export const theLogBlockIn = (log: string): readonly string[] => {
 export const fieldsIn = (log: string): ReadonlyMap<string, string> =>
   theLogBlockIn(log).reduce(afterLogLine, NOTHING_READ).said;
 
+const THE_CLOCK_FIELD = "Ran";
+
+const BETWEEN_THE_RAN_PARTS = "·";
+
+const NOT_MEASURED = /not measured/i;
+
+const theWallClockOf = (ran: string): string => ran.split(BETWEEN_THE_RAN_PARTS)[FIRST] ?? NOWHERE;
+
+export const clockComplaints = (file: string, fields: ReadonlyMap<string, string>): readonly string[] => {
+  const ran = fields.get(THE_CLOCK_FIELD);
+
+  return ran !== undefined && NOT_MEASURED.test(theWallClockOf(ran))
+    ? [
+        `${file}: "${THE_CLOCK_FIELD}: ${ran}" leaves the wall clock unmeasured. Both ends are ` +
+          `always at hand — the owner's opening message carries a timestamp in the session ` +
+          `transcript, and the final commit's own %cI is one git log away — so a clock written ` +
+          `"not measured" is a guess about how long a kind of work takes, dressed as honesty`,
+      ]
+    : [];
+};
+
 export const estimateComplaints = (
   file: string,
   fields: ReadonlyMap<string, string>

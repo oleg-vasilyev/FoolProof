@@ -126,7 +126,8 @@ What is actually knowable:
   being an unrelated errand between the two commits. The end is the final commit's own
   `%cI`. **So wall clock may not be `not measured` when both ends are in the
   transcript** — the opening message carries a time, and `git log --format=%cI -1`
-  gives the second the moment the phase commits. `date +%F` is a date with no time in it and cannot produce a duration — the
+  gives the second the moment the phase commits; `docs-check` refuses a `Ran:` that
+  says so, since 11 September 2026. `date +%F` is a date with no time in it and cannot produce a duration — the
   first version of this page recommended it anyway.
 
 `Found by:` is the field the checkup was built for and the easiest to fill in the

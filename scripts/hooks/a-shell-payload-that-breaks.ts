@@ -16,8 +16,8 @@ const A_NON_ASCII_CHARACTER = /[^\u0000-\u007f]/u;
 
 const A_LINE = /\r?\n/;
 
-const AN_INLINE_EVALUATOR =
-  /(?:^|[\s;&|(])(?:node\s+(?:-e|--eval|-p|--print)|python3?\s+-c)\s+(['"])/g;
+const AN_INLINE_SCRIPT =
+  /(?:^|[\s;&|(])(?:node\s+(?:-e|--eval|-p|--print)|python3?\s+-c|perl(?:\s+-[a-zA-Z0-9]+)*?\s+-[eE]|sed(?:\s+-[a-zA-Z]+(?:\.[a-z]+)?)*(?:\s+-e)?)\s+(['"])/g;
 
 const A_HEREDOC_OPENER = /(?<!<)<<-?\s*(['"\\])?([A-Za-z_][A-Za-z0-9_]*)/;
 
@@ -34,7 +34,7 @@ export interface Payload {
 }
 
 const inlinePayloadsIn = (command: string): readonly Payload[] =>
-  [...command.matchAll(AN_INLINE_EVALUATOR)].map((match) => {
+  [...command.matchAll(AN_INLINE_SCRIPT)].map((match) => {
     const quote = match[FIRST_GROUP] ?? "";
     const opens = (match.index ?? NOTHING) + match[THE_WHOLE_MATCH].length;
     const closes = command.indexOf(quote, opens);
@@ -94,8 +94,8 @@ export const shellPayloadThatBreaks = (command: string): string | null => {
 
   return [
     `Refused: ${broken.join("; ")}.`,
-    "A backslash or a non-ASCII character inside an inline evaluator or an unquoted",
-    "heredoc is rewritten by the shell on the way in, and a backslash survives no heredoc",
+    "A backslash or a non-ASCII character inside an inline evaluator, the first sed or perl",
+    "script or an unquoted heredoc is rewritten by the shell on the way in, and a backslash survives no heredoc",
     "here, quoted or not: the loss is downstream of the shell. Use Edit or Write for",
     "that content — write the payload to a file and run the file — or quote the",
     "delimiter (<<'EOF') when non-ASCII is all the body carries.",

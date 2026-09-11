@@ -3,7 +3,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { A_LINE, FIRST_GROUP } from "../markdown-text.ts";
 import { FLOW_DOCUMENT, read } from "../document-files.ts";
-import { estimateComplaints, fieldsIn } from "./phase-log-fields.ts";
+import { clockComplaints, estimateComplaints, fieldsIn } from "./phase-log-fields.ts";
 
 
 const NOTHING = 0;
@@ -142,12 +142,12 @@ export const pathComplaints = (
   }
 
   const fields = fieldsIn(log);
-  const estimated = estimateComplaints(file, fields);
+  const aboutNumbers = [...estimateComplaints(file, fields), ...clockComplaints(file, fields)];
   const missing = THE_OWED_FIELDS.filter((field) => !fields.has(field));
 
   if (missing.length > NOTHING) {
     return [
-      ...estimated,
+      ...aboutNumbers,
       ...missing.map(
         (field) =>
           `${file}: no "${field}:" line — the walk through ${FLOW_DOCUMENT} is what shows a ` +
@@ -175,7 +175,7 @@ export const pathComplaints = (
   );
 
   return [
-    ...estimated,
+    ...aboutNumbers,
     ...walked.flatMap((citation) =>
       complaintAbout(file, WALKED, citation, markersMatching(citation, markers))
     ),

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   afterLogLine,
+  clockComplaints,
   estimateComplaints,
   fieldsIn,
   theLogBlockIn,
@@ -119,6 +120,32 @@ describe("fieldsIn", () => {
 
     expect(fieldsIn(log).get("Path")).toBe("framing → release");
     expect(fieldsIn(log).get("Skipped")).toBe("quality gates");
+  });
+});
+
+describe("clockComplaints", () => {
+  it("should refuse a Ran field that leaves the clock unmeasured, and say where both ends are", () => {
+    const said = clockComplaints(A_LOG, new Map([["Ran", "not measured · Opus 5 · 41k"]]));
+
+    expect(said).toHaveLength(ONE_COMPLAINT);
+    expect(said[FIRST]).toContain(`${A_LOG}: "Ran: not measured · Opus 5 · 41k" leaves the wall clock unmeasured`);
+    expect(said[FIRST]).toContain("opening message carries a timestamp");
+    expect(said[FIRST]).toContain("%cI is one git log away");
+  });
+
+  it("should refuse the phrase however it is capitalised, as long as it sits in the clock's own part", () => {
+    expect(clockComplaints(A_LOG, new Map([["Ran", "opened at nine, closed Not Measured · Opus 5 · 41k"]]))).toHaveLength(
+      ONE_COMPLAINT
+    );
+  });
+
+  it("should let the tokens be not measured, since the logbook says own tokens are not available", () => {
+    expect(clockComplaints(A_LOG, new Map([["Ran", "18m31s · Opus 5 · own tokens not measured"]]))).toHaveLength(NOTHING);
+  });
+
+  it("should let a measured Ran field through, and a log with no Ran field at all", () => {
+    expect(clockComplaints(A_LOG, new Map([["Ran", "18m31s · Opus 5 · 41k"]]))).toHaveLength(NOTHING);
+    expect(clockComplaints(A_LOG, new Map([["Path", "not measured"]]))).toHaveLength(NOTHING);
   });
 });
 
