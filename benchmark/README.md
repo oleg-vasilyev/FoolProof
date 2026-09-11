@@ -29,7 +29,10 @@ the checkup runs on**, so a checkup measures the harness and not a model that mo
 under it.
 
 What the agent never sees: `task.json`, `acceptance.spec.ts`, the reference diff, this
-file, and the runner itself.
+file, and the runner itself. The hidden spec also has to stay outside every runner's
+default glob: it fails on the snapshot by design, so a Stryker config that named no
+vitest config once ran Vitest's own `**/*.spec.ts` default, reached it in the dry run
+and turned the whole mutation gate red at a pristine HEAD.
 
 ## The fence
 
