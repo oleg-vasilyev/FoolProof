@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<!-- Frozen snapshot of the harness as of 3 September 2026 at commit 9d7115c; the
-     story counts the 274 commits up to 25108af. Not a living doc: do not edit for drift from the current repo, and
+<!-- Frozen snapshot of the harness as of 14 September 2026; the story counts the 314
+     commits up to 09676f7 (the first 274, up to 25108af, were read on 3 September, the
+     forty after them on 14 September). Not a living doc: do not edit for drift from the current repo, and
      do not add it to any gate. See CLAUDE.md's document-ownership rule and the
      owner's own request in the commit that added this page. -->
 <html lang="en">
@@ -9,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>The harness that learned to check itself — a FoolProof case study</title>
-<meta name="description" content="How the rules, checks, skills and agents around a small Telegram bot were built, broken and rebuilt over 274 commits in five weeks, one person working with Claude Code. Read from the git history alone.">
+<meta name="description" content="How the rules, checks, skills and agents around a small Telegram bot were built, broken and rebuilt over 314 commits in six and a half weeks, one person working with Claude Code. Read from the git history alone.">
 <link rel="canonical" href="https://oleg-vasilyev.github.io/FoolProof/case-study/">
 
 <link rel="alternate" hreflang="en" href="https://oleg-vasilyev.github.io/FoolProof/case-study/">
@@ -22,7 +23,7 @@
 <meta property="og:locale:alternate" content="ru_RU">
 <meta property="og:url" content="https://oleg-vasilyev.github.io/FoolProof/case-study/">
 <meta property="og:title" content="The harness that learned to check itself">
-<meta property="og:description" content="274 commits, five weeks, one person and one model: how the rules and checks around a small bot were built, broken and rebuilt.">
+<meta property="og:description" content="314 commits, six and a half weeks, one person and one model: how the rules and checks around a small bot were built, broken and rebuilt.">
 <meta property="og:image" content="https://oleg-vasilyev.github.io/FoolProof/previews/og-cover.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -30,7 +31,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The harness that learned to check itself">
-<meta name="twitter:description" content="274 commits, five weeks, one person and one model: how the rules and checks around a small bot were built, broken and rebuilt.">
+<meta name="twitter:description" content="314 commits, six and a half weeks, one person and one model: how the rules and checks around a small bot were built, broken and rebuilt.">
 <meta name="twitter:image" content="https://oleg-vasilyev.github.io/FoolProof/previews/og-cover.png">
 
 <meta name="theme-color" content="#0B0A09">
@@ -55,7 +56,7 @@
     </a>
 
     <nav aria-label="Primary" class="ml-auto hidden items-center gap-7 text-[15px] text-muted md:flex">
-      <a href="#eras" class="hover:text-ink">The six eras</a>
+      <a href="#eras" class="hover:text-ink">The seven eras</a>
       <a href="#patterns" class="hover:text-ink">What kept coming back</a>
       <a href="#today" class="hover:text-ink">Today</a>
       <a href="https://github.com/oleg-vasilyev/FoolProof" class="hover:text-ink" rel="noopener">Source</a>
@@ -90,7 +91,7 @@
 <main id="main">
 
   <section aria-labelledby="hero-heading" class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-    <p class="eyebrow hero-rise">Case study · 28 July – 2 September 2026 · 274 commits</p>
+    <p class="eyebrow hero-rise">Case study · 28 July – 11 September 2026 · 314 commits</p>
 
     <h1 id="hero-heading" class="hero-rise mt-5 max-w-[22ch] text-[40px] font-black leading-[1.03] tracking-[-0.03em] text-balance sm:text-[58px]">
       The harness that learned to check itself
@@ -98,32 +99,78 @@
 
     <p class="hero-rise-2 mt-7 max-w-[68ch] text-[19px] leading-relaxed text-muted">
       FoolProof is a small Telegram bot that keeps score at Durak. One person, working with
-      Claude Code, built it in five weeks, and the bot is the least interesting part. Around it grew a set
+      Claude Code, built it in six and a half weeks, and the bot is the least interesting part. Around it grew a set
       of rules, checks, skills and agents that decide how the next line of code gets written,
       and that set was rewritten more often than the bot was. This is the story of that set:
       what broke, what replaced it, and what it looks like today.
     </p>
     <p class="hero-rise-2 mt-4 max-w-[68ch] text-[17px] leading-relaxed text-dim">
       Every claim here comes from the commit history, every number is read from git, and every
-      hash links to its commit. How that was done is told at the end.
+      hash links to its commit.
     </p>
 
     <div class="hero-rise-3 mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-      <div class="tile"><p class="tile-value">274</p><p class="tile-label">commits, one author</p></div>
-      <div class="tile"><p class="tile-value">37</p><p class="tile-label">days, 28 July to 2 September</p></div>
-      <div class="tile"><p class="tile-value">34</p><p class="tile-label">releases tagged</p></div>
-      <div class="tile"><p class="tile-value">0 → 4,367</p><p class="tile-label">tests, by the last commit message</p></div>
+      <div class="tile"><p class="tile-value">314</p><p class="tile-label">commits, one author</p></div>
+      <div class="tile"><p class="tile-value">46</p><p class="tile-label">days, 28 July to 11 September</p></div>
+      <div class="tile"><p class="tile-value">40</p><p class="tile-label">releases tagged</p></div>
+      <div class="tile"><p class="tile-value">0 → 5,043</p><p class="tile-label">tests, by the last commit message that counted them</p></div>
       <div class="tile"><p class="tile-value">11 + 7</p><p class="tile-label">skills and agents at the end</p></div>
+    </div>
+  </section>
+
+  <section id="findings" aria-labelledby="findings-heading" class="border-t border-line">
+    <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+      <p class="eyebrow">Before the detail</p>
+      <h2 id="findings-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">What the history says, in five findings</h2>
+      <p class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
+        Each one is drawn from the chapters below and points at the commit that states it.
+        If you read nothing else, read these. Then pick an era: 2 is where a rule was found
+        dead, 5 is where the readers arrive, 7 is where the harness got a ruler.
+      </p>
+
+      <ol class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+        <li class="reveal">
+          <p class="pattern-n">01</p>
+          <h3 class="mt-2 text-[19px] font-bold">The harness is over two thirds the size of the product</h3>
+          <p class="mt-2 text-[16px] leading-relaxed text-muted">At the last commit the bot's source is 15,829 lines without its tests; the skills, agents, documents and document checks that decide how the next line gets written are 11,332 — and that side was rewritten more often than the bot was.</p>
+        </li>
+        <li class="reveal">
+          <p class="pattern-n">02</p>
+          <h3 class="mt-2 text-[19px] font-bold">Acceptance cannot tell models apart; the process can</h3>
+          <p class="mt-2 text-[16px] leading-relaxed text-muted">Every model dropped cold into the benchmark's fenced clone passed the hidden spec and left every gate green. Only the process columns separated them: eight of eleven obligations for a dollar and six minutes, against eleven of eleven for twenty-two dollars and thirty-six.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a05104e" rel="noopener">a05104e</a></p>
+        </li>
+        <li class="reveal">
+          <p class="pattern-n">03</p>
+          <h3 class="mt-2 text-[19px] font-bold">The agent is the harness's only user, and for six weeks nothing was built that way</h3>
+          <p class="mt-2 text-[16px] leading-relaxed text-muted">A count over a month of transcripts found 1,463 hand-typed test runs whose verdicts the model read through a grep on a stream.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a>
+            Then package.json went from twenty-three scripts to eight, and every gate started leaving its verdict in a file.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a></p>
+        </li>
+        <li class="reveal">
+          <p class="pattern-n">04</p>
+          <h3 class="mt-2 text-[19px] font-bold">A rule counts only once it has been seen refusing</h3>
+          <p class="mt-2 text-[16px] leading-relaxed text-muted">A lint rule was found dead four times in one day; three documentation checks stayed green under sabotage. In the phase that finally made the deliberate break a step of the flow, fourteen such breaks were made and four hit nothing the rule watched.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5d48dac" rel="noopener">5d48dac</a></p>
+        </li>
+        <li class="reveal">
+          <p class="pattern-n">05</p>
+          <h3 class="mt-2 text-[19px] font-bold">The author is the wrong reader — this page included</h3>
+          <p class="mt-2 text-[16px] leading-relaxed text-muted">Every diff is reviewed by an agent that did not write it, every picture read by one that does not know what it is for. A fact-checker re-deriving this page's claims from git found 17 of 263 that the history did not support, and every one of them read perfectly.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5bf13e4" rel="noopener">5bf13e4</a></p>
+        </li>
+      </ol>
     </div>
   </section>
 
   <section id="timeline" aria-labelledby="timeline-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <p class="eyebrow">Every commit, in order</p>
-      <h2 id="timeline-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Thirty-seven days on one strip</h2>
+      <h2 id="timeline-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Forty-six days on one strip</h2>
       <p class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
         One bar per commit, coloured by era. A diamond above a bar is a release tag. Of the
-        thirty-seven days, twenty-four have commits. The six eras are this page's division,
+        forty-six days, thirty-one have commits. The seven eras are this page's division,
         not the repository's: the lines fall where the subject of the work changed. Hover or tap a bar to read the commit;
         click an era name to jump to its chapter.
       </p>
@@ -144,41 +191,44 @@
         The harness is everything in the repository that is not the product.
       </p>
 
-      <ul class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">CLAUDE.md</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">The rules loaded before every session. Style, layering, testing, gates.</p>
-        </li>
-        <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">Skills</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">Procedures loaded for one kind of job: writing a spec (the test file of one module), adding a feature, finishing a phase.</p>
-        </li>
-        <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">Agents</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">Separate model instances with a brief and a contract: a reviewer, a designer, and cold readers, who are deliberately not told what they are looking at.</p>
-        </li>
-        <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">Hooks</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">Scripts that fire on an edit or at the end of a turn, that is, of one reply from the model.</p>
-        </li>
-        <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">Lint rules and gates</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">What a machine refuses, and what must be green before a commit or a tag.</p>
-        </li>
-        <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">Documents</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">The spec, the debt list, the flow drawing, the logbook, and the check that holds all of them against the code.</p>
-        </li>
-      </ul>
-
-      <div class="prose reveal mt-10 max-w-[68ch]">
-        <p>
-          A few more words recur in the project's own sense. The <strong>owner</strong> is the one
+      <details class="era-detail mt-10">
+        <summary><span class="era-detail-h">Ten words this page uses in the project's own sense</span></summary>
+        <ul class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <li class="reveal lift rounded-2xl border border-line bg-card p-6">
+            <h3 class="text-[18px] font-bold">CLAUDE.md</h3>
+            <p class="mt-2 text-[15px] leading-relaxed text-muted">The rules loaded before every session. Style, layering, testing, gates.</p>
+          </li>
+          <li class="reveal lift rounded-2xl border border-line bg-card p-6">
+            <h3 class="text-[18px] font-bold">Skills</h3>
+            <p class="mt-2 text-[15px] leading-relaxed text-muted">Procedures loaded for one kind of job: writing a spec (the test file of one module), adding a feature, finishing a phase.</p>
+          </li>
+          <li class="reveal lift rounded-2xl border border-line bg-card p-6">
+            <h3 class="text-[18px] font-bold">Agents</h3>
+            <p class="mt-2 text-[15px] leading-relaxed text-muted">Separate model instances with a brief and a contract: a reviewer, a designer, and cold readers, who are deliberately not told what they are looking at.</p>
+          </li>
+          <li class="reveal lift rounded-2xl border border-line bg-card p-6">
+            <h3 class="text-[18px] font-bold">Hooks</h3>
+            <p class="mt-2 text-[15px] leading-relaxed text-muted">Scripts that fire on an edit or at the end of a turn, that is, of one reply from the model.</p>
+          </li>
+          <li class="reveal lift rounded-2xl border border-line bg-card p-6">
+            <h3 class="text-[18px] font-bold">Lint rules and gates</h3>
+            <p class="mt-2 text-[15px] leading-relaxed text-muted">What a machine refuses, and what must be green before a commit or a tag.</p>
+          </li>
+          <li class="reveal lift rounded-2xl border border-line bg-card p-6">
+            <h3 class="text-[18px] font-bold">Documents</h3>
+            <p class="mt-2 text-[15px] leading-relaxed text-muted">The spec, the debt list, the flow drawing, the logbook, and the check that holds all of them against the code.</p>
+          </li>
+        </ul>
+        <p class="mt-6 max-w-[68ch] text-[16px] leading-relaxed text-muted">
+          Four more recur in the project's own sense. The <strong>owner</strong> is the one
           person who sets the tasks and makes the decisions. The other side of the conversation
           is the model, and one of its replies is a <strong>turn</strong>. A
           <strong>phase</strong> is any bounded list of changes, feature or not, that ends at a
           commit or a tag. A <strong>gate</strong> is a check a phase must pass on the way.
         </p>
+      </details>
+
+      <div class="prose reveal mt-10 max-w-[68ch]">
         <p>
           One question the history keeps asking: where in the harness does a rule belong, in
           the text the model reads or in the toolchain, meaning the lint, the hooks and the
@@ -198,96 +248,85 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 1 of 6</span><span>28–29 July</span><span>commits 1–30</span>
+        <span class="text-ink">Era 1 of 7</span><span>28–29 July</span><span>commits 1–30</span>
       </div>
 
       <h2 id="era-1-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Two Markdown files</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
         <p>
-          The repository begins with no code. The first commit is a spec, PLAN.md, and a
-          rulebook, CLAUDE.md, adapted from a sibling project.
+          The repository begins with no code — only a rulebook that already forbids the things
+          the project would spend the next month learning how to enforce.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/44f6f66" rel="noopener">44f6f66</a>
-          The rulebook already says the things the project would spend a month enforcing: no
-          comments in the source, a named constant for every number, one file allowed to
-          contain SQL, and two more in the same spirit. The one thing it did not have was a
-          check. How the checks would be built was settled in the first
-          two days.
-        </p>
-        <p>
-          The second commit adds the first hook: at the end of every turn it runs the lint
-          autofix. The third adds ESLint with five
-          rules, and the comment at the top of the config admits the limit: the no-comments rule "has no
-          ESLint equivalent and stays a review convention." That sentence lasted one day.
+          The one thing it did not have was a check. By the end of the second day three of its
+          paragraphs had become ESLint rules, the code had layers that may not import each
+          other, and a tool called Stryker was grading the tests by planting deliberate breaks
+          in the code — 88.4% caught on the first run. One rule from those two days outlived
+          everything: a fact lives where its reason lives, and the other document gets a
+          pointer, never a retelling.
         </p>
 
-        <h3>Tests arrive, and then a grader for the tests</h3>
-        <p>
-          On 29 July the code got 312 tests in fourteen files and a coverage gate at 70%.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/9276ad7" rel="noopener">9276ad7</a>
-          The same day it got Stryker, a mutation-testing tool. It plants small deliberate
-          breaks in the code; each such break is called a mutant. Then it counts how many
-          mutants the tests noticed. The commit says why: "coverage says a line ran; it does
-          not say a test would notice if that line broke."
-        </p>
-        <p>
-          The first run scored 88.4%. That was the project's first mutation score; by the end of the era it had reached
-          94.78%, and a chart in era 3 carries it into September.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/508de4e" rel="noopener">508de4e</a>
-          The line below which the gate fails was raised from its initial 60 to 85 in those
-          same days, so that the gate "bites on a regression" rather than hanging there for
-          show.
-        </p>
-        <p>
-          The investment paid back at once. Mutation testing found what coverage could not:
-          tests that passed for the wrong reason. The first example: a dependency in a test
-          had been replaced by a stub, and the test checked only that the stub was called,
-          not what the real dependency would have done. The second: one test passed only
-          because the test before it had left a stub behind. Stryker stayed with the
-          project for all five weeks.
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">Tests arrive, and then a grader for the tests</span><span class="era-detail-n">312 tests</span></summary>
+          <p>
+            On 29 July the code got 312 tests in fourteen files and a coverage gate at 70%.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/9276ad7" rel="noopener">9276ad7</a>
+            The same day it got Stryker, a mutation-testing tool: each small deliberate break
+            it plants is called a mutant, and it counts how many of them the tests noticed.
+          </p>
+          <p>
+            The first run scored 88.4%, the project's first mutation score;
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fda82cb" rel="noopener">fda82cb</a>
+            by the end of the era it had reached 94.78%.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/508de4e" rel="noopener">508de4e</a>
+            The line below which the gate fails was raised from its initial 60 to 85 in those
+            same days, so that the gate "bites on a regression" rather than hanging there for
+            show.
+          </p>
+          <p>
+            The investment paid back at once. Mutation testing found what coverage could not:
+            tests that passed for the wrong reason: a dependency in a test
+            had been replaced by a stub, and the test checked only that the stub was called,
+            not what the real dependency would have done. Stryker stayed with the
+            project for the rest of the history.
+          </p>
+        </details>
 
-        <h3>The rules move out of prose</h3>
-        <p>
-          Commit 26, "make the checkable conventions checkable", set the shape of the harness.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>
-          Three paragraphs of the rulebook became three ESLint rules written straight into the
-          config: no comments, named numbers, blank lines after imports. The code was split
-          into layers, shared code, game logic, rendering, Telegram handlers, and the layers
-          became zones of banned imports: what may not import what. Each zone was proved
-          with a deliberate violation. A hook on every edit started linting each file as it
-          was written.
-        </p>
-        <p>
-          The same commit brought the first two skills and the first agent. The skill
-          <code>finish-phase</code>, where the gates moved out of CLAUDE.md. The skill
-          <code>add-repository-method</code>, for new queries to the database. And the agent
-          <code>phase-reviewer</code>, which reads a whole diff and is told "Do not fix
-          anything."
-        </p>
-        <p>
-          Two more ideas from the same two days survived everything that came after.
-        </p>
-        <p>
-          The first decides which document a fact belongs to. It was written when four subjects
-          turned up in both PLAN.md and CLAUDE.md. The question is: would this still be true if
-          the bot were rewritten in Python? If yes, the fact belongs in PLAN.md; if no, in
-          CLAUDE.md. "A fact lives where its reason lives; the other document gets a pointer,
-          never a retelling."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0afd7b2" rel="noopener">0afd7b2</a>
-        </p>
-        <p>
-          The second is about tests: units by default, integration by exception. A spec tests
-          one file and replaces everything else with stubs.
-        </p>
-        <p>
-          By the end of 29 July the testing craft had outgrown the rulebook and became the third
-          skill, <code>write-a-spec</code>, and the tests stood at 418 by the end of the day.
-          CLAUDE.md itself had nearly doubled in two days and was cut back: "CLAUDE.md is loaded on every turn, so it should hold what is true while
-          writing any line of code."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/66ff3bd" rel="noopener">66ff3bd</a>
-          It would not stay inside those bounds.
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The rules move out of prose</span><span class="era-detail-n">3 lint rules</span></summary>
+          <p>
+            Commit 26, "make the checkable conventions checkable", set the shape of the harness.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>
+            The three were no comments, named numbers, blank lines after imports, written
+            straight into the config. The code was split
+            into layers, shared code, game logic, rendering, Telegram handlers, and the layers
+            became zones of banned imports: what may not import what. Each zone was proved
+            with a deliberate violation. A hook on every edit started linting each file as it
+            was written.
+          </p>
+          <p>
+            The same commit brought the first two skills and the first agent. The skill
+            <code>finish-phase</code>, where the gates moved out of CLAUDE.md. The skill
+            <code>add-repository-method</code>, for new queries to the database. And the agent
+            <code>phase-reviewer</code>, which reads a whole diff and is told "Do not fix
+            anything."
+          </p>
+          <p>
+            The rule about where a fact lives was written when four subjects
+            turned up in both PLAN.md and CLAUDE.md. The question is: would this still be true if
+            the bot were rewritten in Python? If yes, the fact belongs in PLAN.md; if no, in
+            CLAUDE.md.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0afd7b2" rel="noopener">0afd7b2</a>
+          </p>
+          <p>
+            By the end of 29 July the testing craft had outgrown the rulebook and became the third
+            skill, <code>write-a-spec</code>, and the tests stood at 418 by the end of the day.
+            CLAUDE.md itself had nearly doubled in two days and was cut back: "CLAUDE.md is loaded on every turn, so it should hold what is true while
+            writing any line of code."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/66ff3bd" rel="noopener">66ff3bd</a>
+            It would not stay inside those bounds.
+          </p>
+        </details>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -328,7 +367,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 2 of 6</span><span>30 July – 2 August</span><span>commits 31–66</span>
+        <span class="text-ink">Era 2 of 7</span><span>30 July – 2 August</span><span>commits 31–66</span>
       </div>
 
       <h2 id="era-2-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Features you can delete, and rules that prove they fire</h2>
@@ -336,52 +375,51 @@ so a comment is refused at the edit, not at the end of the turn.</div>
       <div class="prose reveal mt-6 max-w-[68ch]">
         <p>
           Era 1 made the rules checkable. Era 2 found out that a checkable rule can be dead, and
-          that nothing tells you.
-        </p>
-        <p>
-          It starts by turning the source tree inside out. Instead of layers at the top
-          (<code>game/</code>, <code>render/</code>, <code>bot/</code>), each feature became a
-          folder with those layers inside it, and the rule was stated as a test: "a feature is a
-          folder you can delete." It was verified by deleting one.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/476f239" rel="noopener">476f239</a>
-          Every import came to be written from the root, through an alias with a hash sign (a
-          name like <code>#shared/…</code> in place of a relative path): the alias names the
-          folder, so an import from another feature shows in the line itself, which a path
-          made of dots never does.
+          that nothing tells you. On 30 July four commits kept finding the same
+          feature-independence rule dead — three versions of the rule and two exemptions beside
+          it, none of which made a sound. The answer was not a fix but a habit that outlived the
+          era: a new zone is not finished until a deliberate violation has been shown to fail
+          the lint. The same era gave the project a fake Telegram, a debt list where an entry
+          names a trigger rather than a wish, and the documents gate that would grow into thirty
+          families of checks.
         </p>
 
-        <h3>A rule found dead, four times in one day</h3>
-        <p>
-          Fencing features off from each other with lint produced the lesson the project would
-          repeat most often. The feature-independence rule was written, enabled and green. It
-          did not work. On 30 July four commits that day kept finding something dead, five findings
-          in four commits: three versions of the rule itself, and two exemptions beside it.
-        </p>
-        <p>
-          The first two versions of the rule did nothing: first a path pattern never matched a
-          relative import, then two config blocks set the same rule and silently replaced each
-          other.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/476f239" rel="noopener">476f239</a>
-          The third version was killed by the pattern library: it read the hash-sign aliases
-          as comments, the pattern matched no import at all, and the zone passed everything.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/40d8179" rel="noopener">40d8179</a>
-        </p>
-        <p>
-          The remaining two of the four commits found exemptions dead outside the zones. The
-          logger had moved to a folder, and the exemption that allowed it what the rest may
-          not was left pointing at a file that no longer existed.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4d6b389" rel="noopener">4d6b389</a>
-          A Stryker exclusion for the database-connection file was orphaned the same way.
-          After the file moved, Stryker began mutating it, and there is nothing to assert in
-          it: housekeeping statements and the schema. Nine mutants no test could kill dragged
-          the score down.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f749a9c" rel="noopener">f749a9c</a>
-        </p>
-        <p>
-          None of these failures made a sound. The response was a habit rather than a fix:
-          "a new zone is not finished until a deliberate violation has been shown to fail the
-          lint." Thirteen deliberate violations were run to prove one commit.
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">A rule found dead, four times in one day</span><span class="era-detail-n">13 violations</span></summary>
+          <p>
+            The era starts by turning the source tree inside out. Instead of layers at the top
+            (<code>game/</code>, <code>render/</code>, <code>bot/</code>), each feature became a
+            folder with those layers inside it, and the rule was stated as a test: "a feature is a
+            folder you can delete." It was verified by deleting one.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/476f239" rel="noopener">476f239</a>
+            Every import came to be written from the root, through an alias with a hash sign (a
+            name like <code>#shared/…</code> in place of a relative path): the alias names the
+            folder, so an import from another feature shows in the line itself, which a path
+            made of dots never does.
+          </p>
+          <p>
+            Fencing features off from each other with lint produced the lesson the project would
+            repeat most often. The rule was written, enabled and green. It did not work.
+            The first two versions of it did nothing: first a path pattern never matched a
+            relative import, then two config blocks set the same rule and silently replaced each
+            other.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/476f239" rel="noopener">476f239</a>
+            The third version was killed by the pattern library: it read the hash-sign aliases
+            as comments, the pattern matched no import at all, and the zone passed everything.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/40d8179" rel="noopener">40d8179</a>
+          </p>
+          <p>
+            The remaining two of the four commits found exemptions dead outside the zones. The
+            logger had moved to a folder, and the exemption that allowed it what the rest may
+            not was left pointing at a file that no longer existed.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4d6b389" rel="noopener">4d6b389</a>
+            A Stryker exclusion was orphaned the same way, and the score fell.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f749a9c" rel="noopener">f749a9c</a>
+          </p>
+          <p>
+            Thirteen deliberate violations were run to prove one commit.
+          </p>
+        </details>
       </div>
 
       <blockquote class="said reveal mt-10 max-w-[60ch]">
@@ -390,93 +428,97 @@ so a comment is refused at the edit, not at the end of the turn.</div>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
-        <h3>A fake Telegram</h3>
-        <p>
-          By 31 July the bot could retry, restart itself and report on its own state. Then it
-          got a rig (called e2e in the code): a fake Bot API server and scenarios that play a
-          whole evening against the bot, one sitting at the table over several games, tap by
-          tap. One scenario file is one evening, with several checks, or cases, inside it; where a
-          tile at the end of an era gives an e2e number, it counts cases.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3ab3c9c" rel="noopener">3ab3c9c</a>
-          The rules for the fake: it only records what it is sent, never decides anything
-          itself, and must refuse everything the real one refuses.
-        </p>
-        <p>
-          The rig worked, but it was not yet a gate. Its seven known faults were written
-          honestly into a new file, TECH-DEBT.md, along with a rule for the file itself: "an
-          entry names a trigger, not a wish." "Split the file" is a wish; "split it when a
-          fifth job arrives" is a trigger, the event after which the debt has to be paid.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0505b9b" rel="noopener">0505b9b</a>
-        </p>
-        <p>
-          The rig earned its keep seventy minutes later. A new screen with buttons was given a
-          narrow obligation: "a feature with an inline keyboard gets scenarios"; an inline
-          keyboard is those buttons under the bot's message. The scenarios immediately caught
-          two wrong assumptions of the model's own about the bot's behaviour, and the model
-          wrote that down in the commit message.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/aea4238" rel="noopener">aea4238</a>
-          The rig becomes a gate in era 3.
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">A fake Telegram</span><span class="era-detail-n">7 known faults</span></summary>
+          <p>
+            By 31 July the bot could retry, restart itself and report on its own state. Then it
+            got e2e: a fake Bot API server and scenarios that play a
+            whole evening against the bot, one sitting at the table over several games, tap by
+            tap. One scenario file is one evening, with several checks, or cases, inside it.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3ab3c9c" rel="noopener">3ab3c9c</a>
+            The rules for the fake: it only records what it is sent, never decides anything
+            itself, and must refuse everything the real one refuses.
+          </p>
+          <p>
+            e2e worked, but it was not yet a gate. Its seven known faults were written
+            honestly into a new file, TECH-DEBT.md, along with a rule for the file itself: "an
+            entry names a trigger, not a wish." "Split the file" is a wish; "split it when a
+            fifth job arrives" is a trigger, the event after which the debt has to be paid.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0505b9b" rel="noopener">0505b9b</a>
+          </p>
+          <p>
+            e2e earned its keep seventy minutes later. A new screen with buttons was given a
+            narrow obligation: "a feature with an inline keyboard gets scenarios"; an inline
+            keyboard is those buttons under the bot's message. The scenarios immediately caught
+            two wrong assumptions of the model's own about the bot's behaviour, and the model
+            wrote that down in the commit message.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/aea4238" rel="noopener">aea4238</a>
+            e2e becomes a gate in era 3.
+          </p>
+        </details>
 
-        <h3>The cost of a gate</h3>
-        <p>
-          The project learned what a gate costs on that same new screen. It "took an hour and
-          most of a model budget, and the breakdown was not the feature: eight Stryker
-          invocations where two would have done." A model
-          budget is the amount of text the model can read and write in one session, and
-          every gate's output spends it. The answer
-          was a mode that mutates only the changed files: 63 seconds instead of four and a
-          half minutes.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/66564c9" rel="noopener">66564c9</a>
-        </p>
-        <p>
-          Two rules came with it and stayed. First: "Never re-run a gate to re-read its
-          output." Second: one round of survivor-killing per phase. Survivors are the mutants no test
-          caught, and they are killed by writing the missing tests.
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The cost of a gate</span><span class="era-detail-n">63 seconds</span></summary>
+          <p>
+            The project learned what a gate costs on that same new screen. It "took an hour and
+            most of a model budget, and the breakdown was not the feature: eight Stryker
+            invocations where two would have done." A model
+            budget is the amount of text the model can read and write in one session, and
+            every gate's output spends it. The answer
+            was a mode that mutates only the changed files: 63 seconds instead of four and a
+            half minutes.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/66564c9" rel="noopener">66564c9</a>
+          </p>
+          <p>
+            Two rules came with it and stayed. First: "Never re-run a gate to re-read its
+            output." Second: one round of survivor-killing per phase. Survivors are the mutants no test
+            caught, and they are killed by writing the missing tests.
+          </p>
+        </details>
 
-        <h3>The rulebook overflows</h3>
-        <p>
-          CLAUDE.md had been the default place to append every lesson, and it reached 585 lines.
-          It was cut to 354 by moving rather than deleting: the rig's rules went to its own
-          README, the layering procedure to a new <code>add-a-feature</code> skill.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>
-        </p>
-        <p>
-          Twenty-three minutes later came the commit "make the documents check themselves". It
-          observed that the documents had now been de-duplicated twice, and drew the
-          conclusion: the rule itself was not at fault, the fault was that nobody checked it.
-          And it added the documents gate the rest of this story calls docs:check.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/29fe4d5" rel="noopener">29fe4d5</a>
-          At first it checked links, the README tree against the real folders, the script
-          table against <code>package.json</code>, and a 380-line budget on CLAUDE.md. Its
-          first run found two undocumented scripts. By the end of the story it holds more than
-          thirty groups of checks, each about one subject; this page calls such a group a
-          family.
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The rulebook overflows</span><span class="era-detail-n">585 lines</span></summary>
+          <p>
+            CLAUDE.md had been the default place to append every lesson, and it reached 585 lines.
+            It was cut to 354 by moving rather than deleting: the e2e rules went to its own
+            README, the layering procedure to a new <code>add-a-feature</code> skill.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>
+          </p>
+          <p>
+            Then came the commit "make the documents check themselves". It
+            observed that the documents had now been de-duplicated twice, and drew the
+            conclusion: the rule itself was not at fault, the fault was that nobody checked it.
+            And it added the documents gate this story calls docs:check, the name it carried
+            until September; the repository calls it docs-check today.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/29fe4d5" rel="noopener">29fe4d5</a>
+            At first it checked links, the README tree against the real folders, the script
+            table against <code>package.json</code>, and a 380-line budget on CLAUDE.md. Its
+            first run found two undocumented scripts. By the end of the story it holds more than
+            thirty groups of checks, each about one subject; this page calls such a group a
+            family.
+          </p>
+        </details>
 
-        <h3>A lesson left in the chat is gone</h3>
-        <p>
-          The era ends with the retrospective, and its first attempt failed. The retrospective
-          was hung on compaction: when a conversation stops fitting in the model's memory it
-          is squeezed down to a short summary, and the hook was to ask five questions first,
-          about rework, repeated commands, subagents, sequencing and re-reading. It was
-          deleted the same day. A compaction hook cannot return a word into the
-          conversation, so it simply failed on every compaction, and compaction was "the
-          worst moment available" anyway.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ec3d818" rel="noopener">ec3d818</a>
-        </p>
-        <p>
-          The retrospective became a gate, the fifth in order and, at the time, the last. It also became a skill of its own.
-        </p>
-        <p>
-          Its very first outputs rewrote the delegation policy. Before: "mechanical work goes
-          to a subagent on a cheaper model." The rule was replaced by a measurement: one
-          phase had spent 493k tokens across six agents and only the review had paid for
-          itself. Hence a narrower rule, which the owner overrules in era 4: delegate only
-          when your own context is scarce.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ecc6395" rel="noopener">ecc6395</a>
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">A lesson left in the chat is gone</span><span class="era-detail-n">5 questions</span></summary>
+          <p>
+            The era ends with the retrospective, and its first attempt failed. The retrospective
+            was hung on compaction: when a conversation stops fitting in the model's memory it
+            is squeezed down to a short summary, and the hook was to ask five questions first,
+            about rework, repeated commands, subagents, sequencing and re-reading. It was
+            deleted the same day. A compaction hook cannot return a word into the
+            conversation, so it simply failed on every compaction, and compaction was "the
+            worst moment available" anyway.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ec3d818" rel="noopener">ec3d818</a>
+          </p>
+          <p>
+            The retrospective became a gate, the fifth in order and, at the time, the last. It also became a skill of its own.
+            Its very first outputs replaced the delegation policy with a narrower rule, which the
+            owner overrules in era 4: delegate only when your own context is scarce.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ecc6395" rel="noopener">ecc6395</a>
+          </p>
+        </details>
+
         <p>
           This era learned to prove that a rule fires. The next one finds a hole in a proven rule too.
         </p>
@@ -507,139 +549,133 @@ so a comment is refused at the edit, not at the end of the turn.</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 3 of 6</span><span>5–7 August</span><span>commits 67–121</span>
+        <span class="text-ink">Era 3 of 7</span><span>5–7 August</span><span>commits 67–121</span>
       </div>
 
       <h2 id="era-3-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Scenarios become a gate, states become tables</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
         <p>
-          Three days and five releases, in which the checks stopped reading only the documents
-          and started reading the code as well. The bot also learned Russian.
-        </p>
-
-        <h3>The rig becomes a gate</h3>
-        <p>
-          The rig still had seven recorded problems. Six were closed in one commit. The
-          seventh, a graceful shutdown of the bot on a signal, cannot be played on Windows,
-          where the system does not deliver that signal to a child process.
-        </p>
-        <p>
-          But before they could be a gate, the scenarios had to be taught to end the way a
-          real evening ends, not in mid-sentence. The bot's message holding the current game,
-          with buttons under it, is called the card here. Eight of sixteen scenarios broke
-          off mid-card, leaving it with its buttons still open, and the rig now fails any
-          that do.
-        </p>
-        <p>
-          The gate plays only the scenarios the diff can reach: for a phase inside one feature
-          that is usually two or three scenario files and about fifteen seconds.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/52c0f73" rel="noopener">52c0f73</a>
-          From that commit the phase ends with six gates in a fixed order; the rig came in
-          fourth, and era 2's five gates became six: lint and types, coverage, mutation over
-          the diff, e2e over the diff, the review, the retrospective.
-          "Over the diff" means over the files the phase changed, and no others.
-        </p>
-        <p>
-          Writing a scenario got its own skill, and the reason is not about scenarios but about
-          what makes a skill open: the model opens a skill when its description matches what
-          the model is doing right now. CLAUDE.md said: if you touch the scenario folder, read the
-          README. A phase edited a scenario "without opening the README once, because that
-          felt like adding a case, not like touching <code>e2e/</code>." The skill now
-          surfaces on "editing a scenario file" rather than on "touching a folder."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a0fcb61" rel="noopener">a0fcb61</a>
-          The same lesson returns in era 4, and costs more.
-        </p>
-
-        <h3>The rule that caught its own author</h3>
-        <p>
-          Every string the code used as a name for a game phase, a button press, an outcome or
-          a refusal was moved into a table per feature. Then a lint rule banned writing such a
-          name as a string anywhere else. Merely installing it caught five real ones in the shared code.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3c0b283" rel="noopener">3c0b283</a>
-        </p>
-        <p>
-          Specs were exempt at first. Three commits later the review found a spec comparing a
-          state against a bare string. The spec had been added after the rule existed, and the
-          same model that wrote the rule had written it. The rule was extended to specs, and
-          along the way it caught five more sites in the production code itself.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a89a991" rel="noopener">a89a991</a>
-        </p>
-        <p>
-          Then a release review found a function still returning a game state as a string,
-          well after the state table existed. The rule knew three shapes a state can be
-          spelled in as a string, and a value returned from a function was a fourth. Hence one
-          more step in the ritual for proving a rule, the one from era 2: once the rule is
-          shown to fire, search the whole tree once for the shapes it cannot reach. "A lint
-          rule catches the syntax somebody thought of."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/dc2602c" rel="noopener">dc2602c</a>
-        </p>
-
-        <h3>docs:check learns to read the code</h3>
-        <p>
-          The documents gate grew from links and budgets into a truth-checker. It grew one
-          family of checks at a time, and each family was added after something had been found
-          wrong.
-        </p>
-        <p>
-          One family checks the database schema: the SQL in PLAN.md against the SQL the bot
-          actually runs. It arrived after a schema recreated from the document failed the first command: the
-          database refused a record with a required field missing.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a24c0d4" rel="noopener">a24c0d4</a>
-        </p>
-        <p>
-          Another redraws the posters, the statistics pictures the bot sends into the chat,
-          and compares them with the committed ones: one changed colour code, and the gate is
-          red. It arrived after the posters were compared with their own design mockup and the
-          comparison found "three different palettes in play, two font families and two
-          widths." No document said which was right, because no check held it.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/73b4f3a" rel="noopener">73b4f3a</a>
-        </p>
-        <p>
-          A third counts the files in a folder and fails one holding more than nine. It came
-          in the same commit that split two overgrown folders into subfolders by subject, and
-          the number is deliberately generous: the count only makes somebody ask whether to
-          split.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cae506a" rel="noopener">cae506a</a>
-        </p>
-        <p>
-          The same evening two of the new subfolders were renamed. They had first been named
-          after an activity, "opening" and "seating"; the new names say what the feature's
-          commands are about: the line-up of players, and the screen a player sees.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a1dc566" rel="noopener">a1dc566</a>
-        </p>
-        <p>
-          In those same days the bot learned Russian. A chat picks its own language, and the
-          bot's lines became a parameter passed down the calls rather than an import, which would have pinned the bot to one language.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fa668dc" rel="noopener">fa668dc</a>
-        </p>
-
-        <h3>Two gates found lying</h3>
-        <p>
-          The release of 1.7.0 says it plainly: "Two gates were found lying on the way, both by
-          accident and both for as long as they have existed."
+          In this era a lint rule caught the model that had written it — and two gates were
+          found green for as long as they had existed, both by accident. Three days in which
+          the checks stopped reading only the documents and started reading the code as well. A lint rule
+          banning game states written as bare strings caught five real ones merely by being
+          installed, then a spec written by the same model that had written the rule, then a
+          fourth spelling nobody had thought of. The release of 1.7.0 says the rest plainly:
+          "Two gates were found lying on the way, both by accident and both for as long as
+          they have existed."
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4422ddb" rel="noopener">4422ddb</a>
+          One waited 600 ms for a picture that had grown to take longer, the other could not
+          read a checkout with Windows line endings — which is what a fresh clone gets.
         </p>
+
+        <details class="era-detail">
+          <summary><span class="era-detail-h">e2e becomes a gate</span><span class="era-detail-n">6 gates</span></summary>
+          <p>
+            e2e still had seven recorded problems. Six were closed in one commit.
+          </p>
+          <p>
+            But before they could be a gate, the scenarios had to be taught to end the way a
+            real evening ends, not in mid-sentence. The bot's message holding the current game,
+            with buttons under it, is called the card here. Eight of sixteen scenarios broke
+            off mid-card, leaving it with its buttons still open, and e2e now fails any
+            that do.
+          </p>
+          <p>
+            The gate plays only the scenarios the diff can reach: for a phase inside one feature
+            that is usually two or three scenario files and about fifteen seconds.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/52c0f73" rel="noopener">52c0f73</a>
+            From that commit the phase ends with six gates in a fixed order; e2e came in
+            fourth, and era 2's five gates became six: lint and types, coverage, mutation over
+            the diff, e2e over the diff, the review, the retrospective.
+            "Over the diff" means over the files the phase changed, and no others.
+          </p>
+          <p>
+            Writing a scenario got its own skill, and the reason is not about scenarios but about
+            what makes a skill open: the model opens a skill when its description matches what
+            the model is doing right now. CLAUDE.md said: if you touch the scenario folder, read the
+            README. A phase edited a scenario "without opening the README once, because that
+            felt like adding a case, not like touching <code>e2e/</code>." The skill now
+            surfaces on "editing a scenario file" rather than on "touching a folder."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a0fcb61" rel="noopener">a0fcb61</a>
+            The same lesson returns in era 4, and costs more.
+          </p>
+        </details>
+
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The rule that caught its own author</span><span class="era-detail-n">5 more sites</span></summary>
+          <p>
+            Every string the code used as a name for a game phase, a button press, an outcome or
+            a refusal was moved into a table per feature. Then a lint rule banned writing such a
+            name as a string anywhere else.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3c0b283" rel="noopener">3c0b283</a>
+          </p>
+          <p>
+            Specs were exempt at first. Three commits later the review found a spec comparing a
+            state against a bare string. The spec had been added after the rule existed, and the
+            same model that wrote the rule had written it. The rule was extended to specs, and
+            along the way it caught five more sites in the production code itself.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a89a991" rel="noopener">a89a991</a>
+          </p>
+          <p>
+            Then a release review found a function still returning a game state as a string,
+            well after the state table existed. The rule knew three shapes a state can be
+            spelled in as a string, and a value returned from a function was a fourth. Hence one
+            more step in the ritual for proving a rule, the one from era 2: once the rule is
+            shown to fire, search the whole tree once for the shapes it cannot reach. "A lint
+            rule catches the syntax somebody thought of."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/dc2602c" rel="noopener">dc2602c</a>
+          </p>
+        </details>
+
+        <details class="era-detail">
+          <summary><span class="era-detail-h">docs:check learns to read the code</span><span class="era-detail-n">3 palettes</span></summary>
+          <p>
+            The documents gate grew from links and budgets into a truth-checker. It grew one
+            family of checks at a time, and each family was added after something had been found
+            wrong.
+          </p>
+          <p>
+            One family checks the database schema: the SQL in PLAN.md against the SQL the bot
+            actually runs. It arrived after a schema recreated from the document failed the first command: the
+            database refused a record with a required field missing.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a24c0d4" rel="noopener">a24c0d4</a>
+          </p>
+          <p>
+            Another redraws the posters, the statistics pictures the bot sends into the chat,
+            and compares them with the committed ones: one changed colour code, and the gate is
+            red. It arrived after the posters were compared with their own design mockup and the
+            comparison found "three different palettes in play, two font families and two
+            widths." No document said which was right, because no check held it.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/73b4f3a" rel="noopener">73b4f3a</a>
+          </p>
+        </details>
+
+        <details class="era-detail">
+          <summary><span class="era-detail-h">Two gates found lying</span><span class="era-detail-n">5 of 17 scenarios</span></summary>
+          <p>
+            Both lied the same way: they were green by luck, not because they checked what they
+            promised. The first was the e2e quiet window, the pause a scenario waits before it
+            reads the screen. The usual poster render grew from 460 to 540 ms, the headroom shrank
+            to 60 ms, and that stopped being enough: the picture began landing after the window
+            had closed, and five of seventeen scenarios went red on a working bot. The failure
+            looked exactly like flakiness, a random fail, and was measured instead of waved off:
+            the window was doubled.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2e7c639" rel="noopener">2e7c639</a>
+          </p>
+          <p>
+            The second was the documents gate, which could not read a checkout, a working copy
+            of the repository, whose files carried CRLF. The author's working copy happened to
+            hold the Unix endings, so the gate was green.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6ddd56e" rel="noopener">6ddd56e</a>
+            On a fresh clone it would have gone red on a tree where nothing was wrong,
+            reporting every table undescribed.
+          </p>
+        </details>
+
         <p>
-          Both lied the same way: they were green by luck, not because they checked what they
-          promised. The first was the rig's quiet window, the pause a scenario waits before it
-          reads the screen. It was 600 ms. The usual poster render grew from 460 to 540 ms, the headroom shrank
-          to 60 ms, and that stopped being enough: the picture began landing after the window
-          had closed, and five of seventeen scenarios went red on a working bot. The failure
-          looked exactly like flakiness, a random fail, and was measured instead of waved off:
-          the window was doubled.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2e7c639" rel="noopener">2e7c639</a>
-        </p>
-        <p>
-          The second was the documents gate, which could not read a checkout, a working copy
-          of the repository, whose files carried the Windows line endings, CRLF. A fresh
-          clone on Windows gets exactly those, but the author's working copy happened to hold
-          the Unix endings, so the gate was green.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6ddd56e" rel="noopener">6ddd56e</a>
-          On a fresh clone it would have gone red on a tree where nothing was wrong,
-          reporting every table undescribed. Two unrelated things happen in the next era:
-          the bot leaves the laptop for a server, and the first gate no machine can answer
-          appears.
+          Two unrelated things happen in the next era: the bot leaves the laptop for a server,
+          and the first gate no machine can answer appears.
         </p>
       </div>
 
@@ -678,33 +714,39 @@ so a comment is refused at the edit, not at the end of the turn.</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 4 of 6</span><span>11–14 August</span><span>commits 122–184</span>
+        <span class="text-ink">Era 4 of 7</span><span>11–14 August</span><span>commits 122–184</span>
       </div>
 
       <h2 id="era-4-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The bot leaves the laptop</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
         <p>
-          Sixty-three commits in four days, ten releases, and the largest change of setting: the
-          bot moved to a server. With it came the first gate no machine can answer and the first
-          checkup of the harness itself.
+          Sixty-three commits in four days brought the first gate no machine can answer: a
+          poster is a picture, and no test reads one. Its first run caught two holes in the
+          award rules and a line of text leaving the card, and the brief that made it work was
+          "specific claims, not a verdict". The bot also left the laptop for a server that
+          pulls the newest tag every five minutes and waits for nobody, which forces the order
+          of every check after it. And one phase "ran six gates and released without the
+          seventh" — not from carelessness, but because the skill holding the gates never
+          opened.
         </p>
 
-        <h3>The gate a machine cannot answer</h3>
-        <p>
-          A poster is a picture, and no test reads one. The gallery gate takes nine awkward
-          evenings and draws both posters for them, the chronology and the awards. That makes
-          seventeen pictures: one evening earned no awards, so it has no awards sheet. The gate asks whoever looks for "specific claims, not a verdict." It came in
-          fifth, and the gates became seven.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ce3c70c" rel="noopener">ce3c70c</a>
-          Its first run caught two holes in the rules by which the bot hands out awards for an
-          evening (captions like THE COMEBACK that the poster grants players on the night's
-          results), and a line of text leaving the card. Two days later the gate was moved to
-          after the review, because "a picture checked at gate five could be stale by gate
-          six."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/743adaa" rel="noopener">743adaa</a>
-          Who should look at the picture is only settled in era 5.
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The gate a machine cannot answer</span><span class="era-detail-n">9 evenings</span></summary>
+          <p>
+            The gallery gate takes nine awkward
+            evenings and draws both posters for them, the chronology and the awards. It came in
+            fifth, and the gates became seven.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ce3c70c" rel="noopener">ce3c70c</a>
+            The two holes were in the rules by which the bot hands out awards for an
+            evening: captions like THE COMEBACK that the poster grants players on the night's
+            results. Two days later the gate was moved to
+            after the review, because "a picture checked at gate five could be stale by gate
+            six."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/743adaa" rel="noopener">743adaa</a>
+            Who should look at the picture is only settled in era 5.
+          </p>
+        </details>
       </div>
 
       <blockquote class="said reveal mt-10 max-w-[60ch]">
@@ -713,113 +755,112 @@ so a comment is refused at the edit, not at the end of the turn.</div>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
-        <h3>Delegation becomes the rule</h3>
-        <p>
-          The rule from era 2, delegate only when your own context is scarce, was overruled by
-          the owner. An independent scope now goes to a subagent at once when three conditions
-          hold: the work touches no file the model itself has open, the brief fits one
-          message, and only the result matters. The review became "always the
-          <code>phase-reviewer</code> subagent, and never a re-read."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0352b2b" rel="noopener">0352b2b</a>
-          The retrospective was told to count how many such scopes were delegated and how
-          many were not. A new default rarely fails by being used badly. More often it is
-          quietly not used, and without the count nobody notices.
-        </p>
-        <p>
-          A later commit added the reviewer's limit: it reads the diff and runs nothing, so "a
-          green review of a shell script, a systemd unit or a workflow is half a gate." All
-          three are files only a run can check: the unit tells the server how to start the
-          bot, the workflow tells GitHub what to run on every push.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6a4c252" rel="noopener">6a4c252</a>
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">Delegation becomes the rule</span><span class="era-detail-n">3 conditions</span></summary>
+          <p>
+            The rule from era 2, delegate only when your own context is scarce, was overruled by
+            the owner. An independent scope now goes to a subagent at once when three conditions
+            hold: the work touches no file the model itself has open, the brief fits one
+            message, and only the result matters. The review became "always the
+            <code>phase-reviewer</code> subagent, and never a re-read."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0352b2b" rel="noopener">0352b2b</a>
+            The retrospective was told to count how many such scopes were delegated and how
+            many were not. A new default rarely fails by being used badly. More often it is
+            quietly not used, and without the count nobody notices.
+          </p>
+          <p>
+            A later commit added the reviewer's limit: it reads the diff and runs nothing, so "a
+            green review of a shell script, a systemd unit or a workflow is half a gate." All
+            three are files only a run can check: the unit tells the server how to start the
+            bot, the workflow tells GitHub what to run on every push.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6a4c252" rel="noopener">6a4c252</a>
+          </p>
+        </details>
 
-        <h3>Deploy, and three wrong lock files</h3>
-        <p>
-          The server pulls the newest tag every five minutes; nothing pushes to it.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cfd02a1" rel="noopener">cfd02a1</a>
-        </p>
-        <p>
-          The move's main trouble came from the lock file, the list of exact dependency
-          versions. Written on Windows, it failed on Linux twice in this era, and a third time
-          a week later. Each failure left a mark. First a trial install that changes nothing
-          on disk was added to the gate. Then came the admission that on the laptop this trial
-          had passed both times and predicted nothing. Finally a rule was written down: a
-          broken lock file is repaired by restoring the lines that went missing from it, not
-          by rebuilding it from scratch.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ab89f77" rel="noopener">ab89f77</a>
-        </p>
-        <p>
-          The single check split into three by what is at stake. Before a push: lint, types
-          and the documents, run by CI on every push, because a push changes not the bot but the
-          website (the project's page on GitHub Pages) and the documents. At the end of a
-          phase: the four machine gates as one command, locally. Before a tag: the full
-          battery, coverage, every mutant, every scenario.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f58e793" rel="noopener">f58e793</a>
-        </p>
-        <p>
-          The battery sits in a git hook on the developer's machine and runs before the tag
-          leaves for GitHub. The order is forced: the server pulls a tag the moment it
-          appears and waits for nobody. A red CI after that stops nothing; it can only report
-          that a broken bot is already on the server.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3b22b7c" rel="noopener">3b22b7c</a>
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">Three checks, by what is at stake</span><span class="era-detail-n">3 checks</span></summary>
+          <p>
+            The server pulls the newest tag every five minutes; nothing pushes to it.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cfd02a1" rel="noopener">cfd02a1</a>
+            The single check split into three by what is at stake. Before a push: lint, types
+            and the documents, run by CI on every push, because a push changes not the bot but the
+            website (the project's page on GitHub Pages) and the documents. At the end of a
+            phase: the four machine gates as one command, locally. Before a tag: the full
+            battery, coverage, every mutant, every scenario.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f58e793" rel="noopener">f58e793</a>
+          </p>
+          <p>
+            The battery sits in a git hook on the developer's machine and runs before the tag
+            leaves for GitHub. A red CI after that stops nothing; it can only report
+            that a broken bot is already on the server.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3b22b7c" rel="noopener">3b22b7c</a>
+          </p>
+        </details>
 
-        <h3>The flow gets drawn, and the drawing gets hooks</h3>
-        <p>
-          The whole development loop was drawn as a sequence diagram and given its own file,
-          DEVELOPMENT-FLOW.md.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/edc1148" rel="noopener">edc1148</a>
-          Today the drawing has eight stages: framing the task and the mockup, code and tests,
-          the machine gates, a review by an agent that did not write the diff, reading the
-          sentences and syncing the pictures, the retrospective, the release, and the checkup.
-        </p>
-        <p>
-          It is the owner's drawing, and two things follow. It may not be changed quietly: the
-          owner would meet the change as a diff months later, with the reasoning gone. And
-          permission may not be asked for either: that stalls a finished phase on a decision
-          already delegated. So the rule is to do it and say so: move the step, then report
-          it in the closing message, with counts rather than an impression.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5eb6933" rel="noopener">5eb6933</a>
-          Three things watch the drawing. A hook states that
-          obligation the moment the file is edited. A check on the commit message refuses a
-          commit that moves a step without saying what moved and why. And docs:check fails if
-          the drawing names a skill or script that does not exist.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/912be9b" rel="noopener">912be9b</a>
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The flow gets drawn, and the drawing gets hooks</span><span class="era-detail-n">8 stages</span></summary>
+          <p>
+            The whole development loop was drawn as a sequence diagram and given its own file,
+            DEVELOPMENT-FLOW.md.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/edc1148" rel="noopener">edc1148</a>
+            Today the drawing has eight stages: framing the task and the mockup, code and tests,
+            the machine gates, a review by an agent that did not write the diff, reading the
+            sentences and syncing the pictures, the retrospective, the release, and the checkup.
+          </p>
+          <p>
+            It is the owner's drawing, and two things follow. It may not be changed quietly: the
+            owner would meet the change as a diff months later, with the reasoning gone. And
+            permission may not be asked for either: that stalls a finished phase on a decision
+            already delegated. So the rule is to do it and say so: move the step, then report
+            it in the closing message, with counts rather than an impression.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5eb6933" rel="noopener">5eb6933</a>
+            Three things watch the drawing. A hook states that
+            obligation the moment the file is edited. A check on the commit message refuses a
+            commit that moves a step without saying what moved and why. And docs:check fails if
+            the drawing names a skill or script that does not exist.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/912be9b" rel="noopener">912be9b</a>
+          </p>
+        </details>
 
-        <h3>Nothing audits the auditors</h3>
-        <p>
-          The <code>deep-checkup</code> agent was written to run weekly, "believe nothing on
-          say-so," fix nothing, and return a detailed report in which every verdict cites a
-          command and its output.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4e56b66" rel="noopener">4e56b66</a>
-          Its first run took 33 minutes and produced thirteen findings. The highest: no backup
-          existed and no restore had been rehearsed. A verified daily backup followed, and the
-          other twelve findings closed in one commit.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0ba2815" rel="noopener">0ba2815</a>
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">Nothing audits the auditors</span><span class="era-detail-n">13 findings</span></summary>
+          <p>
+            The <code>deep-checkup</code> agent was written to run weekly, "believe nothing on
+            say-so," fix nothing, and return a detailed report in which every verdict cites a
+            command and its output.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4e56b66" rel="noopener">4e56b66</a>
+            Its first run took 33 minutes and produced thirteen findings. The highest: no backup
+            existed and no restore had been rehearsed. A verified daily backup followed, and the
+            other twelve findings closed in one commit.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0ba2815" rel="noopener">0ba2815</a>
+          </p>
+        </details>
 
-        <h3>The retrospective that was skipped</h3>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The retrospective that was skipped</span><span class="era-detail-n">27 rows</span></summary>
+          <p>
+            There were seven gates
+            by then, and the retrospective stood seventh. The first explanation blamed the
+            release feeling like the end. The next commit corrected it at the owner's word: the
+            phase had worked from the checkup's findings register, 27 rows, and not one row was
+            a gate; when the register emptied, the empty list read as a finished phase.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6799bd8" rel="noopener">6799bd8</a>
+            The fix was not another rule but a change in what makes a skill open. Every skill
+            description was checked and a third of them rewritten to name the task the skill is
+            needed on: "a phase being wrapped up", "interfaces still being frozen". Not a
+            retelling of what the skill is about but a condition, because "a skill description
+            is not documentation about the skill — it is the trigger that decides whether the
+            skill is opened at all."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fdab9be" rel="noopener">fdab9be</a>
+            And docs:check began failing when a skill or agent is named nowhere in CLAUDE.md.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f6f617b" rel="noopener">f6f617b</a>
+            Era 3 had met the same lesson on the scenarios; here it cost a skipped gate.
+          </p>
+        </details>
+
         <p>
-          One phase "ran six gates and released without the seventh"; there were seven gates
-          by then, and the retrospective stood seventh. The first explanation blamed the
-          release feeling like the end. The next commit corrected it at the owner's word: the
-          phase had worked from the checkup's findings register, 27 rows, and not one row was
-          a gate; when the register emptied, the empty list read as a finished phase, and the
-          skill holding the gates was never opened.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6799bd8" rel="noopener">6799bd8</a>
-          The fix was not another rule but a change in what makes a skill open. Every skill
-          description was checked and a third of them rewritten to name the task the skill is
-          needed on: "a phase being wrapped up", "interfaces still being frozen". Not a
-          retelling of what the skill is about but a condition, because "a skill description
-          is not documentation about the skill — it is the trigger that decides whether the
-          skill is opened at all."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fdab9be" rel="noopener">fdab9be</a>
-          And docs:check began failing when a skill or agent is named nowhere in CLAUDE.md.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f6f617b" rel="noopener">f6f617b</a>
-          Era 3 had met the same lesson on the scenarios; here it cost a skipped gate. In the
-          next era the harness gains readers who are told nothing on purpose, and every agent
-          a contract for what it must be told and what it must return.
+          In the next era the harness gains readers who are told nothing on purpose, and every
+          agent a contract for what it must be told and what it must return.
         </p>
       </div>
 
@@ -839,67 +880,60 @@ so a comment is refused at the edit, not at the end of the turn.</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 5 of 6</span><span>19–25 August</span><span>commits 185–244</span>
+        <span class="text-ink">Era 5 of 7</span><span>19–25 August</span><span>commits 185–244</span>
       </div>
 
       <h2 id="era-5-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Cold readers and the budget squeeze</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
         <p>
-          The product got its third poster, after the evening's chronology and its awards: one
-          player's whole career.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2b1353b" rel="noopener">2b1353b</a>
-          The harness got five agents, most of them readers who are told nothing on purpose.
-          And then a set of limits on how much harness there may be.
+          A released poster told the players "one dot per evening — 3 more evenings", and never
+          said what would arrive. The owner read it cold and asked what it meant; that question
+          is the origin of every cold reader in the project: agents briefed with the pictures
+          and nothing else, whose first run reported seventeen findings on a gallery of twenty-nine
+          drawings. Then the harness was pointed at itself: a checkup broke every document rule
+          on purpose and three stayed green, Stryker found the checks caught 47.17% of their
+          own mutants. Then at its own size: every skill got a line budget, a tag became
+          conditional, and the era ends with eight consecutive commits marked "Tag: none".
         </p>
 
-        <h3>The author cannot read their own drawing</h3>
-        <p>
-          A released poster carried a hint line beside a chart heading: "one dot per evening —
-          3 more evenings". The chart was not on the poster yet: it appears once enough evenings have
-          accumulated, and until then a hint stands in its place. This one described the
-          coming chart, one dot per evening, three evenings short of appearing; what would
-          arrive, it never said. The owner read it cold and
-          asked what it meant. That is the
-          origin of the cold readers. <code>poster-reader</code> is briefed with pictures and
-          the list of lines on them, and nothing else. It reads them "cold, with no idea what
-          any of it is for."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da50714" rel="noopener">da50714</a>
-          The gallery gate became, at the time, "the one gate you may not perform yourself." The gallery had
-          grown to nearly thirty drawings by then, and the first run with this reader reported seventeen
-          findings.
-        </p>
-        <p>
-          The same failure existed in words. First, reading one real evening before shipping
-          became a gate, owed whenever a phase changes what a poster says. Until then no gate
-          in the project had asked what the evening's chronology actually says.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/93c1456" rel="noopener">93c1456</a>
-        </p>
-        <p>
-          Then two real evenings were taken, and what the bot told the players about them was
-          read: ten minutes found eight defects. So <code>copy-reader</code> was born: it
-          reads every line the bot can say, in both languages, with real values filled in,
-          and asks whether a person would say it. That reading became one more gate, and with
-          the two inserted gates there were nine.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d45f2f0" rel="noopener">d45f2f0</a>
-          Its first readings found some sixty things, most of which were acted on. It was
-          then moved earlier: to the moment a table of lines is written, before anything is
-          built on it.
-        </p>
-        <p>
-          The <code>plan-reviewer</code> agent works at the very start of a phase, when the
-          plan exists and the code does not. It gets the owner's words and the
-          agreed function signatures, nothing more, and comes with "You may come back with nothing": the reviewer owes no finding, only
-          an account of what it checked. Calibrated on a plan with three planted faults, it found all three and a
-          fourth.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e64c8cd" rel="noopener">e64c8cd</a>
-        </p>
-        <p>
-          <code>poster-designer</code> is the only one of the new agents that draws rather
-          than reads. It returns two things: a contact sheet, one image with every edge case
-          beside the neighbouring poster, and an inventory of everything written on it in a
-          player's words.
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The author cannot read their own drawing</span><span class="era-detail-n">9 gates</span></summary>
+          <p>
+            The chart was not on the poster yet: it appears once enough evenings have
+            accumulated, and until then a hint stands in its place.
+            <code>poster-reader</code> is briefed with pictures and
+            the list of lines on them, and nothing else. It reads them "cold, with no idea what
+            any of it is for."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da50714" rel="noopener">da50714</a>
+            The gallery gate became, at the time, "the one gate you may not perform yourself."
+          </p>
+          <p>
+            The same failure existed in words. First, reading one real evening before shipping
+            became a gate, owed whenever a phase changes what a poster says. Until then no gate
+            in the project had asked what the evening's chronology actually says.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/93c1456" rel="noopener">93c1456</a>
+          </p>
+          <p>
+            Then two real evenings were taken, and what the bot told the players about them was
+            read: ten minutes found eight defects. So <code>copy-reader</code> was born: it
+            reads every line the bot can say, in both languages, with real values filled in,
+            and asks whether a person would say it. That reading became one more gate, and with
+            the two inserted gates there were nine.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d45f2f0" rel="noopener">d45f2f0</a>
+            Its first readings found some sixty things, most of which were acted on. It was
+            then moved earlier: to the moment a table of lines is written, before anything is
+            built on it.
+          </p>
+          <p>
+            The <code>plan-reviewer</code> agent works at the very start of a phase, when the
+            plan exists and the code does not. It gets the owner's words and the
+            agreed function signatures, nothing more, and comes with "You may come back with nothing": the reviewer owes no finding, only
+            an account of what it checked. Calibrated on a plan with three planted faults, it found all three and a
+            fourth.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e64c8cd" rel="noopener">e64c8cd</a>
+          </p>
+        </details>
       </div>
 
       <blockquote class="said reveal mt-10 max-w-[60ch]">
@@ -908,77 +942,85 @@ so a comment is refused at the edit, not at the end of the turn.</div>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
-        <h3>A gate that silently does not apply</h3>
-        <p>
-          The career poster shipped in two releases with no gallery case, because no rule said
-          a new poster owed one: "A gate that does not apply is indistinguishable from a gate
-          with nothing to report."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da16c8d" rel="noopener">da16c8d</a>
-        </p>
-        <p>
-          Next the checkers themselves were checked. A checkup broke every docs:check rule on
-          purpose, and three stayed green.
-        </p>
-        <p>
-          Then the tooling itself was run through Stryker: the tests caught only 47.17% of
-          the mutants in the document checks. The checks were rewritten as pure functions
-          with specs and given their own Stryker run with an 80% bar; the tiles call that a
-          second Stryker family. Separate, because an average over the whole tree would have hidden the
-          failure: by the commit's own arithmetic, the tooling's mutants averaged with the
-          bot's would have read as 93%.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/471cac4" rel="noopener">471cac4</a>
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">A gate that silently does not apply</span><span class="era-detail-n">80% bar</span></summary>
+          <p>
+            The product got its third poster, after the evening's chronology and its awards: one
+            player's whole career.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2b1353b" rel="noopener">2b1353b</a>
+            It shipped in two releases with no gallery case, because no rule said
+            a new poster owed one: "A gate that does not apply is indistinguishable from a gate
+            with nothing to report."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da16c8d" rel="noopener">da16c8d</a>
+          </p>
+          <p>
+            Next the checkers themselves were checked: a checkup broke every document rule on
+            purpose, nine went red and three stayed green.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3d92c6b" rel="noopener">3d92c6b</a>
+            Then the tooling was run through Stryker, and the tests caught only 47.17% of the
+            mutants in the document checks. The checks were rewritten as pure functions
+            with specs and given their own Stryker run with an 80% bar, a second Stryker
+            family. Separate, because an average over the whole tree would have hidden the
+            failure: by the commit's own arithmetic, the tooling's mutants averaged with the
+            bot's would have read as 93%.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/471cac4" rel="noopener">471cac4</a>
+          </p>
+        </details>
 
-        <h3>Budgets everywhere</h3>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">Budgets everywhere</span><span class="era-detail-n">16% of changed lines</span></summary>
+          <p>
+            CLAUDE.md had had a line budget since era 2. Now every skill got one, and so did
+            TECH-DEBT.md. The <code>finish-phase</code> skill had grown to 722 lines. It was cut
+            to 459 with five pages moved into files beside it, and the budgets were lowered in
+            the same commit "so the split cannot be a
+            way to turn the counter off."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ab68474" rel="noopener">ab68474</a>
+          </p>
+          <p>
+            An outside review of the process, run by a fresh model with no memory of the work,
+            measured how much effort was going into the harness itself: 16% of five days'
+            changed lines had gone into the process rather than the product. Separately it
+            counted releases: eight in four days, almost one every half day, each one restarting
+            the bot and paying for a full mutation run and a full run of e2e again.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fff3c5f" rel="noopener">fff3c5f</a>
+            In response, three things became conditional. A tag only when a player or the operator gets
+            something new. Delegated writing only above ten files. A retrospective only when
+            there is something to count.
+          </p>
+          <p>
+            The last commit of the era tested the claim that a skill should state outcomes rather
+            than steps. The claim did not hold. One skill was rewritten from scratch, to almost half its length, and lost six
+            concrete instructions on what to do. They went the same
+            way each time: the account of the breakage that had produced an instruction
+            survived, the instruction itself did not, because an instruction reads like a
+            step-by-step recipe, which is what the brief said to remove. The commit puts it
+            this way: "the war stories survived as symptoms while the fixes they bought were
+            compressed away." With that in the brief, another skill was cut without losing a single instruction. A
+            <code>skill-auditor</code> agent now inventories a skill rule by rule before anyone
+            shortens it.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/784b26c" rel="noopener">784b26c</a>
+          </p>
+          <p>
+            Every agent also got a contract: what its brief must carry and what it returns, and the
+            reply has to open with a verdict line: two numbers, how much was covered and how
+            much was found, with the findings themselves after it. The verdict does not replace the findings: it is their summary, and it shows
+            whether the whole scope was covered. The reason: the report of an agent
+            that checked less than it was asked to is indistinguishable from a full one, and
+            nobody further down the chain checks it again.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ba4603f" rel="noopener">ba4603f</a>
+          </p>
+          <p>
+            Then came a hook on the end of a turn. One phase had stopped on a
+            message that listed what was left, ended with "Continuing", and then did nothing.
+            No gate could have noticed: every gate judges a diff, and there was no diff. The
+            hook now reads the last sentence of a reply and refuses a turn that ends by
+            announcing work instead of doing it.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2239ef0" rel="noopener">2239ef0</a>
+          </p>
+        </details>
+
         <p>
-          CLAUDE.md had had a line budget since era 2. Now every skill got one, and so did
-          TECH-DEBT.md. The <code>finish-phase</code> skill had grown to 722 lines. It was cut
-          to 459 with five pages moved into files beside it, and the budgets were lowered in
-          the same commit "so the split cannot be a
-          way to turn the counter off."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ab68474" rel="noopener">ab68474</a>
-        </p>
-        <p>
-          An outside review of the process, run by a fresh model with no memory of the work,
-          measured how much effort was going into the harness itself: 16% of five days'
-          changed lines had gone into the process rather than the product. Separately it
-          counted releases: eight in four days, almost one every half day, each one restarting
-          the bot and paying for a full mutation run and a full run of the rig again.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fff3c5f" rel="noopener">fff3c5f</a>
-          In response, three things became conditional. A tag only when a player or the operator gets
-          something new. Delegated writing only above ten files. A retrospective only when
-          there is something to count. The tag rule shows in the history itself: the era ends
-          with eight consecutive commits marked "Tag: none", no tag, in their messages.
-        </p>
-        <p>
-          The last commit of the era tested the claim that a skill should state outcomes rather
-          than steps. The claim did not hold. One skill was rewritten from scratch, to almost half its length, and lost six
-          concrete instructions on what to do. They went the same
-          way each time: the account of the breakage that had produced an instruction
-          survived, the instruction itself did not, because an instruction reads like a
-          step-by-step recipe, which is what the brief said to remove. The commit puts it
-          this way: "the war stories survived as symptoms while the fixes they bought were
-          compressed away." With that in the brief, another skill was cut without losing a single instruction. A
-          <code>skill-auditor</code> agent now inventories a skill rule by rule before anyone
-          shortens it.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/784b26c" rel="noopener">784b26c</a>
-        </p>
-        <p>
-          Every agent also got a contract: what its brief must carry and what it returns, and the
-          reply has to open with a verdict line: two numbers, how much was covered and how
-          much was found, with the findings themselves after it. The verdict does not replace the findings: it is their summary, and it shows
-          whether the whole scope was covered. The reason: the report of an agent
-          that checked less than it was asked to is indistinguishable from a full one, and
-          nobody further down the chain checks it again.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ba4603f" rel="noopener">ba4603f</a>
-        </p>
-        <p>
-          Seventeen minutes after the contracts commit came a hook on the end of a turn. One phase had stopped on a
-          message that listed what was left, ended with "Continuing", and then did nothing.
-          No gate could have noticed: every gate judges a diff, and there was no diff. The
-          hook now reads the last sentence of a reply and refuses a turn that ends by
-          announcing work instead of doing it.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2239ef0" rel="noopener">2239ef0</a>
           What remained was to teach the harness to remember what it had done. That is the
           last era's work.
         </p>
@@ -1010,57 +1052,61 @@ so a comment is refused at the edit, not at the end of the turn.</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 6 of 6</span><span>26 August – 2 September</span><span>commits 245–274</span>
+        <span class="text-ink">Era 6 of 7</span><span>26 August – 2 September</span><span>commits 245–274</span>
       </div>
 
       <h2 id="era-6-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The harness keeps records of itself</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
         <p>
-          The last era added almost no new parts. Instead the harness turned on itself: where
-          the lint was blind, how a skill learns that its turn has come, and how to keep a
-          record of a finished phase after the chat is gone. And along the way, the numbers
-          the harness quoted about itself turned out not to match git.
+          This era added almost no new parts. It deleted one: the routing table at the top of
+          CLAUDE.md, which had been telling the model which skill to read since era 2 — and was
+          a second copy of a fact that had quietly drifted from the first. When the check that
+          replaced it was wired in, it fired on every skill in the repository: not one
+          description said when it was due. The same round of audits found the lint blind in
+          three places at once, including a hundred spec files that loaded their subject with
+          <code>await import(...)</code>, which no import ban had ever looked at. And the
+          number of awards the bot can hand out was "thirty-six" in six places, and it was
+          forty-five.
         </p>
 
-        <h3>Blind spots in the lint</h3>
-        <p>
-          A round of skill audits found where the lint was blind. ESLint had never been run on
-          the scenario folder. And the import zones read only static <code>import</code>
-          statements, while over a hundred spec files loaded the code under test with
-          <code>await import(...)</code>. Every ban is now written twice, for static and for
-          dynamic imports.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fee84a4" rel="noopener">fee84a4</a>
-          Two more rules moved from prose into lint. One is as old as the first commit: only
-          one file may open the database.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/76a0ee0" rel="noopener">76a0ee0</a>
-          The other: every screen's Cancel and Confirm row is assembled in one place.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6232fe5" rel="noopener">6232fe5</a>
-          And the hand-written list of features in the lint config was replaced by reading the
-          folder, because "a folder left off it got no fence at all, silently."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a>
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">Blind spots in the lint</span><span class="era-detail-n">2 more lint rules</span></summary>
+          <p>
+            ESLint had never been run on
+            the scenario folder. And the import zones read only static <code>import</code>
+            statements. Every ban is now written twice, for static and for
+            dynamic imports.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fee84a4" rel="noopener">fee84a4</a>
+            Two more rules moved from prose into lint. One is as old as the first commit: only
+            one file may open the database.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/76a0ee0" rel="noopener">76a0ee0</a>
+            The other: every screen's Cancel and Confirm row is assembled in one place.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6232fe5" rel="noopener">6232fe5</a>
+            And the hand-written list of features in the lint config was replaced by reading the
+            folder, because "a folder left off it got no fence at all, silently."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a>
+          </p>
+        </details>
 
-        <h3>Where a skill says when it is due</h3>
-        <p>
-          CLAUDE.md had opened with a routing table since era 2: what you are doing, and which
-          skill to read for it. The skill's own description played the same role, and nobody
-          checked either: era 4 had taught the descriptions to name the task, but not one
-          named the stage of the flow, and the table and the descriptions had drifted apart.
-          The table was deleted as a second copy of a fact already held in the descriptions. Each skill's
-          description now names its stage itself, and docs:check keeps the description, the
-          skill's title and the flow drawing in agreement with one another. When the gate was wired in it fired on every skill: not one description in
-          the repository said when it was due. Since then the drawing keeps count of the
-          skills: it draws every skill and every agent at its stage, and docs:check checks it
-          in both directions.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a>
-          The description of <code>finish-phase</code> flipped from "Load it when ANY list of
-          changes to this repository is accepted" to "Do NOT load it at stage 1," after the
-          checkup found that wording firing two stages early.
-        </p>
-      </div>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">Where a skill says when it is due</span></summary>
+          <p>
+            The skill's own description played the same role as the table, and nobody
+            checked either: era 4 had taught the descriptions to name the task, but not one
+            named the stage of the flow, and the table and the descriptions had drifted apart.
+            Each skill's
+            description now names its stage itself, and docs:check keeps the description, the
+            skill's title and the flow drawing in agreement with one another. Since then the drawing keeps count of the
+            skills: it draws every skill and every agent at its stage, and docs:check checks it
+            in both directions.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a>
+            The description of <code>finish-phase</code> flipped from "Load it when ANY list of
+            changes to this repository is accepted" to "Do NOT load it at stage 1," after the
+            checkup found that wording firing two stages early.
+          </p>
 
-      <div class="reveal mt-10 max-w-[68ch]">
+          <div class="reveal mt-10 max-w-[68ch]">
                 <p class="eyebrow">Then and now · how a skill says when it is due</p>
         <p class="mt-2 text-[15px] leading-relaxed text-muted">Two artifacts from the repository: the CLAUDE.md table, where the reader finds the right row alone, and the skill description that names its own stage.</p>
         <div class="then-now mt-3" data-then-now>
@@ -1084,68 +1130,71 @@ skill …"</div>
           <p class="then-now-note">The routing table CLAUDE.md opened with from
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>, and the skill's own header after
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a> deleted the table.</p>
-        </div>
+          </div>
+          </div>
+        </details>
       </div>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
-        <h3>The flow, corrected five times in a day</h3>
-        <p>
-          The flow drawing was read as prose, step by step, and several steps turned out not
-          to sit where they happen. Two steps every phase needs, studying the project and
-          reading the debt list, sat in the branch only a bug fix enters. Another example is a
-          question that can be settled by opening files in the repository; such a question
-          goes to a separate agent. The drawing had that step at stage 4, beside the review.
-          In fact it happens at stage 1, before the owner is asked anything: the repository is
-          asked before the owner.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/8a1bfc2" rel="noopener">8a1bfc2</a>
-          On 26 August five commits in a row corrected where steps sit on the drawing (two more
-          that day drew in the steps about the phase log), and two of the five admitted that "nothing mechanical checks that a step sits where it
-          actually happens."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/650cdec" rel="noopener">650cdec</a>
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3beac4c" rel="noopener">3beac4c</a>
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The flow, corrected five times in a day</span><span class="era-detail-n">5 commits</span></summary>
+          <p>
+            The flow drawing was read as prose, step by step, and several steps turned out not
+            to sit where they happen. Two steps every phase needs, studying the project and
+            reading the debt list, sat in the branch only a bug fix enters. Another example is a
+            question that can be settled by opening files in the repository; such a question
+            goes to a separate agent. The drawing had that step at stage 4, beside the review.
+            In fact it happens at stage 1, before the owner is asked anything: the repository is
+            asked before the owner.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/8a1bfc2" rel="noopener">8a1bfc2</a>
+            On 26 August five commits in a row corrected where steps sit on the drawing (two more
+            that day drew in the steps about the phase log), and two of the five admitted that "nothing mechanical checks that a step sits where it
+            actually happens."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/650cdec" rel="noopener">650cdec</a>
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3beac4c" rel="noopener">3beac4c</a>
+          </p>
+        </details>
 
-        <h3>The logbook</h3>
-        <p>
-          The answer to that was a record. The logbook folder holds one log per phase, written
-          at the retrospective: what was asked, what kind of work it was, what ran, what was
-          delegated, what was rebuilt, and which gate found each defect.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/db81a3a" rel="noopener">db81a3a</a>
-          Two fields of a log, the path taken and the stages skipped, name the stages in the
-          drawing's own words, and between them they must list every stage without exception.
-          So a phase
-          that quietly went round a stage reads differently from one that did not mention it.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f4b09e7" rel="noopener">f4b09e7</a>
-        </p>
-        <p>
-          The one rule that matters: "A number you did not measure is written
-          <code>not measured</code>, never estimated." The first log written under it showed
-          why. It had two counts wrong: both figures could have been checked with one
-          <code>git log</code> command, and both erred in the flattering direction, the one
-          that made the day read better.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/db81a3a" rel="noopener">db81a3a</a>
-        </p>
-        <p>
-          The folder beside it keeps every checkup report, and none is ever pruned.
-          Each carries a measurements table, so the next visit can ask whether a number moved. The first report in it is from a new run at the end of August, not the one era 4
-          describes: 6823 mutants, 121 survived; 178 e2e cases in 109 seconds on a cold clone, a
-          freshly downloaded copy of the repository with no caches; 1.7 GB of leftover
-          reports.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/b8cb5ea" rel="noopener">b8cb5ea</a>
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The logbook</span><span class="era-detail-n">2 fields</span></summary>
+          <p>
+            The answer to that was a record. The logbook folder holds one log per phase, written
+            at the retrospective: what was asked, what kind of work it was, what ran, what was
+            delegated, what was rebuilt, and which gate found each defect.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/db81a3a" rel="noopener">db81a3a</a>
+            Two fields of a log, the path taken and the stages skipped, name the stages in the
+            drawing's own words, and between them they must list every stage without exception.
+            So a phase
+            that quietly went round a stage reads differently from one that did not mention it.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f4b09e7" rel="noopener">f4b09e7</a>
+          </p>
+          <p>
+            The one rule that matters: "A number you did not measure is written
+            <code>not measured</code>, never estimated." The first log written under it showed
+            why. It had two counts wrong: both figures could have been checked with one
+            <code>git log</code> command, and both erred in the flattering direction, the one
+            that made the day read better.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/db81a3a" rel="noopener">db81a3a</a>
+          </p>
+          <p>
+            The folder beside it keeps every checkup report, and none is ever pruned.
+            Each carries a measurements table, so the next visit can ask whether a number moved. The first report in it is from a new run at the end of August, not the one era 4
+            describes.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/b8cb5ea" rel="noopener">b8cb5ea</a>
+          </p>
+        </details>
 
-        <h3>Counts rot</h3>
-        <p>
-          The most repeated lesson of the last era is small. "129 spec files with dynamic imports" was 102, because a grep counted too much. A line-count column in TECH-DEBT.md was dropped because half
-          of it was stale and no gate could have said so. The number of awards the bot can
-          hand out for an evening was "thirty-six" in six places, and it was forty-five. Then
-          the number was removed
-          entirely, with a gate for it considered and rejected: "a check defends a fact
-          something depends on, and nothing depends on this one."
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/25108af" rel="noopener">25108af</a>
-          The patterns collected below were made not from these small lessons but from the
-          failures of all six eras. The last era only taught the harness not to forget them.
-        </p>
+        <details class="era-detail">
+          <summary><span class="era-detail-h">Counts rot</span></summary>
+          <p>
+            The most repeated lesson of the era is small. A
+            count of spec files and a column of line counts had rotted the same way as the
+            award count. Then the number was removed
+            entirely, with a gate for it considered and rejected: "a check defends a fact
+            something depends on, and nothing depends on this one."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/25108af" rel="noopener">25108af</a>
+          </p>
+        </details>
       </div>
 
       <blockquote class="said reveal mt-10 max-w-[60ch]">
@@ -1174,45 +1223,281 @@ skill …"</div>
     </div>
   </article>
 
-  <section id="patterns" aria-labelledby="patterns-heading" class="border-t border-line bg-panel">
+  <!-- ERA 7 -->
+  <article id="era-7" aria-labelledby="era-7-heading" class="border-t border-line bg-panel">
+    <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+      <div class="era-band">
+        <span class="era-dot" style="background: var(--era)"></span>
+        <span class="text-ink">Era 7 of 7</span><span>3–11 September</span><span>commits 275–314</span>
+      </div>
+
+      <h2 id="era-7-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The agent becomes the user, and the harness gets a ruler</h2>
+
+      <div class="prose reveal mt-6 max-w-[68ch]">
+        <p>
+          The deploy had been failing a third of the time since 31 August, and nothing noticed,
+          because "a fetch that fails looks exactly like a fetch that found nothing new."
+          Finding that took reading the server's journal instead of the README, and it set the
+          tone for an era that stopped believing what the harness said about itself. Then the
+          scripts were rebuilt around a fact true since the first commit and shaping nothing:
+          their only user is an agent. Twenty-three scripts became eight, every gate a row in
+          one table leaving a verdict file behind it. Last came a ruler — a frozen task in a
+          fenced clone, run cold — and its first honest table said something the gates could
+          not: every model passes, and only the process columns tell them apart.
+        </p>
+
+        <details class="era-detail">
+          <summary><span class="era-detail-h">Two repairs for a real evening</span><span class="era-detail-n">11 games</span></summary>
+          <p>
+            Two people at the table are called Roma, the second written Romani so the sheet can
+            tell them apart. One Friday the wrong one was typed, eleven games went to a man who
+            stayed home, and the evening was repaired over ssh with a script. That became
+            <code class="cmd">/replace</code>: the two names typed, the decision read back with the
+            game count, one tap. The plan reviewer found the hole before a line existed: the
+            screen carries an id of a player created when it was sent, so Confirm re-derives
+            everything and answers "screen expired" rather than crashing.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/9b28574" rel="noopener">9b28574</a>
+          </p>
+          <p>
+            The harness lesson sat underneath. A feature may not import another, so the
+            name parser and the seat rotation moved to <code class="cmd">shared/</code> before
+            <code class="cmd">/replace</code> could exist. And a second feature that listens for
+            typed text exposed a fault the single-feature case had hidden: the first listener
+            had been swallowing every text message meant for the ones after it.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/7d2ad6d" rel="noopener">7d2ad6d</a>
+          </p>
+        </details>
+
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The checkup reads the journal</span><span class="era-detail-n">181 activations</span></summary>
+          <p>
+            The first checkup had called the deploy's anonymous fetch a design. The second found
+            181 activations of the deploy timer since 31 August ending in GitHub refusing an
+            unauthenticated download.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6207423" rel="noopener">6207423</a>
+            The fetch got a key. The phase that took the rest of the report counted the process: three of twelve phases had
+            written no phase log while their commit claimed a retrospective, and six of ten had
+            broken a shell command on a backslash that two memories already forbade. Both became
+            hooks, one on the commit message and one on the shell command before the shell sees it.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/02277c0" rel="noopener">02277c0</a>
+          </p>
+          <p>
+            One gate moved for the price on its ticket: the retrospective had run in a fork of
+            the conversation, which re-sends the whole transcript on every call. It runs in the
+            conversation now.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f1f874e" rel="noopener">f1f874e</a>
+          </p>
+        </details>
+
+        <details class="era-detail">
+          <summary><span class="era-detail-h">Twenty-three scripts become eight</span><span class="era-detail-n">1,463 test runs</span></summary>
+          <p>
+            A gate's verdict sat in
+            the middle of a stream the agent sees only the tail of, so every run that week went
+            through "save the log, grep the log". And the release battery ran
+            twenty-nine minutes inside a git push, where the agent lost sight of it and edited the
+            tree under it. Now one runner runs any gate, streams its output to a log, leaves a
+            verdict file with its exit code, its duration and the numbers read from the tool's
+            own JSON, and rebuilds the Gates paragraph after every gate, "so a commit pastes it rather
+            than retypes it."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e026d5e" rel="noopener">e026d5e</a>
+          </p>
+          <p>
+            The owner then asked for the same for every other script, and for everything the
+            agent never runs to go. A count over a month of transcripts said where the cost
+            actually was, and it was not in the scripts: 14,301 tool calls, of which 1,463 were
+            hand-typed test runs on one spec, every one read
+            through a grep on a stream. Every script left in
+            package.json had been run that month, so nothing more was deleted, "and the log says
+            so rather than deleting for effect."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a>
+          </p>
+          <p>
+            The document check learned the runner's
+            own table and refused a bare <code class="cmd">npx eslint</code> or
+            <code class="cmd">npm test</code>, because with the configs moved those misbehave; its
+            first run found 63 stale names. While that rule was being written for the documents,
+            the agent typed the same commands by hand twelve times, so a hook refuses them in the
+            agent's shell too. Every moved gate and every new rule was proven by a deliberate break
+            before the next was touched, fourteen in all, and four of them hit nothing the rule
+            watched.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a>
+          </p>
+
+      <div class="reveal mt-10 max-w-[68ch]">
+        <p class="eyebrow">Then and now · the scripts in package.json</p>
+        <p class="mt-2 text-[15px] leading-relaxed text-muted">The first tab is the scripts block as it stood at the start of 9 September. The second is the same block four commits later, after the gates moved into a table of their own.</p>
+        <div class="then-now mt-3" data-then-now>
+          <div class="then-now-tabs">
+            <button type="button" class="then-now-tab" aria-pressed="true">Commit 290 · 9 September</button>
+            <button type="button" class="then-now-tab" aria-pressed="false">Commit 294 · 9 September</button>
+          </div>
+          <div class="then-now-body">prepare  start  start:prod
+check  check:push  check:phase  check:release
+lint  lint:fix  typecheck  docs:check
+test  test:unit  test:integration  test:watch
+test:coverage  test:mutation  test:mutation:changed
+e2e  e2e:changed  e2e:watch  e2e:test  e2e:typecheck</div>
+          <div class="then-now-body" hidden>prepare  start  start:prod
+check:quick  check:push  check:phase  check:release
+e2e:watch
+
+Every gate is a row in scripts/gates/gate-list.ts,
+run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
+          <p class="then-now-note">The scripts of <code class="cmd">package.json</code> at
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/93a27ef" rel="noopener">93a27ef</a>, and at
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a>.</p>
+        </div>
+      </div>
+        </details>
+
+        <details class="era-detail">
+          <summary><span class="era-detail-h">A ruler for the harness</span><span class="era-detail-n">4 models</span></summary>
+          <p>
+            "The harness changed every week and nothing said whether it got better; models
+            changed underneath it too, and the only comparison anybody could make was an
+            impression of one session against a memory of another." On 10 September the
+            repository got a benchmark: a frozen task with the owner's brief, a hidden spec and
+            a list of obligations, and a runner that cuts a clone of HEAD without history, hands
+            the brief to a headless agent, scores what comes back with the clone's own gate
+            runner and writes one row per run. Nothing is a single score on purpose: acceptance
+            is the headline, and gates, obligations, turns, minutes and dollars say how it was
+            reached. The task's award is never merged, because the day it lands the task
+            measures memory.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d011e68" rel="noopener">d011e68</a>
+          </p>
+          <p>
+            In the next phase the owner asked what stopped a model from noticing it was being
+            measured and reading its way to the answer, "and the honest reply was nothing much."
+            The calibration was cancelled on the spot. The clone moved under the system temp
+            folder with the runner's source stripped out, a hook written into the clone refuses
+            every step whose path leaves it, and the count of refusals is a column of the table.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5f5a120" rel="noopener">5f5a120</a>
+            The first calibration then showed what a new instrument shows: seven fence hits and
+            not one of them a step out of the clone, and a minutes
+            column that said eleven for a run the file times put at forty-six.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cf15a80" rel="noopener">cf15a80</a>
+            Both columns were fixed the same night.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3328b6e" rel="noopener">3328b6e</a>
+          </p>
+          <p>
+            The table was rewritten once more when all four models tried failed the same two
+            obligations, the only two whose pattern spans a line break: the clone is checked out
+            on Windows with a carriage return before every newline. With the matcher fixed, the
+            rows said what the owner had asked to know. "Acceptance and the gates saturate for
+            every model tried, so they say only whether the award was written correctly." The
+            process columns separate the models in the order one would expect: Haiku at medium
+            effort met eight of eleven obligations, named no debt, and cost a dollar and six
+            minutes; Opus at medium met eleven of eleven, named the debt, and cost twenty-two
+            dollars and thirty-six minutes.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a05104e" rel="noopener">a05104e</a>
+          </p>
+        </details>
+
+        <details class="era-detail">
+          <summary><span class="era-detail-h">The checkup finds what the gates cannot</span><span class="era-detail-n">13 sentences</span></summary>
+          <p>
+            The fourth checkup, on 11 September, ran the full mutation battery and found it red at
+            a pristine HEAD: neither mutation config named a test config, so the dry run collected
+            every spec under the root, and since 10 September that set held the benchmark's hidden
+            spec, which fails on the snapshot by design.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/1f901b6" rel="noopener">1f901b6</a>
+            It found thirteen sentences in the documents that had stopped being true or never were,
+            none of them within reach of the document check, which "cannot read a server or a git
+            history."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/187f621" rel="noopener">187f621</a>
+          </p>
+          <p>
+            Then it read the harness as its only user does. A Stop hook had been running the linter's
+            autofix over the whole tree at the end of every turn, silently, editing files the agent
+            had not asked it to touch and refusing nothing, "so it could not be seen refusing." It is
+            gone. The Gates paragraph a commit pastes now opens with the battery, the HEAD and the
+            time it ran at, and the commit hook refuses a stamp from another HEAD.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3f77a65" rel="noopener">3f77a65</a>
+            The release battery left the push hook; the hook now reads the stamp and refuses a tag
+            whose battery was not green at that commit.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/81b76d1" rel="noopener">81b76d1</a>
+            The award rules were found holding a dozen survivors on exact boundaries, every
+            one a rule a player would notice moving by one game.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cf74fb1" rel="noopener">cf74fb1</a>
+            And thirteen of the sixteen phase logs the checkup folded in had written "not measured"
+            for the wall clock, against a rule that says the number is always there to take. The
+            document check refuses that field now.
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/08aac82" rel="noopener">08aac82</a>
+          </p>
+        </details>
+      </div>
+
+      <blockquote class="said reveal mt-10 max-w-[60ch]">
+        "the agent is the harness's only user, and a person's convenience is second"
+        <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a> · 9 September</cite>
+      </blockquote>
+
+      <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div class="tile"><p class="tile-value">11 + 7</p><p class="tile-label">skills and agents</p></div>
+        <div class="tile"><p class="tile-value">8</p><p class="tile-label">project lint rules</p></div>
+        <div class="tile"><p class="tile-value">23 → 8</p><p class="tile-label">scripts in package.json</p></div>
+        <div class="tile"><p class="tile-value">5,043</p><p class="tile-label">tests</p></div>
+        <div class="tile"><p class="tile-value">205</p><p class="tile-label">e2e cases</p></div>
+        <div class="tile"><p class="tile-value">379</p><p class="tile-label">lines in CLAUDE.md, of 380</p></div>
+      </div>
+    </div>
+  </article>
+
+  <section id="patterns" aria-labelledby="patterns-heading" class="border-t border-line">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p class="eyebrow">Across all six eras</p>
+      <p class="eyebrow">Across all seven eras</p>
       <h2 id="patterns-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">What kept coming back</h2>
       <p class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
-        Six patterns run through the whole history. Each was stated in a commit, not inferred.
+        Seven patterns run through the whole history. Each was stated in a commit, not inferred.
+        These are the same lessons the findings above counted — here as the rule each of them
+        became.
       </p>
 
       <ol class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         <li class="reveal">
           <p class="pattern-n">01</p>
           <h3 class="mt-2 text-[19px] font-bold">Prose becomes a machine</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Every rule starts as a sentence in CLAUDE.md. If a machine can check it, it becomes a lint rule, a hook or a docs:check family, and the sentence is deleted. Seven project lint rules and more than thirty documentation checks are the residue.</p>
+          <p class="mt-2 text-[16px] leading-relaxed text-muted">Every rule starts as a sentence in CLAUDE.md. If a machine can check it, it becomes a lint rule, a hook or a docs:check family, and the sentence is deleted. The trigger is measured, not felt: "A rule in prose had been broken thirteen times in a week, which is the sign it needs a machine."
+            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/08aac82" rel="noopener">08aac82</a></p>
+          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-1" class="hover:text-ink">→ era 1</a></p>
         </li>
         <li class="reveal">
           <p class="pattern-n">02</p>
           <h3 class="mt-2 text-[19px] font-bold">A rule that never fires looks clean</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">A rule found dead four times in one day. A gate that passed only because the author's machine had no CRLF. Three docs:check rules that stayed green under sabotage. The answer is always the same: prove a new rule with a deliberate violation before trusting it, then search the tree by hand for the spellings of the violation its author did not think of.</p>
+          <p class="mt-2 text-[16px] leading-relaxed text-muted">A rule found dead. A gate that passed only because the author's machine had no CRLF. Documentation rules that stayed green under sabotage. The answer is always the same: prove a new rule with a deliberate violation before trusting it, then search the tree by hand for the spellings of the violation its author did not think of.</p>
+          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ era 2</a></p>
         </li>
         <li class="reveal">
           <p class="pattern-n">03</p>
           <h3 class="mt-2 text-[19px] font-bold">Gate the diff, read the report you have</h3>
           <p class="mt-2 text-[16px] leading-relaxed text-muted">Mutation over changed files, e2e over reachable scenarios, one round of survivor-killing, and never re-running a gate to re-read its output.</p>
+          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ era 2</a></p>
         </li>
         <li class="reveal">
           <p class="pattern-n">04</p>
-          <h3 class="mt-2 text-[19px] font-bold">The author is the wrong reader</h3>
+          <h3 class="mt-2 text-[19px] font-bold">Every reader is briefed, and told less than the author knows</h3>
           <p class="mt-2 text-[16px] leading-relaxed text-muted">The review is always an agent that did not write the diff. The pictures are read by an agent that does not know what they are for. The bot's lines are read as sentences with real values in them. The plan is criticised before code exists.</p>
+          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-5" class="hover:text-ink">→ era 5</a></p>
         </li>
         <li class="reveal">
           <p class="pattern-n">05</p>
           <h3 class="mt-2 text-[19px] font-bold">A lesson left in the chat is gone</h3>
           <p class="mt-2 text-[16px] leading-relaxed text-muted">The retrospective is a gate that falls before the release, not after it. Each lesson has to land as a rule, a check or a skill line. And since every file has a line budget, each new rule displaces an older one.</p>
+          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ era 2</a> · <a href="#era-5" class="hover:text-ink">→ era 5</a></p>
         </li>
         <li class="reveal">
           <p class="pattern-n">06</p>
           <h3 class="mt-2 text-[19px] font-bold">Counts in prose rot</h3>
           <p class="mt-2 text-[16px] leading-relaxed text-muted">A number that changes whenever a list changes is removed rather than corrected. The exception is a number something depends on: a check holds that one.</p>
-                </li>
+          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-6" class="hover:text-ink">→ era 6</a></p>
+        </li>
+        <li class="reveal">
+          <p class="pattern-n">07</p>
+          <h3 class="mt-2 text-[19px] font-bold">Shape every output for the one who reads it</h3>
+          <p class="mt-2 text-[16px] leading-relaxed text-muted">The harness has one user, and it is not a person. A verdict is a file it can open, never a stream it sees the tail of; a red gate names its reasons and the one command that re-runs it; nothing waits on a terminal. The rule was stated in the seventh era and applied backwards over everything written before it.</p>
+          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-7" class="hover:text-ink">→ era 7</a></p>
+        </li>
       </ol>
 
       <p class="mt-12 max-w-[68ch] text-[17px] leading-relaxed text-muted">
@@ -1221,15 +1506,15 @@ skill …"</div>
     </div>
   </section>
 
-  <section id="today" aria-labelledby="today-heading">
+  <section id="today" aria-labelledby="today-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p class="eyebrow">At commit 274</p>
+      <p class="eyebrow">At commit 314</p>
       <h2 id="today-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The harness today</h2>
 
       <dl class="mt-12 grid gap-5 sm:grid-cols-2">
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
           <dt class="text-[18px] font-bold">Rules loaded every session</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">CLAUDE.md, 359 lines against a budget of 380.</dd>
+          <dd class="mt-2 text-[15px] leading-relaxed text-muted">CLAUDE.md, 379 lines against a budget of 380.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
           <dt class="text-[18px] font-bold">Skills, 11</dt>
@@ -1241,27 +1526,32 @@ skill …"</div>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
           <dt class="text-[18px] font-bold">Hooks</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Lint on every edit, a reason owed on every flow edit, <code class="cmd">lint:fix</code> at the end of a turn, and a refusal of a turn that ends by announcing work instead of doing it. Git hooks: a commit message check for the flow drawing, and the full release battery before a tag leaves.</dd>
+          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Six. Lint on every edit, a reason owed on every flow edit, a refusal of a turn that ends by announcing work instead of doing it, a refusal of a shell command that carries a backslash where the shell would eat it, a refusal of a gate typed by hand instead of run through the runner, and the fence the benchmark writes into its clone. Git hooks: a commit message check for the flow drawing, the phase log and the Gates stamp, and a push hook that lets a tag leave only on a green stamp from the release battery.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
           <dt class="text-[18px] font-bold">Lint</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Seven project rules and import zones per feature layer, compiled for static and dynamic imports.</dd>
+          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Eight project rules and import zones per feature layer, compiled for static and dynamic imports.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
           <dt class="text-[18px] font-bold">Gates</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Nine, though the numbering in <code class="cmd">finish-phase</code> only reaches seven: two late gates were slotted in between the old ones as 3a, the real evening, and 5b, the bot's sentences. In order: lint and types, coverage, mutation over the diff, a real evening, e2e over the diff, review, the sentences, the pictures, the retrospective. Three composite scripts, one per moment: before a push, at the end of a phase, before a tag. Two Stryker families with two bars.</dd>
+          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Nine in the phase ritual, in order: lint and types, coverage, mutation over the diff, a real evening, e2e over the diff, review, the sentences, the pictures, the retrospective. The machine half is eleven rows in one table, run only through one runner, each leaving a log and a verdict file; four batteries, one per moment.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6 sm:col-span-2">
           <dt class="text-[18px] font-bold">Documents</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">README, PLAN, CLAUDE, TECH-DEBT, DEVELOPMENT-FLOW, three folder READMEs, and a logbook, all held against the code by docs:check.</dd>
+          <dd class="mt-2 text-[15px] leading-relaxed text-muted">README, PLAN, CLAUDE, TECH-DEBT, DEVELOPMENT-FLOW, four folder READMEs, and a logbook of phases and checkups, all held against the code by the document check.</dd>
+        </div>
+        <div class="reveal lift rounded-2xl border border-line bg-card p-6 sm:col-span-2">
+          <dt class="text-[18px] font-bold">Benchmark</dt>
+          <dd class="mt-2 text-[15px] leading-relaxed text-muted">One frozen task, run cold in a fenced clone and scored by the clone's own gates; one row per run, with acceptance, gates, obligations, fence hits, tool calls, minutes and dollars by model. The weekly checkup runs the pinned model, so its row moves only when the harness does. Three rows so far.</dd>
         </div>
       </dl>
 
       <div class="prose reveal mt-14 max-w-[68ch]">
         <h3 id="method">How this page was written</h3>
         <p>
-          Only the git history was read: 274 commit messages and the diffs of the harness files at
-          each of them. No session transcripts. Where a motive is stated in a commit it is quoted;
+          Only the git history was read: 314 commit messages and the diffs of the harness files at
+          each of them. The first 274 were read on 3 September and the forty after them on
+          14 September, the same way. No session transcripts. Where a motive is stated in a commit it is quoted;
           where a pattern is observed across commits, the text says it is an observation. The
           charts are computed from the tree at every commit. Hashes link to the commits on
           <a href="https://github.com/oleg-vasilyev/FoolProof/commits/main" rel="noopener">GitHub</a>.
@@ -1326,7 +1616,7 @@ document.addEventListener("keydown", (event) => {
 <script>
 const TEXT = {
   release: "release",
-  eras: ["Era 1 · Two Markdown files", "Era 2 · Features you can delete", "Era 3 · Scenarios and state tables", "Era 4 · The bot leaves the laptop", "Era 5 · Cold readers", "Era 6 · The logbook"],
+  eras: ["Era 1 · Two Markdown files", "Era 2 · Features you can delete", "Era 3 · Scenarios and state tables", "Era 4 · The bot leaves the laptop", "Era 5 · Cold readers", "Era 6 · The logbook", "Era 7 · The agent as the user"],
   months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
   series: { claude: "CLAUDE.md lines", budget: "budget", tests: "tests", mutation: "mutation score", threshold: "break threshold", skills: "skills", agents: "agents", rules: "project lint rules", src: "source lines", harness: "harness lines" },
   table: { commit: "Commit", date: "Date" },

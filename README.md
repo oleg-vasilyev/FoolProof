@@ -272,11 +272,11 @@ whole deploy: no workflow, no second branch, nothing to keep in step by hand.
 **[The case study](https://oleg-vasilyev.github.io/FoolProof/case-study/)** is the
 other thing the site says: how the harness around this bot — `CLAUDE.md`, the
 skills, the agents, the hooks, the lint rules and `docs-check` — was built, broken
-and rebuilt over the 274 commits between 28 July and 2 September 2026, told in six
+and rebuilt over the 314 commits between 28 July and 11 September 2026, told in seven
 eras, with a strip of every commit and charts read from the tree at each one. It was
 written from the git history alone. Both languages share
 `docs/case-study/commit-history-charts.js`, which carries the per-commit numbers and draws
-them; they are a snapshot of the history at commit 274, dated on the page, and
+them; they are a snapshot of the history at commit 314, dated on the page, and
 nothing regenerates them.
 
 Two parts of it are generated rather than written:

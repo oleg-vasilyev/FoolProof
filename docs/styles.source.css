@@ -212,6 +212,83 @@
     margin-top: 0.75rem;
   }
 
+  .era-detail {
+    margin-top: 1.25rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    background-color: color-mix(in srgb, var(--color-card) 70%, transparent);
+  }
+
+  .era-detail + .era-detail {
+    margin-top: 0.625rem;
+  }
+
+  .era-detail > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+    cursor: pointer;
+    list-style: none;
+    padding: 0.875rem 1.125rem 0.875rem 2.5rem;
+    position: relative;
+  }
+
+  .era-detail > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .era-detail > summary::before {
+    content: "";
+    position: absolute;
+    left: 1.125rem;
+    top: 1.35rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 2px solid var(--color-dim);
+    border-bottom: 2px solid var(--color-dim);
+    transform: rotate(-45deg);
+    transition: transform 0.2s ease;
+  }
+
+  .era-detail[open] > summary::before {
+    transform: rotate(45deg);
+  }
+
+  .era-detail > summary:hover .era-detail-h,
+  .era-detail[open] > summary .era-detail-h {
+    color: var(--color-accent);
+  }
+
+  .era-detail-h {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+  }
+
+  .era-detail-n {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-dim);
+  }
+
+  .era-detail > :not(summary) {
+    padding: 0 1.125rem;
+  }
+
+  .era-detail > summary + * {
+    margin-top: 0.25rem;
+  }
+
+  .era-detail > :last-child:not(summary) {
+    padding-bottom: 1.125rem;
+  }
+
+  .era-detail p + p {
+    margin-top: 1.1em;
+  }
+
   .said {
     border-left: 3px solid var(--color-accent);
     padding: 0.25rem 0 0.25rem 1.25rem;
