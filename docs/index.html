@@ -61,16 +61,16 @@
       "mainEntity": [
         { "@type": "Question", "name": "Is it free?",
           "acceptedAnswer": { "@type": "Answer", "text": "Yes. No accounts, no ads, nothing to buy." } },
-        { "@type": "Question", "name": "Does it read our chat?",
-          "acceptedAnswer": { "@type": "Answer", "text": "No. Left in Telegram's default privacy mode, a bot receives only commands and replies to its own messages. The rest of the conversation never reaches it." } },
+        { "@type": "Question", "name": "Does it read the chat?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. In Telegram's default privacy mode a bot receives only commands and replies to its own messages; the rest of the conversation never reaches it." } },
         { "@type": "Question", "name": "What does it store?",
-          "acceptedAnswer": { "@type": "Answer", "text": "The names you send it, the results of the games played in that chat — each tap recorded with the Telegram id of whoever made it — and which language that chat picked. Nothing else." } },
+          "acceptedAnswer": { "@type": "Answer", "text": "The names sent to it, the results of the games played in that chat with each tap recorded against the Telegram id of whoever made it, and the language that chat picked. Nothing else." } },
         { "@type": "Question", "name": "Which Durak does it score?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Podkidnoy, two to ten players. It records the finishing order and the fool — it does not deal cards or referee the game." } },
-        { "@type": "Question", "name": "Do I have to install anything?",
-          "acceptedAnswer": { "@type": "Answer", "text": "No. Add the bot to your group and send /game with the names." } },
+          "acceptedAnswer": { "@type": "Answer", "text": "Podkidnoy, two to ten players. It records the finishing order and the fool; it does not deal cards or referee the game." } },
+        { "@type": "Question", "name": "Does anything have to be installed?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. Add the bot to the group and send /game with the names." } },
         { "@type": "Question", "name": "Can I run my own copy?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Yes. The whole thing is open source under MIT — it needs Node 24 and has no build step." } }
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. The whole thing is open source under MIT; it needs Node 24 and has no build step." } }
       ]
     }
   ]
@@ -91,8 +91,8 @@
 
     <nav aria-label="Primary" class="ml-auto hidden items-center gap-7 text-[15px] text-muted md:flex">
       <a data-block="header.nav-how" href="#how" class="hover:text-ink">How it works</a>
-      <a data-block="header.nav-posters" href="#posters" class="hover:text-ink">The posters</a>
-      <a data-block="header.nav-faq" href="#faq" class="hover:text-ink">Questions</a>
+      <a data-block="header.nav-posters" href="#posters" class="hover:text-ink">Posters</a>
+      <a data-block="header.nav-faq" href="#faq" class="hover:text-ink">FAQ</a>
       <a data-block="header.nav-story" href="case-study/" class="hover:text-ink">How it was built</a>
       <a data-block="header.nav-source" href="https://github.com/oleg-vasilyev/FoolProof" class="hover:text-ink" rel="noopener">Source</a>
     </nav>
@@ -119,7 +119,7 @@
 
     <a data-block="header.add" href="https://t.me/FoolProofMegaBot?startgroup=true" rel="noopener"
        class="rounded-lg bg-accent px-4 py-2 text-[15px] font-semibold text-ground transition-colors hover:bg-accent-soft">
-      Add to a group
+      Add to group
     </a>
   </div>
 </header>
@@ -130,34 +130,32 @@
     <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
 
       <div>
-        <p data-block="hero.eyebrow" class="eyebrow hero-rise">Telegram bot · Podkidnoy Durak · free</p>
+        <p data-block="hero.eyebrow" class="eyebrow hero-rise">Telegram bot · Podkidnoy Durak · Free</p>
 
         <h1 data-block="hero.title" id="hero-heading" class="hero-rise mt-5 text-[42px] font-black leading-[1.03] tracking-[-0.03em] text-balance sm:text-[58px]">
-          You play the cards. FoolProof keeps the score.
-        </h1>
+  You play the cards. FoolProof keeps the score.
+</h1>
 
-        <p data-block="hero.lead" class="hero-rise-2 mt-6 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-          Add it to the group chat where your table gathers. Send the line-up once, then
-          tap who went first and tap each player out. By the end of the night, the whole
-          evening comes back as two posters — and any player's whole record as a third.
-        </p>
+        <p data-block="hero.lead" data-rev="2" class="hero-rise-2 mt-6 max-w-[68ch] text-[18px] leading-relaxed text-muted">
+  Play cards with friends and find out who was best that night, without adding anything up by hand. Add the bot to your group chat, send the line-up once, then tap who made the first move and tap each player as they go out. At the end you get two posters about the evening, and any player can ask for a third: their own record across every game they ever played.
+</p>
 
         <div class="hero-rise-3 mt-9 flex flex-wrap gap-3">
           <a data-block="hero.add" href="https://t.me/FoolProofMegaBot?startgroup=true" rel="noopener" class="btn btn-accent">
-            <span aria-hidden="true">➕</span> Add to a group
-          </a>
+ <span aria-hidden="true">➕</span> Add to group
+</a>
           <a data-block="hero.open" href="https://t.me/FoolProofMegaBot" rel="noopener" class="btn btn-ghost">Open the bot</a>
         </div>
 
         <p data-block="hero.footnote" class="hero-rise-3 mt-6 font-mono text-[13px] text-dim">
-          No accounts · nothing to install · reads only commands and replies to its own messages
-        </p>
+  No accounts, nothing to install. The bot reads only commands and replies to its own messages.
+</p>
       </div>
 
       <figure class="hero-rise-4 lg:justify-self-end">
         <div class="w-full max-w-[420px] rounded-2xl border border-line bg-card p-5 shadow-2xl shadow-black/50">
           <p data-block="hero.card-title" class="text-[17px] font-bold">Game 3</p>
-          <p data-block="hero.card-first" class="mt-1 text-[15px] text-muted">Went first: <span class="text-ink">Oleg</span></p>
+          <p data-block="hero.card-first" class="mt-1 text-[15px] text-muted"><span class="text-ink">Oleg</span> made the first move</p>
 
           <div data-block="hero.card-keys" class="mt-4 grid grid-cols-2 gap-2" role="img"
                aria-label="The bot's inline keyboard: Oleg finished first, Roma second; Anya and Dima are still to be tapped.">
@@ -165,13 +163,13 @@
             <span class="key border-accent/60 text-accent">✅ 2 Roma</span>
             <span class="key key-live">Anya</span>
             <span class="key">Dima</span>
-            <span class="key">↩️ Back</span>
             <span class="key">🟢 Draw</span>
+            <span class="key">↩️ Back</span>
           </div>
         </div>
-        <figcaption data-block="hero.card-caption" class="mt-4 max-w-[420px] font-mono text-[13px] leading-relaxed text-dim">
-          One message, edited in place. The chat never fills up with score-keeping.
-        </figcaption>
+        <figcaption data-block="hero.card-caption" data-rev="2" class="mt-4 max-w-[420px] font-mono text-[13px] leading-relaxed text-dim">
+  The card is one message the bot keeps updating as the game goes on, so the chat never fills up with score-keeping.
+</figcaption>
       </figure>
 
     </div>
@@ -179,35 +177,30 @@
 
   <section id="how" aria-labelledby="how-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="how.eyebrow" class="eyebrow">An evening, end to end</p>
-      <h2 data-block="how.title" id="how-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Three actions, and only one of them repeats</h2>
+      <p data-block="how.eyebrow" class="eyebrow">One evening</p>
+      <h2 data-block="how.title" id="how-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Three steps, one of them on repeat</h2>
 
       <ol class="mt-12 grid gap-6 md:grid-cols-3">
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
           <p data-block="how.step1-label" class="font-mono text-[13px] text-accent">Step 1</p>
           <h3 data-block="how.step1-title" class="mt-3 text-[21px] font-bold">Send the line-up</h3>
           <p data-block="how.step1-body" class="mt-3 text-[16px] leading-relaxed text-muted">
-            <code class="cmd">/game Oleg, Anya, Roma</code> — the list is the seating order,
-            clockwise. The bot opens one card in the chat.
-          </p>
+  Type <code class="cmd">/game Oleg, Anya, Roma</code> with the names in seating order, clockwise. The bot opens one card in the chat.
+</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
           <p data-block="how.step2-label" class="font-mono text-[13px] text-accent">Step 2</p>
           <h3 data-block="how.step2-title" class="mt-3 text-[21px] font-bold">Tap who went out</h3>
           <p data-block="how.step2-body" class="mt-3 text-[16px] leading-relaxed text-muted">
-            First tap who went first, then one tap per player in the order they finish, then
-            Confirm. Whoever is left unmarked is the fool. There is nothing to type.
-          </p>
+  Tap who made the first move, then tap each player as they go out, then tap Confirm. Whoever is left is the fool. Nothing gets typed.
+</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
           <p data-block="how.step3-label" class="font-mono text-[13px] text-accent">Step 3</p>
-          <h3 data-block="how.step3-title" class="mt-3 text-[21px] font-bold">Ask how it went</h3>
-          <p data-block="how.step3-body" class="mt-3 text-[16px] leading-relaxed text-muted">
-            <code class="cmd">/stats</code> draws the chronology, and the awards too once five
-            games are in. <code class="cmd">/personal</code> draws one player across every evening
-            they have played. <code class="cmd">/next</code> opens the same table again — the
-            fool's neighbour goes first.
-          </p>
+          <h3 data-block="how.step3-title" class="mt-3 text-[21px] font-bold">Ask how the evening went</h3>
+          <p data-block="how.step3-body" data-rev="2" class="mt-3 text-[16px] leading-relaxed text-muted">
+  <code class="cmd">/stats</code> draws the whole evening, game by game, and after five games it draws the awards too. <code class="cmd">/personal</code> draws one player's record across every evening they ever played. Then <code class="cmd">/next</code> opens the next game with the same players, and the fool is attacked first, as the rules of Durak say.
+</p>
         </li>
       </ol>
     </div>
@@ -215,21 +208,20 @@
 
   <section id="posters" aria-labelledby="posters-heading">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="posters.eyebrow" class="eyebrow">What the bot draws</p>
+      <p data-block="posters.eyebrow" class="eyebrow">What it draws</p>
       <h2 data-block="posters.title" id="posters-heading" class="mt-4 max-w-[68ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">
-        Drawn rather than listed
-      </h2>
-      <p data-block="posters.lead" class="mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-        All three are drawn by the bot itself, sized to be read at arm's length across
-        a table after Telegram has recompressed them.
-      </p>
+  The evening on a poster
+</h2>
+      <p data-block="posters.lead" data-rev="5" class="mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
+  Instead of a column of numbers, the evening becomes something to look at and argue over: who was best, who was the fool, and who earned which award, spread around the table with nine to a poster. All three are comfortable to look at on a phone.
+</p>
 
       <div class="mt-12 lg:grid lg:grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)] lg:items-start lg:gap-8" data-deck>
         <div role="tablist" aria-orientation="vertical" aria-label="Which poster to show"
              class="reveal hidden gap-2 lg:flex lg:flex-col lg:py-8">
-          <button data-block="posters.tab-chronology" type="button" class="deck-tab text-left" id="poster-tab-1" role="tab" aria-controls="poster-panel-1" aria-selected="true">The chronology</button>
-          <button data-block="posters.tab-awards" type="button" class="deck-tab text-left" id="poster-tab-2" role="tab" aria-controls="poster-panel-2" aria-selected="false" tabindex="-1">The awards</button>
-          <button data-block="posters.tab-personal" type="button" class="deck-tab text-left" id="poster-tab-3" role="tab" aria-controls="poster-panel-3" aria-selected="false" tabindex="-1">The player's card</button>
+          <button data-block="posters.tab-chronology" type="button" class="deck-tab text-left" id="poster-tab-1" role="tab" aria-controls="poster-panel-1" aria-selected="true">Chronology</button>
+          <button data-block="posters.tab-awards" type="button" class="deck-tab text-left" id="poster-tab-2" role="tab" aria-controls="poster-panel-2" aria-selected="false" tabindex="-1">Awards</button>
+          <button data-block="posters.tab-personal" type="button" class="deck-tab text-left" id="poster-tab-3" role="tab" aria-controls="poster-panel-3" aria-selected="false" tabindex="-1">Player's card</button>
         </div>
 
         <div class="reveal flex flex-col gap-14 lg:col-start-2 lg:row-start-1 lg:block">
@@ -241,10 +233,9 @@
             <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
               <p data-block="posters.chronology-command" class="font-mono text-[13px] text-accent">/stats_chronology</p>
               <h3 data-block="posters.chronology-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">The chronology</h3>
-              <p data-block="posters.chronology-body" class="mt-4 text-[17px] leading-relaxed text-muted">
-                A row per game, a column per player. It marks only what an ordinary finish is
-                not: drew for last, left the fool, did not play.
-              </p>
+              <p data-block="posters.chronology-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
+  Every game is a row and every player a column, and each cell says where that player finished. Only what is out of the ordinary gets a mark of its own: a draw for last place, being left the fool, a game somebody sat out.
+</p>
             </figcaption>
           </figure>
 
@@ -256,11 +247,9 @@
             <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
               <p data-block="posters.awards-command" class="font-mono text-[13px] text-accent">/stats_awards</p>
               <h3 data-block="posters.awards-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">The awards</h3>
-              <p data-block="posters.awards-body" class="mt-4 text-[17px] leading-relaxed text-muted">
-                More than forty exist and nine fit, so the poster keeps the king and the fool and
-                shares the rest around the table, rarest first — which is what stops every
-                Friday reading the same.
-              </p>
+              <p data-block="posters.awards-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
+  There are more than forty awards, and the poster has room for nine. Two are always on it: the king of the table, who finished ahead of the most opponents over the evening, and the fool of the night. The other places go around the table and the rarest award earned that night comes first, so no two Fridays end with the same poster.
+</p>
             </figcaption>
           </figure>
 
@@ -272,10 +261,9 @@
             <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
               <p data-block="posters.personal-command" class="font-mono text-[13px] text-accent">/personal</p>
               <h3 data-block="posters.personal-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">The player's card</h3>
-              <p data-block="posters.personal-body" class="mt-4 text-[17px] leading-relaxed text-muted">
-                One player across everything they ever played. Twenty facts compete for four
-                places, so two people at the same table rarely get cards that read alike.
-              </p>
+              <p data-block="posters.personal-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
+  This one is about a single player over everything they ever played: four percentages about them, a chart of how they did evening by evening, and four moments that made their record. Twenty facts compete for those four spots, so two people at the same table rarely get cards that read alike.
+</p>
             </figcaption>
           </figure>
         </div>
@@ -294,55 +282,45 @@
 
   <section id="why" aria-labelledby="why-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="why.eyebrow" class="eyebrow">Why it is shaped this way</p>
-      <h2 data-block="why.title" id="why-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Built for a Friday evening</h2>
+      <p data-block="why.eyebrow" class="eyebrow">Behind the design</p>
+      <h2 data-block="why.title" id="why-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Made for a Friday evening</h2>
 
       <ul class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         <li class="reveal">
           <h3 data-block="why.taps-title" class="text-[19px] font-bold">Taps, not typing</h3>
-          <p data-block="why.taps-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            Input happens on a phone, one-handed, between games. So the whole product is
-            one message with a keyboard on it. A wrong tap noticed only after Confirm is
-            not final either: <code class="cmd">/reopen</code> brings the last game back
-            as a card, and Back takes it off.
-          </p>
+          <p data-block="why.taps-body" data-rev="3" class="mt-2 text-[16px] leading-relaxed text-muted">
+  Keeping score never pulls anyone out of the game. The score lives in one message with buttons on it, so a game is marked from a phone, one-handed, between games. Tapped the wrong name? Back undoes it. Noticed only after Confirm? <code class="cmd">/reopen</code> brings the last game back as a card.
+</p>
         </li>
         <li class="reveal">
-          <h3 data-block="why.privacy-title" class="text-[19px] font-bold">It cannot read the rest</h3>
+          <h3 data-block="why.privacy-title" class="text-[19px] font-bold">Never reads the chat</h3>
           <p data-block="why.privacy-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            In Telegram's default privacy mode a bot receives only commands and replies to
-            its own messages. Your conversation never reaches it.
-          </p>
+  In Telegram's default privacy mode a bot receives only commands and replies to its own messages. The conversation never reaches it.
+</p>
         </li>
         <li class="reveal">
-          <h3 data-block="why.restart-title" class="text-[19px] font-bold">A restart costs nothing</h3>
+          <h3 data-block="why.restart-title" class="text-[19px] font-bold">Bot went down? Nothing lost</h3>
           <p data-block="why.restart-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            The card is rebuilt from what was recorded, so a crash or a deploy in the middle
-            of a game leaves the evening intact.
-          </p>
+  Every tap is recorded, and the card is rebuilt from that record. If the bot crashes or gets updated in the middle of a game, it comes back with the card exactly where the game was.
+</p>
         </li>
         <li class="reveal">
           <h3 data-block="why.names-title" class="text-[19px] font-bold">One player, two names</h3>
           <p data-block="why.names-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            Somebody types <span class="cmd">Anya</span> once and <span class="cmd">Ania</span> the
-            rest of the night. <code class="cmd">/merge</code> folds them back into one person.
-            When a whole evening went under the wrong name, <code class="cmd">/replace</code>
-            moves it to the right one.
-          </p>
+  Somebody types <span class="cmd">Anya</span> once and <span class="cmd">Ania</span> the rest of the night; <code class="cmd">/merge</code> folds the two back into one person. When a whole evening went under the wrong name, <code class="cmd">/replace</code> moves it to the right one.
+</p>
         </li>
         <li class="reveal">
           <h3 data-block="why.language-title" class="text-[19px] font-bold">English or Russian</h3>
           <p data-block="why.language-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            <code class="cmd">/language</code> sets the language for that chat — including the
-            words printed on the posters.
-          </p>
+  <code class="cmd">/language</code> sets the language for that chat, down to the words printed on the posters.
+</p>
         </li>
         <li class="reveal">
           <h3 data-block="why.table-title" class="text-[19px] font-bold">Two to ten at the table</h3>
-          <p data-block="why.table-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            <code class="cmd">/next_with</code> and <code class="cmd">/next_without</code> change the
-            line-up when somebody arrives or goes home.
-          </p>
+          <p data-block="why.table-body" data-rev="3" class="mt-2 text-[16px] leading-relaxed text-muted">
+  The line-up need not stay the same all evening. When somebody joins the table, <code class="cmd">/next_with</code> adds them to the next game; when somebody steps away or sits a game out, <code class="cmd">/next_without</code> starts it without them.
+</p>
         </li>
       </ul>
     </div>
@@ -350,7 +328,7 @@
 
   <section id="faq" aria-labelledby="faq-heading">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="faq.eyebrow" class="eyebrow">Before you add it</p>
+      <p data-block="faq.eyebrow" class="eyebrow">Still wondering?</p>
       <h2 data-block="faq.title" id="faq-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Questions</h2>
 
       <dl class="mt-12 max-w-[68ch] divide-y divide-line border-t border-line">
@@ -359,40 +337,34 @@
           <dd data-block="faq.free-a" class="mt-2 text-[16px] leading-relaxed text-muted">Yes. No accounts, no ads, nothing to buy.</dd>
         </div>
         <div class="reveal py-6">
-          <dt data-block="faq.chat-q" class="text-[19px] font-bold">Does it read our chat?</dt>
+          <dt data-block="faq.chat-q" class="text-[19px] font-bold">Does it read the chat?</dt>
           <dd data-block="faq.chat-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-            No. Left in Telegram's default privacy mode, a bot receives only commands and
-            replies to its own messages. The rest of the conversation never reaches it.
-          </dd>
+  No. In Telegram's default privacy mode a bot receives only commands and replies to its own messages; the rest of the conversation never reaches it.
+</dd>
         </div>
         <div class="reveal py-6">
           <dt data-block="faq.store-q" class="text-[19px] font-bold">What does it store?</dt>
           <dd data-block="faq.store-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-            The names you send it, the results of the games played in that chat — each tap
-            recorded with the Telegram id of whoever made it — and which language that chat
-            picked. Nothing else.
-          </dd>
+  The names sent to it, the results of the games played in that chat with each tap recorded against the Telegram id of whoever made it, and the language that chat picked. Nothing else.
+</dd>
         </div>
         <div class="reveal py-6">
           <dt data-block="faq.which-q" class="text-[19px] font-bold">Which Durak does it score?</dt>
           <dd data-block="faq.which-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-            Podkidnoy, two to ten players. It records the finishing order and the fool — it
-            does not deal cards or referee the game.
-          </dd>
+  Podkidnoy, two to ten players. It records the finishing order and the fool; it does not deal cards or referee the game.
+</dd>
         </div>
         <div class="reveal py-6">
-          <dt data-block="faq.install-q" class="text-[19px] font-bold">Do I have to install anything?</dt>
+          <dt data-block="faq.install-q" class="text-[19px] font-bold">Does anything have to be installed?</dt>
           <dd data-block="faq.install-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-            No. Add the bot to your group and send <code class="cmd">/game</code> with the names.
-          </dd>
+  No. Add the bot to the group and send <code class="cmd">/game</code> with the names.
+</dd>
         </div>
         <div class="reveal py-6">
           <dt data-block="faq.copy-q" class="text-[19px] font-bold">Can I run my own copy?</dt>
           <dd data-block="faq.copy-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-            Yes. The whole thing is
-            <a href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="text-accent underline decoration-line underline-offset-4 hover:text-accent-soft">open source under MIT</a>
-            — it needs Node 24 and has no build step.
-          </dd>
+  Yes. The whole thing is <a href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="text-accent underline decoration-line underline-offset-4 hover:text-accent-soft">open source under MIT</a>; it needs Node 24 and has no build step.
+</dd>
         </div>
       </dl>
     </div>
@@ -400,17 +372,16 @@
 
   <section aria-labelledby="cta-heading" class="border-t border-line bg-panel">
     <div class="reveal mx-auto max-w-6xl px-5 py-20 text-center sm:px-8">
-      <h2 data-block="cta.title" id="cta-heading" class="mx-auto max-w-[20ch] text-[32px] font-black leading-tight tracking-[-0.02em] sm:text-[44px]">
-        Your table plays on Friday.
-      </h2>
-      <p data-block="cta.lead" class="mx-auto mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-        Let the score keep itself this time. Adding the bot is one tap, and the only thing
-        you will ever type is names — and only when the line-up changes.
-      </p>
+      <h2 data-block="cta.title" data-rev="3" id="cta-heading" class="mx-auto max-w-[20ch] text-[32px] font-black leading-tight tracking-[-0.02em] sm:text-[44px]">
+  Play on Friday. Find out who is really the best.
+</h2>
+      <p data-block="cta.lead" data-rev="3" class="mx-auto mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
+  Find out who the best player is without counting anything by hand. Add some spice with awards spread around the table, and get your own record across every game you ever played. Adding the bot is one tap, and you type names only when the line-up changes.
+</p>
       <div class="mt-9 flex flex-wrap justify-center gap-3">
         <a data-block="cta.add" href="https://t.me/FoolProofMegaBot?startgroup=true" rel="noopener" class="btn btn-accent">
-          <span aria-hidden="true">➕</span> Add to a group
-        </a>
+ <span aria-hidden="true">➕</span> Add to group
+</a>
         <a data-block="cta.open" href="https://t.me/FoolProofMegaBot" rel="noopener" class="btn btn-ghost">Open the bot</a>
       </div>
     </div>
@@ -420,17 +391,17 @@
 
 <footer class="border-t border-line">
   <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-[15px] text-dim sm:flex-row sm:items-center sm:px-8">
-    <p data-block="footer.line">FoolProof — a scoresheet for Podkidnoy Durak.</p>
+    <p data-block="footer.line">FoolProof is a scoresheet for Podkidnoy Durak.</p>
     <nav aria-label="Footer" class="flex flex-wrap gap-6 sm:ml-auto">
       <a data-block="footer.story" href="case-study/" class="hover:text-ink">How it was built</a>
       <a data-block="footer.github" href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="hover:text-ink">GitHub</a>
       <a data-block="footer.licence" href="https://github.com/oleg-vasilyev/FoolProof/blob/main/LICENSE" rel="license noopener" class="hover:text-ink">MIT licence</a>
-      <a data-block="footer.bot" href="https://t.me/FoolProofMegaBot" rel="noopener" class="hover:text-ink">The bot</a>
+      <a data-block="footer.bot" href="https://t.me/FoolProofMegaBot" rel="noopener" class="hover:text-ink">Open the bot</a>
     </nav>
   </div>
   <div data-block="footer.disclaimer" class="mx-auto max-w-6xl px-5 pb-10 font-mono text-[12px] text-edge sm:px-8">
-    Not affiliated with Telegram.
-  </div>
+  Not affiliated with Telegram.
+</div>
 </footer>
 
 <script data-goatcounter="https://alehvasilyeu.goatcounter.com/count"

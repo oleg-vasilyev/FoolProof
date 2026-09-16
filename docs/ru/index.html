@@ -60,17 +60,17 @@
       "@type": "FAQPage",
       "mainEntity": [
         { "@type": "Question", "name": "Это бесплатно?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Да. Ни регистрации, ни рекламы, ни платных функций." } },
-        { "@type": "Question", "name": "Он читает нашу переписку?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Нет. В обычном режиме приватности бот получает только команды и ответы на свои же сообщения. Остальной разговор до него не доходит." } },
+          "acceptedAnswer": { "@type": "Answer", "text": "Да. Без аккаунтов, без рекламы и без покупок." } },
+        { "@type": "Question", "name": "Он читает чат?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Нет. В обычном режиме приватности Telegram бот получает только команды и ответы на свои сообщения, а остальной разговор до него не доходит." } },
         { "@type": "Question", "name": "Что он хранит?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Имена, которые вы ему отправили, результаты партий, сыгранных в этом чате — у каждой отметки записано, кто из участников её нажал, — и выбранный этим чатом язык. Больше ничего." } },
-        { "@type": "Question", "name": "В какого дурака он умеет?",
-          "acceptedAnswer": { "@type": "Answer", "text": "В подкидного, от двух до десяти игроков. Он записывает порядок выхода и дурака, но не раздаёт карты и не судит игру." } },
+          "acceptedAnswer": { "@type": "Answer", "text": "Имена, которые ему отправили. Результаты партий в этом чате и Telegram-id того, кто нажимал кнопки. Язык, который выбрал чат. Больше ничего." } },
+        { "@type": "Question", "name": "В какого дурака он считает?",
+          "acceptedAnswer": { "@type": "Answer", "text": "В подкидного, от двух до десяти игроков. Бот записывает порядок выхода и того, кто остался дураком. Карты он не раздаёт и за игрой не следит." } },
         { "@type": "Question", "name": "Нужно что-то устанавливать?",
           "acceptedAnswer": { "@type": "Answer", "text": "Нет. Добавьте бота в группу и отправьте /game с именами." } },
         { "@type": "Question", "name": "Можно поднять свою копию?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Да, весь бот открыт под лицензией MIT — нужен Node 24, шага сборки нет." } }
+          "acceptedAnswer": { "@type": "Answer", "text": "Да. Весь код открыт под лицензией MIT. Нужен Node 24, сборки нет." } }
       ]
     }
   ]
@@ -80,7 +80,7 @@
 
 <body class="bg-ground font-sans text-ink antialiased">
 
-<a data-block="header.skip" href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-ground">К содержимому</a>
+<a data-block="header.skip" href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-ground">К содержанию</a>
 
 <header class="sticky top-0 z-40 border-b border-line bg-ground/90 backdrop-blur">
   <div class="mx-auto flex max-w-6xl items-center gap-4 px-5 py-4 sm:px-8">
@@ -119,8 +119,8 @@
 
     <a data-block="header.add" href="https://t.me/FoolProofMegaBot?startgroup=true" rel="noopener"
        class="rounded-lg bg-accent px-4 py-2 text-[15px] font-semibold text-ground transition-colors hover:bg-accent-soft">
-      Добавить в группу
-    </a>
+  Добавить в группу
+</a>
   </div>
 </header>
 
@@ -130,34 +130,32 @@
     <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
 
       <div>
-        <p data-block="hero.eyebrow" class="eyebrow hero-rise">Телеграм-бот · подкидной дурак · бесплатно</p>
+        <p data-block="hero.eyebrow" class="eyebrow hero-rise">Telegram-бот · Подкидной дурак · Бесплатно</p>
 
         <h1 data-block="hero.title" id="hero-heading" class="hero-rise mt-5 text-[42px] font-black leading-[1.03] tracking-[-0.03em] text-balance sm:text-[58px]">
-          Вы играете. Счёт ведёт FoolProof.
-        </h1>
+  Вы играете. Счёт ведёт FoolProof.
+</h1>
 
-        <p data-block="hero.lead" class="hero-rise-2 mt-6 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-          Добавьте бота в чат, где собирается ваша компания. Состав присылается один раз,
-          дальше отмечайте, кто ходил первым и кто вышел из партии. К концу вечера бот
-          возвращает всё сыгранное двумя постерами, а карьеру любого игрока — третьим.
-        </p>
+        <p data-block="hero.lead" data-rev="2" class="hero-rise-2 mt-6 max-w-[68ch] text-[18px] leading-relaxed text-muted">
+  Играете в дурака с друзьями? FoolProof запомнит за вас порядок выхода в каждой партии и покажет, кто на самом деле лучший игрок. Добавьте бота в групповой чат и один раз отправьте ему имена. Дальше только нажимайте кнопки: кто ходил первым и кто за кем вышел. Когда вечер закончится, попросите у бота два постера про него, а по любому игроку он нарисует карточку за все партии, которые тот когда-либо сыграл.
+</p>
 
         <div class="hero-rise-3 mt-9 flex flex-wrap gap-3">
           <a data-block="hero.add" href="https://t.me/FoolProofMegaBot?startgroup=true" rel="noopener" class="btn btn-accent">
-            <span aria-hidden="true">➕</span> Добавить в группу
-          </a>
+  <span aria-hidden="true">➕</span> Добавить в группу
+</a>
           <a data-block="hero.open" href="https://t.me/FoolProofMegaBot" rel="noopener" class="btn btn-ghost">Открыть бота</a>
         </div>
 
         <p data-block="hero.footnote" class="hero-rise-3 mt-6 font-mono text-[13px] text-dim">
-          Без регистрации · ничего не устанавливать · читает только команды и ответы на свои сообщения
-        </p>
+  Без аккаунтов и установки. Бот видит только команды и ответы на свои сообщения.
+</p>
       </div>
 
       <figure class="hero-rise-4 lg:justify-self-end">
         <div class="w-full max-w-[420px] rounded-2xl border border-line bg-card p-5 shadow-2xl shadow-black/50">
           <p data-block="hero.card-title" class="text-[17px] font-bold">Партия 3</p>
-          <p data-block="hero.card-first" class="mt-1 text-[15px] text-muted">Ходит первым: <span class="text-ink">Олег</span></p>
+          <p data-block="hero.card-first" class="mt-1 text-[15px] text-muted">Первым ходил <span class="text-ink">Олег</span></p>
 
           <div data-block="hero.card-keys" class="mt-4 grid grid-cols-2 gap-2" role="img"
                aria-label="Клавиатура бота: Олег вышел первым, Рома вторым; Аня и Дима ещё не отмечены.">
@@ -169,9 +167,9 @@
             <span class="key">↩️ Назад</span>
           </div>
         </div>
-        <figcaption data-block="hero.card-caption" class="mt-4 max-w-[420px] font-mono text-[13px] leading-relaxed text-dim">
-          Одно сообщение, которое правится на месте. Чат не забивается счётом.
-        </figcaption>
+        <figcaption data-block="hero.card-caption" data-rev="2" class="mt-4 max-w-[420px] font-mono text-[13px] leading-relaxed text-dim">
+  Карточка — это одно сообщение, которое бот редактирует по ходу партии, поэтому чат не зарастает подсчётами.
+</figcaption>
       </figure>
 
     </div>
@@ -179,35 +177,30 @@
 
   <section id="how" aria-labelledby="how-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="how.eyebrow" class="eyebrow">Вечер от начала до конца</p>
-      <h2 data-block="how.title" id="how-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Три действия, и повторяется только одно</h2>
+      <p data-block="how.eyebrow" class="eyebrow">Один вечер от начала до конца</p>
+      <h2 data-block="how.title" id="how-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Три шага на весь вечер</h2>
 
       <ol class="mt-12 grid gap-6 md:grid-cols-3">
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
           <p data-block="how.step1-label" class="font-mono text-[13px] text-accent">Шаг 1</p>
           <h3 data-block="how.step1-title" class="mt-3 text-[21px] font-bold">Отправьте состав</h3>
           <p data-block="how.step1-body" class="mt-3 text-[16px] leading-relaxed text-muted">
-            <code class="cmd">/game Олег, Аня, Рома</code> — порядок имён это рассадка за
-            столом, по часовой стрелке. Бот открывает в чате одну карточку.
-          </p>
+  Напишите <code class="cmd">/game Олег, Аня, Рома</code> — имена в том порядке, в каком игроки сидят за столом по часовой стрелке. Бот откроет в чате одну карточку.
+</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
           <p data-block="how.step2-label" class="font-mono text-[13px] text-accent">Шаг 2</p>
           <h3 data-block="how.step2-title" class="mt-3 text-[21px] font-bold">Отмечайте, кто вышел</h3>
           <p data-block="how.step2-body" class="mt-3 text-[16px] leading-relaxed text-muted">
-            Сначала отметьте, кто ходил первым, дальше — нажатие на имя в порядке выхода,
-            затем «Записать». Кто остался без отметки, тот и дурак. Печатать ничего не нужно.
-          </p>
+  Сначала нажмите на того, кто ходил первым. Потом нажимайте на игроков в том порядке, в каком они выходили, и в конце нажмите «Записать». Кого не отметили, тот и остался дураком. Печатать ничего не нужно.
+</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
           <p data-block="how.step3-label" class="font-mono text-[13px] text-accent">Шаг 3</p>
-          <h3 data-block="how.step3-title" class="mt-3 text-[21px] font-bold">Спросите, как всё прошло</h3>
-          <p data-block="how.step3-body" class="mt-3 text-[16px] leading-relaxed text-muted">
-            <code class="cmd">/stats</code> рисует хронологию, а с пятой партии — ещё и
-            награды. <code class="cmd">/personal</code> рисует одного игрока за все вечера,
-            что он сыграл. <code class="cmd">/next</code> открывает тот же стол заново: первым
-            ходит сосед дурака.
-          </p>
+          <h3 data-block="how.step3-title" class="mt-3 text-[21px] font-bold">Спросите, как прошёл вечер</h3>
+          <p data-block="how.step3-body" data-rev="2" class="mt-3 text-[16px] leading-relaxed text-muted">
+  <code class="cmd">/stats</code> рисует хронологию вечера, а начиная с пятой партии ещё и награды. <code class="cmd">/personal</code> рисует одного игрока по всем вечерам, где он играл. <code class="cmd">/next</code> открывает новую партию тем же составом, и первым ходят на дурака.
+</p>
         </li>
       </ol>
     </div>
@@ -217,12 +210,11 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
       <p data-block="posters.eyebrow" class="eyebrow">Что рисует бот</p>
       <h2 data-block="posters.title" id="posters-heading" class="mt-4 max-w-[68ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">
-        Нарисованное, а не перечисленное
-      </h2>
-      <p data-block="posters.lead" class="mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-        Все три картинки бот рисует сам — с таким запасом, чтобы они читались через стол
-        даже после того, как Телеграм их пережмёт.
-      </p>
+  Два постера про вечер и карточка на каждого
+</h2>
+      <p data-block="posters.lead" data-rev="5" class="mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
+  Вместо столбика цифр вы получаете картинку, которую хочется разглядывать и обсуждать: на ней назван лучший игрок вечера, назван дурак, а награды разошлись по всему столу. И всем этим удобно пользоваться с телефона.
+</p>
 
       <div class="mt-12 lg:grid lg:grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)] lg:items-start lg:gap-8" data-deck>
         <div role="tablist" aria-orientation="vertical" aria-label="Какой постер показать"
@@ -241,10 +233,9 @@
             <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
               <p data-block="posters.chronology-command" class="font-mono text-[13px] text-accent">/stats_chronology</p>
               <h3 data-block="posters.chronology-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">Хронология</h3>
-              <p data-block="posters.chronology-body" class="mt-4 text-[17px] leading-relaxed text-muted">
-                Строка на партию, столбец на игрока. Выделено только необычное: ничья за
-                последнее место, дурак, пропуск партии.
-              </p>
+              <p data-block="posters.chronology-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
+  Каждая партия занимает строку, каждый игрок столбец, а в клетке стоит, каким по счёту он вышел. Особо выделено только то, что стоит обсудить: кто разделил последнее место, кто остался дураком и кто пропустил партию.
+</p>
             </figcaption>
           </figure>
 
@@ -256,11 +247,9 @@
             <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
               <p data-block="posters.awards-command" class="font-mono text-[13px] text-accent">/stats_awards</p>
               <h3 data-block="posters.awards-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">Награды</h3>
-              <p data-block="posters.awards-body" class="mt-4 text-[17px] leading-relaxed text-muted">
-                Их больше сорока, а на постере девять: король и дурак — всегда, остальные места
-                расходятся по столу, начиная с самых редких. Поэтому две пятницы не
-                выглядят одинаково.
-              </p>
+              <p data-block="posters.awards-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
+  Наград больше сорока, на постер попадают девять. Две есть всегда: король стола, то есть тот, кто за вечер обошёл больше всех соперников, и дурак вечера. Остальные семь зависят от того, как прошёл вечер, и самая редкая из них стоит первой. Поэтому двух одинаковых постеров не бывает.
+</p>
             </figcaption>
           </figure>
 
@@ -272,10 +261,9 @@
             <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
               <p data-block="posters.personal-command" class="font-mono text-[13px] text-accent">/personal</p>
               <h3 data-block="posters.personal-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">Карточка игрока</h3>
-              <p data-block="posters.personal-body" class="mt-4 text-[17px] leading-relaxed text-muted">
-                Один человек за всё, что он сыграл. Двадцать фактов борются за четыре места,
-                поэтому у двоих за одним столом карточки редко похожи.
-              </p>
+              <p data-block="posters.personal-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
+  На карточке один человек и всё, что он когда-либо сыграл: четыре его показателя в процентах, график по вечерам, как он играл, и факты, которые за ним закрепились. Фактов двадцать, а мест на карточке четыре, поэтому у двух людей за одним столом карточки почти никогда не совпадают.
+</p>
             </figcaption>
           </figure>
         </div>
@@ -299,49 +287,40 @@
 
       <ul class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         <li class="reveal">
-          <h3 data-block="why.taps-title" class="text-[19px] font-bold">Нажатия, а не текст</h3>
-          <p data-block="why.taps-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            Счёт ведётся с телефона, одной рукой, между раздачами. Поэтому весь продукт —
-            одно сообщение с клавиатурой под ним. Ошибочное нажатие, замеченное уже после
-            «Записать», тоже не приговор: <code class="cmd">/reopen</code> возвращает
-            последнюю партию карточкой, и «Назад» снимает ошибочное нажатие.
-          </p>
+          <h3 data-block="why.taps-title" class="text-[19px] font-bold">Нажимать, а не печатать</h3>
+          <p data-block="why.taps-body" data-rev="3" class="mt-2 text-[16px] leading-relaxed text-muted">
+  Счёт ведётся кнопками в сообщении бота, поэтому он не отвлекает от игры: партию отмечают с телефона, одной рукой, между партиями. Нажали лишнее — «Назад» это отменит. Заметили ошибку уже после «Записать» — <code class="cmd">/reopen</code> откроет последнюю партию заново, и её можно поправить.
+</p>
         </li>
         <li class="reveal">
-          <h3 data-block="why.privacy-title" class="text-[19px] font-bold">Остального он не читает</h3>
+          <h3 data-block="why.privacy-title" class="text-[19px] font-bold">Чат он не читает</h3>
           <p data-block="why.privacy-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            В обычном режиме приватности бот получает только команды и ответы на свои же
-            сообщения. Ваш разговор до него не доходит.
-          </p>
+  В обычном режиме приватности Telegram бот получает только команды и ответы на свои сообщения. Разговор в чате до него не доходит.
+</p>
         </li>
         <li class="reveal">
-          <h3 data-block="why.restart-title" class="text-[19px] font-bold">Перезапуск ничего не стоит</h3>
+          <h3 data-block="why.restart-title" class="text-[19px] font-bold">Ничего не теряется</h3>
           <p data-block="why.restart-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            Карточка каждый раз собирается заново из записанного, поэтому падение или
-            деплой посреди партии вечеру не вредит.
-          </p>
+  Если бот посреди партии упал или обновился, всё, что вы уже нажали, остаётся на месте: карточка восстанавливается из записанного, и вечер продолжается.
+</p>
         </li>
         <li class="reveal">
           <h3 data-block="why.names-title" class="text-[19px] font-bold">Один игрок под двумя именами</h3>
           <p data-block="why.names-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            Кто-то напишет <span class="cmd">Аня</span>, а потом весь вечер
-            <span class="cmd">Анна</span>. <code class="cmd">/merge</code> снова делает из
-            них одного человека. А если кого-то весь вечер записывали под чужим именем,
-            <code class="cmd">/replace</code> переписывает вечер на нужного человека.
-          </p>
+  Кто-то один раз написал <span class="cmd">Аня</span>, а весь остальной вечер — <span class="cmd">Анна</span>. <code class="cmd">/merge</code> снова делает из двух имён одного человека. А если целый вечер записан не на то имя, <code class="cmd">/replace</code> переносит его на нужное.
+</p>
         </li>
         <li class="reveal">
-          <h3 data-block="why.language-title" class="text-[19px] font-bold">Русский или английский</h3>
+          <h3 data-block="why.language-title" class="text-[19px] font-bold">По-русски или по-английски</h3>
           <p data-block="why.language-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            <code class="cmd">/language</code> выбирает язык для чата — включая слова на постерах.
-          </p>
+  <code class="cmd">/language</code> выбирает язык для этого чата, включая подписи на постерах.
+</p>
         </li>
         <li class="reveal">
           <h3 data-block="why.table-title" class="text-[19px] font-bold">От двух до десяти за столом</h3>
-          <p data-block="why.table-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-            <code class="cmd">/next_with</code> и <code class="cmd">/next_without</code> меняют
-            состав, когда кто-то пришёл или ушёл домой.
-          </p>
+          <p data-block="why.table-body" data-rev="3" class="mt-2 text-[16px] leading-relaxed text-muted">
+  Состав не обязан быть одним на весь вечер. Кто-то подсел к столу — <code class="cmd">/next_with</code> добавит его в следующую партию. Кто-то отошёл или решил пропустить партию — <code class="cmd">/next_without</code> его уберёт.
+</p>
         </li>
       </ul>
     </div>
@@ -349,49 +328,43 @@
 
   <section id="faq" aria-labelledby="faq-heading">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="faq.eyebrow" class="eyebrow">Прежде чем добавить</p>
+      <p data-block="faq.eyebrow" class="eyebrow">Ещё сомневаетесь?</p>
       <h2 data-block="faq.title" id="faq-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Вопросы</h2>
 
       <dl class="mt-12 max-w-[68ch] divide-y divide-line border-t border-line">
         <div class="reveal py-6">
           <dt data-block="faq.free-q" class="text-[19px] font-bold">Это бесплатно?</dt>
-          <dd data-block="faq.free-a" class="mt-2 text-[16px] leading-relaxed text-muted">Да. Ни регистрации, ни рекламы, ни платных функций.</dd>
+          <dd data-block="faq.free-a" class="mt-2 text-[16px] leading-relaxed text-muted">Да. Без аккаунтов, без рекламы и без покупок.</dd>
         </div>
         <div class="reveal py-6">
-          <dt data-block="faq.chat-q" class="text-[19px] font-bold">Он читает нашу переписку?</dt>
+          <dt data-block="faq.chat-q" class="text-[19px] font-bold">Он читает чат?</dt>
           <dd data-block="faq.chat-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-            Нет. В обычном режиме приватности бот получает только команды и ответы на свои же
-            сообщения. Остальной разговор до него не доходит.
-          </dd>
+  Нет. В обычном режиме приватности Telegram бот получает только команды и ответы на свои сообщения, а остальной разговор до него не доходит.
+</dd>
         </div>
         <div class="reveal py-6">
           <dt data-block="faq.store-q" class="text-[19px] font-bold">Что он хранит?</dt>
           <dd data-block="faq.store-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-            Имена, которые вы ему отправили, результаты партий, сыгранных в этом чате —
-            у каждой отметки записано, кто из участников её нажал, — и выбранный этим чатом
-            язык. Больше ничего.
-          </dd>
+  Имена, которые ему отправили. Результаты партий в этом чате и Telegram-id того, кто нажимал кнопки. Язык, который выбрал чат. Больше ничего.
+</dd>
         </div>
         <div class="reveal py-6">
-          <dt data-block="faq.which-q" class="text-[19px] font-bold">В какого дурака он умеет?</dt>
+          <dt data-block="faq.which-q" class="text-[19px] font-bold">В какого дурака он считает?</dt>
           <dd data-block="faq.which-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-            В подкидного, от двух до десяти игроков. Он записывает порядок выхода и дурака,
-            но не раздаёт карты и не судит игру.
-          </dd>
+  В подкидного, от двух до десяти игроков. Бот записывает порядок выхода и того, кто остался дураком. Карты он не раздаёт и за игрой не следит.
+</dd>
         </div>
         <div class="reveal py-6">
           <dt data-block="faq.install-q" class="text-[19px] font-bold">Нужно что-то устанавливать?</dt>
           <dd data-block="faq.install-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-            Нет. Добавьте бота в группу и отправьте <code class="cmd">/game</code> с именами.
-          </dd>
+  Нет. Добавьте бота в группу и отправьте <code class="cmd">/game</code> с именами.
+</dd>
         </div>
         <div class="reveal py-6">
           <dt data-block="faq.copy-q" class="text-[19px] font-bold">Можно поднять свою копию?</dt>
           <dd data-block="faq.copy-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-            Да, весь бот
-            <a href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="text-accent underline decoration-line underline-offset-4 hover:text-accent-soft">открыт под лицензией MIT</a>
-            — нужен Node 24, шага сборки нет.
-          </dd>
+  Да. Весь код открыт <a href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="text-accent underline decoration-line underline-offset-4 hover:text-accent-soft">под лицензией MIT</a>. Нужен Node 24, сборки нет.
+</dd>
         </div>
       </dl>
     </div>
@@ -399,17 +372,16 @@
 
   <section aria-labelledby="cta-heading" class="border-t border-line bg-panel">
     <div class="reveal mx-auto max-w-6xl px-5 py-20 text-center sm:px-8">
-      <h2 data-block="cta.title" id="cta-heading" class="mx-auto max-w-[24ch] text-[32px] font-black leading-tight tracking-[-0.02em] sm:text-[44px]">
-        В пятницу снова сядете за стол.
-      </h2>
-      <p data-block="cta.lead" class="mx-auto mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-        Пусть в этот раз счёт запишется сам. Добавить бота — одно нажатие, а печатать
-        придётся только имена — и только когда меняется состав.
-      </p>
+      <h2 data-block="cta.title" data-rev="3" id="cta-heading" class="mx-auto max-w-[24ch] text-[32px] font-black leading-tight tracking-[-0.02em] sm:text-[44px]">
+  Сыграйте в пятницу и узнайте, кто на самом деле лучший
+</h2>
+      <p data-block="cta.lead" data-rev="3" class="mx-auto mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
+  Без ручного подсчёта: бот сам покажет, кто лучший игрок, кому какие награды достались за вечер и как каждый играл за всё время. Добавляется он одним нажатием, а имена вы печатаете один раз и потом только тогда, когда меняется состав.
+</p>
       <div class="mt-9 flex flex-wrap justify-center gap-3">
         <a data-block="cta.add" href="https://t.me/FoolProofMegaBot?startgroup=true" rel="noopener" class="btn btn-accent">
-          <span aria-hidden="true">➕</span> Добавить в группу
-        </a>
+  <span aria-hidden="true">➕</span> Добавить в группу
+</a>
         <a data-block="cta.open" href="https://t.me/FoolProofMegaBot" rel="noopener" class="btn btn-ghost">Открыть бота</a>
       </div>
     </div>
@@ -419,7 +391,7 @@
 
 <footer class="border-t border-line">
   <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-[15px] text-dim sm:flex-row sm:items-center sm:px-8">
-    <p data-block="footer.line">FoolProof — журнал вечера для подкидного дурака.</p>
+    <p data-block="footer.line">FoolProof — таблица счёта для подкидного дурака.</p>
     <nav aria-label="Подвал" class="flex flex-wrap gap-6 sm:ml-auto">
       <a data-block="footer.story" href="case-study/" class="hover:text-ink">История разработки</a>
       <a data-block="footer.github" href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="hover:text-ink">GitHub</a>
@@ -428,8 +400,8 @@
     </nav>
   </div>
   <div data-block="footer.disclaimer" class="mx-auto max-w-6xl px-5 pb-10 font-mono text-[12px] text-edge sm:px-8">
-    Не связан с Telegram.
-  </div>
+  Не связан с Telegram.
+</div>
 </footer>
 
 <script data-goatcounter="https://alehvasilyeu.goatcounter.com/count"

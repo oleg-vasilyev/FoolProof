@@ -58,9 +58,19 @@ For each block, in the tree's order:
 4. **Keep the words the tree keeps.** A command is printed verbatim inside
    `<code class="cmd">`; a term the page's glossary defines (*harness*, *gate*,
    *phase*, *skill*, *agent*, *owner*, *turn*) is used as the glossary spells it
-   and never paraphrased into a metaphor.
+   and never paraphrased into a metaphor. **A proper name is never transliterated**:
+   Telegram, GitHub, Node, ESLint, Stryker stay in Latin letters in Russian prose
+   — the owner's rule, 16 September 2026 — and only a compound the page already
+   uses as a common noun («телеграм-бот») may be written in Cyrillic. **The game's
+   own phrases beat a description of them**: «первым ходят на дурака», not «первым
+   ходит сосед дурака»; «остался дураком», not «проиграл».
 5. **One paragraph, unless the block says `granularity: section`.** Then as many
    as the language needs, and no more.
+6. **A heading or an eyebrow is simple and catchy, never a sentence.** Two to
+   four words that a poster could carry — the owner's examples: «Ещё
+   сомневаетесь?», «Сделан под вечер пятницы» — and no pronoun opening it. A
+   heading that describes its section («Что стоит выяснить до того, как добавить
+   бота») is a fact restated, and he rejected it on sight.
 
 ## What the sentence has to survive
 
@@ -69,6 +79,9 @@ and is reading it on a phone. It has to survive four things:
 
 - **A verb in every clause.** A dash or a semicolon standing where the verb should
   be is the commonest fault on these pages. *«с тех пор — 50%»* is two fragments.
+- **No word twice in one sentence.** «Кто остался неотмеченным, тот остался
+  дураком», «одно нажатие, одной рукой», «кто за кем выходил… и покажет, кто» —
+  the owner refused all three on sight, on one page, in one afternoon.
 - **A subject the reader can see.** *«гейт, который двигался за цену на своём
   билете»* has a subject, but only somebody who read the English knows which. If a
   noun needs the code or the other language to be understood, say what it is.

@@ -14,6 +14,19 @@ other spells it as a word (*era 2* against *во второй эпохе*); `com
 it may cite; and `rev:` climbs when a fact changes so the pages go red until
 rewritten. A block is one paragraph unless it says `granularity: section`.
 
+## The page's job
+
+A visitor arrives from a link, plays cards with friends, and has never heard of the
+bot. The page has one job: make them want to add it to their group tonight. So every
+paragraph sells a benefit the table gets — no counting by hand, the evening's best
+player named for certain, awards that make every player somebody, a personal record
+across every game — and states the facts below as the proof of that benefit, never as
+a description of the software. The owner's own lines for the tone: «играете в карты с
+друзьями — FoolProof улучшит ваш опыт», «узнайте, кто лучший игрок, без ручных
+подсчётов», «добавьте изюминку в игру интересными наградами для каждого игрока»,
+«получите свою персональную статистику сквозь партии». Nothing may be said that the
+facts do not back, and nothing may read as a burden («придётся», «приходится»).
+
 ## header
 
 ### skip
@@ -32,7 +45,7 @@ rewritten. A block is one paragraph unless it says `granularity: section`.
 - Leads to the questions.
 
 ### nav-story
-- Leads to the case study, the story of how the bot was built.
+- Leads to the case study, the story of how the bot was built — named so a visitor cannot mistake it («История разработки», "How it was built"), never a bare «История» or "Story".
 
 ### nav-source
 - Leads to the source on GitHub.
@@ -58,9 +71,10 @@ rewritten. A block is one paragraph unless it says `granularity: section`.
 - The one line the page is about: the players play the cards, the bot keeps the score.
 
 ### lead
-- Add the bot to the group chat where the table gathers.
-- The line-up is sent once; after that the players tap who went first and tap each player out.
-- By the end of the night the evening comes back as two posters, and any one player's whole record as a third.
+- The benefit first: the table plays cards with friends and gets, without counting anything by hand, the evening's story and who its best player was.
+- What it takes: add the bot to the group chat, send the line-up once, then tap who went first and tap each player out.
+- What comes back: two posters about the evening, and any one player's whole record across every game as a third.
+rev: 2
 
 ### add
 - The button that adds the bot to a group.
@@ -83,7 +97,8 @@ numbers: 3
 numbers: 1, 2
 
 ### card-caption
-- The card is one message edited in place, so the chat never fills up with score-keeping.
+- The card is one message that the bot keeps editing as the game goes on, so the chat never fills up with score-keeping — say "edited as the game goes", never a calque of "in place".
+rev: 2
 
 ## how
 
@@ -126,7 +141,8 @@ numbers: 3
 ### step3-body
 - /stats draws the chronology, and the awards too once five games are in.
 - /personal draws one player across every evening they played.
-- /next opens the same table again, and the fool's neighbour goes first.
+- /next opens the same table again, and the first move is made on the fool, as the game says it (in Russian, «ходят на дурака»).
+rev: 2
 
 ## posters
 
@@ -137,7 +153,9 @@ numbers: 3
 - The evening is drawn rather than listed.
 
 ### lead
-- All three posters are drawn by the bot itself, sized to be read at arm's length across a table after Telegram has recompressed them.
+- The benefit: the whole evening becomes something to look at and argue over, not a column of numbers — the best player named, the fool named, and awards spread around the table (nine on the poster, so not one each at a full table).
+- The posters are comfortable to use from a phone — that much and no more; the owner cut "readable across the table after Telegram recompressed them" as a detail nobody needs.
+rev: 5
 
 ### tab-chronology
 - The tab that shows the chronology.
@@ -155,8 +173,9 @@ numbers: 3
 - The chronology.
 
 ### chronology-body
-- A row per game, a column per player.
+- A row per game, a column per player, and each cell prints where that player finished.
 - It marks only what an ordinary finish is not: a draw for last place, being left the fool, sitting a game out.
+rev: 2
 
 ### awards-command
 - The command that draws the awards, /stats_awards, verbatim.
@@ -166,8 +185,9 @@ numbers: 3
 
 ### awards-body
 - More than forty awards exist and nine fit on the poster.
-- The king and the fool are always shown; the rest of the places go around the table, rarest award first.
+- Two are always shown: the king of the table, the player who finished ahead of the most opponents over the evening, and the fool of the night; the rest of the places go around the table, rarest award first.
 - That is what stops every Friday's poster reading the same.
+rev: 2
 
 ### personal-command
 - The command that draws the player's card, /personal, verbatim.
@@ -176,8 +196,9 @@ numbers: 3
 - The player's card.
 
 ### personal-body
-- One player across everything they ever played.
+- One player across everything they ever played: four percentages about them, a chart of how they did evening by evening, and the facts that stuck.
 - Twenty facts compete for four places, so two people at the same table rarely get cards that read alike.
+rev: 2
 
 ## why
 
@@ -191,8 +212,9 @@ numbers: 3
 - Taps, not typing.
 
 ### taps-body
-- Input happens on a phone, one-handed, between games, so the whole product is one message with a keyboard on it.
+- Keeping score is effortless and never pulls anyone out of the game: the score lives in one message with buttons, and a game is marked from a phone, one-handed, between games (not "the whole bot is one message" — the bot also sends posters). Say the ease, never the burden.
 - A wrong tap noticed only after Confirm is not final: /reopen brings the last game back as a card, and Back takes the tap off.
+rev: 3
 
 ### privacy-title
 - The bot cannot read the rest of the chat.
@@ -223,7 +245,8 @@ numbers: 3
 - Two to ten at the table.
 
 ### table-body
-- /next_with and /next_without change the line-up when somebody arrives or goes home.
+- The line-up need not stay the same all evening: /next_with adds somebody who joined the table to the next game, /next_without leaves out somebody who stepped away or sits a game out — not "goes home".
+rev: 3
 
 ## faq
 
@@ -274,11 +297,13 @@ numbers: 24
 ## cta
 
 ### title
-- The reader's table plays on Friday.
+- A call to the reader, not a statement, and a benefit in it: play on Friday and find out who the best player really is.
+rev: 3
 
 ### lead
-- This time the score keeps itself.
-- Adding the bot is one tap, and the only thing ever typed is names, and only when the line-up changes.
+- Three benefits as calls, one sentence each: learn who the best player is without counting by hand («без ручного подсчёта», never «на бумажке» or any other embellishment); give the game some spice with awards spread around the table (nine a poster, so not "every player"); get a personal record across every game played.
+- Adding the bot is one tap, and names are typed only when the line-up changes — said as ease, never as a burden.
+rev: 3
 
 ### add
 - The button that adds the bot to a group.
@@ -292,7 +317,7 @@ numbers: 24
 - FoolProof is a scoresheet for Podkidnoy Durak.
 
 ### story
-- Leads to the case study.
+- Leads to the case study, named as in the header: «История разработки», "How it was built".
 
 ### github
 - Leads to GitHub.
