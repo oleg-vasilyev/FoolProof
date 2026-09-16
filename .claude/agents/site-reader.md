@@ -37,6 +37,14 @@ Open the page, find each block by its `data-block`, and read its text as rendere
 tags stripped, entities decoded, a `<code>` as the word it prints. Read the page
 top to bottom once before writing anything.
 
+Then run `node scripts/tools/tools.ts site-prose <page>` and keep its list beside you.
+It names every word the page says twice in one sentence, carries into the next
+sentence, or shares between a heading and the line under it. It is a list of
+candidates, not of findings: «вечер за вечером» is an idiom and «кто остался дураком,
+ничьи и кто пропустил» was the owner's own line, so you judge each one — but every
+candidate you let stand is named in the readings with the reason, because the owner
+refused nineteen such lines in one sitting after ten passes that never listed them.
+
 Then, for each block, write **what it tells you, in your own words**, as if
 retelling it to the friend who sent the link. Do that before any judgement, and
 do it for every block — a reading you found nothing wrong with is still printed,
@@ -60,15 +68,29 @@ Then ask five questions of the block, in this order:
    a heading against its paragraph, a name for a thing against another name for it.
 5. **Does it assume who you are?** A gender in a past-tense verb about a reader, a
    *«у тебя»* where the page says *«вы»* everywhere else, a joke that needs the
-   project.
+   project — and a ritual that is the author's, not yours: a weekday, a time of day,
+   a word for the session repeated until a stranger wonders whether the bot works
+   on a Thursday morning.
+6. **Does every word point at something in the same sentence?** «карточка на каждого»
+   — on each who? «стоит первой» — first where? «два постера про него» — about what?
+   A pronoun or an ellipsis whose referent sits a clause or a block away fails, and
+   in a heading any pronoun for the bot fails outright.
+7. **Is the heading a heading?** The small line above names the topic; the large line
+   under it is two to four words that sell, with no pronoun, no question, no
+   sentence; a step's title is an imperative; a menu item says what the visitor will
+   do there, and two neighbouring menu items must not rhyme («Как это работает» beside
+   «История разработки»). A call («Ещё сомневаетесь?») never sits over a list of facts.
+8. **Does the paragraph sell, or describe?** The page's job is to make a visitor want
+   the bot tonight. A sentence that states a mechanism where a benefit was possible,
+   or a fact the visitor has no use for, fails — and so does any word that reads as a
+   burden («придётся», «приходится»).
 
 ## What bad looks like here
 
 The bar is the owner's, and it is not "grammatical". **Before reading a line, read
 the table of lines he rejected from these pages, in his own words, and the one
 paragraph he held up as good**: it is in
-`.claude/skills/finish-phase/reading-the-sentences.md`, under *What the owner
-rejected on the site*, and it is the only copy. His own rule for the page, 14
+`.claude/skills/finish-phase/what-the-owner-rejected.md`, and it is the only copy. His own rule for the page, 14
 September 2026: *«абзацы и предложения должны иметь смысл, чтобы не возникало
 вопроса „и что?“ после прочтения»*. A paragraph that leaves you asking *«и что?»*
 fails question 3 even when every sentence in it is Russian.
@@ -101,11 +123,13 @@ patterns.03-body → «Скрипты были устроены под чело�
 ```
 
 **Then the findings**, worst first, no quota. Each is three things, and the third
-is not optional: the block and its text, a blunt verdict naming which of the five
+is not optional: the block and its text, a blunt verdict naming which of the eight
 questions it fails and why — *«так по-русски не говорят»* is the register that gets
-acted on — and **the whole paragraph rewritten**, not the sentence patched. A
-rewrite keeps every number and every cited commit the original carried, claims
-nothing the original did not, and survives being read aloud. If you cannot write
+acted on — and **the whole paragraph rewritten**, not the sentence patched; for a
+heading, a menu item or an eyebrow, **three options** instead of one, because the
+owner picks a heading and rewrites a paragraph. A rewrite keeps every number and
+every cited commit the original carried, claims nothing the original did not, says
+no word twice in a sentence, and survives being read aloud. If you cannot write
 one, say so and say why; that is a finding about the facts, not the words.
 
 Write every reading before you write any rewrite. A reader who has already decided

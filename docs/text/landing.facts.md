@@ -14,6 +14,14 @@ other spells it as a word (*era 2* against *во второй эпохе*); `com
 it may cite; and `rev:` climbs when a fact changes so the pages go red until
 rewritten. A block is one paragraph unless it says `granularity: section`.
 
+A page held to this tree also keeps its words: `avoid-ru:` and `avoid-en:` list the
+stems a language never prints, and `docs-check` fails a page that says one, or a
+heading that says «он» about the bot. What the tool `node scripts/tools/tools.ts
+site-prose <page>` lists is only a candidate for the site-reader to judge.
+
+avoid-ru: пятниц, бумажк, придётся, приходится, зараста
+avoid-en: friday
+
 ## The page's job
 
 A visitor arrives from a link, plays cards with friends, and has never heard of the
@@ -90,10 +98,10 @@ rev: 2
 numbers: 3
 
 ### card-first
-- The card names who went first in this game.
+- The card names who moves first in this game, in the bot's own line («Ходит первым: Олег», "Went first: Oleg"); the control row has no Cancel key at this phase, the owner's screenshot of 16 September 2026 shows exactly Back and Draw.
 
 ### card-keys
-- Six keys: two players already marked first and second, two players still to tap, a draw key and a back key.
+- Six keys: two players already marked first and second, two players still to tap, then the control row as the bot draws it — Back on the left, Draw on the right, each with the bot's own emoji (↩️, 🟢).
 numbers: 1, 2
 
 ### card-caption
@@ -141,8 +149,8 @@ numbers: 3
 ### step3-body
 - /stats draws the chronology, and the awards too once five games are in.
 - /personal draws one player across every evening they played.
-- /next opens the same table again, and the first move is made on the fool, as the game says it (in Russian, «ходят на дурака»).
-rev: 2
+- /next opens the same table again — and nothing about who moves first; the owner cut «и первым ходят на дурака» as a detail the visitor does not need.
+rev: 3
 
 ## posters
 
@@ -153,7 +161,7 @@ rev: 2
 - The evening is drawn rather than listed.
 
 ### lead
-- The benefit: the whole evening becomes something to look at and argue over, not a column of numbers — the best player named, the fool named, and awards spread around the table (nine on the poster, so not one each at a full table).
+- The benefit: the whole evening becomes something to look at and argue over, not a column of numbers — the best player named, the fool named, and nearly every player getting an award (nine on the poster, so not one each at a full table; the owner refused «разошлись по столу», the meaning is that the players get them).
 - The posters are comfortable to use from a phone — that much and no more; the owner cut "readable across the table after Telegram recompressed them" as a detail nobody needs.
 rev: 5
 
@@ -186,7 +194,7 @@ rev: 2
 ### awards-body
 - More than forty awards exist and nine fit on the poster.
 - Two are always shown: the king of the table, the player who finished ahead of the most opponents over the evening, and the fool of the night; the rest of the places go around the table, rarest award first.
-- That is what stops every Friday's poster reading the same.
+- That is what stops two posters ever reading the same.
 rev: 2
 
 ### personal-command
@@ -206,13 +214,14 @@ rev: 2
 - This section says why the bot is shaped the way it is.
 
 ### title
-- It is built for a Friday evening.
+- It is built for a real game among friends at a table — never a weekday or a time of day: the owner cut «пятница» on 16 September 2026 because a stranger reads it as the only time the bot works. Warmth stays; the ritual goes.
+rev: 2
 
 ### taps-title
 - Taps, not typing.
 
 ### taps-body
-- Keeping score is effortless and never pulls anyone out of the game: the score lives in one message with buttons, and a game is marked from a phone, one-handed, between games (not "the whole bot is one message" — the bot also sends posters). Say the ease, never the burden.
+- Keeping score is effortless and never pulls anyone out of the game: the score lives in one message with buttons, and a game is marked from a phone, one-handed, in the pause before the next deal (not "the whole bot is one message" — the bot also sends posters; not «между партиями» beside «партию», the owner refused the repeat). Say the ease, never the burden.
 - A wrong tap noticed only after Confirm is not final: /reopen brings the last game back as a card, and Back takes the tap off.
 rev: 3
 
@@ -251,10 +260,12 @@ rev: 3
 ## faq
 
 ### eyebrow
-- Questions to settle before adding the bot.
+- The abbreviation the menu uses, FAQ, in both languages.
+rev: 3
 
 ### title
-- Questions.
+- Questions and answers, plainly — no call: the owner tried «Ещё сомневаетесь?» both above and as the heading on 16 September 2026 and cut it, because a call over a list of factual questions stood out from the section.
+rev: 3
 
 ### free-q
 - Is it free?
@@ -297,11 +308,11 @@ numbers: 24
 ## cta
 
 ### title
-- A call to the reader, not a statement, and a benefit in it: play on Friday and find out who the best player really is.
-rev: 3
+- A call to the reader, not a statement, and a benefit in it: sit down to play and find out who the best player really is — no weekday named, same reason as why.title.
+rev: 4
 
 ### lead
-- Three benefits as calls, one sentence each: learn who the best player is without counting by hand («без ручного подсчёта», never «на бумажке» or any other embellishment); give the game some spice with awards spread around the table (nine a poster, so not "every player"); get a personal record across every game played.
+- Three benefits as calls, one sentence each: learn who the best player is without counting by hand («без ручного подсчёта», never «на бумажке» or any other embellishment); give the game some spice with named awards for nearly every player (nine a poster, so not "every player"); get a personal record across every game played. The first call must not repeat the title's «кто лучший».
 - Adding the bot is one tap, and names are typed only when the line-up changes — said as ease, never as a burden.
 rev: 3
 

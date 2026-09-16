@@ -90,9 +90,9 @@
     </a>
 
     <nav aria-label="Основная" class="ml-auto hidden items-center gap-7 text-[15px] text-muted md:flex">
-      <a data-block="header.nav-how" href="#how" class="hover:text-ink">Как это работает</a>
+      <a data-block="header.nav-how" href="#how" class="hover:text-ink">Как пользоваться</a>
       <a data-block="header.nav-posters" href="#posters" class="hover:text-ink">Постеры</a>
-      <a data-block="header.nav-faq" href="#faq" class="hover:text-ink">Вопросы</a>
+      <a data-block="header.nav-faq" href="#faq" class="hover:text-ink">FAQ</a>
       <a data-block="header.nav-story" href="case-study/" class="hover:text-ink">История разработки</a>
       <a data-block="header.nav-source" href="https://github.com/oleg-vasilyev/FoolProof" class="hover:text-ink" rel="noopener">Исходники</a>
     </nav>
@@ -137,7 +137,7 @@
 </h1>
 
         <p data-block="hero.lead" data-rev="2" class="hero-rise-2 mt-6 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-  Играете в дурака с друзьями? FoolProof запомнит за вас порядок выхода в каждой партии и покажет, кто на самом деле лучший игрок. Добавьте бота в групповой чат и один раз отправьте ему имена. Дальше только нажимайте кнопки: кто ходил первым и кто за кем вышел. Когда вечер закончится, попросите у бота два постера про него, а по любому игроку он нарисует карточку за все партии, которые тот когда-либо сыграл.
+  Играете в дурака с друзьями? Добавьте бота в групповой чат, один раз отправьте состав и дальше только отмечайте нажатием первый ход и каждый выход из партии. Без ручного подсчёта вы получите два постера о вечере с его лучшим игроком, а третьим бот пришлёт личную статистику любого участника за все партии.
 </p>
 
         <div class="hero-rise-3 mt-9 flex flex-wrap gap-3">
@@ -155,7 +155,7 @@
       <figure class="hero-rise-4 lg:justify-self-end">
         <div class="w-full max-w-[420px] rounded-2xl border border-line bg-card p-5 shadow-2xl shadow-black/50">
           <p data-block="hero.card-title" class="text-[17px] font-bold">Партия 3</p>
-          <p data-block="hero.card-first" class="mt-1 text-[15px] text-muted">Первым ходил <span class="text-ink">Олег</span></p>
+          <p data-block="hero.card-first" class="mt-1 text-[15px] text-muted">Ходит первым: <span class="text-ink">Олег</span></p>
 
           <div data-block="hero.card-keys" class="mt-4 grid grid-cols-2 gap-2" role="img"
                aria-label="Клавиатура бота: Олег вышел первым, Рома вторым; Аня и Дима ещё не отмечены.">
@@ -163,12 +163,12 @@
             <span class="key border-accent/60 text-accent">✅ 2 Рома</span>
             <span class="key key-live">Аня</span>
             <span class="key">Дима</span>
-            <span class="key">🤝 Ничья</span>
             <span class="key">↩️ Назад</span>
+            <span class="key">🟢 Ничья</span>
           </div>
         </div>
         <figcaption data-block="hero.card-caption" data-rev="2" class="mt-4 max-w-[420px] font-mono text-[13px] leading-relaxed text-dim">
-  Карточка — это одно сообщение, которое бот редактирует по ходу партии, поэтому чат не зарастает подсчётами.
+  Карточка — это одно сообщение, которое бот редактирует по ходу партии, поэтому чат не засоряется подсчётами.
 </figcaption>
       </figure>
 
@@ -177,8 +177,8 @@
 
   <section id="how" aria-labelledby="how-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="how.eyebrow" class="eyebrow">Один вечер от начала до конца</p>
-      <h2 data-block="how.title" id="how-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Три шага на весь вечер</h2>
+      <p data-block="how.eyebrow" class="eyebrow">Весь сценарий от начала до конца</p>
+      <h2 data-block="how.title" id="how-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Три шага на всю игру</h2>
 
       <ol class="mt-12 grid gap-6 md:grid-cols-3">
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
@@ -192,14 +192,14 @@
           <p data-block="how.step2-label" class="font-mono text-[13px] text-accent">Шаг 2</p>
           <h3 data-block="how.step2-title" class="mt-3 text-[21px] font-bold">Отмечайте, кто вышел</h3>
           <p data-block="how.step2-body" class="mt-3 text-[16px] leading-relaxed text-muted">
-  Сначала нажмите на того, кто ходил первым. Потом нажимайте на игроков в том порядке, в каком они выходили, и в конце нажмите «Записать». Кого не отметили, тот и остался дураком. Печатать ничего не нужно.
+  Сначала коснитесь того, кто ходил первым. Потом отмечайте игроков по мере того, как они выходят, и завершите партию кнопкой «Записать». Кого не отметили, тот и остался дураком. Печатать ничего не нужно.
 </p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
           <p data-block="how.step3-label" class="font-mono text-[13px] text-accent">Шаг 3</p>
-          <h3 data-block="how.step3-title" class="mt-3 text-[21px] font-bold">Спросите, как прошёл вечер</h3>
-          <p data-block="how.step3-body" data-rev="2" class="mt-3 text-[16px] leading-relaxed text-muted">
-  <code class="cmd">/stats</code> рисует хронологию вечера, а начиная с пятой партии ещё и награды. <code class="cmd">/personal</code> рисует одного игрока по всем вечерам, где он играл. <code class="cmd">/next</code> открывает новую партию тем же составом, и первым ходят на дурака.
+          <h3 data-block="how.step3-title" class="mt-3 text-[21px] font-bold">Посмотрите итоги</h3>
+          <p data-block="how.step3-body" data-rev="3" class="mt-3 text-[16px] leading-relaxed text-muted">
+  <code class="cmd">/stats</code> присылает хронологию серии игр, а после пятой партии и награды. <code class="cmd">/personal</code> рисует одного игрока сквозь все вечера, в которых он участвовал. <code class="cmd">/next</code> снова открывает тот же стол.
 </p>
         </li>
       </ol>
@@ -210,10 +210,10 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
       <p data-block="posters.eyebrow" class="eyebrow">Что рисует бот</p>
       <h2 data-block="posters.title" id="posters-heading" class="mt-4 max-w-[68ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">
-  Два постера про вечер и карточка на каждого
+  Вечер в картинках
 </h2>
       <p data-block="posters.lead" data-rev="5" class="mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-  Вместо столбика цифр вы получаете картинку, которую хочется разглядывать и обсуждать: на ней назван лучший игрок вечера, назван дурак, а награды разошлись по всему столу. И всем этим удобно пользоваться с телефона.
+  Вместо столбика цифр вы получаете картинку, которую хочется разглядывать и обсуждать: на ней назван лучший игрок вечера, виден дурак, а награды достаются почти всем участникам — на постере их девять. Идеально для просмотра прямо с телефона.
 </p>
 
       <div class="mt-12 lg:grid lg:grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)] lg:items-start lg:gap-8" data-deck>
@@ -234,7 +234,7 @@
               <p data-block="posters.chronology-command" class="font-mono text-[13px] text-accent">/stats_chronology</p>
               <h3 data-block="posters.chronology-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">Хронология</h3>
               <p data-block="posters.chronology-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
-  Каждая партия занимает строку, каждый игрок столбец, а в клетке стоит, каким по счёту он вышел. Особо выделено только то, что стоит обсудить: кто разделил последнее место, кто остался дураком и кто пропустил партию.
+  Каждая партия занимает строку, каждый игрок столбец, а в клетке стоит, каким по счёту он вышел. Отдельно выделено то, что достойно внимания: кто остался дураком, ничьи и кто пропустил партию.
 </p>
             </figcaption>
           </figure>
@@ -248,7 +248,7 @@
               <p data-block="posters.awards-command" class="font-mono text-[13px] text-accent">/stats_awards</p>
               <h3 data-block="posters.awards-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">Награды</h3>
               <p data-block="posters.awards-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
-  Наград больше сорока, на постер попадают девять. Две есть всегда: король стола, то есть тот, кто за вечер обошёл больше всех соперников, и дурак вечера. Остальные семь зависят от того, как прошёл вечер, и самая редкая из них стоит первой. Поэтому двух одинаковых постеров не бывает.
+  Наград больше сорока, на постер попадают девять. Две есть всегда: король стола, то есть тот, кто за серию игр обошёл больше всех соперников, и дурак вечера. Остальные семь каждый раз свои: их определяет ход игры, и наиболее редкие отображаются первыми. Поэтому двух одинаковых постеров не бывает.
 </p>
             </figcaption>
           </figure>
@@ -262,7 +262,7 @@
               <p data-block="posters.personal-command" class="font-mono text-[13px] text-accent">/personal</p>
               <h3 data-block="posters.personal-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">Карточка игрока</h3>
               <p data-block="posters.personal-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
-  На карточке один человек и всё, что он когда-либо сыграл: четыре его показателя в процентах, график по вечерам, как он играл, и факты, которые за ним закрепились. Фактов двадцать, а мест на карточке четыре, поэтому у двух людей за одним столом карточки почти никогда не совпадают.
+  На карточке один человек и всё, что он когда-либо сыграл: четыре показателя в процентах, график результатов вечер за вечером и факты, которые за ним закрепились. Фактов двадцать, а мест на карточке четыре, поэтому у двух людей за одним столом карточки почти никогда не совпадают.
 </p>
             </figcaption>
           </figure>
@@ -282,18 +282,18 @@
 
   <section id="why" aria-labelledby="why-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="why.eyebrow" class="eyebrow">Почему он такой</p>
-      <h2 data-block="why.title" id="why-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Сделан под вечер пятницы</h2>
+      <p data-block="why.eyebrow" class="eyebrow">Основные идеи</p>
+      <h2 data-block="why.title" data-rev="2" id="why-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Сделан под живую игру</h2>
 
       <ul class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         <li class="reveal">
           <h3 data-block="why.taps-title" class="text-[19px] font-bold">Нажимать, а не печатать</h3>
           <p data-block="why.taps-body" data-rev="3" class="mt-2 text-[16px] leading-relaxed text-muted">
-  Счёт ведётся кнопками в сообщении бота, поэтому он не отвлекает от игры: партию отмечают с телефона, одной рукой, между партиями. Нажали лишнее — «Назад» это отменит. Заметили ошибку уже после «Записать» — <code class="cmd">/reopen</code> откроет последнюю партию заново, и её можно поправить.
+  Вести счёт легко: всё происходит в одном сообщении с кнопками, партию отмечают с телефона, одной рукой, в паузе перед следующей раздачей, так что игра не прерывается. Если ошибку заметили уже после «Записать», ничего не потеряно: <code class="cmd">/reopen</code> возвращает последнюю партию карточкой, а «Назад» снимает лишнюю отметку.
 </p>
         </li>
         <li class="reveal">
-          <h3 data-block="why.privacy-title" class="text-[19px] font-bold">Чат он не читает</h3>
+          <h3 data-block="why.privacy-title" class="text-[19px] font-bold">Не читает чат</h3>
           <p data-block="why.privacy-body" class="mt-2 text-[16px] leading-relaxed text-muted">
   В обычном режиме приватности Telegram бот получает только команды и ответы на свои сообщения. Разговор в чате до него не доходит.
 </p>
@@ -301,13 +301,13 @@
         <li class="reveal">
           <h3 data-block="why.restart-title" class="text-[19px] font-bold">Ничего не теряется</h3>
           <p data-block="why.restart-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-  Если бот посреди партии упал или обновился, всё, что вы уже нажали, остаётся на месте: карточка восстанавливается из записанного, и вечер продолжается.
+  Если бот посреди партии упал или обновился, всё, что вы уже нажали, остаётся на месте: карточка восстанавливается из записанного, и игра продолжается.
 </p>
         </li>
         <li class="reveal">
           <h3 data-block="why.names-title" class="text-[19px] font-bold">Один игрок под двумя именами</h3>
           <p data-block="why.names-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-  Кто-то один раз написал <span class="cmd">Аня</span>, а весь остальной вечер — <span class="cmd">Анна</span>. <code class="cmd">/merge</code> снова делает из двух имён одного человека. А если целый вечер записан не на то имя, <code class="cmd">/replace</code> переносит его на нужное.
+  Кто-то один раз написал <span class="cmd">Аня</span>, а дальше всю встречу — <span class="cmd">Анна</span>. <code class="cmd">/merge</code> снова делает из двух имён одного человека. А если вся встреча записана не на то имя, <code class="cmd">/replace</code> переносит её на нужное.
 </p>
         </li>
         <li class="reveal">
@@ -319,7 +319,7 @@
         <li class="reveal">
           <h3 data-block="why.table-title" class="text-[19px] font-bold">От двух до десяти за столом</h3>
           <p data-block="why.table-body" data-rev="3" class="mt-2 text-[16px] leading-relaxed text-muted">
-  Состав не обязан быть одним на весь вечер. Кто-то подсел к столу — <code class="cmd">/next_with</code> добавит его в следующую партию. Кто-то отошёл или решил пропустить партию — <code class="cmd">/next_without</code> его уберёт.
+  Состав не обязан быть одним на всю встречу. Кто-то подсел к столу — <code class="cmd">/next_with</code> добавит его в следующую партию. Кто-то отошёл или решил пропустить партию — <code class="cmd">/next_without</code> его уберёт.
 </p>
         </li>
       </ul>
@@ -328,8 +328,8 @@
 
   <section id="faq" aria-labelledby="faq-heading">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="faq.eyebrow" class="eyebrow">Ещё сомневаетесь?</p>
-      <h2 data-block="faq.title" id="faq-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Вопросы</h2>
+      <p data-block="faq.eyebrow" data-rev="3" class="eyebrow">FAQ</p>
+      <h2 data-block="faq.title" data-rev="3" id="faq-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Вопросы и ответы</h2>
 
       <dl class="mt-12 max-w-[68ch] divide-y divide-line border-t border-line">
         <div class="reveal py-6">
@@ -372,11 +372,11 @@
 
   <section aria-labelledby="cta-heading" class="border-t border-line bg-panel">
     <div class="reveal mx-auto max-w-6xl px-5 py-20 text-center sm:px-8">
-      <h2 data-block="cta.title" data-rev="3" id="cta-heading" class="mx-auto max-w-[24ch] text-[32px] font-black leading-tight tracking-[-0.02em] sm:text-[44px]">
-  Сыграйте в пятницу и узнайте, кто на самом деле лучший
+      <h2 data-block="cta.title" data-rev="4" id="cta-heading" class="mx-auto max-w-[24ch] text-[32px] font-black leading-tight tracking-[-0.02em] sm:text-[44px]">
+  Соберитесь за столом и узнайте, кто на самом деле лучший игрок
 </h2>
       <p data-block="cta.lead" data-rev="3" class="mx-auto mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-  Без ручного подсчёта: бот сам покажет, кто лучший игрок, кому какие награды достались за вечер и как каждый играл за всё время. Добавляется он одним нажатием, а имена вы печатаете один раз и потом только тогда, когда меняется состав.
+  Ручной подсчёт больше не нужен: бот ведёт его сам. Добавьте игре изюминку именными наградами почти для каждого участника. Получите персональную статистику сквозь все сыгранные партии. Бот добавляется одним касанием, и печатать имена нужно только при смене состава.
 </p>
       <div class="mt-9 flex flex-wrap justify-center gap-3">
         <a data-block="cta.add" href="https://t.me/FoolProofMegaBot?startgroup=true" rel="noopener" class="btn btn-accent">
@@ -391,7 +391,7 @@
 
 <footer class="border-t border-line">
   <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-[15px] text-dim sm:flex-row sm:items-center sm:px-8">
-    <p data-block="footer.line">FoolProof — таблица счёта для подкидного дурака.</p>
+    <p data-block="footer.line">FoolProof ведёт счёт в подкидного дурака.</p>
     <nav aria-label="Подвал" class="flex flex-wrap gap-6 sm:ml-auto">
       <a data-block="footer.story" href="case-study/" class="hover:text-ink">История разработки</a>
       <a data-block="footer.github" href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="hover:text-ink">GitHub</a>

@@ -262,7 +262,6 @@ a limit nobody has reached.
 
 ---
 
-
 ## The player card never says which table its expectation is read off
 
 Every tile on `/personal` prints «рассадка предсказывает 20%», averaged from
@@ -554,13 +553,14 @@ left it alone with nowhere to hide.
 that opens the mutation gate** — "touches `scripts/`" fired on one that only moved them,
 and the move of 9 September re-mutated every gates file for the same reason.
 
-## The site-text gate reads the body and nothing else
+## The site gates read the body, and the case study's tree holds no words
 
-`site-text` holds both languages of a page to its tree in `docs/text/`, but only the
-body's text nodes: not the `<title>`, the `meta` descriptions, an `aria-label` or `alt`,
-nor the chart strings in the case study's `<script>`, so those can drift unnoticed.
-**Extend it when one is found wrong in one language only, or when a page gets a third
-language** — a reader for the head and attributes, with `head.*` blocks in the tree.
+`site-text` holds a page to its tree only through the body's text nodes — not the
+`<title>`, `meta`, `aria-label`, `alt` or the case study's chart strings. **Extend it when
+one is found wrong in one language only, or when a page gets a third language.** And
+`site-prose` refuses «он» in a heading and the tree's `avoid-<lang>:` stems only for a tree
+that lists any; `case-study.facts.md` lists none, so the 5 Russian headings there saying «его»
+wait for **the Russian case-study rewrite, which adds the two `avoid-` lines first**.
 
 ## The picture gate cannot fork until its triage half moves out
 

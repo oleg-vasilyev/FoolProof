@@ -285,8 +285,8 @@ that changed no copy after stage 2 owes nothing here and says so in the commit.
 
 What the reader's brief owes it, why it reads **every** line filled with real values
 rather than only the ones a poster draws, what a drawing's own labels owe before the
-owner is shown them, and the question that pays for this gate twice are in [reading
-the sentences](reading-the-sentences.md).
+owner is shown them, and the question that pays for this gate twice are in [reading the
+sentences](reading-the-sentences.md); his verdicts on the site are [what the owner rejected](what-the-owner-rejected.md).
 
 ## 6. The pictures — only when the phase drew something
 

@@ -8,6 +8,9 @@ import { ENGLISH_SUFFIX, refreshDesignPage } from "./design-page.ts";
 import { GALLERY_DIR, POSTER_DIR } from "../drawings/drawn-into.ts";
 import { drawnByName, everyDrawing, featuresThatDraw } from "../drawings/feature-drawings.ts";
 import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
+import { proseCandidates } from "../docs-check/source/site-prose.ts";
+import { blocksOnPage } from "../docs-check/source/site-text.ts";
+import { read } from "../docs-check/document-files.ts";
 import { siteImageOf } from "./site-images.ts";
 import { REPORTS_DIR, tidyReports } from "./tidy-reports.ts";
 import {
@@ -125,6 +128,27 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     does: "delete one chat's games, players and language choice, leaving every other chat alone",
     usage: "node scripts/tools/tools.ts forget-chat <chat id>",
     run: forgetChat,
+  },
+  "site-prose": {
+    does:
+      "list every word a page of the site repeats — inside a sentence, across two sentences, " +
+      "between a heading and its line — for the site-reader to judge, never for a gate",
+    usage: "node scripts/tools/tools.ts site-prose <page.html>",
+    run: (args, say) => {
+      const page = args[PAGE_TO_READ];
+
+      if (page === undefined) {
+        throw new Error("site-prose needs the page to read, such as docs/ru/index.html");
+      }
+
+      const candidates = proseCandidates(page, blocksOnPage(read(page)).blocks);
+
+      for (const candidate of candidates) {
+        say(`${candidate.block}: "${candidate.words}" ${candidate.shape}`);
+      }
+
+      say(`${page} — ${String(candidates.length)} candidates`);
+    },
   },
   "design-page": {
     does: "redraw every mockup on a Claude Design page, leaving its prose alone",

@@ -62,7 +62,7 @@
         { "@type": "Question", "name": "Is it free?",
           "acceptedAnswer": { "@type": "Answer", "text": "Yes. No accounts, no ads, nothing to buy." } },
         { "@type": "Question", "name": "Does it read the chat?",
-          "acceptedAnswer": { "@type": "Answer", "text": "No. In Telegram's default privacy mode a bot receives only commands and replies to its own messages; the rest of the conversation never reaches it." } },
+          "acceptedAnswer": { "@type": "Answer", "text": "No: in Telegram's default privacy mode a bot is handed only commands and the messages written in reply to its own, and the rest of the conversation never reaches it." } },
         { "@type": "Question", "name": "What does it store?",
           "acceptedAnswer": { "@type": "Answer", "text": "The names sent to it, the results of the games played in that chat with each tap recorded against the Telegram id of whoever made it, and the language that chat picked. Nothing else." } },
         { "@type": "Question", "name": "Which Durak does it score?",
@@ -90,7 +90,7 @@
     </a>
 
     <nav aria-label="Primary" class="ml-auto hidden items-center gap-7 text-[15px] text-muted md:flex">
-      <a data-block="header.nav-how" href="#how" class="hover:text-ink">How it works</a>
+      <a data-block="header.nav-how" href="#how" class="hover:text-ink">How to use it</a>
       <a data-block="header.nav-posters" href="#posters" class="hover:text-ink">Posters</a>
       <a data-block="header.nav-faq" href="#faq" class="hover:text-ink">FAQ</a>
       <a data-block="header.nav-story" href="case-study/" class="hover:text-ink">How it was built</a>
@@ -137,7 +137,7 @@
 </h1>
 
         <p data-block="hero.lead" data-rev="2" class="hero-rise-2 mt-6 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-  Play cards with friends and find out who was best that night, without adding anything up by hand. Add the bot to your group chat, send the line-up once, then tap who made the first move and tap each player as they go out. At the end you get two posters about the evening, and any player can ask for a third: their own record across every game they ever played.
+  Sit down with friends and let the bot tell you who was best, with the whole story of the evening and nothing counted by hand. Add it to the group chat, send the line-up once, then mark who opened the game and tap everyone else as they finish. At the end you get two posters about that night, plus any player's record across every game.
 </p>
 
         <div class="hero-rise-3 mt-9 flex flex-wrap gap-3">
@@ -148,14 +148,14 @@
         </div>
 
         <p data-block="hero.footnote" class="hero-rise-3 mt-6 font-mono text-[13px] text-dim">
-  No accounts, nothing to install. The bot reads only commands and replies to its own messages.
+  No accounts, nothing to install, and your conversation never reaches the bot.
 </p>
       </div>
 
       <figure class="hero-rise-4 lg:justify-self-end">
         <div class="w-full max-w-[420px] rounded-2xl border border-line bg-card p-5 shadow-2xl shadow-black/50">
           <p data-block="hero.card-title" class="text-[17px] font-bold">Game 3</p>
-          <p data-block="hero.card-first" class="mt-1 text-[15px] text-muted"><span class="text-ink">Oleg</span> made the first move</p>
+          <p data-block="hero.card-first" class="mt-1 text-[15px] text-muted">Went first: <span class="text-ink">Oleg</span></p>
 
           <div data-block="hero.card-keys" class="mt-4 grid grid-cols-2 gap-2" role="img"
                aria-label="The bot's inline keyboard: Oleg finished first, Roma second; Anya and Dima are still to be tapped.">
@@ -163,8 +163,8 @@
             <span class="key border-accent/60 text-accent">✅ 2 Roma</span>
             <span class="key key-live">Anya</span>
             <span class="key">Dima</span>
-            <span class="key">🟢 Draw</span>
             <span class="key">↩️ Back</span>
+            <span class="key">🟢 Draw</span>
           </div>
         </div>
         <figcaption data-block="hero.card-caption" data-rev="2" class="mt-4 max-w-[420px] font-mono text-[13px] leading-relaxed text-dim">
@@ -177,8 +177,8 @@
 
   <section id="how" aria-labelledby="how-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="how.eyebrow" class="eyebrow">One evening</p>
-      <h2 data-block="how.title" id="how-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Three steps, one of them on repeat</h2>
+      <p data-block="how.eyebrow" class="eyebrow">Everything, start to finish</p>
+      <h2 data-block="how.title" id="how-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Three steps for the whole game</h2>
 
       <ol class="mt-12 grid gap-6 md:grid-cols-3">
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
@@ -192,14 +192,14 @@
           <p data-block="how.step2-label" class="font-mono text-[13px] text-accent">Step 2</p>
           <h3 data-block="how.step2-title" class="mt-3 text-[21px] font-bold">Tap who went out</h3>
           <p data-block="how.step2-body" class="mt-3 text-[16px] leading-relaxed text-muted">
-  Tap who made the first move, then tap each player as they go out, then tap Confirm. Whoever is left is the fool. Nothing gets typed.
+  Start by marking who moved first, press one button per player as each finishes, and end with Confirm. Whoever is left over is the fool. Nothing is typed.
 </p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
           <p data-block="how.step3-label" class="font-mono text-[13px] text-accent">Step 3</p>
-          <h3 data-block="how.step3-title" class="mt-3 text-[21px] font-bold">Ask how the evening went</h3>
-          <p data-block="how.step3-body" data-rev="2" class="mt-3 text-[16px] leading-relaxed text-muted">
-  <code class="cmd">/stats</code> draws the whole evening, game by game, and after five games it draws the awards too. <code class="cmd">/personal</code> draws one player's record across every evening they ever played. Then <code class="cmd">/next</code> opens the next game with the same players, and the fool is attacked first, as the rules of Durak say.
+          <h3 data-block="how.step3-title" class="mt-3 text-[21px] font-bold">See the results</h3>
+          <p data-block="how.step3-body" data-rev="3" class="mt-3 text-[16px] leading-relaxed text-muted">
+  <code class="cmd">/stats</code> draws the chronology, and the awards as well once five games are in. <code class="cmd">/personal</code> shows one player across every evening they took part in. <code class="cmd">/next</code> opens another game for the same players.
 </p>
         </li>
       </ol>
@@ -210,10 +210,10 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
       <p data-block="posters.eyebrow" class="eyebrow">What it draws</p>
       <h2 data-block="posters.title" id="posters-heading" class="mt-4 max-w-[68ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">
-  The evening on a poster
+  The evening in pictures
 </h2>
       <p data-block="posters.lead" data-rev="5" class="mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-  Instead of a column of numbers, the evening becomes something to look at and argue over: who was best, who was the fool, and who earned which award, spread around the table with nine to a poster. All three are comfortable to look at on a phone.
+  The whole evening turns into something to look at and argue over instead of a column of numbers: the best player is named, so is the fool, and nearly everyone at the table earns an award. The posters are easy to read on a phone.
 </p>
 
       <div class="mt-12 lg:grid lg:grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)] lg:items-start lg:gap-8" data-deck>
@@ -234,7 +234,7 @@
               <p data-block="posters.chronology-command" class="font-mono text-[13px] text-accent">/stats_chronology</p>
               <h3 data-block="posters.chronology-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">The chronology</h3>
               <p data-block="posters.chronology-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
-  Every game is a row and every player a column, and each cell says where that player finished. Only what is out of the ordinary gets a mark of its own: a draw for last place, being left the fool, a game somebody sat out.
+  Each game takes a row, every player a column, and the cells hold finishing places. Only what is worth attention gets a mark: the fool, a draw for last place, and anyone who sat one out.
 </p>
             </figcaption>
           </figure>
@@ -248,7 +248,7 @@
               <p data-block="posters.awards-command" class="font-mono text-[13px] text-accent">/stats_awards</p>
               <h3 data-block="posters.awards-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">The awards</h3>
               <p data-block="posters.awards-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
-  There are more than forty awards, and the poster has room for nine. Two are always on it: the king of the table, who finished ahead of the most opponents over the evening, and the fool of the night. The other places go around the table and the rarest award earned that night comes first, so no two Fridays end with the same poster.
+  There are more than forty awards, and nine fit on one poster. Two are always there: the king of the table, who finished ahead of the most opponents over the series of games, and the fool of the night. The other seven slots go to whatever the results earned, rarest award first, which is why no two posters ever look alike.
 </p>
             </figcaption>
           </figure>
@@ -262,7 +262,7 @@
               <p data-block="posters.personal-command" class="font-mono text-[13px] text-accent">/personal</p>
               <h3 data-block="posters.personal-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">The player's card</h3>
               <p data-block="posters.personal-body" data-rev="2" class="mt-4 text-[17px] leading-relaxed text-muted">
-  This one is about a single player over everything they ever played: four percentages about them, a chart of how they did evening by evening, and four moments that made their record. Twenty facts compete for those four spots, so two people at the same table rarely get cards that read alike.
+  One poster follows a player across everything they ever played: four percentages, a chart of their results evening by evening, and four facts about them worth remembering. The facts are picked from a pool of twenty, so two people at one table rarely end up with the same card.
 </p>
             </figcaption>
           </figure>
@@ -282,32 +282,32 @@
 
   <section id="why" aria-labelledby="why-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="why.eyebrow" class="eyebrow">Behind the design</p>
-      <h2 data-block="why.title" id="why-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Made for a Friday evening</h2>
+      <p data-block="why.eyebrow" class="eyebrow">The ideas behind the design</p>
+      <h2 data-block="why.title" data-rev="2" id="why-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Made for a table of friends</h2>
 
       <ul class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         <li class="reveal">
           <h3 data-block="why.taps-title" class="text-[19px] font-bold">Taps, not typing</h3>
           <p data-block="why.taps-body" data-rev="3" class="mt-2 text-[16px] leading-relaxed text-muted">
-  Keeping score never pulls anyone out of the game. The score lives in one message with buttons on it, so a game is marked from a phone, one-handed, between games. Tapped the wrong name? Back undoes it. Noticed only after Confirm? <code class="cmd">/reopen</code> brings the last game back as a card.
+  Nobody is pulled away from the table to keep score: everything sits in one message with buttons, and a result goes in from a phone, one-handed, in the pause before the next deal. A wrong tap noticed only after Confirm is not final: <code class="cmd">/reopen</code> brings the last game back as a card, and Back removes the mark.
 </p>
         </li>
         <li class="reveal">
-          <h3 data-block="why.privacy-title" class="text-[19px] font-bold">Never reads the chat</h3>
+          <h3 data-block="why.privacy-title" class="text-[19px] font-bold">The chat stays private</h3>
           <p data-block="why.privacy-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-  In Telegram's default privacy mode a bot receives only commands and replies to its own messages. The conversation never reaches it.
+  In Telegram's default privacy mode a bot is handed only commands and the messages written in reply to its own. The conversation itself never reaches it.
 </p>
         </li>
         <li class="reveal">
           <h3 data-block="why.restart-title" class="text-[19px] font-bold">Bot went down? Nothing lost</h3>
           <p data-block="why.restart-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-  Every tap is recorded, and the card is rebuilt from that record. If the bot crashes or gets updated in the middle of a game, it comes back with the card exactly where the game was.
+  The card is rebuilt from what was already recorded, so if the bot crashes or is updated in the middle of a game, the evening carries on where it stopped.
 </p>
         </li>
         <li class="reveal">
           <h3 data-block="why.names-title" class="text-[19px] font-bold">One player, two names</h3>
           <p data-block="why.names-body" class="mt-2 text-[16px] leading-relaxed text-muted">
-  Somebody types <span class="cmd">Anya</span> once and <span class="cmd">Ania</span> the rest of the night; <code class="cmd">/merge</code> folds the two back into one person. When a whole evening went under the wrong name, <code class="cmd">/replace</code> moves it to the right one.
+  Somebody types a name one way at first and another way for the rest of the night. <code class="cmd">/merge</code> folds both back into a single person. When a whole series went under the wrong name, <code class="cmd">/replace</code> moves it to the right one.
 </p>
         </li>
         <li class="reveal">
@@ -319,7 +319,7 @@
         <li class="reveal">
           <h3 data-block="why.table-title" class="text-[19px] font-bold">Two to ten at the table</h3>
           <p data-block="why.table-body" data-rev="3" class="mt-2 text-[16px] leading-relaxed text-muted">
-  The line-up need not stay the same all evening. When somebody joins the table, <code class="cmd">/next_with</code> adds them to the next game; when somebody steps away or sits a game out, <code class="cmd">/next_without</code> starts it without them.
+  The line-up can change as the session goes on: <code class="cmd">/next_with</code> brings in somebody who has just joined the table, and <code class="cmd">/next_without</code> leaves out anyone who has stepped away or wants to skip a game.
 </p>
         </li>
       </ul>
@@ -328,8 +328,8 @@
 
   <section id="faq" aria-labelledby="faq-heading">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="faq.eyebrow" class="eyebrow">Still wondering?</p>
-      <h2 data-block="faq.title" id="faq-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Questions</h2>
+      <p data-block="faq.eyebrow" data-rev="3" class="eyebrow">FAQ</p>
+      <h2 data-block="faq.title" data-rev="3" id="faq-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Questions and answers</h2>
 
       <dl class="mt-12 max-w-[68ch] divide-y divide-line border-t border-line">
         <div class="reveal py-6">
@@ -339,7 +339,7 @@
         <div class="reveal py-6">
           <dt data-block="faq.chat-q" class="text-[19px] font-bold">Does it read the chat?</dt>
           <dd data-block="faq.chat-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-  No. In Telegram's default privacy mode a bot receives only commands and replies to its own messages; the rest of the conversation never reaches it.
+  No: in Telegram's default privacy mode a bot is handed only commands and the messages written in reply to its own, and the rest of the conversation never reaches it.
 </dd>
         </div>
         <div class="reveal py-6">
@@ -372,11 +372,11 @@
 
   <section aria-labelledby="cta-heading" class="border-t border-line bg-panel">
     <div class="reveal mx-auto max-w-6xl px-5 py-20 text-center sm:px-8">
-      <h2 data-block="cta.title" data-rev="3" id="cta-heading" class="mx-auto max-w-[20ch] text-[32px] font-black leading-tight tracking-[-0.02em] sm:text-[44px]">
-  Play on Friday. Find out who is really the best.
+      <h2 data-block="cta.title" data-rev="4" id="cta-heading" class="mx-auto max-w-[20ch] text-[32px] font-black leading-tight tracking-[-0.02em] sm:text-[44px]">
+  Sit down to play and find out who the best player really is
 </h2>
       <p data-block="cta.lead" data-rev="3" class="mx-auto mt-5 max-w-[68ch] text-[18px] leading-relaxed text-muted">
-  Find out who the best player is without counting anything by hand. Add some spice with awards spread around the table, and get your own record across every game you ever played. Adding the bot is one tap, and you type names only when the line-up changes.
+  Let the bot do the counting and the standings are settled beyond argument. An award for nearly everyone at the table adds some spice to the evening, and your own record follows you from game to game. Adding FoolProof is a single tap, and names are typed only when the line-up changes.
 </p>
       <div class="mt-9 flex flex-wrap justify-center gap-3">
         <a data-block="cta.add" href="https://t.me/FoolProofMegaBot?startgroup=true" rel="noopener" class="btn btn-accent">
@@ -391,7 +391,7 @@
 
 <footer class="border-t border-line">
   <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-[15px] text-dim sm:flex-row sm:items-center sm:px-8">
-    <p data-block="footer.line">FoolProof is a scoresheet for Podkidnoy Durak.</p>
+    <p data-block="footer.line">FoolProof keeps the score in Podkidnoy Durak.</p>
     <nav aria-label="Footer" class="flex flex-wrap gap-6 sm:ml-auto">
       <a data-block="footer.story" href="case-study/" class="hover:text-ink">How it was built</a>
       <a data-block="footer.github" href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="hover:text-ink">GitHub</a>

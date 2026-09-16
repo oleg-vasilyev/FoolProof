@@ -39,6 +39,7 @@ import {
 } from "./source/source-tree.ts";
 import { imagesOutOfStep, siteCssOutOfStep } from "./source/site-pages.ts";
 import { siteTextOutOfStep } from "./source/site-text.ts";
+import { siteProseOutOfStep } from "./source/site-prose.ts";
 import { lineEndingsOutOfStep } from "./source/line-endings.ts";
 import { ALL_GATES } from "../gates/gate-list.ts";
 
@@ -88,6 +89,7 @@ const complaints = [
   ...siteCssOutOfStep(),
   ...imagesOutOfStep(),
   ...siteTextOutOfStep(),
+  ...siteProseOutOfStep(),
   ...lineEndingsOutOfStep(),
 ];
 

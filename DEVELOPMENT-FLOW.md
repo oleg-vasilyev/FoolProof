@@ -87,7 +87,8 @@ sequenceDiagram
         C->>R: the site-writer agent, once per language — the tree and the block ids, never the other language's page
         R-->>C: one paragraph per block, ready to be placed
         C->>C: place the paragraphs, build the page and look at it at a phone's width and a laptop's — a page is laid out by the browser, so the contact sheet is the built page itself
-        C->>R: the site-reader agent, once per language — the built page and nothing else
+        C->>C: node scripts/gates/gate-runner.ts docs-check — the tree's words and the headings' pronouns are refused here, before any reader is paid for
+        C->>R: the site-reader agent, once per language — the built page and nothing else — it runs node scripts/tools/tools.ts site-prose itself and judges every repeat the tool lists
         R-->>C: what each paragraph tells a visitor, and every one a person would not say that way, rewritten in full
         C->>R: the site-writer agent again with the findings, until the reader returns none
         C->>U: the built page for approval, at both widths

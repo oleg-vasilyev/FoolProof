@@ -67,10 +67,26 @@ For each block, in the tree's order:
 5. **One paragraph, unless the block says `granularity: section`.** Then as many
    as the language needs, and no more.
 6. **A heading or an eyebrow is simple and catchy, never a sentence.** Two to
-   four words that a poster could carry — the owner's examples: «Ещё
-   сомневаетесь?», «Сделан под вечер пятницы» — and no pronoun opening it. A
-   heading that describes its section («Что стоит выяснить до того, как добавить
-   бота») is a fact restated, and he rejected it on sight.
+   four words that a poster could carry — the owner's examples: «Сделан под живую
+   игру», «Вечер в картинках» — with **no pronoun for the bot anywhere in it**
+   («Почему он такой» and «Чат он не читает» both went), no question where a step
+   is named (a step's title is an imperative: «Посмотрите итоги»), and nothing that
+   dangles («карточка на каждого» — on each who?). A heading that describes its
+   section («Что стоит выяснить до того, как добавить бота») is a fact restated, and
+   he rejected it on sight; a call («Ещё сомневаетесь?») does not sit over a list of
+   facts. A menu item says what the visitor will do there («Как пользоваться»), and
+   two neighbouring items must not rhyme («Как это работает» beside «История
+   разработки»). `docs-check` refuses «он» in a heading; the rest is yours.
+7. **The tree's `avoid-<lang>:` stems are never printed, and the page's ritual is not
+   the reader's.** No weekday, no time of day: a stranger reads «пятница» as the
+   only time the bot works. The word the poster itself uses for a session («вечер»)
+   stays where the page describes what the poster shows, and elsewhere the session is
+   the game, the series, the table — varied, and still warm.
+8. **A lead never repeats the title's phrase, and a line never repeats its heading's
+   word.** «Вы играете. Счёт ведёт FoolProof.» over «Пусть счёт ведёт FoolProof» was
+   refused, as was «кто лучший» in the closing title and its first line. The hero's
+   lead is at most three sentences of about forty-five words: it has to fit the first
+   screen beside the card.
 
 ## What the sentence has to survive
 
@@ -79,9 +95,16 @@ and is reading it on a phone. It has to survive four things:
 
 - **A verb in every clause.** A dash or a semicolon standing where the verb should
   be is the commonest fault on these pages. *«с тех пор — 50%»* is two fragments.
-- **No word twice in one sentence.** «Кто остался неотмеченным, тот остался
-  дураком», «одно нажатие, одной рукой», «кто за кем выходил… и покажет, кто» —
-  the owner refused all three on sight, on one page, in one afternoon.
+- **No word twice in one sentence, and no echo into the next.** «Кто остался
+  неотмеченным, тот остался дураком», «одно нажатие, одной рукой», «кто за кем
+  выходил… и покажет, кто» — the owner refused all three on sight, on one page, in
+  one afternoon; «Сначала нажмите… Потом нажимайте… нажмите» and «/stats рисует…
+  /personal рисует» went the same way across a full stop. Two forms of one word
+  («партию… партиями», «постере… постеры») count as the repeat. Before returning,
+  read each paragraph once for nothing but this.
+- **Every noun and pronoun has its referent in the same sentence.** «два постера про
+  него», «стоит первой», «карточка на каждого» each left the owner asking *what?
+  where? whom?*; name the thing.
 - **A subject the reader can see.** *«гейт, который двигался за цену на своём
   билете»* has a subject, but only somebody who read the English knows which. If a
   noun needs the code or the other language to be understood, say what it is.
@@ -100,8 +123,7 @@ The bar is the owner's, and he set it in one sentence on 14 September 2026: *«�
 — and *«текста не должно быть слишком много: даже если он хорош, человек устанет на
 полпути и уйдёт»*. **Before writing a line, read the table of lines he rejected from
 these pages, in his own words, and the one paragraph he held up as good**: it is in
-`.claude/skills/finish-phase/reading-the-sentences.md`, under *What the owner rejected
-on the site*, and it is the only copy.
+`.claude/skills/finish-phase/what-the-owner-rejected.md`, and it is the only copy.
 
 Five faults run through that table, and naming which one a line has is more useful
 than calling it awkward: **a calque of an English idiom**, **a fragment with no
