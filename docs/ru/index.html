@@ -227,9 +227,12 @@
         <div class="reveal flex flex-col gap-14 lg:col-start-2 lg:row-start-1 lg:block">
           <figure class="deck-slide grid gap-6 lg:hidden lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-10 lg:data-[on]:grid"
                   id="poster-panel-1" role="tabpanel" aria-labelledby="poster-tab-1" data-on>
-            <img src="../posters/chronology-ru.webp" width="1048" height="1518" loading="lazy" decoding="async"
+            <div class="poster-frame" data-poster-full="../posters/chronology-ru.png">
+              <img src="../posters/chronology-ru.webp" width="1048" height="1518" loading="lazy" decoding="async"
                  alt="Постер хронологии: строка на каждую из двенадцати партий, столбец на каждого из пяти игроков, в каждой клетке занятое место, а за пропущенную партию — прочерк."
                  class="mx-auto w-full max-w-[560px] rounded-xl border border-line lg:h-[clamp(420px,68vh,600px)] lg:w-auto lg:max-w-none xl:h-[clamp(480px,86vh,760px)]">
+              <button type="button" class="poster-open" data-poster-open aria-label="Открыть постер на весь экран"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
+            </div>
             <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
               <p data-block="posters.chronology-command" class="font-mono text-[13px] text-accent">/stats_chronology</p>
               <h3 data-block="posters.chronology-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">Хронология</h3>
@@ -241,9 +244,12 @@
 
           <figure class="deck-slide grid gap-6 lg:hidden lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-10 lg:data-[on]:grid"
                   id="poster-panel-2" role="tabpanel" aria-labelledby="poster-tab-2">
-            <img src="../posters/awards-ru.webp" width="1048" height="1593" loading="lazy" decoding="async"
+            <div class="poster-frame" data-poster-full="../posters/awards-ru.png">
+              <img src="../posters/awards-ru.webp" width="1048" height="1593" loading="lazy" decoding="async"
                  alt="Постер наград: девять титулов, заработанных за вечер, и дурак вечера на красной плашке внизу."
                  class="mx-auto w-full max-w-[560px] rounded-xl border border-line lg:h-[clamp(420px,68vh,600px)] lg:w-auto lg:max-w-none xl:h-[clamp(480px,86vh,760px)]">
+              <button type="button" class="poster-open" data-poster-open aria-label="Открыть постер на весь экран"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
+            </div>
             <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
               <p data-block="posters.awards-command" class="font-mono text-[13px] text-accent">/stats_awards</p>
               <h3 data-block="posters.awards-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">Награды</h3>
@@ -255,9 +261,12 @@
 
           <figure class="deck-slide grid gap-6 lg:hidden lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-10 lg:data-[on]:grid"
                   id="poster-panel-3" role="tabpanel" aria-labelledby="poster-tab-3">
-            <img src="../posters/personal-ru.webp" width="1048" height="1656" loading="lazy" decoding="async"
+            <div class="poster-frame" data-poster-full="../posters/personal-ru.png">
+              <img src="../posters/personal-ru.webp" width="1048" height="1656" loading="lazy" decoding="async"
                  alt="Карточка игрока: четыре показателя про одного человека, график «выше соперников» по вечерам и факты, которые запомнились за всю карьеру."
                  class="mx-auto w-full max-w-[560px] rounded-xl border border-line lg:h-[clamp(420px,68vh,600px)] lg:w-auto lg:max-w-none xl:h-[clamp(480px,86vh,760px)]">
+              <button type="button" class="poster-open" data-poster-open aria-label="Открыть постер на весь экран"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
+            </div>
             <figcaption class="max-w-[46ch] lg:max-w-none lg:py-8 lg:pb-24">
               <p data-block="posters.personal-command" class="font-mono text-[13px] text-accent">/personal</p>
               <h3 data-block="posters.personal-title" class="mt-3 text-[26px] font-bold tracking-[-0.01em]">Карточка игрока</h3>
@@ -404,6 +413,11 @@
 </div>
 </footer>
 
+<dialog class="lightbox" data-lightbox aria-label="Постер на весь экран">
+  <button type="button" class="lightbox-close" data-lightbox-close aria-label="Закрыть"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <div class="lightbox-stage" data-lightbox-stage></div>
+</dialog>
+
 <script data-goatcounter="https://alehvasilyeu.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
 
@@ -511,6 +525,119 @@ if (deck) {
   });
   window.addEventListener("load", warmTheHidden);
   arrange();
+}
+const lightbox = document.querySelector("[data-lightbox]");
+if (lightbox) {
+  const stage = lightbox.querySelector("[data-lightbox-stage]");
+  const picture = document.createElement("img");
+  picture.decoding = "async";
+  stage.append(picture);
+  const SCALE_MIN = 1;
+  const SCALE_MAX = 8;
+  const WHEEL_STEP = 0.0015;
+  let scale = 1;
+  let x = 0;
+  let y = 0;
+  const pointers = new Map();
+  let pinchStart = null;
+  let dragStart = null;
+  const place = () => {
+    picture.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+    lightbox.toggleAttribute("data-zoomed", scale > SCALE_MIN);
+  };
+  const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+  const zoomTo = (next, aroundX, aroundY) => {
+    const previous = scale;
+    scale = clamp(next, SCALE_MIN, SCALE_MAX);
+    const box = stage.getBoundingClientRect();
+    const originX = aroundX - box.left - box.width / 2;
+    const originY = aroundY - box.top - box.height / 2;
+    x = originX - (originX - x) * (scale / previous);
+    y = originY - (originY - y) * (scale / previous);
+    if (scale === SCALE_MIN) {
+      x = 0;
+      y = 0;
+    }
+    place();
+  };
+  const open = (source, alt) => {
+    picture.src = source;
+    picture.alt = alt;
+    scale = 1;
+    x = 0;
+    y = 0;
+    place();
+    lightbox.showModal();
+  };
+  document.querySelectorAll("[data-poster-full]").forEach((frame) => {
+    const shown = frame.querySelector("img");
+    const show = () => open(frame.dataset.posterFull, shown.alt);
+    frame.querySelector("[data-poster-open]").addEventListener("click", show);
+    shown.addEventListener("click", show);
+  });
+  lightbox.querySelector("[data-lightbox-close]").addEventListener("click", () => lightbox.close());
+  lightbox.addEventListener("close", () => {
+    picture.removeAttribute("src");
+  });
+  stage.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    zoomTo(scale * Math.exp(-event.deltaY * WHEEL_STEP), event.clientX, event.clientY);
+  }, { passive: false });
+  picture.addEventListener("dblclick", (event) => {
+    zoomTo(scale > SCALE_MIN ? SCALE_MIN : 2.5, event.clientX, event.clientY);
+  });
+  const distance = () => {
+    const [a, b] = [...pointers.values()];
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  };
+  const middle = () => {
+    const [a, b] = [...pointers.values()];
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  };
+  let tapOnBackground = null;
+  stage.addEventListener("pointerdown", (event) => {
+    tapOnBackground = event.target === stage && pointers.size === 0 ? { x: event.clientX, y: event.clientY } : null;
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    stage.setPointerCapture(event.pointerId);
+    if (pointers.size === 2) {
+      pinchStart = { distance: distance(), scale };
+      dragStart = null;
+    } else if (pointers.size === 1 && scale > SCALE_MIN) {
+      dragStart = { x: event.clientX - x, y: event.clientY - y };
+    }
+  });
+  stage.addEventListener("pointermove", (event) => {
+    if (!pointers.has(event.pointerId)) {
+      return;
+    }
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pointers.size === 2 && pinchStart) {
+      const at = middle();
+      zoomTo(pinchStart.scale * (distance() / pinchStart.distance), at.x, at.y);
+    } else if (dragStart && pointers.size === 1) {
+      x = event.clientX - dragStart.x;
+      y = event.clientY - dragStart.y;
+      place();
+    }
+  });
+  const TAP_SLACK = 6;
+  const release = (event) => {
+    pointers.delete(event.pointerId);
+    if (tapOnBackground && pointers.size === 0 && Math.hypot(event.clientX - tapOnBackground.x, event.clientY - tapOnBackground.y) < TAP_SLACK) {
+      lightbox.close();
+    }
+    if (pointers.size === 0) {
+      tapOnBackground = null;
+    }
+    if (pointers.size < 2) {
+      pinchStart = null;
+    }
+    if (pointers.size === 0) {
+      dragStart = null;
+    }
+  };
+  stage.addEventListener("pointerup", release);
+  stage.addEventListener("pointercancel", release);
 }
 </script>
 

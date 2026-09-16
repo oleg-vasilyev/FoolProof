@@ -4,7 +4,7 @@ import { rasterize } from "#shared/drawing/rasterize.ts";
 import { rootDir } from "#shared/config/env.ts";
 import { repository } from "#shared/repository/repository-instance.ts";
 import { measureAdvances } from "./measure-advances.ts";
-import { ENGLISH_SUFFIX, refreshDesignPage } from "./design-page.ts";
+import { refreshDesignPage } from "./design-page.ts";
 import { GALLERY_DIR, POSTER_DIR } from "../drawings/drawn-into.ts";
 import { drawnByName, everyDrawing, featuresThatDraw } from "../drawings/feature-drawings.ts";
 import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
@@ -56,10 +56,7 @@ const writePosters = async (_args: readonly string[], say: Say): Promise<void> =
   for (const [name, svg] of Object.entries(await drawnByName((offered) => offered.posters()))) {
     writeFileSync(resolve(directory, `${name}.svg`), svg, "utf8");
     writeFileSync(resolve(directory, `${name}.webp`), await siteImageOf(svg));
-
-    if (name.endsWith(ENGLISH_SUFFIX)) {
-      writeFileSync(resolve(directory, `${name}.png`), await rasterize(svg));
-    }
+    writeFileSync(resolve(directory, `${name}.png`), await rasterize(svg));
 
     say(`${POSTER_DIR}/${name}`);
   }

@@ -283,7 +283,7 @@ Two parts of it are generated rather than written:
 
 | What | Rebuilt by |
 |---|---|
-| `docs/posters/` — every poster in both languages: SVG, the WebP the pages show at the width they are read at, and a PNG of the English three at the width the bot sends | `node scripts/tools/tools.ts posters` |
+| `docs/posters/` — every poster in both languages: SVG, the WebP the pages show at the width they are read at, and a PNG at the width the bot sends, which the landing opens full screen | `node scripts/tools/tools.ts posters` |
 | `docs/styles.computed.css` — Tailwind, minified and committed | `node scripts/tools/tools.ts site-css` |
 
 **`node scripts/gates/gate-runner.ts docs-check` fails on either being stale**, and that is the point: a push
