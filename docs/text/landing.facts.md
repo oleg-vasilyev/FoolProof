@@ -98,7 +98,7 @@ rev: 2
 numbers: 3
 
 ### card-first
-- The card names who moves first in this game, in the bot's own line («Ходит первым: Олег», "Went first: Oleg"); the control row has no Cancel key at this phase, the owner's screenshot of 16 September 2026 shows exactly Back and Draw.
+- The card names who moves first in this game, in the bot's own line («Первый ход: Олег», "Went first: Oleg"); the control row has no Cancel key at this phase, the owner's screenshot of 16 September 2026 shows exactly Back and Draw.
 
 ### card-keys
 - Six keys: two players already marked first and second, two players still to tap, then the control row as the bot draws it — Back on the left, Draw on the right, each with the bot's own emoji (↩️, 🟢).
