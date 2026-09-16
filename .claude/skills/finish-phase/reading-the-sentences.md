@@ -37,9 +37,46 @@ it moved ahead of them; the phase that measured it moved it again, all the way t
 artifact it reads.
 
 At the end of the phase it runs a second time **only over what moved since** — keys
-edited after the first reading, and prose that lives outside a copy table, like the
-site's pages. A phase that changed no copy after stage 2 owes nothing here and says so
-in the commit.
+edited after the first reading. A phase that changed no copy after stage 2 owes
+nothing here and says so in the commit.
+
+**The site's pages are not the copy-reader's.** A page under `docs/` is written from
+its fact tree in `docs/text/` by the `site-writer` agent, one language at a time and
+never from the other language's page, and read by the `site-reader` agent, which is
+given the built page and nothing else — no tree, no other language. The reader's
+findings go back to the writer, not into the HTML by hand: seventy-three line-level
+patches on one page left every sentence locally fine and the page still reading as a
+translation. The pass ends when the reader returns no findings or the owner approves
+the page. `docs-check` holds both languages to the tree — same blocks, same order,
+same numbers, same commits — so structure is not the reader's question, only whether
+a person would say it.
+
+## What the owner rejected on the site
+
+Both agents read this table before a line, and it is kept here, once, so his next
+verdict has one place to land. Real lines from the Russian pages, his words verbatim.
+
+| Shipped | His verdict |
+|---|---|
+| «Единственный пользователь харнеса — агент, и шесть недель ничего не строили так» | «это что такое? 😁» |
+| «Агент plan-reviewer встал на другом конце фазы, в самом её начале» | «так не говорят» |
+| «CI на теге может только доложить, но не удержать» | «это невозможно понять» |
+| «Последний отрезок добавил мало новых частей. Он поправил то, как части узнают, что настал их черёд, и как харнес помнит, что делал.» | «очень слабый абзац, его невозможно понять» |
+| «Когда фичи отгораживали друг от друга линтом, проект получил урок, который потом повторял чаще всех остальных. Первые две версии правила независимости не делали ничего…» | «с первого раза невозможно понять, про что абзац» |
+| «Он разбирает схему базы в PLAN.md и сравнивает её с SQL… И он валит папку, где скопилось больше девяти файлов…» | «очень косноязычно, тяжело читать» |
+| «Ещё две идеи тех же двух дней пережили всё, что было после. Первая — правило о том, какому документу принадлежит факт… Вторая — …» | «прям сложный для восприятия, много тире, всё в куче» |
+| «новое умолчание проваливается не тем, что его применяют плохо, а тем, что его тихо не применяют» | «очень сложно с первого раза понять идею этой цитаты» |
+| «Вместе с этим пришли первый гейт, на который не может ответить машина, и первая ревизия самого харнеса.» | «не пришли, а пришёл или появился» |
+| «Потом стенд поставили на прикол» | «„на прикол“ на русском значит „шутка“» |
+| «Эта страница написана по тому же правилу: каждое число в ней прочитано из git, а не по памяти.» | «лишнее предложение» |
+| «эквивалента в ESLint не имеет и остаётся соглашением для ревью» | «задай себе вопрос „и что?“ — ну и ничего, значит можно убрать» |
+| «Деплой и три неправильных lock-файла» | «не особо ключевой момент, просто деталь — такие можно и удалить, они только отвлекают» |
+| «Счёт в дурака без бумажки.» — the landing's first title, August 2026 | «звучит как начало анекдота» |
+
+And the paragraph he held up as the bar — *«вот это пример хорошего абзаца, легко
+читается, интересно и по существу»*: *«Первая эпоха сделала правила проверяемыми…
+„фича — это папка, которую можно удалить“. Проверили, удалив одну.»* One claim, one
+proof, and the sentence ends where the point does.
 
 Its third question is the one that pays for the gate twice: following a sentence back
 to the rule that earns it has already caught a claim no rule guaranteed and two

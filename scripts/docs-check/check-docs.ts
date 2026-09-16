@@ -38,6 +38,7 @@ import {
   scriptsOutOfStep,
 } from "./source/source-tree.ts";
 import { imagesOutOfStep, siteCssOutOfStep } from "./source/site-pages.ts";
+import { siteTextOutOfStep } from "./source/site-text.ts";
 import { lineEndingsOutOfStep } from "./source/line-endings.ts";
 import { ALL_GATES } from "../gates/gate-list.ts";
 
@@ -86,6 +87,7 @@ const complaints = [
   ...designPageOutOfStep(thePosters),
   ...siteCssOutOfStep(),
   ...imagesOutOfStep(),
+  ...siteTextOutOfStep(),
   ...lineEndingsOutOfStep(),
 ];
 

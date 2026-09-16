@@ -83,9 +83,13 @@ sequenceDiagram
         U-->>C: approved, or changes
     end
     opt the change is a page of the site under docs/, not a poster
-        C->>C: build the page and look at it at a phone's width and a laptop's — a page is laid out by the browser, so the contact sheet is the built page itself
-        C->>S: one cold reader per language, given the built page and nothing else — what each sentence says to somebody who has never seen the code
-        S-->>C: the lines no person would say, and the ones that mean nothing without the code
+        C->>C: write the facts first — the page's tree under docs/text/, one block per paragraph, the numbers and the commits each block may print, and docs-check holds both languages to it
+        C->>R: the site-writer agent, once per language — the tree and the block ids, never the other language's page
+        R-->>C: one paragraph per block, ready to be placed
+        C->>C: place the paragraphs, build the page and look at it at a phone's width and a laptop's — a page is laid out by the browser, so the contact sheet is the built page itself
+        C->>R: the site-reader agent, once per language — the built page and nothing else
+        R-->>C: what each paragraph tells a visitor, and every one a person would not say that way, rewritten in full
+        C->>R: the site-writer agent again with the findings, until the reader returns none
         C->>U: the built page for approval, at both widths
         U-->>C: approved, or changes
     end
@@ -188,8 +192,10 @@ sequenceDiagram
         C->>C: take the better lines as written, and where a sentence claimed more than the rule delivers, fix the code behind it
     end
     opt the change is a page of the site under docs/
-        C->>S: one cold reader per language over the built page, and a fact-checker whenever the prose retells history — every quote and number taken again from git, after every wave of edits
-        S-->>C: the sentences that read wrong, and the claims git does not back
+        C->>R: the site-reader agent once more per language, over what the review moved
+        R-->>C: the paragraphs that still read wrong, rewritten
+        C->>S: a fact-checker whenever the prose retells history — every number and hash in the tree taken again from git, and every claim of a product page from the code, after every wave of edits
+        S-->>C: the facts git or the code does not back
     end
     opt the change touched what the bot or the site draws
         opt the phase added a poster the gallery has never drawn

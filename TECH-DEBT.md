@@ -159,19 +159,11 @@ to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
 
 The failure these rules have is peculiar to them: a rule that runs, reports nothing,
 and would report nothing whatever the repository looked like. It has shipped three
-times — a poster rule whose regexp lost a backslash matched every path forever; the
-same escaping bug caught again one substring from shipping; and the copy-table rule
-blind to a counted word after the non-breaking space a poster line uses, which no
-probe found because the space was invisible in the source.
-
-Half the answer is now mechanical: splitting `check-docs.ts` into `scripts/docs-check/`
-put every rule that *reasons* — a trigger, a mermaid lane, a PNG header, a baked
-word form — behind a pure function taking its subject as an argument, and writing
-one of those specs is what found the third bug. The stubbed filesystem this entry
-feared was not needed. The other half still reads the repository — links, budgets,
-the schema, the committed pictures — and there the standing answer is the probe:
-break it on purpose, watch the complaint, put it back, which a person remembers
-rather than something that happens.
+times — twice a regexp that lost a backslash, once a rule blind to a word after a
+non-breaking space no probe could see. Every rule that *reasons* now sits behind a
+pure function with a spec, which is what found the third; the half that reads the
+repository — links, budgets, the schema, the pictures — still has only the probe:
+break it on purpose, watch the complaint, put it back.
 
 **Build the fixture repository the first time a filesystem rule is found to have
 been passing vacuously in the field.** Until then the probe is cheaper than the
@@ -561,6 +553,14 @@ left it alone with nowhere to hide.
 **Worth doing with the next phase that changes what one of these files decides, or
 that opens the mutation gate** — "touches `scripts/`" fired on one that only moved them,
 and the move of 9 September re-mutated every gates file for the same reason.
+
+## The site-text gate reads the body and nothing else
+
+`site-text` holds both languages of a page to its tree in `docs/text/`, but only the
+body's text nodes: not the `<title>`, the `meta` descriptions, an `aria-label` or `alt`,
+nor the chart strings in the case study's `<script>`, so those can drift unnoticed.
+**Extend it when one is found wrong in one language only, or when a page gets a third
+language** — a reader for the head and attributes, with `head.*` blocks in the tree.
 
 ## The picture gate cannot fork until its triage half moves out
 

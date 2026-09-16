@@ -1,23 +1,18 @@
 # FoolProof — how the code here is written
 
 This file is loaded before every session, so it holds only what has to be known
-*before* the first edit. Anything needed for one specific job lives in a skill or
-beside the code it describes.
+*before* the first edit; anything for one job lives in a skill or beside the code.
 
-**This file used to route each job to its skill in a table, and does not any more.**
-A skill is loaded at the right moment because its own `description:` says which one
-that is — not because a second, hand-kept copy of the answer lives here. That copy
-drifted for weeks and cost a phase its sequencing. The roster and the order the jobs
-come in are [`DEVELOPMENT-FLOW.md`](DEVELOPMENT-FLOW.md), which draws every skill and
-agent at its stage and is gated in both directions.
+**This file does not route jobs to skills.** A skill is loaded because its own
+`description:` says when — a hand-kept table here drifted for weeks and cost a phase
+its sequencing. The roster and the order the jobs come in are
+[`DEVELOPMENT-FLOW.md`](DEVELOPMENT-FLOW.md), gated in both directions.
 
 Five documents, one job each:
 
-- **`README.md`** — what the bot is and how to run it. For someone arriving at the
-  repository.
+- **`README.md`** — what the bot is and how to run it, for someone arriving cold.
 - **`deploy/README.md`** — the operator's half: provisioning, the units, the deploy
-  timer, the backup, and what to do when the bot is unwell. It sits beside the units
-  it describes so it leaves with them.
+  timer, the backup, and what to do when the bot is unwell; beside the units it describes.
 - **`PLAN.md`** — what the bot does and why: state machine, data model, invariants,
   edge cases, and the design dead ends already paid for.
 - **`CLAUDE.md`** — this file. Style, layering, testing, gates.
@@ -114,6 +109,11 @@ chat's language. A module-level `import { copy }` pins the bot to one language.
 tables real on purpose, so a decision made inside one is compared against itself and
 no test can catch it breaking; `write-a-spec` has the mutants that proved it, and
 `docs-check` now fails the shape on sight.
+
+**The site's pages are held like copy.** Each page pair has a language-neutral fact
+tree in `docs/text/`; a language's page is written from it by the `site-writer` agent,
+never from the other language's page, and `docs-check` holds both pages to the tree's
+blocks, order, numbers and commits. Why that replaced translation is `finish-phase`'s.
 
 Player names are user data, not copy. Matching normalises via Unicode NFC and lower
 case, plus `ё` → `е`, and the parser must not assume latin

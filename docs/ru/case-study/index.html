@@ -46,24 +46,24 @@
 
 <body class="bg-ground font-sans text-ink antialiased">
 
-<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-ground">К содержимому</a>
+<a data-block="header.skip" href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-ground">К содержимому</a>
 
 <header class="sticky top-0 z-40 border-b border-line bg-ground/90 backdrop-blur">
   <div class="mx-auto flex max-w-6xl items-center gap-4 px-5 py-4 sm:px-8">
     <a href="../" class="flex items-center gap-3" aria-label="FoolProof, главная">
       <img src="../../favicon.png" width="36" height="36" alt="" class="h-9 w-9 rounded-lg">
-      <span class="text-lg font-extrabold tracking-tight max-[520px]:hidden">FoolProof</span>
+      <span data-block="header.brand" class="text-lg font-extrabold tracking-tight max-[520px]:hidden">FoolProof</span>
     </a>
 
     <nav aria-label="Основная" class="ml-auto hidden items-center gap-7 text-[15px] text-muted md:flex">
-      <a href="#eras" class="hover:text-ink">Семь эпох</a>
-      <a href="#patterns" class="hover:text-ink">Что повторялось</a>
-      <a href="#today" class="hover:text-ink">Сегодня</a>
-      <a href="https://github.com/oleg-vasilyev/FoolProof" class="hover:text-ink" rel="noopener">Исходники</a>
+      <a data-block="header.nav-eras" href="#eras" class="hover:text-ink">Семь эпох</a>
+      <a data-block="header.nav-patterns" href="#patterns" class="hover:text-ink">Что повторялось</a>
+      <a data-block="header.nav-today" href="#today" class="hover:text-ink">Сегодня</a>
+      <a data-block="header.nav-source" href="https://github.com/oleg-vasilyev/FoolProof" class="hover:text-ink" rel="noopener">Исходники</a>
     </nav>
 
     <details class="lang ml-auto md:ml-0">
-      <summary aria-label="Язык: русский">
+      <summary data-block="header.lang-current" aria-label="Язык: русский">
         <svg class="max-[520px]:hidden" viewBox="0 0 24 24" width="17" height="17"
              fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
           <circle cx="12" cy="12" r="9"></circle>
@@ -77,12 +77,12 @@
         </svg>
       </summary>
       <ul class="lang-menu">
-        <li><a class="lang-option" href="../../case-study/" hreflang="en" lang="en">English</a></li>
-        <li><a class="lang-option" href="./" hreflang="ru" lang="ru" aria-current="true">Русский</a></li>
+        <li><a data-block="header.lang-en" class="lang-option" href="../../case-study/" hreflang="en" lang="en">English</a></li>
+        <li><a data-block="header.lang-ru" class="lang-option" href="./" hreflang="ru" lang="ru" aria-current="true">Русский</a></li>
       </ul>
     </details>
 
-    <a href="../" class="rounded-lg border border-edge px-4 py-2 text-[15px] font-semibold text-ink transition-colors hover:border-accent hover:text-accent">
+    <a data-block="header.bot" href="../" class="rounded-lg border border-edge px-4 py-2 text-[15px] font-semibold text-ink transition-colors hover:border-accent hover:text-accent">
       Сам бот
     </a>
   </div>
@@ -91,13 +91,13 @@
 <main id="main">
 
   <section aria-labelledby="hero-heading" class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-    <p class="eyebrow hero-rise">История разработки · 28 июля – 11 сентября 2026 · 314 коммитов</p>
+    <p data-block="hero.eyebrow" class="eyebrow hero-rise">История разработки · 28 июля – 11 сентября 2026 · 314 коммитов</p>
 
-    <h1 id="hero-heading" class="hero-rise mt-5 max-w-[22ch] text-[40px] font-black leading-[1.03] tracking-[-0.03em] text-balance sm:text-[58px]">
+    <h1 data-block="hero.title" id="hero-heading" class="hero-rise mt-5 max-w-[22ch] text-[40px] font-black leading-[1.03] tracking-[-0.03em] text-balance sm:text-[58px]">
       Харнес, который научился проверять себя
     </h1>
 
-    <p class="hero-rise-2 mt-7 max-w-[68ch] text-[19px] leading-relaxed text-muted">
+    <p data-block="hero.lead" class="hero-rise-2 mt-7 max-w-[68ch] text-[19px] leading-relaxed text-muted">
       FoolProof — маленький телеграм-бот, который ведёт счёт в дураке. Его за шесть с половиной недель
       написали один человек и Claude Code, и сам бот — наименее интересная часть этой
       истории. Вокруг него выросла система правил, проверок, скиллов и агентов, которая
@@ -105,25 +105,25 @@
       чем бота. Это рассказ о ней: что ломалось, что приходило на смену и как она выглядит
       сегодня.
     </p>
-    <p class="hero-rise-2 mt-4 max-w-[68ch] text-[17px] leading-relaxed text-dim">
+    <p data-block="hero.note" class="hero-rise-2 mt-4 max-w-[68ch] text-[17px] leading-relaxed text-dim">
       Каждое утверждение здесь взято из истории коммитов, каждое число прочитано из git, а
       каждый хэш ведёт на свой коммит.
     </p>
 
     <div class="hero-rise-3 mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-      <div class="tile"><p class="tile-value">314</p><p class="tile-label">коммитов, один автор</p></div>
-      <div class="tile"><p class="tile-value">46</p><p class="tile-label">дней, с 28 июля по 11 сентября</p></div>
-      <div class="tile"><p class="tile-value">40</p><p class="tile-label">релизов с тегом</p></div>
-      <div class="tile"><p class="tile-value">0 → 5 043</p><p class="tile-label">тестов — по последнему сообщению коммита, в котором они посчитаны</p></div>
-      <div class="tile"><p class="tile-value">11 + 7</p><p class="tile-label">скиллов и агентов к концу</p></div>
+      <div class="tile"><p data-block="hero.tile-1-value" class="tile-value">314</p><p data-block="hero.tile-1-label" class="tile-label">коммитов, один автор</p></div>
+      <div class="tile"><p data-block="hero.tile-2-value" class="tile-value">46</p><p data-block="hero.tile-2-label" class="tile-label">дней, с 28 июля по 11 сентября</p></div>
+      <div class="tile"><p data-block="hero.tile-3-value" class="tile-value">40</p><p data-block="hero.tile-3-label" class="tile-label">релизов с тегом</p></div>
+      <div class="tile"><p data-block="hero.tile-4-value" class="tile-value">0 → 5 043</p><p data-block="hero.tile-4-label" class="tile-label">тестов — по последнему сообщению коммита, в котором они посчитаны</p></div>
+      <div class="tile"><p data-block="hero.tile-5-value" class="tile-value">11 + 7</p><p data-block="hero.tile-5-label" class="tile-label">скиллов и агентов к концу</p></div>
     </div>
   </section>
 
   <section id="findings" aria-labelledby="findings-heading" class="border-t border-line">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-      <p class="eyebrow">Прежде чем лезть в детали</p>
-      <h2 id="findings-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Что говорит история, в пяти выводах</h2>
-      <p class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
+      <p data-block="findings.eyebrow" class="eyebrow">Прежде чем лезть в детали</p>
+      <h2 data-block="findings.title" id="findings-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Что говорит история, в пяти выводах</h2>
+      <p data-block="findings.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
         Каждый вывод взят из глав ниже и ведёт на коммит, в котором он сформулирован.
         Если читать что-то одно, читайте это. Потом выберите эпоху: во второй правило нашли
         мёртвым, в пятой приходят читатели, в седьмой у харнеса появляется линейка.
@@ -131,34 +131,34 @@
 
       <ol class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         <li class="reveal">
-          <p class="pattern-n">01</p>
-          <h3 class="mt-2 text-[19px] font-bold">Харнес — больше двух третей от размера продукта</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">На последнем коммите исходники бота без тестов — 15 829 строк; скиллы, агенты, документы и проверки документов, которые решают, как будет написана следующая строка, — 11 332, и эту часть переписывали чаще, чем бота.</p>
+          <p data-block="findings.f1-n" class="pattern-n">01</p>
+          <h3 data-block="findings.f1-title" class="mt-2 text-[19px] font-bold">Харнес — больше двух третей от размера продукта</h3>
+          <p data-block="findings.f1-body" class="mt-2 text-[16px] leading-relaxed text-muted">На последнем коммите исходники бота без тестов — 15 829 строк; скиллы, агенты, документы и проверки документов, которые решают, как будет написана следующая строка, — 11 332, и эту часть переписывали чаще, чем бота.</p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">02</p>
-          <h3 class="mt-2 text-[19px] font-bold">Приёмка не различает модели, процесс — различает</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Каждая модель, которую вслепую запускали в огороженном клоне бенчмарка, прошла скрытый спек и оставила все гейты зелёными. Разделили их только колонки процесса: восемь обязательств из одиннадцати за доллар и шесть минут против одиннадцати из одиннадцати за двадцать два доллара и тридцать шесть минут.
+          <p data-block="findings.f2-n" class="pattern-n">02</p>
+          <h3 data-block="findings.f2-title" class="mt-2 text-[19px] font-bold">Приёмка не различает модели, процесс — различает</h3>
+          <p data-block="findings.f2-body" class="mt-2 text-[16px] leading-relaxed text-muted">Каждая модель, которую вслепую запускали в огороженном клоне бенчмарка, прошла скрытый спек и оставила все гейты зелёными. Разделили их только колонки процесса: восемь обязательств из одиннадцати за доллар и шесть минут против одиннадцати из одиннадцати за двадцать два доллара и тридцать шесть минут.
            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a05104e" rel="noopener">a05104e</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">03</p>
-          <h3 class="mt-2 text-[19px] font-bold">У харнеса один пользователь — агент, а шесть недель его строили под человека</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Скрипты были устроены под человека за терминалом. Подсчёт по расшифровкам за месяц нашёл 1 463 прогона тестов, набранных вручную; вердикт каждого из них модель вычитывала grep-ом из потока вывода.
+          <p data-block="findings.f3-n" class="pattern-n">03</p>
+          <h3 data-block="findings.f3-title" class="mt-2 text-[19px] font-bold">У харнеса один пользователь — агент, а шесть недель его строили под человека</h3>
+          <p data-block="findings.f3-body" class="mt-2 text-[16px] leading-relaxed text-muted">Скрипты были устроены под человека за терминалом. Подсчёт по расшифровкам за месяц нашёл 1 463 прогона тестов, набранных вручную; вердикт каждого из них модель вычитывала grep-ом из потока вывода.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a>
             Потом package.json ужался с двадцати трёх скриптов до восьми, и каждый гейт стал оставлять вердикт в файле.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">04</p>
-          <h3 class="mt-2 text-[19px] font-bold">Правило считается, только когда его видели отказывающим</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Одно правило линта нашли мёртвым четыре раза за день; три проверки документов остались зелёными, когда их предмет ломали нарочно. В фазе, которая наконец сделала намеренную поломку шагом процесса, таких поломок было четырнадцать, и четыре попали туда, куда правило не смотрело.
+          <p data-block="findings.f4-n" class="pattern-n">04</p>
+          <h3 data-block="findings.f4-title" class="mt-2 text-[19px] font-bold">Правило считается, только когда его видели отказывающим</h3>
+          <p data-block="findings.f4-body" class="mt-2 text-[16px] leading-relaxed text-muted">Одно правило линта нашли мёртвым четыре раза за день; три проверки документов остались зелёными, когда их предмет ломали нарочно. В фазе, которая наконец сделала намеренную поломку шагом процесса, таких поломок было четырнадцать, и четыре попали туда, куда правило не смотрело.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5d48dac" rel="noopener">5d48dac</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">05</p>
-          <h3 class="mt-2 text-[19px] font-bold">Автор — не тот читатель, и эта страница не исключение</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Каждый дифф проверяет агент, который его не писал; каждую картинку читает агент, который не знает, для чего она. Фактчекер, заново выводивший утверждения этой страницы из git, нашёл 17 утверждений из 263, которых история не подтверждала, и каждое из них читалось безупречно.
+          <p data-block="findings.f5-n" class="pattern-n">05</p>
+          <h3 data-block="findings.f5-title" class="mt-2 text-[19px] font-bold">Автор — не тот читатель, и эта страница не исключение</h3>
+          <p data-block="findings.f5-body" class="mt-2 text-[16px] leading-relaxed text-muted">Каждый дифф проверяет агент, который его не писал; каждую картинку читает агент, который не знает, для чего она. Фактчекер, заново выводивший утверждения этой страницы из git, нашёл 17 утверждений из 263, которых история не подтверждала, и каждое из них читалось безупречно.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5bf13e4" rel="noopener">5bf13e4</a></p>
         </li>
       </ol>
@@ -167,9 +167,9 @@
 
   <section id="timeline" aria-labelledby="timeline-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-      <p class="eyebrow">Все коммиты по порядку</p>
-      <h2 id="timeline-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Сорок шесть дней на одной полосе</h2>
-      <p class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
+      <p data-block="timeline.eyebrow" class="eyebrow">Все коммиты по порядку</p>
+      <h2 data-block="timeline.title" id="timeline-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Сорок шесть дней на одной полосе</h2>
+      <p data-block="timeline.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
         Одна полоска на коммит, цвет по эпохе. Ромб над полоской — тег релиза. Из сорока
         шести дней коммиты есть в тридцати одном. Семь эпох — деление этой страницы, а не
         репозитория: границы проведены там, где менялся предмет работы. Наведите или коснитесь полоски, чтобы
@@ -186,41 +186,41 @@
 
   <section id="harness" aria-labelledby="harness-heading">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-      <p class="eyebrow">Термины</p>
-      <h2 id="harness-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Что здесь называется харнесом</h2>
-      <p class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
+      <p data-block="harness.eyebrow" class="eyebrow">Термины</p>
+      <h2 data-block="harness.title" id="harness-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Что здесь называется харнесом</h2>
+      <p data-block="harness.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
         Харнес — это всё в репозитории, кроме самого продукта.
       </p>
 
       <details class="era-detail mt-10">
-        <summary><span class="era-detail-h">Десять слов, которые на этой странице значат то, что вкладывает в них проект</span></summary>
+        <summary data-block="harness.terms-summary"><span class="era-detail-h">Десять слов, которые на этой странице значат то, что вкладывает в них проект</span></summary>
         <ul class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">CLAUDE.md</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">Правила, которые загружаются перед каждой сессией. Стиль, слои, тесты, гейты.</p>
+          <h3 data-block="harness.term-1-title" class="text-[18px] font-bold">CLAUDE.md</h3>
+          <p data-block="harness.term-1-body" class="mt-2 text-[15px] leading-relaxed text-muted">Правила, которые загружаются перед каждой сессией. Стиль, слои, тесты, гейты.</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">Скиллы</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">Процедуры, которые загружаются под один вид работы: написать спек (файл с тестами одного модуля), добавить фичу, закрыть фазу.</p>
+          <h3 data-block="harness.term-2-title" class="text-[18px] font-bold">Скиллы</h3>
+          <p data-block="harness.term-2-body" class="mt-2 text-[15px] leading-relaxed text-muted">Процедуры, которые загружаются под один вид работы: написать спек (файл с тестами одного модуля), добавить фичу, закрыть фазу.</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">Агенты</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">Отдельные экземпляры модели с брифом и контрактом: ревьюер, дизайнер и «холодные читатели», которым нарочно не говорят, что перед ними.</p>
+          <h3 data-block="harness.term-3-title" class="text-[18px] font-bold">Агенты</h3>
+          <p data-block="harness.term-3-body" class="mt-2 text-[15px] leading-relaxed text-muted">Отдельные экземпляры модели с брифом и контрактом: ревьюер, дизайнер и «холодные читатели», которым нарочно не говорят, что перед ними.</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">Хуки</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">Скрипты, которые срабатывают на правку файла или в конце хода, то есть одного ответа модели.</p>
+          <h3 data-block="harness.term-4-title" class="text-[18px] font-bold">Хуки</h3>
+          <p data-block="harness.term-4-body" class="mt-2 text-[15px] leading-relaxed text-muted">Скрипты, которые срабатывают на правку файла или в конце хода, то есть одного ответа модели.</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">Линт и гейты</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">То, что отказывается принимать машина, и то, что должно быть зелёным перед коммитом или тегом.</p>
+          <h3 data-block="harness.term-5-title" class="text-[18px] font-bold">Линт и гейты</h3>
+          <p data-block="harness.term-5-body" class="mt-2 text-[15px] leading-relaxed text-muted">То, что отказывается принимать машина, и то, что должно быть зелёным перед коммитом или тегом.</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 class="text-[18px] font-bold">Документы</h3>
-          <p class="mt-2 text-[15px] leading-relaxed text-muted">Спецификация, список долгов, схема процесса, логбук и проверка, которая сверяет их все с кодом.</p>
+          <h3 data-block="harness.term-6-title" class="text-[18px] font-bold">Документы</h3>
+          <p data-block="harness.term-6-body" class="mt-2 text-[15px] leading-relaxed text-muted">Спецификация, список долгов, схема процесса, логбук и проверка, которая сверяет их все с кодом.</p>
         </li>
         </ul>
-        <p class="mt-6 max-w-[68ch] text-[16px] leading-relaxed text-muted">
+        <p data-block="harness.terms-more" class="mt-6 max-w-[68ch] text-[16px] leading-relaxed text-muted">
           Ещё четыре слова употреблены здесь в том же, проектном смысле. <strong>Владелец</strong> —
           единственный человек, который ставит задачи и принимает решения. По другую сторону
           разговора — модель, и один её ответ называется <strong>ходом</strong>.
@@ -231,7 +231,7 @@
       </details>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
-        <p>
+        <p data-block="harness.question">
           Один вопрос история задаёт снова и снова: где в харнесе должно жить правило —
           в тексте, который читает модель, или в инструментарии, то есть в линте, хуках и
           проверках, которые исполняет машина. Первый ответ дан 29 июля и с тех пор не
@@ -250,13 +250,13 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Эпоха 1 из 7</span><span>28–29 июля</span><span>коммиты 1–30</span>
+        <span data-block="era-1.band-era" class="text-ink">Эпоха 1 из 7</span><span data-block="era-1.band-dates">28–29 июля</span><span data-block="era-1.band-commits">коммиты 1–30</span>
       </div>
 
-      <h2 id="era-1-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Два markdown-файла</h2>
+      <h2 data-block="era-1.title" id="era-1-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Два markdown-файла</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-1.lead">
           Репозиторий начинается без кода — только со свода правил: он уже запрещал то,
           что проект потом целый месяц учился проверять.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/44f6f66" rel="noopener">44f6f66</a>
@@ -269,15 +269,15 @@
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Приходят тесты, а следом — оценщик для тестов</span><span class="era-detail-n">312 тестов</span></summary>
-        <p>
+          <summary data-block="era-1.d1-summary"><span class="era-detail-h">Приходят тесты, а следом — оценщик для тестов</span><span class="era-detail-n">312 тестов</span></summary>
+        <p data-block="era-1.d1-p1">
           29 июля код получил 312 тестов в четырнадцати файлах и гейт покрытия в 70%.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/9276ad7" rel="noopener">9276ad7</a>
           В тот же день появился Stryker, инструмент мутационного тестирования. Он намеренно
           вносит в код мелкие поломки; каждая такая поломка называется мутантом. Потом он
           считает, сколько мутантов заметили тесты.
         </p>
-        <p>
+        <p data-block="era-1.d1-p2">
           Первый прогон дал 88,4% — первый мутационный скор проекта;
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fda82cb" rel="noopener">fda82cb</a>
           к концу эпохи он дорос до 94,78%.
@@ -285,7 +285,7 @@
           Красную черту, ниже которой гейт падает, в те же дни подняли с начальных 60 до 85,
           чтобы гейт «кусался при регрессии», а не висел для красоты.
         </p>
-        <p>
+        <p data-block="era-1.d1-p3">
           Вложение окупилось сразу. Мутационное тестирование нашло то, чего не находило
           покрытие, — тесты, которые проходили не по той причине: зависимость
           в тесте была подменена заглушкой, и тест проверял только то, что заглушку вызвали,
@@ -295,8 +295,8 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Правила уходят из прозы</span><span class="era-detail-n">3 правила линта</span></summary>
-        <p>
+          <summary data-block="era-1.d2-summary"><span class="era-detail-h">Правила уходят из прозы</span><span class="era-detail-n">3 правила линта</span></summary>
+        <p data-block="era-1.d2-p1">
           Коммит 26, «сделать проверяемым то, что можно проверить», задал форму харнеса.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>
           Три абзаца свода стали тремя правилами ESLint, написанными прямо в конфиге: запрет
@@ -306,21 +306,21 @@
           намеренным нарушением. Хук на правку файла начал линтить каждый файл в момент
           записи.
         </p>
-        <p>
+        <p data-block="era-1.d2-p2">
           Тем же коммитом появились первые два скилла и первый агент. Скилл
           <code>finish-phase</code>, куда из CLAUDE.md переехали гейты. Скилл
           <code>add-repository-method</code> для новых запросов к базе. И агент
           <code>phase-reviewer</code>, который читает дифф целиком и получает указание
           «Ничего не чинить».
         </p>
-        <p>
+        <p data-block="era-1.d2-p3">
           Правило о том, какому документу принадлежит факт, появилось, когда четыре темы
           оказались описаны и в PLAN.md, и в CLAUDE.md. Вопрос звучит так: осталось бы это
           правдой, если бы бота переписали на Python? Если да, факту место в PLAN.md, если
           нет, в CLAUDE.md.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0afd7b2" rel="noopener">0afd7b2</a>
         </p>
-        <p>
+        <p data-block="era-1.d2-p4">
           К концу 29 июля ремесло тестирования переросло свод правил и стало третьим скиллом,
           <code>write-a-spec</code>, а тестов к концу дня стало 418. Сам CLAUDE.md за два дня
           разбух почти вдвое, и его ужали обратно: «CLAUDE.md загружается на каждом ходу, поэтому в нём должно быть
@@ -332,31 +332,31 @@
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">3</p><p class="tile-label">скилла</p></div>
-        <div class="tile"><p class="tile-value">1</p><p class="tile-label">агент</p></div>
-        <div class="tile"><p class="tile-value">2</p><p class="tile-label">хука</p></div>
-        <div class="tile"><p class="tile-value">3</p><p class="tile-label">собственных правила линта</p></div>
-        <div class="tile"><p class="tile-value">418</p><p class="tile-label">тестов</p></div>
-        <div class="tile"><p class="tile-value">94,78%</p><p class="tile-label">мутационный скор</p></div>
+        <div class="tile"><p data-block="era-1.tile-1-value" class="tile-value">3</p><p data-block="era-1.tile-1-label" class="tile-label">скилла</p></div>
+        <div class="tile"><p data-block="era-1.tile-2-value" class="tile-value">1</p><p data-block="era-1.tile-2-label" class="tile-label">агент</p></div>
+        <div class="tile"><p data-block="era-1.tile-3-value" class="tile-value">2</p><p data-block="era-1.tile-3-label" class="tile-label">хука</p></div>
+        <div class="tile"><p data-block="era-1.tile-4-value" class="tile-value">3</p><p data-block="era-1.tile-4-label" class="tile-label">собственных правила линта</p></div>
+        <div class="tile"><p data-block="era-1.tile-5-value" class="tile-value">418</p><p data-block="era-1.tile-5-label" class="tile-label">тестов</p></div>
+        <div class="tile"><p data-block="era-1.tile-6-value" class="tile-value">94,78%</p><p data-block="era-1.tile-6-label" class="tile-label">мутационный скор</p></div>
       </div>
 
       <div class="reveal mt-10 max-w-[68ch]">
-                <p class="eyebrow">Тогда и сейчас · правило о комментариях</p>
-        <p class="mt-2 text-[15px] leading-relaxed text-muted">Первая вкладка — шапка конфига линта, по-английски, как она и стояла в репозитории: в ней признано, что правило о комментариях машина проверить не может. Вторая — то же самое, когда оно стало правилом ESLint; здесь пересказано по-русски.</p>
+                <p data-block="era-1.tn-eyebrow" class="eyebrow">Тогда и сейчас · правило о комментариях</p>
+        <p data-block="era-1.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">Первая вкладка — шапка конфига линта, по-английски, как она и стояла в репозитории: в ней признано, что правило о комментариях машина проверить не может. Вторая — то же самое, когда оно стало правилом ESLint; здесь пересказано по-русски.</p>
         <div class="then-now mt-3" data-then-now>
           <div class="then-now-tabs">
-            <button type="button" class="then-now-tab" aria-pressed="true">Коммит 3 · 28 июля</button>
-            <button type="button" class="then-now-tab" aria-pressed="false">Коммит 26 · 29 июля</button>
+            <button data-block="era-1.tn-tab-1" type="button" class="then-now-tab" aria-pressed="true">Коммит 3 · 28 июля</button>
+            <button data-block="era-1.tn-tab-2" type="button" class="then-now-tab" aria-pressed="false">Коммит 26 · 29 июля</button>
           </div>
-          <div class="then-now-body">// Lint rules that back the conventions in CLAUDE.md. Kept intentionally small
+          <div data-block="era-1.tn-body-1" class="then-now-body">// Lint rules that back the conventions in CLAUDE.md. Kept intentionally small
 // and autofix-friendly: `npm run lint:fix` (and the Stop hook) cleans them.
 // The "no comments in src/" rule has no ESLint equivalent and stays a review
 // convention — see CLAUDE.md.</div>
-          <div class="then-now-body" hidden>"project/no-comments": правило ESLint прямо в конфиге, двенадцать строк.
+          <div data-block="era-1.tn-body-2" class="then-now-body" hidden>"project/no-comments": правило ESLint прямо в конфиге, двенадцать строк.
 
 Запускается хуком `.claude/hooks/lint-changed.mjs` на каждый Edit или Write,
 так что комментарий отклоняется в момент правки, а не в конце хода.</div>
-          <p class="then-now-note">Шапка <code class="cmd">eslint.config.js</code> в
+          <p data-block="era-1.tn-note" class="then-now-note">Шапка <code class="cmd">eslint.config.js</code> в
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2db720c" rel="noopener">2db720c</a> и то, что пришло ей на смену в
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>.</p>
         </div>
@@ -369,13 +369,13 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Эпоха 2 из 7</span><span>30 июля – 2 августа</span><span>коммиты 31–66</span>
+        <span data-block="era-2.band-era" class="text-ink">Эпоха 2 из 7</span><span data-block="era-2.band-dates">30 июля – 2 августа</span><span data-block="era-2.band-commits">коммиты 31–66</span>
       </div>
 
-      <h2 id="era-2-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Фичи, которые можно удалить, и правила, обязанные доказать, что срабатывают</h2>
+      <h2 data-block="era-2.title" id="era-2-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Фичи, которые можно удалить, и правила, обязанные доказать, что срабатывают</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-2.lead">
           Первая эпоха сделала правила проверяемыми. Вторая выяснила, что проверяемое
           правило может быть мёртвым, и что об этом ничто не сообщит. 30 июля четыре коммита
           подряд находили мёртвым одно и то же правило независимости фич — три версии самого
@@ -387,8 +387,8 @@
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Правило, найденное мёртвым четыре раза за день</span><span class="era-detail-n">13 нарушений</span></summary>
-        <p>
+          <summary data-block="era-2.d1-summary"><span class="era-detail-h">Правило, найденное мёртвым четыре раза за день</span><span class="era-detail-n">13 нарушений</span></summary>
+        <p data-block="era-2.d1-p1">
           Эпоха начинается с того, что дерево исходников выворачивают наизнанку. Вместо слоёв
           наверху (<code>game/</code>, <code>render/</code>, <code>bot/</code>) каждая фича
           стала папкой с этими слоями внутри, и правило сформулировано как тест: «фича — это
@@ -399,7 +399,7 @@
           и импорт из чужой фичи виден в самой строке, а путь из точек этого не показывает.
         </p>
 
-        <p>
+        <p data-block="era-2.d1-p2">
           Когда фичи стали отгораживать друг от друга линтом, проект получил урок, который
           потом повторял чаще всех остальных. Правило независимости фич было написано,
           включено и горело зелёным. Оно не работало.
@@ -411,7 +411,7 @@
           комментарии, шаблон не совпадал ни с одним импортом, и зона пропускала всё.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/40d8179" rel="noopener">40d8179</a>
         </p>
-        <p>
+        <p data-block="era-2.d1-p3">
           Два оставшихся из четырёх коммитов нашли мёртвыми исключения уже не в зонах.
           Логгер переехал в папку, а исключение, разрешавшее ему то, что запрещено остальным,
           осталось указывать на файл, которого больше нет.
@@ -419,21 +419,21 @@
           Так же осиротело исключение Stryker, и скор упал.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f749a9c" rel="noopener">f749a9c</a>
         </p>
-        <p>
+        <p data-block="era-2.d1-p4">
           Чтобы доказать один коммит, прогнали тринадцать намеренных нарушений.
         </p>
         </details>
       </div>
 
-      <blockquote class="said reveal mt-10 max-w-[60ch]">
+      <blockquote data-block="era-2.q1" class="said reveal mt-10 max-w-[60ch]">
         «Правило, которое срабатывает, и правило, которое мертво, снаружи выглядят одинаково».
         <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/f749a9c" rel="noopener">f749a9c</a> · 30 июля · в оригинале: a rule that fires and a rule that is dead look identical from the outside</cite>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
-          <summary><span class="era-detail-h">Поддельный Telegram</span><span class="era-detail-n">7 известных изъянов</span></summary>
-        <p>
+          <summary data-block="era-2.d2-summary"><span class="era-detail-h">Поддельный Telegram</span><span class="era-detail-n">7 известных изъянов</span></summary>
+        <p data-block="era-2.d2-p1">
           К 31 июля бот умел повторять запросы, перезапускать себя и докладывать о своём
           состоянии. Затем он получил e2e: поддельный сервер
           Bot API и сценарии, которые проигрывают с ботом целый вечер, то есть одну
@@ -443,7 +443,7 @@
           Правила для этого поддельного сервера: он только записывает, что ему прислали, ничего
           не решает сам и обязан отказывать во всём, в чём отказывает настоящий Telegram.
         </p>
-        <p>
+        <p data-block="era-2.d2-p2">
           e2e работал, но в гейты пока не встал. Его семь известных изъянов честно
           записали в новый файл, TECH-DEBT.md, вместе с правилом для самого файла: «запись
           называет триггер, а не желание». «Разделить файл» — желание; «разделить, когда в
@@ -451,7 +451,7 @@
           взяться.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0505b9b" rel="noopener">0505b9b</a>
         </p>
-        <p>
+        <p data-block="era-2.d2-p3">
           Первую пользу e2e принёс через семьдесят минут. Новому экрану с кнопками выписали
           узкое обязательство: «фича с инлайн-клавиатурой получает сценарии»;
           инлайн-клавиатура — это и есть кнопки под сообщением бота. Сценарии сразу поймали
@@ -463,8 +463,8 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Цена гейта</span><span class="era-detail-n">63 секунды</span></summary>
-        <p>
+          <summary data-block="era-2.d3-summary"><span class="era-detail-h">Цена гейта</span><span class="era-detail-n">63 секунды</span></summary>
+        <p data-block="era-2.d3-p1">
           Чего стоят гейты, проект узнал на этом же новом экране: тот «занял час и большую часть
           бюджета модели, и дело было не в фиче: восемь запусков Stryker там, где хватило бы
           двух». Бюджет модели — это
@@ -474,7 +474,7 @@
           минут.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/66564c9" rel="noopener">66564c9</a>
         </p>
-        <p>
+        <p data-block="era-2.d3-p2">
           С ним пришли и остались два правила. Первое: «Никогда не перезапускай гейт, чтобы
           перечитать его вывод». Второе: один раунд добивания выживших за фазу. Выжившие — мутанты, которых не
           поймал ни один тест, и добивают их, дописывая тесты.
@@ -482,14 +482,14 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Свод правил переполняется</span><span class="era-detail-n">585 строк</span></summary>
-        <p>
+          <summary data-block="era-2.d4-summary"><span class="era-detail-h">Свод правил переполняется</span><span class="era-detail-n">585 строк</span></summary>
+        <p data-block="era-2.d4-p1">
           CLAUDE.md был местом, куда по умолчанию дописывали каждый урок, и дорос до 585
           строк. Его сократили до 354 переносом, а не вычёркиванием: правила e2e ушли в его
           README, процедура слоёв в новый скилл <code>add-a-feature</code>.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>
         </p>
-        <p>
+        <p data-block="era-2.d4-p2">
           Затем появился коммит «пусть документы проверяют себя сами».
           Он заметил, что документы чистят от дублей уже второй раз, и сделал вывод: само
           правило не виновато, виновато то, что его никто не проверял. И добавил гейт
@@ -505,8 +505,8 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Урок, оставленный в чате, потерян</span><span class="era-detail-n">5 вопросов</span></summary>
-        <p>
+          <summary data-block="era-2.d5-summary"><span class="era-detail-h">Урок, оставленный в чате, потерян</span><span class="era-detail-n">5 вопросов</span></summary>
+        <p data-block="era-2.d5-p1">
           Эпоха заканчивается ретроспективой, и первая её попытка провалилась. Ретроспективу
           повесили на компакцию: когда разговор перестаёт помещаться в память модели, его
           ужимают до краткого пересказа, и хук должен был перед этим задать пять вопросов: о
@@ -516,7 +516,7 @@
           моментов».
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ec3d818" rel="noopener">ec3d818</a>
         </p>
-        <p>
+        <p data-block="era-2.d5-p2">
           Ретроспектива стала гейтом, пятым по счёту и на тот момент последним. Она же стала отдельным скиллом.
           Первые же её выводы заменили политику делегирования более узким правилом, которое в
           четвёртой эпохе владелец отменит: делегируй, только когда не хватает собственного
@@ -525,27 +525,27 @@
         </p>
         </details>
 
-        <p>
+        <p data-block="era-2.next">
           Эпоха научилась доказывать, что правило срабатывает. Следующая найдёт дыру и в доказанном правиле.
         </p>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">6</p><p class="tile-label">скиллов</p></div>
-        <div class="tile"><p class="tile-value">1</p><p class="tile-label">агент</p></div>
-        <div class="tile"><p class="tile-value">370<span class="text-dim text-[15px]">/380</span></p><p class="tile-label">строк CLAUDE.md при его бюджете</p></div>
-        <div class="tile"><p class="tile-value">1 367</p><p class="tile-label">тестов</p></div>
-        <div class="tile"><p class="tile-value">82</p><p class="tile-label">e2e-кейса</p></div>
-        <div class="tile"><p class="tile-value">≈97,5%</p><p class="tile-label">мутационный скор</p></div>
+        <div class="tile"><p data-block="era-2.tile-1-value" class="tile-value">6</p><p data-block="era-2.tile-1-label" class="tile-label">скиллов</p></div>
+        <div class="tile"><p data-block="era-2.tile-2-value" class="tile-value">1</p><p data-block="era-2.tile-2-label" class="tile-label">агент</p></div>
+        <div class="tile"><p data-block="era-2.tile-3-value" class="tile-value">370<span class="text-dim text-[15px]">/380</span></p><p data-block="era-2.tile-3-label" class="tile-label">строк CLAUDE.md при его бюджете</p></div>
+        <div class="tile"><p data-block="era-2.tile-4-value" class="tile-value">1 367</p><p data-block="era-2.tile-4-label" class="tile-label">тестов</p></div>
+        <div class="tile"><p data-block="era-2.tile-5-value" class="tile-value">82</p><p data-block="era-2.tile-5-label" class="tile-label">e2e-кейса</p></div>
+        <div class="tile"><p data-block="era-2.tile-6-value" class="tile-value">≈97,5%</p><p data-block="era-2.tile-6-label" class="tile-label">мутационный скор</p></div>
       </div>
 
       <figure class="chart reveal mt-10" data-chart="claude">
         <figcaption>
-          <p class="chart-title">Свод правил под бюджетом</p>
-          <p class="chart-sub">Строк в CLAUDE.md на каждом коммите. Линия на 380 — бюджет, который docs:check держит с коммита 50.</p>
+          <p data-block="era-2.chart-title" class="chart-title">Свод правил под бюджетом</p>
+          <p data-block="era-2.chart-sub" class="chart-sub">Строк в CLAUDE.md на каждом коммите. Линия на 380 — бюджет, который docs:check держит с коммита 50.</p>
         </figcaption>
         <div class="chart-plot"></div>
-        <details class="chart-table"><summary>Показать таблицей</summary></details>
+        <details class="chart-table"><summary data-block="era-2.chart-table">Показать таблицей</summary></details>
       </figure>
     </div>
   </article>
@@ -555,13 +555,13 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Эпоха 3 из 7</span><span>5–7 августа</span><span>коммиты 67–121</span>
+        <span data-block="era-3.band-era" class="text-ink">Эпоха 3 из 7</span><span data-block="era-3.band-dates">5–7 августа</span><span data-block="era-3.band-commits">коммиты 67–121</span>
       </div>
 
-      <h2 id="era-3-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Сценарии становятся гейтом, состояния — таблицами</h2>
+      <h2 data-block="era-3.title" id="era-3-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Сценарии становятся гейтом, состояния — таблицами</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-3.lead">
           В этой эпохе правило линта поймало модель, которая его же написала, — а два гейта, как выяснилось, горели зелёным всё время своего существования, и оба по случайности. Три
           дня, за которые проверки перестали читать только документы и начали читать ещё и
           код. Правило линта, запретившее писать состояния партии голыми строками,
@@ -575,18 +575,18 @@
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">e2e становится гейтом</span><span class="era-detail-n">6 гейтов</span></summary>
-        <p>
+          <summary data-block="era-3.d1-summary"><span class="era-detail-h">e2e становится гейтом</span><span class="era-detail-n">6 гейтов</span></summary>
+        <p data-block="era-3.d1-p1">
           У e2e оставалось семь записанных проблем. Шесть закрыли одним коммитом.
         </p>
-        <p>
+        <p data-block="era-3.d1-p2">
           Но прежде чем стать гейтом, сценарии пришлось научить заканчиваться так, как
           заканчивается настоящий вечер, а не на полуслове. Сообщение бота с текущей партией
           и кнопками под ней здесь зовётся карточкой. Восемь из шестнадцати сценариев
           обрывались посреди карточки, бросая её с открытыми кнопками, и теперь e2e валит
           любой такой сценарий.
         </p>
-        <p>
+        <p data-block="era-3.d1-p3">
           Гейт разыгрывает только те сценарии, до которых дотягивается дифф: для фазы внутри
           одной фичи это обычно два-три файла сценариев и примерно пятнадцать секунд.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/52c0f73" rel="noopener">52c0f73</a>
@@ -595,7 +595,7 @@
           по диффу, e2e по диффу, ревью, ретроспектива. «По диффу» значит только по файлам,
           которые фаза изменила.
         </p>
-        <p>
+        <p data-block="era-3.d1-p4">
           Написание сценария получило собственный скилл, и причина тут не в сценариях, а в
           том, что заставляет скилл открыться: модель открывает скилл, когда его описание
           совпадает с тем, что она сейчас делает. CLAUDE.md говорил: правишь папку сценариев,
@@ -609,21 +609,21 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Правило, поймавшее своего автора</span><span class="era-detail-n">ещё 5 мест</span></summary>
-        <p>
+          <summary data-block="era-3.d2-summary"><span class="era-detail-h">Правило, поймавшее своего автора</span><span class="era-detail-n">ещё 5 мест</span></summary>
+        <p data-block="era-3.d2-p1">
           Каждая строка-имя, которой код обозначал фазу партии, нажатие кнопки, исход или
           отказ, переехала в таблицу своей фичи. Затем правило линта запретило писать такие
           имена строкой где-либо ещё.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3c0b283" rel="noopener">3c0b283</a>
         </p>
-        <p>
+        <p data-block="era-3.d2-p2">
           На спеки правило поначалу не распространялось. Три коммита спустя ревью нашло спек,
           который сравнивал состояние с голой строкой. Спек появился уже после правила, и
           написала его та же модель, что написала правило. Правило распространили и на спеки, и
           заодно оно поймало ещё пять мест в самом коде.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a89a991" rel="noopener">a89a991</a>
         </p>
-        <p>
+        <p data-block="era-3.d2-p3">
           Потом ревью релиза нашло функцию, которая всё ещё возвращала состояние партии строкой,
           хотя таблица состояний давно существовала. Правило знало три формы, в которых состояние пишут
           строкой, а значение, которое возвращает функция, оказалось четвёртой. Отсюда ещё
@@ -635,19 +635,19 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">docs:check учится читать код</span><span class="era-detail-n">3 палитры</span></summary>
-        <p>
+          <summary data-block="era-3.d3-summary"><span class="era-detail-h">docs:check учится читать код</span><span class="era-detail-n">3 палитры</span></summary>
+        <p data-block="era-3.d3-p1">
           Гейт документов вырос из проверки ссылок и бюджетов в проверку истинности. Рос он по
           одному семейству за раз, и каждое семейство добавлялось после того, как что-то
           оказалось неправдой.
         </p>
-        <p>
+        <p data-block="era-3.d3-p2">
           Одно семейство сверяет схему базы: SQL в PLAN.md против SQL, который бот выполняет
           на самом деле. Появилось оно после того, как схему воссоздали по документу и она упала на первой
           же команде: база отказалась принять запись без обязательного поля.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a24c0d4" rel="noopener">a24c0d4</a>
         </p>
-        <p>
+        <p data-block="era-3.d3-p3">
           Другое заново рисует постеры, картинки со статистикой, которые бот присылает в чат,
           и сравнивает их с закоммиченными: один изменённый код цвета, и гейт красный.
           Появилось оно после того, как постеры сравнили с их же дизайн-макетом и нашли «три
@@ -658,8 +658,8 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Два гейта, пойманные на лжи</span><span class="era-detail-n">5 сценариев из 17</span></summary>
-        <p>
+          <summary data-block="era-3.d4-summary"><span class="era-detail-h">Два гейта, пойманные на лжи</span><span class="era-detail-n">5 сценариев из 17</span></summary>
+        <p data-block="era-3.d4-p1">
           Лгали оба одинаково: горели зелёным по случайности, а не потому, что проверяли то, что
           обещали. Первый — «окно тишины» e2e, пауза, которую сценарий выдерживает перед
           чтением экрана. Обычный рендер постера вырос с 460 до 540 мс, запаса осталось
@@ -668,7 +668,7 @@
           как флейк, случайный провал, и его измерили, вместо того чтобы отмахнуться: окно расширили вдвое.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2e7c639" rel="noopener">2e7c639</a>
         </p>
-        <p>
+        <p data-block="era-3.d4-p2">
           Второй — гейт документов, который не умел читать чекаут, то есть рабочую копию
           репозитория, если файлы в ней лежат с переводами строк Windows, CRLF. Рабочая копия
           автора по случайности хранила переводы строк Unix, и гейт был зелёным.
@@ -678,37 +678,37 @@
         </p>
         </details>
 
-        <p>
+        <p data-block="era-3.next">
           В следующей эпохе случатся две вещи, не связанные между собой: бот уедет с ноутбука
           на сервер, и появится первый гейт, на который машина ответить не может.
         </p>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">8</p><p class="tile-label">скиллов</p></div>
-        <div class="tile"><p class="tile-value">5</p><p class="tile-label">собственных правил линта</p></div>
-        <div class="tile"><p class="tile-value">6</p><p class="tile-label">гейтов</p></div>
-        <div class="tile"><p class="tile-value">1 976</p><p class="tile-label">тестов</p></div>
-        <div class="tile"><p class="tile-value">142</p><p class="tile-label">e2e-кейса</p></div>
-        <div class="tile"><p class="tile-value">98,96%</p><p class="tile-label">мутационный скор по десяти файлам, которых коснулся редизайн одного постера</p></div>
+        <div class="tile"><p data-block="era-3.tile-1-value" class="tile-value">8</p><p data-block="era-3.tile-1-label" class="tile-label">скиллов</p></div>
+        <div class="tile"><p data-block="era-3.tile-2-value" class="tile-value">5</p><p data-block="era-3.tile-2-label" class="tile-label">собственных правил линта</p></div>
+        <div class="tile"><p data-block="era-3.tile-3-value" class="tile-value">6</p><p data-block="era-3.tile-3-label" class="tile-label">гейтов</p></div>
+        <div class="tile"><p data-block="era-3.tile-4-value" class="tile-value">1 976</p><p data-block="era-3.tile-4-label" class="tile-label">тестов</p></div>
+        <div class="tile"><p data-block="era-3.tile-5-value" class="tile-value">142</p><p data-block="era-3.tile-5-label" class="tile-label">e2e-кейса</p></div>
+        <div class="tile"><p data-block="era-3.tile-6-value" class="tile-value">98,96%</p><p data-block="era-3.tile-6-label" class="tile-label">мутационный скор по десяти файлам, которых коснулся редизайн одного постера</p></div>
       </div>
 
       <div class="mt-10 grid gap-5 lg:grid-cols-2">
         <figure class="chart reveal" data-chart="tests">
           <figcaption>
-            <p class="chart-title">Тесты, как их считают сообщения коммитов</p>
-            <p class="chart-sub">Число тестов, которое называет финальный коммит фазы. Пропуски — коммиты, которые его не назвали.</p>
+            <p data-block="era-3.chart-1-title" class="chart-title">Тесты, как их считают сообщения коммитов</p>
+            <p data-block="era-3.chart-1-sub" class="chart-sub">Число тестов, которое называет финальный коммит фазы. Пропуски — коммиты, которые его не назвали.</p>
           </figcaption>
           <div class="chart-plot"></div>
-          <details class="chart-table"><summary>Показать таблицей</summary></details>
+          <details class="chart-table"><summary data-block="era-3.chart-1-table">Показать таблицей</summary></details>
         </figure>
         <figure class="chart reveal" data-chart="mutation">
           <figcaption>
-            <p class="chart-title">Мутационный скор, каким его сообщали коммиты</p>
-            <p class="chart-sub">Скор по всему дереву или по диффу из сообщений коммитов. Линия на 85 — порог падения с коммита 20.</p>
+            <p data-block="era-3.chart-2-title" class="chart-title">Мутационный скор, каким его сообщали коммиты</p>
+            <p data-block="era-3.chart-2-sub" class="chart-sub">Скор по всему дереву или по диффу из сообщений коммитов. Линия на 85 — порог падения с коммита 20.</p>
           </figcaption>
           <div class="chart-plot"></div>
-          <details class="chart-table"><summary>Показать таблицей</summary></details>
+          <details class="chart-table"><summary data-block="era-3.chart-2-table">Показать таблицей</summary></details>
         </figure>
       </div>
     </div>
@@ -719,13 +719,13 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Эпоха 4 из 7</span><span>11–14 августа</span><span>коммиты 122–184</span>
+        <span data-block="era-4.band-era" class="text-ink">Эпоха 4 из 7</span><span data-block="era-4.band-dates">11–14 августа</span><span data-block="era-4.band-commits">коммиты 122–184</span>
       </div>
 
-      <h2 id="era-4-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Бот уезжает с ноутбука</h2>
+      <h2 data-block="era-4.title" id="era-4-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Бот уезжает с ноутбука</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-4.lead">
           Шестьдесят три коммита за четыре дня принесли первый гейт, на который машина
           ответить не может: постер — это картинка, а картинку не читает ни один тест. Первый
           его прогон поймал две дыры в правилах наград и строку текста, уходящую за край
@@ -737,8 +737,8 @@
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Гейт, на который машина ответить не может</span><span class="era-detail-n">9 вечеров</span></summary>
-        <p>
+          <summary data-block="era-4.d1-summary"><span class="era-detail-h">Гейт, на который машина ответить не может</span><span class="era-detail-n">9 вечеров</span></summary>
+        <p data-block="era-4.d1-p1">
           Гейт галереи берёт девять
           неудобных вечеров и рисует по ним оба постера, хронологию и награды. Он встал
           пятым, и гейтов стало семь.
@@ -753,15 +753,15 @@
         </details>
       </div>
 
-      <blockquote class="said reveal mt-10 max-w-[60ch]">
+      <blockquote data-block="era-4.q1" class="said reveal mt-10 max-w-[60ch]">
         «„Посмотрел, нормально“ — это зелёный свет, за которым ничего нет».
         <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/ce3c70c" rel="noopener">ce3c70c</a> · 11 августа · в оригинале: "looked, fine" is the green light with nothing behind it</cite>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
-          <summary><span class="era-detail-h">Делегирование становится правилом</span><span class="era-detail-n">3 условия</span></summary>
-        <p>
+          <summary data-block="era-4.d2-summary"><span class="era-detail-h">Делегирование становится правилом</span><span class="era-detail-n">3 условия</span></summary>
+        <p data-block="era-4.d2-p1">
           Правило второй эпохи, делегировать только когда не хватает собственного контекста,
           владелец отменил. Теперь независимый участок работы отдаётся субагенту сразу, если
           выполнены три условия: работа не задевает файлов, открытых у самой модели, бриф
@@ -772,7 +772,7 @@
           Новое правило редко ломается оттого, что его применяют плохо. Чаще его просто тихо
           не применяют, и без подсчёта этого никто не заметит.
         </p>
-        <p>
+        <p data-block="era-4.d2-p2">
           Позже один коммит записал предел ревьюера: он читает дифф и ничего не запускает,
           так что «зелёное ревью shell-скрипта, systemd-юнита или воркфлоу — это полгейта».
           Все три — файлы, которые проверяются только запуском: юнит говорит серверу, как
@@ -782,8 +782,8 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Три проверки — по тому, что на кону</span><span class="era-detail-n">3 проверки</span></summary>
-        <p>
+          <summary data-block="era-4.d3-summary"><span class="era-detail-h">Три проверки — по тому, что на кону</span><span class="era-detail-n">3 проверки</span></summary>
+        <p data-block="era-4.d3-p1">
           Сервер сам забирает новейший тег каждые пять минут; никто ничего на него не пушит.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cfd02a1" rel="noopener">cfd02a1</a>
           Единую проверку разделили на три по тому, что стоит на кону. Перед пушем — линт,
@@ -793,7 +793,7 @@
           сценарии.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f58e793" rel="noopener">f58e793</a>
         </p>
-        <p>
+        <p data-block="era-4.d3-p2">
           Батарея стоит в git-хуке на машине разработчика и отрабатывает до того, как тег
           уйдёт на GitHub. Красный CI после этого уже ничего не остановит, а лишь сообщит,
           что сломанный бот уже на сервере.
@@ -802,8 +802,8 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Процесс рисуют, а у рисунка появляются хуки</span><span class="era-detail-n">8 стадий</span></summary>
-        <p>
+          <summary data-block="era-4.d4-summary"><span class="era-detail-h">Процесс рисуют, а у рисунка появляются хуки</span><span class="era-detail-n">8 стадий</span></summary>
+        <p data-block="era-4.d4-p1">
           Весь цикл разработки нарисовали диаграммой последовательности и вынесли в отдельный
           файл, DEVELOPMENT-FLOW.md.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/edc1148" rel="noopener">edc1148</a>
@@ -811,7 +811,7 @@
           гейты, ревью чужим агентом, чтение фраз и сверка картинок, ретроспектива, релиз и
           чекап.
         </p>
-        <p>
+        <p data-block="era-4.d4-p2">
           Это рисунок владельца, и отсюда два запрета. Менять его молча нельзя: владелец
           встретил бы сдвиг как дифф месяцы спустя, и рассуждения за ним было бы уже не
           восстановить. Спрашивать разрешения тоже
@@ -828,8 +828,8 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Никто не проверяет проверяющих</span><span class="era-detail-n">13 находок</span></summary>
-        <p>
+          <summary data-block="era-4.d5-summary"><span class="era-detail-h">Никто не проверяет проверяющих</span><span class="era-detail-n">13 находок</span></summary>
+        <p data-block="era-4.d5-p1">
           Агента <code>deep-checkup</code> написали, чтобы он раз в неделю «не верил ничему на
           слово», ничего не чинил и возвращал подробный отчёт, где за каждым вердиктом стоит
           команда и её вывод.
@@ -842,8 +842,8 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Пропущенная ретроспектива</span><span class="era-detail-n">27 строк</span></summary>
-        <p>
+          <summary data-block="era-4.d6-summary"><span class="era-detail-h">Пропущенная ретроспектива</span><span class="era-detail-n">27 строк</span></summary>
+        <p data-block="era-4.d6-p1">
           Гейтов к тому
           времени было семь, и седьмым стояла ретроспектива. Сначала это объяснили тем, что
           релиз ощущается как конец. Следующий коммит поправил его со слов владельца:
@@ -864,7 +864,7 @@
         </p>
         </details>
 
-        <p>
+        <p data-block="era-4.next">
           В следующей эпохе у харнеса появятся читатели, которым нарочно
           ничего не объясняют, а у каждого агента — контракт на то, что ему обязаны сообщить
           и что он обязан вернуть.
@@ -872,12 +872,12 @@
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">10</p><p class="tile-label">скиллов</p></div>
-        <div class="tile"><p class="tile-value">2</p><p class="tile-label">агента</p></div>
-        <div class="tile"><p class="tile-value">3 + 2</p><p class="tile-label">хука Claude и git-хука</p></div>
-        <div class="tile"><p class="tile-value">7</p><p class="tile-label">гейтов</p></div>
-        <div class="tile"><p class="tile-value">12</p><p class="tile-label">семейств docs:check</p></div>
-        <div class="tile"><p class="tile-value">2 502</p><p class="tile-label">теста</p></div>
+        <div class="tile"><p data-block="era-4.tile-1-value" class="tile-value">10</p><p data-block="era-4.tile-1-label" class="tile-label">скиллов</p></div>
+        <div class="tile"><p data-block="era-4.tile-2-value" class="tile-value">2</p><p data-block="era-4.tile-2-label" class="tile-label">агента</p></div>
+        <div class="tile"><p data-block="era-4.tile-3-value" class="tile-value">3 + 2</p><p data-block="era-4.tile-3-label" class="tile-label">хука Claude и git-хука</p></div>
+        <div class="tile"><p data-block="era-4.tile-4-value" class="tile-value">7</p><p data-block="era-4.tile-4-label" class="tile-label">гейтов</p></div>
+        <div class="tile"><p data-block="era-4.tile-5-value" class="tile-value">12</p><p data-block="era-4.tile-5-label" class="tile-label">семейств docs:check</p></div>
+        <div class="tile"><p data-block="era-4.tile-6-value" class="tile-value">2 502</p><p data-block="era-4.tile-6-label" class="tile-label">теста</p></div>
       </div>
     </div>
   </article>
@@ -887,13 +887,13 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Эпоха 5 из 7</span><span>19–25 августа</span><span>коммиты 185–244</span>
+        <span data-block="era-5.band-era" class="text-ink">Эпоха 5 из 7</span><span data-block="era-5.band-dates">19–25 августа</span><span data-block="era-5.band-commits">коммиты 185–244</span>
       </div>
 
-      <h2 id="era-5-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Холодные читатели и урезание бюджетов</h2>
+      <h2 data-block="era-5.title" id="era-5-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Холодные читатели и урезание бюджетов</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-5.lead">
           На уже выпущенном постере игрокам было сказано: «по точке за вечер — ещё 3 вечера», —
           и ни слова о том, что именно придёт. Владелец прочитал это как посторонний и
           спросил, что оно значит; из этого вопроса пошли все холодные читатели проекта:
@@ -906,8 +906,8 @@
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Автор не может прочитать собственный рисунок</span><span class="era-detail-n">9 гейтов</span></summary>
-        <p>
+          <summary data-block="era-5.d1-summary"><span class="era-detail-h">Автор не может прочитать собственный рисунок</span><span class="era-detail-n">9 гейтов</span></summary>
+        <p data-block="era-5.d1-p1">
           Графика на постере ещё не было: он появляется, когда накопится достаточно вечеров,
           а до тех пор на его месте стоит подсказка.
           <code>poster-reader</code> получает
@@ -916,13 +916,13 @@
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da50714" rel="noopener">da50714</a>
           Гейт галереи стал тогда «единственным гейтом, который нельзя выполнять самому».
         </p>
-        <p>
+        <p data-block="era-5.d1-p2">
           Та же беда была и в словах. Сначала гейтом стало чтение одного настоящего вечера
           перед выпуском, обязательное, когда фаза меняет то, что говорит постер. До того ни
           один гейт в проекте не спрашивал, что на самом деле говорит хронология вечера.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/93c1456" rel="noopener">93c1456</a>
         </p>
-        <p>
+        <p data-block="era-5.d1-p3">
           Затем взяли два настоящих вечера и прочитали, что бот сказал о них игрокам: за
           десять минут нашлись восемь дефектов. Поэтому появился <code>copy-reader</code>: он
           читает каждую реплику бота на обоих языках с подставленными настоящими значениями и
@@ -933,7 +933,7 @@
           сдвинули раньше, к моменту, когда таблица реплик только написана и на ней ещё
           ничего не построено.
         </p>
-        <p>
+        <p data-block="era-5.d1-p4">
           Агент <code>plan-reviewer</code> работает в самом начале фазы, когда план уже есть,
           а кода ещё нет. Он получает слова владельца и согласованные
           сигнатуры функций, и ничего больше, с напутствием «Можешь вернуться ни с чем»: ревьюер не обязан что-то найти, обязан
@@ -944,15 +944,15 @@
         </details>
       </div>
 
-      <blockquote class="said reveal mt-10 max-w-[60ch]">
+      <blockquote data-block="era-5.q1" class="said reveal mt-10 max-w-[60ch]">
         «Это единственный читатель здесь, чьё незнание — инструмент».
         <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/da50714" rel="noopener">da50714</a> · 20 августа · в оригинале: It is the only reader here whose ignorance is the instrument</cite>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
-          <summary><span class="era-detail-h">Гейт, который молча не применяется</span><span class="era-detail-n">планка 80%</span></summary>
-        <p>
+          <summary data-block="era-5.d2-summary"><span class="era-detail-h">Гейт, который молча не применяется</span><span class="era-detail-n">планка 80%</span></summary>
+        <p data-block="era-5.d2-p1">
           Продукт получил третий постер, после хронологии вечера и наград за него: всю
           карьеру одного игрока.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2b1353b" rel="noopener">2b1353b</a>
@@ -961,7 +961,7 @@
           не применяется, неотличим от гейта, которому нечего сообщить».
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da16c8d" rel="noopener">da16c8d</a>
         </p>
-        <p>
+        <p data-block="era-5.d2-p2">
           Дальше проверяли самих проверяющих: чекап нарочно сломал каждое правило документов,
           девять покраснели, а три остались зелёными.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3d92c6b" rel="noopener">3d92c6b</a>
@@ -975,15 +975,15 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Бюджеты повсюду</span><span class="era-detail-n">16% изменённых строк</span></summary>
-        <p>
+          <summary data-block="era-5.d3-summary"><span class="era-detail-h">Бюджеты повсюду</span><span class="era-detail-n">16% изменённых строк</span></summary>
+        <p data-block="era-5.d3-p1">
           У CLAUDE.md бюджет строк был со второй эпохи. Теперь бюджет получил каждый скилл и
           TECH-DEBT.md. Скилл <code>finish-phase</code> дорос до 722 строк. Его сократили до
           459, вынеся пять страниц в соседние файлы, а бюджеты тем же коммитом понизили,
           «чтобы разделение не могло стать способом выключить счётчик».
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ab68474" rel="noopener">ab68474</a>
         </p>
-        <p>
+        <p data-block="era-5.d3-p2">
           Сторонний разбор процесса, который провела свежая модель без памяти о проделанной
           работе, измерил, сколько усилий уходит в сам харнес: 16% строк, изменённых за пять
           дней, пришлись на процесс, а не на продукт. Отдельно он посчитал релизы: восемь за
@@ -994,7 +994,7 @@
           новое. Делегирование написания кода — только начиная с десяти файлов. Ретроспектива —
           только когда есть что считать.
         </p>
-        <p>
+        <p data-block="era-5.d3-p3">
           Последний коммит эпохи проверил утверждение, что скилл должен описывать результаты,
           а не шаги. Утверждение не выдержало. Один скилл переписали с нуля, почти вдвое короче, и он потерял шесть конкретных
           указаний, что делать. Пропали они по одному
@@ -1007,7 +1007,7 @@
           прежде чем кто-нибудь его укоротит.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/784b26c" rel="noopener">784b26c</a>
         </p>
-        <p>
+        <p data-block="era-5.d3-p4">
           Каждый агент получил ещё и контракт: что обязан содержать его бриф и что он
           возвращает, и ответ обязан открываться строкой вердикта: два числа, сколько
           проверено и сколько найдено, а за ними сами находки. Вердикт не заменяет находок: это их итог, по которому видно, весь ли объём
@@ -1016,7 +1016,7 @@
           никто ниже по цепочке его не перепроверяет.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ba4603f" rel="noopener">ba4603f</a>
         </p>
-        <p>
+        <p data-block="era-5.d3-p5">
           Затем появился хук на конец хода. Одна фаза оборвалась на
           сообщении, которое перечисляло, что осталось, заканчивалось словом «Продолжаю» и
           дальше не делало ничего. Ни один гейт не мог этого заметить: гейты судят дифф, а
@@ -1026,28 +1026,28 @@
         </p>
         </details>
 
-        <p>
+        <p data-block="era-5.next">
           Оставалось научить харнес помнить, что он делал. Этим занялась последняя эпоха.
         </p>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">11</p><p class="tile-label">скиллов</p></div>
-        <div class="tile"><p class="tile-value">7</p><p class="tile-label">агентов</p></div>
-        <div class="tile"><p class="tile-value">2</p><p class="tile-label">семейства Stryker, две планки</p></div>
-        <div class="tile"><p class="tile-value">≈30</p><p class="tile-label">семейств docs:check</p></div>
-        <div class="tile"><p class="tile-value">3 994</p><p class="tile-label">теста</p></div>
-        <div class="tile"><p class="tile-value">8</p><p class="tile-label">коммитов подряд с пометкой «Tag: none» в конце эпохи</p></div>
+        <div class="tile"><p data-block="era-5.tile-1-value" class="tile-value">11</p><p data-block="era-5.tile-1-label" class="tile-label">скиллов</p></div>
+        <div class="tile"><p data-block="era-5.tile-2-value" class="tile-value">7</p><p data-block="era-5.tile-2-label" class="tile-label">агентов</p></div>
+        <div class="tile"><p data-block="era-5.tile-3-value" class="tile-value">2</p><p data-block="era-5.tile-3-label" class="tile-label">семейства Stryker, две планки</p></div>
+        <div class="tile"><p data-block="era-5.tile-4-value" class="tile-value">≈30</p><p data-block="era-5.tile-4-label" class="tile-label">семейств docs:check</p></div>
+        <div class="tile"><p data-block="era-5.tile-5-value" class="tile-value">3 994</p><p data-block="era-5.tile-5-label" class="tile-label">теста</p></div>
+        <div class="tile"><p data-block="era-5.tile-6-value" class="tile-value">8</p><p data-block="era-5.tile-6-label" class="tile-label">коммитов подряд с пометкой «Tag: none» в конце эпохи</p></div>
       </div>
 
       <figure class="chart reveal mt-10" data-chart="parts">
         <figcaption>
-          <p class="chart-title">Части харнеса</p>
-          <p class="chart-sub">Скиллы, агенты и собственные правила линта в дереве на каждом коммите.</p>
+          <p data-block="era-5.chart-title" class="chart-title">Части харнеса</p>
+          <p data-block="era-5.chart-sub" class="chart-sub">Скиллы, агенты и собственные правила линта в дереве на каждом коммите.</p>
         </figcaption>
         <div class="chart-legend"></div>
         <div class="chart-plot"></div>
-        <details class="chart-table"><summary>Показать таблицей</summary></details>
+        <details class="chart-table"><summary data-block="era-5.chart-table">Показать таблицей</summary></details>
       </figure>
     </div>
   </article>
@@ -1057,13 +1057,13 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Эпоха 6 из 7</span><span>26 августа – 2 сентября</span><span>коммиты 245–274</span>
+        <span data-block="era-6.band-era" class="text-ink">Эпоха 6 из 7</span><span data-block="era-6.band-dates">26 августа – 2 сентября</span><span data-block="era-6.band-commits">коммиты 245–274</span>
       </div>
 
-      <h2 id="era-6-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Харнес ведёт записи о себе</h2>
+      <h2 data-block="era-6.title" id="era-6-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Харнес ведёт записи о себе</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-6.lead">
           В этой эпохе новых частей почти не появилось. Зато исчезла одна: таблица
           маршрутизации в шапке CLAUDE.md, которая со второй эпохи говорила модели, какой
           скилл читать, — вторая копия факта, тихо разошедшаяся с первой. Когда
@@ -1076,8 +1076,8 @@
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Слепые пятна линта</span><span class="era-detail-n">ещё 2 правила линта</span></summary>
-        <p>
+          <summary data-block="era-6.d1-summary"><span class="era-detail-h">Слепые пятна линта</span><span class="era-detail-n">ещё 2 правила линта</span></summary>
+        <p data-block="era-6.d1-p1">
           ESLint ни разу не запускали на папке
           сценариев. А зоны импортов видели только статический <code>import</code>.
           Теперь каждый запрет записан дважды, для
@@ -1095,8 +1095,8 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Где скилл говорит, когда он нужен</span></summary>
-        <p>
+          <summary data-block="era-6.d2-summary"><span class="era-detail-h">Где скилл говорит, когда он нужен</span></summary>
+        <p data-block="era-6.d2-p1">
           Ту же роль, что и таблица, играло описание самого скилла, и ни то, ни другое
           никто не проверял: в четвёртой эпохе описания научили называть задачу, но стадию
           процесса не называло ни одно, а таблица и описания разошлись. Описание каждого скилла теперь само
@@ -1111,27 +1111,27 @@
         </p>
 
           <div class="reveal mt-10 max-w-[68ch]">
-                <p class="eyebrow">Тогда и сейчас · как скилл говорит, когда он нужен</p>
-        <p class="mt-2 text-[15px] leading-relaxed text-muted">Два артефакта из репозитория, на английском: таблица из CLAUDE.md, где нужную строку читатель ищет сам, и описание скилла, которое само называет свою стадию.</p>
+                <p data-block="era-6.tn-eyebrow" class="eyebrow">Тогда и сейчас · как скилл говорит, когда он нужен</p>
+        <p data-block="era-6.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">Два артефакта из репозитория, на английском: таблица из CLAUDE.md, где нужную строку читатель ищет сам, и описание скилла, которое само называет свою стадию.</p>
         <div class="then-now mt-3" data-then-now>
           <div class="then-now-tabs">
-            <button type="button" class="then-now-tab" aria-pressed="true">CLAUDE.md · 1 августа</button>
-            <button type="button" class="then-now-tab" aria-pressed="false">finish-phase · 28 августа</button>
+            <button data-block="era-6.tn-tab-1" type="button" class="then-now-tab" aria-pressed="true">CLAUDE.md · 1 августа</button>
+            <button data-block="era-6.tn-tab-2" type="button" class="then-now-tab" aria-pressed="false">finish-phase · 28 августа</button>
           </div>
-          <div class="then-now-body">| Doing this                                    | Read                        |
+          <div data-block="era-6.tn-body-1" class="then-now-body">| Doing this                                    | Read                        |
 |-----------------------------------------------|-----------------------------|
 | Adding a command, a screen, a feature folder  | `add-a-feature` skill       |
 | Adding a query                                | `add-repository-method`     |
 | Writing or changing any spec                  | `write-a-spec` skill        |
 | Closing a phase, running the gates            | `finish-phase` skill        |
 | Touching `e2e/`                               | `e2e/README.md`             |</div>
-          <div class="then-now-body" hidden>description: "… This is stage 3 and the stages after it, so load it
+          <div data-block="era-6.tn-body-2" class="then-now-body" hidden>description: "… This is stage 3 and the stages after it, so load it
 when the code is written and the gates are due — a phase being wrapped up,
 a release being cut, an external list of changes that has run out, or the
 user asking whether the code is releasable. Do NOT load it at stage 1:
 recognising a list of changes as a phase is not the same as opening this
 skill …"</div>
-          <p class="then-now-note">Таблица маршрутизации, которой CLAUDE.md открывался начиная с
+          <p data-block="era-6.tn-note" class="then-now-note">Таблица маршрутизации, которой CLAUDE.md открывался начиная с
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>, и собственная шапка скилла после того, как
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a> удалил таблицу.</p>
           </div>
@@ -1141,8 +1141,8 @@ skill …"</div>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
-          <summary><span class="era-detail-h">Схема процесса, исправленная пять раз за день</span><span class="era-detail-n">5 коммитов</span></summary>
-        <p>
+          <summary data-block="era-6.d3-summary"><span class="era-detail-h">Схема процесса, исправленная пять раз за день</span><span class="era-detail-n">5 коммитов</span></summary>
+        <p data-block="era-6.d3-p1">
           Схему процесса прочитали как прозу, шаг за шагом, и несколько шагов оказались не
           там, где они происходят. Два шага, нужные каждой фазе, изучить проект и прочитать
           список долгов, стояли в ветке, куда заходит только починка бага. Другой пример —
@@ -1160,8 +1160,8 @@ skill …"</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Логбук</span><span class="era-detail-n">2 поля</span></summary>
-        <p>
+          <summary data-block="era-6.d4-summary"><span class="era-detail-h">Логбук</span><span class="era-detail-n">2 поля</span></summary>
+        <p data-block="era-6.d4-p1">
           Ответом на это стали записи. Папка логбука хранит по одному логу на фазу,
           написанному на ретроспективе: что просили, какого рода была работа, что прогнали,
           что делегировали, что перестроили и какой гейт нашёл каждый дефект.
@@ -1171,7 +1171,7 @@ skill …"</div>
           обошедшая стадию, читается иначе, чем та, что её просто не упомянула.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f4b09e7" rel="noopener">f4b09e7</a>
         </p>
-        <p>
+        <p data-block="era-6.d4-p2">
           Единственное правило, которое по-настоящему важно: «Число, которое ты не измерил,
           записывается как <code>not measured</code>, а не оценивается на глаз». Первый же
           лог, написанный по этому правилу, показал, зачем оно. Два подсчёта в нём оказались
@@ -1179,7 +1179,7 @@ skill …"</div>
           ошибались в лестную сторону — ту, где день выглядит лучше.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/db81a3a" rel="noopener">db81a3a</a>
         </p>
-        <p>
+        <p data-block="era-6.d4-p3">
           Соседняя папка хранит каждый отчёт чекапа, и их никогда не чистят. В
           каждом есть таблица измерений, чтобы при следующем заходе можно было спросить,
           сдвинулось ли число. Первый отчёт в ней — от нового прогона в конце августа, не от того, что в четвёртой
@@ -1189,8 +1189,8 @@ skill …"</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Подсчёты гниют</span></summary>
-        <p>
+          <summary data-block="era-6.d5-summary"><span class="era-detail-h">Подсчёты гниют</span></summary>
+        <p data-block="era-6.d5-p1">
           Самый повторяющийся урок эпохи — мелкий. Так же, как число наград, сгнили и счёт
           файлов со спеками, и колонка с числом строк. Потом число убрали совсем, а гейт для него
           рассмотрели и отвергли: «проверка защищает факт, от которого что-то зависит, а от
@@ -1200,28 +1200,28 @@ skill …"</div>
         </details>
       </div>
 
-      <blockquote class="said reveal mt-10 max-w-[60ch]">
+      <blockquote data-block="era-6.q1" class="said reveal mt-10 max-w-[60ch]">
         «Факт, записанный в двух местах, — это та копия, которая гниёт».
         <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a> · 28 августа · в оригинале: a fact stated in two places is the copy that rots</cite>
       </blockquote>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">11 + 7</p><p class="tile-label">скиллов и агентов</p></div>
-        <div class="tile"><p class="tile-value">7</p><p class="tile-label">собственных правил линта</p></div>
-        <div class="tile"><p class="tile-value">32</p><p class="tile-label">семейства docs:check</p></div>
-        <div class="tile"><p class="tile-value">4 367</p><p class="tile-label">тестов</p></div>
-        <div class="tile"><p class="tile-value">178</p><p class="tile-label">e2e-кейсов</p></div>
-        <div class="tile"><p class="tile-value">359</p><p class="tile-label">строк в CLAUDE.md</p></div>
+        <div class="tile"><p data-block="era-6.tile-1-value" class="tile-value">11 + 7</p><p data-block="era-6.tile-1-label" class="tile-label">скиллов и агентов</p></div>
+        <div class="tile"><p data-block="era-6.tile-2-value" class="tile-value">7</p><p data-block="era-6.tile-2-label" class="tile-label">собственных правил линта</p></div>
+        <div class="tile"><p data-block="era-6.tile-3-value" class="tile-value">32</p><p data-block="era-6.tile-3-label" class="tile-label">семейства docs:check</p></div>
+        <div class="tile"><p data-block="era-6.tile-4-value" class="tile-value">4 367</p><p data-block="era-6.tile-4-label" class="tile-label">тестов</p></div>
+        <div class="tile"><p data-block="era-6.tile-5-value" class="tile-value">178</p><p data-block="era-6.tile-5-label" class="tile-label">e2e-кейсов</p></div>
+        <div class="tile"><p data-block="era-6.tile-6-value" class="tile-value">359</p><p data-block="era-6.tile-6-label" class="tile-label">строк в CLAUDE.md</p></div>
       </div>
 
       <figure class="chart reveal mt-10" data-chart="lines">
         <figcaption>
-          <p class="chart-title">Продукт и харнес в строках текста</p>
-          <p class="chart-sub">Исходники в <code class="cmd">src/</code> без спеков и стабов — и скиллы, агенты, документы и код docs:check, которые ими управляют.</p>
+          <p data-block="era-6.chart-title" class="chart-title">Продукт и харнес в строках текста</p>
+          <p data-block="era-6.chart-sub" class="chart-sub">Исходники в <code class="cmd">src/</code> без спеков и стабов — и скиллы, агенты, документы и код docs:check, которые ими управляют.</p>
         </figcaption>
         <div class="chart-legend"></div>
         <div class="chart-plot"></div>
-        <details class="chart-table"><summary>Показать таблицей</summary></details>
+        <details class="chart-table"><summary data-block="era-6.chart-table">Показать таблицей</summary></details>
       </figure>
     </div>
   </article>
@@ -1231,13 +1231,13 @@ skill …"</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Эпоха 7 из 7</span><span>3–11 сентября</span><span>коммиты 275–314</span>
+        <span data-block="era-7.band-era" class="text-ink">Эпоха 7 из 7</span><span data-block="era-7.band-dates">3–11 сентября</span><span data-block="era-7.band-commits">коммиты 275–314</span>
       </div>
 
-      <h2 id="era-7-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Агент становится пользователем, а у харнеса появляется линейка</h2>
+      <h2 data-block="era-7.title" id="era-7-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Агент становится пользователем, а у харнеса появляется линейка</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-7.lead">
           Деплой отказывал в трети случаев с 31 августа, и никто этого не замечал, потому что
           «неудавшаяся загрузка выглядит ровно так же, как загрузка, не нашедшая ничего
           нового». Чтобы это найти, пришлось читать журнал сервера, а не README, — и это
@@ -1251,8 +1251,8 @@ skill …"</div>
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Две починки для настоящего вечера</span><span class="era-detail-n">11 партий</span></summary>
-        <p>
+          <summary data-block="era-7.d1-summary"><span class="era-detail-h">Две починки для настоящего вечера</span><span class="era-detail-n">11 партий</span></summary>
+        <p data-block="era-7.d1-p1">
           За столом двое зовутся Ромой, второго записывают как Романи, чтобы таблица их
           различала. В одну пятницу набрали не того: одиннадцать партий ушли человеку, который
           остался дома, и вечер чинили по ssh скриптом. Из этого вышел
@@ -1262,7 +1262,7 @@ skill …"</div>
           всё вычисляет и отвечает «экран устарел», а не падает.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/9b28574" rel="noopener">9b28574</a>
         </p>
-        <p>
+        <p data-block="era-7.d1-p2">
           Урок для харнеса лежал ниже. Фича не может импортировать другую, поэтому парсер имён и
           поворот стола переехали в <code class="cmd">shared/</code> раньше, чем
           <code class="cmd">/replace</code> смог появиться. А вторая фича, слушающая набранный
@@ -1273,8 +1273,8 @@ skill …"</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Чекап читает журнал</span><span class="era-detail-n">181 срабатывание</span></summary>
-        <p>
+          <summary data-block="era-7.d2-summary"><span class="era-detail-h">Чекап читает журнал</span><span class="era-detail-n">181 срабатывание</span></summary>
+        <p data-block="era-7.d2-p1">
           Первый чекап назвал анонимную загрузку деплоя дизайном. Второй нашёл 181 срабатывание
           таймера деплоя с 31 августа, закончившееся отказом GitHub отдать файл без авторизации.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6207423" rel="noopener">6207423</a>
@@ -1284,7 +1284,7 @@ skill …"</div>
           один на сообщение коммита, другой на команду шелла до того, как её увидит шелл.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/02277c0" rel="noopener">02277c0</a>
         </p>
-        <p>
+        <p data-block="era-7.d2-p2">
           Один гейт переехал из-за того, во сколько он обходился: ретроспектива шла в форке разговора,
           который пересылает всю расшифровку при каждом вызове. Теперь она идёт в самом
           разговоре.
@@ -1293,8 +1293,8 @@ skill …"</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Двадцать три скрипта становятся восемью</span><span class="era-detail-n">1 463 прогона тестов</span></summary>
-        <p>
+          <summary data-block="era-7.d3-summary"><span class="era-detail-h">Двадцать три скрипта становятся восемью</span><span class="era-detail-n">1 463 прогона тестов</span></summary>
+        <p data-block="era-7.d3-p1">
           Вердикт гейта сидел посреди
           потока, у которого агент видит только хвост, так что каждый прогон той недели шёл через
           «сохрани лог, погрепай лог». А релизная батарея шла двадцать девять минут
@@ -1304,7 +1304,7 @@ skill …"</div>
           пересобирает абзац после каждого гейта, «чтобы коммит его вставлял, а не перепечатывал».
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e026d5e" rel="noopener">e026d5e</a>
         </p>
-        <p>
+        <p data-block="era-7.d3-p2">
           Затем владелец попросил того же для всех остальных скриптов, а всё, что агент никогда
           не запускает, — убрать. Подсчёт по расшифровкам за месяц показал, где на самом деле
           лежит цена, и лежала она не в скриптах: 14 301 вызов инструментов, из них 1 463 прогона тестов
@@ -1313,7 +1313,7 @@ skill …"</div>
           это, вместо того чтобы удалять для эффекта».
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a>
         </p>
-        <p>
+        <p data-block="era-7.d3-p3">
           Проверка документов выучила таблицу раннера и стала
           отказывать голым <code class="cmd">npx eslint</code> и <code class="cmd">npm test</code>,
           потому что с переехавшими конфигами они ведут себя неправильно; первый прогон нашёл 63
@@ -1325,26 +1325,26 @@ skill …"</div>
         </p>
 
       <div class="reveal mt-10 max-w-[68ch]">
-        <p class="eyebrow">Тогда и сейчас · скрипты в package.json</p>
-        <p class="mt-2 text-[15px] leading-relaxed text-muted">Первая вкладка — блок скриптов, каким он был в начале 9 сентября. Вторая — тот же блок четырьмя коммитами позже, когда гейты переехали в собственную таблицу. Обе на английском, потому что цитируют файл репозитория.</p>
+        <p data-block="era-7.tn-eyebrow" class="eyebrow">Тогда и сейчас · скрипты в package.json</p>
+        <p data-block="era-7.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">Первая вкладка — блок скриптов, каким он был в начале 9 сентября. Вторая — тот же блок четырьмя коммитами позже, когда гейты переехали в собственную таблицу. Обе на английском, потому что цитируют файл репозитория.</p>
         <div class="then-now mt-3" data-then-now>
           <div class="then-now-tabs">
-            <button type="button" class="then-now-tab" aria-pressed="true">Коммит 290 · 9 сентября</button>
-            <button type="button" class="then-now-tab" aria-pressed="false">Коммит 294 · 9 сентября</button>
+            <button data-block="era-7.tn-tab-1" type="button" class="then-now-tab" aria-pressed="true">Коммит 290 · 9 сентября</button>
+            <button data-block="era-7.tn-tab-2" type="button" class="then-now-tab" aria-pressed="false">Коммит 294 · 9 сентября</button>
           </div>
-          <div class="then-now-body">prepare  start  start:prod
+          <div data-block="era-7.tn-body-1" class="then-now-body">prepare  start  start:prod
 check  check:push  check:phase  check:release
 lint  lint:fix  typecheck  docs:check
 test  test:unit  test:integration  test:watch
 test:coverage  test:mutation  test:mutation:changed
 e2e  e2e:changed  e2e:watch  e2e:test  e2e:typecheck</div>
-          <div class="then-now-body" hidden>prepare  start  start:prod
+          <div data-block="era-7.tn-body-2" class="then-now-body" hidden>prepare  start  start:prod
 check:quick  check:push  check:phase  check:release
 e2e:watch
 
 Every gate is a row in scripts/gates/gate-list.ts,
 run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
-          <p class="then-now-note">Скрипты <code class="cmd">package.json</code> на
+          <p data-block="era-7.tn-note" class="then-now-note">Скрипты <code class="cmd">package.json</code> на
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/93a27ef" rel="noopener">93a27ef</a> и на
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a>.</p>
         </div>
@@ -1352,8 +1352,8 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Линейка для харнеса</span><span class="era-detail-n">4 модели</span></summary>
-        <p>
+          <summary data-block="era-7.d4-summary"><span class="era-detail-h">Линейка для харнеса</span><span class="era-detail-n">4 модели</span></summary>
+        <p data-block="era-7.d4-p1">
           «Харнес менялся каждую неделю, и ничто не говорило, стал ли он лучше; модели под ним
           тоже менялись, и единственное сравнение, доступное кому угодно, — впечатление от одной
           сессии против памяти о другой». 10 сентября в репозитории появился бенчмарк:
@@ -1365,7 +1365,7 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
           потому что в день, когда она попадёт в код, задача начнёт измерять память.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d011e68" rel="noopener">d011e68</a>
         </p>
-        <p>
+        <p data-block="era-7.d4-p2">
           В следующей фазе владелец спросил, что мешает модели заметить, что её измеряют, и
           вычитать ответ прямо из репозитория, «и честным ответом было: почти ничего». Калибровку отменили на
           месте. Клон переехал во временную папку системы, исходники раннера из него вырезали. Хук,
@@ -1379,7 +1379,7 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
           Обе колонки починили той же ночью.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3328b6e" rel="noopener">3328b6e</a>
         </p>
-        <p>
+        <p data-block="era-7.d4-p3">
           Таблицу переписали ещё раз, когда все четыре опробованные модели провалили одни и те же
           два обязательства — единственные два, чей шаблон захватывает перенос строки: клон
           выкачивается на Windows, где перед каждым переносом стоит возврат каретки. Когда сопоставление
@@ -1394,8 +1394,8 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Чекап находит то, чего не видят гейты</span><span class="era-detail-n">13 предложений</span></summary>
-        <p>
+          <summary data-block="era-7.d5-summary"><span class="era-detail-h">Чекап находит то, чего не видят гейты</span><span class="era-detail-n">13 предложений</span></summary>
+        <p data-block="era-7.d5-p1">
           Четвёртый чекап, 11 сентября, прогнал полную мутационную батарею и нашёл её красной на
           нетронутом HEAD: ни один мутационный конфиг не называл конфиг тестов, поэтому пробный
           прогон собирал все спеки под корнем, а с 10 сентября среди них был скрытый спек
@@ -1406,7 +1406,7 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
           «не умеет читать сервер или историю git».
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/187f621" rel="noopener">187f621</a>
         </p>
-        <p>
+        <p data-block="era-7.d5-p2">
           Потом он прочитал харнес так, как читает его единственный пользователь. Stop-хук в конце
           каждого хода молча гонял автофикс линтера по всему дереву, правя файлы, которые агент не
           просил трогать, и ничему не отказывая, «так что его нельзя было увидеть отказывающим».
@@ -1427,27 +1427,27 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
         </details>
       </div>
 
-      <blockquote class="said reveal mt-10 max-w-[60ch]">
+      <blockquote data-block="era-7.q1" class="said reveal mt-10 max-w-[60ch]">
         «Единственный пользователь харнеса — агент, а удобство человека вторично».
         <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a> · 9 сентября · в оригинале: the agent is the harness's only user, and a person's convenience is second</cite>
       </blockquote>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">11 + 7</p><p class="tile-label">скиллов и агентов</p></div>
-        <div class="tile"><p class="tile-value">8</p><p class="tile-label">собственных правил линта</p></div>
-        <div class="tile"><p class="tile-value">23 → 8</p><p class="tile-label">скриптов в package.json</p></div>
-        <div class="tile"><p class="tile-value">5 043</p><p class="tile-label">тестов</p></div>
-        <div class="tile"><p class="tile-value">205</p><p class="tile-label">e2e-кейсов</p></div>
-        <div class="tile"><p class="tile-value">379</p><p class="tile-label">строк в CLAUDE.md из 380</p></div>
+        <div class="tile"><p data-block="era-7.tile-1-value" class="tile-value">11 + 7</p><p data-block="era-7.tile-1-label" class="tile-label">скиллов и агентов</p></div>
+        <div class="tile"><p data-block="era-7.tile-2-value" class="tile-value">8</p><p data-block="era-7.tile-2-label" class="tile-label">собственных правил линта</p></div>
+        <div class="tile"><p data-block="era-7.tile-3-value" class="tile-value">23 → 8</p><p data-block="era-7.tile-3-label" class="tile-label">скриптов в package.json</p></div>
+        <div class="tile"><p data-block="era-7.tile-4-value" class="tile-value">5 043</p><p data-block="era-7.tile-4-label" class="tile-label">тестов</p></div>
+        <div class="tile"><p data-block="era-7.tile-5-value" class="tile-value">205</p><p data-block="era-7.tile-5-label" class="tile-label">e2e-кейсов</p></div>
+        <div class="tile"><p data-block="era-7.tile-6-value" class="tile-value">379</p><p data-block="era-7.tile-6-label" class="tile-label">строк в CLAUDE.md из 380</p></div>
       </div>
     </div>
   </article>
 
   <section id="patterns" aria-labelledby="patterns-heading" class="border-t border-line">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p class="eyebrow">Сквозь все семь эпох</p>
-      <h2 id="patterns-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Что повторялось</h2>
-      <p class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
+      <p data-block="patterns.eyebrow" class="eyebrow">Сквозь все семь эпох</p>
+      <h2 data-block="patterns.title" id="patterns-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Что повторялось</h2>
+      <p data-block="patterns.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
         Семь закономерностей проходят через всю историю. Каждая названа в коммите, а не
         выведена. Это те же уроки, что сосчитаны в выводах выше, — только здесь каждый показан
         как правило, в которое он превратился.
@@ -1455,51 +1455,51 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
 
       <ol class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         <li class="reveal">
-          <p class="pattern-n">01</p>
-          <h3 class="mt-2 text-[19px] font-bold">Проза становится машиной</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Каждое правило начинается предложением в CLAUDE.md. Если машина может его проверить, оно становится правилом линта, хуком или семейством docs:check, а предложение удаляется. Повод измеряется, а не чувствуется: «правило в прозе нарушили тринадцать раз за неделю, а это признак, что ему нужна машина».
+          <p data-block="patterns.r1-n" class="pattern-n">01</p>
+          <h3 data-block="patterns.r1-title" class="mt-2 text-[19px] font-bold">Проза становится машиной</h3>
+          <p data-block="patterns.r1-body" class="mt-2 text-[16px] leading-relaxed text-muted">Каждое правило начинается предложением в CLAUDE.md. Если машина может его проверить, оно становится правилом линта, хуком или семейством docs:check, а предложение удаляется. Повод измеряется, а не чувствуется: «правило в прозе нарушили тринадцать раз за неделю, а это признак, что ему нужна машина».
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/08aac82" rel="noopener">08aac82</a></p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-1" class="hover:text-ink">→ эпоха 1</a></p>
+          <p data-block="patterns.r1-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-1" class="hover:text-ink">→ эпоха 1</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">02</p>
-          <h3 class="mt-2 text-[19px] font-bold">Правило, которое никогда не срабатывает, выглядит чистым</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Правило, найденное мёртвым. Гейт, который проходил только потому, что на машине автора не было CRLF. Правила документов, оставшиеся зелёными, когда их предмет ломали нарочно. Ответ всегда один: прежде чем доверять новому правилу, докажи его намеренным нарушением, а потом руками поищи по дереву те формы записи нарушения, о которых автор правила не подумал.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ эпоха 2</a></p>
+          <p data-block="patterns.r2-n" class="pattern-n">02</p>
+          <h3 data-block="patterns.r2-title" class="mt-2 text-[19px] font-bold">Правило, которое никогда не срабатывает, выглядит чистым</h3>
+          <p data-block="patterns.r2-body" class="mt-2 text-[16px] leading-relaxed text-muted">Правило, найденное мёртвым. Гейт, который проходил только потому, что на машине автора не было CRLF. Правила документов, оставшиеся зелёными, когда их предмет ломали нарочно. Ответ всегда один: прежде чем доверять новому правилу, докажи его намеренным нарушением, а потом руками поищи по дереву те формы записи нарушения, о которых автор правила не подумал.</p>
+          <p data-block="patterns.r2-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ эпоха 2</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">03</p>
-          <h3 class="mt-2 text-[19px] font-bold">Проверяй дифф и читай отчёт, который уже есть</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Мутации по изменённым файлам, e2e по достижимым сценариям, один раунд добивания выживших, и никогда не перезапускать гейт, чтобы перечитать его вывод.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ эпоха 2</a></p>
+          <p data-block="patterns.r3-n" class="pattern-n">03</p>
+          <h3 data-block="patterns.r3-title" class="mt-2 text-[19px] font-bold">Проверяй дифф и читай отчёт, который уже есть</h3>
+          <p data-block="patterns.r3-body" class="mt-2 text-[16px] leading-relaxed text-muted">Мутации по изменённым файлам, e2e по достижимым сценариям, один раунд добивания выживших, и никогда не перезапускать гейт, чтобы перечитать его вывод.</p>
+          <p data-block="patterns.r3-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ эпоха 2</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">04</p>
-          <h3 class="mt-2 text-[19px] font-bold">Каждому читателю дают бриф — и говорят меньше, чем знает автор</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Ревью всегда делает агент, который не писал дифф. Картинки читает агент, который не знает, для чего они. Реплики бота читаются как предложения с настоящими значениями внутри. План критикуют до того, как появился код.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-5" class="hover:text-ink">→ эпоха 5</a></p>
+          <p data-block="patterns.r4-n" class="pattern-n">04</p>
+          <h3 data-block="patterns.r4-title" class="mt-2 text-[19px] font-bold">Каждому читателю дают бриф — и говорят меньше, чем знает автор</h3>
+          <p data-block="patterns.r4-body" class="mt-2 text-[16px] leading-relaxed text-muted">Ревью всегда делает агент, который не писал дифф. Картинки читает агент, который не знает, для чего они. Реплики бота читаются как предложения с настоящими значениями внутри. План критикуют до того, как появился код.</p>
+          <p data-block="patterns.r4-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-5" class="hover:text-ink">→ эпоха 5</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">05</p>
-          <h3 class="mt-2 text-[19px] font-bold">Урок, оставленный в чате, потерян</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Ретроспектива — гейт, который стоит до релиза, а не после. Каждый урок обязан лечь правилом, проверкой или строкой скилла. А поскольку у каждого файла есть бюджет строк, новое правило вытесняет какое-то старое.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ эпоха 2</a> · <a href="#era-5" class="hover:text-ink">→ эпоха 5</a></p>
+          <p data-block="patterns.r5-n" class="pattern-n">05</p>
+          <h3 data-block="patterns.r5-title" class="mt-2 text-[19px] font-bold">Урок, оставленный в чате, потерян</h3>
+          <p data-block="patterns.r5-body" class="mt-2 text-[16px] leading-relaxed text-muted">Ретроспектива — гейт, который стоит до релиза, а не после. Каждый урок обязан лечь правилом, проверкой или строкой скилла. А поскольку у каждого файла есть бюджет строк, новое правило вытесняет какое-то старое.</p>
+          <p data-block="patterns.r5-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ эпоха 2</a> · <a href="#era-5" class="hover:text-ink">→ эпоха 5</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">06</p>
-          <h3 class="mt-2 text-[19px] font-bold">Подсчёты в прозе гниют</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Число, которое меняется при каждом изменении списка, удаляют, а не правят. Исключение — число, от которого что-то зависит: его держит проверка.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-6" class="hover:text-ink">→ эпоха 6</a></p>
+          <p data-block="patterns.r6-n" class="pattern-n">06</p>
+          <h3 data-block="patterns.r6-title" class="mt-2 text-[19px] font-bold">Подсчёты в прозе гниют</h3>
+          <p data-block="patterns.r6-body" class="mt-2 text-[16px] leading-relaxed text-muted">Число, которое меняется при каждом изменении списка, удаляют, а не правят. Исключение — число, от которого что-то зависит: его держит проверка.</p>
+          <p data-block="patterns.r6-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-6" class="hover:text-ink">→ эпоха 6</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">07</p>
-          <h3 class="mt-2 text-[19px] font-bold">Каждый отчёт — в той форме, в какой его прочтут</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">У харнеса один пользователь, и это не человек. Вердикт — файл, который он может открыть, а не поток, у которого он видит хвост; красный гейт называет причины и одну команду, которая перезапускает его; ничто не ждёт терминала. Правило сформулировано в седьмой эпохе и применено задним числом ко всему, что написано раньше.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-7" class="hover:text-ink">→ эпоха 7</a></p>
+          <p data-block="patterns.r7-n" class="pattern-n">07</p>
+          <h3 data-block="patterns.r7-title" class="mt-2 text-[19px] font-bold">Каждый отчёт — в той форме, в какой его прочтут</h3>
+          <p data-block="patterns.r7-body" class="mt-2 text-[16px] leading-relaxed text-muted">У харнеса один пользователь, и это не человек. Вердикт — файл, который он может открыть, а не поток, у которого он видит хвост; красный гейт называет причины и одну команду, которая перезапускает его; ничто не ждёт терминала. Правило сформулировано в седьмой эпохе и применено задним числом ко всему, что написано раньше.</p>
+          <p data-block="patterns.r7-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-7" class="hover:text-ink">→ эпоха 7</a></p>
         </li>
       </ol>
 
-      <p class="mt-12 max-w-[68ch] text-[17px] leading-relaxed text-muted">
+      <p data-block="patterns.outro" class="mt-12 max-w-[68ch] text-[17px] leading-relaxed text-muted">
         Что из этого стоит в репозитории сегодня — ниже, одним списком.
       </p>
     </div>
@@ -1507,47 +1507,47 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
 
   <section id="today" aria-labelledby="today-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p class="eyebrow">На коммите 314</p>
-      <h2 id="today-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Харнес сегодня</h2>
+      <p data-block="today.eyebrow" class="eyebrow">На коммите 314</p>
+      <h2 data-block="today.title" id="today-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Харнес сегодня</h2>
 
       <dl class="mt-12 grid gap-5 sm:grid-cols-2">
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Правила, загружаемые каждую сессию</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">CLAUDE.md, 379 строк при бюджете 380.</dd>
+          <dt data-block="today.item-1-term" class="text-[18px] font-bold">Правила, загружаемые каждую сессию</dt>
+          <dd data-block="today.item-1-desc" class="mt-2 text-[15px] leading-relaxed text-muted">CLAUDE.md, 379 строк при бюджете 380.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Скиллы, 11</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">add-a-feature, add-repository-method, finish-phase с пятью страницами рядом, fix-a-bug, refresh-the-pictures, retrospective, update-the-design-page, write-a-commit, write-a-doc, write-a-spec, write-an-e2e-scenario. Описание каждого называет его стадию в процессе.</dd>
+          <dt data-block="today.item-2-term" class="text-[18px] font-bold">Скиллы, 11</dt>
+          <dd data-block="today.item-2-desc" class="mt-2 text-[15px] leading-relaxed text-muted">add-a-feature, add-repository-method, finish-phase с пятью страницами рядом, fix-a-bug, refresh-the-pictures, retrospective, update-the-design-page, write-a-commit, write-a-doc, write-a-spec, write-an-e2e-scenario. Описание каждого называет его стадию в процессе.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Агенты, 7</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">phase-reviewer, plan-reviewer, poster-designer, poster-reader, copy-reader, skill-auditor, deep-checkup. У каждого контракт на бриф и строка <code class="cmd">Verdict:</code>.</dd>
+          <dt data-block="today.item-3-term" class="text-[18px] font-bold">Агенты, 7</dt>
+          <dd data-block="today.item-3-desc" class="mt-2 text-[15px] leading-relaxed text-muted">phase-reviewer, plan-reviewer, poster-designer, poster-reader, copy-reader, skill-auditor, deep-checkup. У каждого контракт на бриф и строка <code class="cmd">Verdict:</code>.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Хуки</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Шесть. Линт на каждую правку, обязательная причина при правке схемы процесса, отказ принять ход, который заканчивается обещанием сделать работу вместо самой работы, отказ команде шелла с обратным слэшем там, где шелл его съест, отказ в запуске гейта, набранного руками мимо раннера, и ограда, которую бенчмарк записывает в свой клон. Git-хуки: проверка сообщения коммита для схемы процесса, журнала фазы и штампа Gates, и хук пуша, который выпускает тег только по зелёному штампу релизной батареи.</dd>
+          <dt data-block="today.item-4-term" class="text-[18px] font-bold">Хуки</dt>
+          <dd data-block="today.item-4-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Шесть. Линт на каждую правку, обязательная причина при правке схемы процесса, отказ принять ход, который заканчивается обещанием сделать работу вместо самой работы, отказ команде шелла с обратным слэшем там, где шелл его съест, отказ в запуске гейта, набранного руками мимо раннера, и ограда, которую бенчмарк записывает в свой клон. Git-хуки: проверка сообщения коммита для схемы процесса, журнала фазы и штампа Gates, и хук пуша, который выпускает тег только по зелёному штампу релизной батареи.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Линт</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Восемь собственных правил и зоны импортов на каждый слой фичи, скомпилированные и для статических, и для динамических импортов.</dd>
+          <dt data-block="today.item-5-term" class="text-[18px] font-bold">Линт</dt>
+          <dd data-block="today.item-5-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Восемь собственных правил и зоны импортов на каждый слой фичи, скомпилированные и для статических, и для динамических импортов.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Гейты</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Девять в ритуале фазы, по порядку: линт и типы, покрытие, мутации по диффу, настоящий вечер, e2e по диффу, ревью, фразы бота, картинки, ретроспектива. Машинная половина — одиннадцать строк в одной таблице, запускаемых только через один раннер, каждая оставляет лог и файл вердикта; четыре батареи — по одной на каждый такой момент.</dd>
+          <dt data-block="today.item-6-term" class="text-[18px] font-bold">Гейты</dt>
+          <dd data-block="today.item-6-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Девять в ритуале фазы, по порядку: линт и типы, покрытие, мутации по диффу, настоящий вечер, e2e по диффу, ревью, фразы бота, картинки, ретроспектива. Машинная половина — одиннадцать строк в одной таблице, запускаемых только через один раннер, каждая оставляет лог и файл вердикта; четыре батареи — по одной на каждый такой момент.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6 sm:col-span-2">
-          <dt class="text-[18px] font-bold">Документы</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">README, PLAN, CLAUDE, TECH-DEBT, DEVELOPMENT-FLOW, четыре README в папках и логбук фаз и чекапов, и все они сверяются с кодом через проверку документов.</dd>
+          <dt data-block="today.item-7-term" class="text-[18px] font-bold">Документы</dt>
+          <dd data-block="today.item-7-desc" class="mt-2 text-[15px] leading-relaxed text-muted">README, PLAN, CLAUDE, TECH-DEBT, DEVELOPMENT-FLOW, четыре README в папках и логбук фаз и чекапов, и все они сверяются с кодом через проверку документов.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6 sm:col-span-2">
-          <dt class="text-[18px] font-bold">Бенчмарк</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Одна замороженная задача, которую агент решает вслепую в огороженном клоне, а оценивают гейты самого клона; по строке на прогон — приёмка, гейты, обязательства, срабатывания ограды, вызовы инструментов, минуты и доллары по моделям. Еженедельный чекап гоняет закреплённую модель, так что его строка сдвигается, только когда сдвинулся харнес. Пока три строки.</dd>
+          <dt data-block="today.item-8-term" class="text-[18px] font-bold">Бенчмарк</dt>
+          <dd data-block="today.item-8-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Одна замороженная задача, которую агент решает вслепую в огороженном клоне, а оценивают гейты самого клона; по строке на прогон — приёмка, гейты, обязательства, срабатывания ограды, вызовы инструментов, минуты и доллары по моделям. Еженедельный чекап гоняет закреплённую модель, так что его строка сдвигается, только когда сдвинулся харнес. Пока три строки.</dd>
         </div>
       </dl>
 
       <div class="prose reveal mt-14 max-w-[68ch]">
-        <h3 id="method">Как написана эта страница</h3>
-        <p>
+        <h3 data-block="today.method-title" id="method">Как написана эта страница</h3>
+        <p data-block="today.method-body">
           Прочитана только история git: 314 сообщений коммитов и диффы файлов харнеса на каждом
           из них. Первые 274 прочитаны 3 сентября, сорок следующих — 14 сентября, тем же
           способом. Никаких расшифровок сессий. Там, где мотив назван в коммите, он процитирован
@@ -1563,15 +1563,15 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
 
 <footer class="border-t border-line">
   <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-[15px] text-dim sm:flex-row sm:items-center sm:px-8">
-    <p>FoolProof — таблица результатов для подкидного дурака.</p>
+    <p data-block="footer.line">FoolProof — таблица результатов для подкидного дурака.</p>
     <nav aria-label="Подвал" class="flex flex-wrap gap-6 sm:ml-auto">
-      <a href="../" class="hover:text-ink">Главная</a>
-      <a href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="hover:text-ink">GitHub</a>
-      <a href="https://github.com/oleg-vasilyev/FoolProof/blob/main/LICENSE" rel="license noopener" class="hover:text-ink">Лицензия MIT</a>
-      <a href="https://t.me/FoolProofMegaBot" rel="noopener" class="hover:text-ink">Бот</a>
+      <a data-block="footer.landing" href="../" class="hover:text-ink">Главная</a>
+      <a data-block="footer.github" href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="hover:text-ink">GitHub</a>
+      <a data-block="footer.licence" href="https://github.com/oleg-vasilyev/FoolProof/blob/main/LICENSE" rel="license noopener" class="hover:text-ink">Лицензия MIT</a>
+      <a data-block="footer.bot" href="https://t.me/FoolProofMegaBot" rel="noopener" class="hover:text-ink">Бот</a>
     </nav>
   </div>
-  <div class="mx-auto max-w-6xl px-5 pb-10 font-mono text-[12px] text-edge sm:px-8">
+  <div data-block="footer.disclaimer" class="mx-auto max-w-6xl px-5 pb-10 font-mono text-[12px] text-edge sm:px-8">
     Не связано с Telegram.
   </div>
 </footer>

@@ -46,24 +46,24 @@
 
 <body class="bg-ground font-sans text-ink antialiased">
 
-<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-ground">Skip to content</a>
+<a data-block="header.skip" href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-ground">Skip to content</a>
 
 <header class="sticky top-0 z-40 border-b border-line bg-ground/90 backdrop-blur">
   <div class="mx-auto flex max-w-6xl items-center gap-4 px-5 py-4 sm:px-8">
     <a href="../" class="flex items-center gap-3" aria-label="FoolProof, home">
       <img src="../favicon.png" width="36" height="36" alt="" class="h-9 w-9 rounded-lg">
-      <span class="text-lg font-extrabold tracking-tight max-[520px]:hidden">FoolProof</span>
+      <span data-block="header.brand" class="text-lg font-extrabold tracking-tight max-[520px]:hidden">FoolProof</span>
     </a>
 
     <nav aria-label="Primary" class="ml-auto hidden items-center gap-7 text-[15px] text-muted md:flex">
-      <a href="#eras" class="hover:text-ink">The seven eras</a>
-      <a href="#patterns" class="hover:text-ink">What kept coming back</a>
-      <a href="#today" class="hover:text-ink">Today</a>
-      <a href="https://github.com/oleg-vasilyev/FoolProof" class="hover:text-ink" rel="noopener">Source</a>
+      <a data-block="header.nav-eras" href="#eras" class="hover:text-ink">The seven eras</a>
+      <a data-block="header.nav-patterns" href="#patterns" class="hover:text-ink">What kept coming back</a>
+      <a data-block="header.nav-today" href="#today" class="hover:text-ink">Today</a>
+      <a data-block="header.nav-source" href="https://github.com/oleg-vasilyev/FoolProof" class="hover:text-ink" rel="noopener">Source</a>
     </nav>
 
     <details class="lang ml-auto md:ml-0">
-      <summary aria-label="Language: English">
+      <summary data-block="header.lang-current" aria-label="Language: English">
         <svg class="max-[520px]:hidden" viewBox="0 0 24 24" width="17" height="17"
              fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
           <circle cx="12" cy="12" r="9"></circle>
@@ -77,12 +77,12 @@
         </svg>
       </summary>
       <ul class="lang-menu">
-        <li><a class="lang-option" href="./" hreflang="en" lang="en" aria-current="true">English</a></li>
-        <li><a class="lang-option" href="../ru/case-study/" hreflang="ru" lang="ru">Русский</a></li>
+        <li><a data-block="header.lang-en" class="lang-option" href="./" hreflang="en" lang="en" aria-current="true">English</a></li>
+        <li><a data-block="header.lang-ru" class="lang-option" href="../ru/case-study/" hreflang="ru" lang="ru">Русский</a></li>
       </ul>
     </details>
 
-    <a href="../" class="rounded-lg border border-edge px-4 py-2 text-[15px] font-semibold text-ink transition-colors hover:border-accent hover:text-accent">
+    <a data-block="header.bot" href="../" class="rounded-lg border border-edge px-4 py-2 text-[15px] font-semibold text-ink transition-colors hover:border-accent hover:text-accent">
       The bot
     </a>
   </div>
@@ -91,38 +91,38 @@
 <main id="main">
 
   <section aria-labelledby="hero-heading" class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-    <p class="eyebrow hero-rise">Case study · 28 July – 11 September 2026 · 314 commits</p>
+    <p data-block="hero.eyebrow" class="eyebrow hero-rise">Case study · 28 July – 11 September 2026 · 314 commits</p>
 
-    <h1 id="hero-heading" class="hero-rise mt-5 max-w-[22ch] text-[40px] font-black leading-[1.03] tracking-[-0.03em] text-balance sm:text-[58px]">
+    <h1 data-block="hero.title" id="hero-heading" class="hero-rise mt-5 max-w-[22ch] text-[40px] font-black leading-[1.03] tracking-[-0.03em] text-balance sm:text-[58px]">
       The harness that learned to check itself
     </h1>
 
-    <p class="hero-rise-2 mt-7 max-w-[68ch] text-[19px] leading-relaxed text-muted">
+    <p data-block="hero.lead" class="hero-rise-2 mt-7 max-w-[68ch] text-[19px] leading-relaxed text-muted">
       FoolProof is a small Telegram bot that keeps score at Durak. One person, working with
       Claude Code, built it in six and a half weeks, and the bot is the least interesting part. Around it grew a set
       of rules, checks, skills and agents that decide how the next line of code gets written,
       and that set was rewritten more often than the bot was. This is the story of that set:
       what broke, what replaced it, and what it looks like today.
     </p>
-    <p class="hero-rise-2 mt-4 max-w-[68ch] text-[17px] leading-relaxed text-dim">
+    <p data-block="hero.note" class="hero-rise-2 mt-4 max-w-[68ch] text-[17px] leading-relaxed text-dim">
       Every claim here comes from the commit history, every number is read from git, and every
       hash links to its commit.
     </p>
 
     <div class="hero-rise-3 mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-      <div class="tile"><p class="tile-value">314</p><p class="tile-label">commits, one author</p></div>
-      <div class="tile"><p class="tile-value">46</p><p class="tile-label">days, 28 July to 11 September</p></div>
-      <div class="tile"><p class="tile-value">40</p><p class="tile-label">releases tagged</p></div>
-      <div class="tile"><p class="tile-value">0 → 5,043</p><p class="tile-label">tests, by the last commit message that counted them</p></div>
-      <div class="tile"><p class="tile-value">11 + 7</p><p class="tile-label">skills and agents at the end</p></div>
+      <div class="tile"><p data-block="hero.tile-1-value" class="tile-value">314</p><p data-block="hero.tile-1-label" class="tile-label">commits, one author</p></div>
+      <div class="tile"><p data-block="hero.tile-2-value" class="tile-value">46</p><p data-block="hero.tile-2-label" class="tile-label">days, 28 July to 11 September</p></div>
+      <div class="tile"><p data-block="hero.tile-3-value" class="tile-value">40</p><p data-block="hero.tile-3-label" class="tile-label">releases tagged</p></div>
+      <div class="tile"><p data-block="hero.tile-4-value" class="tile-value">0 → 5,043</p><p data-block="hero.tile-4-label" class="tile-label">tests, by the last commit message that counted them</p></div>
+      <div class="tile"><p data-block="hero.tile-5-value" class="tile-value">11 + 7</p><p data-block="hero.tile-5-label" class="tile-label">skills and agents at the end</p></div>
     </div>
   </section>
 
   <section id="findings" aria-labelledby="findings-heading" class="border-t border-line">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-      <p class="eyebrow">Before the detail</p>
-      <h2 id="findings-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">What the history says, in five findings</h2>
-      <p class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
+      <p data-block="findings.eyebrow" class="eyebrow">Before the detail</p>
+      <h2 data-block="findings.title" id="findings-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">What the history says, in five findings</h2>
+      <p data-block="findings.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
         Each one is drawn from the chapters below and points at the commit that states it.
         If you read nothing else, read these. Then pick an era: 2 is where a rule was found
         dead, 5 is where the readers arrive, 7 is where the harness got a ruler.
@@ -130,34 +130,34 @@
 
       <ol class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         <li class="reveal">
-          <p class="pattern-n">01</p>
-          <h3 class="mt-2 text-[19px] font-bold">The harness is over two thirds the size of the product</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">At the last commit the bot's source is 15,829 lines without its tests; the skills, agents, documents and document checks that decide how the next line gets written are 11,332 — and that side was rewritten more often than the bot was.</p>
+          <p data-block="findings.f1-n" class="pattern-n">01</p>
+          <h3 data-block="findings.f1-title" class="mt-2 text-[19px] font-bold">The harness is over two thirds the size of the product</h3>
+          <p data-block="findings.f1-body" class="mt-2 text-[16px] leading-relaxed text-muted">At the last commit the bot's source is 15,829 lines without its tests; the skills, agents, documents and document checks that decide how the next line gets written are 11,332 — and that side was rewritten more often than the bot was.</p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">02</p>
-          <h3 class="mt-2 text-[19px] font-bold">Acceptance cannot tell models apart; the process can</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Every model dropped cold into the benchmark's fenced clone passed the hidden spec and left every gate green. Only the process columns separated them: eight of eleven obligations for a dollar and six minutes, against eleven of eleven for twenty-two dollars and thirty-six.
+          <p data-block="findings.f2-n" class="pattern-n">02</p>
+          <h3 data-block="findings.f2-title" class="mt-2 text-[19px] font-bold">Acceptance cannot tell models apart; the process can</h3>
+          <p data-block="findings.f2-body" class="mt-2 text-[16px] leading-relaxed text-muted">Every model dropped cold into the benchmark's fenced clone passed the hidden spec and left every gate green. Only the process columns separated them: eight of eleven obligations for a dollar and six minutes, against eleven of eleven for twenty-two dollars and thirty-six.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a05104e" rel="noopener">a05104e</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">03</p>
-          <h3 class="mt-2 text-[19px] font-bold">The agent is the harness's only user, and for six weeks nothing was built that way</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">The scripts were shaped for a person at a terminal. A count over a month of transcripts found 1,463 hand-typed test runs whose verdicts the model read through a grep on a stream.
+          <p data-block="findings.f3-n" class="pattern-n">03</p>
+          <h3 data-block="findings.f3-title" class="mt-2 text-[19px] font-bold">The agent is the harness's only user, and for six weeks nothing was built that way</h3>
+          <p data-block="findings.f3-body" class="mt-2 text-[16px] leading-relaxed text-muted">The scripts were shaped for a person at a terminal. A count over a month of transcripts found 1,463 hand-typed test runs whose verdicts the model read through a grep on a stream.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a>
             Then package.json went from twenty-three scripts to eight, and every gate started leaving its verdict in a file.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">04</p>
-          <h3 class="mt-2 text-[19px] font-bold">A rule counts only once it has been seen refusing</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">A lint rule was found dead four times in one day; three documentation checks stayed green under sabotage. In the phase that finally made the deliberate break a step of the flow, fourteen such breaks were made and four hit nothing the rule watched.
+          <p data-block="findings.f4-n" class="pattern-n">04</p>
+          <h3 data-block="findings.f4-title" class="mt-2 text-[19px] font-bold">A rule counts only once it has been seen refusing</h3>
+          <p data-block="findings.f4-body" class="mt-2 text-[16px] leading-relaxed text-muted">A lint rule was found dead four times in one day; three documentation checks stayed green under sabotage. In the phase that finally made the deliberate break a step of the flow, fourteen such breaks were made and four hit nothing the rule watched.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5d48dac" rel="noopener">5d48dac</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">05</p>
-          <h3 class="mt-2 text-[19px] font-bold">The author is the wrong reader — this page included</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Every diff is reviewed by an agent that did not write it, every picture read by one that does not know what it is for. A fact-checker re-deriving this page's claims from git found 17 of 263 that the history did not support, and every one of them read perfectly.
+          <p data-block="findings.f5-n" class="pattern-n">05</p>
+          <h3 data-block="findings.f5-title" class="mt-2 text-[19px] font-bold">The author is the wrong reader — this page included</h3>
+          <p data-block="findings.f5-body" class="mt-2 text-[16px] leading-relaxed text-muted">Every diff is reviewed by an agent that did not write it, every picture read by one that does not know what it is for. A fact-checker re-deriving this page's claims from git found 17 of 263 that the history did not support, and every one of them read perfectly.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5bf13e4" rel="noopener">5bf13e4</a></p>
         </li>
       </ol>
@@ -166,9 +166,9 @@
 
   <section id="timeline" aria-labelledby="timeline-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-      <p class="eyebrow">Every commit, in order</p>
-      <h2 id="timeline-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Forty-six days on one strip</h2>
-      <p class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
+      <p data-block="timeline.eyebrow" class="eyebrow">Every commit, in order</p>
+      <h2 data-block="timeline.title" id="timeline-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Forty-six days on one strip</h2>
+      <p data-block="timeline.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
         One bar per commit, coloured by era. A diamond above a bar is a release tag. Of the
         forty-six days, thirty-one have commits. The seven eras are this page's division,
         not the repository's: the lines fall where the subject of the work changed. Hover or tap a bar to read the commit;
@@ -185,41 +185,41 @@
 
   <section id="harness" aria-labelledby="harness-heading">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-      <p class="eyebrow">Terms</p>
-      <h2 id="harness-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">What "the harness" means here</h2>
-      <p class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
+      <p data-block="harness.eyebrow" class="eyebrow">Terms</p>
+      <h2 data-block="harness.title" id="harness-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">What "the harness" means here</h2>
+      <p data-block="harness.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
         The harness is everything in the repository that is not the product.
       </p>
 
       <details class="era-detail mt-10">
-        <summary><span class="era-detail-h">Ten words this page uses in the project's own sense</span></summary>
+        <summary data-block="harness.terms-summary"><span class="era-detail-h">Ten words this page uses in the project's own sense</span></summary>
         <ul class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-            <h3 class="text-[18px] font-bold">CLAUDE.md</h3>
-            <p class="mt-2 text-[15px] leading-relaxed text-muted">The rules loaded before every session. Style, layering, testing, gates.</p>
+            <h3 data-block="harness.term-1-title" class="text-[18px] font-bold">CLAUDE.md</h3>
+            <p data-block="harness.term-1-body" class="mt-2 text-[15px] leading-relaxed text-muted">The rules loaded before every session. Style, layering, testing, gates.</p>
           </li>
           <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-            <h3 class="text-[18px] font-bold">Skills</h3>
-            <p class="mt-2 text-[15px] leading-relaxed text-muted">Procedures loaded for one kind of job: writing a spec (the test file of one module), adding a feature, finishing a phase.</p>
+            <h3 data-block="harness.term-2-title" class="text-[18px] font-bold">Skills</h3>
+            <p data-block="harness.term-2-body" class="mt-2 text-[15px] leading-relaxed text-muted">Procedures loaded for one kind of job: writing a spec (the test file of one module), adding a feature, finishing a phase.</p>
           </li>
           <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-            <h3 class="text-[18px] font-bold">Agents</h3>
-            <p class="mt-2 text-[15px] leading-relaxed text-muted">Separate model instances with a brief and a contract: a reviewer, a designer, and cold readers, who are deliberately not told what they are looking at.</p>
+            <h3 data-block="harness.term-3-title" class="text-[18px] font-bold">Agents</h3>
+            <p data-block="harness.term-3-body" class="mt-2 text-[15px] leading-relaxed text-muted">Separate model instances with a brief and a contract: a reviewer, a designer, and cold readers, who are deliberately not told what they are looking at.</p>
           </li>
           <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-            <h3 class="text-[18px] font-bold">Hooks</h3>
-            <p class="mt-2 text-[15px] leading-relaxed text-muted">Scripts that fire on an edit or at the end of a turn, that is, of one reply from the model.</p>
+            <h3 data-block="harness.term-4-title" class="text-[18px] font-bold">Hooks</h3>
+            <p data-block="harness.term-4-body" class="mt-2 text-[15px] leading-relaxed text-muted">Scripts that fire on an edit or at the end of a turn, that is, of one reply from the model.</p>
           </li>
           <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-            <h3 class="text-[18px] font-bold">Lint rules and gates</h3>
-            <p class="mt-2 text-[15px] leading-relaxed text-muted">What a machine refuses, and what must be green before a commit or a tag.</p>
+            <h3 data-block="harness.term-5-title" class="text-[18px] font-bold">Lint rules and gates</h3>
+            <p data-block="harness.term-5-body" class="mt-2 text-[15px] leading-relaxed text-muted">What a machine refuses, and what must be green before a commit or a tag.</p>
           </li>
           <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-            <h3 class="text-[18px] font-bold">Documents</h3>
-            <p class="mt-2 text-[15px] leading-relaxed text-muted">The spec, the debt list, the flow drawing, the logbook, and the check that holds all of them against the code.</p>
+            <h3 data-block="harness.term-6-title" class="text-[18px] font-bold">Documents</h3>
+            <p data-block="harness.term-6-body" class="mt-2 text-[15px] leading-relaxed text-muted">The spec, the debt list, the flow drawing, the logbook, and the check that holds all of them against the code.</p>
           </li>
         </ul>
-        <p class="mt-6 max-w-[68ch] text-[16px] leading-relaxed text-muted">
+        <p data-block="harness.terms-more" class="mt-6 max-w-[68ch] text-[16px] leading-relaxed text-muted">
           Four more recur in the project's own sense. The <strong>owner</strong> is the one
           person who sets the tasks and makes the decisions. The other side of the conversation
           is the model, and one of its replies is a <strong>turn</strong>. A
@@ -229,7 +229,7 @@
       </details>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
-        <p>
+        <p data-block="harness.question">
           One question the history keeps asking: where in the harness does a rule belong, in
           the text the model reads or in the toolchain, meaning the lint, the hooks and the
           checks a machine runs. The first answer was given on 29 July and never changed:
@@ -248,13 +248,13 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 1 of 7</span><span>28–29 July</span><span>commits 1–30</span>
+        <span data-block="era-1.band-era" class="text-ink">Era 1 of 7</span><span data-block="era-1.band-dates">28–29 July</span><span data-block="era-1.band-commits">commits 1–30</span>
       </div>
 
-      <h2 id="era-1-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Two Markdown files</h2>
+      <h2 data-block="era-1.title" id="era-1-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Two Markdown files</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-1.lead">
           The repository begins with no code — only a rulebook that already forbids the things
           the project would spend the next month learning how to enforce.
           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/44f6f66" rel="noopener">44f6f66</a>
@@ -267,14 +267,14 @@
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Tests arrive, and then a grader for the tests</span><span class="era-detail-n">312 tests</span></summary>
-          <p>
+          <summary data-block="era-1.d1-summary"><span class="era-detail-h">Tests arrive, and then a grader for the tests</span><span class="era-detail-n">312 tests</span></summary>
+          <p data-block="era-1.d1-p1">
             On 29 July the code got 312 tests in fourteen files and a coverage gate at 70%.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/9276ad7" rel="noopener">9276ad7</a>
             The same day it got Stryker, a mutation-testing tool: each small deliberate break
             it plants is called a mutant, and it counts how many of them the tests noticed.
           </p>
-          <p>
+          <p data-block="era-1.d1-p2">
             The first run scored 88.4%, the project's first mutation score;
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fda82cb" rel="noopener">fda82cb</a>
             by the end of the era it had reached 94.78%.
@@ -283,7 +283,7 @@
             same days, so that the gate "bites on a regression" rather than hanging there for
             show.
           </p>
-          <p>
+          <p data-block="era-1.d1-p3">
             The investment paid back at once. Mutation testing found what coverage could not:
             tests that passed for the wrong reason: a dependency in a test
             had been replaced by a stub, and the test checked only that the stub was called,
@@ -293,8 +293,8 @@
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">The rules move out of prose</span><span class="era-detail-n">3 lint rules</span></summary>
-          <p>
+          <summary data-block="era-1.d2-summary"><span class="era-detail-h">The rules move out of prose</span><span class="era-detail-n">3 lint rules</span></summary>
+          <p data-block="era-1.d2-p1">
             Commit 26, "make the checkable conventions checkable", set the shape of the harness.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>
             The three were no comments, named numbers, blank lines after imports, written
@@ -304,21 +304,21 @@
             with a deliberate violation. A hook on every edit started linting each file as it
             was written.
           </p>
-          <p>
+          <p data-block="era-1.d2-p2">
             The same commit brought the first two skills and the first agent. The skill
             <code>finish-phase</code>, where the gates moved out of CLAUDE.md. The skill
             <code>add-repository-method</code>, for new queries to the database. And the agent
             <code>phase-reviewer</code>, which reads a whole diff and is told "Do not fix
             anything."
           </p>
-          <p>
+          <p data-block="era-1.d2-p3">
             The rule about where a fact lives was written when four subjects
             turned up in both PLAN.md and CLAUDE.md. The question is: would this still be true if
             the bot were rewritten in Python? If yes, the fact belongs in PLAN.md; if no, in
             CLAUDE.md.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0afd7b2" rel="noopener">0afd7b2</a>
           </p>
-          <p>
+          <p data-block="era-1.d2-p4">
             By the end of 29 July the testing craft had outgrown the rulebook and became the third
             skill, <code>write-a-spec</code>, and the tests stood at 418 by the end of the day.
             CLAUDE.md itself had nearly doubled in two days and was cut back: "CLAUDE.md is loaded on every turn, so it should hold what is true while
@@ -330,31 +330,31 @@
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">3</p><p class="tile-label">skills</p></div>
-        <div class="tile"><p class="tile-value">1</p><p class="tile-label">agent</p></div>
-        <div class="tile"><p class="tile-value">2</p><p class="tile-label">hooks</p></div>
-        <div class="tile"><p class="tile-value">3</p><p class="tile-label">project lint rules</p></div>
-        <div class="tile"><p class="tile-value">418</p><p class="tile-label">tests</p></div>
-        <div class="tile"><p class="tile-value">94.78%</p><p class="tile-label">mutation score</p></div>
+        <div class="tile"><p data-block="era-1.tile-1-value" class="tile-value">3</p><p data-block="era-1.tile-1-label" class="tile-label">skills</p></div>
+        <div class="tile"><p data-block="era-1.tile-2-value" class="tile-value">1</p><p data-block="era-1.tile-2-label" class="tile-label">agent</p></div>
+        <div class="tile"><p data-block="era-1.tile-3-value" class="tile-value">2</p><p data-block="era-1.tile-3-label" class="tile-label">hooks</p></div>
+        <div class="tile"><p data-block="era-1.tile-4-value" class="tile-value">3</p><p data-block="era-1.tile-4-label" class="tile-label">project lint rules</p></div>
+        <div class="tile"><p data-block="era-1.tile-5-value" class="tile-value">418</p><p data-block="era-1.tile-5-label" class="tile-label">tests</p></div>
+        <div class="tile"><p data-block="era-1.tile-6-value" class="tile-value">94.78%</p><p data-block="era-1.tile-6-label" class="tile-label">mutation score</p></div>
       </div>
 
       <div class="reveal mt-10 max-w-[68ch]">
-                <p class="eyebrow">Then and now · the no-comments rule</p>
-        <p class="mt-2 text-[15px] leading-relaxed text-muted">The first tab is the header of the lint config as it stood in the repository: it admits the no-comments rule cannot be checked by a machine. The second is the same rule once it became an ESLint rule, retold.</p>
+                <p data-block="era-1.tn-eyebrow" class="eyebrow">Then and now · the no-comments rule</p>
+        <p data-block="era-1.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">The first tab is the header of the lint config as it stood in the repository: it admits the no-comments rule cannot be checked by a machine. The second is the same rule once it became an ESLint rule, retold.</p>
         <div class="then-now mt-3" data-then-now>
           <div class="then-now-tabs">
-            <button type="button" class="then-now-tab" aria-pressed="true">Commit 3 · 28 July</button>
-            <button type="button" class="then-now-tab" aria-pressed="false">Commit 26 · 29 July</button>
+            <button data-block="era-1.tn-tab-1" type="button" class="then-now-tab" aria-pressed="true">Commit 3 · 28 July</button>
+            <button data-block="era-1.tn-tab-2" type="button" class="then-now-tab" aria-pressed="false">Commit 26 · 29 July</button>
           </div>
-          <div class="then-now-body">// Lint rules that back the conventions in CLAUDE.md. Kept intentionally small
+          <div data-block="era-1.tn-body-1" class="then-now-body">// Lint rules that back the conventions in CLAUDE.md. Kept intentionally small
 // and autofix-friendly: `npm run lint:fix` (and the Stop hook) cleans them.
 // The "no comments in src/" rule has no ESLint equivalent and stays a review
 // convention — see CLAUDE.md.</div>
-          <div class="then-now-body" hidden>"project/no-comments": an inline ESLint rule, twelve lines.
+          <div data-block="era-1.tn-body-2" class="then-now-body" hidden>"project/no-comments": an inline ESLint rule, twelve lines.
 
 Run by `.claude/hooks/lint-changed.mjs` on every Edit or Write,
 so a comment is refused at the edit, not at the end of the turn.</div>
-          <p class="then-now-note">The header of <code class="cmd">eslint.config.js</code> at
+          <p data-block="era-1.tn-note" class="then-now-note">The header of <code class="cmd">eslint.config.js</code> at
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2db720c" rel="noopener">2db720c</a>, and what replaced it at
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>.</p>
         </div>
@@ -367,13 +367,13 @@ so a comment is refused at the edit, not at the end of the turn.</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 2 of 7</span><span>30 July – 2 August</span><span>commits 31–66</span>
+        <span data-block="era-2.band-era" class="text-ink">Era 2 of 7</span><span data-block="era-2.band-dates">30 July – 2 August</span><span data-block="era-2.band-commits">commits 31–66</span>
       </div>
 
-      <h2 id="era-2-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Features you can delete, and rules that prove they fire</h2>
+      <h2 data-block="era-2.title" id="era-2-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Features you can delete, and rules that prove they fire</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-2.lead">
           Era 1 made the rules checkable. Era 2 found out that a checkable rule can be dead, and
           that nothing tells you. On 30 July four commits kept finding the same
           feature-independence rule dead — three versions of the rule and two exemptions beside
@@ -385,8 +385,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">A rule found dead, four times in one day</span><span class="era-detail-n">13 violations</span></summary>
-          <p>
+          <summary data-block="era-2.d1-summary"><span class="era-detail-h">A rule found dead, four times in one day</span><span class="era-detail-n">13 violations</span></summary>
+          <p data-block="era-2.d1-p1">
             The era starts by turning the source tree inside out. Instead of layers at the top
             (<code>game/</code>, <code>render/</code>, <code>bot/</code>), each feature became a
             folder with those layers inside it, and the rule was stated as a test: "a feature is a
@@ -397,7 +397,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             folder, so an import from another feature shows in the line itself, which a path
             made of dots never does.
           </p>
-          <p>
+          <p data-block="era-2.d1-p2">
             Fencing features off from each other with lint produced the lesson the project would
             repeat most often. The rule was written, enabled and green. It did not work.
             The first two versions of it did nothing: first a path pattern never matched a
@@ -408,7 +408,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             as comments, the pattern matched no import at all, and the zone passed everything.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/40d8179" rel="noopener">40d8179</a>
           </p>
-          <p>
+          <p data-block="era-2.d1-p3">
             The remaining two of the four commits found exemptions dead outside the zones. The
             logger had moved to a folder, and the exemption that allowed it what the rest may
             not was left pointing at a file that no longer existed.
@@ -416,21 +416,21 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             A Stryker exclusion was orphaned the same way, and the score fell.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f749a9c" rel="noopener">f749a9c</a>
           </p>
-          <p>
+          <p data-block="era-2.d1-p4">
             Thirteen deliberate violations were run to prove one commit.
           </p>
         </details>
       </div>
 
-      <blockquote class="said reveal mt-10 max-w-[60ch]">
+      <blockquote data-block="era-2.q1" class="said reveal mt-10 max-w-[60ch]">
         "a rule that fires and a rule that is dead look identical from the outside."
         <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/f749a9c" rel="noopener">f749a9c</a> · 30 July</cite>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
-          <summary><span class="era-detail-h">A fake Telegram</span><span class="era-detail-n">7 known faults</span></summary>
-          <p>
+          <summary data-block="era-2.d2-summary"><span class="era-detail-h">A fake Telegram</span><span class="era-detail-n">7 known faults</span></summary>
+          <p data-block="era-2.d2-p1">
             By 31 July the bot could retry, restart itself and report on its own state. Then it
             got e2e: a fake Bot API server and scenarios that play a
             whole evening against the bot, one sitting at the table over several games, tap by
@@ -439,14 +439,14 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             The rules for the fake: it only records what it is sent, never decides anything
             itself, and must refuse everything the real one refuses.
           </p>
-          <p>
+          <p data-block="era-2.d2-p2">
             e2e worked, but it was not yet a gate. Its seven known faults were written
             honestly into a new file, TECH-DEBT.md, along with a rule for the file itself: "an
             entry names a trigger, not a wish." "Split the file" is a wish; "split it when a
             fifth job arrives" is a trigger, the event after which the debt has to be paid.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0505b9b" rel="noopener">0505b9b</a>
           </p>
-          <p>
+          <p data-block="era-2.d2-p3">
             e2e earned its keep seventy minutes later. A new screen with buttons was given a
             narrow obligation: "a feature with an inline keyboard gets scenarios"; an inline
             keyboard is those buttons under the bot's message. The scenarios immediately caught
@@ -458,8 +458,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">The cost of a gate</span><span class="era-detail-n">63 seconds</span></summary>
-          <p>
+          <summary data-block="era-2.d3-summary"><span class="era-detail-h">The cost of a gate</span><span class="era-detail-n">63 seconds</span></summary>
+          <p data-block="era-2.d3-p1">
             The project learned what a gate costs on that same new screen. It "took an hour and
             most of a model budget, and the breakdown was not the feature: eight Stryker
             invocations where two would have done." A model
@@ -469,7 +469,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             half minutes.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/66564c9" rel="noopener">66564c9</a>
           </p>
-          <p>
+          <p data-block="era-2.d3-p2">
             Two rules came with it and stayed. First: "Never re-run a gate to re-read its
             output." Second: one round of survivor-killing per phase. Survivors are the mutants no test
             caught, and they are killed by writing the missing tests.
@@ -477,14 +477,14 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">The rulebook overflows</span><span class="era-detail-n">585 lines</span></summary>
-          <p>
+          <summary data-block="era-2.d4-summary"><span class="era-detail-h">The rulebook overflows</span><span class="era-detail-n">585 lines</span></summary>
+          <p data-block="era-2.d4-p1">
             CLAUDE.md had been the default place to append every lesson, and it reached 585 lines.
             It was cut to 354 by moving rather than deleting: the e2e rules went to its own
             README, the layering procedure to a new <code>add-a-feature</code> skill.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>
           </p>
-          <p>
+          <p data-block="era-2.d4-p2">
             Then came the commit "make the documents check themselves". It
             observed that the documents had now been de-duplicated twice, and drew the
             conclusion: the rule itself was not at fault, the fault was that nobody checked it.
@@ -500,8 +500,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">A lesson left in the chat is gone</span><span class="era-detail-n">5 questions</span></summary>
-          <p>
+          <summary data-block="era-2.d5-summary"><span class="era-detail-h">A lesson left in the chat is gone</span><span class="era-detail-n">5 questions</span></summary>
+          <p data-block="era-2.d5-p1">
             The era ends with the retrospective, and its first attempt failed. The retrospective
             was hung on compaction: when a conversation stops fitting in the model's memory it
             is squeezed down to a short summary, and the hook was to ask five questions first,
@@ -511,7 +511,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             worst moment available" anyway.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ec3d818" rel="noopener">ec3d818</a>
           </p>
-          <p>
+          <p data-block="era-2.d5-p2">
             The retrospective became a gate, the fifth in order and, at the time, the last. It also became a skill of its own.
             Its very first outputs replaced the delegation policy with a narrower rule, which the
             owner overrules in era 4: delegate only when your own context is scarce.
@@ -519,27 +519,27 @@ so a comment is refused at the edit, not at the end of the turn.</div>
           </p>
         </details>
 
-        <p>
+        <p data-block="era-2.next">
           This era learned to prove that a rule fires. The next one finds a hole in a proven rule too.
         </p>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">6</p><p class="tile-label">skills</p></div>
-        <div class="tile"><p class="tile-value">1</p><p class="tile-label">agent</p></div>
-        <div class="tile"><p class="tile-value">370<span class="text-dim text-[15px]">/380</span></p><p class="tile-label">CLAUDE.md lines against its budget</p></div>
-        <div class="tile"><p class="tile-value">1,367</p><p class="tile-label">tests</p></div>
-        <div class="tile"><p class="tile-value">82</p><p class="tile-label">e2e cases</p></div>
-        <div class="tile"><p class="tile-value">≈97.5%</p><p class="tile-label">mutation score</p></div>
+        <div class="tile"><p data-block="era-2.tile-1-value" class="tile-value">6</p><p data-block="era-2.tile-1-label" class="tile-label">skills</p></div>
+        <div class="tile"><p data-block="era-2.tile-2-value" class="tile-value">1</p><p data-block="era-2.tile-2-label" class="tile-label">agent</p></div>
+        <div class="tile"><p data-block="era-2.tile-3-value" class="tile-value">370<span class="text-dim text-[15px]">/380</span></p><p data-block="era-2.tile-3-label" class="tile-label">CLAUDE.md lines against its budget</p></div>
+        <div class="tile"><p data-block="era-2.tile-4-value" class="tile-value">1,367</p><p data-block="era-2.tile-4-label" class="tile-label">tests</p></div>
+        <div class="tile"><p data-block="era-2.tile-5-value" class="tile-value">82</p><p data-block="era-2.tile-5-label" class="tile-label">e2e cases</p></div>
+        <div class="tile"><p data-block="era-2.tile-6-value" class="tile-value">≈97.5%</p><p data-block="era-2.tile-6-label" class="tile-label">mutation score</p></div>
       </div>
 
       <figure class="chart reveal mt-10" data-chart="claude">
         <figcaption>
-          <p class="chart-title">The rulebook under a budget</p>
-          <p class="chart-sub">Lines in CLAUDE.md at every commit. The line at 380 is the budget docs:check has enforced since commit 50.</p>
+          <p data-block="era-2.chart-title" class="chart-title">The rulebook under a budget</p>
+          <p data-block="era-2.chart-sub" class="chart-sub">Lines in CLAUDE.md at every commit. The line at 380 is the budget docs:check has enforced since commit 50.</p>
         </figcaption>
         <div class="chart-plot"></div>
-        <details class="chart-table"><summary>Show as a table</summary></details>
+        <details class="chart-table"><summary data-block="era-2.chart-table">Show as a table</summary></details>
       </figure>
     </div>
   </article>
@@ -549,13 +549,13 @@ so a comment is refused at the edit, not at the end of the turn.</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 3 of 7</span><span>5–7 August</span><span>commits 67–121</span>
+        <span data-block="era-3.band-era" class="text-ink">Era 3 of 7</span><span data-block="era-3.band-dates">5–7 August</span><span data-block="era-3.band-commits">commits 67–121</span>
       </div>
 
-      <h2 id="era-3-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Scenarios become a gate, states become tables</h2>
+      <h2 data-block="era-3.title" id="era-3-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Scenarios become a gate, states become tables</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-3.lead">
           In this era a lint rule caught the model that had written it — and two gates were
           found green for as long as they had existed, both by accident. Three days in which
           the checks stopped reading only the documents and started reading the code as well. A lint rule
@@ -570,18 +570,18 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">e2e becomes a gate</span><span class="era-detail-n">6 gates</span></summary>
-          <p>
+          <summary data-block="era-3.d1-summary"><span class="era-detail-h">e2e becomes a gate</span><span class="era-detail-n">6 gates</span></summary>
+          <p data-block="era-3.d1-p1">
             e2e still had seven recorded problems. Six were closed in one commit.
           </p>
-          <p>
+          <p data-block="era-3.d1-p2">
             But before they could be a gate, the scenarios had to be taught to end the way a
             real evening ends, not in mid-sentence. The bot's message holding the current game,
             with buttons under it, is called the card here. Eight of sixteen scenarios broke
             off mid-card, leaving it with its buttons still open, and e2e now fails any
             that do.
           </p>
-          <p>
+          <p data-block="era-3.d1-p3">
             The gate plays only the scenarios the diff can reach: for a phase inside one feature
             that is usually two or three scenario files and about fifteen seconds.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/52c0f73" rel="noopener">52c0f73</a>
@@ -590,7 +590,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             the diff, e2e over the diff, the review, the retrospective.
             "Over the diff" means over the files the phase changed, and no others.
           </p>
-          <p>
+          <p data-block="era-3.d1-p4">
             Writing a scenario got its own skill, and the reason is not about scenarios but about
             what makes a skill open: the model opens a skill when its description matches what
             the model is doing right now. CLAUDE.md said: if you touch the scenario folder, read the
@@ -603,21 +603,21 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">The rule that caught its own author</span><span class="era-detail-n">5 more sites</span></summary>
-          <p>
+          <summary data-block="era-3.d2-summary"><span class="era-detail-h">The rule that caught its own author</span><span class="era-detail-n">5 more sites</span></summary>
+          <p data-block="era-3.d2-p1">
             Every string the code used as a name for a game phase, a button press, an outcome or
             a refusal was moved into a table per feature. Then a lint rule banned writing such a
             name as a string anywhere else.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3c0b283" rel="noopener">3c0b283</a>
           </p>
-          <p>
+          <p data-block="era-3.d2-p2">
             Specs were exempt at first. Three commits later the review found a spec comparing a
             state against a bare string. The spec had been added after the rule existed, and the
             same model that wrote the rule had written it. The rule was extended to specs, and
             along the way it caught five more sites in the production code itself.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a89a991" rel="noopener">a89a991</a>
           </p>
-          <p>
+          <p data-block="era-3.d2-p3">
             Then a release review found a function still returning a game state as a string,
             well after the state table existed. The rule knew three shapes a state can be
             spelled in as a string, and a value returned from a function was a fourth. Hence one
@@ -629,19 +629,19 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">docs:check learns to read the code</span><span class="era-detail-n">3 palettes</span></summary>
-          <p>
+          <summary data-block="era-3.d3-summary"><span class="era-detail-h">docs:check learns to read the code</span><span class="era-detail-n">3 palettes</span></summary>
+          <p data-block="era-3.d3-p1">
             The documents gate grew from links and budgets into a truth-checker. It grew one
             family of checks at a time, and each family was added after something had been found
             wrong.
           </p>
-          <p>
+          <p data-block="era-3.d3-p2">
             One family checks the database schema: the SQL in PLAN.md against the SQL the bot
             actually runs. It arrived after a schema recreated from the document failed the first command: the
             database refused a record with a required field missing.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a24c0d4" rel="noopener">a24c0d4</a>
           </p>
-          <p>
+          <p data-block="era-3.d3-p3">
             Another redraws the posters, the statistics pictures the bot sends into the chat,
             and compares them with the committed ones: one changed colour code, and the gate is
             red. It arrived after the posters were compared with their own design mockup and the
@@ -652,8 +652,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Two gates found lying</span><span class="era-detail-n">5 of 17 scenarios</span></summary>
-          <p>
+          <summary data-block="era-3.d4-summary"><span class="era-detail-h">Two gates found lying</span><span class="era-detail-n">5 of 17 scenarios</span></summary>
+          <p data-block="era-3.d4-p1">
             Both lied the same way: they were green by luck, not because they checked what they
             promised. The first was the e2e quiet window, the pause a scenario waits before it
             reads the screen. The usual poster render grew from 460 to 540 ms, the headroom shrank
@@ -663,7 +663,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             the window was doubled.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2e7c639" rel="noopener">2e7c639</a>
           </p>
-          <p>
+          <p data-block="era-3.d4-p2">
             The second was the documents gate, which could not read a checkout, a working copy
             of the repository, whose files carried CRLF. The author's working copy happened to
             hold the Unix endings, so the gate was green.
@@ -673,37 +673,37 @@ so a comment is refused at the edit, not at the end of the turn.</div>
           </p>
         </details>
 
-        <p>
+        <p data-block="era-3.next">
           Two unrelated things happen in the next era: the bot leaves the laptop for a server,
           and the first gate no machine can answer appears.
         </p>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">8</p><p class="tile-label">skills</p></div>
-        <div class="tile"><p class="tile-value">5</p><p class="tile-label">project lint rules</p></div>
-        <div class="tile"><p class="tile-value">6</p><p class="tile-label">gates</p></div>
-        <div class="tile"><p class="tile-value">1,976</p><p class="tile-label">tests</p></div>
-        <div class="tile"><p class="tile-value">142</p><p class="tile-label">e2e cases</p></div>
-        <div class="tile"><p class="tile-value">98.96%</p><p class="tile-label">mutation over the ten files one poster's redesign touched</p></div>
+        <div class="tile"><p data-block="era-3.tile-1-value" class="tile-value">8</p><p data-block="era-3.tile-1-label" class="tile-label">skills</p></div>
+        <div class="tile"><p data-block="era-3.tile-2-value" class="tile-value">5</p><p data-block="era-3.tile-2-label" class="tile-label">project lint rules</p></div>
+        <div class="tile"><p data-block="era-3.tile-3-value" class="tile-value">6</p><p data-block="era-3.tile-3-label" class="tile-label">gates</p></div>
+        <div class="tile"><p data-block="era-3.tile-4-value" class="tile-value">1,976</p><p data-block="era-3.tile-4-label" class="tile-label">tests</p></div>
+        <div class="tile"><p data-block="era-3.tile-5-value" class="tile-value">142</p><p data-block="era-3.tile-5-label" class="tile-label">e2e cases</p></div>
+        <div class="tile"><p data-block="era-3.tile-6-value" class="tile-value">98.96%</p><p data-block="era-3.tile-6-label" class="tile-label">mutation over the ten files one poster's redesign touched</p></div>
       </div>
 
       <div class="mt-10 grid gap-5 lg:grid-cols-2">
         <figure class="chart reveal" data-chart="tests">
           <figcaption>
-            <p class="chart-title">Tests, as the commit messages count them</p>
-            <p class="chart-sub">The test count a phase-final commit reports. Gaps are commits that did not report one.</p>
+            <p data-block="era-3.chart-1-title" class="chart-title">Tests, as the commit messages count them</p>
+            <p data-block="era-3.chart-1-sub" class="chart-sub">The test count a phase-final commit reports. Gaps are commits that did not report one.</p>
           </figcaption>
           <div class="chart-plot"></div>
-          <details class="chart-table"><summary>Show as a table</summary></details>
+          <details class="chart-table"><summary data-block="era-3.chart-1-table">Show as a table</summary></details>
         </figure>
         <figure class="chart reveal" data-chart="mutation">
           <figcaption>
-            <p class="chart-title">The mutation score, as reported</p>
-            <p class="chart-sub">Whole-tree or diff scores from commit messages. The line at 85 is the break threshold since commit 20.</p>
+            <p data-block="era-3.chart-2-title" class="chart-title">The mutation score, as reported</p>
+            <p data-block="era-3.chart-2-sub" class="chart-sub">Whole-tree or diff scores from commit messages. The line at 85 is the break threshold since commit 20.</p>
           </figcaption>
           <div class="chart-plot"></div>
-          <details class="chart-table"><summary>Show as a table</summary></details>
+          <details class="chart-table"><summary data-block="era-3.chart-2-table">Show as a table</summary></details>
         </figure>
       </div>
     </div>
@@ -714,13 +714,13 @@ so a comment is refused at the edit, not at the end of the turn.</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 4 of 7</span><span>11–14 August</span><span>commits 122–184</span>
+        <span data-block="era-4.band-era" class="text-ink">Era 4 of 7</span><span data-block="era-4.band-dates">11–14 August</span><span data-block="era-4.band-commits">commits 122–184</span>
       </div>
 
-      <h2 id="era-4-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The bot leaves the laptop</h2>
+      <h2 data-block="era-4.title" id="era-4-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The bot leaves the laptop</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-4.lead">
           Sixty-three commits in four days brought the first gate no machine can answer: a
           poster is a picture, and no test reads one. Its first run caught two holes in the
           award rules and a line of text leaving the card, and the brief that made it work was
@@ -732,8 +732,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">The gate a machine cannot answer</span><span class="era-detail-n">9 evenings</span></summary>
-          <p>
+          <summary data-block="era-4.d1-summary"><span class="era-detail-h">The gate a machine cannot answer</span><span class="era-detail-n">9 evenings</span></summary>
+          <p data-block="era-4.d1-p1">
             The gallery gate takes nine awkward
             evenings and draws both posters for them, the chronology and the awards. It came in
             fifth, and the gates became seven.
@@ -749,15 +749,15 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
       </div>
 
-      <blockquote class="said reveal mt-10 max-w-[60ch]">
+      <blockquote data-block="era-4.q1" class="said reveal mt-10 max-w-[60ch]">
         "'looked, fine' is the green light with nothing behind it"
         <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/ce3c70c" rel="noopener">ce3c70c</a> · 11 August</cite>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
-          <summary><span class="era-detail-h">Delegation becomes the rule</span><span class="era-detail-n">3 conditions</span></summary>
-          <p>
+          <summary data-block="era-4.d2-summary"><span class="era-detail-h">Delegation becomes the rule</span><span class="era-detail-n">3 conditions</span></summary>
+          <p data-block="era-4.d2-p1">
             The rule from era 2, delegate only when your own context is scarce, was overruled by
             the owner. An independent scope now goes to a subagent at once when three conditions
             hold: the work touches no file the model itself has open, the brief fits one
@@ -768,7 +768,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             many were not. A new default rarely fails by being used badly. More often it is
             quietly not used, and without the count nobody notices.
           </p>
-          <p>
+          <p data-block="era-4.d2-p2">
             A later commit added the reviewer's limit: it reads the diff and runs nothing, so "a
             green review of a shell script, a systemd unit or a workflow is half a gate." All
             three are files only a run can check: the unit tells the server how to start the
@@ -778,8 +778,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Three checks, by what is at stake</span><span class="era-detail-n">3 checks</span></summary>
-          <p>
+          <summary data-block="era-4.d3-summary"><span class="era-detail-h">Three checks, by what is at stake</span><span class="era-detail-n">3 checks</span></summary>
+          <p data-block="era-4.d3-p1">
             The server pulls the newest tag every five minutes; nothing pushes to it.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cfd02a1" rel="noopener">cfd02a1</a>
             The single check split into three by what is at stake. Before a push: lint, types
@@ -789,7 +789,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             battery, coverage, every mutant, every scenario.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f58e793" rel="noopener">f58e793</a>
           </p>
-          <p>
+          <p data-block="era-4.d3-p2">
             The battery sits in a git hook on the developer's machine and runs before the tag
             leaves for GitHub. A red CI after that stops nothing; it can only report
             that a broken bot is already on the server.
@@ -798,8 +798,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">The flow gets drawn, and the drawing gets hooks</span><span class="era-detail-n">8 stages</span></summary>
-          <p>
+          <summary data-block="era-4.d4-summary"><span class="era-detail-h">The flow gets drawn, and the drawing gets hooks</span><span class="era-detail-n">8 stages</span></summary>
+          <p data-block="era-4.d4-p1">
             The whole development loop was drawn as a sequence diagram and given its own file,
             DEVELOPMENT-FLOW.md.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/edc1148" rel="noopener">edc1148</a>
@@ -807,7 +807,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             the machine gates, a review by an agent that did not write the diff, reading the
             sentences and syncing the pictures, the retrospective, the release, and the checkup.
           </p>
-          <p>
+          <p data-block="era-4.d4-p2">
             It is the owner's drawing, and two things follow. It may not be changed quietly: the
             owner would meet the change as a diff months later, with the reasoning gone. And
             permission may not be asked for either: that stalls a finished phase on a decision
@@ -823,8 +823,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Nothing audits the auditors</span><span class="era-detail-n">13 findings</span></summary>
-          <p>
+          <summary data-block="era-4.d5-summary"><span class="era-detail-h">Nothing audits the auditors</span><span class="era-detail-n">13 findings</span></summary>
+          <p data-block="era-4.d5-p1">
             The <code>deep-checkup</code> agent was written to run weekly, "believe nothing on
             say-so," fix nothing, and return a detailed report in which every verdict cites a
             command and its output.
@@ -837,8 +837,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">The retrospective that was skipped</span><span class="era-detail-n">27 rows</span></summary>
-          <p>
+          <summary data-block="era-4.d6-summary"><span class="era-detail-h">The retrospective that was skipped</span><span class="era-detail-n">27 rows</span></summary>
+          <p data-block="era-4.d6-p1">
             There were seven gates
             by then, and the retrospective stood seventh. The first explanation blamed the
             release feeling like the end. The next commit corrected it at the owner's word: the
@@ -858,19 +858,19 @@ so a comment is refused at the edit, not at the end of the turn.</div>
           </p>
         </details>
 
-        <p>
+        <p data-block="era-4.next">
           In the next era the harness gains readers who are told nothing on purpose, and every
           agent a contract for what it must be told and what it must return.
         </p>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">10</p><p class="tile-label">skills</p></div>
-        <div class="tile"><p class="tile-value">2</p><p class="tile-label">agents</p></div>
-        <div class="tile"><p class="tile-value">3 + 2</p><p class="tile-label">Claude hooks and git hooks</p></div>
-        <div class="tile"><p class="tile-value">7</p><p class="tile-label">gates</p></div>
-        <div class="tile"><p class="tile-value">12</p><p class="tile-label">docs:check families</p></div>
-        <div class="tile"><p class="tile-value">2,502</p><p class="tile-label">tests</p></div>
+        <div class="tile"><p data-block="era-4.tile-1-value" class="tile-value">10</p><p data-block="era-4.tile-1-label" class="tile-label">skills</p></div>
+        <div class="tile"><p data-block="era-4.tile-2-value" class="tile-value">2</p><p data-block="era-4.tile-2-label" class="tile-label">agents</p></div>
+        <div class="tile"><p data-block="era-4.tile-3-value" class="tile-value">3 + 2</p><p data-block="era-4.tile-3-label" class="tile-label">Claude hooks and git hooks</p></div>
+        <div class="tile"><p data-block="era-4.tile-4-value" class="tile-value">7</p><p data-block="era-4.tile-4-label" class="tile-label">gates</p></div>
+        <div class="tile"><p data-block="era-4.tile-5-value" class="tile-value">12</p><p data-block="era-4.tile-5-label" class="tile-label">docs:check families</p></div>
+        <div class="tile"><p data-block="era-4.tile-6-value" class="tile-value">2,502</p><p data-block="era-4.tile-6-label" class="tile-label">tests</p></div>
       </div>
     </div>
   </article>
@@ -880,13 +880,13 @@ so a comment is refused at the edit, not at the end of the turn.</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 5 of 7</span><span>19–25 August</span><span>commits 185–244</span>
+        <span data-block="era-5.band-era" class="text-ink">Era 5 of 7</span><span data-block="era-5.band-dates">19–25 August</span><span data-block="era-5.band-commits">commits 185–244</span>
       </div>
 
-      <h2 id="era-5-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Cold readers and the budget squeeze</h2>
+      <h2 data-block="era-5.title" id="era-5-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Cold readers and the budget squeeze</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-5.lead">
           A released poster told the players "one dot per evening — 3 more evenings", and never
           said what would arrive. The owner read it cold and asked what it meant; that question
           is the origin of every cold reader in the project: agents briefed with the pictures
@@ -898,8 +898,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">The author cannot read their own drawing</span><span class="era-detail-n">9 gates</span></summary>
-          <p>
+          <summary data-block="era-5.d1-summary"><span class="era-detail-h">The author cannot read their own drawing</span><span class="era-detail-n">9 gates</span></summary>
+          <p data-block="era-5.d1-p1">
             The chart was not on the poster yet: it appears once enough evenings have
             accumulated, and until then a hint stands in its place.
             <code>poster-reader</code> is briefed with pictures and
@@ -908,13 +908,13 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da50714" rel="noopener">da50714</a>
             The gallery gate became, at the time, "the one gate you may not perform yourself."
           </p>
-          <p>
+          <p data-block="era-5.d1-p2">
             The same failure existed in words. First, reading one real evening before shipping
             became a gate, owed whenever a phase changes what a poster says. Until then no gate
             in the project had asked what the evening's chronology actually says.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/93c1456" rel="noopener">93c1456</a>
           </p>
-          <p>
+          <p data-block="era-5.d1-p3">
             Then two real evenings were taken, and what the bot told the players about them was
             read: ten minutes found eight defects. So <code>copy-reader</code> was born: it
             reads every line the bot can say, in both languages, with real values filled in,
@@ -925,7 +925,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             then moved earlier: to the moment a table of lines is written, before anything is
             built on it.
           </p>
-          <p>
+          <p data-block="era-5.d1-p4">
             The <code>plan-reviewer</code> agent works at the very start of a phase, when the
             plan exists and the code does not. It gets the owner's words and the
             agreed function signatures, nothing more, and comes with "You may come back with nothing": the reviewer owes no finding, only
@@ -936,15 +936,15 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
       </div>
 
-      <blockquote class="said reveal mt-10 max-w-[60ch]">
+      <blockquote data-block="era-5.q1" class="said reveal mt-10 max-w-[60ch]">
         "It is the only reader here whose ignorance is the instrument."
         <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/da50714" rel="noopener">da50714</a> · 20 August</cite>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
-          <summary><span class="era-detail-h">A gate that silently does not apply</span><span class="era-detail-n">80% bar</span></summary>
-          <p>
+          <summary data-block="era-5.d2-summary"><span class="era-detail-h">A gate that silently does not apply</span><span class="era-detail-n">80% bar</span></summary>
+          <p data-block="era-5.d2-p1">
             The product got its third poster, after the evening's chronology and its awards: one
             player's whole career.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2b1353b" rel="noopener">2b1353b</a>
@@ -953,7 +953,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             with nothing to report."
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da16c8d" rel="noopener">da16c8d</a>
           </p>
-          <p>
+          <p data-block="era-5.d2-p2">
             Next the checkers themselves were checked: a checkup broke every document rule on
             purpose, nine went red and three stayed green.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3d92c6b" rel="noopener">3d92c6b</a>
@@ -968,8 +968,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Budgets everywhere</span><span class="era-detail-n">16% of changed lines</span></summary>
-          <p>
+          <summary data-block="era-5.d3-summary"><span class="era-detail-h">Budgets everywhere</span><span class="era-detail-n">16% of changed lines</span></summary>
+          <p data-block="era-5.d3-p1">
             CLAUDE.md had had a line budget since era 2. Now every skill got one, and so did
             TECH-DEBT.md. The <code>finish-phase</code> skill had grown to 722 lines. It was cut
             to 459 with five pages moved into files beside it, and the budgets were lowered in
@@ -977,7 +977,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             way to turn the counter off."
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ab68474" rel="noopener">ab68474</a>
           </p>
-          <p>
+          <p data-block="era-5.d3-p2">
             An outside review of the process, run by a fresh model with no memory of the work,
             measured how much effort was going into the harness itself: 16% of five days'
             changed lines had gone into the process rather than the product. Separately it
@@ -988,7 +988,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             something new. Delegated writing only above ten files. A retrospective only when
             there is something to count.
           </p>
-          <p>
+          <p data-block="era-5.d3-p3">
             The last commit of the era tested the claim that a skill should state outcomes rather
             than steps. The claim did not hold. One skill was rewritten from scratch, to almost half its length, and lost six
             concrete instructions on what to do. They went the same
@@ -1001,7 +1001,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             shortens it.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/784b26c" rel="noopener">784b26c</a>
           </p>
-          <p>
+          <p data-block="era-5.d3-p4">
             Every agent also got a contract: what its brief must carry and what it returns, and the
             reply has to open with a verdict line: two numbers, how much was covered and how
             much was found, with the findings themselves after it. The verdict does not replace the findings: it is their summary, and it shows
@@ -1010,7 +1010,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
             nobody further down the chain checks it again.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ba4603f" rel="noopener">ba4603f</a>
           </p>
-          <p>
+          <p data-block="era-5.d3-p5">
             Then came a hook on the end of a turn. One phase had stopped on a
             message that listed what was left, ended with "Continuing", and then did nothing.
             No gate could have noticed: every gate judges a diff, and there was no diff. The
@@ -1020,29 +1020,29 @@ so a comment is refused at the edit, not at the end of the turn.</div>
           </p>
         </details>
 
-        <p>
+        <p data-block="era-5.next">
           What remained was to teach the harness to remember what it had done. That is the
           last era's work.
         </p>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">11</p><p class="tile-label">skills</p></div>
-        <div class="tile"><p class="tile-value">7</p><p class="tile-label">agents</p></div>
-        <div class="tile"><p class="tile-value">2</p><p class="tile-label">Stryker families, two bars</p></div>
-        <div class="tile"><p class="tile-value">≈30</p><p class="tile-label">docs:check families</p></div>
-        <div class="tile"><p class="tile-value">3,994</p><p class="tile-label">tests</p></div>
-        <div class="tile"><p class="tile-value">8</p><p class="tile-label">consecutive commits marked "Tag: none" at the end of the era</p></div>
+        <div class="tile"><p data-block="era-5.tile-1-value" class="tile-value">11</p><p data-block="era-5.tile-1-label" class="tile-label">skills</p></div>
+        <div class="tile"><p data-block="era-5.tile-2-value" class="tile-value">7</p><p data-block="era-5.tile-2-label" class="tile-label">agents</p></div>
+        <div class="tile"><p data-block="era-5.tile-3-value" class="tile-value">2</p><p data-block="era-5.tile-3-label" class="tile-label">Stryker families, two bars</p></div>
+        <div class="tile"><p data-block="era-5.tile-4-value" class="tile-value">≈30</p><p data-block="era-5.tile-4-label" class="tile-label">docs:check families</p></div>
+        <div class="tile"><p data-block="era-5.tile-5-value" class="tile-value">3,994</p><p data-block="era-5.tile-5-label" class="tile-label">tests</p></div>
+        <div class="tile"><p data-block="era-5.tile-6-value" class="tile-value">8</p><p data-block="era-5.tile-6-label" class="tile-label">consecutive commits marked "Tag: none" at the end of the era</p></div>
       </div>
 
       <figure class="chart reveal mt-10" data-chart="parts">
         <figcaption>
-          <p class="chart-title">The parts of the harness</p>
-          <p class="chart-sub">Skills, agents and project lint rules present in the tree at every commit.</p>
+          <p data-block="era-5.chart-title" class="chart-title">The parts of the harness</p>
+          <p data-block="era-5.chart-sub" class="chart-sub">Skills, agents and project lint rules present in the tree at every commit.</p>
         </figcaption>
         <div class="chart-legend"></div>
         <div class="chart-plot"></div>
-        <details class="chart-table"><summary>Show as a table</summary></details>
+        <details class="chart-table"><summary data-block="era-5.chart-table">Show as a table</summary></details>
       </figure>
     </div>
   </article>
@@ -1052,13 +1052,13 @@ so a comment is refused at the edit, not at the end of the turn.</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 6 of 7</span><span>26 August – 2 September</span><span>commits 245–274</span>
+        <span data-block="era-6.band-era" class="text-ink">Era 6 of 7</span><span data-block="era-6.band-dates">26 August – 2 September</span><span data-block="era-6.band-commits">commits 245–274</span>
       </div>
 
-      <h2 id="era-6-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The harness keeps records of itself</h2>
+      <h2 data-block="era-6.title" id="era-6-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The harness keeps records of itself</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-6.lead">
           This era added almost no new parts. It deleted one: the routing table at the top of
           CLAUDE.md, which had been telling the model which skill to read since era 2 — and was
           a second copy of a fact that had quietly drifted from the first. When the check that
@@ -1071,8 +1071,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Blind spots in the lint</span><span class="era-detail-n">2 more lint rules</span></summary>
-          <p>
+          <summary data-block="era-6.d1-summary"><span class="era-detail-h">Blind spots in the lint</span><span class="era-detail-n">2 more lint rules</span></summary>
+          <p data-block="era-6.d1-p1">
             ESLint had never been run on
             the scenario folder. And the import zones read only static <code>import</code>
             statements. Every ban is now written twice, for static and for
@@ -1090,8 +1090,8 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Where a skill says when it is due</span></summary>
-          <p>
+          <summary data-block="era-6.d2-summary"><span class="era-detail-h">Where a skill says when it is due</span></summary>
+          <p data-block="era-6.d2-p1">
             The skill's own description played the same role as the table, and nobody
             checked either: era 4 had taught the descriptions to name the task, but not one
             named the stage of the flow, and the table and the descriptions had drifted apart.
@@ -1107,27 +1107,27 @@ so a comment is refused at the edit, not at the end of the turn.</div>
           </p>
 
           <div class="reveal mt-10 max-w-[68ch]">
-                <p class="eyebrow">Then and now · how a skill says when it is due</p>
-        <p class="mt-2 text-[15px] leading-relaxed text-muted">Two artifacts from the repository: the CLAUDE.md table, where the reader finds the right row alone, and the skill description that names its own stage.</p>
+                <p data-block="era-6.tn-eyebrow" class="eyebrow">Then and now · how a skill says when it is due</p>
+        <p data-block="era-6.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">Two artifacts from the repository: the CLAUDE.md table, where the reader finds the right row alone, and the skill description that names its own stage.</p>
         <div class="then-now mt-3" data-then-now>
           <div class="then-now-tabs">
-            <button type="button" class="then-now-tab" aria-pressed="true">CLAUDE.md · 1 August</button>
-            <button type="button" class="then-now-tab" aria-pressed="false">finish-phase · 28 August</button>
+            <button data-block="era-6.tn-tab-1" type="button" class="then-now-tab" aria-pressed="true">CLAUDE.md · 1 August</button>
+            <button data-block="era-6.tn-tab-2" type="button" class="then-now-tab" aria-pressed="false">finish-phase · 28 August</button>
           </div>
-          <div class="then-now-body">| Doing this                                    | Read                        |
+          <div data-block="era-6.tn-body-1" class="then-now-body">| Doing this                                    | Read                        |
 |-----------------------------------------------|-----------------------------|
 | Adding a command, a screen, a feature folder  | `add-a-feature` skill       |
 | Adding a query                                | `add-repository-method`     |
 | Writing or changing any spec                  | `write-a-spec` skill        |
 | Closing a phase, running the gates            | `finish-phase` skill        |
 | Touching `e2e/`                               | `e2e/README.md`             |</div>
-          <div class="then-now-body" hidden>description: "… This is stage 3 and the stages after it, so load it
+          <div data-block="era-6.tn-body-2" class="then-now-body" hidden>description: "… This is stage 3 and the stages after it, so load it
 when the code is written and the gates are due — a phase being wrapped up,
 a release being cut, an external list of changes that has run out, or the
 user asking whether the code is releasable. Do NOT load it at stage 1:
 recognising a list of changes as a phase is not the same as opening this
 skill …"</div>
-          <p class="then-now-note">The routing table CLAUDE.md opened with from
+          <p data-block="era-6.tn-note" class="then-now-note">The routing table CLAUDE.md opened with from
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>, and the skill's own header after
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a> deleted the table.</p>
           </div>
@@ -1137,8 +1137,8 @@ skill …"</div>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
-          <summary><span class="era-detail-h">The flow, corrected five times in a day</span><span class="era-detail-n">5 commits</span></summary>
-          <p>
+          <summary data-block="era-6.d3-summary"><span class="era-detail-h">The flow, corrected five times in a day</span><span class="era-detail-n">5 commits</span></summary>
+          <p data-block="era-6.d3-p1">
             The flow drawing was read as prose, step by step, and several steps turned out not
             to sit where they happen. Two steps every phase needs, studying the project and
             reading the debt list, sat in the branch only a bug fix enters. Another example is a
@@ -1156,8 +1156,8 @@ skill …"</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">The logbook</span><span class="era-detail-n">2 fields</span></summary>
-          <p>
+          <summary data-block="era-6.d4-summary"><span class="era-detail-h">The logbook</span><span class="era-detail-n">2 fields</span></summary>
+          <p data-block="era-6.d4-p1">
             The answer to that was a record. The logbook folder holds one log per phase, written
             at the retrospective: what was asked, what kind of work it was, what ran, what was
             delegated, what was rebuilt, and which gate found each defect.
@@ -1168,7 +1168,7 @@ skill …"</div>
             that quietly went round a stage reads differently from one that did not mention it.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f4b09e7" rel="noopener">f4b09e7</a>
           </p>
-          <p>
+          <p data-block="era-6.d4-p2">
             The one rule that matters: "A number you did not measure is written
             <code>not measured</code>, never estimated." The first log written under it showed
             why. It had two counts wrong: both figures could have been checked with one
@@ -1176,7 +1176,7 @@ skill …"</div>
             that made the day read better.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/db81a3a" rel="noopener">db81a3a</a>
           </p>
-          <p>
+          <p data-block="era-6.d4-p3">
             The folder beside it keeps every checkup report, and none is ever pruned.
             Each carries a measurements table, so the next visit can ask whether a number moved. The first report in it is from a new run at the end of August, not the one era 4
             describes.
@@ -1185,8 +1185,8 @@ skill …"</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Counts rot</span></summary>
-          <p>
+          <summary data-block="era-6.d5-summary"><span class="era-detail-h">Counts rot</span></summary>
+          <p data-block="era-6.d5-p1">
             The most repeated lesson of the era is small. A
             count of spec files and a column of line counts had rotted the same way as the
             award count. Then the number was removed
@@ -1197,28 +1197,28 @@ skill …"</div>
         </details>
       </div>
 
-      <blockquote class="said reveal mt-10 max-w-[60ch]">
+      <blockquote data-block="era-6.q1" class="said reveal mt-10 max-w-[60ch]">
         "a fact stated in two places is the copy that rots"
         <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a> · 28 August</cite>
       </blockquote>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">11 + 7</p><p class="tile-label">skills and agents</p></div>
-        <div class="tile"><p class="tile-value">7</p><p class="tile-label">project lint rules</p></div>
-        <div class="tile"><p class="tile-value">32</p><p class="tile-label">docs:check families</p></div>
-        <div class="tile"><p class="tile-value">4,367</p><p class="tile-label">tests</p></div>
-        <div class="tile"><p class="tile-value">178</p><p class="tile-label">e2e cases</p></div>
-        <div class="tile"><p class="tile-value">359</p><p class="tile-label">lines in CLAUDE.md</p></div>
+        <div class="tile"><p data-block="era-6.tile-1-value" class="tile-value">11 + 7</p><p data-block="era-6.tile-1-label" class="tile-label">skills and agents</p></div>
+        <div class="tile"><p data-block="era-6.tile-2-value" class="tile-value">7</p><p data-block="era-6.tile-2-label" class="tile-label">project lint rules</p></div>
+        <div class="tile"><p data-block="era-6.tile-3-value" class="tile-value">32</p><p data-block="era-6.tile-3-label" class="tile-label">docs:check families</p></div>
+        <div class="tile"><p data-block="era-6.tile-4-value" class="tile-value">4,367</p><p data-block="era-6.tile-4-label" class="tile-label">tests</p></div>
+        <div class="tile"><p data-block="era-6.tile-5-value" class="tile-value">178</p><p data-block="era-6.tile-5-label" class="tile-label">e2e cases</p></div>
+        <div class="tile"><p data-block="era-6.tile-6-value" class="tile-value">359</p><p data-block="era-6.tile-6-label" class="tile-label">lines in CLAUDE.md</p></div>
       </div>
 
       <figure class="chart reveal mt-10" data-chart="lines">
         <figcaption>
-          <p class="chart-title">Product and harness, in lines of text</p>
-          <p class="chart-sub">Source under <code class="cmd">src/</code> without specs and stubs, against the skills, agents, documents and docs:check code that govern it.</p>
+          <p data-block="era-6.chart-title" class="chart-title">Product and harness, in lines of text</p>
+          <p data-block="era-6.chart-sub" class="chart-sub">Source under <code class="cmd">src/</code> without specs and stubs, against the skills, agents, documents and docs:check code that govern it.</p>
         </figcaption>
         <div class="chart-legend"></div>
         <div class="chart-plot"></div>
-        <details class="chart-table"><summary>Show as a table</summary></details>
+        <details class="chart-table"><summary data-block="era-6.chart-table">Show as a table</summary></details>
       </figure>
     </div>
   </article>
@@ -1228,13 +1228,13 @@ skill …"</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span class="text-ink">Era 7 of 7</span><span>3–11 September</span><span>commits 275–314</span>
+        <span data-block="era-7.band-era" class="text-ink">Era 7 of 7</span><span data-block="era-7.band-dates">3–11 September</span><span data-block="era-7.band-commits">commits 275–314</span>
       </div>
 
-      <h2 id="era-7-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The agent becomes the user, and the harness gets a ruler</h2>
+      <h2 data-block="era-7.title" id="era-7-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The agent becomes the user, and the harness gets a ruler</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p>
+        <p data-block="era-7.lead">
           The deploy had been failing a third of the time since 31 August, and nothing noticed,
           because "a fetch that fails looks exactly like a fetch that found nothing new."
           Finding that took reading the server's journal instead of the README, and it set the
@@ -1247,8 +1247,8 @@ skill …"</div>
         </p>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Two repairs for a real evening</span><span class="era-detail-n">11 games</span></summary>
-          <p>
+          <summary data-block="era-7.d1-summary"><span class="era-detail-h">Two repairs for a real evening</span><span class="era-detail-n">11 games</span></summary>
+          <p data-block="era-7.d1-p1">
             Two people at the table are called Roma, the second written Romani so the sheet can
             tell them apart. One Friday the wrong one was typed, eleven games went to a man who
             stayed home, and the evening was repaired over ssh with a script. That became
@@ -1258,7 +1258,7 @@ skill …"</div>
             everything and answers "screen expired" rather than crashing.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/9b28574" rel="noopener">9b28574</a>
           </p>
-          <p>
+          <p data-block="era-7.d1-p2">
             The harness lesson sat underneath. A feature may not import another, so the
             name parser and the seat rotation moved to <code class="cmd">shared/</code> before
             <code class="cmd">/replace</code> could exist. And a second feature that listens for
@@ -1269,8 +1269,8 @@ skill …"</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">The checkup reads the journal</span><span class="era-detail-n">181 activations</span></summary>
-          <p>
+          <summary data-block="era-7.d2-summary"><span class="era-detail-h">The checkup reads the journal</span><span class="era-detail-n">181 activations</span></summary>
+          <p data-block="era-7.d2-p1">
             The first checkup had called the deploy's anonymous fetch a design. The second found
             181 activations of the deploy timer since 31 August ending in GitHub refusing an
             unauthenticated download.
@@ -1281,7 +1281,7 @@ skill …"</div>
             hooks, one on the commit message and one on the shell command before the shell sees it.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/02277c0" rel="noopener">02277c0</a>
           </p>
-          <p>
+          <p data-block="era-7.d2-p2">
             One gate moved for the price on its ticket: the retrospective had run in a fork of
             the conversation, which re-sends the whole transcript on every call. It runs in the
             conversation now.
@@ -1290,8 +1290,8 @@ skill …"</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">Twenty-three scripts become eight</span><span class="era-detail-n">1,463 test runs</span></summary>
-          <p>
+          <summary data-block="era-7.d3-summary"><span class="era-detail-h">Twenty-three scripts become eight</span><span class="era-detail-n">1,463 test runs</span></summary>
+          <p data-block="era-7.d3-p1">
             A gate's verdict sat in
             the middle of a stream the agent sees only the tail of, so every run that week went
             through "save the log, grep the log". And the release battery ran
@@ -1302,7 +1302,7 @@ skill …"</div>
             than retypes it."
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e026d5e" rel="noopener">e026d5e</a>
           </p>
-          <p>
+          <p data-block="era-7.d3-p2">
             The owner then asked for the same for every other script, and for everything the
             agent never runs to go. A count over a month of transcripts said where the cost
             actually was, and it was not in the scripts: 14,301 tool calls, of which 1,463 were
@@ -1312,7 +1312,7 @@ skill …"</div>
             so rather than deleting for effect."
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a>
           </p>
-          <p>
+          <p data-block="era-7.d3-p3">
             The document check learned the runner's
             own table and refused a bare <code class="cmd">npx eslint</code> or
             <code class="cmd">npm test</code>, because with the configs moved those misbehave; its
@@ -1325,26 +1325,26 @@ skill …"</div>
           </p>
 
       <div class="reveal mt-10 max-w-[68ch]">
-        <p class="eyebrow">Then and now · the scripts in package.json</p>
-        <p class="mt-2 text-[15px] leading-relaxed text-muted">The first tab is the scripts block as it stood at the start of 9 September. The second is the same block four commits later, after the gates moved into a table of their own.</p>
+        <p data-block="era-7.tn-eyebrow" class="eyebrow">Then and now · the scripts in package.json</p>
+        <p data-block="era-7.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">The first tab is the scripts block as it stood at the start of 9 September. The second is the same block four commits later, after the gates moved into a table of their own.</p>
         <div class="then-now mt-3" data-then-now>
           <div class="then-now-tabs">
-            <button type="button" class="then-now-tab" aria-pressed="true">Commit 290 · 9 September</button>
-            <button type="button" class="then-now-tab" aria-pressed="false">Commit 294 · 9 September</button>
+            <button data-block="era-7.tn-tab-1" type="button" class="then-now-tab" aria-pressed="true">Commit 290 · 9 September</button>
+            <button data-block="era-7.tn-tab-2" type="button" class="then-now-tab" aria-pressed="false">Commit 294 · 9 September</button>
           </div>
-          <div class="then-now-body">prepare  start  start:prod
+          <div data-block="era-7.tn-body-1" class="then-now-body">prepare  start  start:prod
 check  check:push  check:phase  check:release
 lint  lint:fix  typecheck  docs:check
 test  test:unit  test:integration  test:watch
 test:coverage  test:mutation  test:mutation:changed
 e2e  e2e:changed  e2e:watch  e2e:test  e2e:typecheck</div>
-          <div class="then-now-body" hidden>prepare  start  start:prod
+          <div data-block="era-7.tn-body-2" class="then-now-body" hidden>prepare  start  start:prod
 check:quick  check:push  check:phase  check:release
 e2e:watch
 
 Every gate is a row in scripts/gates/gate-list.ts,
 run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
-          <p class="then-now-note">The scripts of <code class="cmd">package.json</code> at
+          <p data-block="era-7.tn-note" class="then-now-note">The scripts of <code class="cmd">package.json</code> at
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/93a27ef" rel="noopener">93a27ef</a>, and at
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a>.</p>
         </div>
@@ -1352,8 +1352,8 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">A ruler for the harness</span><span class="era-detail-n">4 models</span></summary>
-          <p>
+          <summary data-block="era-7.d4-summary"><span class="era-detail-h">A ruler for the harness</span><span class="era-detail-n">4 models</span></summary>
+          <p data-block="era-7.d4-p1">
             "The harness changed every week and nothing said whether it got better; models
             changed underneath it too, and the only comparison anybody could make was an
             impression of one session against a memory of another." On 10 September the
@@ -1366,7 +1366,7 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
             measures memory.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d011e68" rel="noopener">d011e68</a>
           </p>
-          <p>
+          <p data-block="era-7.d4-p2">
             In the next phase the owner asked what stopped a model from noticing it was being
             measured and reading its way to the answer, "and the honest reply was nothing much."
             The calibration was cancelled on the spot. The clone moved under the system temp
@@ -1380,7 +1380,7 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
             Both columns were fixed the same night.
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3328b6e" rel="noopener">3328b6e</a>
           </p>
-          <p>
+          <p data-block="era-7.d4-p3">
             The table was rewritten once more when all four models tried failed the same two
             obligations, the only two whose pattern spans a line break: the clone is checked out
             on Windows with a carriage return before every newline. With the matcher fixed, the
@@ -1395,8 +1395,8 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
         </details>
 
         <details class="era-detail">
-          <summary><span class="era-detail-h">The checkup finds what the gates cannot</span><span class="era-detail-n">13 sentences</span></summary>
-          <p>
+          <summary data-block="era-7.d5-summary"><span class="era-detail-h">The checkup finds what the gates cannot</span><span class="era-detail-n">13 sentences</span></summary>
+          <p data-block="era-7.d5-p1">
             The fourth checkup, on 11 September, ran the full mutation battery and found it red at
             a pristine HEAD: neither mutation config named a test config, so the dry run collected
             every spec under the root, and since 10 September that set held the benchmark's hidden
@@ -1407,7 +1407,7 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
             history."
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/187f621" rel="noopener">187f621</a>
           </p>
-          <p>
+          <p data-block="era-7.d5-p2">
             Then it read the harness as its only user does. A Stop hook had been running the linter's
             autofix over the whole tree at the end of every turn, silently, editing files the agent
             had not asked it to touch and refusing nothing, "so it could not be seen refusing." It is
@@ -1428,27 +1428,27 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
         </details>
       </div>
 
-      <blockquote class="said reveal mt-10 max-w-[60ch]">
+      <blockquote data-block="era-7.q1" class="said reveal mt-10 max-w-[60ch]">
         "the agent is the harness's only user, and a person's convenience is second"
         <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a> · 9 September</cite>
       </blockquote>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <div class="tile"><p class="tile-value">11 + 7</p><p class="tile-label">skills and agents</p></div>
-        <div class="tile"><p class="tile-value">8</p><p class="tile-label">project lint rules</p></div>
-        <div class="tile"><p class="tile-value">23 → 8</p><p class="tile-label">scripts in package.json</p></div>
-        <div class="tile"><p class="tile-value">5,043</p><p class="tile-label">tests</p></div>
-        <div class="tile"><p class="tile-value">205</p><p class="tile-label">e2e cases</p></div>
-        <div class="tile"><p class="tile-value">379</p><p class="tile-label">lines in CLAUDE.md, of 380</p></div>
+        <div class="tile"><p data-block="era-7.tile-1-value" class="tile-value">11 + 7</p><p data-block="era-7.tile-1-label" class="tile-label">skills and agents</p></div>
+        <div class="tile"><p data-block="era-7.tile-2-value" class="tile-value">8</p><p data-block="era-7.tile-2-label" class="tile-label">project lint rules</p></div>
+        <div class="tile"><p data-block="era-7.tile-3-value" class="tile-value">23 → 8</p><p data-block="era-7.tile-3-label" class="tile-label">scripts in package.json</p></div>
+        <div class="tile"><p data-block="era-7.tile-4-value" class="tile-value">5,043</p><p data-block="era-7.tile-4-label" class="tile-label">tests</p></div>
+        <div class="tile"><p data-block="era-7.tile-5-value" class="tile-value">205</p><p data-block="era-7.tile-5-label" class="tile-label">e2e cases</p></div>
+        <div class="tile"><p data-block="era-7.tile-6-value" class="tile-value">379</p><p data-block="era-7.tile-6-label" class="tile-label">lines in CLAUDE.md, of 380</p></div>
       </div>
     </div>
   </article>
 
   <section id="patterns" aria-labelledby="patterns-heading" class="border-t border-line">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p class="eyebrow">Across all seven eras</p>
-      <h2 id="patterns-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">What kept coming back</h2>
-      <p class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
+      <p data-block="patterns.eyebrow" class="eyebrow">Across all seven eras</p>
+      <h2 data-block="patterns.title" id="patterns-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">What kept coming back</h2>
+      <p data-block="patterns.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
         Seven patterns run through the whole history. Each was stated in a commit, not inferred.
         These are the same lessons the findings above counted — here as the rule each of them
         became.
@@ -1456,51 +1456,51 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
 
       <ol class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         <li class="reveal">
-          <p class="pattern-n">01</p>
-          <h3 class="mt-2 text-[19px] font-bold">Prose becomes a machine</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Every rule starts as a sentence in CLAUDE.md. If a machine can check it, it becomes a lint rule, a hook or a docs:check family, and the sentence is deleted. The trigger is measured, not felt: "A rule in prose had been broken thirteen times in a week, which is the sign it needs a machine."
+          <p data-block="patterns.r1-n" class="pattern-n">01</p>
+          <h3 data-block="patterns.r1-title" class="mt-2 text-[19px] font-bold">Prose becomes a machine</h3>
+          <p data-block="patterns.r1-body" class="mt-2 text-[16px] leading-relaxed text-muted">Every rule starts as a sentence in CLAUDE.md. If a machine can check it, it becomes a lint rule, a hook or a docs:check family, and the sentence is deleted. The trigger is measured, not felt: "A rule in prose had been broken thirteen times in a week, which is the sign it needs a machine."
             <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/08aac82" rel="noopener">08aac82</a></p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-1" class="hover:text-ink">→ era 1</a></p>
+          <p data-block="patterns.r1-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-1" class="hover:text-ink">→ era 1</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">02</p>
-          <h3 class="mt-2 text-[19px] font-bold">A rule that never fires looks clean</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">A rule found dead. A gate that passed only because the author's machine had no CRLF. Documentation rules that stayed green under sabotage. The answer is always the same: prove a new rule with a deliberate violation before trusting it, then search the tree by hand for the spellings of the violation its author did not think of.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ era 2</a></p>
+          <p data-block="patterns.r2-n" class="pattern-n">02</p>
+          <h3 data-block="patterns.r2-title" class="mt-2 text-[19px] font-bold">A rule that never fires looks clean</h3>
+          <p data-block="patterns.r2-body" class="mt-2 text-[16px] leading-relaxed text-muted">A rule found dead. A gate that passed only because the author's machine had no CRLF. Documentation rules that stayed green under sabotage. The answer is always the same: prove a new rule with a deliberate violation before trusting it, then search the tree by hand for the spellings of the violation its author did not think of.</p>
+          <p data-block="patterns.r2-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ era 2</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">03</p>
-          <h3 class="mt-2 text-[19px] font-bold">Gate the diff, read the report you have</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">Mutation over changed files, e2e over reachable scenarios, one round of survivor-killing, and never re-running a gate to re-read its output.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ era 2</a></p>
+          <p data-block="patterns.r3-n" class="pattern-n">03</p>
+          <h3 data-block="patterns.r3-title" class="mt-2 text-[19px] font-bold">Gate the diff, read the report you have</h3>
+          <p data-block="patterns.r3-body" class="mt-2 text-[16px] leading-relaxed text-muted">Mutation over changed files, e2e over reachable scenarios, one round of survivor-killing, and never re-running a gate to re-read its output.</p>
+          <p data-block="patterns.r3-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ era 2</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">04</p>
-          <h3 class="mt-2 text-[19px] font-bold">Every reader is briefed, and told less than the author knows</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">The review is always an agent that did not write the diff. The pictures are read by an agent that does not know what they are for. The bot's lines are read as sentences with real values in them. The plan is criticised before code exists.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-5" class="hover:text-ink">→ era 5</a></p>
+          <p data-block="patterns.r4-n" class="pattern-n">04</p>
+          <h3 data-block="patterns.r4-title" class="mt-2 text-[19px] font-bold">Every reader is briefed, and told less than the author knows</h3>
+          <p data-block="patterns.r4-body" class="mt-2 text-[16px] leading-relaxed text-muted">The review is always an agent that did not write the diff. The pictures are read by an agent that does not know what they are for. The bot's lines are read as sentences with real values in them. The plan is criticised before code exists.</p>
+          <p data-block="patterns.r4-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-5" class="hover:text-ink">→ era 5</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">05</p>
-          <h3 class="mt-2 text-[19px] font-bold">A lesson left in the chat is gone</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">The retrospective is a gate that falls before the release, not after it. Each lesson has to land as a rule, a check or a skill line. And since every file has a line budget, each new rule displaces an older one.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ era 2</a> · <a href="#era-5" class="hover:text-ink">→ era 5</a></p>
+          <p data-block="patterns.r5-n" class="pattern-n">05</p>
+          <h3 data-block="patterns.r5-title" class="mt-2 text-[19px] font-bold">A lesson left in the chat is gone</h3>
+          <p data-block="patterns.r5-body" class="mt-2 text-[16px] leading-relaxed text-muted">The retrospective is a gate that falls before the release, not after it. Each lesson has to land as a rule, a check or a skill line. And since every file has a line budget, each new rule displaces an older one.</p>
+          <p data-block="patterns.r5-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ era 2</a> · <a href="#era-5" class="hover:text-ink">→ era 5</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">06</p>
-          <h3 class="mt-2 text-[19px] font-bold">Counts in prose rot</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">A number that changes whenever a list changes is removed rather than corrected. The exception is a number something depends on: a check holds that one.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-6" class="hover:text-ink">→ era 6</a></p>
+          <p data-block="patterns.r6-n" class="pattern-n">06</p>
+          <h3 data-block="patterns.r6-title" class="mt-2 text-[19px] font-bold">Counts in prose rot</h3>
+          <p data-block="patterns.r6-body" class="mt-2 text-[16px] leading-relaxed text-muted">A number that changes whenever a list changes is removed rather than corrected. The exception is a number something depends on: a check holds that one.</p>
+          <p data-block="patterns.r6-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-6" class="hover:text-ink">→ era 6</a></p>
         </li>
         <li class="reveal">
-          <p class="pattern-n">07</p>
-          <h3 class="mt-2 text-[19px] font-bold">Shape every output for the one who reads it</h3>
-          <p class="mt-2 text-[16px] leading-relaxed text-muted">The harness has one user, and it is not a person. A verdict is a file it can open, never a stream it sees the tail of; a red gate names its reasons and the one command that re-runs it; nothing waits on a terminal. The rule was stated in the seventh era and applied backwards over everything written before it.</p>
-          <p class="mt-2 font-mono text-[13px] text-dim"><a href="#era-7" class="hover:text-ink">→ era 7</a></p>
+          <p data-block="patterns.r7-n" class="pattern-n">07</p>
+          <h3 data-block="patterns.r7-title" class="mt-2 text-[19px] font-bold">Shape every output for the one who reads it</h3>
+          <p data-block="patterns.r7-body" class="mt-2 text-[16px] leading-relaxed text-muted">The harness has one user, and it is not a person. A verdict is a file it can open, never a stream it sees the tail of; a red gate names its reasons and the one command that re-runs it; nothing waits on a terminal. The rule was stated in the seventh era and applied backwards over everything written before it.</p>
+          <p data-block="patterns.r7-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-7" class="hover:text-ink">→ era 7</a></p>
         </li>
       </ol>
 
-      <p class="mt-12 max-w-[68ch] text-[17px] leading-relaxed text-muted">
+      <p data-block="patterns.outro" class="mt-12 max-w-[68ch] text-[17px] leading-relaxed text-muted">
         What of all this stands in the repository today is below, in one list.
       </p>
     </div>
@@ -1508,47 +1508,47 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
 
   <section id="today" aria-labelledby="today-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p class="eyebrow">At commit 314</p>
-      <h2 id="today-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The harness today</h2>
+      <p data-block="today.eyebrow" class="eyebrow">At commit 314</p>
+      <h2 data-block="today.title" id="today-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">The harness today</h2>
 
       <dl class="mt-12 grid gap-5 sm:grid-cols-2">
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Rules loaded every session</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">CLAUDE.md, 379 lines against a budget of 380.</dd>
+          <dt data-block="today.item-1-term" class="text-[18px] font-bold">Rules loaded every session</dt>
+          <dd data-block="today.item-1-desc" class="mt-2 text-[15px] leading-relaxed text-muted">CLAUDE.md, 379 lines against a budget of 380.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Skills, 11</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">add-a-feature, add-repository-method, finish-phase with five pages beside it, fix-a-bug, refresh-the-pictures, retrospective, update-the-design-page, write-a-commit, write-a-doc, write-a-spec, write-an-e2e-scenario. Each description names its stage in the flow.</dd>
+          <dt data-block="today.item-2-term" class="text-[18px] font-bold">Skills, 11</dt>
+          <dd data-block="today.item-2-desc" class="mt-2 text-[15px] leading-relaxed text-muted">add-a-feature, add-repository-method, finish-phase with five pages beside it, fix-a-bug, refresh-the-pictures, retrospective, update-the-design-page, write-a-commit, write-a-doc, write-a-spec, write-an-e2e-scenario. Each description names its stage in the flow.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Agents, 7</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">phase-reviewer, plan-reviewer, poster-designer, poster-reader, copy-reader, skill-auditor, deep-checkup. Each with a brief contract and a <code class="cmd">Verdict:</code> line.</dd>
+          <dt data-block="today.item-3-term" class="text-[18px] font-bold">Agents, 7</dt>
+          <dd data-block="today.item-3-desc" class="mt-2 text-[15px] leading-relaxed text-muted">phase-reviewer, plan-reviewer, poster-designer, poster-reader, copy-reader, skill-auditor, deep-checkup. Each with a brief contract and a <code class="cmd">Verdict:</code> line.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Hooks</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Six. Lint on every edit, a reason owed on every flow edit, a refusal of a turn that ends by announcing work instead of doing it, a refusal of a shell command that carries a backslash where the shell would eat it, a refusal of a gate typed by hand instead of run through the runner, and the fence the benchmark writes into its clone. Git hooks: a commit message check for the flow drawing, the phase log and the Gates stamp, and a push hook that lets a tag leave only on a green stamp from the release battery.</dd>
+          <dt data-block="today.item-4-term" class="text-[18px] font-bold">Hooks</dt>
+          <dd data-block="today.item-4-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Six. Lint on every edit, a reason owed on every flow edit, a refusal of a turn that ends by announcing work instead of doing it, a refusal of a shell command that carries a backslash where the shell would eat it, a refusal of a gate typed by hand instead of run through the runner, and the fence the benchmark writes into its clone. Git hooks: a commit message check for the flow drawing, the phase log and the Gates stamp, and a push hook that lets a tag leave only on a green stamp from the release battery.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Lint</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Eight project rules and import zones per feature layer, compiled for static and dynamic imports.</dd>
+          <dt data-block="today.item-5-term" class="text-[18px] font-bold">Lint</dt>
+          <dd data-block="today.item-5-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Eight project rules and import zones per feature layer, compiled for static and dynamic imports.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt class="text-[18px] font-bold">Gates</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">Nine in the phase ritual, in order: lint and types, coverage, mutation over the diff, a real evening, e2e over the diff, review, the sentences, the pictures, the retrospective. The machine half is eleven rows in one table, run only through one runner, each leaving a log and a verdict file; four batteries, one per moment.</dd>
+          <dt data-block="today.item-6-term" class="text-[18px] font-bold">Gates</dt>
+          <dd data-block="today.item-6-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Nine in the phase ritual, in order: lint and types, coverage, mutation over the diff, a real evening, e2e over the diff, review, the sentences, the pictures, the retrospective. The machine half is eleven rows in one table, run only through one runner, each leaving a log and a verdict file; four batteries, one per moment.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6 sm:col-span-2">
-          <dt class="text-[18px] font-bold">Documents</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">README, PLAN, CLAUDE, TECH-DEBT, DEVELOPMENT-FLOW, four folder READMEs, and a logbook of phases and checkups, all held against the code by the document check.</dd>
+          <dt data-block="today.item-7-term" class="text-[18px] font-bold">Documents</dt>
+          <dd data-block="today.item-7-desc" class="mt-2 text-[15px] leading-relaxed text-muted">README, PLAN, CLAUDE, TECH-DEBT, DEVELOPMENT-FLOW, four folder READMEs, and a logbook of phases and checkups, all held against the code by the document check.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6 sm:col-span-2">
-          <dt class="text-[18px] font-bold">Benchmark</dt>
-          <dd class="mt-2 text-[15px] leading-relaxed text-muted">One frozen task, run cold in a fenced clone and scored by the clone's own gates; one row per run, with acceptance, gates, obligations, fence hits, tool calls, minutes and dollars by model. The weekly checkup runs the pinned model, so its row moves only when the harness does. Three rows so far.</dd>
+          <dt data-block="today.item-8-term" class="text-[18px] font-bold">Benchmark</dt>
+          <dd data-block="today.item-8-desc" class="mt-2 text-[15px] leading-relaxed text-muted">One frozen task, run cold in a fenced clone and scored by the clone's own gates; one row per run, with acceptance, gates, obligations, fence hits, tool calls, minutes and dollars by model. The weekly checkup runs the pinned model, so its row moves only when the harness does. Three rows so far.</dd>
         </div>
       </dl>
 
       <div class="prose reveal mt-14 max-w-[68ch]">
-        <h3 id="method">How this page was written</h3>
-        <p>
+        <h3 data-block="today.method-title" id="method">How this page was written</h3>
+        <p data-block="today.method-body">
           Only the git history was read: 314 commit messages and the diffs of the harness files at
           each of them. The first 274 were read on 3 September and the forty after them on
           14 September, the same way. No session transcripts. Where a motive is stated in a commit it is quoted;
@@ -1564,15 +1564,15 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
 
 <footer class="border-t border-line">
   <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-[15px] text-dim sm:flex-row sm:items-center sm:px-8">
-    <p>FoolProof — a scoresheet for Podkidnoy Durak.</p>
+    <p data-block="footer.line">FoolProof — a scoresheet for Podkidnoy Durak.</p>
     <nav aria-label="Footer" class="flex flex-wrap gap-6 sm:ml-auto">
-      <a href="../" class="hover:text-ink">The landing page</a>
-      <a href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="hover:text-ink">GitHub</a>
-      <a href="https://github.com/oleg-vasilyev/FoolProof/blob/main/LICENSE" rel="license noopener" class="hover:text-ink">MIT licence</a>
-      <a href="https://t.me/FoolProofMegaBot" rel="noopener" class="hover:text-ink">The bot</a>
+      <a data-block="footer.landing" href="../" class="hover:text-ink">The landing page</a>
+      <a data-block="footer.github" href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="hover:text-ink">GitHub</a>
+      <a data-block="footer.licence" href="https://github.com/oleg-vasilyev/FoolProof/blob/main/LICENSE" rel="license noopener" class="hover:text-ink">MIT licence</a>
+      <a data-block="footer.bot" href="https://t.me/FoolProofMegaBot" rel="noopener" class="hover:text-ink">The bot</a>
     </nav>
   </div>
-  <div class="mx-auto max-w-6xl px-5 pb-10 font-mono text-[12px] text-edge sm:px-8">
+  <div data-block="footer.disclaimer" class="mx-auto max-w-6xl px-5 pb-10 font-mono text-[12px] text-edge sm:px-8">
     Not affiliated with Telegram.
   </div>
 </footer>

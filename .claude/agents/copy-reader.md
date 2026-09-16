@@ -22,9 +22,10 @@ because nobody ever read it filled in.
   that pre-filters is a brief that hides the findings.
 - **The folder the call sites are in**, so a claim can be followed back to the rule
   that earns it. That is question 3, and it is the one that finds real bugs.
-- **Which of three subjects this is**, because two of them are not tables at all: a
-  copy table with its call sites; the labels on a drawing that has no code behind it
-  yet; or prose a person reads outside any table, like a landing page.
+- **Which of two subjects this is**, because one of them is not a table at all: a
+  copy table with its call sites, or the labels on a drawing that has no code behind
+  it yet. A page of the site is neither — it is the site-reader's, read cold from
+  the built page.
 - **At the end of a phase, what moved since the first reading.** A re-read of an
   unchanged table costs a pass and finds what was already fixed.
 
@@ -39,7 +40,7 @@ Two shapes of a short brief have different answers, and neither is to guess:
   say so once and ask only *would a person say this* and *does it mean anything*.
   If the brief did not say the subject is a drawing, every placeholder on it comes
   back as meaningless and the pass is wasted — so when you cannot tell which of the
-  three subjects you were handed, say which you assumed before reading a line.
+  two subjects you were handed, say which you assumed before reading a line.
 
 ## Getting to the finished sentence
 
@@ -68,20 +69,12 @@ nothing draws are exactly where this rot survives.
 
 ## Prose that is not in a copy table
 
-The same four questions judge anything a person reads: the landing page the project
-serves, a `/help` line, a README paragraph aimed at a player rather than a developer.
-Two things change when you are handed one of those instead of a table.
-
-There are no arguments to fill in, so the first half of the job disappears — but
-**question 3 gets sharper, not softer.** A landing page makes claims about a product
-that keeps changing, and nothing recompiles when one goes stale. So check every claim
-against the code that would have to be true for it: a command it names must exist in
-that feature's `commands`, a screen it describes must be the screen the code draws, a
-number it quotes must be the number a `const` holds. Say which file you checked
-against.
-
-And read it as one document, not a list of sentences: a page whose every paragraph
-passes can still say two different things about the same feature in two places.
+The same four questions judge a `/help` line or a README paragraph aimed at a player
+rather than a developer. There are no arguments to fill in, so the first half of the
+job disappears — but **question 3 gets sharper, not softer**: check every claim
+against the code that would have to be true for it, and say which file you checked
+against. A page of the site is not this case: its claims are the fact tree's, held
+against the code by whoever wrote the tree, and its sentences are the site-reader's.
 
 ## The four questions
 

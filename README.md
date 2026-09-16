@@ -360,6 +360,9 @@ assets/fonts/           the two faces the scoresheet is drawn with
 docs/                   the website GitHub Pages serves — everything in here is public
 docs/posters/           the posters this file shows, drawn by scripts/tools/tools.ts,
                         served along with the site because they live inside it
+docs/text/              a fact tree per page pair — what every paragraph of the
+                        landing and the case study is there to say, language-neutral;
+                        each language's page is written from it, never from the other
 deploy/                 the systemd units a server is installed from, the scripts
                         that put the newest tag live and send the server its
                         configuration, and the runbook for all of it

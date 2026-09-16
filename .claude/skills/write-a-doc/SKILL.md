@@ -154,8 +154,8 @@ the second list is the one a reviewer can check.
 ## The budget is the point
 
 `CLAUDE.md` **and every skill** carry a line budget, enforced by `docs-check`; a skill
-with no row in the table fails the gate too. They exist so that adding costs
-something, and the two differ in what it buys. **`CLAUDE.md`'s number never rises** —
+with no row in the table fails the gate too; the gate counts one more than `wc -l`, so
+aim at `budget − 1` by `wc` and go round once. **`CLAUDE.md`'s number never rises** —
 it is read before every session, so a new rule displaces an older one into the file
 loaded when it applies, and the argument that the whole file is always needed has lost
 twice. **A skill's may rise, by what a genuinely new section costs and nothing else**:
