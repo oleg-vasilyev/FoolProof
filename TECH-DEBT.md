@@ -573,39 +573,39 @@ that returns looking exactly like success.
 
 ## Stryker's incremental mode has never been measured here
 
-A tag mutates only what changed since the previous tag, and the full run is the
-weekly checkup's, 26 minutes at v1.20.1. Stryker also has `--incremental`, which
-keeps the last report and re-tests only mutants whose code or tests moved — the
-same idea one level down, and it might make the full run cheap enough to sit in
-`check:release` again. Nothing here has measured it. **Worth one run with the next
-checkup that has two full reports to compare, or the next time a tag's since-tag
-mutation crosses ten minutes.**
+A tag mutates only what changed since the previous tag; the full run is the weekly
+checkup's, 26 minutes at v1.20.1. Stryker's `--incremental` re-tests only mutants whose
+code or tests moved and might make the full run cheap enough for `check:release` again;
+nothing here has measured it. **Worth one run with the next checkup that has two full
+reports to compare, or the next time a tag's since-tag mutation crosses ten minutes.**
 
 ## The checkup's phases are numbered in fractions
 
-`deep-checkup.md` has grown phases 3½, 3¾ and 3⅞ between 3 and 4, and 9½ between 9 and
-10 — each inserted where it belonged rather than renumbering the ones after it, because
-the cut list and the report cite phases by number. Fractions read badly and run out: the
-next insertion after 3⅞ has nowhere to go. The owner's preference is letters — 3A, 3B,
-3C — which insert without arithmetic.
-
-**Rename them the next time the brief is edited for another reason**, in one commit
-with the cut list and every citation in `logbook/checkups/` left as written, since a
-report is a record and not a document kept in step.
+`deep-checkup.md` has grown phases 3½, 3¾, 3⅞ and 9½, each inserted where it belonged
+because the cut list and the report cite phases by number; fractions read badly and the
+next one after 3⅞ has nowhere to go. The owner prefers letters — 3A, 3B, 3C. **Rename them
+the next time the brief is edited for another reason**, in one commit with the cut list,
+leaving every citation in `logbook/checkups/` as written: a report is a record.
 
 ## A benchmark run measures the harness and the code at one commit, never apart
 
 `benchmark/` cuts its clone from `HEAD`, so a run two weeks from now compares today's
-harness *and* today's code against that day's. That is the comparison the owner asked
-for first, and it is honest as long as the task's award machinery holds still. What it
-cannot do is put an old harness on a new snapshot, or the reverse, to say which of the
-two moved a number. The overlay is mechanical — `.claude/`, `CLAUDE.md`,
-`DEVELOPMENT-FLOW.md` from one commit over the tree of another — but the gates under
-`scripts/` are coupled to the code and would have to stay with the snapshot.
+harness *and* today's code against that day's — the comparison the owner asked for first.
+It cannot put an old harness on a new snapshot, or the reverse, to say which moved a
+number; the overlay is mechanical (`.claude/`, `CLAUDE.md`, `DEVELOPMENT-FLOW.md` from one
+commit over another's tree), but the gates under `scripts/` would have to stay with the
+snapshot. **Add the overlay when two runs disagree and nobody can say whether the harness
+or the code did it.** Until then every row in `benchmark/RUNS.md` carries the one commit.
 
-**Add the overlay when two runs disagree and nobody can say whether the harness or the
-code did it.** Until then every row in `benchmark/RUNS.md` carries the one commit both came
-from, which is enough to go back and find out by hand.
+## The landing's chart is routed round today's text and coloured by copy
+
+`TRACE_ROUTE` was drawn round the paragraphs as they stood on 16 September 2026, at four
+widths and with the parallax's extreme shifts simulated, in a browser by hand; a longer FAQ
+answer can put a line under text and no gate reads layout. **Redo that check whenever a
+landing paragraph changes length**; twice, and `docs-check` earns a headless browser. The
+lines, ribbons and header strip are `PLAYER_COLOURS` typed into `docs/styles.source.css` as
+hex, since `scripts/` may not import a feature. **When the poster palette changes**, the
+drawings contract offers a palette or `docs-check` holds the two files equal.
 
 ## Not debt, deliberately
 

@@ -37,10 +37,11 @@ import {
   foldersMissingFromTheTree,
   scriptsOutOfStep,
 } from "./source/source-tree.ts";
-import { imagesOutOfStep, siteCssOutOfStep } from "./source/site-pages.ts";
+import { faqOutOfStep, imagesOutOfStep, siteCssOutOfStep } from "./source/site-pages.ts";
 import { siteTextOutOfStep } from "./source/site-text.ts";
 import { siteProseOutOfStep } from "./source/site-prose.ts";
 import { lineEndingsOutOfStep } from "./source/line-endings.ts";
+import { tracesOutOfStep } from "./source/site-traces.ts";
 import { ALL_GATES } from "../gates/gate-list.ts";
 
 
@@ -91,6 +92,8 @@ const complaints = [
   ...siteTextOutOfStep(),
   ...siteProseOutOfStep(),
   ...lineEndingsOutOfStep(),
+  ...tracesOutOfStep(),
+  ...faqOutOfStep(),
 ];
 
 for (const complaint of complaints) {

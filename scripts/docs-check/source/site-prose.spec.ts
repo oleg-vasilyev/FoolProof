@@ -277,8 +277,14 @@ describe("proseComplaints", () => {
     expect(found).toEqual([]);
   });
 
-  it("should let a pronoun stand in a question", () => {
-    const found = proseComplaints(RUSSIAN_PAGE, blocks('<h3 data-block="faq.chat-q">Он читает чат?</h3>'), held());
+  it("should refuse a pronoun in a FAQ question, which is a heading set in a dt", () => {
+    const [complaint] = proseComplaints(RUSSIAN_PAGE, blocks('<dt data-block="faq.chat-q">Он читает чат?</dt>'), held());
+
+    expect(complaint).toContain('heading "faq.chat-q" says "он"');
+  });
+
+  it("should let a pronoun stand in a FAQ answer", () => {
+    const found = proseComplaints(RUSSIAN_PAGE, blocks('<dd data-block="faq.chat-a">Нет, он его не читает.</dd>'), held());
 
     expect(found).toEqual([]);
   });

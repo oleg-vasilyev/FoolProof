@@ -36,7 +36,7 @@
   }
 
   [id] {
-    scroll-margin-top: 5.5rem;
+    scroll-margin-top: 4.6rem;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -47,6 +47,225 @@
 }
 
 @layer components {
+
+  main {
+    overflow-x: clip;
+  }
+
+  main > section {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .trace-frame {
+    position: relative;
+  }
+
+
+  .trace {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    fill: none;
+    stroke-width: 1;
+    stroke-opacity: 0.4;
+    stroke-linejoin: round;
+  }
+
+  .trace polyline {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .trace-1 {
+    stroke: #e7bf5d;
+    background-color: #e7bf5d;
+  }
+
+  .trace-2 {
+    stroke: #779af5;
+    background-color: #779af5;
+  }
+
+  .trace-3 {
+    stroke: #e67e54;
+    background-color: #e67e54;
+  }
+
+  .trace-4 {
+    stroke: #26dafe;
+    background-color: #26dafe;
+  }
+
+  .trace-5 {
+    stroke: #4cb774;
+    background-color: #4cb774;
+  }
+
+  .trace-6 {
+    stroke: #f4a3f3;
+    background-color: #f4a3f3;
+  }
+
+  .trace-dot {
+    position: absolute;
+    z-index: 1;
+    bottom: -4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    translate: -50% 0;
+    border: 2px solid var(--color-panel);
+  }
+
+  .ribbon {
+    border-left: 3px solid var(--ribbon, var(--color-accent));
+    padding-left: 1.125rem;
+  }
+
+  .ribbon:nth-child(1),
+  .faq-awards > .reveal:nth-child(1) {
+    --ribbon: #e7bf5d;
+  }
+
+  .ribbon:nth-child(2),
+  .faq-awards > .reveal:nth-child(2) {
+    --ribbon: #779af5;
+  }
+
+  .ribbon:nth-child(3),
+  .faq-awards > .reveal:nth-child(3) {
+    --ribbon: #e67e54;
+  }
+
+  .ribbon:nth-child(4),
+  .faq-awards > .reveal:nth-child(4) {
+    --ribbon: #26dafe;
+  }
+
+  .ribbon:nth-child(5),
+  .faq-awards > .reveal:nth-child(5) {
+    --ribbon: #4cb774;
+  }
+
+  .ribbon:nth-child(6),
+  .faq-awards > .reveal:nth-child(6) {
+    --ribbon: #f4a3f3;
+  }
+
+  .faq-awards {
+    counter-reset: faq;
+  }
+
+  .faq-awards > .reveal {
+    position: relative;
+    box-shadow: inset 3px 0 0 var(--ribbon);
+    padding: 1.25rem 0 1.25rem 3.5rem;
+  }
+
+  .faq-awards > .reveal::before {
+    content: counter(faq, decimal-leading-zero);
+    counter-increment: faq;
+    position: absolute;
+    left: 1rem;
+    top: 1.55rem;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--color-dim);
+  }
+
+  .faq-awards > .reveal > dt {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 17px;
+  }
+
+  .step-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.375rem;
+    background-color: var(--color-raised);
+    padding: 0.3rem 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 12px;
+  }
+
+  .step-cell::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 2px;
+    background-color: var(--color-accent);
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .eyebrow::after {
+    content: "";
+    flex: 1;
+    max-width: 12rem;
+    height: 1px;
+    background-color: var(--color-edge);
+  }
+
+  #posters {
+    background-image:
+      linear-gradient(var(--color-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+    background-size: 56px 56px;
+    background-position: center top;
+  }
+
+  #posters::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 40%, transparent 30%, var(--color-ground) 75%);
+    pointer-events: none;
+  }
+
+  #posters .deck-arrow {
+    border-color: var(--color-edge);
+    background-color: var(--color-card);
+  }
+
+  header {
+    isolation: isolate;
+  }
+
+  header::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, #e7bf5daa, #779af5aa, #e67e54aa, #26dafeaa, #4cb774aa, #f4a3f3aa);
+  }
+
+  [data-parallax] {
+    will-change: translate;
+  }
+
+  @media (max-width: 64rem) {
+    .trace,
+    .trace-dot {
+      display: none;
+    }
+  }
 
   .deck-arrow {
     display: inline-flex;

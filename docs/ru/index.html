@@ -23,7 +23,7 @@
 <meta property="og:image" content="https://oleg-vasilyev.github.io/FoolProof/previews/og-cover-ru.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Логотип FoolProof рядом с постером хронологии, который бот рисует в конце вечера.">
+<meta property="og:image:alt" content="Заголовок FoolProof рядом с веером из трёх постеров, которые рисует бот: хронология вечера, его награды и карточка одного игрока.">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="FoolProof — телеграм-бот, который ведёт счёт в дурака">
@@ -61,12 +61,12 @@
       "mainEntity": [
         { "@type": "Question", "name": "Это бесплатно?",
           "acceptedAnswer": { "@type": "Answer", "text": "Да. Без аккаунтов, без рекламы и без покупок." } },
-        { "@type": "Question", "name": "Он читает чат?",
+        { "@type": "Question", "name": "Бот читает чат?",
           "acceptedAnswer": { "@type": "Answer", "text": "Нет. В обычном режиме приватности Telegram бот получает только команды и ответы на свои сообщения, а остальной разговор до него не доходит." } },
-        { "@type": "Question", "name": "Что он хранит?",
+        { "@type": "Question", "name": "Что бот хранит?",
           "acceptedAnswer": { "@type": "Answer", "text": "Имена, которые ему отправили. Результаты партий в этом чате и Telegram-id того, кто нажимал кнопки. Язык, который выбрал чат. Больше ничего." } },
-        { "@type": "Question", "name": "В какого дурака он считает?",
-          "acceptedAnswer": { "@type": "Answer", "text": "В подкидного, от двух до десяти игроков. Бот записывает порядок выхода и того, кто остался дураком. Карты он не раздаёт и за игрой не следит." } },
+        { "@type": "Question", "name": "Какой вид дурака поддерживается?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Бот разрабатывался под подкидного дурака на компанию от двух до десяти человек, но подойдёт и для любого другого вида: он записывает лишь порядок выхода и того, кто остался с картами. Раздача и судейство остаются за столом." } },
         { "@type": "Question", "name": "Нужно что-то устанавливать?",
           "acceptedAnswer": { "@type": "Answer", "text": "Нет. Добавьте бота в группу и отправьте /game с именами." } },
         { "@type": "Question", "name": "Можно поднять свою копию?",
@@ -127,7 +127,8 @@
 <main id="main">
 
   <section aria-labelledby="hero-heading" class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-    <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
+    <svg class="trace" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="trace-1" points="48.8,0 48.7,6 50.5,14 57.0,22 54.4,30 52.8,38 51.8,50 53.6,62 54.2,70 51.0,78 52.5,88 46.8,94 48.5,100"/><polyline class="trace-2" points="49.8,0 49.9,6 57.0,14 59.0,22 56.0,30 53.8,38 52.8,50 54.3,62 54.8,70 54.3,78 53.4,88 51.3,94 49.1,100"/><polyline class="trace-3" points="50.1,0 51.1,6 59.0,14 61.0,22 61.2,30 54.8,38 56.0,50 55.0,62 55.4,70 55.3,78 54.3,88 52.7,94 49.7,100"/><polyline class="trace-4" points="50.4,0 55.0,6 61.0,14 63.0,22 62.8,30 55.8,38 57.0,50 55.7,62 57.4,70 56.3,78 57.3,88 54.1,94 50.3,100"/><polyline class="trace-5" points="50.7,0 56.2,6 63.0,14 69.5,22 64.4,30 59.0,38 58.0,50 56.4,62 58.0,70 57.3,78 58.1,88 55.5,94 52.3,100"/></svg>
+    <div data-parallax="0.065" class="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
 
       <div>
         <p data-block="hero.eyebrow" class="eyebrow hero-rise">Telegram-бот · Подкидной дурак · Бесплатно</p>
@@ -176,27 +177,28 @@
   </section>
 
   <section id="how" aria-labelledby="how-heading" class="border-t border-line bg-panel">
-    <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+    <div class="trace-frame mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24" data-parallax="0.065" data-parallax-static=".trace">
+      <svg class="trace" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="trace-1" points="48.5,0 60.4,8 70.8,14 74.1,22 75.2,32 71.2,48 42.0,60 36.5,75 52.5,88 52.5,100"/><polyline class="trace-2" points="49.1,0 62.0,8 72.3,14 75.3,22 76.6,32 72.8,48 48.5,60 38.5,75 59.0,88 53.5,100"/><polyline class="trace-3" points="49.7,0 67.2,8 73.7,14 79.2,22 78.0,32 74.4,48 50.5,60 40.5,75 61.0,88 54.5,100"/><polyline class="trace-4" points="50.3,0 68.8,8 75.0,14 80.4,22 79.4,32 79.6,48 52.5,60 47.0,75 63.0,88 55.5,100"/><polyline class="trace-5" points="52.3,0 70.4,8 79.6,14 81.6,22 80.8,32 81.2,48 54.5,60 49.0,75 65.0,88 58.8,100"/></svg>
       <p data-block="how.eyebrow" class="eyebrow">Весь сценарий от начала до конца</p>
       <h2 data-block="how.title" id="how-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Три шага на всю игру</h2>
 
       <ol class="mt-12 grid gap-6 md:grid-cols-3">
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
-          <p data-block="how.step1-label" class="font-mono text-[13px] text-accent">Шаг 1</p>
+          <p data-block="how.step1-label" class="step-cell font-mono text-[13px] text-accent">Шаг 1</p>
           <h3 data-block="how.step1-title" class="mt-3 text-[21px] font-bold">Отправьте состав</h3>
           <p data-block="how.step1-body" class="mt-3 text-[16px] leading-relaxed text-muted">
   Напишите <code class="cmd">/game Олег, Аня, Рома</code> — имена в том порядке, в каком игроки сидят за столом по часовой стрелке. Бот откроет в чате одну карточку.
 </p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
-          <p data-block="how.step2-label" class="font-mono text-[13px] text-accent">Шаг 2</p>
+          <p data-block="how.step2-label" class="step-cell font-mono text-[13px] text-accent">Шаг 2</p>
           <h3 data-block="how.step2-title" class="mt-3 text-[21px] font-bold">Отмечайте, кто вышел</h3>
           <p data-block="how.step2-body" class="mt-3 text-[16px] leading-relaxed text-muted">
   Сначала коснитесь того, кто ходил первым. Потом отмечайте игроков по мере того, как они выходят, и завершите партию кнопкой «Записать». Кого не отметили, тот и остался дураком. Печатать ничего не нужно.
 </p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-7">
-          <p data-block="how.step3-label" class="font-mono text-[13px] text-accent">Шаг 3</p>
+          <p data-block="how.step3-label" class="step-cell font-mono text-[13px] text-accent">Шаг 3</p>
           <h3 data-block="how.step3-title" class="mt-3 text-[21px] font-bold">Посмотрите итоги</h3>
           <p data-block="how.step3-body" data-rev="3" class="mt-3 text-[16px] leading-relaxed text-muted">
   <code class="cmd">/stats</code> присылает хронологию серии игр, а после пятой партии и награды. <code class="cmd">/personal</code> рисует одного игрока сквозь все вечера, в которых он участвовал. <code class="cmd">/next</code> снова открывает тот же стол.
@@ -207,7 +209,8 @@
   </section>
 
   <section id="posters" aria-labelledby="posters-heading">
-    <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+    <div class="trace-frame mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24" data-parallax="0.065" data-parallax-static=".trace">
+      <svg class="trace" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="trace-1" points="52.5,0 61.1,8 79.3,16 86.1,26 103.2,34 107.2,52 96.0,68 78.5,78 82.5,88 74.0,100"/><polyline class="trace-2" points="53.5,0 62.5,8 80.5,16 87.3,26 104.6,34 108.8,52 102.5,68 80.5,78 89.0,88 75.6,100"/><polyline class="trace-3" points="54.5,0 67.0,8 81.7,16 91.2,26 106.0,34 110.4,52 104.5,68 82.5,78 91.0,88 77.2,100"/><polyline class="trace-4" points="55.5,0 68.5,8 82.9,16 92.4,26 107.4,34 115.6,52 106.5,68 89.0,78 93.0,88 78.8,100"/><polyline class="trace-5" points="58.8,0 69.8,8 86.8,16 93.6,26 108.8,34 117.2,52 108.5,68 91.0,78 95.0,88 84.0,100"/></svg>
       <p data-block="posters.eyebrow" class="eyebrow">Что рисует бот</p>
       <h2 data-block="posters.title" id="posters-heading" class="mt-4 max-w-[68ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">
   Вечер в картинках
@@ -290,42 +293,43 @@
   </section>
 
   <section id="why" aria-labelledby="why-heading" class="border-t border-line bg-panel">
-    <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+    <div class="trace-frame mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24" data-parallax="0.065" data-parallax-static=".trace">
+      <svg class="trace" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="trace-1" points="74.0,0 78.4,8 100.8,14 107.5,22 118.0,40 106.0,58 112.0,76 102.5,96 93.3,100"/><polyline class="trace-2" points="75.6,0 80.0,8 102.3,14 109.5,22 120.0,40 108.0,58 118.5,76 104.5,96 99.1,100"/><polyline class="trace-3" points="77.2,0 85.2,8 103.7,14 116.0,22 122.0,40 110.0,58 120.5,76 106.5,96 100.9,100"/><polyline class="trace-4" points="78.8,0 86.8,8 105.0,14 118.0,22 124.0,40 116.5,58 122.5,76 113.0,96 102.7,100"/><polyline class="trace-5" points="84.0,0 88.4,8 109.6,14 120.0,22 126.0,40 118.5,58 124.5,76 115.0,96 104.5,100"/></svg>
       <p data-block="why.eyebrow" class="eyebrow">Основные идеи</p>
       <h2 data-block="why.title" data-rev="2" id="why-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Сделан под живую игру</h2>
 
       <ul class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-        <li class="reveal">
+        <li class="reveal ribbon">
           <h3 data-block="why.taps-title" class="text-[19px] font-bold">Нажимать, а не печатать</h3>
           <p data-block="why.taps-body" data-rev="3" class="mt-2 text-[16px] leading-relaxed text-muted">
   Вести счёт легко: всё происходит в одном сообщении с кнопками, партию отмечают с телефона, одной рукой, в паузе перед следующей раздачей, так что игра не прерывается. Если ошибку заметили уже после «Записать», ничего не потеряно: <code class="cmd">/reopen</code> возвращает последнюю партию карточкой, а «Назад» снимает лишнюю отметку.
 </p>
         </li>
-        <li class="reveal">
+        <li class="reveal ribbon">
           <h3 data-block="why.privacy-title" class="text-[19px] font-bold">Не читает чат</h3>
           <p data-block="why.privacy-body" class="mt-2 text-[16px] leading-relaxed text-muted">
   В обычном режиме приватности Telegram бот получает только команды и ответы на свои сообщения. Разговор в чате до него не доходит.
 </p>
         </li>
-        <li class="reveal">
+        <li class="reveal ribbon">
           <h3 data-block="why.restart-title" class="text-[19px] font-bold">Ничего не теряется</h3>
           <p data-block="why.restart-body" class="mt-2 text-[16px] leading-relaxed text-muted">
   Если бот посреди партии упал или обновился, всё, что вы уже нажали, остаётся на месте: карточка восстанавливается из записанного, и игра продолжается.
 </p>
         </li>
-        <li class="reveal">
+        <li class="reveal ribbon">
           <h3 data-block="why.names-title" class="text-[19px] font-bold">Один игрок под двумя именами</h3>
           <p data-block="why.names-body" class="mt-2 text-[16px] leading-relaxed text-muted">
   Кто-то один раз написал <span class="cmd">Аня</span>, а дальше всю встречу — <span class="cmd">Анна</span>. <code class="cmd">/merge</code> снова делает из двух имён одного человека. А если вся встреча записана не на то имя, <code class="cmd">/replace</code> переносит её на нужное.
 </p>
         </li>
-        <li class="reveal">
+        <li class="reveal ribbon">
           <h3 data-block="why.language-title" class="text-[19px] font-bold">По-русски или по-английски</h3>
           <p data-block="why.language-body" class="mt-2 text-[16px] leading-relaxed text-muted">
   <code class="cmd">/language</code> выбирает язык для этого чата, включая подписи на постерах.
 </p>
         </li>
-        <li class="reveal">
+        <li class="reveal ribbon">
           <h3 data-block="why.table-title" class="text-[19px] font-bold">От двух до десяти за столом</h3>
           <p data-block="why.table-body" data-rev="3" class="mt-2 text-[16px] leading-relaxed text-muted">
   Состав не обязан быть одним на всю встречу. Кто-то подсел к столу — <code class="cmd">/next_with</code> добавит его в следующую партию. Кто-то отошёл или решил пропустить партию — <code class="cmd">/next_without</code> его уберёт.
@@ -336,31 +340,32 @@
   </section>
 
   <section id="faq" aria-labelledby="faq-heading">
-    <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+    <div class="trace-frame mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24" data-parallax="0.065" data-parallax-static=".trace">
+      <svg class="trace" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="trace-1" points="93.3,0 79.5,8 67.7,15 60.0,22 64.8,30 71.2,38 65.2,46 66.4,52 68.2,58 69.5,63 66.0,70 63.7,78 71.3,86 73.5,93 81.6,100"/><polyline class="trace-2" points="99.1,0 81.3,8 69.5,15 61.8,22 66.4,30 72.6,38 66.8,46 71.0,52 69.5,58 73.4,63 67.6,70 65.5,78 72.5,86 74.8,93 82.8,100"/><polyline class="trace-3" points="100.9,0 83.1,8 75.3,15 63.5,22 71.6,30 74.0,38 68.4,46 72.3,52 71.0,58 74.6,63 69.2,70 71.3,78 73.7,86 79.4,93 84.0,100"/><polyline class="trace-4" points="102.7,0 84.9,8 77.2,15 65.3,22 73.2,30 75.4,38 73.6,46 73.8,52 75.5,58 75.8,63 70.8,70 73.2,78 74.9,86 80.8,93 85.2,100"/><polyline class="trace-5" points="104.5,0 90.8,8 79.0,15 71.2,22 74.8,30 76.8,38 75.2,46 75.2,52 76.9,58 77.0,63 76.0,70 75.0,78 78.8,86 82.2,93 86.4,100"/></svg>
       <p data-block="faq.eyebrow" data-rev="3" class="eyebrow">FAQ</p>
       <h2 data-block="faq.title" data-rev="3" id="faq-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Вопросы и ответы</h2>
 
-      <dl class="mt-12 max-w-[68ch] divide-y divide-line border-t border-line">
+      <dl class="faq-awards mt-12 max-w-[68ch] divide-y divide-line">
         <div class="reveal py-6">
           <dt data-block="faq.free-q" class="text-[19px] font-bold">Это бесплатно?</dt>
           <dd data-block="faq.free-a" class="mt-2 text-[16px] leading-relaxed text-muted">Да. Без аккаунтов, без рекламы и без покупок.</dd>
         </div>
         <div class="reveal py-6">
-          <dt data-block="faq.chat-q" class="text-[19px] font-bold">Он читает чат?</dt>
+          <dt data-block="faq.chat-q" class="text-[19px] font-bold">Бот читает чат?</dt>
           <dd data-block="faq.chat-a" class="mt-2 text-[16px] leading-relaxed text-muted">
   Нет. В обычном режиме приватности Telegram бот получает только команды и ответы на свои сообщения, а остальной разговор до него не доходит.
 </dd>
         </div>
         <div class="reveal py-6">
-          <dt data-block="faq.store-q" class="text-[19px] font-bold">Что он хранит?</dt>
+          <dt data-block="faq.store-q" class="text-[19px] font-bold">Что бот хранит?</dt>
           <dd data-block="faq.store-a" class="mt-2 text-[16px] leading-relaxed text-muted">
   Имена, которые ему отправили. Результаты партий в этом чате и Telegram-id того, кто нажимал кнопки. Язык, который выбрал чат. Больше ничего.
 </dd>
         </div>
         <div class="reveal py-6">
-          <dt data-block="faq.which-q" class="text-[19px] font-bold">В какого дурака он считает?</dt>
+          <dt data-block="faq.which-q" class="text-[19px] font-bold">Какой вид дурака поддерживается?</dt>
           <dd data-block="faq.which-a" class="mt-2 text-[16px] leading-relaxed text-muted">
-  В подкидного, от двух до десяти игроков. Бот записывает порядок выхода и того, кто остался дураком. Карты он не раздаёт и за игрой не следит.
+  Бот разрабатывался под подкидного дурака на компанию от двух до десяти человек, но подойдёт и для любого другого вида: он записывает лишь порядок выхода и того, кто остался с картами. Раздача и судейство остаются за столом.
 </dd>
         </div>
         <div class="reveal py-6">
@@ -380,7 +385,8 @@
   </section>
 
   <section aria-labelledby="cta-heading" class="border-t border-line bg-panel">
-    <div class="reveal mx-auto max-w-6xl px-5 py-20 text-center sm:px-8">
+    <div class="trace-frame reveal mx-auto max-w-6xl px-5 py-20 text-center sm:px-8" data-parallax="0.065" data-parallax-static=".trace">
+      <svg class="trace" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="trace-1" points="81.6,0 90.6,6 100.0,35 104.5,55 90.5,75 79.0,100"/><polyline class="trace-2" points="82.8,0 92.4,6 106.5,35 106.5,55 97.0,75 81.0,100"/><polyline class="trace-3" points="84.0,0 94.2,6 108.5,35 108.5,55 99.0,75 83.0,100"/><polyline class="trace-4" points="85.2,0 100.0,6 110.5,35 115.0,55 101.0,75 85.0,100"/><polyline class="trace-5" points="86.4,0 101.8,6 112.5,35 117.0,55 103.0,75 91.5,100"/></svg>
       <h2 data-block="cta.title" data-rev="4" id="cta-heading" class="mx-auto max-w-[24ch] text-[32px] font-black leading-tight tracking-[-0.02em] sm:text-[44px]">
   Соберитесь за столом и узнайте, кто на самом деле лучший игрок
 </h2>
@@ -439,6 +445,46 @@ setTimeout(() => {
     }
   });
 }, 2000);
+
+const drifting = [...document.querySelectorAll("[data-parallax]")];
+if (drifting.length > 0 && matchMedia("(prefers-reduced-motion: no-preference)").matches) {
+  let queued = false;
+  const anchorLine = parseFloat(getComputedStyle(document.querySelector("[id]")).scrollMarginTop) || 0;
+  const drift = () => {
+    queued = false;
+    for (const piece of drifting) {
+      const box = piece.getBoundingClientRect();
+      const shift = piece.style.translate ? parseFloat(piece.style.translate.split(" ")[1] ?? "0") : 0;
+      const top = box.top - shift;
+      const moved = Math.round((anchorLine - top) * Number(piece.dataset.parallax));
+      piece.style.translate = "0 " + moved + "px";
+      if (piece.dataset.parallaxStatic) {
+        piece.querySelectorAll(piece.dataset.parallaxStatic).forEach((still) => {
+          still.style.translate = "0 " + -moved + "px";
+        });
+      }
+    }
+  };
+  const ask = () => {
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(drift);
+    }
+  };
+  addEventListener("scroll", ask, { passive: true });
+  addEventListener("resize", ask);
+  drift();
+}
+
+const traceEnd = document.querySelector('[aria-labelledby="cta-heading"] .trace-frame');
+if (traceEnd) {
+  traceEnd.querySelectorAll(".trace polyline").forEach((line) => {
+    const dot = document.createElement("span");
+    dot.className = "trace-dot " + line.getAttribute("class");
+    dot.style.left = line.getAttribute("points").split(" ").pop().split(",")[0] + "%";
+    traceEnd.appendChild(dot);
+  });
+}
 
 const language = document.querySelector(".lang");
 document.addEventListener("click", (event) => {

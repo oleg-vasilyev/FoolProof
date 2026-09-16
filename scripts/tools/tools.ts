@@ -7,7 +7,8 @@ import { measureAdvances } from "./measure-advances.ts";
 import { refreshDesignPage } from "./design-page.ts";
 import { GALLERY_DIR, POSTER_DIR } from "../drawings/drawn-into.ts";
 import { drawnByName, everyDrawing, featuresThatDraw } from "../drawings/feature-drawings.ts";
-import { SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
+import { LANDING_PAGES, SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
+import { writeSiteTraces } from "./site-traces.ts";
 import { proseCandidates } from "../docs-check/source/site-prose.ts";
 import { blocksOnPage } from "../docs-check/source/site-text.ts";
 import { read } from "../docs-check/document-files.ts";
@@ -102,6 +103,13 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     run: (_args, say) => {
       buildSiteCss();
       say(`${SITE_CSS} — rebuilt`);
+    },
+  },
+  "site-traces": {
+    does: `redraw the chart lines behind ${LANDING_PAGES.join(" and ")} from the route in site-traces.ts`,
+    usage: "node scripts/tools/tools.ts site-traces",
+    run: (_args, say) => {
+      writeSiteTraces(say);
     },
   },
   gallery: {

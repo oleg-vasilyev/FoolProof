@@ -286,11 +286,12 @@ rev: 3
 - The names sent to it, the results of the games played in that chat with each tap recorded against the Telegram id of whoever made it, and the language that chat picked; nothing else.
 
 ### which-q
-- Which Durak does it score?
+- Which kind of Durak does it support?
 
 ### which-a
-- Podkidnoy, two to ten players.
-- It records the finishing order and the fool; it does not deal cards or referee the game.
+- It was designed around Podkidnoy Durak, two to ten players.
+- It only records who went out and who was left holding cards, so any other variant works just as well.
+- It does not deal cards or referee the game.
 
 ### install-q
 - Does anything have to be installed?

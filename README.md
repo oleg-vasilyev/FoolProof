@@ -279,14 +279,15 @@ written from the git history alone. Both languages share
 them; they are a snapshot of the history at commit 314, dated on the page, and
 nothing regenerates them.
 
-Two parts of it are generated rather than written:
+Three parts of it are generated rather than written:
 
 | What | Rebuilt by |
 |---|---|
 | `docs/posters/` — every poster in both languages: SVG, the WebP the pages show at the width they are read at, and a PNG at the width the bot sends, which the landing opens full screen | `node scripts/tools/tools.ts posters` |
 | `docs/styles.computed.css` — Tailwind, minified and committed | `node scripts/tools/tools.ts site-css` |
+| the five chart lines drawn behind the landing's sections, in the players' colours from the posters, from the route in `scripts/tools/site-traces.ts` — the same drawing on both language pages, each line leaving a section exactly where it enters the next | `node scripts/tools/tools.ts site-traces` |
 
-**`node scripts/gates/gate-runner.ts docs-check` fails on either being stale**, and that is the point: a push
+**`node scripts/gates/gate-runner.ts docs-check` fails on any of them being stale**, and that is the point: a push
 is the deploy, so a forgotten rebuild does not wait to be noticed — it ships. The
 posters are the bot's own renders of one sample evening — English copy with Latin
 names for one page, Russian for the other, and the English three are the very files

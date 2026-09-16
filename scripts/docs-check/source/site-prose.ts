@@ -39,7 +39,7 @@ const STEM_FROM = 6;
 
 const STEM_LENGTH = 5;
 
-const A_HEADING_BLOCK = /(?:^|[.-])(?:title|eyebrow)$/;
+const A_HEADING_BLOCK = /(?:^|[.-])(?:title|eyebrow|q)$/;
 
 const A_TITLE_BLOCK = /(?:^|[.-])title$/;
 
