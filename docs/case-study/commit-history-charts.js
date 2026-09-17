@@ -1,6 +1,11 @@
-const ERA_COLOURS = ["#e7bf5d", "#779af5", "#e67e54", "#4fb3c4", "#4cb774", "#e486c8", "#b39cf2"];
 const ERA_ENDS = [30, 66, 121, 184, 244, 274, 314];
-document.querySelectorAll(".era-band").forEach((band, index) => band.style.setProperty("--era", ERA_COLOURS[index]));
+const ROOT_STYLE = getComputedStyle(document.documentElement);
+const ERA_COLOURS = ERA_ENDS.map((_, index) => ROOT_STYLE.getPropertyValue(`--color-era-${index + 1}`).trim());
+const ACCENT = ROOT_STYLE.getPropertyValue("--color-accent").trim();
+const eraInk = (position) => ERA_COLOURS[position] || ACCENT;
+const eraCustomProperty = (position) => ERA_COLOURS[position] ?? "";
+document.querySelectorAll(".era-band").forEach((band, index) => (band.closest("article") ?? band).style.setProperty("--era", eraCustomProperty(index)));
+document.querySelectorAll("[data-era]").forEach((piece) => piece.style.setProperty("--era", eraCustomProperty(Number(piece.dataset.era) - 1)));
 document.querySelectorAll("[data-then-now]").forEach((widget) => {
   const tabs = [...widget.querySelectorAll(".then-now-tab")];
   const panels = [...widget.querySelectorAll(".then-now-body")];
@@ -33,7 +38,7 @@ const svgOf = (tag, attributes) => {
     const n = row[COL.n];
     const x = (n - 1) * slot;
     const link = svgOf("a", { href: GITHUB + row[COL.hash], target: "_blank", rel: "noopener", class: "tl-commit", tabindex: "-1" });
-    link.appendChild(svgOf("rect", { x: x + 0.4, y: BAR_TOP, width: Math.max(slot - 0.8, 1.2), height: BAR_H, rx: 0.6, fill: ERA_COLOURS[eraOf(n)], opacity: 0.85 }));
+    link.appendChild(svgOf("rect", { x: x + 0.4, y: BAR_TOP, width: Math.max(slot - 0.8, 1.2), height: BAR_H, rx: 0.6, fill: eraInk(eraOf(n)), opacity: 0.85 }));
     if (row[COL.tag]) {
       link.appendChild(svgOf("path", { d: `M${x + slot / 2} ${TOP - 6} l4 6 l-4 6 l-4 -6 z`, class: "tl-tag" }));
     }
@@ -47,7 +52,7 @@ const svgOf = (tag, attributes) => {
   let start = 1;
   ERA_ENDS.forEach((end, index) => {
     const x0 = (start - 1) * slot, x1 = end * slot;
-    svg.appendChild(svgOf("line", { x1: x0 + 1, y1: LABEL_Y - 9, x2: x1 - 1, y2: LABEL_Y - 9, stroke: ERA_COLOURS[index], "stroke-width": 2 }));
+    svg.appendChild(svgOf("line", { x1: x0 + 1, y1: LABEL_Y - 9, x2: x1 - 1, y2: LABEL_Y - 9, stroke: eraInk(index), "stroke-width": 2 }));
     const label = svgOf("text", { x: x0 + 2, y: LABEL_Y + 2, class: "tl-era-label" });
     label.textContent = `${index + 1} · ${dayOf(DATA[start - 1][COL.date])} – ${dayOf(DATA[end - 1][COL.date])}`;
     label.style.cursor = "pointer";
@@ -71,11 +76,15 @@ const svgOf = (tag, attributes) => {
   }
   function hide() { tip.hidden = true; }
   const legend = document.querySelector("[data-tl-legend]");
-  TEXT.eras.forEach((name, index) => {
+  const AN_ERA_HEADING = /^era-(\d+)-heading$/;
+  const eraHeadings = [...document.querySelectorAll('[data-block$=".title"][id$="-heading"]')].filter((heading) => AN_ERA_HEADING.test(heading.id));
+  eraHeadings.forEach((heading) => {
+    const era = Number(AN_ERA_HEADING.exec(heading.id)[1]);
+    const name = `${TEXT.eraLabel} ${era} · ${heading.textContent.trim()}`;
     const item = document.createElement("a");
-    item.href = `#era-${index + 1}`;
+    item.href = `#era-${era}`;
     item.className = "inline-flex items-center gap-2 hover:text-ink";
-    const dot = document.createElement("span"); dot.className = "era-dot"; dot.style.background = ERA_COLOURS[index];
+    const dot = document.createElement("span"); dot.className = "era-dot"; dot.style.background = eraInk(era - 1);
     item.append(dot, document.createTextNode(name));
     legend.appendChild(item);
   });
@@ -186,7 +195,6 @@ function lineChart(figure, spec) {
   details.appendChild(table);
 }
 
-const ACCENT = ERA_COLOURS[3];
 const CAT = ERA_COLOURS.slice(0, 3);
 const percent = (v) => `${v.toLocaleString(TEXT.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
 const charts = {

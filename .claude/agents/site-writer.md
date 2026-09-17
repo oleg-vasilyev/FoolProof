@@ -16,6 +16,12 @@ them. Nothing is in front of you but the facts.
 
 - **The tree** — a file under `docs/text/`, named. Read its opening paragraphs: they
   say what a section, a block, `numbers:`, `commits:` and `granularity:` are.
+- **The tree's "The page's job" section, read before any block**: it names the reader
+  as a person and the test every block must pass in his eyes. Twice a section written
+  without that reader in view was rejected whole by the owner on sight — the landing
+  on 16 September 2026, the case study's findings on 17 September — and rewritten
+  from the tree; a tree whose page's job does not name its reader is not ready to
+  write from, and the verdict line says so.
 - **The language** you are writing in, as a word: English or Russian.
 - **Which blocks** — a list of ids, or *every block*. A block not on the list is not
   yours to touch, and you do not read the page to find out what is there.
@@ -52,13 +58,19 @@ For each block, in the tree's order:
    Russian, `15,829` in English, a bare `24` for a version. A number listed only
    under the other language's field is one your language spells as a word (*во
    второй эпохе* against *era 2*); a number under neither is written as a word or
-   not at all, because the gate reads digits.
+   not at all, because the gate reads digits. **The fields are the block's own**:
+   a count in the fold's summary line is that summary's, and taking it for the
+   paragraph's cost one red gate. **A tile's caption is read in one line with its
+   value**, so in Russian it takes the case the number demands — «3 скилла»,
+   «6 скиллов», «1 агент» — and a page whose tiles stand in the nominative was
+   the owner's own complaint about a number glued to a noun phrase.
 3. **Cite every hash under `commits:`**, as `<a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/HASH" rel="noopener">HASH</a>`,
    at the end of the sentence that the commit is evidence for.
 4. **Keep the words the tree keeps.** A command is printed verbatim inside
    `<code class="cmd">`; a term the page's glossary defines (*harness*, *gate*,
-   *phase*, *skill*, *agent*, *owner*, *turn*) is used as the glossary spells it
-   and never paraphrased into a metaphor. **A proper name is never transliterated**:
+   *phase*, *skill*, *agent*, *owner*, *turn*, *spec*) is used as the glossary
+   spells it and never paraphrased — including in a block the reader meets
+   before the glossary, where a second word for it reads as a second thing. **A proper name is never transliterated**:
    Telegram, GitHub, Node, ESLint, Stryker stay in Latin letters in Russian prose
    — the owner's rule, 16 September 2026 — and only a compound the page already
    uses as a common noun («телеграм-бот») may be written in Cyrillic. **The game's

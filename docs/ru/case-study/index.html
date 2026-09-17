@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- Frozen snapshot of the harness as of 14 September 2026; the story counts the 314
-     commits up to 09676f7 (the first 274, up to 25108af, were read on 3 September, the
-     forty after them on 14 September). Not a living doc: do not edit for drift from the current repo, and
-     do not add it to any gate. See CLAUDE.md's document-ownership rule and the
-     owner's own request in the commit that added this page. -->
+<!-- A snapshot of the harness at commit 314 (09676f7, 11 September 2026): the story counts
+     the commits up to it and does not follow the repository after that, by the owner's own
+     request in the commit that added this page. Its text in both languages is written from
+     docs/text/case-study.facts.md by the site-writer agent, and docs-check holds both pages
+     to that tree; a block is never edited by hand, and never from the other language's page. -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -48,7 +48,7 @@
 
 <a data-block="header.skip" href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-ground">К содержимому</a>
 
-<header class="sticky top-0 z-40 border-b border-line bg-ground/90 backdrop-blur">
+<header class="eras-strip sticky top-0 z-40 border-b border-line bg-ground/90 backdrop-blur">
   <div class="mx-auto flex max-w-6xl items-center gap-4 px-5 py-4 sm:px-8">
     <a href="../" class="flex items-center gap-3" aria-label="FoolProof, главная">
       <img src="../../favicon.png" width="36" height="36" alt="" class="h-9 w-9 rounded-lg">
@@ -56,9 +56,9 @@
     </a>
 
     <nav aria-label="Основная" class="ml-auto hidden items-center gap-7 text-[15px] text-muted md:flex">
+      <a data-block="header.nav-findings" href="#findings" class="hover:text-ink">Пять выводов</a>
       <a data-block="header.nav-eras" href="#eras" class="hover:text-ink">Семь эпох</a>
-      <a data-block="header.nav-patterns" href="#patterns" class="hover:text-ink">Что повторялось</a>
-      <a data-block="header.nav-today" href="#today" class="hover:text-ink">Сегодня</a>
+      <a data-block="header.nav-today" href="#today" class="hover:text-ink">Харнес сегодня</a>
       <a data-block="header.nav-source" href="https://github.com/oleg-vasilyev/FoolProof" class="hover:text-ink" rel="noopener">Исходники</a>
     </nav>
 
@@ -82,84 +82,66 @@
       </ul>
     </details>
 
-    <a data-block="header.bot" href="../" class="rounded-lg border border-edge px-4 py-2 text-[15px] font-semibold text-ink transition-colors hover:border-accent hover:text-accent">
-      Сам бот
-    </a>
+    <a data-block="header.bot" href="../" class="rounded-lg border border-edge px-4 py-2 text-[15px] font-semibold text-ink transition-colors hover:border-accent hover:text-accent">Про бота</a>
   </div>
 </header>
 
 <main id="main">
 
   <section aria-labelledby="hero-heading" class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-    <p data-block="hero.eyebrow" class="eyebrow hero-rise">История разработки · 28 июля – 11 сентября 2026 · 314 коммитов</p>
+    <p data-block="hero.eyebrow" class="eyebrow hero-rise">Кейс-стади · 28 июля – 11 сентября 2026 · 314 коммитов</p>
 
-    <h1 data-block="hero.title" id="hero-heading" class="hero-rise mt-5 max-w-[22ch] text-[40px] font-black leading-[1.03] tracking-[-0.03em] text-balance sm:text-[58px]">
-      Харнес, который научился проверять себя
-    </h1>
+    <h1 data-block="hero.title" id="hero-heading" class="hero-rise mt-5 max-w-[22ch] text-[40px] font-black leading-[1.03] tracking-[-0.03em] text-balance sm:text-[58px]">Харнес, который научился проверять себя</h1>
 
-    <p data-block="hero.lead" class="hero-rise-2 mt-7 max-w-[68ch] text-[19px] leading-relaxed text-muted">
-      FoolProof — маленький телеграм-бот, который ведёт счёт в дураке. Его за шесть с половиной недель
-      написали один человек и Claude Code, и сам бот — наименее интересная часть этой
-      истории. Вокруг него выросла система правил, проверок, скиллов и агентов, которая
-      решает, как будет написана следующая строка кода, и эту систему переписывали чаще,
-      чем бота. Это рассказ о ней: что ломалось, что приходило на смену и как она выглядит
-      сегодня.
-    </p>
-    <p data-block="hero.note" class="hero-rise-2 mt-4 max-w-[68ch] text-[17px] leading-relaxed text-dim">
-      Каждое утверждение здесь взято из истории коммитов, каждое число прочитано из git, а
-      каждый хэш ведёт на свой коммит.
-    </p>
+    <p data-rev="3" data-block="hero.lead" class="hero-rise-2 mt-7 max-w-[68ch] text-[19px] leading-relaxed text-muted">FoolProof — небольшой Telegram-бот для счёта в дурака; один человек собрал его с Claude Code за шесть с половиной недель. Интереснее бота то, что выросло вокруг: правила, проверки, скиллы и агенты, решающие, как пишется каждая новая строка, — харнес, который переписывали чаще, чем код игры. Дальше о том, что в нём отказывало, что вставало на замену и как он устроен сегодня.</p>
 
     <div class="hero-rise-3 mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       <div class="tile"><p data-block="hero.tile-1-value" class="tile-value">314</p><p data-block="hero.tile-1-label" class="tile-label">коммитов, один автор</p></div>
       <div class="tile"><p data-block="hero.tile-2-value" class="tile-value">46</p><p data-block="hero.tile-2-label" class="tile-label">дней, с 28 июля по 11 сентября</p></div>
       <div class="tile"><p data-block="hero.tile-3-value" class="tile-value">40</p><p data-block="hero.tile-3-label" class="tile-label">релизов с тегом</p></div>
-      <div class="tile"><p data-block="hero.tile-4-value" class="tile-value">0 → 5 043</p><p data-block="hero.tile-4-label" class="tile-label">тестов — по последнему сообщению коммита, в котором они посчитаны</p></div>
-      <div class="tile"><p data-block="hero.tile-5-value" class="tile-value">11 + 7</p><p data-block="hero.tile-5-label" class="tile-label">скиллов и агентов к концу</p></div>
+      <div class="tile"><p data-block="hero.tile-4-value" class="tile-value">0 → 5&nbsp;043</p><p data-block="hero.tile-4-label" class="tile-label">тестов, от первого коммита до последнего</p></div>
+      <div class="tile"><p data-block="hero.tile-5-value" class="tile-value">11 + 7</p><p data-rev="2" data-block="hero.tile-5-label" class="tile-label">скиллов, то есть записанных процедур, и агентов — моделей с одной задачей</p></div>
     </div>
   </section>
 
   <section id="findings" aria-labelledby="findings-heading" class="border-t border-line">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-      <p data-block="findings.eyebrow" class="eyebrow">Прежде чем лезть в детали</p>
-      <h2 data-block="findings.title" id="findings-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Что говорит история, в пяти выводах</h2>
-      <p data-block="findings.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
-        Каждый вывод взят из глав ниже и ведёт на коммит, в котором он сформулирован.
-        Если читать что-то одно, читайте это. Потом выберите эпоху: во второй правило нашли
-        мёртвым, в пятой приходят читатели, в седьмой у харнеса появляется линейка.
-      </p>
+      <p data-block="findings.eyebrow" class="eyebrow">Сначала главное</p>
+      <h2 data-block="findings.title" id="findings-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Пять выводов из истории</h2>
+      <p data-rev="3" data-block="findings.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">Этот раздел для тех, кто строит софт с ИИ-агентом или собирается начать: шесть недель истории оставили несколько правил, которые можно забрать с собой. За каждым стоит один доказавший его эпизод, а подробности лежат в эпохе ниже.</p>
 
-      <ol class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-        <li class="reveal">
-          <p data-block="findings.f1-n" class="pattern-n">01</p>
-          <h3 data-block="findings.f1-title" class="mt-2 text-[19px] font-bold">Харнес — больше двух третей от размера продукта</h3>
-          <p data-block="findings.f1-body" class="mt-2 text-[16px] leading-relaxed text-muted">На последнем коммите исходники бота без тестов — 15 829 строк; скиллы, агенты, документы и проверки документов, которые решают, как будет написана следующая строка, — 11 332, и эту часть переписывали чаще, чем бота.</p>
+      <ol class="mt-12 grid max-w-[72ch] gap-y-12">
+        <li class="reveal finding" data-era="1">
+          <p data-block="findings.f1-n" class="finding-n">01</p>
+          <h3 data-rev="3" data-block="findings.f1-title" class="mt-2 text-[22px] font-bold leading-snug sm:text-[24px]">Текст можно пропустить, проверку нельзя</h3>
+          <p data-rev="3" data-block="findings.f1-body" class="mt-2 text-[16px] leading-relaxed text-muted">Перед каждой сессией агент читает рабочие требования проекта из одного файла — и всё равно часть из них пропускает, не со зла, а так, как человек пробегает текст глазами. Один пункт просил указывать в отчёте о каждой законченной работе, сколько она заняла времени; за неделю в тринадцати случаях из шестнадцати этого не сделали, хотя из файла он никуда не исчезал <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/08aac82" rel="noopener">08aac82</a>. Проверку глазами не пробежишь: она просто откажется принять результат. Поэтому пункт превратили в неё — как и всё остальное, что машина способна подтвердить сама. Стоит машине взять его на себя, фразу из файла удаляют; поводом служит счёт промахов, а не ощущение. К финальному коммиту проверки и инструкции, определяющие, каким будет код, набрали 11&nbsp;332 строки против 15&nbsp;829 в самом боте; нижний график на этой странице рисует обе величины <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/09676f7" rel="noopener">09676f7</a>.</p>
+          <p data-block="findings.f1-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-1" class="hover:text-ink">→ эпоха 1</a></p>
         </li>
-        <li class="reveal">
-          <p data-block="findings.f2-n" class="pattern-n">02</p>
-          <h3 data-block="findings.f2-title" class="mt-2 text-[19px] font-bold">Приёмка не различает модели, процесс — различает</h3>
-          <p data-block="findings.f2-body" class="mt-2 text-[16px] leading-relaxed text-muted">Каждая модель, которую вслепую запускали в огороженном клоне бенчмарка, прошла скрытый спек и оставила все гейты зелёными. Разделили их только колонки процесса: восемь обязательств из одиннадцати за доллар и шесть минут против одиннадцати из одиннадцати за двадцать два доллара и тридцать шесть минут.
-           <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a05104e" rel="noopener">a05104e</a></p>
+        <li class="reveal finding" data-era="2">
+          <p data-block="findings.f2-n" class="finding-n">02</p>
+          <h3 data-rev="3" data-block="findings.f2-title" class="mt-2 text-[22px] font-bold leading-snug sm:text-[24px]">Ложный зелёный хуже отсутствия проверки</h3>
+          <p data-rev="3" data-block="findings.f2-body" class="mt-2 text-[16px] leading-relaxed text-muted">Пока проверки нет, человек следит сам; когда она зелёная, он перестаёт смотреть — и именно это делает ложный пропуск дороже отсутствия. Здесь такое случалось трижды. Правило, запрещавшее одной части кода импортировать другую, включили, оно было зелёным, и за один день четыре раза выяснялось, что оно не срабатывает ни на чём. Вторая проверка проходила лишь потому, что на той машине в файлах стояли юниксовые переводы строк. Три проверки документов оставались зелёными, пока сами документы намеренно приводили в негодность. Отсюда привычка: новой проверке верят только после нарочного слома — портят то, что она охраняет, ждут, покраснеет ли она, а затем руками ищут в коде формы той же ошибки, которых ей не видно. Когда этот шаг стал обязательным, за один отрезок работы сделали четырнадцать нарочных сломов, и четыре из них не задели ничего из того, за чем следила проверка; доказали что-то только десять покрасневших <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5d48dac" rel="noopener">5d48dac</a>. Так что и само доказательство нуждается в проверке.</p>
+          <p data-block="findings.f2-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ эпоха 2</a></p>
         </li>
-        <li class="reveal">
-          <p data-block="findings.f3-n" class="pattern-n">03</p>
-          <h3 data-block="findings.f3-title" class="mt-2 text-[19px] font-bold">У харнеса один пользователь — агент, а шесть недель его строили под человека</h3>
-          <p data-block="findings.f3-body" class="mt-2 text-[16px] leading-relaxed text-muted">Скрипты были устроены под человека за терминалом. Подсчёт по расшифровкам за месяц нашёл 1 463 прогона тестов, набранных вручную; вердикт каждого из них модель вычитывала grep-ом из потока вывода.
-            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a>
-            Потом package.json ужался с двадцати трёх скриптов до восьми, и каждый гейт стал оставлять вердикт в файле.
-            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a></p>
+        <li class="reveal finding" data-era="5">
+          <p data-block="findings.f3-n" class="finding-n">03</p>
+          <h3 data-rev="3" data-block="findings.f3-title" class="mt-2 text-[22px] font-bold leading-snug sm:text-[24px]">Лучший ревьюер ничего не знает заранее</h3>
+          <p data-rev="3" data-block="findings.f3-body" class="mt-2 text-[16px] leading-relaxed text-muted">Модель, только что написавшая текст или код, ещё держит в памяти ход рассуждений, от которого результат выглядит верным, поэтому её ревью собственной работы превращается в чтение с готовым ответом в руках. Человек слеп так же, но здесь лекарство дёшево: запустить второй экземпляр с пустым контекстом и задачей в одну строку. В этом проекте любое изменение смотрит вторая модель, не писавшая его; картинки бота описывает та, что не знает их назначения; его реплики читают с подставленными настоящими именами и числами; план критикуют до появления кода. Доказательство — эта самая страница. Читатель без контекста получил её и историю git проекта, больше ничего, и нашёл 17 утверждений из 263, которых история не подтверждала <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5bf13e4" rel="noopener">5bf13e4</a>. Автору каждое из них читалось безупречно.</p>
+          <p data-block="findings.f3-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-5" class="hover:text-ink">→ эпоха 5</a></p>
         </li>
-        <li class="reveal">
-          <p data-block="findings.f4-n" class="pattern-n">04</p>
-          <h3 data-block="findings.f4-title" class="mt-2 text-[19px] font-bold">Правило считается, только когда его видели отказывающим</h3>
-          <p data-block="findings.f4-body" class="mt-2 text-[16px] leading-relaxed text-muted">Одно правило линта нашли мёртвым четыре раза за день; три проверки документов остались зелёными, когда их предмет ломали нарочно. В фазе, которая наконец сделала намеренную поломку шагом процесса, таких поломок было четырнадцать, и четыре попали туда, куда правило не смотрело.
-            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5d48dac" rel="noopener">5d48dac</a></p>
+        <li class="reveal finding" data-era="7">
+          <p data-block="findings.f4-n" class="finding-n">04</p>
+          <h3 data-rev="3" data-block="findings.f4-title" class="mt-2 text-[22px] font-bold leading-snug sm:text-[24px]">Инструменты под человека агенту не подходят</h3>
+          <p data-rev="3" data-block="findings.f4-body" class="mt-2 text-[16px] leading-relaxed text-muted">Каждый инструмент в программном проекте сделан под человека за терминалом: вывод бежит по экрану, на вердикт бросают взгляд, команду держат в памяти. Разработчик-ИИ ничего из этого не делает так же: он видит только хвост длинной распечатки, забывает, что уже прокрутилось, а итог проверки ищет в тексте. Шесть недель никто здесь не замечал этого несовпадения, а подсчёт по расшифровкам сессий агента за месяц нашёл 1&nbsp;463 запуска тестов, набранных вручную, где каждый вердикт выуживался из потока поиском. Когда инструменты перестроили под настоящего пользователя, скриптов стало восемь вместо двадцати трёх <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a>. Каждая проверка начала записывать вердикт, причины и одну команду для перезапуска в файл, который агент открывает; удобство человека сознательно отошло на второе место, и никто из людей ничего не потерял <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a>.</p>
+          <p data-block="findings.f4-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-7" class="hover:text-ink">→ эпоха 7</a></p>
         </li>
-        <li class="reveal">
-          <p data-block="findings.f5-n" class="pattern-n">05</p>
-          <h3 data-block="findings.f5-title" class="mt-2 text-[19px] font-bold">Автор — не тот читатель, и эта страница не исключение</h3>
-          <p data-block="findings.f5-body" class="mt-2 text-[16px] leading-relaxed text-muted">Каждый дифф проверяет агент, который его не писал; каждую картинку читает агент, который не знает, для чего она. Фактчекер, заново выводивший утверждения этой страницы из git, нашёл 17 утверждений из 263, которых история не подтверждала, и каждое из них читалось безупречно.
-            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5bf13e4" rel="noopener">5bf13e4</a></p>
+        <li class="reveal finding" data-era="7">
+          <p data-block="findings.f5-n" class="finding-n">05</p>
+          <h3 data-rev="3" data-block="findings.f5-title" class="mt-2 text-[22px] font-bold leading-snug sm:text-[24px]">Три цикла улучшения разной длины</h3>
+          <div data-rev="3" data-block="findings.f5-body" class="mt-2 text-[16px] leading-relaxed text-muted"><p>Короткий цикл замыкается после каждой задачи. Работа заканчивается разбором: он считает, во что она обошлась — переделки, проверки, запущенные дважды, решение, принятое наугад, — и превращает каждый урок в правило там, где оно переживёт сессию: в линтер, в скрипт на правке, в строку письменной инструкции <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ec3d818" rel="noopener">ec3d818</a>. Один разбор оставляет одну запись в журнале: что просили, что запускали, что переделывали и какая проверка нашла тот или иной дефект <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/db81a3a" rel="noopener">db81a3a</a>.</p>
+<p class="mt-2">Длинный цикл занимает неделю. Проверяющий агент, которому велено ничему не верить на слово, ничего не чинить и к каждому вердикту прикладывать команду, читает накопившийся за это время журнал и саму работающую систему; так закономерность, которую не увидеть из одной задачи, — правило, нарушенное в шести случаях из десяти, деплой, падающий несколько дней подряд, — становится числом <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4e56b66" rel="noopener">4e56b66</a>. Его отчёты хранят таблицу измерений, чтобы следующая проверка могла спросить, сдвинулась ли цифра.</p>
+<p class="mt-2">Мерилом служит бенчмарк: модель получает замороженную задачу в копии репозитория, тест, который её судит, спрятан, а результат оценивают собственные проверки этой копии — так система измеряется целиком, а не обсуждается по впечатлениям <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d011e68" rel="noopener">d011e68</a>. Прогон повторяется еженедельно без изменений и при одном усилии — глубине рассуждения, заданной модели в настройках, — только так строки таблицы можно сравнивать между собой. Циклу пришлось поправить и себя: разбор сначала шёл после всего подряд, а теперь обязателен там, где есть что считать, и не раньше, потому что ритуал, который всегда идёт и обычно ничего не находит, учит пропускать строку, где стояла бы настоящая находка <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fff3c5f" rel="noopener">fff3c5f</a>.</p></div>
+          <p data-block="findings.f5-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-7" class="hover:text-ink">→ эпоха 7</a></p>
         </li>
       </ol>
     </div>
@@ -168,13 +150,8 @@
   <section id="timeline" aria-labelledby="timeline-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <p data-block="timeline.eyebrow" class="eyebrow">Все коммиты по порядку</p>
-      <h2 data-block="timeline.title" id="timeline-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Сорок шесть дней на одной полосе</h2>
-      <p data-block="timeline.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
-        Одна полоска на коммит, цвет по эпохе. Ромб над полоской — тег релиза. Из сорока
-        шести дней коммиты есть в тридцати одном. Семь эпох — деление этой страницы, а не
-        репозитория: границы проведены там, где менялся предмет работы. Наведите или коснитесь полоски, чтобы
-        прочитать коммит; щёлкните название эпохи, чтобы перейти к её главе.
-      </p>
+      <h2 data-block="timeline.title" id="timeline-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Вся история на одной ленте</h2>
+      <p data-block="timeline.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">Каждому коммиту отведён свой столбик, цвет которого показывает эпоху, а ромб сверху отмечает тег релиза. Работа шла тридцать один день из сорока шести. Деление на семь эпох принадлежит странице, а не репозиторию: границы проходят там, где менялся предмет работы. Наведите курсор на столбик или коснитесь его, чтобы прочитать коммит, а по названию эпохи перейдите к нужной главе.</p>
 
       <div class="tl reveal mt-10" data-timeline>
         <div class="chart-tip" data-tl-tip hidden></div>
@@ -187,58 +164,42 @@
   <section id="harness" aria-labelledby="harness-heading">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <p data-block="harness.eyebrow" class="eyebrow">Термины</p>
-      <h2 data-block="harness.title" id="harness-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Что здесь называется харнесом</h2>
-      <p data-block="harness.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
-        Харнес — это всё в репозитории, кроме самого продукта.
-      </p>
+      <h2 data-block="harness.title" id="harness-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Что здесь значит «харнес»</h2>
+      <p data-block="harness.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">Харнесом на этой странице называется всё в репозитории, что не относится к продукту.</p>
 
       <details class="era-detail mt-10">
-        <summary data-block="harness.terms-summary"><span class="era-detail-h">Десять слов, которые на этой странице значат то, что вкладывает в них проект</span></summary>
+        <summary data-block="harness.terms-summary">Словарь страницы</summary>
         <ul class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 data-block="harness.term-1-title" class="text-[18px] font-bold">CLAUDE.md</h3>
-          <p data-block="harness.term-1-body" class="mt-2 text-[15px] leading-relaxed text-muted">Правила, которые загружаются перед каждой сессией. Стиль, слои, тесты, гейты.</p>
+          <h3 data-block="harness.term-1-title" class="text-[18px] font-bold"><code class="cmd">CLAUDE.md</code></h3>
+          <p data-block="harness.term-1-body" class="mt-2 text-[15px] leading-relaxed text-muted">Правила, которые загружаются перед каждой сессией: стиль, слои, тесты, гейты.</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
           <h3 data-block="harness.term-2-title" class="text-[18px] font-bold">Скиллы</h3>
-          <p data-block="harness.term-2-body" class="mt-2 text-[15px] leading-relaxed text-muted">Процедуры, которые загружаются под один вид работы: написать спек (файл с тестами одного модуля), добавить фичу, закрыть фазу.</p>
+          <p data-block="harness.term-2-body" class="mt-2 text-[15px] leading-relaxed text-muted">Процедуры, которые загружаются под один вид работы: написать спек (файл тестов одного модуля), добавить фичу, закрыть фазу.</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
           <h3 data-block="harness.term-3-title" class="text-[18px] font-bold">Агенты</h3>
-          <p data-block="harness.term-3-body" class="mt-2 text-[15px] leading-relaxed text-muted">Отдельные экземпляры модели с брифом и контрактом: ревьюер, дизайнер и «холодные читатели», которым нарочно не говорят, что перед ними.</p>
+          <p data-block="harness.term-3-body" class="mt-2 text-[15px] leading-relaxed text-muted">Отдельные экземпляры модели с брифом и контрактом: ревьюер, дизайнер и холодные читатели, которым нарочно не говорят, на что они смотрят.</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
           <h3 data-block="harness.term-4-title" class="text-[18px] font-bold">Хуки</h3>
-          <p data-block="harness.term-4-body" class="mt-2 text-[15px] leading-relaxed text-muted">Скрипты, которые срабатывают на правку файла или в конце хода, то есть одного ответа модели.</p>
+          <p data-block="harness.term-4-body" class="mt-2 text-[15px] leading-relaxed text-muted">Скрипты, которые срабатывают на правку или в конце хода; ход здесь означает один ответ модели.</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <h3 data-block="harness.term-5-title" class="text-[18px] font-bold">Линт и гейты</h3>
-          <p data-block="harness.term-5-body" class="mt-2 text-[15px] leading-relaxed text-muted">То, что отказывается принимать машина, и то, что должно быть зелёным перед коммитом или тегом.</p>
+          <h3 data-block="harness.term-5-title" class="text-[18px] font-bold">Правила линта и гейты</h3>
+          <p data-block="harness.term-5-body" class="mt-2 text-[15px] leading-relaxed text-muted">То, что машина отвергает, и то, что должно быть зелёным перед коммитом или тегом.</p>
         </li>
         <li class="reveal lift rounded-2xl border border-line bg-card p-6">
           <h3 data-block="harness.term-6-title" class="text-[18px] font-bold">Документы</h3>
-          <p data-block="harness.term-6-body" class="mt-2 text-[15px] leading-relaxed text-muted">Спецификация, список долгов, схема процесса, логбук и проверка, которая сверяет их все с кодом.</p>
+          <p data-block="harness.term-6-body" class="mt-2 text-[15px] leading-relaxed text-muted">Проектный документ, список долгов, схема флоу, журнал и проверка, которая не даёт им разойтись с кодом.</p>
         </li>
         </ul>
-        <p data-block="harness.terms-more" class="mt-6 max-w-[68ch] text-[16px] leading-relaxed text-muted">
-          Ещё четыре слова употреблены здесь в том же, проектном смысле. <strong>Владелец</strong> —
-          единственный человек, который ставит задачи и принимает решения. По другую сторону
-          разговора — модель, и один её ответ называется <strong>ходом</strong>.
-          <strong>Фаза</strong> — это любой ограниченный список правок, с новой функциональностью
-          или без неё, который заканчивается коммитом или тегом. <strong>Гейт</strong> — проверка,
-          которую фаза обязана пройти по дороге.
-        </p>
+        <p data-block="harness.terms-more" class="mt-6 max-w-[68ch] text-[16px] leading-relaxed text-muted">Ещё три слова на странице значат своё. Владелец — единственный человек, который ставит задачи и принимает решения; другая сторона разговора — модель. Фаза — любой ограниченный список правок, с фичей или без, который заканчивается коммитом или тегом.</p>
       </details>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
-        <p data-block="harness.question">
-          Один вопрос история задаёт снова и снова: где в харнесе должно жить правило —
-          в тексте, который читает модель, или в инструментарии, то есть в линте, хуках и
-          проверках, которые исполняет машина. Первый ответ дан 29 июля и с тех пор не
-          менялся: «Проза — для суждений; всё остальное — в инструментарий».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>
-          Всё, что дальше, — история о том, как этот ответ проверяли на прочность.
-        </p>
+        <p data-block="harness.question">История всё время задаёт один вопрос: где живёт правило — в тексте, который читает модель, или в инструментах, то есть в линте, хуках и проверках, которые запускает машина. Первый ответ дан 29 июля и с тех пор не менялся: проза остаётся для суждения, всё остальное уходит в инструменты <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>. Дальше рассказано, как его проверяли на прочность.</p>
       </div>
     </div>
   </section>
@@ -250,84 +211,27 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span data-block="era-1.band-era" class="text-ink">Эпоха 1 из 7</span><span data-block="era-1.band-dates">28–29 июля</span><span data-block="era-1.band-commits">коммиты 1–30</span>
+        <span data-block="era-1.band-era" class="text-ink">Эпоха 1 из 7</span><span data-block="era-1.band-dates">28–29 июля</span><span data-block="era-1.band-commits">Коммиты 1–30</span>
       </div>
 
-      <h2 data-block="era-1.title" id="era-1-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Два markdown-файла</h2>
+      <h2 data-rev="2" data-block="era-1.title" id="era-1-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Правила раньше кода</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p data-block="era-1.lead">
-          Репозиторий начинается без кода — только со свода правил: он уже запрещал то,
-          что проект потом целый месяц учился проверять.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/44f6f66" rel="noopener">44f6f66</a>
-          Не было в нём только одного: проверок. К концу второго дня три его абзаца стали
-          правилами ESLint, у кода появились слои, которым нельзя импортировать друг друга, а
-          инструмент под названием Stryker начал оценивать тесты, намеренно внося в код
-          поломки, — 88,4% пойманных на первом прогоне. Одно правило тех двух дней пережило
-          всё: факт живёт там, где живёт его причина, а другой документ получает ссылку и
-          никогда — пересказ.
-        </p>
+        <p data-rev="2" data-block="era-1.lead">Репозиторий начинается без единой строки кода: два Markdown-файла, CLAUDE.md и PLAN.md, да .gitignore <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/44f6f66" rel="noopener">44f6f66</a>. Свод правил уже запрещает то, чему проект будет учить машину все следующие недели, и пока ни один запрет ничем не подкреплён. Первые три правила машина взяла на себя к концу второго дня: три абзаца стали правилами ESLint, код разделили на слои, которым нельзя импортировать друг друга, а тесты начал оценивать отдельный инструмент. На остальной свод ушёл остаток месяца.</p>
 
         <details class="era-detail">
-          <summary data-block="era-1.d1-summary"><span class="era-detail-h">Приходят тесты, а следом — оценщик для тестов</span><span class="era-detail-n">312 тестов</span></summary>
-        <p data-block="era-1.d1-p1">
-          29 июля код получил 312 тестов в четырнадцати файлах и гейт покрытия в 70%.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/9276ad7" rel="noopener">9276ad7</a>
-          В тот же день появился Stryker, инструмент мутационного тестирования. Он намеренно
-          вносит в код мелкие поломки; каждая такая поломка называется мутантом. Потом он
-          считает, сколько мутантов заметили тесты.
-        </p>
-        <p data-block="era-1.d1-p2">
-          Первый прогон дал 88,4% — первый мутационный скор проекта;
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fda82cb" rel="noopener">fda82cb</a>
-          к концу эпохи он дорос до 94,78%.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/508de4e" rel="noopener">508de4e</a>
-          Красную черту, ниже которой гейт падает, в те же дни подняли с начальных 60 до 85,
-          чтобы гейт «кусался при регрессии», а не висел для красоты.
-        </p>
-        <p data-block="era-1.d1-p3">
-          Вложение окупилось сразу. Мутационное тестирование нашло то, чего не находило
-          покрытие, — тесты, которые проходили не по той причине: зависимость
-          в тесте была подменена заглушкой, и тест проверял только то, что заглушку вызвали,
-          а не то, что сделала бы настоящая зависимость. Stryker остался с
-          проектом до конца истории.
-        </p>
+          <summary data-block="era-1.d1-summary"><span class="era-detail-h">Приходят тесты и их оценщик</span><span class="era-detail-n">312 тестов</span></summary>
+        <p data-block="era-1.d1-p1">29 июля код получил 312 тестов в четырнадцати файлах и гейт покрытия на 70%. В тот же день появился Stryker, инструмент мутационного тестирования: он вносит в код мелкие намеренные поломки, каждая зовётся мутантом, и считает, сколько из них заметили тесты <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/9276ad7" rel="noopener">9276ad7</a>.</p>
+        <p data-block="era-1.d1-p2">Первый прогон дал 88,4%, и одним коммитом результат подняли до 91,9% <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fda82cb" rel="noopener">fda82cb</a>. Тогда же мутационному гейту сдвинули порог с 60 до 85, чтобы он падал при ухудшении, а не стоял для вида <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/94b0587" rel="noopener">94b0587</a>. К концу эпохи оценка дошла до 94,78% <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/508de4e" rel="noopener">508de4e</a>.</p>
+        <p data-block="era-1.d1-p3">Вложение окупилось сразу: мутационные прогоны нашли тесты, которые проходили, ничего на деле не проверяя, — зависимость подменяли заглушкой, и всё испытание сводилось к тому, что её позвали. Stryker остался в проекте до конца истории.</p>
         </details>
 
         <details class="era-detail">
           <summary data-block="era-1.d2-summary"><span class="era-detail-h">Правила уходят из прозы</span><span class="era-detail-n">3 правила линта</span></summary>
-        <p data-block="era-1.d2-p1">
-          Коммит 26, «сделать проверяемым то, что можно проверить», задал форму харнеса.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>
-          Три абзаца свода стали тремя правилами ESLint, написанными прямо в конфиге: запрет
-          комментариев, именованные числа, пустые строки после импортов. Код был поделён на
-          слои — общее, логика игры, отрисовка, обработчики Telegram, — и слои стали
-          зонами запрещённых импортов: что кому нельзя импортировать. Каждую зону проверили
-          намеренным нарушением. Хук на правку файла начал линтить каждый файл в момент
-          записи.
-        </p>
-        <p data-block="era-1.d2-p2">
-          Тем же коммитом появились первые два скилла и первый агент. Скилл
-          <code>finish-phase</code>, куда из CLAUDE.md переехали гейты. Скилл
-          <code>add-repository-method</code> для новых запросов к базе. И агент
-          <code>phase-reviewer</code>, который читает дифф целиком и получает указание
-          «Ничего не чинить».
-        </p>
-        <p data-block="era-1.d2-p3">
-          Правило о том, какому документу принадлежит факт, появилось, когда четыре темы
-          оказались описаны и в PLAN.md, и в CLAUDE.md. Вопрос звучит так: осталось бы это
-          правдой, если бы бота переписали на Python? Если да, факту место в PLAN.md, если
-          нет, в CLAUDE.md.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0afd7b2" rel="noopener">0afd7b2</a>
-        </p>
-        <p data-block="era-1.d2-p4">
-          К концу 29 июля ремесло тестирования переросло свод правил и стало третьим скиллом,
-          <code>write-a-spec</code>, а тестов к концу дня стало 418. Сам CLAUDE.md за два дня
-          разбух почти вдвое, и его ужали обратно: «CLAUDE.md загружается на каждом ходу, поэтому в нём должно быть
-          то, что верно при написании любой строки кода».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/66ff3bd" rel="noopener">66ff3bd</a>
-          Удержаться в этих рамках ему не удастся.
-        </p>
+        <p data-rev="2" data-block="era-1.d2-p1">Коммит 26, «make the checkable conventions checkable», задал форму харнеса: три правила — без комментариев, у каждого числа есть имя, пустые строки после импортов — записаны прямо в конфиг <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>. На запрете комментариев посторонний спотыкается, поэтому вот причина словами свода: смысл несёт имя, числу вместо пояснения дают именованную константу, а функцию, разделы которой требуют слов, лучше разбить. Код разложили по четырём слоям: общие модули, логика игры, отрисовка и обработчики Telegram. Каждому слою закрыли импорты из соседних и подтвердили это нарочным сломом. Хук на каждой правке стал прогонять линтер по файлу сразу после записи.</p>
+        <p data-block="era-1.d2-p2">Тот же коммит принёс два скилла и одного агента, первых в проекте: <code class="cmd">finish-phase</code>, куда гейты переехали из <code class="cmd">CLAUDE.md</code>; <code class="cmd">add-repository-method</code> для новых запросов; и <code class="cmd">phase-reviewer</code>, который читает весь дифф и которому велено ничего не чинить.</p>
+        <p data-block="era-1.d2-p3">Правило о том, где живёт тот или иной факт, написали, когда четыре темы нашлись сразу в <code class="cmd">PLAN.md</code> и <code class="cmd">CLAUDE.md</code>. Решает всё один вопрос: осталось бы написанное верным, если бы бота переписали на Python? Утвердительный ответ отправляет запись в <code class="cmd">PLAN.md</code>, отрицательный — в <code class="cmd">CLAUDE.md</code> <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0afd7b2" rel="noopener">0afd7b2</a>.</p>
+        <p data-block="era-1.d2-p4">К концу 29 июля ремесло тестирования переросло общий свод правил и стало третьим скиллом — <code class="cmd">write-a-spec</code>. Тестов к этому дню набралось 418 <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/66ff3bd" rel="noopener">66ff3bd</a>. <code class="cmd">CLAUDE.md</code> за два дня почти удвоился, и его сократили — читают этот файл перед каждой сессией, поэтому оставлять в нём стоит только то, что верно при написании любой строки кода. Удержаться в таких рамках ему так и не удалось.</p>
         </details>
       </div>
 
@@ -335,14 +239,14 @@
         <div class="tile"><p data-block="era-1.tile-1-value" class="tile-value">3</p><p data-block="era-1.tile-1-label" class="tile-label">скилла</p></div>
         <div class="tile"><p data-block="era-1.tile-2-value" class="tile-value">1</p><p data-block="era-1.tile-2-label" class="tile-label">агент</p></div>
         <div class="tile"><p data-block="era-1.tile-3-value" class="tile-value">2</p><p data-block="era-1.tile-3-label" class="tile-label">хука</p></div>
-        <div class="tile"><p data-block="era-1.tile-4-value" class="tile-value">3</p><p data-block="era-1.tile-4-label" class="tile-label">собственных правила линта</p></div>
+        <div class="tile"><p data-block="era-1.tile-4-value" class="tile-value">3</p><p data-block="era-1.tile-4-label" class="tile-label">правила линта проекта</p></div>
         <div class="tile"><p data-block="era-1.tile-5-value" class="tile-value">418</p><p data-block="era-1.tile-5-label" class="tile-label">тестов</p></div>
-        <div class="tile"><p data-block="era-1.tile-6-value" class="tile-value">94,78%</p><p data-block="era-1.tile-6-label" class="tile-label">мутационный скор</p></div>
+        <div class="tile"><p data-block="era-1.tile-6-value" class="tile-value">94,78%</p><p data-block="era-1.tile-6-label" class="tile-label">мутационный процент</p></div>
       </div>
 
       <div class="reveal mt-10 max-w-[68ch]">
-                <p data-block="era-1.tn-eyebrow" class="eyebrow">Тогда и сейчас · правило о комментариях</p>
-        <p data-block="era-1.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">Первая вкладка — шапка конфига линта, по-английски, как она и стояла в репозитории: в ней признано, что правило о комментариях машина проверить не может. Вторая — то же самое, когда оно стало правилом ESLint; здесь пересказано по-русски.</p>
+                <p data-block="era-1.tn-eyebrow" class="eyebrow">Тогда и теперь: запрет на комментарии</p>
+        <p data-block="era-1.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">На первой вкладке стоит заголовок конфига линта из репозитория, где признано, что запрет комментариев машине не по силам; на второй пересказано, чем тот же запрет стал, когда превратился в правило ESLint.</p>
         <div class="then-now mt-3" data-then-now>
           <div class="then-now-tabs">
             <button data-block="era-1.tn-tab-1" type="button" class="then-now-tab" aria-pressed="true">Коммит 3 · 28 июля</button>
@@ -356,9 +260,7 @@
 
 Запускается хуком `.claude/hooks/lint-changed.mjs` на каждый Edit или Write,
 так что комментарий отклоняется в момент правки, а не в конце хода.</div>
-          <p data-block="era-1.tn-note" class="then-now-note">Шапка <code class="cmd">eslint.config.js</code> в
-            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2db720c" rel="noopener">2db720c</a> и то, что пришло ей на смену в
-            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>.</p>
+          <p data-block="era-1.tn-note" class="then-now-note">Заголовок <code class="cmd">eslint.config.js</code> в том виде, в каком его закоммитили <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2db720c" rel="noopener">2db720c</a>. Второй коммит поставил на его место правило <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e88417a" rel="noopener">e88417a</a>.</p>
         </div>
       </div>
     </div>
@@ -369,180 +271,67 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span data-block="era-2.band-era" class="text-ink">Эпоха 2 из 7</span><span data-block="era-2.band-dates">30 июля – 2 августа</span><span data-block="era-2.band-commits">коммиты 31–66</span>
+        <span data-block="era-2.band-era" class="text-ink">Эпоха 2 из 7</span><span data-block="era-2.band-dates">30 июля – 2 августа</span><span data-block="era-2.band-commits">Коммиты 31–66</span>
       </div>
 
-      <h2 data-block="era-2.title" id="era-2-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Фичи, которые можно удалить, и правила, обязанные доказать, что срабатывают</h2>
+      <h2 data-block="era-2.title" id="era-2-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Зелёное правило может ничего не проверять</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p data-block="era-2.lead">
-          Первая эпоха сделала правила проверяемыми. Вторая выяснила, что проверяемое
-          правило может быть мёртвым, и что об этом ничто не сообщит. 30 июля четыре коммита
-          подряд находили мёртвым одно и то же правило независимости фич — три версии самого
-          правила и два исключения по соседству, и ни одно из них не подало голоса. Ответом
-          стала не починка, а привычка, пережившая эпоху: новая зона не закончена, пока не
-          показано, что намеренное нарушение проваливает линт. Та же эпоха дала проекту
-          поддельный Telegram, список долгов, где запись называет триггер, а не желание, и
-          гейт документов, который дорастёт до тридцати семейств проверок.
-        </p>
+        <p data-block="era-2.lead">Первая эпоха отдала правила машине; вторая обнаружила, что там они могут быть мёртвыми, и ничто об этом не сообщит. Заодно проект получил три вещи: поддельный Telegram, против которого можно сыграть целый вечер; список долгов, где запись называет не пожелание, а событие, после которого пора платить; и гейт документов, которому предстоит разрастись до тридцати семейств проверок.</p>
 
         <details class="era-detail">
-          <summary data-block="era-2.d1-summary"><span class="era-detail-h">Правило, найденное мёртвым четыре раза за день</span><span class="era-detail-n">13 нарушений</span></summary>
-        <p data-block="era-2.d1-p1">
-          Эпоха начинается с того, что дерево исходников выворачивают наизнанку. Вместо слоёв
-          наверху (<code>game/</code>, <code>render/</code>, <code>bot/</code>) каждая фича
-          стала папкой с этими слоями внутри, и правило сформулировано как тест: «фича — это
-          папка, которую можно удалить». Проверили, удалив одну.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/476f239" rel="noopener">476f239</a>
-          Каждый импорт стал писаться от корня, через алиас с решёткой (имя вида
-          <code>#shared/…</code> вместо относительного пути): алиас называет папку по имени,
-          и импорт из чужой фичи виден в самой строке, а путь из точек этого не показывает.
-        </p>
+          <summary data-rev="2" data-block="era-2.d1-summary"><span class="era-detail-h">Правило оказалось мёртвым, четыре раза за день</span><span class="era-detail-n">13 нарочных сломов</span></summary>
+        <p data-block="era-2.d1-p1">Эпоха началась с того, что дерево исходников вывернули наизнанку: игра, рисование и бот перестали быть верхними папками, и каждая фича получила их все внутри себя. Правило сформулировали как испытание: фича — это папка, которую можно удалить. Проверили, удалив одну. Каждый импорт стали писать от корня через алиас с решёткой, и обращение к чужой фиче сделалось видно прямо в строке — относительный путь такого не показывал никогда <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/476f239" rel="noopener">476f239</a>.</p>
 
-        <p data-block="era-2.d1-p2">
-          Когда фичи стали отгораживать друг от друга линтом, проект получил урок, который
-          потом повторял чаще всех остальных. Правило независимости фич было написано,
-          включено и горело зелёным. Оно не работало.
-          Первые две версии правила не делали ничего: сначала шаблон пути не совпадал с
-          относительным импортом, потом два блока конфига задавали одно правило и молча
-          заменяли друг друга.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/476f239" rel="noopener">476f239</a>
-          Третью версию убила библиотека шаблонов: она прочитала алиасы с решёткой как
-          комментарии, шаблон не совпадал ни с одним импортом, и зона пропускала всё.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/40d8179" rel="noopener">40d8179</a>
-        </p>
-        <p data-block="era-2.d1-p3">
-          Два оставшихся из четырёх коммитов нашли мёртвыми исключения уже не в зонах.
-          Логгер переехал в папку, а исключение, разрешавшее ему то, что запрещено остальным,
-          осталось указывать на файл, которого больше нет.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4d6b389" rel="noopener">4d6b389</a>
-          Так же осиротело исключение Stryker, и скор упал.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f749a9c" rel="noopener">f749a9c</a>
-        </p>
-        <p data-block="era-2.d1-p4">
-          Чтобы доказать один коммит, прогнали тринадцать намеренных нарушений.
-        </p>
+        <p data-block="era-2.d1-p2">Правило линтера, отделяющее фичи одну от другой, написали, включили, оно было зелёным — и не работало. Четыре коммита 30 июля находили его мёртвым, а тот, что стоял между ними, ничего не заметил <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/476f239" rel="noopener">476f239</a>. Первые две версии не делали ничего: путь в правиле ни разу не совпал с относительным импортом, затем два блока конфига молча заменяли один другого. Третью убила библиотека шаблонов, которая читала алиасы через решётку как комментарии. Чтобы доказать каждое направление починенных запретов, понадобилось тринадцать нарочных сломов <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/40d8179" rel="noopener">40d8179</a>.</p>
+        <p data-block="era-2.d1-p3">Остальные два коммита из четырёх нашли, что и исключения из правила умирают: логгер переехал, а строка, освобождавшая его от запрета, указывала на файл, которого больше не было; так же осиротела и строка Stryker, и мутационный счёт упал <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4d6b389" rel="noopener">4d6b389</a>. Привычка пережила эпоху: новый запрет не считается готовым, пока нарочный слом не показал, что линтер краснеет <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f749a9c" rel="noopener">f749a9c</a>.</p>
         </details>
       </div>
 
-      <blockquote data-block="era-2.q1" class="said reveal mt-10 max-w-[60ch]">
-        «Правило, которое срабатывает, и правило, которое мертво, снаружи выглядят одинаково».
-        <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/f749a9c" rel="noopener">f749a9c</a> · 30 июля · в оригинале: a rule that fires and a rule that is dead look identical from the outside</cite>
+      <blockquote data-block="era-2.q1" class="said reveal mt-10 max-w-[60ch]">«Снаружи не отличить правило, которое срабатывает, от того, которое мертво.»
+        <cite><a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f749a9c" rel="noopener">f749a9c</a> · 30 июля · в оригинале: a rule that fires and a rule that is dead look identical from the outside</cite>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
-          <summary data-block="era-2.d2-summary"><span class="era-detail-h">Поддельный Telegram</span><span class="era-detail-n">7 известных изъянов</span></summary>
-        <p data-block="era-2.d2-p1">
-          К 31 июля бот умел повторять запросы, перезапускать себя и докладывать о своём
-          состоянии. Затем он получил e2e: поддельный сервер
-          Bot API и сценарии, которые проигрывают с ботом целый вечер, то есть одну
-          встречу за столом на несколько партий, тап за тапом. Один файл сценария — один
-          вечер, а внутри него несколько проверок, они же кейсы.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3ab3c9c" rel="noopener">3ab3c9c</a>
-          Правила для этого поддельного сервера: он только записывает, что ему прислали, ничего
-          не решает сам и обязан отказывать во всём, в чём отказывает настоящий Telegram.
-        </p>
-        <p data-block="era-2.d2-p2">
-          e2e работал, но в гейты пока не встал. Его семь известных изъянов честно
-          записали в новый файл, TECH-DEBT.md, вместе с правилом для самого файла: «запись
-          называет триггер, а не желание». «Разделить файл» — желание; «разделить, когда в
-          нём появится пятая обязанность» — триггер, событие, после которого за долг обязаны
-          взяться.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0505b9b" rel="noopener">0505b9b</a>
-        </p>
-        <p data-block="era-2.d2-p3">
-          Первую пользу e2e принёс через семьдесят минут. Новому экрану с кнопками выписали
-          узкое обязательство: «фича с инлайн-клавиатурой получает сценарии»;
-          инлайн-клавиатура — это и есть кнопки под сообщением бота. Сценарии сразу поймали
-          два неверных предположения самой модели о поведении бота, и она записала это в
-          сообщении коммита.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/aea4238" rel="noopener">aea4238</a>
-          Гейтом e2e станет в третьей эпохе.
-        </p>
+          <summary data-block="era-2.d2-summary"><span class="era-detail-h">Поддельный Telegram</span><span class="era-detail-n">7 известных дефектов</span></summary>
+        <p data-block="era-2.d2-p1">К 31 июля бот умел повторять запросы, перезапускаться и докладывать о собственном состоянии. Следом появились e2e, поддельный сервер Bot API и сценарии, которые играют против бота нажатие за нажатием: один файл — это целый вечер с несколькими случаями внутри <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3ab3c9c" rel="noopener">3ab3c9c</a>. От подделки требовали немногого: записывать присланное, ничего не решать самой и повторять все отказы настоящего Bot API.</p>
+        <p data-block="era-2.d2-p2">e2e работали, но гейтом ещё не были; семь их известных дефектов занесли в новый файл <code class="cmd">TECH-DEBT.md</code> и завели для него правило: каждая строка называет не пожелание, а событие, после которого долг пора платить <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0505b9b" rel="noopener">0505b9b</a>.</p>
+        <p data-block="era-2.d2-p3">Через семьдесят минут после того коммита e2e окупились. Для нового экрана с кнопками ввели узкое правило: фича с inline-клавиатурой получает сценарии. Они тут же поймали два неверных допущения самой модели, и она назвала их в сообщении коммита <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/aea4238" rel="noopener">aea4238</a>. Обязательным гейтом e2e станут в третьей эпохе.</p>
         </details>
 
         <details class="era-detail">
           <summary data-block="era-2.d3-summary"><span class="era-detail-h">Цена гейта</span><span class="era-detail-n">63 секунды</span></summary>
-        <p data-block="era-2.d3-p1">
-          Чего стоят гейты, проект узнал на этом же новом экране: тот «занял час и большую часть
-          бюджета модели, и дело было не в фиче: восемь запусков Stryker там, где хватило бы
-          двух». Бюджет модели — это
-          объём текста, который она может прочитать и написать за одну сессию, и каждый
-          вывод гейта его расходует. Ответом стал режим,
-          который мутирует только изменённые файлы: 63 секунды вместо четырёх с половиной
-          минут.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/66564c9" rel="noopener">66564c9</a>
-        </p>
-        <p data-block="era-2.d3-p2">
-          С ним пришли и остались два правила. Первое: «Никогда не перезапускай гейт, чтобы
-          перечитать его вывод». Второе: один раунд добивания выживших за фазу. Выжившие — мутанты, которых не
-          поймал ни один тест, и добивают их, дописывая тесты.
-        </p>
+        <p data-block="era-2.d3-p1">Что стоит гейт, проект узнал на том же экране: час и почти весь бюджет модели, восемь запусков Stryker там, где хватило бы двух; бюджетом здесь называется текст, который модель успевает прочесть и написать за сессию. Ответом стал режим, мутирующий только изменённые файлы: 63 секунды вместо четырёх с половиной минут <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/66564c9" rel="noopener">66564c9</a>.</p>
+        <p data-block="era-2.d3-p2">С ним пришли два правила, и оба остались: никогда не перезапускать гейт, чтобы перечитать его вывод, и один раунд на фазу против выживших мутантов, тех, что не заметил ни один тест; их убивают, дописывая недостающие проверки.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-2.d4-summary"><span class="era-detail-h">Свод правил переполняется</span><span class="era-detail-n">585 строк</span></summary>
-        <p data-block="era-2.d4-p1">
-          CLAUDE.md был местом, куда по умолчанию дописывали каждый урок, и дорос до 585
-          строк. Его сократили до 354 переносом, а не вычёркиванием: правила e2e ушли в его
-          README, процедура слоёв в новый скилл <code>add-a-feature</code>.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>
-        </p>
-        <p data-block="era-2.d4-p2">
-          Затем появился коммит «пусть документы проверяют себя сами».
-          Он заметил, что документы чистят от дублей уже второй раз, и сделал вывод: само
-          правило не виновато, виновато то, что его никто не проверял. И добавил гейт
-          документов, который в этой истории зовётся docs:check — это имя он носил до
-          сентября, а в репозитории сегодня зовётся docs-check.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/29fe4d5" rel="noopener">29fe4d5</a>
-          Поначалу он сверял ссылки, дерево в README с настоящими папками, таблицу скриптов с
-          <code>package.json</code> и держал бюджет CLAUDE.md в 380 строк. Первый же прогон
-          нашёл два незадокументированных скрипта. К концу истории в нём будет больше
-          тридцати групп проверок, каждая о своём предмете; дальше такая группа зовётся
-          семейством.
-        </p>
+          <summary data-block="era-2.d4-summary"><span class="era-detail-h">Свод правил переполнен</span><span class="era-detail-n">585 строк</span></summary>
+        <p data-block="era-2.d4-p1"><code class="cmd">CLAUDE.md</code> по умолчанию принимал каждый урок и дорос до 585 строк; его ужали до 354, не удаляя, а перенося: правила e2e ушли в собственный README, процедура раскладки по слоям — в новый скилл <code class="cmd">add-a-feature</code> <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>.</p>
+        <p data-block="era-2.d4-p2">Потом коммит «make the documents check themselves» заметил, что документы уже дважды чистили от повторов, и назвал причину: за правилом о том, что факт живёт в одном месте, никто не следил. Так появился гейт документов — до сентября его команда звалась <code class="cmd">docs:check</code>, сегодня <code class="cmd">docs-check</code> <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/29fe4d5" rel="noopener">29fe4d5</a>. Сначала он сверял ссылки, дерево из README с папками, таблицу скриптов с package.json и держал CLAUDE.md в бюджете 380 строк; первый прогон нашёл два скрипта, не описанных нигде. К концу истории в нём больше тридцати групп проверок, каждая про свой предмет, — на этой странице такая группа зовётся семейством.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-2.d5-summary"><span class="era-detail-h">Урок, оставленный в чате, потерян</span><span class="era-detail-n">5 вопросов</span></summary>
-        <p data-block="era-2.d5-p1">
-          Эпоха заканчивается ретроспективой, и первая её попытка провалилась. Ретроспективу
-          повесили на компакцию: когда разговор перестаёт помещаться в память модели, его
-          ужимают до краткого пересказа, и хук должен был перед этим задать пять вопросов: о
-          переделках, повторных командах, субагентах, порядке шагов и перечитывании. Удалили
-          его в тот же день. Хук на компакцию не умеет ничего вернуть в разговор, так что он
-          просто падал на каждой компакции, да и сама компакция была «худшим из доступных
-          моментов».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ec3d818" rel="noopener">ec3d818</a>
-        </p>
-        <p data-block="era-2.d5-p2">
-          Ретроспектива стала гейтом, пятым по счёту и на тот момент последним. Она же стала отдельным скиллом.
-          Первые же её выводы заменили политику делегирования более узким правилом, которое в
-          четвёртой эпохе владелец отменит: делегируй, только когда не хватает собственного
-          контекста.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ecc6395" rel="noopener">ecc6395</a>
-        </p>
+          <summary data-block="era-2.d5-summary"><span class="era-detail-h">Урок, оставленный в чате, пропадает</span><span class="era-detail-n">5 вопросов</span></summary>
+        <p data-block="era-2.d5-p1">Эпоха заканчивается ретроспективой, и первая попытка провалилась. Её поручили хуку, который срабатывает при компакции (когда разговор перестаёт помещаться в память модели и его сжимают до сводки), и тот задавал пять вопросов: о переделках, повторённых командах, субагентах, порядке шагов и перечитывании. В тот же день его удалили: в момент компакции хук не имеет права ничего сказать модели, поэтому каждый раз падал, а худшего момента для вопросов и так было не найти <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ec3d818" rel="noopener">ec3d818</a>.</p>
+        <p data-block="era-2.d5-p2">Ретроспектива стала гейтом, пятым по порядку и на тот момент последним, и отдельным скиллом. Первые её выводы заменили политику делегирования более узким правилом, которое владелец отменит в четвёртой эпохе: делегируй только тогда, когда свой контекст на исходе <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ecc6395" rel="noopener">ecc6395</a>.</p>
         </details>
-
-        <p data-block="era-2.next">
-          Эпоха научилась доказывать, что правило срабатывает. Следующая найдёт дыру и в доказанном правиле.
-        </p>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <div class="tile"><p data-block="era-2.tile-1-value" class="tile-value">6</p><p data-block="era-2.tile-1-label" class="tile-label">скиллов</p></div>
         <div class="tile"><p data-block="era-2.tile-2-value" class="tile-value">1</p><p data-block="era-2.tile-2-label" class="tile-label">агент</p></div>
-        <div class="tile"><p data-block="era-2.tile-3-value" class="tile-value">370<span class="text-dim text-[15px]">/380</span></p><p data-block="era-2.tile-3-label" class="tile-label">строк CLAUDE.md при его бюджете</p></div>
-        <div class="tile"><p data-block="era-2.tile-4-value" class="tile-value">1 367</p><p data-block="era-2.tile-4-label" class="tile-label">тестов</p></div>
-        <div class="tile"><p data-block="era-2.tile-5-value" class="tile-value">82</p><p data-block="era-2.tile-5-label" class="tile-label">e2e-кейса</p></div>
-        <div class="tile"><p data-block="era-2.tile-6-value" class="tile-value">≈97,5%</p><p data-block="era-2.tile-6-label" class="tile-label">мутационный скор</p></div>
+        <div class="tile"><p data-block="era-2.tile-3-value" class="tile-value">370<span class="text-dim text-[15px]">/380</span></p><p data-block="era-2.tile-3-label" class="tile-label">строк в CLAUDE.md и его бюджет</p></div>
+        <div class="tile"><p data-block="era-2.tile-4-value" class="tile-value">1&nbsp;367</p><p data-block="era-2.tile-4-label" class="tile-label">тестов</p></div>
+        <div class="tile"><p data-block="era-2.tile-5-value" class="tile-value">82</p><p data-block="era-2.tile-5-label" class="tile-label">сценария e2e</p></div>
+        <div class="tile"><p data-block="era-2.tile-6-value" class="tile-value">~97,5%</p><p data-block="era-2.tile-6-label" class="tile-label">мутационный процент</p></div>
       </div>
 
       <figure class="chart reveal mt-10" data-chart="claude">
         <figcaption>
           <p data-block="era-2.chart-title" class="chart-title">Свод правил под бюджетом</p>
-          <p data-block="era-2.chart-sub" class="chart-sub">Строк в CLAUDE.md на каждом коммите. Линия на 380 — бюджет, который docs:check держит с коммита 50.</p>
+          <p data-block="era-2.chart-sub" class="chart-sub">Строк в CLAUDE.md на каждом коммите; линия на 380 показывает бюджет, который docs:check держит с коммита 50.</p>
         </figcaption>
         <div class="chart-plot"></div>
         <details class="chart-table"><summary data-block="era-2.chart-table">Показать таблицей</summary></details>
@@ -555,157 +344,65 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span data-block="era-3.band-era" class="text-ink">Эпоха 3 из 7</span><span data-block="era-3.band-dates">5–7 августа</span><span data-block="era-3.band-commits">коммиты 67–121</span>
+        <span data-block="era-3.band-era" class="text-ink">Эпоха 3 из 7</span><span data-block="era-3.band-dates">5–7 августа</span><span data-block="era-3.band-commits">Коммиты 67–121</span>
       </div>
 
-      <h2 data-block="era-3.title" id="era-3-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Сценарии становятся гейтом, состояния — таблицами</h2>
+      <h2 data-block="era-3.title" id="era-3-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">От документов к коду</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p data-block="era-3.lead">
-          В этой эпохе правило линта поймало модель, которая его же написала, — а два гейта, как выяснилось, горели зелёным всё время своего существования, и оба по случайности. Три
-          дня, за которые проверки перестали читать только документы и начали читать ещё и
-          код. Правило линта, запретившее писать состояния партии голыми строками,
-          поймало пять настоящих нарушений уже тем, что его включили; потом — спек, написанный
-          той же моделью, что написала само правило; потом — четвёртую форму записи, о которой
-          никто не подумал. Остальное прямо сказано в релизе 1.7.0: «По дороге два гейта были пойманы на
-          лжи, оба случайно и оба лгали столько, сколько существовали».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4422ddb" rel="noopener">4422ddb</a>
-          Один ждал 600 мс картинку, которая стала рисоваться дольше, другой не умел читать
-          рабочую копию с переводами строк Windows — а именно такой получает свежий клон.
-        </p>
+        <p data-block="era-3.lead">За три дня проверки добрались до исходников: сценарии превратились в гейт, а имена игровых состояний переехали в таблицу. Тогда же гейт документов начал сверять написанное в них с кодом. По дороге правило линта поймало ту самую модель, которая его написала, а два гейта всё время, что существовали, проходили по чистой случайности.</p>
 
         <details class="era-detail">
-          <summary data-block="era-3.d1-summary"><span class="era-detail-h">e2e становится гейтом</span><span class="era-detail-n">6 гейтов</span></summary>
-        <p data-block="era-3.d1-p1">
-          У e2e оставалось семь записанных проблем. Шесть закрыли одним коммитом.
-        </p>
-        <p data-block="era-3.d1-p2">
-          Но прежде чем стать гейтом, сценарии пришлось научить заканчиваться так, как
-          заканчивается настоящий вечер, а не на полуслове. Сообщение бота с текущей партией
-          и кнопками под ней здесь зовётся карточкой. Восемь из шестнадцати сценариев
-          обрывались посреди карточки, бросая её с открытыми кнопками, и теперь e2e валит
-          любой такой сценарий.
-        </p>
-        <p data-block="era-3.d1-p3">
-          Гейт разыгрывает только те сценарии, до которых дотягивается дифф: для фазы внутри
-          одной фичи это обычно два-три файла сценариев и примерно пятнадцать секунд.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/52c0f73" rel="noopener">52c0f73</a>
-          С этого коммита фаза заканчивается шестью гейтами в строго заданном порядке — e2e встал
-          четвёртым, и пять гейтов второй эпохи стали шестью: линт и типы, покрытие, мутации
-          по диффу, e2e по диффу, ревью, ретроспектива. «По диффу» значит только по файлам,
-          которые фаза изменила.
-        </p>
-        <p data-block="era-3.d1-p4">
-          Написание сценария получило собственный скилл, и причина тут не в сценариях, а в
-          том, что заставляет скилл открыться: модель открывает скилл, когда его описание
-          совпадает с тем, что она сейчас делает. CLAUDE.md говорил: правишь папку сценариев,
-          прочти README. Одна фаза отредактировала сценарий, «ни разу не открыв README,
-          потому что это ощущалось как добавление кейса, а не как правка в
-          <code>e2e/</code>». Теперь скилл открывается на «правке файла сценария», а
-          не на «работе с папкой».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a0fcb61" rel="noopener">a0fcb61</a>
-          Тот же урок вернётся в четвёртой эпохе и обойдётся дороже.
-        </p>
+          <summary data-block="era-3.d1-summary"><span class="era-detail-h">e2e встаёт в строй</span><span class="era-detail-n">6 гейтов</span></summary>
+        <p data-block="era-3.d1-p1">У e2e оставалось семь записанных проблем; шесть закрыли одним коммитом.</p>
+        <p data-block="era-3.d1-p2">Прежде чем стать гейтом, сценарии должны были доигрывать до конца, как в живой игре. Карточка — это сообщение бота с текущей партией и кнопками, и восемь из шестнадцати сценариев бросали её на полпути. Теперь e2e такой обрыв не пропускает.</p>
+        <p data-block="era-3.d1-p3">Гейт берёт не все сценарии, а только те, до которых дотягивается дифф, то есть изменённые фазой файлы. Внутри одной фичи их обычно два-три, и прогон занимает около пятнадцати секунд. С этого коммита фаза заканчивается шестью гейтами в закреплённом порядке, и e2e стоит четвёртым: линт и типы, покрытие, мутанты по диффу, e2e по нему же, ревью, ретроспектива. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/52c0f73" rel="noopener">52c0f73</a></p>
+        <p data-block="era-3.d1-p4">Написание сценария получило отдельный скилл — <code class="cmd">write-an-e2e-scenario</code>, — и причина тут в том, как модель выбирает себе чтение: описание должно совпадать с тем, чем она занята прямо сейчас. <code class="cmd">CLAUDE.md</code> требовал открыть <code class="cmd">README</code> при любой работе с той папкой, а фаза, поправившая сценарий, обошлась без него: правка выглядела как добавление случая <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a0fcb61" rel="noopener">a0fcb61</a>. Теперь скилл появляется сам, стоит модели взяться за такой файл. В четвёртой эпохе тот же урок повторится дороже.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-3.d2-summary"><span class="era-detail-h">Правило, поймавшее своего автора</span><span class="era-detail-n">ещё 5 мест</span></summary>
-        <p data-block="era-3.d2-p1">
-          Каждая строка-имя, которой код обозначал фазу партии, нажатие кнопки, исход или
-          отказ, переехала в таблицу своей фичи. Затем правило линта запретило писать такие
-          имена строкой где-либо ещё.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3c0b283" rel="noopener">3c0b283</a>
-        </p>
-        <p data-block="era-3.d2-p2">
-          На спеки правило поначалу не распространялось. Три коммита спустя ревью нашло спек,
-          который сравнивал состояние с голой строкой. Спек появился уже после правила, и
-          написала его та же модель, что написала правило. Правило распространили и на спеки, и
-          заодно оно поймало ещё пять мест в самом коде.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a89a991" rel="noopener">a89a991</a>
-        </p>
-        <p data-block="era-3.d2-p3">
-          Потом ревью релиза нашло функцию, которая всё ещё возвращала состояние партии строкой,
-          хотя таблица состояний давно существовала. Правило знало три формы, в которых состояние пишут
-          строкой, а значение, которое возвращает функция, оказалось четвёртой. Отсюда ещё
-          один шаг в ритуале проверки правила из второй эпохи: доказав, что правило
-          срабатывает, один раз поищи по всему дереву те формы, до которых оно не
-          дотягивается. «Правило линта ловит тот синтаксис, о котором кто-то подумал».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/dc2602c" rel="noopener">dc2602c</a>
-        </p>
+          <summary data-block="era-3.d2-summary"><span class="era-detail-h">Правило поймало своего автора</span><span class="era-detail-n">ещё 5 мест</span></summary>
+        <p data-block="era-3.d2-p1">Все слова, которыми код называл фазу игры, нажатие кнопки, исход или отказ, собрали в таблицу, свою у каждой фичи, а правило линта запретило писать их строкой где-либо ещё <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3c0b283" rel="noopener">3c0b283</a>.</p>
+        <p data-block="era-3.d2-p2">Спеки сначала оставили в стороне. Через три коммита ревью нашло в спеке сравнение состояния с голой строкой, дописанное уже после того, как правило заработало, и той самой моделью, которая его сочинила. Правило распространили и на спеки, а заодно оно поймало ещё пять мест в рабочем коде <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a89a991" rel="noopener">a89a991</a>.</p>
+        <p data-block="era-3.d2-p3">Потом ревью релиза нашло функцию, которая всё ещё отдавала состояние игры строкой: запрет знал три способа написать литерал, а этот был четвёртым. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/dc2602c" rel="noopener">dc2602c</a> Отсюда привычка: как только правило впервые сработало, один раз пройти по всему дереву руками и поискать, что оно могло пропустить, ведь линт видит лишь тот синтаксис, о котором кто-то заранее подумал.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-3.d3-summary"><span class="era-detail-h">docs:check учится читать код</span><span class="era-detail-n">3 палитры</span></summary>
-        <p data-block="era-3.d3-p1">
-          Гейт документов вырос из проверки ссылок и бюджетов в проверку истинности. Рос он по
-          одному семейству за раз, и каждое семейство добавлялось после того, как что-то
-          оказалось неправдой.
-        </p>
-        <p data-block="era-3.d3-p2">
-          Одно семейство сверяет схему базы: SQL в PLAN.md против SQL, который бот выполняет
-          на самом деле. Появилось оно после того, как схему воссоздали по документу и она упала на первой
-          же команде: база отказалась принять запись без обязательного поля.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a24c0d4" rel="noopener">a24c0d4</a>
-        </p>
-        <p data-block="era-3.d3-p3">
-          Другое заново рисует постеры, картинки со статистикой, которые бот присылает в чат,
-          и сравнивает их с закоммиченными: один изменённый код цвета, и гейт красный.
-          Появилось оно после того, как постеры сравнили с их же дизайн-макетом и нашли «три
-          разные палитры в ходу, две гарнитуры и две ширины». Какая из них верна, не говорил
-          ни один документ, потому что ни одна проверка этого не держала.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/73b4f3a" rel="noopener">73b4f3a</a>
-        </p>
+          <summary data-block="era-3.d3-summary"><span class="era-detail-h">docs:check читает код</span><span class="era-detail-n">3 палитры</span></summary>
+        <p data-block="era-3.d3-p1"><code class="cmd">docs:check</code> начинал с битых ссылок и лимитов на длину, а вырос в сверку с исходниками. Каждое новое семейство проверок добавляли после того, как в документах находили неправду.</p>
+        <p data-block="era-3.d3-p2">Одно семейство следит за схемой базы и сверяет SQL из <code class="cmd">PLAN.md</code> с тем, который выполняет бот. Проверка появилась после того, как схема, собранная по документу, упала на первой же команде: база отказалась принимать запись без обязательного поля <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a24c0d4" rel="noopener">a24c0d4</a>.</p>
+        <p data-block="era-3.d3-p3">Другое перерисовывает постеры и сравнивает их с закоммиченными, так что изменённый код цвета делает гейт красным. Оно родилось из сверки с дизайн-макетом: в ходу оказались три палитры, два семейства шрифтов и две ширины, и ни один документ не говорил, какие из них правильные. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/73b4f3a" rel="noopener">73b4f3a</a></p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-3.d4-summary"><span class="era-detail-h">Два гейта, пойманные на лжи</span><span class="era-detail-n">5 сценариев из 17</span></summary>
-        <p data-block="era-3.d4-p1">
-          Лгали оба одинаково: горели зелёным по случайности, а не потому, что проверяли то, что
-          обещали. Первый — «окно тишины» e2e, пауза, которую сценарий выдерживает перед
-          чтением экрана. Обычный рендер постера вырос с 460 до 540 мс, запаса осталось
-          60 мс, и его перестало хватать: картинка стала приходить уже после закрытия окна, и
-          пять из семнадцати сценариев покраснели на исправном боте. Сбой выглядел в точности
-          как флейк, случайный провал, и его измерили, вместо того чтобы отмахнуться: окно расширили вдвое.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2e7c639" rel="noopener">2e7c639</a>
-        </p>
-        <p data-block="era-3.d4-p2">
-          Второй — гейт документов, который не умел читать чекаут, то есть рабочую копию
-          репозитория, если файлы в ней лежат с переводами строк Windows, CRLF. Рабочая копия
-          автора по случайности хранила переводы строк Unix, и гейт был зелёным.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6ddd56e" rel="noopener">6ddd56e</a>
-          На свежем клоне он покраснел бы на дереве, где всё в порядке, и объявил бы, что ни
-          одна таблица не описана.
-        </p>
+          <summary data-block="era-3.d4-summary"><span class="era-detail-h">Два гейта врали</span><span class="era-detail-n">5 сценариев из 17</span></summary>
+        <p data-block="era-3.d4-p1">Оба гейта держались на везении. Первым таким случаем стало окно тишины в e2e — 600 мс, которые выжидают перед чтением экрана. Запаса хватало, пока обычная отрисовка постера не выросла с 460 до 540 мс: свободными остались 60 мс, и пять сценариев из семнадцати покраснели на исправном боте. Похоже это было на случайный сбой, но вместо того чтобы отмахнуться, время измерили и окно удвоили <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2e7c639" rel="noopener">2e7c639</a>.</p>
+        <p data-block="era-3.d4-p2">Вторым был гейт документов: он не мог прочитать дерево, где файлы несут переводы строк CRLF. В копии, на которой шла работа, случайно оказался формат Unix, поэтому проверка проходила, а на свежем клоне покраснела бы там, где ничего не сломано <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6ddd56e" rel="noopener">6ddd56e</a>. Оба случая названы в релизе 1.7.0 <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4422ddb" rel="noopener">4422ddb</a>.</p>
         </details>
-
-        <p data-block="era-3.next">
-          В следующей эпохе случатся две вещи, не связанные между собой: бот уедет с ноутбука
-          на сервер, и появится первый гейт, на который машина ответить не может.
-        </p>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <div class="tile"><p data-block="era-3.tile-1-value" class="tile-value">8</p><p data-block="era-3.tile-1-label" class="tile-label">скиллов</p></div>
-        <div class="tile"><p data-block="era-3.tile-2-value" class="tile-value">5</p><p data-block="era-3.tile-2-label" class="tile-label">собственных правил линта</p></div>
+        <div class="tile"><p data-block="era-3.tile-2-value" class="tile-value">5</p><p data-block="era-3.tile-2-label" class="tile-label">правил линта проекта</p></div>
         <div class="tile"><p data-block="era-3.tile-3-value" class="tile-value">6</p><p data-block="era-3.tile-3-label" class="tile-label">гейтов</p></div>
-        <div class="tile"><p data-block="era-3.tile-4-value" class="tile-value">1 976</p><p data-block="era-3.tile-4-label" class="tile-label">тестов</p></div>
-        <div class="tile"><p data-block="era-3.tile-5-value" class="tile-value">142</p><p data-block="era-3.tile-5-label" class="tile-label">e2e-кейса</p></div>
-        <div class="tile"><p data-block="era-3.tile-6-value" class="tile-value">98,96%</p><p data-block="era-3.tile-6-label" class="tile-label">мутационный скор по десяти файлам, которых коснулся редизайн одного постера</p></div>
+        <div class="tile"><p data-block="era-3.tile-4-value" class="tile-value">1&nbsp;976</p><p data-block="era-3.tile-4-label" class="tile-label">тестов</p></div>
+        <div class="tile"><p data-block="era-3.tile-5-value" class="tile-value">142</p><p data-block="era-3.tile-5-label" class="tile-label">сценария e2e</p></div>
+        <div class="tile"><p data-block="era-3.tile-6-value" class="tile-value">98,96%</p><p data-block="era-3.tile-6-label" class="tile-label">мутационный процент, десять файлов постера</p></div>
       </div>
 
       <div class="mt-10 grid gap-5 lg:grid-cols-2">
         <figure class="chart reveal" data-chart="tests">
           <figcaption>
-            <p data-block="era-3.chart-1-title" class="chart-title">Тесты, как их считают сообщения коммитов</p>
-            <p data-block="era-3.chart-1-sub" class="chart-sub">Число тестов, которое называет финальный коммит фазы. Пропуски — коммиты, которые его не назвали.</p>
+            <p data-block="era-3.chart-1-title" class="chart-title">Тесты по сообщениям коммитов</p>
+            <p data-block="era-3.chart-1-sub" class="chart-sub">Сколько тестов назвал финальный коммит каждой фазы; пропуск там, где в сообщении цифры нет.</p>
           </figcaption>
           <div class="chart-plot"></div>
           <details class="chart-table"><summary data-block="era-3.chart-1-table">Показать таблицей</summary></details>
         </figure>
         <figure class="chart reveal" data-chart="mutation">
           <figcaption>
-            <p data-block="era-3.chart-2-title" class="chart-title">Мутационный скор, каким его сообщали коммиты</p>
-            <p data-block="era-3.chart-2-sub" class="chart-sub">Скор по всему дереву или по диффу из сообщений коммитов. Линия на 85 — порог падения с коммита 20.</p>
+            <p data-block="era-3.chart-2-title" class="chart-title">Заявленный мутационный процент</p>
+            <p data-block="era-3.chart-2-sub" class="chart-sub">Значения взяты из сообщений коммитов, по всему дереву или по изменённым файлам; линия на 85 стоит с 20-го и отмечает порог, ниже которого гейт падает.</p>
           </figcaption>
           <div class="chart-plot"></div>
           <details class="chart-table"><summary data-block="era-3.chart-2-table">Показать таблицей</summary></details>
@@ -719,156 +416,53 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span data-block="era-4.band-era" class="text-ink">Эпоха 4 из 7</span><span data-block="era-4.band-dates">11–14 августа</span><span data-block="era-4.band-commits">коммиты 122–184</span>
+        <span data-block="era-4.band-era" class="text-ink">Эпоха 4 из 7</span><span data-block="era-4.band-dates">11–14 августа</span><span data-block="era-4.band-commits">Коммиты 122–184</span>
       </div>
 
-      <h2 data-block="era-4.title" id="era-4-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Бот уезжает с ноутбука</h2>
+      <h2 data-block="era-4.title" id="era-4-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Бот покидает ноутбук</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p data-block="era-4.lead">
-          Шестьдесят три коммита за четыре дня принесли первый гейт, на который машина
-          ответить не может: постер — это картинка, а картинку не читает ни один тест. Первый
-          его прогон поймал две дыры в правилах наград и строку текста, уходящую за край
-          карточки, а работать его заставил бриф: «конкретные утверждения, а не вердикт». Ещё
-          бот уехал с ноутбука на сервер, который каждые пять минут забирает новейший тег и
-          никого не ждёт, — и это задаёт порядок всех проверок после него. А одна фаза
-          «прогнала шесть гейтов и выпустила релиз без седьмого» — не по небрежности, а
-          потому, что скилл с гейтами так и не открыли.
-        </p>
+        <p data-block="era-4.lead">Шестьдесят три коммита за четыре дня, и в них случилось вот что. Появился первый гейт, на который машина ответить не может: постер — это картинка, и читать её тесты не умеют. Бот переехал с ноутбука на сервер, который сам забирает свежий тег каждые пять минут. И одна фаза прошла шесть гейтов и выпустила релиз без седьмого.</p>
 
         <details class="era-detail">
-          <summary data-block="era-4.d1-summary"><span class="era-detail-h">Гейт, на который машина ответить не может</span><span class="era-detail-n">9 вечеров</span></summary>
-        <p data-block="era-4.d1-p1">
-          Гейт галереи берёт девять
-          неудобных вечеров и рисует по ним оба постера, хронологию и награды. Он встал
-          пятым, и гейтов стало семь.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ce3c70c" rel="noopener">ce3c70c</a>
-          Обе дыры были в правилах, по которым бот раздаёт награды за вечер: подписи вроде
-          «THE COMEBACK», которые постер присуждает игрокам по итогам вечера. Через два дня гейт
-          передвинули после
-          ревью, потому что «картинка, проверенная на пятом гейте, к шестому может устареть».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/743adaa" rel="noopener">743adaa</a>
-          Кто должен смотреть на картинку, выяснится только в пятой эпохе.
-        </p>
+          <summary data-block="era-4.d1-summary"><span class="era-detail-h">Гейт без ответа от машины</span><span class="era-detail-n">9 вечеров</span></summary>
+        <p data-rev="3" data-block="era-4.d1-p1">Появилась галерея: девять вечеров с неудобными раскладами, каждый нарисован в виде двух постеров — хронологии и наград. Картинок при этом семнадцать, а не восемнадцать: вечер из одной партии награды не приносит, и второго постера у него нет. Смотреть на них стало пятым гейтом, всего их сделалось семь <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ce3c70c" rel="noopener">ce3c70c</a>. Разглядывала та же модель, что их нарисовала, по брифу в скилле фазы: от неё требовали конкретных утверждений о каждой картинке, а не вердикта. Первый же просмотр нашёл две дыры в правилах, решающих, кому из игроков достаётся, например, THE COMEBACK, и строку текста, выехавшую за край карточки награды на постере. Через два дня гейт перенесли за ревью: картинка, проверенная на этом шаге, к следующему могла устареть. Кому это поручить, решилось только в пятой эпохе <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/743adaa" rel="noopener">743adaa</a>.</p>
         </details>
       </div>
 
-      <blockquote data-block="era-4.q1" class="said reveal mt-10 max-w-[60ch]">
-        «„Посмотрел, нормально“ — это зелёный свет, за которым ничего нет».
-        <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/ce3c70c" rel="noopener">ce3c70c</a> · 11 августа · в оригинале: "looked, fine" is the green light with nothing behind it</cite>
+      <blockquote data-block="era-4.q1" class="said reveal mt-10 max-w-[60ch]">«„Посмотрел, всё в порядке“ — это зелёный свет, за которым ничего нет.»
+        <cite><a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ce3c70c" rel="noopener">ce3c70c</a> · 11 августа · в оригинале: "looked, fine" is the green light with nothing behind it</cite>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
-          <summary data-block="era-4.d2-summary"><span class="era-detail-h">Делегирование становится правилом</span><span class="era-detail-n">3 условия</span></summary>
-        <p data-block="era-4.d2-p1">
-          Правило второй эпохи, делегировать только когда не хватает собственного контекста,
-          владелец отменил. Теперь независимый участок работы отдаётся субагенту сразу, если
-          выполнены три условия: работа не задевает файлов, открытых у самой модели, бриф
-          помещается в одно сообщение и важен только результат. Ревью стало «всегда
-          субагентом <code>phase-reviewer</code>, и никогда перечитыванием».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0352b2b" rel="noopener">0352b2b</a>
-          Ретроспективе поручили считать, сколько таких участков делегировали, а сколько нет.
-          Новое правило редко ломается оттого, что его применяют плохо. Чаще его просто тихо
-          не применяют, и без подсчёта этого никто не заметит.
-        </p>
-        <p data-block="era-4.d2-p2">
-          Позже один коммит записал предел ревьюера: он читает дифф и ничего не запускает,
-          так что «зелёное ревью shell-скрипта, systemd-юнита или воркфлоу — это полгейта».
-          Все три — файлы, которые проверяются только запуском: юнит говорит серверу, как
-          запускать бота, воркфлоу говорит GitHub, что прогонять на каждый пуш.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6a4c252" rel="noopener">6a4c252</a>
-        </p>
+          <summary data-block="era-4.d2-summary"><span class="era-detail-h">Делегирование по умолчанию</span><span class="era-detail-n">3 условия</span></summary>
+        <p data-block="era-4.d2-p1">Во второй эпохе действовало правило: зови субагента, только когда своего контекста не хватает. Владелец его отменил. Теперь самостоятельную задачу отдают сразу, при трёх условиях: она не трогает файлов, открытых у модели, бриф умещается в одно сообщение, и нужен от неё готовый ответ, а не разговор. Ревью с тех пор пишет <code class="cmd">phase-reviewer</code>, а не автор диффа. Ретроспективе велели считать, сколько таких задач отдали, а сколько оставили себе: новое правило проваливается тихо, им просто перестают пользоваться. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0352b2b" rel="noopener">0352b2b</a></p>
+        <p data-block="era-4.d2-p2">Позже отдельный коммит записал границу <code class="cmd">phase-reviewer</code>: он читает дифф и ничего не выполняет. Поэтому зелёное ревью shell-скрипта, systemd-юнита или конфигурации CI закрывает лишь половину гейта: такие файлы доказывает только запуск. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6a4c252" rel="noopener">6a4c252</a></p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-4.d3-summary"><span class="era-detail-h">Три проверки — по тому, что на кону</span><span class="era-detail-n">3 проверки</span></summary>
-        <p data-block="era-4.d3-p1">
-          Сервер сам забирает новейший тег каждые пять минут; никто ничего на него не пушит.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cfd02a1" rel="noopener">cfd02a1</a>
-          Единую проверку разделили на три по тому, что стоит на кону. Перед пушем — линт,
-          типы и документы: их гоняет CI на каждый пуш, потому что пуш меняет не бота, а сайт
-          (страницу проекта на GitHub Pages) и документы. В конце фазы — четыре машинных гейта
-          одной командой, локально. Перед тегом — полная батарея: покрытие, все мутанты, все
-          сценарии.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f58e793" rel="noopener">f58e793</a>
-        </p>
-        <p data-block="era-4.d3-p2">
-          Батарея стоит в git-хуке на машине разработчика и отрабатывает до того, как тег
-          уйдёт на GitHub. Красный CI после этого уже ничего не остановит, а лишь сообщит,
-          что сломанный бот уже на сервере.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3b22b7c" rel="noopener">3b22b7c</a>
-        </p>
+          <summary data-rev="2" data-block="era-4.d3-summary"><span class="era-detail-h">Одна батарея становится тремя</span><span class="era-detail-n">3 батареи</span></summary>
+        <p data-block="era-4.d3-p1">Сервер сам забирает свежий тег каждые пять минут; никто ничего на него не выкладывает. Значит, сломанный релиз окажется в работе раньше, чем кто-нибудь успеет отреагировать, и остановить его можно только до того, как тег появится. Единая проверка разделилась на три по тому, что стоит на кону в каждый момент. На пуш CI гоняет линтер, типы и документы: от него меняются сайт и документация, а не бот <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cfd02a1" rel="noopener">cfd02a1</a>. В конце фазы четыре машинных гейта запускаются одной командой. Перед тегом идёт полная батарея: покрытие, все мутанты, все сценарии <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f58e793" rel="noopener">f58e793</a>.</p>
+        <p data-block="era-4.d3-p2">Батарея живёт в git-хуке на машине разработчика и отрабатывает до того, как тег уйдёт в GitHub: сервер подхватит его в ближайшие пять минут, и к тому часу, когда CI покраснеет, сломанный бот уже работает <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3b22b7c" rel="noopener">3b22b7c</a>.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-4.d4-summary"><span class="era-detail-h">Процесс рисуют, а у рисунка появляются хуки</span><span class="era-detail-n">8 стадий</span></summary>
-        <p data-block="era-4.d4-p1">
-          Весь цикл разработки нарисовали диаграммой последовательности и вынесли в отдельный
-          файл, DEVELOPMENT-FLOW.md.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/edc1148" rel="noopener">edc1148</a>
-          Сегодня на схеме восемь стадий: постановка задачи и макет, код и тесты, машинные
-          гейты, ревью чужим агентом, чтение фраз и сверка картинок, ретроспектива, релиз и
-          чекап.
-        </p>
-        <p data-block="era-4.d4-p2">
-          Это рисунок владельца, и отсюда два запрета. Менять его молча нельзя: владелец
-          встретил бы сдвиг как дифф месяцы спустя, и рассуждения за ним было бы уже не
-          восстановить. Спрашивать разрешения тоже
-          нельзя: это стопорит законченную фазу на решении, которое уже делегировано.
-          Поэтому правило — сделать и сказать: сдвинуть шаг и доложить об этом в закрывающем
-          сообщении, с цифрами вместо впечатления.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5eb6933" rel="noopener">5eb6933</a>
-          Рисунок стерегут три проверки. Хук напоминает об
-          этом обязательстве в момент правки файла. Проверка сообщения коммита отклоняет
-          коммит, который двигает шаг, но не объясняет, что и почему сдвинулось. А docs:check
-          падает, если рисунок называет скилл или скрипт, которого не существует.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/912be9b" rel="noopener">912be9b</a>
-        </p>
+          <summary data-block="era-4.d4-summary"><span class="era-detail-h">Флоу нарисован и охраняется</span><span class="era-detail-n">8 стадий</span></summary>
+        <p data-block="era-4.d4-p1">Весь цикл разработки нарисовали диаграммой последовательности в <code class="cmd">DEVELOPMENT-FLOW.md</code>. Сегодня на ней 8 стадий: постановка задачи вместе с макетом; код и тесты; машинные гейты; ревью агентом, который этот дифф не писал; чтение предложений со сверкой картинок; ретроспектива; релиз; чекап <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/edc1148" rel="noopener">edc1148</a>.</p>
+        <p data-block="era-4.d4-p2">Схема принадлежит владельцу, так что менять её втихую нельзя, а спрашивать разрешения не велено. Поэтому шаг переставляют сами, а в закрывающем сообщении фазы называют сдвиг и подсчёты, которые за ним стоят. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5eb6933" rel="noopener">5eb6933</a> Следят за этим с трёх сторон: хук напоминает об обязанности прямо во время правки, разбор сообщения коммита не пропускает переезд без причины, а <code class="cmd">docs:check</code> падает, если на схеме назван скилл или скрипт, которого нет. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/912be9b" rel="noopener">912be9b</a></p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-4.d5-summary"><span class="era-detail-h">Никто не проверяет проверяющих</span><span class="era-detail-n">13 находок</span></summary>
-        <p data-block="era-4.d5-p1">
-          Агента <code>deep-checkup</code> написали, чтобы он раз в неделю «не верил ничему на
-          слово», ничего не чинил и возвращал подробный отчёт, где за каждым вердиктом стоит
-          команда и её вывод.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4e56b66" rel="noopener">4e56b66</a>
-          Первый прогон занял 33 минуты и дал тринадцать находок. Главная: бэкапа не было, а
-          восстановление никто не репетировал. Появился проверенный ежедневный бэкап, а
-          остальные двенадцать находок закрыли одним коммитом.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0ba2815" rel="noopener">0ba2815</a>
-        </p>
+          <summary data-block="era-4.d5-summary"><span class="era-detail-h">Кто проверяет проверяющих</span><span class="era-detail-n">13 находок</span></summary>
+        <p data-block="era-4.d5-p1">Агента <code class="cmd">deep-checkup</code> написали для еженедельного обхода: ничему не верить на слово, ничего не чинить, вернуть отчёт, где за каждым вердиктом стоит команда и её вывод <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4e56b66" rel="noopener">4e56b66</a>. Первый прогон занял 33 минуты и принёс тринадцать находок, и тяжелее всех оказалась та, что бэкапа нет, а восстановление ни разу не репетировали; его завели следом, ежедневным и с проверкой, а остальные двенадцать закрыли одним коммитом <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/0ba2815" rel="noopener">0ba2815</a>.</p>
         </details>
 
         <details class="era-detail">
           <summary data-block="era-4.d6-summary"><span class="era-detail-h">Пропущенная ретроспектива</span><span class="era-detail-n">27 строк</span></summary>
-        <p data-block="era-4.d6-p1">
-          Гейтов к тому
-          времени было семь, и седьмым стояла ретроспектива. Сначала это объяснили тем, что
-          релиз ощущается как конец. Следующий коммит поправил его со слов владельца:
-          фаза шла по реестру находок чекапа, 27 строк, и ни одна строка не была гейтом; когда
-          реестр опустел, пустой список прочитался как законченная фаза.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6799bd8" rel="noopener">6799bd8</a>
-          Починили не ещё одним правилом: изменили то, от чего зависит, откроется ли скилл
-          вообще. Все описания скиллов проверили, а треть переписали так, чтобы они
-          называли задачу, на которой скилл нужен: «фаза закрывается», «интерфейсы ещё не
-          заморожены». Не пересказ, о чём скилл, а условие, потому что «описание скилла — это
-          не документация о скилле; это триггер, который решает, будет ли скилл вообще
-          открыт».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fdab9be" rel="noopener">fdab9be</a>
-          А docs:check начал падать, если скилл или агент нигде не упомянут в CLAUDE.md.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f6f617b" rel="noopener">f6f617b</a>
-          С этим уроком третья эпоха уже встречалась на сценариях; здесь он обошёлся в
-          пропущенный гейт.
-        </p>
+        <div data-rev="2" data-block="era-4.d6-p1"><p>Гейтов было семь, и ретроспектива стояла седьмой — её пропустили. Первое объяснение винило релиз: он ощущался финалом <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6799bd8" rel="noopener">6799bd8</a>. Следующий коммит по слову владельца исправил то объяснение: фаза шла по списку находок из аудита, 27 строк, и ни одна из них не была гейтом, поэтому пустой список прочитался как законченная работа <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fdab9be" rel="noopener">fdab9be</a>.</p>
+<p class="mt-2">Починили то, от чего скилл открывается: его описание. Все двенадцать сверили с таблицей маршрутов и с нарисованными этапами, четыре расходившихся переписали так, чтобы они называли задачу, на которой скилл нужен, — ведь именно от этого текста зависит, откроют ли его вообще <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f6f617b" rel="noopener">f6f617b</a>. Заодно <code class="cmd">docs:check</code> стал падать, если скилл или агент не назван в CLAUDE.md ни разу. Третья эпоха встретила этот урок на сценариях; здесь он стоил пропущенного гейта.</p></div>
         </details>
-
-        <p data-block="era-4.next">
-          В следующей эпохе у харнеса появятся читатели, которым нарочно
-          ничего не объясняют, а у каждого агента — контракт на то, что ему обязаны сообщить
-          и что он обязан вернуть.
-        </p>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -877,7 +471,7 @@
         <div class="tile"><p data-block="era-4.tile-3-value" class="tile-value">3 + 2</p><p data-block="era-4.tile-3-label" class="tile-label">хука Claude и git-хука</p></div>
         <div class="tile"><p data-block="era-4.tile-4-value" class="tile-value">7</p><p data-block="era-4.tile-4-label" class="tile-label">гейтов</p></div>
         <div class="tile"><p data-block="era-4.tile-5-value" class="tile-value">12</p><p data-block="era-4.tile-5-label" class="tile-label">семейств docs:check</p></div>
-        <div class="tile"><p data-block="era-4.tile-6-value" class="tile-value">2 502</p><p data-block="era-4.tile-6-label" class="tile-label">теста</p></div>
+        <div class="tile"><p data-block="era-4.tile-6-value" class="tile-value">2&nbsp;502</p><p data-block="era-4.tile-6-label" class="tile-label">теста</p></div>
       </div>
     </div>
   </article>
@@ -887,163 +481,57 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span data-block="era-5.band-era" class="text-ink">Эпоха 5 из 7</span><span data-block="era-5.band-dates">19–25 августа</span><span data-block="era-5.band-commits">коммиты 185–244</span>
+        <span data-block="era-5.band-era" class="text-ink">Эпоха 5 из 7</span><span data-block="era-5.band-dates">19–25 августа</span><span data-block="era-5.band-commits">Коммиты 185–244</span>
       </div>
 
-      <h2 data-block="era-5.title" id="era-5-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Холодные читатели и урезание бюджетов</h2>
+      <h2 data-block="era-5.title" id="era-5-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Холодные читатели и бюджеты</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p data-block="era-5.lead">
-          На уже выпущенном постере игрокам было сказано: «по точке за вечер — ещё 3 вечера», —
-          и ни слова о том, что именно придёт. Владелец прочитал это как посторонний и
-          спросил, что оно значит; из этого вопроса пошли все холодные читатели проекта:
-          агенты, которым в брифе дают картинки и больше ничего; их первый прогон дал
-          семнадцать находок на галерее из двадцати девяти рисунков. Затем харнес навели на себя
-          самого: чекап нарочно сломал каждое правило документов, и три остались зелёными, а
-          Stryker показал, что проверки ловят 47,17% собственных мутантов. Потом — на
-          собственный размер: каждый скилл получил бюджет строк, тег стал условным, и эпоха
-          заканчивается восемью коммитами подряд с пометкой «Tag: none».
-        </p>
+        <p data-block="era-5.lead">Постер, уже ушедший в релиз, сообщал «одна точка — вечер, ещё 3 вечера», но не говорил, что случится, когда эти вечера будут сыграны. Владелец прочитал строку глазами игрока и спросил, что она значит. С того вопроса пошли все проверяющие, которым нарочно не объясняют, на что они смотрят. Потом харнес навели на самого себя: его гейты испытали, а размер ограничили.</p>
 
         <details class="era-detail">
-          <summary data-block="era-5.d1-summary"><span class="era-detail-h">Автор не может прочитать собственный рисунок</span><span class="era-detail-n">9 гейтов</span></summary>
-        <p data-block="era-5.d1-p1">
-          Графика на постере ещё не было: он появляется, когда накопится достаточно вечеров,
-          а до тех пор на его месте стоит подсказка.
-          <code>poster-reader</code> получает
-          в брифе картинки и список строк на них, и больше ничего. Он читает их «холодно, без
-          понятия, для чего всё это».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da50714" rel="noopener">da50714</a>
-          Гейт галереи стал тогда «единственным гейтом, который нельзя выполнять самому».
-        </p>
-        <p data-block="era-5.d1-p2">
-          Та же беда была и в словах. Сначала гейтом стало чтение одного настоящего вечера
-          перед выпуском, обязательное, когда фаза меняет то, что говорит постер. До того ни
-          один гейт в проекте не спрашивал, что на самом деле говорит хронология вечера.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/93c1456" rel="noopener">93c1456</a>
-        </p>
-        <p data-block="era-5.d1-p3">
-          Затем взяли два настоящих вечера и прочитали, что бот сказал о них игрокам: за
-          десять минут нашлись восемь дефектов. Поэтому появился <code>copy-reader</code>: он
-          читает каждую реплику бота на обоих языках с подставленными настоящими значениями и
-          спрашивает, сказал бы так человек. Это чтение стало ещё одним гейтом, и с двумя
-          вставленными гейтами их стало девять.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d45f2f0" rel="noopener">d45f2f0</a>
-          Первые чтения дали шесть десятков замечаний, и большинство приняли. Затем агента
-          сдвинули раньше, к моменту, когда таблица реплик только написана и на ней ещё
-          ничего не построено.
-        </p>
-        <p data-block="era-5.d1-p4">
-          Агент <code>plan-reviewer</code> работает в самом начале фазы, когда план уже есть,
-          а кода ещё нет. Он получает слова владельца и согласованные
-          сигнатуры функций, и ничего больше, с напутствием «Можешь вернуться ни с чем»: ревьюер не обязан что-то найти, обязан
-          лишь отчитаться, что именно он проверил. На калибровке, на плане с тремя подложенными изъянами, он нашёл все три
-          и ещё четвёртый.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e64c8cd" rel="noopener">e64c8cd</a>
-        </p>
+          <summary data-block="era-5.d1-summary"><span class="era-detail-h">Взгляд со стороны</span><span class="era-detail-n">9 гейтов</span></summary>
+        <p data-block="era-5.d1-p1">Та строка стояла на месте графика, которого ещё не было: он появляется, когда накопится достаточно вечеров, а до тех пор постер пишет подсказку. Агент <code class="cmd">poster-reader</code> получает картинки и список строк на них, и больше ничего; он читает их, не зная, зачем всё это. Первый прогон дал семнадцать находок на двадцати девяти рисунках, и гейт галереи стал единственным, который нельзя проходить самому. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da50714" rel="noopener">da50714</a></p>
+        <p data-block="era-5.d1-p2">Ту же дыру нашли и в текстах: надписи на постере никто не разбирал так, как их читает игрок. Теперь фаза, тронувшая хоть одну такую строку, обязана перед релизом взять хронологию настоящего вечера и сказать, что там написано; раньше об этом не спрашивал ни один гейт <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/93c1456" rel="noopener">93c1456</a>.</p>
+        <p data-block="era-5.d1-p3">Чтение двух настоящих вечеров заняло десять минут и дало восемь дефектов. После этого появился copy-reader, и гейтов стало девять. Агент читает каждую строку, которую бот показывает игроку, на обоих языках и с подставленными значениями, а затем спрашивает, сказал бы так живой человек. Первые разборы принесли около шестидесяти замечаний, и большую часть учли <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d45f2f0" rel="noopener">d45f2f0</a>. Позднее другой коммит сдвинул чтение в начало фазы: copy-reader получает таблицу строк сразу, как её написали <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fff3c5f" rel="noopener">fff3c5f</a>.</p>
+        <p data-block="era-5.d1-p4">Агент <code class="cmd">plan-reviewer</code> работает в начале фазы, когда план уже есть, а кода ещё нет: он получает слова владельца и согласованные сигнатуры, может вернуться ни с чем и обязан лишь отчитаться, что проверил. Откалиброван на плане с тремя подложенными ошибками: нашёл все три и четвёртую. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e64c8cd" rel="noopener">e64c8cd</a></p>
         </details>
       </div>
 
-      <blockquote data-block="era-5.q1" class="said reveal mt-10 max-w-[60ch]">
-        «Это единственный читатель здесь, чьё незнание — инструмент».
-        <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/da50714" rel="noopener">da50714</a> · 20 августа · в оригинале: It is the only reader here whose ignorance is the instrument</cite>
+      <blockquote data-block="era-5.q1" class="said reveal mt-10 max-w-[60ch]">«Это единственный читатель здесь, чьё незнание и есть инструмент.»
+        <cite><a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da50714" rel="noopener">da50714</a> · 20 августа · в оригинале: It is the only reader here whose ignorance is the instrument</cite>
       </blockquote>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
           <summary data-block="era-5.d2-summary"><span class="era-detail-h">Гейт, который молча не применяется</span><span class="era-detail-n">планка 80%</span></summary>
-        <p data-block="era-5.d2-p1">
-          Продукт получил третий постер, после хронологии вечера и наград за него: всю
-          карьеру одного игрока.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2b1353b" rel="noopener">2b1353b</a>
-          Он вышел в двух релизах без единого кейса в галерее, потому
-          что ни одно правило не говорило, что новый постер обязан его иметь: «Гейт, который
-          не применяется, неотличим от гейта, которому нечего сообщить».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da16c8d" rel="noopener">da16c8d</a>
-        </p>
-        <p data-block="era-5.d2-p2">
-          Дальше проверяли самих проверяющих: чекап нарочно сломал каждое правило документов,
-          девять покраснели, а три остались зелёными.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3d92c6b" rel="noopener">3d92c6b</a>
-          Затем через Stryker прогнали сам инструментарий, и тесты поймали лишь 47,17%
-          мутантов в проверках документов. Проверки переписали чистыми функциями со спеками и дали им собственный прогон
-          Stryker с планкой 80%, второе семейство Stryker. Отдельное,
-          потому что среднее по всему дереву спрятало бы провал: по расчёту из коммита,
-          мутанты инструментария, усреднённые с мутантами самого бота, читались бы как 93%.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/471cac4" rel="noopener">471cac4</a>
-        </p>
+        <p data-block="era-5.d2-p1">Продукт получил третий постер, всю карьеру одного игрока, и тот вышел в двух релизах без единого кейса в галерее: ни одно правило не говорило, что новая картинка обязана его иметь. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2b1353b" rel="noopener">2b1353b</a> <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/da16c8d" rel="noopener">da16c8d</a> Проверка, которая не применяется, неотличима от той, которой нечего сообщить.</p>
+        <p data-block="era-5.d2-p2">Проверили самих проверяющих: чекап нарочно сломал всё, что охраняют правила о документах, и девять проверок покраснели, а три остались зелёными <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3d92c6b" rel="noopener">3d92c6b</a>. Тогда проверки переписали чистыми функциями со спеками и завели для них отдельный прогон Stryker. Первый прогон дал 47,17%: столько собственных мутантов гейта документов поймали его тесты. Планку поставили на 80% и считают отдельно от бота: одно среднее по обоим наборам, где мутантов бота вчетверо больше, показало бы девяносто с чем-то и спрятало бы гейт, набирающий меньше половины <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/471cac4" rel="noopener">471cac4</a>.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-5.d3-summary"><span class="era-detail-h">Бюджеты повсюду</span><span class="era-detail-n">16% изменённых строк</span></summary>
-        <p data-block="era-5.d3-p1">
-          У CLAUDE.md бюджет строк был со второй эпохи. Теперь бюджет получил каждый скилл и
-          TECH-DEBT.md. Скилл <code>finish-phase</code> дорос до 722 строк. Его сократили до
-          459, вынеся пять страниц в соседние файлы, а бюджеты тем же коммитом понизили,
-          «чтобы разделение не могло стать способом выключить счётчик».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ab68474" rel="noopener">ab68474</a>
-        </p>
-        <p data-block="era-5.d3-p2">
-          Сторонний разбор процесса, который провела свежая модель без памяти о проделанной
-          работе, измерил, сколько усилий уходит в сам харнес: 16% строк, изменённых за пять
-          дней, пришлись на процесс, а не на продукт. Отдельно он посчитал релизы: восемь за
-          четыре дня, почти по одному каждые полдня, и каждый перезапускал бота и заново
-          оплачивал полные мутации и полный прогон e2e.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fff3c5f" rel="noopener">fff3c5f</a>
-          В ответ три вещи стали условными. Тег — только когда игрок или оператор получает что-то
-          новое. Делегирование написания кода — только начиная с десяти файлов. Ретроспектива —
-          только когда есть что считать.
-        </p>
-        <p data-block="era-5.d3-p3">
-          Последний коммит эпохи проверил утверждение, что скилл должен описывать результаты,
-          а не шаги. Утверждение не выдержало. Один скилл переписали с нуля, почти вдвое короче, и он потерял шесть конкретных
-          указаний, что делать. Пропали они по одному
-          и тому же образцу: рассказ о поломке, из-за которой указание появилось, уцелел, а
-          само указание нет, потому что указание читается как пошаговая инструкция, а её и
-          велели убрать. В коммите это сказано так: «боевые истории выжили как симптомы, а
-          починки, которые ими оплачены, ужались в ничто». С этим выводом в брифе
-          другой скилл сократили, не потеряв ни одного указания. Агент
-          <code>skill-auditor</code> теперь составляет опись скилла правило за правилом,
-          прежде чем кто-нибудь его укоротит.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/784b26c" rel="noopener">784b26c</a>
-        </p>
-        <p data-block="era-5.d3-p4">
-          Каждый агент получил ещё и контракт: что обязан содержать его бриф и что он
-          возвращает, и ответ обязан открываться строкой вердикта: два числа, сколько
-          проверено и сколько найдено, а за ними сами находки. Вердикт не заменяет находок: это их итог, по которому видно, весь ли объём
-          проверен. Причина:
-          отчёт агента, проверившего меньше, чем просили, снаружи неотличим от полного, и
-          никто ниже по цепочке его не перепроверяет.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ba4603f" rel="noopener">ba4603f</a>
-        </p>
-        <p data-block="era-5.d3-p5">
-          Затем появился хук на конец хода. Одна фаза оборвалась на
-          сообщении, которое перечисляло, что осталось, заканчивалось словом «Продолжаю» и
-          дальше не делало ничего. Ни один гейт не мог этого заметить: гейты судят дифф, а
-          диффа не было. Теперь хук читает последнюю фразу ответа и отказывается принять ход,
-          который заканчивается обещанием сделать работу вместо самой работы.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2239ef0" rel="noopener">2239ef0</a>
-        </p>
+          <summary data-block="era-5.d3-summary"><span class="era-detail-h">Бюджет на всё</span><span class="era-detail-n">16% изменённых строк</span></summary>
+        <p data-block="era-5.d3-p1">Со второй эпохи лимит на длину был только у <code class="cmd">CLAUDE.md</code>, а теперь такой же получили все скиллы и <code class="cmd">TECH-DEBT.md</code>. Сам <code class="cmd">finish-phase</code> разросся до 722 строк, и его ужали до 459: пять разделов вынесли в соседние файлы, а сам предел тем же коммитом опустили, чтобы дробление не стало способом отключить счётчик. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ab68474" rel="noopener">ab68474</a></p>
+        <p data-block="era-5.d3-p2">Внешнее ревью свежей моделью измерило: 16% строк, изменённых за пять дней, ушли в процесс, а не в продукт; оно же насчитало восемь релизов за четыре дня, каждый с перезапуском бота и полным прогоном мутаций и e2e. <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fff3c5f" rel="noopener">fff3c5f</a> Три вещи стали условными: тег лишь когда игрок или оператор получает что-то новое, делегирование правок начиная с десяти файлов, ретроспектива только когда есть что считать.</p>
+        <p data-block="era-5.d3-p3">Последний коммит эпохи проверил утверждение, что скилл должен описывать результат, а не шаги. Оно не выдержало: переписанный почти вдвое короче текст потерял шесть конкретных инструкций — истории о набитых шишках уцелели как симптомы, а найденные тогда решения ушли под сжатие <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/784b26c" rel="noopener">784b26c</a>. С этим в брифе другой скилл сократили, не потеряв ни одного указания, а агент skill-auditor теперь составляет опись правило за правилом, прежде чем кто-нибудь возьмётся укорачивать.</p>
+        <p data-block="era-5.d3-p4">Каждый агент получил контракт: что кладут в его бриф и что он возвращает. Ответ открывается строкой вердикта из двух чисел, сколько проверено и сколько найдено, а находки идут следом. Без этих чисел отчёт агента, осилившего половину задания, ничем не отличается от полного, и заново его никто читать не станет <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/ba4603f" rel="noopener">ba4603f</a>.</p>
+        <p data-block="era-5.d3-p5">В конце хода срабатывает хук, а поставили его вот после чего: фаза встала на сообщении, которое перечисляло оставшееся, кончалось словом «Продолжаю» — и дальше не случилось ничего; ни один гейт этого не поймал, ведь диффа не было. Читает он последнюю фразу ответа и не выпускает ход, в котором работа обещана, а не сделана <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/2239ef0" rel="noopener">2239ef0</a>.</p>
         </details>
-
-        <p data-block="era-5.next">
-          Оставалось научить харнес помнить, что он делал. Этим занялась последняя эпоха.
-        </p>
       </div>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <div class="tile"><p data-block="era-5.tile-1-value" class="tile-value">11</p><p data-block="era-5.tile-1-label" class="tile-label">скиллов</p></div>
         <div class="tile"><p data-block="era-5.tile-2-value" class="tile-value">7</p><p data-block="era-5.tile-2-label" class="tile-label">агентов</p></div>
-        <div class="tile"><p data-block="era-5.tile-3-value" class="tile-value">2</p><p data-block="era-5.tile-3-label" class="tile-label">семейства Stryker, две планки</p></div>
-        <div class="tile"><p data-block="era-5.tile-4-value" class="tile-value">≈30</p><p data-block="era-5.tile-4-label" class="tile-label">семейств docs:check</p></div>
-        <div class="tile"><p data-block="era-5.tile-5-value" class="tile-value">3 994</p><p data-block="era-5.tile-5-label" class="tile-label">теста</p></div>
-        <div class="tile"><p data-block="era-5.tile-6-value" class="tile-value">8</p><p data-block="era-5.tile-6-label" class="tile-label">коммитов подряд с пометкой «Tag: none» в конце эпохи</p></div>
+        <div class="tile"><p data-block="era-5.tile-3-value" class="tile-value">2</p><p data-block="era-5.tile-3-label" class="tile-label">мутационных прогона, каждый со своей планкой</p></div>
+        <div class="tile"><p data-block="era-5.tile-4-value" class="tile-value">30</p><p data-block="era-5.tile-4-label" class="tile-label">семейств docs:check, около того</p></div>
+        <div class="tile"><p data-block="era-5.tile-5-value" class="tile-value">3&nbsp;994</p><p data-block="era-5.tile-5-label" class="tile-label">теста</p></div>
+        <div class="tile"><p data-block="era-5.tile-6-value" class="tile-value">8</p><p data-block="era-5.tile-6-label" class="tile-label">коммитов подряд без тега</p></div>
       </div>
 
       <figure class="chart reveal mt-10" data-chart="parts">
         <figcaption>
           <p data-block="era-5.chart-title" class="chart-title">Части харнеса</p>
-          <p data-block="era-5.chart-sub" class="chart-sub">Скиллы, агенты и собственные правила линта в дереве на каждом коммите.</p>
+          <p data-block="era-5.chart-sub" class="chart-sub">Скиллы, агенты и проектные правила линта в дереве на каждом коммите.</p>
         </figcaption>
         <div class="chart-legend"></div>
         <div class="chart-plot"></div>
@@ -1057,62 +545,26 @@
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span data-block="era-6.band-era" class="text-ink">Эпоха 6 из 7</span><span data-block="era-6.band-dates">26 августа – 2 сентября</span><span data-block="era-6.band-commits">коммиты 245–274</span>
+        <span data-block="era-6.band-era" class="text-ink">Эпоха 6 из 7</span><span data-block="era-6.band-dates">26 августа — 2 сентября</span><span data-block="era-6.band-commits">Коммиты 245–274</span>
       </div>
 
-      <h2 data-block="era-6.title" id="era-6-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Харнес ведёт записи о себе</h2>
+      <h2 data-block="era-6.title" id="era-6-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Харнес берёт себя на учёт</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p data-block="era-6.lead">
-          В этой эпохе новых частей почти не появилось. Зато исчезла одна: таблица
-          маршрутизации в шапке CLAUDE.md, которая со второй эпохи говорила модели, какой
-          скилл читать, — вторая копия факта, тихо разошедшаяся с первой. Когда
-          подключили проверку, пришедшую ей на смену, она сработала на каждом скилле
-          репозитория: ни одно описание не говорило, когда нужен сам скилл. Та же серия ревизий
-          нашла у линта сразу три слепых пятна, включая сотню спеков, загружавших проверяемый
-          код через <code>await import(...)</code>, куда не заглядывал ни один запрет
-          импортов. А число наград, которые бот может раздать, стояло «тридцать шесть» в шести
-          местах, и их было сорок пять.
-        </p>
+        <p data-block="era-6.lead">Новых частей в этой эпохе почти не прибавилось. Зато у старых нашлись слепые места: три в линте и одно в таблице, по которой модель выбирала, какой скилл открыть. А ещё харнес стал записывать, что делал.</p>
 
         <details class="era-detail">
-          <summary data-block="era-6.d1-summary"><span class="era-detail-h">Слепые пятна линта</span><span class="era-detail-n">ещё 2 правила линта</span></summary>
-        <p data-block="era-6.d1-p1">
-          ESLint ни разу не запускали на папке
-          сценариев. А зоны импортов видели только статический <code>import</code>.
-          Теперь каждый запрет записан дважды, для
-          статического и для динамического импорта.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fee84a4" rel="noopener">fee84a4</a>
-          Ещё два правила из прозы стали линтом. Одно — ровесник первого коммита: базу данных
-          открывает один-единственный файл.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/76a0ee0" rel="noopener">76a0ee0</a>
-          Другое: ряд «Отмена — Подтвердить» на каждом экране собирается в одном месте.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6232fe5" rel="noopener">6232fe5</a>
-          А рукописный список фич в конфиге линта заменили чтением папки, потому что «папка,
-          которой в нём не было, не получала никакой ограды — молча».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a>
-        </p>
+          <summary data-block="era-6.d1-summary"><span class="era-detail-h">Слепые места линта</span><span class="era-detail-n">ещё 2 правила</span></summary>
+        <p data-block="era-6.d1-p1">ESLint ни разу не запускали на папке со сценариями, а запреты на импорт видели только прямую форму: сотня спек-файлов, подтягивающих проверяемый модуль через <code class="cmd">await import</code>, под них не попадала никогда. Теперь каждый такой запрет описан дважды, на оба написания <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/fee84a4" rel="noopener">fee84a4</a>. Ещё два правила переехали из прозы в линт: базу данных открывает единственный файл, а кнопки «Отмена» и «Подтвердить» любой экран собирает в одном ряду <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/76a0ee0" rel="noopener">76a0ee0</a> <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6232fe5" rel="noopener">6232fe5</a>. Список фич в конфиге ESLint вели руками, и забытая папка молча оставалась непроверенной; теперь его читают прямо с диска <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a>.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-6.d2-summary"><span class="era-detail-h">Где скилл говорит, когда он нужен</span></summary>
-        <p data-block="era-6.d2-p1">
-          Ту же роль, что и таблица, играло описание самого скилла, и ни то, ни другое
-          никто не проверял: в четвёртой эпохе описания научили называть задачу, но стадию
-          процесса не называло ни одно, а таблица и описания разошлись. Описание каждого скилла теперь само
-          называет стадию, а docs:check держит описание, заголовок скилла и схему процесса в
-          согласии друг с другом. Учёт скиллов с тех пор ведёт схема: она рисует каждый
-          скилл и каждого агента на своей стадии, и docs:check проверяет её в обе стороны.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a>
-          Описание <code>finish-phase</code> поменялось на противоположное: было «Загружай его,
-          когда принят ЛЮБОЙ список изменений в этом репозитории», стало «НЕ загружай его на
-          стадии 1» — после того как
-          чекап обнаружил, что старая формулировка срабатывает на две стадии раньше срока.
-        </p>
+          <summary data-block="era-6.d2-summary"><span class="era-detail-h">Когда открывать скилл</span></summary>
+        <p data-block="era-6.d2-p1">Со второй эпохи таблица в начале CLAUDE.md говорила модели, какой скилл читать под какую работу; ту же роль играло и его собственное описание. Ни то ни другое никто не сверял, и они разъехались: четвёртая эпоха научила описания говорить о задаче, но этап не указывало ни одно. Таблицу удалили, а пришедшая на её место проверка сработала на каждом скилле, потому что ни один не говорил, когда он нужен. Теперь каждый называет свой этап, <code class="cmd">docs-check</code> держит этот текст, заголовок и схему потока в согласии, а сама схема рисует всякий скилл и агент на его этапе — сверка идёт в обе стороны. У finish-phase формулировка «загружай, когда принят любой список правок» сменилась на «не загружай на этапе 1»: чекап заметил, что старая срабатывала на два этапа раньше <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a>.</p>
 
           <div class="reveal mt-10 max-w-[68ch]">
-                <p data-block="era-6.tn-eyebrow" class="eyebrow">Тогда и сейчас · как скилл говорит, когда он нужен</p>
-        <p data-block="era-6.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">Два артефакта из репозитория, на английском: таблица из CLAUDE.md, где нужную строку читатель ищет сам, и описание скилла, которое само называет свою стадию.</p>
+                <p data-block="era-6.tn-eyebrow" class="eyebrow">Тогда и теперь: когда открывать скилл</p>
+        <p data-block="era-6.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">Два артефакта из репозитория: таблица из <code class="cmd">CLAUDE.md</code>, где нужную строку читатель ищет сам, и описание скилла, которое называет свою стадию.</p>
         <div class="then-now mt-3" data-then-now>
           <div class="then-now-tabs">
             <button data-block="era-6.tn-tab-1" type="button" class="then-now-tab" aria-pressed="true">CLAUDE.md · 1 августа</button>
@@ -1131,9 +583,7 @@ a release being cut, an external list of changes that has run out, or the
 user asking whether the code is releasable. Do NOT load it at stage 1:
 recognising a list of changes as a phase is not the same as opening this
 skill …"</div>
-          <p data-block="era-6.tn-note" class="then-now-note">Таблица маршрутизации, которой CLAUDE.md открывался начиная с
-            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>, и собственная шапка скилла после того, как
-            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a> удалил таблицу.</p>
+          <p data-block="era-6.tn-note" class="then-now-note">Таблица, с которой <code class="cmd">CLAUDE.md</code> начинался в первом из этих коммитов, и шапка скилла после второго, который эту таблицу удалил <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a> <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a>.</p>
           </div>
           </div>
         </details>
@@ -1141,83 +591,40 @@ skill …"</div>
 
       <div class="prose reveal mt-10 max-w-[68ch]">
         <details class="era-detail">
-          <summary data-block="era-6.d3-summary"><span class="era-detail-h">Схема процесса, исправленная пять раз за день</span><span class="era-detail-n">5 коммитов</span></summary>
-        <p data-block="era-6.d3-p1">
-          Схему процесса прочитали как прозу, шаг за шагом, и несколько шагов оказались не
-          там, где они происходят. Два шага, нужные каждой фазе, изучить проект и прочитать
-          список долгов, стояли в ветке, куда заходит только починка бага. Другой пример —
-          вопрос, на который можно ответить, открыв файлы репозитория; такой вопрос модель
-          отдаёт отдельному агенту. На схеме этот шаг стоял на четвёртой стадии, рядом с
-          ревью. На деле он случается в первой, до того как владельца спросили о чём-либо:
-          репозиторий спрашивают раньше владельца.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/8a1bfc2" rel="noopener">8a1bfc2</a>
-          26 августа расположение шагов на схеме правили пять коммитов подряд (ещё два в тот
-          день дорисовали шаги про журнал фазы), и два из пяти признавали, что «ничто механическое не проверяет, что шаг стоит там, где он на
-          самом деле происходит».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/650cdec" rel="noopener">650cdec</a>
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3beac4c" rel="noopener">3beac4c</a>
-        </p>
+          <summary data-block="era-6.d3-summary"><span class="era-detail-h">Схема флоу поправлена за день</span><span class="era-detail-n">5 коммитов</span></summary>
+        <p data-block="era-6.d3-p1">Схему потока прочитали как текст, и несколько шагов оказались не там, где случаются. Изучить проект и прочитать список долгов — два шага, нужные каждой фазе, — стояли в ветке, куда заходит только исправление бага; вопрос к репозиторию, на который он способен ответить, был нарисован на четвёртом этапе, а задаётся он на первом, ещё до того, как о чём-либо спрашивают владельца. 26 августа пять коммитов подряд передвигали шаги по местам <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/8a1bfc2" rel="noopener">8a1bfc2</a>. Два из них признали, что ничто механическое не проверяет, стоит ли шаг там, где он происходит <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/650cdec" rel="noopener">650cdec</a>, <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3beac4c" rel="noopener">3beac4c</a>. Журнал фаз дорисовали тем же днём, двумя правками позже.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-6.d4-summary"><span class="era-detail-h">Логбук</span><span class="era-detail-n">2 поля</span></summary>
-        <p data-block="era-6.d4-p1">
-          Ответом на это стали записи. Папка логбука хранит по одному логу на фазу,
-          написанному на ретроспективе: что просили, какого рода была работа, что прогнали,
-          что делегировали, что перестроили и какой гейт нашёл каждый дефект.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/db81a3a" rel="noopener">db81a3a</a>
-          Два поля лога — пройденный путь и пропущенные стадии — называют их словами самой
-          схемы, и вместе они обязаны перечислить все стадии без исключения. Так фаза, тихо
-          обошедшая стадию, читается иначе, чем та, что её просто не упомянула.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f4b09e7" rel="noopener">f4b09e7</a>
-        </p>
-        <p data-block="era-6.d4-p2">
-          Единственное правило, которое по-настоящему важно: «Число, которое ты не измерил,
-          записывается как <code>not measured</code>, а не оценивается на глаз». Первый же
-          лог, написанный по этому правилу, показал, зачем оно. Два подсчёта в нём оказались
-          неверны: обе цифры можно было проверить одной командой <code>git log</code>, и обе
-          ошибались в лестную сторону — ту, где день выглядит лучше.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/db81a3a" rel="noopener">db81a3a</a>
-        </p>
-        <p data-block="era-6.d4-p3">
-          Соседняя папка хранит каждый отчёт чекапа, и их никогда не чистят. В
-          каждом есть таблица измерений, чтобы при следующем заходе можно было спросить,
-          сдвинулось ли число. Первый отчёт в ней — от нового прогона в конце августа, не от того, что в четвёртой
-          эпохе.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/b8cb5ea" rel="noopener">b8cb5ea</a>
-        </p>
+          <summary data-block="era-6.d4-summary"><span class="era-detail-h">Журнал фаз</span><span class="era-detail-n">2 поля</span></summary>
+        <p data-block="era-6.d4-p1">Проверить схему машиной нельзя, поэтому завели журнал: одна запись на фазу, и пишут её на ретроспективе. В ней сказано, о чём просил владелец, какого рода была работа, какие команды запускали, что отдали агентам, что переделывали и какой гейт нашёл каждый дефект <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/db81a3a" rel="noopener">db81a3a</a>. Два поля — пройденный путь и пропущенные стадии — заполняют названиями с самой схемы, и вместе они обязаны перечислить её целиком. Значит, стадия, которую обошли стороной, всё равно названа в журнале своим именем <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f4b09e7" rel="noopener">f4b09e7</a>.</p>
+        <p data-block="era-6.d4-p2">Главное правило одно: неизмеренное число записывается как «не измерено», а не прикидывается на глаз. Первый лог под ним содержал два неверных счётчика; оба проверялись одной командой <code class="cmd">git log</code>, и оба врали в лестную сторону <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/db81a3a" rel="noopener">db81a3a</a>.</p>
+        <p data-block="era-6.d4-p3">Рядом лежит папка со всеми отчётами чекапов, из неё ничего не выбрасывают, и в каждом стоит таблица замеров, чтобы следующий раз можно было спросить, сдвинулось ли число. Сравнивать, правда, выходит не с самого начала: раньше других сохранён прогон конца августа, а тот, о котором рассказывает четвёртая эпоха, сюда не попал <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/b8cb5ea" rel="noopener">b8cb5ea</a>.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-6.d5-summary"><span class="era-detail-h">Подсчёты гниют</span></summary>
-        <p data-block="era-6.d5-p1">
-          Самый повторяющийся урок эпохи — мелкий. Так же, как число наград, сгнили и счёт
-          файлов со спеками, и колонка с числом строк. Потом число убрали совсем, а гейт для него
-          рассмотрели и отвергли: «проверка защищает факт, от которого что-то зависит, а от
-          этого не зависит ничего».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/25108af" rel="noopener">25108af</a>
-        </p>
+          <summary data-block="era-6.d5-summary"><span class="era-detail-h">Числа в тексте устаревают</span></summary>
+        <p data-block="era-6.d5-p1">Самый повторяемый урок эпохи невелик: число наград, которые бот умеет выдавать, в шести местах было записано как «тридцать шесть», а их было сорок пять; так же устарели счётчик спек-файлов и столбец с длиной файлов в строках. Такую цифру не исправляют, а убирают. Гейт для неё обсуждали и отвергли: проверка нужна факту, от которого что-то зависит, а здесь такого нет <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/25108af" rel="noopener">25108af</a>.</p>
         </details>
       </div>
 
-      <blockquote data-block="era-6.q1" class="said reveal mt-10 max-w-[60ch]">
-        «Факт, записанный в двух местах, — это та копия, которая гниёт».
-        <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a> · 28 августа · в оригинале: a fact stated in two places is the copy that rots</cite>
+      <blockquote data-block="era-6.q1" class="said reveal mt-10 max-w-[60ch]">«Факт, записанный дважды, устаревает в одном из мест.»
+        <cite><a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a> · 28 августа · в оригинале: a fact stated in two places is the copy that rots</cite>
       </blockquote>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <div class="tile"><p data-block="era-6.tile-1-value" class="tile-value">11 + 7</p><p data-block="era-6.tile-1-label" class="tile-label">скиллов и агентов</p></div>
-        <div class="tile"><p data-block="era-6.tile-2-value" class="tile-value">7</p><p data-block="era-6.tile-2-label" class="tile-label">собственных правил линта</p></div>
+        <div class="tile"><p data-block="era-6.tile-2-value" class="tile-value">7</p><p data-block="era-6.tile-2-label" class="tile-label">правил линта проекта</p></div>
         <div class="tile"><p data-block="era-6.tile-3-value" class="tile-value">32</p><p data-block="era-6.tile-3-label" class="tile-label">семейства docs:check</p></div>
-        <div class="tile"><p data-block="era-6.tile-4-value" class="tile-value">4 367</p><p data-block="era-6.tile-4-label" class="tile-label">тестов</p></div>
-        <div class="tile"><p data-block="era-6.tile-5-value" class="tile-value">178</p><p data-block="era-6.tile-5-label" class="tile-label">e2e-кейсов</p></div>
-        <div class="tile"><p data-block="era-6.tile-6-value" class="tile-value">359</p><p data-block="era-6.tile-6-label" class="tile-label">строк в CLAUDE.md</p></div>
+        <div class="tile"><p data-block="era-6.tile-4-value" class="tile-value">4&nbsp;367</p><p data-block="era-6.tile-4-label" class="tile-label">тестов</p></div>
+        <div class="tile"><p data-block="era-6.tile-5-value" class="tile-value">178</p><p data-block="era-6.tile-5-label" class="tile-label">сценариев e2e</p></div>
+        <div class="tile"><p data-block="era-6.tile-6-value" class="tile-value">359</p><p data-block="era-6.tile-6-label" class="tile-label">строк в <code class="cmd">CLAUDE.md</code></p></div>
       </div>
 
       <figure class="chart reveal mt-10" data-chart="lines">
         <figcaption>
-          <p data-block="era-6.chart-title" class="chart-title">Продукт и харнес в строках текста</p>
-          <p data-block="era-6.chart-sub" class="chart-sub">Исходники в <code class="cmd">src/</code> без спеков и стабов — и скиллы, агенты, документы и код docs:check, которые ими управляют.</p>
+          <p data-block="era-6.chart-title" class="chart-title">Продукт и харнес в строках</p>
+          <p data-block="era-6.chart-sub" class="chart-sub">На каждом коммите: код бота в <code class="cmd">src/</code> без тестов и заглушек, а рядом всё, что им управляет, — скиллы, агенты, документы и сам <code class="cmd">docs:check</code>.</p>
         </figcaption>
         <div class="chart-legend"></div>
         <div class="chart-plot"></div>
@@ -1231,102 +638,36 @@ skill …"</div>
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <div class="era-band">
         <span class="era-dot" style="background: var(--era)"></span>
-        <span data-block="era-7.band-era" class="text-ink">Эпоха 7 из 7</span><span data-block="era-7.band-dates">3–11 сентября</span><span data-block="era-7.band-commits">коммиты 275–314</span>
+        <span data-block="era-7.band-era" class="text-ink">Эпоха 7 из 7</span><span data-block="era-7.band-dates">3–11 сентября</span><span data-block="era-7.band-commits">Коммиты 275–314</span>
       </div>
 
-      <h2 data-block="era-7.title" id="era-7-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Агент становится пользователем, а у харнеса появляется линейка</h2>
+      <h2 data-block="era-7.title" id="era-7-heading" class="mt-8 max-w-[24ch] text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Агент за пультом, харнес под линейкой</h2>
 
       <div class="prose reveal mt-6 max-w-[68ch]">
-        <p data-block="era-7.lead">
-          Деплой отказывал в трети случаев с 31 августа, и никто этого не замечал, потому что
-          «неудавшаяся загрузка выглядит ровно так же, как загрузка, не нашедшая ничего
-          нового». Чтобы это найти, пришлось читать журнал сервера, а не README, — и это
-          задало тон эпохе, которая перестала верить тому, что харнес говорит о себе. Потом
-          скрипты перестроили вокруг факта, верного с первого коммита и ни на что не
-          влиявшего: их единственный пользователь — агент. Двадцать три скрипта стали восемью,
-          а каждый гейт — строкой одной таблицы, оставляющей после себя файл вердикта.
-          Последней пришла линейка — замороженная задача в огороженном клоне, решаемая
-          вслепую, — и её первая честная таблица сказала то, чего гейты сказать не могли:
-          проходят все модели, а различают их только колонки процесса.
-        </p>
+        <p data-block="era-7.lead">Эта эпоха перестала верить харнесу на слово: чекап полез в журнал сервера вместо README и увидел, что деплой падал уже несколько дней, а не замечал этого никто; скрипты переписали под их единственного пользователя, агента; а под конец и для самого харнеса нашлась мерка.</p>
 
         <details class="era-detail">
-          <summary data-block="era-7.d1-summary"><span class="era-detail-h">Две починки для настоящего вечера</span><span class="era-detail-n">11 партий</span></summary>
-        <p data-block="era-7.d1-p1">
-          За столом двое зовутся Ромой, второго записывают как Романи, чтобы таблица их
-          различала. В одну пятницу набрали не того: одиннадцать партий ушли человеку, который
-          остался дома, и вечер чинили по ssh скриптом. Из этого вышел
-          <code class="cmd">/replace</code>: два имени набраны, решение зачитано обратно вместе с числом
-          партий, один тап. Ревьюер плана нашёл дыру до того, как появилась первая строка:
-          экран несёт id игрока, созданного в момент отправки, поэтому «Подтвердить» заново
-          всё вычисляет и отвечает «экран устарел», а не падает.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/9b28574" rel="noopener">9b28574</a>
-        </p>
-        <p data-block="era-7.d1-p2">
-          Урок для харнеса лежал ниже. Фича не может импортировать другую, поэтому парсер имён и
-          поворот стола переехали в <code class="cmd">shared/</code> раньше, чем
-          <code class="cmd">/replace</code> смог появиться. А вторая фича, слушающая набранный
-          текст, обнажила сбой, который прятал случай с одной фичей: первый слушатель
-          съедал все текстовые сообщения, предназначенные слушателям, стоявшим за ним.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/7d2ad6d" rel="noopener">7d2ad6d</a>
-        </p>
+          <summary data-block="era-7.d1-summary"><span class="era-detail-h">Две починки после живой игры</span><span class="era-detail-n">11 партий</span></summary>
+        <p data-block="era-7.d1-p1">За столом два Ромы, второго записывают как Романи; в один из вечеров ввели не того, и 11 партий ушли человеку, который остался дома. Ошибку исправили по ssh скриптом. Так появилась команда <code class="cmd">/replace</code>: два имени вводятся текстом, бот показывает решение с числом партий, одно нажатие. Дыру нашёл plan-reviewer, когда ни одной строки ещё не было: он спросил, что случится, если таблица изменится между показом решения и подтверждением. Поэтому Confirm пересчитывает всё заново и отвечает «экран устарел», а не падает <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/9b28574" rel="noopener">9b28574</a>.</p>
+        <p data-block="era-7.d1-p2">Харнес заодно напомнил о себе: фича не имеет права импортировать другую, поэтому разбор списка имён и порядок мест за столом сперва переехали в общий код, и уже оттуда их берёт <code class="cmd">/replace</code>. А когда набранный текст понадобился второму экрану, открылось, что первый обработчик забирает каждое сообщение себе и дальше него оно не идёт <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/7d2ad6d" rel="noopener">7d2ad6d</a>.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-7.d2-summary"><span class="era-detail-h">Чекап читает журнал</span><span class="era-detail-n">181 срабатывание</span></summary>
-        <p data-block="era-7.d2-p1">
-          Первый чекап назвал анонимную загрузку деплоя дизайном. Второй нашёл 181 срабатывание
-          таймера деплоя с 31 августа, закончившееся отказом GitHub отдать файл без авторизации.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6207423" rel="noopener">6207423</a>
-          Загрузка получила ключ. Фаза, разобравшая остаток отчёта, посчитала процесс: три фазы из двенадцати не
-          написали журнал фазы, хотя их коммит заявлял ретроспективу, а шесть из десяти сломали
-          команду шелла на обратном слэше, который уже запрещали две записи в памяти. Оба стали хуками:
-          один на сообщение коммита, другой на команду шелла до того, как её увидит шелл.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/02277c0" rel="noopener">02277c0</a>
-        </p>
-        <p data-block="era-7.d2-p2">
-          Один гейт переехал из-за того, во сколько он обходился: ретроспектива шла в форке разговора,
-          который пересылает всю расшифровку при каждом вызове. Теперь она идёт в самом
-          разговоре.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f1f874e" rel="noopener">f1f874e</a>
-        </p>
+          <summary data-rev="2" data-block="era-7.d2-summary"><span class="era-detail-h">Чекап читает системный журнал</span><span class="era-detail-n">181 неудавшийся fetch</span></summary>
+        <div data-block="era-7.d2-p1"><p>Сервер забирал тег без учётной записи GitHub, и первый чекап решил, что так и задумано. Второй прочитал журнал сервера и нашёл, что таймер деплоя падал 181 раз с 31 августа по 3 сентября, из них 107 — за одно 2 сентября, примерно треть попыток того дня; почти каждая строка говорила одно: git не смог прочитать имя пользователя для GitHub. Никто ничего не замечал, потому что снаружи провал неотличим от ответа «ничего нового». Серверу выдали ключ <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/6207423" rel="noopener">6207423</a>.</p>
+<p class="mt-2">Фаза, взявшая остаток отчёта, посчитала сам процесс: из двенадцати фаз после 28 августа три не оставили записи в журнале, хотя заявляли ретроспективу; второй подсчёт, по десяти оставшимся, нашёл шесть, где команда shell сломалась на обратной косой черте, запрещённой правилом уже дважды. Каждая из двух ошибок стала хуком: один читает сообщение коммита, другой проверяет команду перед запуском <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/02277c0" rel="noopener">02277c0</a>.</p></div>
+        <p data-block="era-7.d2-p2">Один гейт передвинули из-за цены: ретроспектива работала в ответвлении разговора, а оно при каждом вызове пересылает весь транскрипт заново; теперь она идёт там же, где вся остальная работа <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/f1f874e" rel="noopener">f1f874e</a>.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-7.d3-summary"><span class="era-detail-h">Двадцать три скрипта становятся восемью</span><span class="era-detail-n">1 463 прогона тестов</span></summary>
-        <p data-block="era-7.d3-p1">
-          Вердикт гейта сидел посреди
-          потока, у которого агент видит только хвост, так что каждый прогон той недели шёл через
-          «сохрани лог, погрепай лог». А релизная батарея шла двадцать девять минут
-          внутри git push, где агент терял её из виду и правил дерево под ней. Теперь один раннер
-          запускает любой гейт, пишет его вывод в лог, оставляет файл вердикта с кодом выхода,
-          длительностью и числами, прочитанными из собственного JSON инструмента, и
-          пересобирает абзац после каждого гейта, «чтобы коммит его вставлял, а не перепечатывал».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e026d5e" rel="noopener">e026d5e</a>
-        </p>
-        <p data-block="era-7.d3-p2">
-          Затем владелец попросил того же для всех остальных скриптов, а всё, что агент никогда
-          не запускает, — убрать. Подсчёт по расшифровкам за месяц показал, где на самом деле
-          лежит цена, и лежала она не в скриптах: 14 301 вызов инструментов, из них 1 463 прогона тестов
-          по одному спеку, набранных вручную, и каждый читался через grep по потоку. Каждый скрипт, оставшийся в
-          package.json, за месяц запускали, так что больше ничего не удалили, «и журнал говорит
-          это, вместо того чтобы удалять для эффекта».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a>
-        </p>
-        <p data-block="era-7.d3-p3">
-          Проверка документов выучила таблицу раннера и стала
-          отказывать голым <code class="cmd">npx eslint</code> и <code class="cmd">npm test</code>,
-          потому что с переехавшими конфигами они ведут себя неправильно; первый прогон нашёл 63
-          устаревших имени. Пока это правило писалось для документов, агент двенадцать раз набрал
-          те же команды руками, так что хук отказывает им и в шелле агента. Каждый переехавший гейт
-          и каждое новое правило доказали намеренной поломкой, прежде чем трогать следующее, —
-          четырнадцать поломок, и четыре попали туда, куда правило не смотрело.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a>
-        </p>
+          <summary data-block="era-7.d3-summary"><span class="era-detail-h">Из двадцати трёх скриптов восемь</span><span class="era-detail-n">1&nbsp;463 прогона тестов</span></summary>
+        <p data-block="era-7.d3-p1">Вердикт гейта лежал посреди потока вывода, а агент видит только его хвост, поэтому каждый запуск шёл по схеме «сохрани вывод, поищи в нём»; релизная батарея двадцать девять минут работала внутри git push, где она пропадала из виду. Теперь всё запускает один раннер: он пишет вывод в лог, оставляет файл вердикта с кодом выхода, длительностью и числами из JSON самого инструмента, а после каждого прогона пересобирает абзац Gates, чтобы коммит вставлял его готовым, а не набирал вручную <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/e026d5e" rel="noopener">e026d5e</a>.</p>
+        <p data-rev="2" data-block="era-7.d3-p2">Владелец попросил того же для остальных скриптов, а всё, чем агент никогда не пользуется, убрать. Подсчёт по транскриптам за месяц дал 14&nbsp;301 вызов инструментов, и 1&nbsp;463 из них были тесты одного спека, набранные вручную и прочитанные через grep по потоку <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a>. Восемь скриптов, оставшихся в package.json после переезда гейтов в свою таблицу, за то же время запускались все до одного, так что удалять оказалось нечего — и в журнале записано именно это.</p>
+        <p data-block="era-7.d3-p3">Проверка документов сверяется со списком гейтов и отклоняет голый <code class="cmd">npx eslint</code> или <code class="cmd">npm test</code>: конфиги лежат теперь в отдельной папке, и без них такая команда меряет не то. Первый прогон нашёл 63 устаревших названия. Пока это писали, агент двенадцать раз набрал те же команды руками, так что их не пропускает и хук в шелле. Каждый переехавший гейт и каждый новый запрет доказывали нарочным сломом: проб вышло четырнадцать, и четыре сломали то, за чем проверяемое правило не следит <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a>.</p>
 
       <div class="reveal mt-10 max-w-[68ch]">
-        <p data-block="era-7.tn-eyebrow" class="eyebrow">Тогда и сейчас · скрипты в package.json</p>
-        <p data-block="era-7.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">Первая вкладка — блок скриптов, каким он был в начале 9 сентября. Вторая — тот же блок четырьмя коммитами позже, когда гейты переехали в собственную таблицу. Обе на английском, потому что цитируют файл репозитория.</p>
+        <p data-block="era-7.tn-eyebrow" class="eyebrow">Тогда и теперь: скрипты в package.json</p>
+        <p data-block="era-7.tn-lead" class="mt-2 text-[15px] leading-relaxed text-muted">Первая вкладка: блок scripts на начало 9 сентября. Вторая: тот же список четыре коммита спустя, когда гейты переехали в собственную таблицу.</p>
         <div class="then-now mt-3" data-then-now>
           <div class="then-now-tabs">
             <button data-block="era-7.tn-tab-1" type="button" class="then-now-tab" aria-pressed="true">Коммит 290 · 9 сентября</button>
@@ -1340,221 +681,86 @@ test:coverage  test:mutation  test:mutation:changed
 e2e  e2e:changed  e2e:watch  e2e:test  e2e:typecheck</div>
           <div data-block="era-7.tn-body-2" class="then-now-body" hidden>prepare  start  start:prod
 check:quick  check:push  check:phase  check:release
-e2e:watch
-
-Every gate is a row in scripts/gates/gate-list.ts,
-run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
-          <p data-block="era-7.tn-note" class="then-now-note">Скрипты <code class="cmd">package.json</code> на
-            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/93a27ef" rel="noopener">93a27ef</a> и на
-            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a>.</p>
+e2e:watch</div>
+          <p data-block="era-7.tn-note" class="then-now-note">В первой вкладке скрипты <code class="cmd">package.json</code> стоят так, как их застал тот коммит <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/93a27ef" rel="noopener">93a27ef</a>. Во второй они лежат так, как их переписал следующий <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d49d590" rel="noopener">d49d590</a>.</p>
         </div>
       </div>
         </details>
 
         <details class="era-detail">
           <summary data-block="era-7.d4-summary"><span class="era-detail-h">Линейка для харнеса</span><span class="era-detail-n">4 модели</span></summary>
-        <p data-block="era-7.d4-p1">
-          «Харнес менялся каждую неделю, и ничто не говорило, стал ли он лучше; модели под ним
-          тоже менялись, и единственное сравнение, доступное кому угодно, — впечатление от одной
-          сессии против памяти о другой». 10 сентября в репозитории появился бенчмарк:
-          замороженная задача с брифом владельца, скрытым спеком и списком обязательств и раннер,
-          который делает из HEAD клон без истории, отдаёт бриф безголовому агенту, оценивает
-          результат гейт-раннером самого клона и пишет по строке на прогон. Единого балла нет
-          нарочно: во главе таблицы стоит приёмка, а гейты, обязательства, ходы, минуты и доллары
-          говорят, как её достигли. Награда, которую эта задача просит написать, никогда не вливается в основную ветку,
-          потому что в день, когда она попадёт в код, задача начнёт измерять память.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d011e68" rel="noopener">d011e68</a>
-        </p>
-        <p data-block="era-7.d4-p2">
-          В следующей фазе владелец спросил, что мешает модели заметить, что её измеряют, и
-          вычитать ответ прямо из репозитория, «и честным ответом было: почти ничего». Калибровку отменили на
-          месте. Клон переехал во временную папку системы, исходники раннера из него вырезали. Хук,
-          записанный в клон, не пропускает ни один шаг, чей путь выходит за его пределы, а число
-          отказов стало колонкой таблицы.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5f5a120" rel="noopener">5f5a120</a>
-          Первая калибровка затем показала то, что показывает любой новый прибор. Ограда сработала
-          семь раз, и ни одно срабатывание не было шагом за пределы клона. А в колонке
-          минут стояло одиннадцать для прогона, который по времени файлов занял сорок шесть.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cf15a80" rel="noopener">cf15a80</a>
-          Обе колонки починили той же ночью.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3328b6e" rel="noopener">3328b6e</a>
-        </p>
-        <p data-block="era-7.d4-p3">
-          Таблицу переписали ещё раз, когда все четыре опробованные модели провалили одни и те же
-          два обязательства — единственные два, чей шаблон захватывает перенос строки: клон
-          выкачивается на Windows, где перед каждым переносом стоит возврат каретки. Когда сопоставление
-          починили, строки сказали то, что владелец и просил узнать. «Приёмка и гейты
-          упираются в потолок на любой опробованной модели, так что говорят только о том, правильно ли
-          написана награда». Колонки процесса расставляют модели в ожидаемом порядке: Haiku на среднем
-          усилии выполнила восемь обязательств из одиннадцати, долг не назвала и стоила доллар и
-          шесть минут; Opus на среднем усилии выполнила одиннадцать из одиннадцати, долг назвала и
-          стоила двадцать два доллара и тридцать шесть минут.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a05104e" rel="noopener">a05104e</a>
-        </p>
+        <p data-rev="2" data-block="era-7.d4-p1">Харнес менялся каждую неделю, и ничто не говорило, стал ли он лучше; внизу ещё и обновлялись модели, а сравнить можно было только впечатление от одной сессии с памятью о другой. 10 сентября в репозитории появился бенчмарк. Его задача заморожена: бриф владельца, спрятанный спек и список обязательств. Раннер делает копию HEAD без истории, отдаёт бриф агенту без интерфейса, оценивает результат её собственными гейтами и записывает по строке на прогон <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/d011e68" rel="noopener">d011e68</a>. Единой оценки нет намеренно: приёмка идёт заголовком, а гейты, обязательства, ходы модели, минуты и доллары говорят, какой ценой она достигнута. Три слова здесь свои. Награда — это фича, которую просят построить. Обязательство — один пункт брифа, по которому сверяют результат. Усилие — глубина рассуждения, на которую настроена модель. Награду в основную ветку не вливают никогда: в день, когда она туда попадёт, бенчмарк начнёт измерять память.</p>
+        <p data-block="era-7.d4-p2">Владелец спросил, что удерживает модель от того, чтобы догадаться о замере и вычитать ответ заранее, и честно признали: ничего. Прогон, который готовили для калибровки, отменили, клон переехал в системную временную папку, исходники раннера из него вырезали, хук внутри стал разворачивать всё, что ведёт за его пределы, а число отказов встало отдельным столбцом <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/5f5a120" rel="noopener">5f5a120</a>. Тот первый калибровочный прогон дал семь отказов, но ни один из них не был выходом из клона, а в столбце минут стояло одиннадцать там, где по времени файлов вышло сорок шесть; оба починили той же ночью <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cf15a80" rel="noopener">cf15a80</a> <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3328b6e" rel="noopener">3328b6e</a>.</p>
+        <p data-rev="2" data-block="era-7.d4-p3">Таблицу переписали ещё раз, когда все четыре модели провалили одни и те же два обязательства. Виновата была оценка, а не модели: только у этих двух шаблон поиска идёт через конец строки, а копия на Windows несёт возврат каретки перед каждым переносом, и на это он не был рассчитан. Четвёрка была такой: Haiku и Opus на среднем усилии, Fable на низком, Sonnet на высоком. Строки Fable и Sonnet пришли до ночных починок и несли числа, о которых уже было известно, что они ложные; их выбросили. Две другие пересчитали, так что в таблице осталось лишь то, что выдал раннер, которому можно верить, и той же ночью прошёл третий прогон уже на исправленном — на высоком усилии, с которым еженедельный чекап работает с тех пор <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/a05104e" rel="noopener">a05104e</a>. С работающей сверкой любая испробованная модель проходит приёмку и оставляет гейты зелёными; разница лишь в цене и в том, сколько обязательств закрыто. Haiku на среднем усилии выполнила восемь из одиннадцати, не тронула список долгов и обошлась в доллар и шесть минут; Opus на том же усилии справился со всеми одиннадцатью, список долгов пополнил и стоил двадцать два доллара и тридцать шесть минут.</p>
         </details>
 
         <details class="era-detail">
-          <summary data-block="era-7.d5-summary"><span class="era-detail-h">Чекап находит то, чего не видят гейты</span><span class="era-detail-n">13 предложений</span></summary>
-        <p data-block="era-7.d5-p1">
-          Четвёртый чекап, 11 сентября, прогнал полную мутационную батарею и нашёл её красной на
-          нетронутом HEAD: ни один мутационный конфиг не называл конфиг тестов, поэтому пробный
-          прогон собирал все спеки под корнем, а с 10 сентября среди них был скрытый спек
-          бенчмарка, который на снимке падает по замыслу.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/1f901b6" rel="noopener">1f901b6</a>
-          Он нашёл в документах тринадцать предложений, которые перестали быть правдой или
-          никогда ею не были, и ни одно из них не досягаемо для проверки документов, которая
-          «не умеет читать сервер или историю git».
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/187f621" rel="noopener">187f621</a>
-        </p>
-        <p data-block="era-7.d5-p2">
-          Потом он прочитал харнес так, как читает его единственный пользователь. Stop-хук в конце
-          каждого хода молча гонял автофикс линтера по всему дереву, правя файлы, которые агент не
-          просил трогать, и ничему не отказывая, «так что его нельзя было увидеть отказывающим».
-          Его больше нет. Абзац Gates, который коммит вставляет в своё сообщение, теперь открывается батареей,
-          HEAD и временем прогона, а хук коммита отвергает штамп, снятый на другом HEAD.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3f77a65" rel="noopener">3f77a65</a>
-          Релизная батарея ушла из хука пуша; хук теперь читает штамп и не пропускает тег, чья
-          батарея не была зелёной на этом коммите.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/81b76d1" rel="noopener">81b76d1</a>
-          У правил наград нашлась дюжина выживших мутантов на точных границах, и каждый — правило,
-          сдвиг которого на одну партию игрок заметит.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cf74fb1" rel="noopener">cf74fb1</a>
-          А тринадцать из шестнадцати журналов фаз, которые чекап вложил в отчёт, написали «не
-          измерено» про время работы — вопреки правилу, по которому число всегда есть откуда
-          взять. Теперь проверка документов отказывает такому полю.
-          <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/08aac82" rel="noopener">08aac82</a>
-        </p>
+          <summary data-block="era-7.d5-summary"><span class="era-detail-h">Куда гейты не дотягиваются</span><span class="era-detail-n">13 предложений</span></summary>
+        <p data-block="era-7.d5-p1">Четвёртый чекап, 11 сентября, запустил полную мутационную батарею и нашёл её красной на нетронутом HEAD: ни один из двух конфигов мутаций не говорил, с каким конфигом тестов гонять набор, поэтому пробный прогон собирал все спеки под корнем, а с 10 сентября среди них лежит спрятанный спек бенчмарка, который падает по замыслу <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/1f901b6" rel="noopener">1f901b6</a>. Ещё он выловил в документах тринадцать предложений, которые перестали быть правдой или никогда ею не были, и ни одно из них гейт документов достать не мог: он не читает ни сервер, ни историю git <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/187f621" rel="noopener">187f621</a>.</p>
+        <p data-block="era-7.d5-p2">Тот же чекап прочитал харнес так, как читает его единственный пользователь: хук в конце хода гонял автофикс линтера по всему дереву, правил файлы без спроса и ничего не отклонял, так что увидеть его отказ было нельзя, — его убрали <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/3f77a65" rel="noopener">3f77a65</a>. Абзац «Гейты», который коммит вставляет в сообщение, теперь открывается батареей, HEAD и временем, и штамп с чужого HEAD хук на коммите не примет. Сам прогон релизной батареи с пуша сняли: тег уходит, только если такой штамп на этом коммите зелёный <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/81b76d1" rel="noopener">81b76d1</a>.</p>
+          <p data-block="era-7.d5-p3">В правилах наград осталась дюжина выживших мутантов, и каждый сидел ровно на границе, которую игрок заметил бы сдвинутой на одну партию; каждой такой границе завели собственный случай <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/cf74fb1" rel="noopener">cf74fb1</a>. Писать «не измерено» положено там, где число никто не снимал, а затраченное время всегда можно прочитать потом, — поэтому тринадцать журналов фазы из шестнадцати ставили эти слова не на своём месте, и гейт документов такое поле больше не принимает <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/08aac82" rel="noopener">08aac82</a>.</p>
         </details>
       </div>
 
-      <blockquote data-block="era-7.q1" class="said reveal mt-10 max-w-[60ch]">
-        «Единственный пользователь харнеса — агент, а удобство человека вторично».
-        <cite><a href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a> · 9 сентября · в оригинале: the agent is the harness's only user, and a person's convenience is second</cite>
+      <blockquote data-block="era-7.q1" class="said reveal mt-10 max-w-[60ch]">«У харнеса один пользователь, и это агент; удобство человека стоит на втором месте.»
+        <cite><a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/af08fc5" rel="noopener">af08fc5</a> · 9 сентября · в оригинале: the agent is the harness's only user, and a person's convenience is second</cite>
       </blockquote>
 
       <div class="reveal mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <div class="tile"><p data-block="era-7.tile-1-value" class="tile-value">11 + 7</p><p data-block="era-7.tile-1-label" class="tile-label">скиллов и агентов</p></div>
-        <div class="tile"><p data-block="era-7.tile-2-value" class="tile-value">8</p><p data-block="era-7.tile-2-label" class="tile-label">собственных правил линта</p></div>
+        <div class="tile"><p data-block="era-7.tile-2-value" class="tile-value">8</p><p data-block="era-7.tile-2-label" class="tile-label">правил линта проекта</p></div>
         <div class="tile"><p data-block="era-7.tile-3-value" class="tile-value">23 → 8</p><p data-block="era-7.tile-3-label" class="tile-label">скриптов в package.json</p></div>
-        <div class="tile"><p data-block="era-7.tile-4-value" class="tile-value">5 043</p><p data-block="era-7.tile-4-label" class="tile-label">тестов</p></div>
-        <div class="tile"><p data-block="era-7.tile-5-value" class="tile-value">205</p><p data-block="era-7.tile-5-label" class="tile-label">e2e-кейсов</p></div>
-        <div class="tile"><p data-block="era-7.tile-6-value" class="tile-value">379</p><p data-block="era-7.tile-6-label" class="tile-label">строк в CLAUDE.md из 380</p></div>
+        <div class="tile"><p data-block="era-7.tile-4-value" class="tile-value">5&nbsp;043</p><p data-block="era-7.tile-4-label" class="tile-label">теста</p></div>
+        <div class="tile"><p data-block="era-7.tile-5-value" class="tile-value">205</p><p data-block="era-7.tile-5-label" class="tile-label">сценариев e2e</p></div>
+        <div class="tile"><p data-block="era-7.tile-6-value" class="tile-value">379<span class="text-dim text-[15px]">/380</span></p><p data-block="era-7.tile-6-label" class="tile-label">строк в CLAUDE.md и его бюджет</p></div>
       </div>
     </div>
   </article>
-
-  <section id="patterns" aria-labelledby="patterns-heading" class="border-t border-line">
-    <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-      <p data-block="patterns.eyebrow" class="eyebrow">Сквозь все семь эпох</p>
-      <h2 data-block="patterns.title" id="patterns-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Что повторялось</h2>
-      <p data-block="patterns.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">
-        Семь закономерностей проходят через всю историю. Каждая названа в коммите, а не
-        выведена. Это те же уроки, что сосчитаны в выводах выше, — только здесь каждый показан
-        как правило, в которое он превратился.
-      </p>
-
-      <ol class="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-        <li class="reveal">
-          <p data-block="patterns.r1-n" class="pattern-n">01</p>
-          <h3 data-block="patterns.r1-title" class="mt-2 text-[19px] font-bold">Проза становится машиной</h3>
-          <p data-block="patterns.r1-body" class="mt-2 text-[16px] leading-relaxed text-muted">Каждое правило начинается предложением в CLAUDE.md. Если машина может его проверить, оно становится правилом линта, хуком или семейством docs:check, а предложение удаляется. Повод измеряется, а не чувствуется: «правило в прозе нарушили тринадцать раз за неделю, а это признак, что ему нужна машина».
-            <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/08aac82" rel="noopener">08aac82</a></p>
-          <p data-block="patterns.r1-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-1" class="hover:text-ink">→ эпоха 1</a></p>
-        </li>
-        <li class="reveal">
-          <p data-block="patterns.r2-n" class="pattern-n">02</p>
-          <h3 data-block="patterns.r2-title" class="mt-2 text-[19px] font-bold">Правило, которое никогда не срабатывает, выглядит чистым</h3>
-          <p data-block="patterns.r2-body" class="mt-2 text-[16px] leading-relaxed text-muted">Правило, найденное мёртвым. Гейт, который проходил только потому, что на машине автора не было CRLF. Правила документов, оставшиеся зелёными, когда их предмет ломали нарочно. Ответ всегда один: прежде чем доверять новому правилу, докажи его намеренным нарушением, а потом руками поищи по дереву те формы записи нарушения, о которых автор правила не подумал.</p>
-          <p data-block="patterns.r2-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ эпоха 2</a></p>
-        </li>
-        <li class="reveal">
-          <p data-block="patterns.r3-n" class="pattern-n">03</p>
-          <h3 data-block="patterns.r3-title" class="mt-2 text-[19px] font-bold">Проверяй дифф и читай отчёт, который уже есть</h3>
-          <p data-block="patterns.r3-body" class="mt-2 text-[16px] leading-relaxed text-muted">Мутации по изменённым файлам, e2e по достижимым сценариям, один раунд добивания выживших, и никогда не перезапускать гейт, чтобы перечитать его вывод.</p>
-          <p data-block="patterns.r3-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ эпоха 2</a></p>
-        </li>
-        <li class="reveal">
-          <p data-block="patterns.r4-n" class="pattern-n">04</p>
-          <h3 data-block="patterns.r4-title" class="mt-2 text-[19px] font-bold">Каждому читателю дают бриф — и говорят меньше, чем знает автор</h3>
-          <p data-block="patterns.r4-body" class="mt-2 text-[16px] leading-relaxed text-muted">Ревью всегда делает агент, который не писал дифф. Картинки читает агент, который не знает, для чего они. Реплики бота читаются как предложения с настоящими значениями внутри. План критикуют до того, как появился код.</p>
-          <p data-block="patterns.r4-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-5" class="hover:text-ink">→ эпоха 5</a></p>
-        </li>
-        <li class="reveal">
-          <p data-block="patterns.r5-n" class="pattern-n">05</p>
-          <h3 data-block="patterns.r5-title" class="mt-2 text-[19px] font-bold">Урок, оставленный в чате, потерян</h3>
-          <p data-block="patterns.r5-body" class="mt-2 text-[16px] leading-relaxed text-muted">Ретроспектива — гейт, который стоит до релиза, а не после. Каждый урок обязан лечь правилом, проверкой или строкой скилла. А поскольку у каждого файла есть бюджет строк, новое правило вытесняет какое-то старое.</p>
-          <p data-block="patterns.r5-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-2" class="hover:text-ink">→ эпоха 2</a> · <a href="#era-5" class="hover:text-ink">→ эпоха 5</a></p>
-        </li>
-        <li class="reveal">
-          <p data-block="patterns.r6-n" class="pattern-n">06</p>
-          <h3 data-block="patterns.r6-title" class="mt-2 text-[19px] font-bold">Подсчёты в прозе гниют</h3>
-          <p data-block="patterns.r6-body" class="mt-2 text-[16px] leading-relaxed text-muted">Число, которое меняется при каждом изменении списка, удаляют, а не правят. Исключение — число, от которого что-то зависит: его держит проверка.</p>
-          <p data-block="patterns.r6-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-6" class="hover:text-ink">→ эпоха 6</a></p>
-        </li>
-        <li class="reveal">
-          <p data-block="patterns.r7-n" class="pattern-n">07</p>
-          <h3 data-block="patterns.r7-title" class="mt-2 text-[19px] font-bold">Каждый отчёт — в той форме, в какой его прочтут</h3>
-          <p data-block="patterns.r7-body" class="mt-2 text-[16px] leading-relaxed text-muted">У харнеса один пользователь, и это не человек. Вердикт — файл, который он может открыть, а не поток, у которого он видит хвост; красный гейт называет причины и одну команду, которая перезапускает его; ничто не ждёт терминала. Правило сформулировано в седьмой эпохе и применено задним числом ко всему, что написано раньше.</p>
-          <p data-block="patterns.r7-link" class="mt-2 font-mono text-[13px] text-dim"><a href="#era-7" class="hover:text-ink">→ эпоха 7</a></p>
-        </li>
-      </ol>
-
-      <p data-block="patterns.outro" class="mt-12 max-w-[68ch] text-[17px] leading-relaxed text-muted">
-        Что из этого стоит в репозитории сегодня — ниже, одним списком.
-      </p>
-    </div>
-  </section>
 
   <section id="today" aria-labelledby="today-heading" class="border-t border-line bg-panel">
     <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
       <p data-block="today.eyebrow" class="eyebrow">На коммите 314</p>
       <h2 data-block="today.title" id="today-heading" class="mt-4 text-[32px] font-black tracking-[-0.02em] sm:text-[42px]">Харнес сегодня</h2>
+      <p data-block="today.lead" class="mt-5 max-w-[68ch] text-[17px] leading-relaxed text-muted">Что от семи эпох осталось в репозитории, сведено в один список.</p>
 
       <dl class="mt-12 grid gap-5 sm:grid-cols-2">
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
-          <dt data-block="today.item-1-term" class="text-[18px] font-bold">Правила, загружаемые каждую сессию</dt>
-          <dd data-block="today.item-1-desc" class="mt-2 text-[15px] leading-relaxed text-muted">CLAUDE.md, 379 строк при бюджете 380.</dd>
+          <dt data-block="today.item-1-term" class="text-[18px] font-bold">Правила на каждую сессию</dt>
+          <dd data-block="today.item-1-desc" class="mt-2 text-[15px] leading-relaxed text-muted"><code class="cmd">CLAUDE.md</code>, 379 строк при бюджете 380.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
           <dt data-block="today.item-2-term" class="text-[18px] font-bold">Скиллы, 11</dt>
-          <dd data-block="today.item-2-desc" class="mt-2 text-[15px] leading-relaxed text-muted">add-a-feature, add-repository-method, finish-phase с пятью страницами рядом, fix-a-bug, refresh-the-pictures, retrospective, update-the-design-page, write-a-commit, write-a-doc, write-a-spec, write-an-e2e-scenario. Описание каждого называет его стадию в процессе.</dd>
+          <dd data-block="today.item-2-desc" class="mt-2 text-[15px] leading-relaxed text-muted">В дереве лежат <code class="cmd">add-a-feature</code>, <code class="cmd">add-repository-method</code>, <code class="cmd">finish-phase</code> с пятью страницами рядом, <code class="cmd">fix-a-bug</code>, <code class="cmd">refresh-the-pictures</code>, <code class="cmd">retrospective</code>, <code class="cmd">update-the-design-page</code>, <code class="cmd">write-a-commit</code>, <code class="cmd">write-a-doc</code>, <code class="cmd">write-a-spec</code> и <code class="cmd">write-an-e2e-scenario</code>; описание каждого называет стадию, на которой этот скилл открывают.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
           <dt data-block="today.item-3-term" class="text-[18px] font-bold">Агенты, 7</dt>
-          <dd data-block="today.item-3-desc" class="mt-2 text-[15px] leading-relaxed text-muted">phase-reviewer, plan-reviewer, poster-designer, poster-reader, copy-reader, skill-auditor, deep-checkup. У каждого контракт на бриф и строка <code class="cmd">Verdict:</code>.</dd>
+          <dd data-block="today.item-3-desc" class="mt-2 text-[15px] leading-relaxed text-muted">В харнесе стоят <code class="cmd">phase-reviewer</code>, <code class="cmd">plan-reviewer</code>, <code class="cmd">poster-designer</code>, <code class="cmd">poster-reader</code>, <code class="cmd">copy-reader</code>, <code class="cmd">skill-auditor</code> и <code class="cmd">deep-checkup</code>; каждый работает по своему контракту и начинает ответ строкой «Вердикт:».</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
           <dt data-block="today.item-4-term" class="text-[18px] font-bold">Хуки</dt>
-          <dd data-block="today.item-4-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Шесть. Линт на каждую правку, обязательная причина при правке схемы процесса, отказ принять ход, который заканчивается обещанием сделать работу вместо самой работы, отказ команде шелла с обратным слэшем там, где шелл его съест, отказ в запуске гейта, набранного руками мимо раннера, и ограда, которую бенчмарк записывает в свой клон. Git-хуки: проверка сообщения коммита для схемы процесса, журнала фазы и штампа Gates, и хук пуша, который выпускает тег только по зелёному штампу релизной батареи.</dd>
+          <dd data-block="today.item-4-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Шесть хуков стоят со стороны Claude: линтер проверяет файл, едва он записан; второй спрашивает причину за правку <code class="cmd">DEVELOPMENT-FLOW.md</code>; третий заворачивает ход, кончающийся обещанием поработать; четвёртый снимает команду с обратным слешем, который съедает оболочка; пятый не даёт набрать гейт руками мимо раннера; шестой не выпускает агента за пределы клона бенчмарка. Git добавляет ещё два: один читает сообщение коммита и не принимает его без журнала фазы, штампа гейтов и объяснения для сдвинутого шага схемы, другой отпускает тег только по зелёной отметке релизной батареи.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
           <dt data-block="today.item-5-term" class="text-[18px] font-bold">Линт</dt>
-          <dd data-block="today.item-5-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Восемь собственных правил и зоны импортов на каждый слой фичи, скомпилированные и для статических, и для динамических импортов.</dd>
+          <dd data-block="today.item-5-desc" class="mt-2 text-[15px] leading-relaxed text-muted">В конфиге стоят восемь собственных правил проекта и по зоне на каждый слой фичи, где сказано, откуда ему нельзя брать код; каждый запрет написан в двух видах — для статического импорта и для динамического.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6">
           <dt data-block="today.item-6-term" class="text-[18px] font-bold">Гейты</dt>
-          <dd data-block="today.item-6-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Девять в ритуале фазы, по порядку: линт и типы, покрытие, мутации по диффу, настоящий вечер, e2e по диффу, ревью, фразы бота, картинки, ретроспектива. Машинная половина — одиннадцать строк в одной таблице, запускаемых только через один раннер, каждая оставляет лог и файл вердикта; четыре батареи — по одной на каждый такой момент.</dd>
+          <dd data-block="today.item-6-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Девять в ритуале фазы, по порядку: линтер и типы, покрытие, мутации по диффу, реальный вечер, e2e по диффу, ревью, предложения, картинки, ретроспектива. Машинные гейты занимают одиннадцать строк одной таблицы, потому что гейт ритуала иногда разложен на несколько; запускаются они только через один раннер, и каждый оставляет лог и файл с вердиктом. Батареи собирают строки под четыре момента: быстрая проверка по ходу работы, конец фазы, пуш в CI и релизный тег.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6 sm:col-span-2">
           <dt data-block="today.item-7-term" class="text-[18px] font-bold">Документы</dt>
-          <dd data-block="today.item-7-desc" class="mt-2 text-[15px] leading-relaxed text-muted">README, PLAN, CLAUDE, TECH-DEBT, DEVELOPMENT-FLOW, четыре README в папках и логбук фаз и чекапов, и все они сверяются с кодом через проверку документов.</dd>
+          <dd data-block="today.item-7-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Гейт документов сверяет с кодом <code class="cmd">README.md</code>, <code class="cmd">PLAN.md</code>, <code class="cmd">CLAUDE.md</code>, <code class="cmd">TECH-DEBT.md</code>, <code class="cmd">DEVELOPMENT-FLOW.md</code>, ещё четыре <code class="cmd">README.md</code> внутри папок, а с ними журнал фаз и чекапов.</dd>
         </div>
         <div class="reveal lift rounded-2xl border border-line bg-card p-6 sm:col-span-2">
           <dt data-block="today.item-8-term" class="text-[18px] font-bold">Бенчмарк</dt>
-          <dd data-block="today.item-8-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Одна замороженная задача, которую агент решает вслепую в огороженном клоне, а оценивают гейты самого клона; по строке на прогон — приёмка, гейты, обязательства, срабатывания ограды, вызовы инструментов, минуты и доллары по моделям. Еженедельный чекап гоняет закреплённую модель, так что его строка сдвигается, только когда сдвинулся харнес. Пока три строки.</dd>
+          <dd data-block="today.item-8-desc" class="mt-2 text-[15px] leading-relaxed text-muted">Задача одна и заморожена: агент берётся за неё на холодную, внутри огороженного клона, где оценку ставят его же гейты. На каждый запуск в таблице появляется строка — приёмка, гейты, обязательства, отказы на выходе из клона, вызовы инструментов, минуты и доллары по модели. Еженедельный чекап всегда идёт на Opus с высоким усилием, чтобы его замеры сравнивались между собой, а всего прогонов пока три: эта модель на двух усилиях и более дешёвый Haiku рядом.</dd>
         </div>
       </dl>
 
       <div class="prose reveal mt-14 max-w-[68ch]">
         <h3 data-block="today.method-title" id="method">Как написана эта страница</h3>
-        <p data-block="today.method-body">
-          Прочитана только история git: 314 сообщений коммитов и диффы файлов харнеса на каждом
-          из них. Первые 274 прочитаны 3 сентября, сорок следующих — 14 сентября, тем же
-          способом. Никаких расшифровок сессий. Там, где мотив назван в коммите, он процитирован
-          в переводе; там, где закономерность видна по нескольким коммитам, текст говорит, что
-          это наблюдение. Графики посчитаны по дереву на каждом коммите. Хэши ведут на коммиты
-          на <a href="https://github.com/oleg-vasilyev/FoolProof/commits/main" rel="noopener">GitHub</a>.
-        </p>
+        <p data-block="today.method-body">Источник один: история git, 314 сообщений коммитов и диффы файлов харнеса в каждом. Первые 274 разобраны 3 сентября, остальные сорок 14-го, тем же способом; транскрипты сессий не открывались. Где мотив назван в сообщении, он процитирован; где закономерность видна только по ряду коммитов, текст так и говорит; графики посчитаны по дереву на каждом шаге истории; хэши ведут на GitHub.</p>
       </div>
     </div>
   </section>
@@ -1563,17 +769,15 @@ run only as `node scripts/gates/gate-runner.ts &lt;gate&gt;`.</div>
 
 <footer class="border-t border-line">
   <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-[15px] text-dim sm:flex-row sm:items-center sm:px-8">
-    <p data-block="footer.line">FoolProof — таблица результатов для подкидного дурака.</p>
+    <p data-block="footer.line">FoolProof ведёт счёт в подкидного дурака.</p>
     <nav aria-label="Подвал" class="flex flex-wrap gap-6 sm:ml-auto">
       <a data-block="footer.landing" href="../" class="hover:text-ink">Главная</a>
-      <a data-block="footer.github" href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="hover:text-ink">GitHub</a>
+      <a data-block="footer.github" href="https://github.com/oleg-vasilyev/FoolProof" rel="noopener" class="hover:text-ink">Код на GitHub</a>
       <a data-block="footer.licence" href="https://github.com/oleg-vasilyev/FoolProof/blob/main/LICENSE" rel="license noopener" class="hover:text-ink">Лицензия MIT</a>
-      <a data-block="footer.bot" href="https://t.me/FoolProofMegaBot" rel="noopener" class="hover:text-ink">Бот</a>
+      <a data-block="footer.bot" href="https://t.me/FoolProofMegaBot" rel="noopener" class="hover:text-ink">Открыть бота</a>
     </nav>
   </div>
-  <div data-block="footer.disclaimer" class="mx-auto max-w-6xl px-5 pb-10 font-mono text-[12px] text-edge sm:px-8">
-    Не связано с Telegram.
-  </div>
+  <div data-block="footer.disclaimer" class="mx-auto max-w-6xl px-5 pb-10 font-mono text-[12px] text-edge sm:px-8">Не связан с Telegram.</div>
 </footer>
 
 <script data-goatcounter="https://alehvasilyeu.goatcounter.com/count"
@@ -1615,14 +819,14 @@ document.addEventListener("keydown", (event) => {
 <script>
 const TEXT = {
   release: "релиз",
-  eras: ["Эпоха 1 · Два markdown-файла", "Эпоха 2 · Фичи, которые можно удалить", "Эпоха 3 · Сценарии и таблицы состояний", "Эпоха 4 · Бот уезжает с ноутбука", "Эпоха 5 · Холодные читатели", "Эпоха 6 · Логбук", "Эпоха 7 · Агент как пользователь"],
+  eraLabel: "Эпоха",
   months: ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"],
-  series: { claude: "строк в CLAUDE.md", budget: "бюджет", tests: "тестов", mutation: "мутационный скор", threshold: "порог падения", skills: "скиллы", agents: "агенты", rules: "собственные правила линта", src: "строки исходников", harness: "строки харнеса" },
+  series: { claude: "строк в CLAUDE.md", budget: "бюджет", tests: "тестов", mutation: "мутационный процент", threshold: "порог падения", skills: "скиллы", agents: "агенты", rules: "собственные правила линта", src: "строки исходников", harness: "строки харнеса" },
   table: { commit: "Коммит", date: "Дата" },
   locale: "ru-RU",
   timeline: "Одна полоска на коммит, цвет по эпохе, ромб над каждым релизом",
   asOf: "по состоянию на #",
-  charts: {"claude":"Строк в CLAUDE.md на каждом коммите","tests":"Тесты по сообщениям коммитов","mutation":"Мутационный скор по сообщениям коммитов","parts":"Скиллы, агенты и собственные правила линта на каждом коммите","lines":"Строки исходников против строк харнеса на каждом коммите"},
+  charts: {"claude":"Строк в CLAUDE.md на каждом коммите","tests":"Тесты по сообщениям коммитов","mutation":"Мутационный процент по сообщениям коммитов","parts":"Скиллы, агенты и собственные правила линта на каждом коммите","lines":"Строки исходников против строк харнеса на каждом коммите"},
 };
 </script>
 <script src="../../case-study/commit-history-charts.js"></script>

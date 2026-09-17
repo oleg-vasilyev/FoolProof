@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { read } from "../document-files.ts";
 import { A_LINE, SECOND_GROUP } from "../markdown-text.ts";
-import { SITE_TEXT_TREES, blocksOnPage, languageOf, type PageBlock } from "./site-text.ts";
+import { SITE_TEXT_TREES, blocksOnPage, languageOf, namesASection, type PageBlock } from "./site-text.ts";
 
 
 export type TreeWordRules = {
@@ -20,8 +20,6 @@ const NOTHING = 0;
 const ONE = 1;
 
 const THIRD_GROUP = 3;
-
-const A_SECTION_HEADING = /^## /;
 
 const A_WORDS_FIELD = /^(avoid)-([a-z]{2}): (.*)$/;
 
@@ -74,7 +72,7 @@ export const wordsInTree = (markdown: string): TreeWordRules => {
   let listsWords = false;
 
   for (const line of markdown.split(A_LINE)) {
-    if (A_SECTION_HEADING.test(line)) {
+    if (namesASection(line)) {
       break;
     }
 

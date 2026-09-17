@@ -6,8 +6,10 @@ language's page: the writer gets a block's facts and says them the way a reader 
 that language would. `node scripts/gates/gate-runner.ts docs-check` holds both pages
 to this tree — same blocks, same order, same numbers.
 
-A `##` heading is a section, a `###` heading a block, and the block's id on the page
-is `section.block` in a `data-block` attribute. Under a block, bullets are the facts
+A `##` heading is a section and a `###` heading a block, each named by one lowercase
+word — a heading spelled any other way is prose for the writer to read, names
+nothing, and may stand only before the first named section; after it `docs-check`
+refuses one. The block's id on the page is `section.block` in a `data-block` attribute. Under a block, bullets are the facts
 it must carry. `numbers:` lists every number its text may print in both languages;
 `numbers-en:` or `numbers-ru:` a number only that language prints as digits, where the
 other spells it as a word (*era 2* against *во второй эпохе*); `commits:` every hash

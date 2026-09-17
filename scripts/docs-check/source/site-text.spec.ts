@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   SITE_TEXT_TREES,
@@ -6,6 +7,7 @@ import {
   languageOf,
   numbersIn,
   siteTextOutOfStep,
+  strayHeadings,
   textComplaints,
   type FactBlock,
   type PageText,
@@ -38,6 +40,7 @@ const aBlock = (overrides: Partial<FactBlock> = {}): FactBlock => ({
   numbersIn: {},
   commits: [],
   rev: null,
+  overwrittenFields: [],
   ...overrides,
 });
 
@@ -105,6 +108,37 @@ describe("blocksInTree", () => {
     expect(block?.numbersIn).toEqual({ en: ["2"] });
   });
 
+  it("should name a field the tree wrote twice under one block", () => {
+    const [block] = blocksInTree(aTree("## era\n\n### lead\n- A.\nnumbers: 7\nnumbers: 9\n"));
+
+    expect(block?.overwrittenFields).toEqual(["numbers"]);
+    expect(block?.numbers).toEqual(["9"]);
+  });
+
+  it("should leave a block under the last section named, not under a heading of prose after it", () => {
+    const blocks = blocksInTree(aTree("## era\n\n## Notes\n\n### p1\n- A.\n"));
+
+    expect(blocks.map((block) => block.id)).toEqual(["era.p1"]);
+  });
+
+  it("should keep a block under its own heading when the heading before it is one lowercase word", () => {
+    const blocks = blocksInTree(aTree("## era\n\n### tile-2\n- A.\n"));
+
+    expect(blocks.map((block) => block.id)).toEqual(["era.tile-2"]);
+  });
+
+  it("should name a field written on three lines once, not once per extra line", () => {
+    const [block] = blocksInTree(aTree("## era\n\n### lead\n- A.\nnumbers: 7\nnumbers: 9\nnumbers: 4\n"));
+
+    expect(block?.overwrittenFields).toEqual(["numbers"]);
+  });
+
+  it("should leave a field written once unreported, in every block", () => {
+    const blocks = blocksInTree(aTree("## era\n\n### lead\n- A.\nnumbers: 7\n\n### p1\n- B.\nnumbers: 9\n"));
+
+    expect(blocks.map((block) => block.overwrittenFields)).toEqual([[], []]);
+  });
+
   it("should read the commits a block may cite", () => {
     const [block] = blocksInTree(aTree("## era\n\n### p1\n- A.\ncommits: af08fc5, d49d590\n"));
 
@@ -145,6 +179,21 @@ describe("blocksInTree", () => {
 
   it("should give a block before any section an empty section", () => {
     expect(blocksInTree(aTree("### x\n- A.\n"))[FIRST]?.id).toBe(".x");
+  });
+
+  it("should return a block carrying only what a reader of it is promised", () => {
+    const [block] = blocksInTree(aTree("## a\n\n### x\n- A.\nnumbers: 5\n"));
+
+    expect(Object.keys(block ?? {}).sort()).toEqual([
+      "commits",
+      "facts",
+      "granularity",
+      "id",
+      "numbers",
+      "numbersIn",
+      "overwrittenFields",
+      "rev",
+    ]);
   });
 
   it("should start a block with no commits, no numbers and no rev", () => {
@@ -494,6 +543,28 @@ describe("blocksOnPage", () => {
   });
 });
 
+describe("strayHeadings", () => {
+  it("should refuse a block heading inside a section that is not one lowercase word", () => {
+    const [complaint] = strayHeadings(TREE, aTree("## era\n\n### p1\n- A.\n\n### Tile-2\n- B.\n"));
+
+    expect(complaint).toContain('the heading "### Tile-2" stands inside a section and names nothing');
+  });
+
+  it("should refuse a section heading of prose once a real section has opened", () => {
+    const [complaint] = strayHeadings(TREE, aTree("## era\n\n### p1\n- A.\n\n## Notes\n"));
+
+    expect(complaint).toContain('the heading "## Notes" stands inside a section');
+  });
+
+  it("should leave a heading of prose before the first section alone", () => {
+    expect(strayHeadings(TREE, aTree("## The page's job\n\n## era\n\n### p1\n- A.\n"))).toEqual([]);
+  });
+
+  it("should leave the repository's own trees without a stray heading", () => {
+    expect(SITE_TEXT_TREES.flatMap(({ tree }) => strayHeadings(tree, readFileSync(tree, "utf8")))).toEqual([]);
+  });
+});
+
 describe("textComplaints", () => {
   const green = (facts: readonly FactBlock[], html: string): readonly string[] =>
     textComplaints(TREE, facts, [[PAGE, aPage(html)]]);
@@ -740,6 +811,15 @@ describe("textComplaints", () => {
     const [complaint] = green([aBlock({ id: "a.x" }), aBlock({ id: "a.x" })], '<p data-block="a.x">A</p>');
 
     expect(complaint).toContain('block "a.x" is declared twice');
+  });
+
+  it("should refuse a block whose field is written on two lines, since the second replaces the first", () => {
+    const complaints = green([aBlock({ id: "a.x", overwrittenFields: ["numbers"] })], '<p data-block="a.x">A</p>');
+
+    expect(complaints).toEqual([
+      `${TREE}: block "a.x" lists "numbers:" more than once — a field is written on one line, and ` +
+        `a later one silently replaces the first rather than adding to it`,
+    ]);
   });
 
   it("should find the repository's own pages in step with their trees", () => {

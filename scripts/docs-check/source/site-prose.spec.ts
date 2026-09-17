@@ -44,6 +44,10 @@ describe("wordsInTree", () => {
     expect(wordsInTree("## a\n\navoid-en: friday\n").listsWords).toBe(false);
   });
 
+  it("should keep reading the intro past a heading of prose, which names no section", () => {
+    expect(wordsInTree("# Page\n\n## The page's job\n\nA line.\n\navoid-en: friday\n\n## a\n").listsWords).toBe(true);
+  });
+
   it("should not take a section marker inside a line for the first section", () => {
     expect(wordsInTree("see ## later\navoid-en: friday\n\n## a\n").listsWords).toBe(true);
   });

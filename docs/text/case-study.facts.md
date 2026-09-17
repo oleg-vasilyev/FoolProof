@@ -9,15 +9,58 @@ the writer gets a block's facts and says them the way a reader of that language 
 `node scripts/gates/gate-runner.ts docs-check` holds both pages to this tree — same
 blocks, same order, same numbers, same commits.
 
-A `##` heading is a section, a `###` heading a block, and the block's id on the page
-is `section.block` in a `data-block` attribute. Under a block, bullets are the facts
-it must carry. `numbers:` lists every number its text may print in both languages;
+A `##` heading is a section and a `###` heading a block, each named by one lowercase
+word — a heading spelled any other way is prose for the writer to read, names
+nothing, and may stand only before the first named section; after it `docs-check`
+refuses one. The block's id on the page is `section.block` in a `data-block` attribute.
+Under a block, bullets are the facts it must carry; a bullet that begins *For the
+writer:* is a note on how to say them — a paragraph count, a word to keep, a
+reason a fact is phrased as it is — and is never itself said on the page. `numbers:` lists every number its text may print in both languages;
 `numbers-en:` or `numbers-ru:` a number only that language prints as digits, where the
 other spells it as a word (*era 2* against *во второй эпохе*); `commits:` every
 hash it may cite in an `<a class="hash">` link; and `rev:` climbs when a fact changes
-so the pages go red until rewritten. A block is one paragraph unless it says
-`granularity: section`. The strings the charts draw with live in `<script>` and are
-not held here.
+so the pages go red until rewritten. Each field is written on one line, and `docs-check`
+refuses a second: it would replace the first rather than add to it. A block is one
+paragraph unless it says `granularity: section`. The strings the charts draw with live
+in `<script>` and are not held here, except the era names: the timeline's legend reads
+those off the era headings, so they are held as any other block is. Two spellings the gate reads as digits: `e2e` counts as the number 2,
+and a version such as `1.7.0` as the numbers 1, 7 and 0, so both are listed where the
+text prints them. A block named `tn-body-*` is what a panel shows: where its
+facts say *as committed*, it is an artifact quoted from the repository, the same bytes
+in both languages, and is not written; where they do not, each language writes it from
+the facts like any other block.
+
+A page held to this tree also keeps its words: `avoid-ru:` and `avoid-en:` list the
+stems a language never prints, and `docs-check` fails a page that says one, or a
+heading that says «он» about the harness or the bot. What the tool `node
+scripts/tools/tools.ts site-prose <page>` lists is only a candidate for the site-reader
+to judge.
+
+avoid-ru: пятниц, прикол, придётся, приходится
+avoid-en: friday
+
+## The page's job
+
+A visitor arrives from a link the owner sent him, builds software with an AI agent or
+wants to, and has never heard of the bot. The owner's own picture of him, in his words
+of 17 September 2026: an engineer with AI experience, lazy and not very interested, who
+starts reading reluctantly; the text and its telling have to take hold of him so that he
+wants to read to the end, and afterwards he is grateful, because he got a distillation
+of unique experience and knowledge. So the page has one job: show, from the record,
+what it costs to make an agent's work checkable and what that bought — so that the
+visitor leaves with a rule or two to try. Every block is judged against that reader:
+would he understand it without the project's vocabulary, and would he keep reading
+after it. A second reader, named by the owner the same day, is somebody outside IT who
+codes with an agent now and then and wants to learn something; the folded list of terms
+under the harness section stays for him — the engineer will not open it, the newcomer
+will. It is a story told in order, once: a fact is said in the era
+where it happened and nowhere else, a finding names the era that proves it, and an
+era's lead frames what changed without pre-telling the details under it. Every claim
+comes from the commit history and every number is read from git; the page never says
+so about itself beyond the method note at the end, because the owner cut that
+sentence as noise. The owner's bar for a paragraph, in his own words: one claim, one
+proof, and the sentence ends where the point does; a reader must never finish a
+paragraph asking «и что?».
 
 ## header
 
@@ -27,11 +70,11 @@ not held here.
 ### brand
 - The product name, beside the icon.
 
+### nav-findings
+- Leads to the five findings.
+
 ### nav-eras
 - Leads to the seven eras.
-
-### nav-patterns
-- Leads to the section on what kept coming back.
 
 ### nav-today
 - Leads to the section on the harness today.
@@ -63,10 +106,9 @@ numbers: 28, 11, 2026, 314
 ### lead
 - FoolProof is a small Telegram bot that keeps score at Durak; one person, working with Claude Code, built it in six and a half weeks.
 - The bot is the least interesting part: around it grew a set of rules, checks, skills and agents that decide how the next line of code gets written, and that set was rewritten more often than the bot.
+- That set is what the page calls the harness, and the title above uses the word, so the lead has to say it, in passing and without defining its parts: the lead stays three sentences and about forty-five words, because it is the first thing a reluctant reader sees.
 - This is the story of that set: what broke, what replaced it, and what it looks like today.
-
-### note
-- Every claim comes from the commit history, every number is read from git, and every hash links to its commit.
+rev: 3
 
 ### tile-1-value
 - The count of commits.
@@ -102,7 +144,8 @@ numbers: 0, 5043
 numbers: 11, 7
 
 ### tile-5-label
-- Skills and agents at the end.
+- Skills and agents, each word glossed in one or two words right there, because a visitor meets both for the first time on this tile: a skill is a written procedure, an agent a model given one job; the caption has to stay within two lines like its neighbours, so "at the end" is dropped, the eyebrow above already dating the row.
+rev: 2
 
 ## findings
 
@@ -113,71 +156,110 @@ numbers: 11, 7
 - What the history says, in five findings.
 
 ### lead
-- Each finding is drawn from the chapters below and points at the commit that states it; a reader short of time reads only these.
-- Then pick an era: the second is where a rule was found dead, the fifth where the readers arrive, the seventh where the harness got a ruler.
-numbers-en: 2, 5, 7
+- This section is written for a reader who has never heard of the project and works, or wants to work, with an AI agent: five things six weeks of history taught, each a rule to take away, each proven by one episode told in plain words, with the era below that holds the details.
+- The owner's bar for the five, in his words of 17 September 2026: they hold the whole final wisdom of the project; each is understood at the level of the idea, plain but not trivial, its heading gripping; after each one the reader should say "I had not thought about that, and it changes how I look at building with AI". A body therefore argues the idea and lets the episode prove it, and ends on the turn that changes the reader's view.
+- Every word here must be understood on its own: no name from inside the project (no gate, harness, phase, hook, spec or brief) may appear in this section before the page has explained it, and the section explains none of them; the writer says what the thing is instead of what it is called.
+- The section has to be the most readable one on the page, because a reader who leaves here leaves for good; the lead promises nothing about the paragraphs' length, since both cold readers caught the word "short" over paragraphs that are not.
+- A heading here is a heading, not a sentence: about seven words at most, no word twice, no pronoun, no dash standing for a verb; a short antithesis in two halves is allowed, a twelve-word sentence with a subordinate clause is not, because both readers stopped on those.
+rev: 3
 
 ### f1-n
 - The first finding's number.
 numbers: 01
 
 ### f1-title
-- The harness is over two thirds the size of the product.
+- The idea: an AI can ignore an instruction written in text, and cannot ignore a deterministic gate, so every rule that matters ends up as a machine check.
+rev: 3
 
 ### f1-body
-- At the last commit the bot's source is 15829 lines without its tests; the skills, agents, documents and document checks that decide how the next line gets written are 11332.
-- That side was rewritten more often than the bot was.
+- The agent reads its working rules for this project from one file before every session, and it still skips them, not out of malice but the way a person skims: one rule asked the write-up of every finished piece of work to record how long the work took, and in one week thirteen of sixteen write-ups left it out, with the rule sitting in the file the whole time.
+- A check that refuses the write-up cannot be skimmed, so that rule became one, and so did every rule a machine could verify; the sentence is deleted once the check exists, and the trigger is a count of misses, never a feeling.
+- The turn for the reader: by the last commit the checks, rules and instructions that decide how the next line gets written came to 11332 lines against 15829 lines of the bot itself; the last chart on this page draws the two. The lead of the page already says which side was rewritten more often, so this block does not.
 numbers: 15829, 11332
+commits: 08aac82, 09676f7
+rev: 3
+
+### f1-link
+- Leads to era 1.
+numbers: 1
 
 ### f2-n
 - The second finding's number.
 numbers: 02
 
 ### f2-title
-- Acceptance cannot tell models apart; the process can.
+- The idea: a check that passes for the wrong reason is worse than no check at all, because it buys trust it has not earned.
+rev: 3
 
 ### f2-body
-- Every model dropped cold into the benchmark's fenced clone passed the hidden spec and left every gate green.
-- Only the process columns separated them: eight of eleven obligations for a dollar and six minutes, against eleven of eleven for twenty-two dollars and thirty-six minutes.
-commits: a05104e
+- With no check, a person stays watchful; with a green one, they stop looking, which is why a false pass costs more than an absence. Three times this project had a green check that checked nothing: a rule meant to keep one part of the code from importing another was switched on, stayed green, and was found to match nothing four times in one day; a second check passed only because the files on that machine happened to end their lines the Unix way; three checks over the project's documents stayed green while the documents they guarded were broken on purpose.
+- The habit that came out of it: a new check is trusted only after somebody breaks what it guards on purpose and watches it go red, and then searches the code by hand for the shapes of the same mistake the check cannot see.
+- The turn for the reader: when that step became mandatory, fourteen deliberate breaks were made in one stretch of work and four of them hit nothing the check was looking at; only the ten that went red proved anything, so even the proof of a check has to be checked.
+commits: 5d48dac
+rev: 3
+
+### f2-link
+- Leads to era 2.
+numbers: 2
 
 ### f3-n
 - The third finding's number.
 numbers: 03
 
 ### f3-title
-- The agent is the harness's only user, and for six weeks nothing was built that way.
+- The idea: quality needs a reviewer with a clean context, a second AI that was told nothing about what it is looking at, because the one that wrote the thing cannot see it any more.
+rev: 3
 
 ### f3-body
-- The scripts were shaped for a person at a terminal; a count over a month of transcripts found 1463 hand-typed test runs whose verdicts the model read through a grep on a stream.
-- Then package.json went from twenty-three scripts to eight, and every gate started leaving its verdict in a file.
-numbers: 1463
-commits: af08fc5, d49d590
+- The model that wrote a thing still holds the reasoning that made it look right, so asking it to review its own work is asking it to read with the answer in hand; a person has the same blindness, and here the fix is cheap: start a second model with an empty context and a one-line job. In this project every change is reviewed by a second model that did not write it, every picture the bot draws is described by one that was not told what it is for, every sentence the bot can say is read with real names and numbers filled in, and a plan is criticised before any code exists.
+- The turn for the reader: the proof is this very page. A model given the page and the project's git history, and nothing else, found 17 of its 263 claims that the history did not support, and every one of them had read perfectly to the author who wrote it.
+numbers: 17, 263
+commits: 5bf13e4
+rev: 3
+
+### f3-link
+- Leads to era 5.
+numbers: 5
 
 ### f4-n
 - The fourth finding's number.
 numbers: 04
 
 ### f4-title
-- A rule counts only once it has been seen refusing.
+- The idea: the habits that work for human developers work badly for an AI developer, because it reads, remembers and gets tired differently, and the tooling has to be built for how it actually works.
+rev: 3
 
 ### f4-body
-- A lint rule was found dead four times in one day; three documentation checks stayed green under sabotage.
-- In the phase that finally made the deliberate break a step of the flow, fourteen such breaks were made and four hit nothing the rule watched.
-commits: 5d48dac
+- Every tool in a software project is shaped for a person at a terminal: output scrolls past, a verdict is a line you glance at, a command is something you remember. An AI developer does none of that the same way: it sees only the tail of a long output, forgets what scrolled off, and reads a verdict by searching the text for it. For six weeks nobody here noticed the mismatch, and a count over one month of the agent's session transcripts found 1463 test runs it had typed by hand, fishing each verdict out of the scroll with a text search.
+- The turn for the reader: once the tooling was rebuilt for its real user, the scripts went from twenty-three to eight, and every check began to write its verdict, its reasons and the one command that re-runs it into a file the agent opens; a person's convenience became second, on purpose, and the person lost nothing.
+numbers: 1463
+commits: af08fc5, d49d590
+rev: 3
+
+### f4-link
+- Leads to era 7.
+numbers: 7
 
 ### f5-n
 - The fifth finding's number.
 numbers: 05
 
 ### f5-title
-- The author is the wrong reader, and this page is no exception.
+- The idea: the harness improves itself, in three loops of different length: a retrospective after every task turns a lesson into a rule, a weekly checkup reads all the retrospectives together to see the whole picture, and a benchmark measures whether the harness as a whole got better.
+rev: 3
 
 ### f5-body
-- Every diff is reviewed by an agent that did not write it, every picture read by one that does not know what it is for.
-- A fact-checker re-deriving this page's claims from git found 17 of 263 that the history did not support, and every one of them read perfectly.
-numbers: 17, 263
-commits: 5bf13e4
+- The short loop: every piece of work ends with a retrospective, run as a gate a task cannot skip, that counts what the work cost, rework, checks run twice, a decision guessed, and turns each lesson into a rule somewhere durable, a lint rule, a hook, a line in a skill; every such retrospective leaves one log in a logbook, saying what was asked, what ran, what was rebuilt and which check found each defect.
+- The long loop: a weekly checkup, an agent told to believe nothing on say-so, fix nothing, and cite a command for every verdict, reads that logbook across the week and the running system itself, so a pattern no single task could see, a rule broken in six phases out of ten, a deploy failing for days, shows up as a count; its own reports keep a table of measurements so the next checkup can ask whether a number moved.
+- The measure: a benchmark gives a model the same frozen task in a copy of the repository, hides the test that judges it, and scores the result with the repository's own checks, so the harness is measured as a whole rather than argued about; the same run at the same effort every week is what lets the rows be compared.
+- The turn for the reader: the loop also has to correct itself, and did: the retrospective once ran after every task regardless and was made conditional, only when there is something to count, because a ritual that always runs and usually finds nothing teaches the reader to skip the line where a real finding would sit.
+commits: ec3d818, db81a3a, 4e56b66, d011e68, fff3c5f
+granularity: section
+rev: 3
+
+### f5-link
+- Leads to era 7.
+numbers: 7
 
 ## timeline
 
@@ -190,7 +272,7 @@ commits: 5bf13e4
 ### lead
 - One bar per commit, coloured by era; a diamond above a bar is a release tag; of the forty-six days, thirty-one have commits.
 - The seven eras are this page's division, not the repository's: the lines fall where the subject of the work changed.
-- Hover or tap a bar to read the commit; click an era name to jump to its chapter.
+- Hover or tap a bar to read the commit; click an era name to jump to the section about it.
 
 ## harness
 
@@ -204,7 +286,7 @@ commits: 5bf13e4
 - The harness is everything in the repository that is not the product.
 
 ### terms-summary
-- Opens the list of ten words this page uses in the project's own sense.
+- Opens the list of words this page uses in the project's own sense.
 
 ### term-1-title
 - CLAUDE.md.
@@ -240,11 +322,11 @@ commits: 5bf13e4
 - Documents.
 
 ### term-6-body
-- The spec, the debt list, the flow drawing, the logbook, and the check that holds all of them against the code.
+- The design document, the debt list, the flow drawing, the logbook, and the check that holds all of them against the code.
 
 ### terms-more
-- Four more words recur in the project's sense: the owner is the one person who sets the tasks and makes the decisions; the other side of the conversation is the model, and one of its replies is a turn.
-- A phase is any bounded list of changes, feature or not, that ends at a commit or a tag; a gate is a check a phase must pass on the way.
+- Three more words recur in the project's sense: the owner is the one person who sets the tasks and makes the decisions; the other side of the conversation is the model.
+- A phase is any bounded list of changes, feature or not, that ends at a commit or a tag.
 
 ### question
 - The question the history keeps asking: where a rule belongs, in the text the model reads or in the toolchain (the lint, the hooks and the checks a machine runs).
@@ -268,14 +350,14 @@ numbers: 28, 29
 numbers: 1, 30
 
 ### title
-- Two Markdown files.
+- The idea of the era, as a heading that sells rather than lists: the rulebook came before any code. The two files it consisted of are named in the lead, not here, because a heading that lists file names sells nothing and is also the chapter name in the timeline's legend.
+rev: 2
 
 ### lead
-- The repository begins with no code, only a rulebook that already forbids the things the project would spend the next month learning how to enforce; the one thing it did not have was a check.
-- By the end of the second day three of its paragraphs had become ESLint rules, the code had layers that may not import each other, and Stryker was grading the tests by planting deliberate breaks, 88.4% caught on the first run.
-- One rule from those two days outlived everything: a fact lives where its reason lives, and the other document gets a pointer, never a retelling.
-numbers: 88, 4
+- The repository begins with no code at all: two Markdown files, CLAUDE.md and PLAN.md, and a .gitignore, and nothing else; the rulebook already forbids the things the project would spend the next month learning how to enforce, and not one of its rules had a check.
+- The first three rules reached the machine by the end of the second day: three paragraphs became ESLint rules, the code got layers that may not import each other, and a tool was grading the tests; making the machine hold most of the rulebook took the rest of the month, and the two spans are distinct.
 commits: 44f6f66
+rev: 2
 
 ### d1-summary
 - Tests arrive, and then a grader for the tests; the count is 312 tests.
@@ -288,10 +370,11 @@ numbers: 29, 312, 70
 commits: 9276ad7
 
 ### d1-p2
-- The first run scored 88.4%, the project's first mutation score; by the end of the era it had reached 94.78%.
+- The first run scored 88.4%, the project's first mutation score, and it was 91.9% by the commit that reported both; by the end of the era it had reached 94.78%.
 - The line below which the gate fails was raised from 60 to 85 in those days, so the gate bites on a regression rather than hanging there for show.
-numbers: 88, 4, 94, 78, 60, 85
-commits: fda82cb, 508de4e
+- The three commits in order: the one reporting 88.4% and 91.9%, then the one raising the line to 85, then the one reporting 94.78%.
+numbers: 88, 4, 91, 9, 94, 78, 60, 85
+commits: fda82cb, 94b0587, 508de4e
 
 ### d1-p3
 - The investment paid back at once: mutation testing found tests that passed for the wrong reason, a dependency replaced by a stub with the test checking only that the stub was called.
@@ -303,10 +386,12 @@ numbers: 3
 
 ### d2-p1
 - Commit 26, "make the checkable conventions checkable", set the shape of the harness: three rules (no comments, named numbers, blank lines after imports) written straight into the config.
-- The code was split into layers (shared code, game logic, rendering, Telegram handlers) and the layers became zones of banned imports, each proved with a deliberate violation.
+- The ban on comments is the one a stranger stops at, so its reason is given where it is first shown, in the rulebook's own words: naming carries the intent, and a number that would need a comment gets a named constant instead; a function that needs a comment to explain its sections is asking to be split.
+- The code was split into four layers, and the four are shared code, game logic, rendering and Telegram handlers; each layer became a zone of banned imports, proved with a deliberate break.
 - A hook on every edit started linting each file as it was written.
 numbers: 26
 commits: e88417a
+rev: 2
 
 ### d2-p2
 - The same commit brought the first two skills and the first agent: finish-phase, where the gates moved out of CLAUDE.md; add-repository-method, for new queries; and phase-reviewer, which reads a whole diff and is told not to fix anything.
@@ -318,7 +403,7 @@ commits: 0afd7b2
 
 ### d2-p4
 - By the end of 29 July the testing craft had outgrown the rulebook and became the third skill, write-a-spec, and the tests stood at 418.
-- CLAUDE.md had nearly doubled in two days and was cut back, on the grounds that it is loaded on every turn and should hold only what is true while writing any line of code; it would not stay inside those bounds.
+- CLAUDE.md had nearly doubled in two days and was cut back, on the grounds that it is loaded before every session and should hold only what is true while writing any line of code; it would not stay inside those bounds.
 numbers: 29, 418
 commits: 66ff3bd
 
@@ -403,18 +488,16 @@ numbers: 30, 2
 numbers: 31, 66
 
 ### title
-- Features you can delete, and rules that prove they fire.
+- A green rule can be doing nothing at all.
 
 ### lead
-- Era 1 made the rules checkable; era 2 found out that a checkable rule can be dead and nothing tells you: on 30 July four commits kept finding the same feature-independence rule dead, three versions of it and two exemptions beside it.
-- The answer was a habit that outlived the era: a new zone is not finished until a deliberate violation has been shown to fail the lint.
-- The same era gave the project a fake Telegram, a debt list where an entry names a trigger rather than a wish, and the documents gate that would grow into thirty families of checks.
-numbers: 30
-numbers-en: 1, 2
+- The first era made the rules checkable; this one found out that a checkable rule can be dead and nothing tells you.
+- It also gave the project a fake Telegram to play whole evenings against, a debt list where an entry names a trigger rather than a wish, and the documents gate that would grow into thirty families of checks.
 
 ### d1-summary
-- A rule found dead, four times in one day; the count is 13 violations.
+- A rule found dead, four times in one day; the count is 13 deliberate breaks, the same word the paragraph under it uses.
 numbers: 13
+rev: 2
 
 ### d1-p1
 - The era starts by turning the source tree inside out: instead of layers at the top (game, render, bot), each feature became a folder with those layers inside it, and the rule was stated as a test, a feature is a folder you can delete, verified by deleting one.
@@ -422,20 +505,20 @@ numbers: 13
 commits: 476f239
 
 ### d1-p2
-- Fencing features off with lint produced the lesson the project would repeat most often: the rule was written, enabled and green, and did not work.
-- The first two versions did nothing (a path pattern never matched a relative import, then two config blocks silently replaced each other); the third was killed by the pattern library reading the hash-sign aliases as comments.
+- The lint rule that fences features off from each other was written, enabled and green, and did not work; four commits of 30 July found it dead, with one commit between them that found nothing wrong.
+- The first two versions did nothing (a path pattern never matched a relative import, then two config blocks silently replaced each other); the third was killed by the pattern library reading the hash-sign aliases as comments, and proving each direction of the repaired bans took thirteen deliberate breaks.
+numbers: 30
 commits: 476f239, 40d8179
 
 ### d1-p3
 - The remaining two of the four commits found exemptions dead outside the zones: the logger had moved and its exemption pointed at a file that no longer existed, and a Stryker exclusion was orphaned the same way, so the score fell.
+- The habit outlived the era: a new zone is not finished until a deliberate break has been shown to turn the lint red.
 commits: 4d6b389, f749a9c
-
-### d1-p4
-- Thirteen deliberate violations were run to prove one commit.
 
 ### q1
 - The quotation: a rule that fires and a rule that is dead look identical from the outside; from the commit cited, 30 July.
-numbers: 749, 9, 30
+numbers: 30
+commits: f749a9c
 
 ### d2-summary
 - A fake Telegram; the count is 7 known faults.
@@ -482,7 +565,7 @@ numbers: 585, 354, 2
 commits: 4a3d0a9
 
 ### d4-p2
-- Then the commit "make the documents check themselves" observed the documents had been de-duplicated twice and concluded the fault was that nobody checked the rule; it added the documents gate this story calls docs:check, the name it carried until September (docs-check today).
+- Then the commit "make the documents check themselves" observed the documents had been de-duplicated twice and concluded the fault was that nobody checked the rule; it added the documents gate, whose command was spelled docs:check until September and docs-check today.
 - At first it checked links, the README tree against the folders, the script table against package.json, and a 380-line budget on CLAUDE.md; its first run found two undocumented scripts.
 - By the end of the story it holds more than thirty groups of checks, each about one subject, which this page calls a family.
 numbers: 380
@@ -503,9 +586,6 @@ commits: ec3d818
 numbers-en: 4
 commits: ecc6395
 
-### next
-- This era learned to prove that a rule fires; the next one finds a hole in a proven rule too.
-
 ### tile-1-value
 - The count of skills.
 numbers: 6
@@ -525,7 +605,7 @@ numbers: 1
 numbers: 370, 380
 
 ### tile-3-label
-- CLAUDE.md lines against its budget.
+- Lines in CLAUDE.md, against the budget the value above already prints.
 
 ### tile-4-value
 - The count of tests.
@@ -574,14 +654,11 @@ numbers: 5, 7
 numbers: 67, 121
 
 ### title
-- Scenarios become a gate, states become tables.
+- The checks start reading the source, not only the documents.
 
 ### lead
-- In this era a lint rule caught the model that had written it, and two gates were found green for as long as they had existed, both by accident: three days in which the checks started reading the code as well as the documents.
-- A rule banning game states written as bare strings caught five real ones by being installed, then a spec written by the same model, then a fourth spelling nobody had thought of.
-- The release of 1.7.0 says two gates were found lying on the way, both by accident and both for as long as they had existed: one waited 600 ms for a picture that had grown slower, the other could not read a checkout with Windows line endings, which a fresh clone gets.
-numbers: 1, 7, 0, 600
-commits: 4422ddb
+- Three days in which the checks started reading the code as well as the documents: the scenarios became a gate, every name of a game state moved into a table, and the documents gate learned to compare the documents with the code.
+- On the way a lint rule caught the model that had written it, and two gates were found green by accident for as long as they had existed.
 
 ### d1-summary
 - e2e becomes a gate; the count is 6 gates.
@@ -649,17 +726,16 @@ commits: 73b4f3a
 numbers: 5, 17
 
 ### d4-p1
-- Both were green by luck: the first was the e2e quiet window, the pause before a scenario reads the screen; the usual poster render grew from 460 to 540 ms, the headroom shrank to 60 ms, and five of seventeen scenarios went red on a working bot.
+- Both were green by luck: the first was the e2e quiet window, the 600 ms a scenario waits before reading the screen; the usual poster render grew from 460 to 540 ms, so the headroom left was 60 ms, and five of seventeen scenarios went red on a working bot.
 - It looked like flakiness and was measured instead of waved off: the window was doubled.
-numbers: 2, 460, 540, 60
+numbers: 2, 600, 460, 540, 60
 commits: 2e7c639
 
 ### d4-p2
-- The second was the documents gate, which could not read a checkout whose files carried CRLF; the author's copy happened to hold Unix endings, so it was green, and on a fresh clone it would have gone red on a tree where nothing was wrong.
-commits: 6ddd56e
-
-### next
-- Two unrelated things happen in the next era: the bot leaves the laptop for a server, and the first gate no machine can answer appears.
+- The second was the documents gate, which could not read a checkout whose files carried CRLF; the copy the work ran on happened to hold Unix endings, so it was green, and on a fresh clone it would have gone red on a tree where nothing was wrong.
+- The release of 1.7.0 names both.
+numbers: 1, 7, 0
+commits: 6ddd56e, 4422ddb
 
 ### tile-1-value
 - The count of skills.
@@ -741,24 +817,24 @@ numbers: 122, 184
 - The bot leaves the laptop.
 
 ### lead
-- Sixty-three commits in four days brought the first gate no machine can answer: a poster is a picture and no test reads one; its first run caught two holes in the award rules and a line of text leaving the card, and the brief that made it work was specific claims, not a verdict.
-- The bot left the laptop for a server that pulls the newest tag every five minutes and waits for nobody, which forces the order of every check after it.
-- One phase ran six gates and released without the seventh, because the skill holding the gates never opened.
+- Sixty-three commits in four days, and three things happened in them: the first gate appeared that no machine can answer, because a poster is a picture and no test reads one; the bot left the laptop for a server that waits for nobody; and one phase ran six gates and released without the seventh.
 
 ### d1-summary
 - The gate a machine cannot answer; the count is 9 evenings.
 numbers: 9
 
 ### d1-p1
-- The gallery gate takes nine awkward evenings and draws both posters for them, the chronology and the awards; it came in fifth, and the gates became seven.
-- The two holes were in the rules by which the bot hands out awards, captions like THE COMEBACK; two days later the gate was moved after the review, because a picture checked at gate five could be stale by gate six.
-- Who should look at the picture is settled only in era 5.
+- A gallery was built, said as a new thing the first time: nine awkward evenings, each drawn as both posters, the chronology and the awards, seventeen pictures in all because the one-game evening earns no award and so gets no awards poster; looking at them became a gate of its own, the fifth, and the gates became seven.
+- The looking was done by the model that had drawn them, under a brief in the phase skill that asked it for specific claims about each picture, never a verdict; its first run caught two holes in the rules that decide which player earns an award such as THE COMEBACK, and a line of text running off the edge of an award's card on the poster.
+- Two days later the gate was moved after the review, because a picture checked at gate five could be stale by gate six; who should look at the picture is settled only in era 5.
 numbers-en: 5
 commits: ce3c70c, 743adaa
+rev: 3
 
 ### q1
 - The quotation: "looked, fine" is the green light with nothing behind it; from the commit cited, 11 August.
-numbers: 3, 70, 11
+numbers: 11
+commits: ce3c70c
 
 ### d2-summary
 - Delegation becomes the rule; the count is 3 conditions.
@@ -766,7 +842,7 @@ numbers: 3
 
 ### d2-p1
 - The era-2 rule, delegate only when context is scarce, was overruled by the owner: an independent scope goes to a subagent at once when the work touches no file the model has open, the brief fits one message, and only the result matters; the review became always the phase-reviewer subagent, never a re-read.
-- The retrospective was told to count how many such scopes were delegated and how many were not, because a new default fails by quietly not being used.
+- The retrospective was told to count how many such scopes were delegated and how many were not, because the way a new default fails is that nobody uses it and nobody notices.
 numbers-en: 2
 commits: 0352b2b
 
@@ -775,8 +851,9 @@ commits: 0352b2b
 commits: 6a4c252
 
 ### d3-summary
-- Three checks, by what is at stake; the count is 3 checks.
+- One battery of gates becomes three, by what is at stake at each moment; the count is 3 batteries, the word the paragraph under it uses.
 numbers: 3
+rev: 2
 
 ### d3-p1
 - The server pulls the newest tag every five minutes; nothing pushes to it.
@@ -784,7 +861,7 @@ numbers: 3
 commits: cfd02a1, f58e793
 
 ### d3-p2
-- The battery sits in a git hook on the developer's machine and runs before the tag leaves for GitHub; a red CI after that stops nothing and can only report a broken bot already on the server.
+- The battery sits in a git hook on the developer's machine and runs before the tag leaves for GitHub, because the server pulls a new tag within five minutes of its landing: by the time CI turns red on that tag, the broken bot is already running.
 commits: 3b22b7c
 
 ### d4-summary
@@ -794,10 +871,11 @@ numbers: 8
 ### d4-p1
 - The whole development loop was drawn as a sequence diagram in DEVELOPMENT-FLOW.md.
 - Today it has eight stages: framing the task and the mockup, code and tests, the machine gates, a review by an agent that did not write the diff, reading the sentences and syncing the pictures, the retrospective, the release, and the checkup.
+numbers-ru: 8
 commits: edc1148
 
 ### d4-p2
-- It is the owner's drawing: it may not be changed quietly, and permission may not be asked for either, so the rule is to move the step and report it in the closing message with counts.
+- It is the owner's drawing: it may not be changed quietly, and permission may not be asked for either, so the rule is to move the step and report it in the closing message, saying how many steps moved and where.
 - Three things watch it: a hook stating the obligation on edit, a commit-message check refusing a moved step without a reason, and docs:check failing if the drawing names a skill or script that does not exist.
 commits: 5eb6933, 912be9b
 
@@ -816,15 +894,15 @@ commits: 4e56b66, 0ba2815
 numbers: 27
 
 ### d6-p1
-- There were seven gates and the retrospective stood seventh; the first explanation blamed the release feeling like the end, and the next commit corrected it at the owner's word: the phase worked from the checkup's findings register, 27 rows, none of them a gate, and the empty list read as a finished phase.
-- The fix was a change in what makes a skill open: every description was checked and a third rewritten to name the task the skill is needed on, because a description is the trigger that decides whether the skill is opened at all.
+- There were seven gates and the retrospective stood seventh; the first explanation blamed the release feeling like the end, and the next commit corrected it at the owner's word: the phase worked from an audit's findings register of its own, 27 rows, none of them a gate, and the empty list read as a finished phase.
+- The fix was a change in what makes a skill open: all twelve descriptions were checked against the routing table and the drawn stages, and the four that disagreed were rewritten to name the task the skill is needed on, because a description is the trigger that decides whether the skill is opened at all.
 - docs:check began failing when a skill or agent is named nowhere in CLAUDE.md; era 3 had met the lesson on the scenarios, here it cost a skipped gate.
+- For the writer: two paragraphs, the skipped gate and its real reason, then the fix; one paragraph holding five moves and three hashes could not be read.
 numbers: 27
 numbers-en: 3
 commits: 6799bd8, fdab9be, f6f617b
-
-### next
-- In the next era the harness gains readers who are told nothing on purpose, and every agent a contract for what it must be told and return.
+granularity: section
+rev: 2
 
 ### tile-1-value
 - The count of skills.
@@ -886,10 +964,9 @@ numbers: 185, 244
 - Cold readers and the budget squeeze.
 
 ### lead
-- A released poster told the players "one dot per evening — 3 more evenings" and never said what would arrive; the owner read it cold and asked what it meant, and that question is the origin of every cold reader: agents briefed with the pictures and nothing else, whose first run reported seventeen findings on twenty-nine drawings.
-- Then the harness was pointed at itself: a checkup broke every document rule on purpose and three stayed green, and Stryker found the checks caught 47.17% of their own mutants.
-- Then at its own size: every skill got a line budget, a tag became conditional, and the era ends with eight consecutive commits marked "Tag: none".
-numbers: 3, 47, 17
+- A released poster told the players "one dot per evening — 3 more evenings" and never said what would arrive; the owner read it cold and asked what it meant, and that question is the origin of every cold reader in the harness.
+- Then the harness was pointed at itself, its checks checked and its size budgeted.
+numbers: 3
 
 ### d1-summary
 - The author cannot read their own drawing; the count is 9 gates.
@@ -897,7 +974,7 @@ numbers: 9
 
 ### d1-p1
 - The chart was not on the poster yet; it appears once enough evenings have accumulated, and a hint stands in its place until then.
-- poster-reader is briefed with pictures and the list of lines on them and nothing else, reading them cold with no idea what any of it is for; the gallery gate became the one gate you may not perform yourself.
+- poster-reader is briefed with pictures and the list of lines on them and nothing else, reading them cold with no idea what any of it is for; its first run reported seventeen findings on twenty-nine drawings, and the gallery gate became the one gate you may not perform yourself.
 commits: da50714
 
 ### d1-p2
@@ -906,8 +983,8 @@ commits: 93c1456
 
 ### d1-p3
 - Two real evenings were read and ten minutes found eight defects, so copy-reader was born: it reads every line the bot can say, in both languages with real values, and asks whether a person would say it; with the two inserted gates there were nine.
-- Its first readings found some sixty things, mostly acted on; it was then moved earlier, to the moment a table of lines is written.
-commits: d45f2f0
+- Its first readings found some sixty things, mostly acted on; the next day a second commit moved it earlier, to the moment a table of lines is written.
+commits: d45f2f0, fff3c5f
 
 ### d1-p4
 - The plan-reviewer agent works at the start of a phase, when the plan exists and the code does not; it gets the owner's words and the agreed signatures, may come back with nothing, and owes only an account of what it checked.
@@ -916,7 +993,8 @@ commits: e64c8cd
 
 ### q1
 - The quotation: it is the only reader here whose ignorance is the instrument; from the commit cited, 20 August.
-numbers: 50714, 20
+numbers: 20
+commits: da50714
 
 ### d2-summary
 - A gate that silently does not apply; the count is the 80% bar.
@@ -927,9 +1005,9 @@ numbers: 80
 commits: 2b1353b, da16c8d
 
 ### d2-p2
-- The checkers were checked: a checkup broke every document rule on purpose, nine went red and three stayed green; Stryker on the tooling found the tests caught only 47.17% of the document checks' mutants.
-- The checks were rewritten as pure functions with specs and given their own Stryker run with an 80% bar, separate because an average with the bot's mutants would have read as 93% and hidden the failure.
-numbers: 47, 17, 80, 93
+- The checkers were checked: a checkup broke every document rule on purpose, and nine went red while three stayed green.
+- The checks were then rewritten as pure functions with specs and given their own Stryker run, and its first score was 47.17%, a number the page shows here for the first time — the share of the documents gate's own mutants their tests caught — and the bar was set at 80%, kept separate from the bot's because a single average over both sets of mutants, four times as many of them the bot's, would have read in the nineties and buried a gate scoring under half.
+numbers: 47, 17, 80
 commits: 3d92c6b, 471cac4
 
 ### d3-summary
@@ -963,9 +1041,6 @@ commits: ba4603f
 - A hook on the end of a turn: one phase stopped on a message that listed what was left, ended with "Continuing", and did nothing; no gate could notice because there was no diff.
 - The hook reads the last sentence of a reply and refuses a turn that ends by announcing work instead of doing it.
 commits: 2239ef0
-
-### next
-- What remained was to teach the harness to remember what it had done; that is the last era's work.
 
 ### tile-1-value
 - The count of skills.
@@ -1036,17 +1111,14 @@ numbers: 245, 274
 - The harness keeps records of itself.
 
 ### lead
-- This era added almost no new parts and deleted one: the routing table at the top of CLAUDE.md, telling the model which skill to read since era 2, a second copy of a fact that had drifted from the first; the check that replaced it fired on every skill, since no description said when it was due.
-- The same audits found the lint blind in three places at once, including a hundred spec files loading their subject with await import, which no import ban had looked at.
-- The number of awards the bot can hand out was "thirty-six" in six places, and it was forty-five.
-numbers-en: 2
+- This era added almost no new parts; it found the ones it had blind, in three places in the lint and in the table that told the model which skill to read, and taught the harness to keep a record of what it had done.
 
 ### d1-summary
 - Blind spots in the lint; the count is 2 more lint rules.
 numbers: 2
 
 ### d1-p1
-- ESLint had never been run on the scenario folder, and the import zones read only static imports; every ban is now written twice, for static and dynamic imports.
+- ESLint had never been run on the scenario folder, and the import zones read only static imports, so a hundred spec files loading their subject with await import had never been looked at; every ban is now written twice, for static and dynamic imports.
 - Two more rules moved from prose into lint: only one file may open the database, and every screen's Cancel and Confirm row is assembled in one place.
 - The hand-written list of features in the lint config was replaced by reading the folder, because a folder left off it got no fence at all, silently.
 commits: fee84a4, 76a0ee0, 6232fe5, 01ef471
@@ -1055,11 +1127,12 @@ commits: fee84a4, 76a0ee0, 6232fe5, 01ef471
 - Where a skill says when it is due.
 
 ### d2-p1
-- The skill's own description played the same role as the table and nobody checked either: era 4 had taught descriptions to name the task, but none named the stage, and the table and the descriptions had drifted apart.
+- Since era 2 a table at the top of CLAUDE.md had told the model which skill to read for which job, and the skill's own description played the same role; nobody checked either, and the two had drifted apart: era 4 had taught descriptions to name the task, but none named the stage.
+- The table was deleted, and the check that replaced it fired on every skill, since no description said when it was due.
 - Each description now names its stage, docs:check keeps the description, the skill's title and the flow drawing in agreement, and the drawing draws every skill and agent at its stage, checked in both directions.
 - finish-phase's description flipped from load it when any list of changes is accepted to do not load it at stage 1, after the checkup found the wording firing two stages early.
 numbers: 1
-numbers-en: 4
+numbers-en: 2, 4
 commits: 01ef471
 
 ### tn-eyebrow
@@ -1093,8 +1166,8 @@ commits: 4a3d0a9, 01ef471
 numbers: 5
 
 ### d3-p1
-- The flow drawing was read as prose and several steps were not where they happen: two steps every phase needs sat in the branch only a bug fix enters, and a question the repository can answer was drawn at stage 4 when it happens at stage 1, before the owner is asked anything.
-- On 26 August five commits in a row corrected where steps sit (two more that day drew in the phase-log steps), and two of the five admitted nothing mechanical checks that a step sits where it actually happens.
+- The flow drawing was read as prose and several steps were not where they happen, and the steps are named: studying the project and reading the debt list, two steps every phase needs, sat in the branch only a bug fix enters; and asking the repository before asking the owner, a question the repository can answer, was drawn at stage 4 when it happens at stage 1, before the owner is asked anything.
+- On 26 August five commits in a row corrected where steps sit, and two of those five admitted nothing mechanical checks that a step sits where it actually happens; the phase log was drawn into the picture by two later commits of the same day, which this page cites where the logbook itself is described.
 numbers: 26
 numbers-en: 4, 1
 commits: 8a1bfc2, 650cdec, 3beac4c
@@ -1114,7 +1187,7 @@ commits: db81a3a, f4b09e7
 commits: db81a3a
 
 ### d4-p3
-- The folder beside it keeps every checkup report, never pruned, each with a measurements table so the next visit can ask whether a number moved; the first report is from a new run at the end of August, not the one era 4 describes.
+- The folder beside it keeps every checkup report, never pruned, each with a measurements table so the next checkup can ask whether a number moved; the record starts later than the checkups do, since the first report kept is from a fresh run at the end of August rather than from the one era 4 describes.
 numbers-en: 4
 commits: b8cb5ea
 
@@ -1122,12 +1195,14 @@ commits: b8cb5ea
 - Counts rot.
 
 ### d5-p1
-- The most repeated lesson of the era is small: a count of spec files and a column of line counts had rotted like the award count, and the number was removed entirely, a gate for it considered and rejected because a check defends a fact something depends on, and nothing depends on this one.
+- The most repeated lesson of the era is small: the number of awards the bot can hand out was written "thirty-six" in six places, and it was forty-five; a count of spec files and a column of line counts had rotted the same way.
+- Such a number is removed rather than corrected; a gate for it was considered and rejected, because a check defends a fact something depends on, and nothing depends on this one.
 commits: 25108af
 
 ### q1
 - The quotation: a fact stated in two places is the copy that rots; from the commit cited, 28 August.
-numbers: 01, 471, 28
+numbers: 28
+commits: 01ef471
 
 ### tile-1-value
 - Skills plus agents.
@@ -1199,17 +1274,15 @@ numbers: 275, 314
 - The agent becomes the user, and the harness gets a ruler.
 
 ### lead
-- The deploy had been failing a third of the time since 31 August and nothing noticed, because a fetch that fails looks like a fetch that found nothing new; finding it took reading the server's journal instead of the README, and set the tone for an era that stopped believing what the harness said about itself.
-- The scripts were rebuilt around a fact true since the first commit: their only user is an agent; twenty-three scripts became eight, every gate a row in one table leaving a verdict file.
-- Last came a ruler, a frozen task in a fenced clone run cold, whose first honest table said every model passes and only the process columns tell them apart.
-numbers: 31
+- An era that stopped believing what the harness said about itself: a checkup read the server's journal instead of the README and found the deploy had been failing for days with nothing noticing; the scripts were rebuilt for their only user, the agent; and last came a ruler for the harness itself.
 
 ### d1-summary
 - Two repairs for a real evening; the count is 11 games.
 numbers: 11
 
 ### d1-p1
-- Two people at the table are called Roma, the second written Romani; one Friday the wrong one was typed, eleven games went to a man who stayed home, and the evening was repaired over ssh with a script.
+- Two people at the table are called Roma, the second written Romani; one evening the wrong one was typed, eleven games went to a man who stayed home, and the evening was repaired over ssh with a script.
+numbers-ru: 11
 - That became /replace: two names typed, the decision read back with the game count, one tap; the plan reviewer found the hole before a line existed, so Confirm re-derives everything and answers "screen expired" rather than crashing.
 commits: 9b28574
 
@@ -1218,14 +1291,17 @@ commits: 9b28574
 commits: 7d2ad6d
 
 ### d2-summary
-- The checkup reads the journal; the count is 181 activations.
+- The checkup reads the journal; the count is 181 failed fetches, the same event the paragraph counts.
 numbers: 181
+rev: 2
 
 ### d2-p1
-- The first checkup had called the deploy's anonymous fetch a design; the second found 181 activations of the deploy timer since 31 August ending in GitHub refusing an unauthenticated download, and the fetch got a key.
-- The phase that took the rest of the report counted the process: three of twelve phases had written no phase log while claiming a retrospective, and six of ten had broken a shell command on a backslash two memories already forbade; both became hooks, one on the commit message and one on the shell command.
-numbers: 181, 31
+- The first checkup had called the deploy's anonymous fetch a design; the second read the journal and found the deploy timer failing 181 times between 31 August and 3 September, 107 of them on 2 September alone, about a third of that day's attempts; almost every line said git could not read a username for GitHub, nothing had noticed because a fetch that fails looks like a fetch that found nothing new, and the server was given a key; "called it a design" means the first checkup had taken the anonymous fetch for a deliberate choice.
+- The phase that took the rest of the report counted the process: of the twelve phases since 28 August three had written no phase log while claiming a retrospective, and a second count, over the ten whose logs survived, found six that had broken a shell command on a backslash a rule already forbade twice; each fault became a hook, one reading the commit message and one the shell command.
+- For the writer: two paragraphs, one per story, the deploy, then the count of the process.
+numbers: 181, 107, 2, 31, 3, 28
 commits: 6207423, 02277c0
+granularity: section
 
 ### d2-p2
 - One gate moved for its price: the retrospective had run in a fork of the conversation, which re-sends the whole transcript on every call, and now runs in the conversation.
@@ -1242,13 +1318,14 @@ commits: e026d5e
 
 ### d3-p2
 - The owner asked for the same for every other script and for everything the agent never runs to go; a count over a month of transcripts found 14301 tool calls, of which 1463 were hand-typed test runs on one spec, read through a grep on a stream.
-- Every script left in package.json had been run that month, so nothing more was deleted, and the log says so rather than deleting for effect.
+- The eight scripts left in package.json after the gates moved into their own table had every one been run that month, so nothing more was deleted, and the log says so rather than deleting for effect; said so that it does not contradict the summary's twenty-three to eight.
 numbers: 14301, 1463
 commits: af08fc5
+rev: 2
 
 ### d3-p3
-- The document check learned the runner's table and refused a bare npx eslint or npm test, because with the configs moved those misbehave; its first run found 63 stale names.
-- While that rule was being written the agent typed the same commands by hand twelve times, so a hook refuses them in the shell too; every moved gate and new rule was proven by a deliberate break, fourteen in all, and four hit nothing the rule watched.
+- The document check learned the runner's table and refused a bare npx eslint or npm test, because with the configs moved those misbehave; its first run found 63 stale command names across the documents it reads.
+- While that rule was being written the agent typed the same commands by hand twelve times, so a hook refuses them in the shell too; every moved gate and new rule was proven by a deliberate break, counted in the second finding at the top of this page.
 numbers: 63
 commits: d49d590
 
@@ -1272,7 +1349,7 @@ numbers: 294, 9
 numbers: 2, 2, 2, 2, 2
 
 ### tn-body-2
-- The eight script names as committed, in English, and the note that every gate is a row in the gate list, run only through the gate runner.
+- The eight script names as committed, in English.
 numbers: 2
 
 ### tn-note
@@ -1287,38 +1364,46 @@ numbers: 4
 - The harness changed every week and nothing said whether it got better; models changed underneath it too, and the only comparison was an impression of one session against a memory of another.
 - On 10 September the repository got a benchmark: a frozen task with the owner's brief, a hidden spec and a list of obligations, and a runner that cuts a clone of HEAD without history, hands the brief to a headless agent, scores the result with the clone's own gate runner and writes one row per run.
 - Nothing is a single score on purpose: acceptance is the headline and gates, obligations, turns, minutes and dollars say how it was reached; the task's award is never merged, because the day it lands the task measures memory.
+- Three words of the benchmark's own are explained where they first appear, in a few words each: the award is the feature the task asks the model to build, an obligation is one item of the written brief the result is checked against, and effort is the depth of reasoning a model is set to run at.
 numbers: 10
 commits: d011e68
+rev: 2
 
 ### d4-p2
-- The owner asked what stopped a model from noticing it was being measured and reading its way to the answer, and the honest reply was nothing much; the calibration was cancelled, the clone moved under the system temp folder with the runner's source stripped out, a hook in the clone refuses every step whose path leaves it, and the refusal count is a column.
-- The first calibration showed seven fence hits, none a step out of the clone, and a minutes column saying eleven for a run the file times put at forty-six; both columns were fixed the same night.
+- The owner asked what stopped a model from noticing it was being measured and reading its way to the answer, and the honest reply was nothing much; the run that had been set up to calibrate the benchmark was called off, the clone moved under the system temp folder with the runner's source stripped out, a hook in the clone refuses every step whose path leaves it, and the refusal count is a column.
+- That first calibrating run showed seven steps the fence had refused, none of them a step out of the clone, and a minutes column saying eleven for a run the file times put at forty-six; both columns were fixed the same night.
 commits: 5f5a120, cf15a80, 3328b6e
 
 ### d4-p3
-- The table was rewritten once more when all four models failed the same two obligations, the only two whose pattern spans a line break, because the clone is checked out on Windows with a carriage return before every newline.
-- With the matcher fixed, acceptance and the gates saturate for every model tried; the process columns separate them: Haiku at medium effort met eight of eleven obligations, named no debt, and cost a dollar and six minutes; Opus at medium met eleven of eleven, named the debt, and cost twenty-two dollars and thirty-six minutes.
+- The table was rewritten once more when all four models failed the same two obligations: the fault was in the scoring, not the models, because those two obligations are the only ones whose search pattern runs across a line break, and the clone is checked out on Windows with a carriage return before every newline, which the pattern did not allow for. The four were Haiku and Opus at medium effort, Fable at low and Sonnet at high; the two rows of Fable and Sonnet had come from the runner before that night's fixes and carried counts now known to be false; they were dropped and the other two re-scored, so the table keeps only what a runner worth believing produced, and a third run went in the same night on the mended runner, at the higher effort the weekly checkup has used ever since.
+- With the matcher fixed, every model tried passes the acceptance and leaves the gates green; the process columns separate them: Haiku at medium effort met eight of eleven obligations, left no entry in the debt list, and cost a dollar and six minutes; Opus at medium met eleven of eleven, wrote the debt entry, and cost twenty-two dollars and thirty-six minutes.
 commits: a05104e
+rev: 2
 
 ### d5-summary
 - The checkup finds what the gates cannot; the count is 13 sentences.
 numbers: 13
 
 ### d5-p1
-- The fourth checkup, on 11 September, ran the full mutation battery and found it red at a pristine HEAD: neither mutation config named a test config, so the dry run collected every spec under the root, including since 10 September the benchmark's hidden spec, which fails by design.
-- It found thirteen sentences in the documents that had stopped being true or never were, none within reach of the document check, which cannot read a server or a git history.
+- The fourth checkup, on 11 September, ran the full mutation battery and found it red at a pristine HEAD: neither of the two mutation configs said which test config to run the suite with, so the dry run collected every spec under the root, including since 10 September the benchmark's hidden spec, which fails by design.
+- It found thirteen sentences in the documents that had stopped being true or never were, none within reach of the documents gate, which cannot read a server or a git history.
 numbers: 11, 10
 commits: 1f901b6, 187f621
 
 ### d5-p2
 - It read the harness as its only user does: a Stop hook had been running the linter's autofix over the whole tree at the end of every turn, editing files unasked and refusing nothing, so it could not be seen refusing; it is gone.
 - The Gates paragraph a commit pastes now opens with the battery, the HEAD and the time, the commit hook refuses a stamp from another HEAD, and the push hook, freed of the release battery, refuses a tag whose battery was not green at that commit.
-- The award rules held a dozen survivors on exact boundaries, each a rule a player would notice moving by one game; and thirteen of the sixteen phase logs had written "not measured" for the wall clock against a rule that the number is always there to take, so the document check refuses that field now.
-commits: 3f77a65, 81b76d1, cf74fb1, 08aac82
+commits: 3f77a65, 81b76d1
+
+### d5-p3
+- The award rules held a dozen survivors on exact boundaries, each a rule a player would notice moving by one game, and every one of those boundaries got a case of its own.
+- Writing "not measured" is the rule for a number nobody took, but the wall clock is always there to read afterwards, so the thirteen of sixteen phase logs that wrote it in that field were writing it where it does not apply, and the documents gate refuses it there now.
+commits: cf74fb1, 08aac82
 
 ### q1
 - The quotation: the agent is the harness's only user, and a person's convenience is second; from the commit cited, 9 September.
-numbers: 08, 5, 9
+numbers: 9
+commits: af08fc5
 
 ### tile-1-value
 - Skills plus agents.
@@ -1357,129 +1442,11 @@ numbers: 205
 numbers: 2
 
 ### tile-6-value
-- The count of lines in CLAUDE.md.
-numbers: 379
+- The count of lines in CLAUDE.md, against its budget.
+numbers: 379, 380
 
 ### tile-6-label
-- Lines in CLAUDE.md, of its budget of 380.
-numbers: 380
-
-## patterns
-
-### eyebrow
-- Across all seven eras.
-
-### title
-- What kept coming back.
-
-### lead
-- Seven patterns run through the whole history, each stated in a commit, not inferred; they are the lessons the findings counted, here as the rule each became.
-
-### r1-n
-- The first pattern's number.
-numbers: 01
-
-### r1-title
-- Prose becomes a machine.
-
-### r1-body
-- Every rule starts as a sentence in CLAUDE.md; if a machine can check it, it becomes a lint rule, a hook or a docs:check family, and the sentence is deleted.
-- The trigger is measured, not felt: a rule in prose broken thirteen times in a week is the sign it needs a machine.
-commits: 08aac82
-
-### r1-link
-- Leads to era 1.
-numbers: 1
-
-### r2-n
-- The second pattern's number.
-numbers: 02
-
-### r2-title
-- A rule that never fires looks clean.
-
-### r2-body
-- A rule found dead, a gate that passed only because the author's machine had no CRLF, documentation rules that stayed green under sabotage.
-- The answer is always the same: prove a new rule with a deliberate violation before trusting it, then search the tree by hand for the spellings its author did not think of.
-
-### r2-link
-- Leads to era 2.
-numbers: 2
-
-### r3-n
-- The third pattern's number.
-numbers: 03
-
-### r3-title
-- Gate the diff, read the report you have.
-
-### r3-body
-- Mutation over changed files, e2e over reachable scenarios, one round of survivor-killing, and never re-running a gate to re-read its output.
-numbers: 2
-
-### r3-link
-- Leads to era 2.
-numbers: 2
-
-### r4-n
-- The fourth pattern's number.
-numbers: 04
-
-### r4-title
-- Every reader is briefed, and told less than the author knows.
-
-### r4-body
-- The review is always an agent that did not write the diff; the pictures are read by an agent that does not know what they are for; the bot's lines are read as sentences with real values; the plan is criticised before code exists.
-
-### r4-link
-- Leads to era 5.
-numbers: 5
-
-### r5-n
-- The fifth pattern's number.
-numbers: 05
-
-### r5-title
-- A lesson left in the chat is gone.
-
-### r5-body
-- The retrospective is a gate that falls before the release, not after; each lesson has to land as a rule, a check or a skill line, and since every file has a line budget, each new rule displaces an older one.
-
-### r5-link
-- Leads to era 2 and to era 5.
-numbers: 2, 5
-
-### r6-n
-- The sixth pattern's number.
-numbers: 06
-
-### r6-title
-- Counts in prose rot.
-
-### r6-body
-- A number that changes whenever a list changes is removed rather than corrected; the exception is a number something depends on, which a check holds.
-
-### r6-link
-- Leads to era 6.
-numbers: 6
-
-### r7-n
-- The seventh pattern's number.
-numbers: 07
-
-### r7-title
-- Shape every output for the one who reads it.
-
-### r7-body
-- The harness has one user and it is not a person: a verdict is a file it can open, never a stream it sees the tail of; a red gate names its reasons and the one command that re-runs it; nothing waits on a terminal.
-- The rule was stated in the seventh era and applied backwards over everything written before it.
-
-### r7-link
-- Leads to era 7.
-numbers: 7
-
-### outro
-- What of all this stands in the repository today is below, in one list.
+- Lines in CLAUDE.md, against the budget the value above already prints.
 
 ## today
 
@@ -1489,6 +1456,9 @@ numbers: 314
 
 ### title
 - The harness today.
+
+### lead
+- What of all seven eras stands in the repository at the last commit, in one list.
 
 ### item-1-term
 - Rules loaded every session.
@@ -1502,7 +1472,7 @@ numbers: 379, 380
 numbers: 11
 
 ### item-2-desc
-- The eleven skills by name: add-a-feature, add-repository-method, finish-phase with five pages beside it, fix-a-bug, refresh-the-pictures, retrospective, update-the-design-page, write-a-commit, write-a-doc, write-a-spec, write-an-e2e-scenario; each description names its stage in the flow.
+- The skills by name, the count being the card's own headline: add-a-feature, add-repository-method, finish-phase with five pages beside it, fix-a-bug, refresh-the-pictures, retrospective, update-the-design-page, write-a-commit, write-a-doc, write-a-spec, write-an-e2e-scenario; each description names its stage in the flow.
 numbers: 2
 
 ### item-3-term
@@ -1510,7 +1480,7 @@ numbers: 2
 numbers: 7
 
 ### item-3-desc
-- The seven agents by name: phase-reviewer, plan-reviewer, poster-designer, poster-reader, copy-reader, skill-auditor, deep-checkup; each with a brief contract and a Verdict: line.
+- The agents by name, the count being the card's own headline: phase-reviewer, plan-reviewer, poster-designer, poster-reader, copy-reader, skill-auditor, deep-checkup; each with a brief contract and a Verdict: line.
 
 ### item-4-term
 - Hooks.
@@ -1530,21 +1500,21 @@ numbers: 7
 
 ### item-6-desc
 - Nine in the phase ritual, in order: lint and types, coverage, mutation over the diff, a real evening, e2e over the diff, review, the sentences, the pictures, the retrospective.
-- The machine half is eleven rows in one table, run only through one runner, each leaving a log and a verdict file; four batteries, one per moment.
+- The gates a machine runs are eleven rows in one table (one gate of the ritual may be several rows), run only through one runner, each leaving a log and a verdict file; four batteries bundle the rows, one per moment, and the moments are named: a quick one while working, the end of a phase, a push to CI, and a release tag.
 numbers: 2
 
 ### item-7-term
 - Documents.
 
 ### item-7-desc
-- README, PLAN, CLAUDE, TECH-DEBT, DEVELOPMENT-FLOW, four folder READMEs, and a logbook of phases and checkups, all held against the code by the document check.
+- README, PLAN, CLAUDE, TECH-DEBT, DEVELOPMENT-FLOW, four folder READMEs, and a logbook of phases and checkups, all held against the code by the documents gate.
 
 ### item-8-term
 - Benchmark.
 
 ### item-8-desc
-- One frozen task, run cold in a fenced clone and scored by the clone's own gates; one row per run with acceptance, gates, obligations, fence hits, tool calls, minutes and dollars by model.
-- The weekly checkup runs the pinned model, so its row moves only when the harness does; three rows so far.
+- One frozen task, run cold in a fenced clone and scored by the clone's own gates; one row per run, under the name of the model that made it, with acceptance, gates, obligations, the steps the fence refused, tool calls, minutes and dollars.
+- The weekly checkup always runs Opus at high effort, so its rows can be compared with each other; the table holds three runs so far — Opus at two efforts, and the cheaper Haiku beside them.
 
 ### method-title
 - How this page was written.

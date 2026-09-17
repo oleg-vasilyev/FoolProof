@@ -57,6 +57,16 @@ same numbers, same commits, and the words the tree's `avoid-<lang>:` lists never
 printed, no «он» in a heading — so structure is not the reader's question, only whether
 a person would say it.
 
+**A page that retells the history owes a cold fact-check as well, against git and not
+against its own tree.** The tree is a fair copy of what somebody once read out of the
+log, so it inherits whatever that reading got wrong: the September fact-check pulled
+«four commits called consecutive» off the case study, the tree kept the phrase, and the
+rewrite put it back on the page. A fresh agent with the page, git and no history of the
+project found more of them in a single pass — two hashes under each other's sentences, a
+percentage from the neighbouring commit, a count the page was already citing elsewhere.
+Brief it after every wave of edits, over that wave's own diff, and correct the **tree**,
+not the paragraph, or the next rewrite restores the error.
+
 **The loop, in order, and the owner sees the page last.** Place the writer's paragraphs;
 run `docs-check` and fix what it names; only then brief the reader, which runs
 `node scripts/tools/tools.ts site-prose <page>` itself and judges every candidate it

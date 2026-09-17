@@ -13,6 +13,7 @@ export type FactBlock = {
   readonly numbersIn: Readonly<Record<string, readonly string[]>>;
   readonly commits: readonly string[];
   readonly rev: string | null;
+  readonly overwrittenFields: readonly string[];
 };
 
 export type PageBlock = {
@@ -46,9 +47,15 @@ const NOTHING = 0;
 
 const ONE = 1;
 
-const A_SECTION_HEADING = /^## (\S+)\s*$/;
+const A_SECTION_HEADING = /^## ([a-z0-9-]+)\s*$/;
 
-const A_BLOCK_HEADING = /^### (\S+)\s*$/;
+const A_BLOCK_HEADING = /^### ([a-z0-9-]+)\s*$/;
+
+const A_HEADING = /^(#{2,3}) (.+?)\s*$/;
+
+const AN_ID = /^[a-z0-9-]+$/;
+
+const SECTION_LEVEL = "##";
 
 const A_FACT = /^- \S/;
 
@@ -302,6 +309,8 @@ type DraftBlock = {
   numbersIn: Record<string, readonly string[]>;
   commits: readonly string[];
   rev: string | null;
+  readonly fieldsSeen: Set<string>;
+  readonly overwrittenFields: string[];
 };
 
 const withoutGaps = (numbers: readonly string[]): readonly string[] =>
@@ -331,11 +340,19 @@ export const blocksInTree = (markdown: string): readonly FactBlock[] => {
         numbersIn: {},
         commits: [],
         rev: null,
+        fieldsSeen: new Set(),
+        overwrittenFields: [],
       });
     } else if (last !== undefined && field !== null) {
       const value = field[SECOND_GROUP] ?? "";
       const name = field[FIRST_GROUP] ?? "";
       const language = A_LANGUAGE_NUMBERS.exec(name)?.[FIRST_GROUP];
+
+      if (last.fieldsSeen.has(name) && !last.overwrittenFields.includes(name)) {
+        last.overwrittenFields.push(name);
+      }
+
+      last.fieldsSeen.add(name);
 
       switch (name) {
         case "granularity":
@@ -358,7 +375,7 @@ export const blocksInTree = (markdown: string): readonly FactBlock[] => {
     }
   }
 
-  return blocks;
+  return blocks.map(({ fieldsSeen: _, ...block }) => block);
 };
 
 const sameSet = (left: readonly string[], right: readonly string[]): boolean =>
@@ -410,6 +427,38 @@ const blockComplaints = (
   ];
 };
 
+export const namesASection = (line: string): boolean => A_SECTION_HEADING.test(line);
+
+export const strayHeadings = (tree: string, markdown: string): readonly string[] =>
+  markdown.split(A_LINE).reduce<{ readonly inSection: boolean; readonly said: readonly string[] }>(
+    (found, line) => {
+      const heading = A_HEADING.exec(line);
+
+      if (heading === null) {
+        return found;
+      }
+
+      const named = AN_ID.test(heading[SECOND_GROUP] ?? "");
+
+      if (named) {
+        return heading[FIRST_GROUP] === SECTION_LEVEL ? { ...found, inSection: true } : found;
+      }
+
+      return found.inSection
+        ? {
+            ...found,
+            said: [
+              ...found.said,
+              `${tree}: the heading "${line.trim()}" stands inside a section and names nothing — a ` +
+                `section and a block are each one lowercase word, so this one is read as prose and ` +
+                `whatever follows it is swallowed by the block above`,
+            ],
+          }
+        : found;
+    },
+    { inSection: false, said: [] }
+  ).said;
+
 export const textComplaints = (
   tree: string,
   facts: readonly FactBlock[],
@@ -423,13 +472,21 @@ export const textComplaints = (
         `${tree}: block "${fact.id}" lists no fact — a slot in the structure has to say what ` +
           `the paragraph is there to tell, or the writer fills it with whatever the other language said`
     );
-  const repeated = ids
+  const repeatedIds = ids
     .filter((id, at) => ids.indexOf(id) !== at)
     .map((id) => `${tree}: block "${id}" is declared twice — an id names one place on the page`);
+  const doubled = facts.flatMap((fact) =>
+    fact.overwrittenFields.map(
+      (field) =>
+        `${tree}: block "${fact.id}" lists "${field}:" more than once — a field is written on one ` +
+          `line, and a later one silently replaces the first rather than adding to it`
+    )
+  );
 
   return [
     ...thin,
-    ...repeated,
+    ...repeatedIds,
+    ...doubled,
     ...pages.flatMap(([page, { blocks, stray }]) => {
       const drawnIds = blocks.map((block) => block.id);
       const missing = ids.filter((id) => !drawnIds.includes(id));
@@ -467,11 +524,14 @@ export const textComplaints = (
 export const siteTextOutOfStep = (): readonly string[] =>
   SITE_TEXT_TREES.flatMap(({ tree, pages }) =>
     existsSync(tree)
-      ? textComplaints(
-          tree,
-          blocksInTree(read(tree)),
-          pages.map((page) => [page, blocksOnPage(read(page))] as const)
-        )
+      ? [
+          ...strayHeadings(tree, read(tree)),
+          ...textComplaints(
+            tree,
+            blocksInTree(read(tree)),
+            pages.map((page) => [page, blocksOnPage(read(page))] as const)
+          ),
+        ]
       : [
           `${tree}: missing — the pages ${pages.join(" and ")} are held to one structure only ` +
             `through this tree, so write it before either page is edited`,

@@ -553,14 +553,14 @@ left it alone with nowhere to hide.
 that opens the mutation gate** — "touches `scripts/`" fired on one that only moved them,
 and the move of 9 September re-mutated every gates file for the same reason.
 
-## The site gates read the body, and the case study's tree holds no words
+## The site gates read the body, and a page says more than its body
 
 `site-text` holds a page to its tree only through the body's text nodes — not the
-`<title>`, `meta`, `aria-label`, `alt` or the case study's chart strings. **Extend it when
-one is found wrong in one language only, or when a page gets a third language.** And
-`site-prose` refuses «он» in a heading and the tree's `avoid-<lang>:` stems only for a tree
-that lists any; `case-study.facts.md` lists none, so the 5 Russian headings there saying «его»
-wait for **the Russian case-study rewrite, which adds the two `avoid-` lines first**.
+`<title>`, `meta`, `aria-label`, `alt` or the case study's chart strings. Its era
+names drifted from the headings they repeat, so the legend reads those headings now.
+**Extend it when a string is wrong in one language only, when a chart's name for a
+measure drifts from the tile printing it — three Russian spellings of *mutation
+score* did — or when a page gets a third language.**
 
 ## The picture gate cannot fork until its triage half moves out
 
