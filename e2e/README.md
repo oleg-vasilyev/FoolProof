@@ -13,12 +13,13 @@ between it and being trusted. Six are closed and the seventh is in
 So it is **a gate now**, and `node scripts/gates/gate-runner.ts e2e:changed` plays only what a diff can reach.
 
 Which means the reach has to be kept honest. `EVERYTHING` in
-[`scripts/gates/e2e-changed.ts`](../scripts/gates/e2e-changed.ts) lists the paths that force
+[`scripts/gates/e2e/e2e-changed.ts`](../scripts/gates/e2e/e2e-changed.ts) lists the paths that force
 every scenario to play, and a file missing from it is a hole rather than a
-saving: `vitest.e2e.config.ts` was absent, so a change to how the whole suite
-runs — worker count included — reported "nothing a scenario covers changed" and
-played nothing. **Anything that decides how scenarios run belongs in that list,
-not just the code they exercise.**
+saving: the suite's own Vitest configuration was absent, so a change to how the whole
+suite runs — worker count included — reported "nothing a scenario covers changed" and
+played nothing. The list now takes the gate's whole folder rather than that one file,
+because moving it reopened the same hole. **Anything that decides how scenarios run
+belongs in that list, not just the code they exercise.**
 
 **This file is about the harness, not about writing a scenario.** Whether one is
 owed, the verbs a scenario drives the chat with, and what it must assert are the
@@ -35,8 +36,9 @@ owns the judgement and says why.
 ## The separation is structural, not a convention to remember
 
 - It lives at the repository root — not in `src/`, not in `scripts/`. It has its own
-  `tsconfig.json` and its own `vitest.e2e.config.ts`, so the unit suite, coverage and
-  mutation cannot pick it up. `node scripts/gates/gate-runner.ts e2e` is the only way in.
+  `tsconfig.json`, and the gate that runs it keeps its own Vitest configuration, so the
+  unit suite, coverage and mutation cannot pick it up. `node scripts/gates/gate-runner.ts e2e`
+  is the only way in.
 - **It imports nothing from `src/`.** Not a type, not a constant, not `copy.en.ts`.
   It knows the bot the way Telegram knows it: commands in, Bot API calls out. A
   harness that imported the copy table would assert a constant against itself.

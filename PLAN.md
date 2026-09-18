@@ -17,7 +17,7 @@ belongs here as an edge case, or it belongs in a commit.
 ## What is in here
 
 Long enough that it is read by following a link rather than from the top.
-`docs-check` holds this list and the sections against each other, so neither can
+`check-docs` holds this list and the sections against each other, so neither can
 quietly lose the other.
 
 | Section | What it settles |
@@ -1698,7 +1698,7 @@ shares that band with the counter on the right**, so it is cut to fit rather tha
 allowed to overrun — the same ellipsis the chronology's column heads use. **Fitting is
 by measurement, glyph by glyph**, against a table generated from the shipped bold face
 by `scripts/tools/measure-advances.ts` and committed as `src/shared/fonts/glyph-advances.ts`;
-`docs-check` holds the table's recorded fingerprint against the faces in `assets/fonts/`,
+`check-docs` holds the table's recorded fingerprint against the faces in `assets/fonts/`,
 so a changed face fails a gate rather than silently mis-fitting every poster.
 
 It used to be a character count against one assumed advance — about 0.58 of the size for

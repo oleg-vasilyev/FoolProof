@@ -1,7 +1,7 @@
 import { EventEmitter } from "node:events";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { BATTERY, GATE } from "./gate-names.ts";
-import type { GateVerdict } from "./gate-verdict.ts";
+import { BATTERY, GATE } from "./shared/gate-names.ts";
+import type { GateVerdict } from "./verdict/gate-verdict.ts";
 
 
 const spawnSpy = vi.fn();
@@ -40,14 +40,14 @@ vi.mock("node:fs", () => ({
   createWriteStream: () => ({ write: logWriteSpy, end: logEndSpy }),
 }));
 
-vi.mock("./gate-numbers.ts", () => ({
+vi.mock("./verdict/gate-numbers.ts", () => ({
   LINT_FINDINGS: "reports/lint/findings.json",
   numbersFor: (gate: unknown, scope: unknown, read: unknown, output: unknown) => numbersForSpy(gate, scope, read, output),
   outputsOf: (gate: unknown) => outputsOfSpy(gate),
   scopeOf: (gate: unknown, against: unknown, args: unknown) => scopeOfSpy(gate, against, args),
 }));
 
-vi.mock("./gate-verdict.ts", () => ({
+vi.mock("./verdict/gate-verdict.ts", () => ({
   FAILED: 1,
   PASSED: 0,
   verdictOf: (...args: readonly unknown[]) => verdictOfSpy(...args),
@@ -60,7 +60,7 @@ const paragraphFileOfSpy = vi.fn();
 
 const stampLineOfSpy = vi.fn();
 
-vi.mock("./gate-summary.ts", () => ({
+vi.mock("./verdict/gate-summary.ts", () => ({
   gatesParagraph: (verdicts: unknown, battery: unknown) => gatesParagraphSpy(verdicts, battery),
   paragraphFileOf: (...args: readonly unknown[]) => paragraphFileOfSpy(...args),
   reasonLines: (verdict: unknown, root: unknown) => reasonLinesSpy(verdict, root),
@@ -477,7 +477,7 @@ describe("main()", () => {
     expect(spawnSpy.mock.calls[FIRST]?.[SECOND]).toEqual([
       "node_modules/eslint/bin/eslint.js",
       "--config",
-      "scripts/gates/config/eslint.config.js",
+      "scripts/gates/lint/eslint.config.js",
       "--quiet",
       "--format",
       "json",
@@ -567,7 +567,7 @@ describe("main(), the reasons under a red line", () => {
       "node_modules/vitest/vitest.mjs",
       "run",
       "--config",
-      "scripts/gates/config/vitest.config.ts",
+      "scripts/gates/test/vitest.config.ts",
       "src/a.spec.ts",
     ]);
   });

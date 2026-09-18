@@ -3,12 +3,12 @@
 The structure of `docs/index.html` and `docs/ru/index.html`, and what each block of
 text on them is there to say. A page is written from this file, never from the other
 language's page: the writer gets a block's facts and says them the way a reader of
-that language would. `node scripts/gates/gate-runner.ts docs-check` holds both pages
+that language would. `node scripts/gates/gate-runner.ts check-docs` holds both pages
 to this tree — same blocks, same order, same numbers.
 
 A `##` heading is a section and a `###` heading a block, each named by one lowercase
 word — a heading spelled any other way is prose for the writer to read, names
-nothing, and may stand only before the first named section; after it `docs-check`
+nothing, and may stand only before the first named section; after it `check-docs`
 refuses one. The block's id on the page is `section.block` in a `data-block` attribute. Under a block, bullets are the facts
 it must carry. `numbers:` lists every number its text may print in both languages;
 `numbers-en:` or `numbers-ru:` a number only that language prints as digits, where the
@@ -17,7 +17,7 @@ it may cite; and `rev:` climbs when a fact changes so the pages go red until
 rewritten. A block is one paragraph unless it says `granularity: section`.
 
 A page held to this tree also keeps its words: `avoid-ru:` and `avoid-en:` list the
-stems a language never prints, and `docs-check` fails a page that says one, or a
+stems a language never prints, and `check-docs` fails a page that says one, or a
 heading that says «он» about the bot. What the tool `node scripts/tools/tools.ts
 site-prose <page>` lists is only a candidate for the site-reader to judge.
 

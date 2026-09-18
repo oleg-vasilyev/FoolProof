@@ -52,7 +52,7 @@ never from the other language's page, and read by the `site-reader` agent, which
 given the built page and nothing else — no tree, no other language. The reader's
 findings go back to the writer, not into the HTML by hand: seventy-three line-level
 patches on one page left every sentence locally fine and the page still reading as a
-translation. `docs-check` holds both languages to the tree — same blocks, same order,
+translation. `check-docs` holds both languages to the tree — same blocks, same order,
 same numbers, same commits, and the words the tree's `avoid-<lang>:` lists never
 printed, no «он» in a heading — so structure is not the reader's question, only whether
 a person would say it.
@@ -68,7 +68,7 @@ Brief it after every wave of edits, over that wave's own diff, and correct the *
 not the paragraph, or the next rewrite restores the error.
 
 **The loop, in order, and the owner sees the page last.** Place the writer's paragraphs;
-run `docs-check` and fix what it names; only then brief the reader, which runs
+run `check-docs` and fix what it names; only then brief the reader, which runs
 `node scripts/tools/tools.ts site-prose <page>` itself and judges every candidate it
 lists. Findings go back to the writer; the loop ends when the reader returns none. Then
 the owner reads the built page on the preview server, never the deployed one — on 16

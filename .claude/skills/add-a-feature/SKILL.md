@@ -49,7 +49,7 @@ whoever has just split the folder and tells everybody else nothing, because open
 is not something the player ends up holding. Name it after the thing they do hold —
 a picture, a screen, an entity the commands are about.
 
-**`docs-check` fails a layer root above nine files**, which is unambiguous crowding
+**`check-docs` fails a layer root above nine files**, which is unambiguous crowding
 rather than a real limit — the fix is always a named subfolder, never a bigger
 number. It is a late alarm on purpose: seven fired on a folder that needed no split,
 so the question is the rule and the count only makes somebody ask it.

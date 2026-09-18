@@ -1,9 +1,9 @@
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { verdictPathOf } from "../gates/gate-paths.ts";
-import { GATE } from "../gates/gate-names.ts";
-import type { GateVerdict } from "../gates/gate-verdict.ts";
+import { verdictPathOf } from "../gates/shared/gate-paths.ts";
+import { GATE } from "../gates/shared/gate-names.ts";
+import type { GateVerdict } from "../gates/verdict/gate-verdict.ts";
 import {
   BENCHMARK_DIR,
   RUNS_DIR,
@@ -78,7 +78,7 @@ const JSON_INDENT = 2;
 
 const OUTPUT_LIMIT = 64 * 1024 * 1024;
 
-const QUICK_GATES = [GATE.lint, GATE.typecheck, GATE.docsCheck, GATE.coverage] as const;
+const QUICK_GATES = [GATE.lint, GATE.typecheck, GATE.checkDocs, GATE.coverage] as const;
 
 export interface ShellResult {
   readonly code: number;

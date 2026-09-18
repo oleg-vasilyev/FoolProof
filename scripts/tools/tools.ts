@@ -9,9 +9,9 @@ import { GALLERY_DIR, POSTER_DIR } from "../drawings/drawn-into.ts";
 import { drawnByName, everyDrawing, featuresThatDraw } from "../drawings/feature-drawings.ts";
 import { LANDING_PAGES, SITE_CSS, SITE_CSS_SOURCE, buildSiteCss } from "./site-css.ts";
 import { writeSiteTraces } from "./site-traces.ts";
-import { proseCandidates } from "../docs-check/source/site-prose.ts";
-import { blocksOnPage } from "../docs-check/source/site-text.ts";
-import { read } from "../docs-check/document-files.ts";
+import { proseCandidates } from "../gates/check-docs/source/site-prose.ts";
+import { blocksOnPage } from "../gates/check-docs/source/site-text.ts";
+import { read } from "../gates/check-docs/document-files.ts";
 import { siteImageOf } from "./site-images.ts";
 import { REPORTS_DIR, tidyReports } from "./tidy-reports.ts";
 import {

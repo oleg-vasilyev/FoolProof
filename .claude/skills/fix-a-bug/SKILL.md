@@ -107,9 +107,9 @@ it runs, not recovered by running it again.
 
 A fault almost never has exactly one site, because it came from a habit rather than
 a typo. The same lost backslash has reached this repository twice — once inside a
-`docs-check` rule whose path split then could not do its job and reported nothing
+`check-docs` rule whose path split then could not do its job and reported nothing
 forever, and once more caught a substring from shipping. `TECH-DEBT.md`, under *Half
-of `docs-check` is proven once*, has both and a third of the same shape. Copying a
+of `check-docs` is proven once*, has both and a third of the same shape. Copying a
 render call to a second module left its font guard behind, and `CLAUDE.md` has what
 that would have committed, beside the rule about refusing at construction.
 
@@ -120,7 +120,7 @@ symptom** — the wrong call, the missing guard, the assumption — across `src/
 - **`\b` is ASCII-only**, and `project/no-ascii-word-boundary` refuses a pattern that
   carries both; a search typed by hand still has to spell the boundary as
   `(?<![\p{L}\p{N}])`.
-- **A name that changed has callers no compiler sees.** `docs-check` fails a document
+- **A name that changed has callers no compiler sees.** `check-docs` fails a document
   naming a path, an `npm run` script or a `scripts/tools/tools.ts` verb that does not exist;
   a changed *function* name still rots in silence.
 

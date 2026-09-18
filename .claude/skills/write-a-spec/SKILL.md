@@ -62,7 +62,7 @@ no title for.
 deliberately never mocked, a decision taken inside it is asserted against itself and
 is therefore **unkillable** — a spec comparing `report` to `copy.problemTally(…)`
 proves nothing about either. A pluraliser put in `diagnostics/copy.en.ts` left five
-surviving mutants until it moved to `render/human-units.ts`; `docs-check` now fails
+surviving mutants until it moved to `render/human-units.ts`; `check-docs` now fails
 that shape on sight. A count still belongs behind a copy function — the *choice of
 word* belongs in `render/`.
 
@@ -330,7 +330,7 @@ it goes red.
 
 ## A message's reason is content, not decoration
 
-A complaint from `docs-check` or a lint rule carries its own reason precisely
+A complaint from `check-docs` or a lint rule carries its own reason precisely
 because that reason lives nowhere else — `CLAUDE.md` does not repeat it. So a spec
 asserting `toContain("What comes back")` has checked the *name of the thing* and
 left the whole explanation unheld: eight of eleven survivors in one new gate module

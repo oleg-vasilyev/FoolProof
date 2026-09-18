@@ -6,12 +6,12 @@ history — 314 commits over six and a half weeks — and every claim on it was
 fact-checked against git, so a block's facts are read from that history, never
 improved on. A page is written from this file, never from the other language's page:
 the writer gets a block's facts and says them the way a reader of that language would.
-`node scripts/gates/gate-runner.ts docs-check` holds both pages to this tree — same
+`node scripts/gates/gate-runner.ts check-docs` holds both pages to this tree — same
 blocks, same order, same numbers, same commits.
 
 A `##` heading is a section and a `###` heading a block, each named by one lowercase
 word — a heading spelled any other way is prose for the writer to read, names
-nothing, and may stand only before the first named section; after it `docs-check`
+nothing, and may stand only before the first named section; after it `check-docs`
 refuses one. The block's id on the page is `section.block` in a `data-block` attribute.
 Under a block, bullets are the facts it must carry; a bullet that begins *For the
 writer:* is a note on how to say them — a paragraph count, a word to keep, a
@@ -19,7 +19,7 @@ reason a fact is phrased as it is — and is never itself said on the page. `num
 `numbers-en:` or `numbers-ru:` a number only that language prints as digits, where the
 other spells it as a word (*era 2* against *во второй эпохе*); `commits:` every
 hash it may cite in an `<a class="hash">` link; and `rev:` climbs when a fact changes
-so the pages go red until rewritten. Each field is written on one line, and `docs-check`
+so the pages go red until rewritten. Each field is written on one line, and `check-docs`
 refuses a second: it would replace the first rather than add to it. A block is one
 paragraph unless it says `granularity: section`. The strings the charts draw with live
 in `<script>` and are not held here, except the era names: the timeline's legend reads
@@ -31,7 +31,7 @@ in both languages, and is not written; where they do not, each language writes i
 the facts like any other block.
 
 A page held to this tree also keeps its words: `avoid-ru:` and `avoid-en:` list the
-stems a language never prints, and `docs-check` fails a page that says one, or a
+stems a language never prints, and `check-docs` fails a page that says one, or a
 heading that says «он» about the harness or the bot. What the tool `node
 scripts/tools/tools.ts site-prose <page>` lists is only a candidate for the site-reader
 to judge.
@@ -565,7 +565,7 @@ numbers: 585, 354, 2
 commits: 4a3d0a9
 
 ### d4-p2
-- Then the commit "make the documents check themselves" observed the documents had been de-duplicated twice and concluded the fault was that nobody checked the rule; it added the documents gate, whose command was spelled docs:check until September and docs-check today.
+- Then the commit "make the documents check themselves" observed the documents had been de-duplicated twice and concluded the fault was that nobody checked the rule; it added the documents gate, whose command was spelled docs:check until September and check-docs today.
 - At first it checked links, the README tree against the folders, the script table against package.json, and a 380-line budget on CLAUDE.md; its first run found two undocumented scripts.
 - By the end of the story it holds more than thirty groups of checks, each about one subject, which this page calls a family.
 numbers: 380

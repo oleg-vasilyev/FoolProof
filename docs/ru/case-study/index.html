@@ -2,7 +2,7 @@
 <!-- A snapshot of the harness at commit 314 (09676f7, 11 September 2026): the story counts
      the commits up to it and does not follow the repository after that, by the owner's own
      request in the commit that added this page. Its text in both languages is written from
-     docs/text/case-study.facts.md by the site-writer agent, and docs-check holds both pages
+     docs/text/case-study.facts.md by the site-writer agent, and check-docs holds both pages
      to that tree; a block is never edited by hand, and never from the other language's page. -->
 <html lang="ru">
 <head>
@@ -309,7 +309,7 @@
         <details class="era-detail">
           <summary data-block="era-2.d4-summary"><span class="era-detail-h">Свод правил переполнен</span><span class="era-detail-n">585 строк</span></summary>
         <p data-block="era-2.d4-p1"><code class="cmd">CLAUDE.md</code> по умолчанию принимал каждый урок и дорос до 585 строк; его ужали до 354, не удаляя, а перенося: правила e2e ушли в собственный README, процедура раскладки по слоям — в новый скилл <code class="cmd">add-a-feature</code> <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>.</p>
-        <p data-block="era-2.d4-p2">Потом коммит «make the documents check themselves» заметил, что документы уже дважды чистили от повторов, и назвал причину: за правилом о том, что факт живёт в одном месте, никто не следил. Так появился гейт документов — до сентября его команда звалась <code class="cmd">docs:check</code>, сегодня <code class="cmd">docs-check</code> <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/29fe4d5" rel="noopener">29fe4d5</a>. Сначала он сверял ссылки, дерево из README с папками, таблицу скриптов с package.json и держал CLAUDE.md в бюджете 380 строк; первый прогон нашёл два скрипта, не описанных нигде. К концу истории в нём больше тридцати групп проверок, каждая про свой предмет, — на этой странице такая группа зовётся семейством.</p>
+        <p data-block="era-2.d4-p2">Потом коммит «make the documents check themselves» заметил, что документы уже дважды чистили от повторов, и назвал причину: за правилом о том, что факт живёт в одном месте, никто не следил. Так появился гейт документов — до сентября его команда звалась <code class="cmd">docs:check</code>, сегодня <code class="cmd">check-docs</code> <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/29fe4d5" rel="noopener">29fe4d5</a>. Сначала он сверял ссылки, дерево из README с папками, таблицу скриптов с package.json и держал CLAUDE.md в бюджете 380 строк; первый прогон нашёл два скрипта, не описанных нигде. К концу истории в нём больше тридцати групп проверок, каждая про свой предмет, — на этой странице такая группа зовётся семейством.</p>
         </details>
 
         <details class="era-detail">
@@ -560,7 +560,7 @@
 
         <details class="era-detail">
           <summary data-block="era-6.d2-summary"><span class="era-detail-h">Когда открывать скилл</span></summary>
-        <p data-block="era-6.d2-p1">Со второй эпохи таблица в начале CLAUDE.md говорила модели, какой скилл читать под какую работу; ту же роль играло и его собственное описание. Ни то ни другое никто не сверял, и они разъехались: четвёртая эпоха научила описания говорить о задаче, но этап не указывало ни одно. Таблицу удалили, а пришедшая на её место проверка сработала на каждом скилле, потому что ни один не говорил, когда он нужен. Теперь каждый называет свой этап, <code class="cmd">docs-check</code> держит этот текст, заголовок и схему потока в согласии, а сама схема рисует всякий скилл и агент на его этапе — сверка идёт в обе стороны. У finish-phase формулировка «загружай, когда принят любой список правок» сменилась на «не загружай на этапе 1»: чекап заметил, что старая срабатывала на два этапа раньше <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a>.</p>
+        <p data-block="era-6.d2-p1">Со второй эпохи таблица в начале CLAUDE.md говорила модели, какой скилл читать под какую работу; ту же роль играло и его собственное описание. Ни то ни другое никто не сверял, и они разъехались: четвёртая эпоха научила описания говорить о задаче, но этап не указывало ни одно. Таблицу удалили, а пришедшая на её место проверка сработала на каждом скилле, потому что ни один не говорил, когда он нужен. Теперь каждый называет свой этап, <code class="cmd">check-docs</code> держит этот текст, заголовок и схему потока в согласии, а сама схема рисует всякий скилл и агент на его этапе — сверка идёт в обе стороны. У finish-phase формулировка «загружай, когда принят любой список правок» сменилась на «не загружай на этапе 1»: чекап заметил, что старая срабатывала на два этапа раньше <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/01ef471" rel="noopener">01ef471</a>.</p>
 
           <div class="reveal mt-10 max-w-[68ch]">
                 <p data-block="era-6.tn-eyebrow" class="eyebrow">Тогда и теперь: когда открывать скилл</p>

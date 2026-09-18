@@ -88,7 +88,7 @@ For each block, in the tree's order:
    he rejected it on sight; a call («Ещё сомневаетесь?») does not sit over a list of
    facts. A menu item says what the visitor will do there («Как пользоваться»), and
    two neighbouring items must not rhyme («Как это работает» beside «История
-   разработки»). `docs-check` refuses «он» in a heading; the rest is yours.
+   разработки»). `check-docs` refuses «он» in a heading; the rest is yours.
 7. **The tree's `avoid-<lang>:` stems are never printed, and the page's ritual is not
    the reader's.** No weekday, no time of day: a stranger reads «пятница» as the
    only time the bot works. The word the poster itself uses for a session («вечер»)

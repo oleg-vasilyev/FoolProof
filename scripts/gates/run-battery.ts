@@ -1,11 +1,11 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { BATTERIES, COMMANDS, isBattery } from "./gate-list.ts";
-import { BATTERY, GATE, type Battery, type Gate } from "./gate-names.ts";
-import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH } from "./gate-paths.ts";
+import { BATTERIES, COMMANDS, isBattery } from "./shared/gate-list.ts";
+import { BATTERY, GATE, type Battery, type Gate } from "./shared/gate-names.ts";
+import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH } from "./shared/gate-paths.ts";
 import { forgetVerdicts, runGate, writeVerdict } from "./gate-runner.ts";
-import { FAILED, PASSED, skippedVerdict, type GateVerdict } from "./gate-verdict.ts";
-import { gatesParagraph, paragraphFileOf, summaryLines } from "./gate-summary.ts";
+import { FAILED, PASSED, skippedVerdict, type GateVerdict } from "./verdict/gate-verdict.ts";
+import { gatesParagraph, paragraphFileOf, summaryLines } from "./verdict/gate-summary.ts";
 
 
 const NOTHING = 0;

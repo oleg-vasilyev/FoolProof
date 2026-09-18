@@ -1,5 +1,5 @@
-import { ALL_GATES, COMMANDS, GATE_RUNNER } from "../gates/gate-list.ts";
-import type { Gate } from "../gates/gate-names.ts";
+import { ALL_GATES, COMMANDS, GATE_RUNNER } from "../gates/shared/gate-list.ts";
+import type { Gate } from "../gates/shared/gate-names.ts";
 
 
 const THE_WHOLE_MATCH = 0;
@@ -40,7 +40,7 @@ export const gateRunByHand = (command: string): string | null => {
     `Refused: ${found.join(", ")} runs a gate by hand.`,
     `Every gate runs through node ${GATE_RUNNER} <gate> — ${ALL_GATES.map(gateOffered).join(", ")} —`,
     "which leaves the log and the verdict under",
-    "reports/gates/ and names the config, now that the configs live in scripts/gates/config/",
+    "reports/gates/ and names the config, now that the configs live in scripts/gates/",
     "and the tool's bare name finds none.",
   ].join("\n");
 };

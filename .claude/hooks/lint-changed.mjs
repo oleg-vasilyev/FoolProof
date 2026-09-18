@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
-import { lintFindingsIn } from "../../scripts/gates/lint-findings.ts";
+import { lintFindingsIn } from "../../scripts/gates/lint/lint-findings.ts";
 
 // PostToolUse hook: lint the single file that was just written, so a violation
 // of the conventions surfaces at the edit rather than at the end of the turn.
@@ -21,7 +21,7 @@ const changedFile = () => {
   }
 };
 
-// The folders the lint gate covers (LINTED_FOLDERS in scripts/gates/gate-list.ts). A file the hook skips is one whose
+// The folders the lint gate covers (LINTED_FOLDERS in scripts/gates/shared/gate-list.ts). A file the hook skips is one whose
 // violation waits until the end of the turn instead of surfacing at the edit.
 const LINTED_FOLDERS = ["src", "scripts", "e2e"];
 
@@ -42,7 +42,7 @@ if (!inSource) {
 // is the right way for that assumption to fail.
 const eslint = resolve("node_modules", "eslint", "bin", "eslint.js");
 
-const config = "scripts/gates/config/eslint.config.js";
+const config = "scripts/gates/lint/eslint.config.js";
 
 // The findings are read from ESLint's JSON and printed in the one shape the lint
 // gate prints — file:line:col rule — message — so a violation reads the same at

@@ -164,7 +164,7 @@ and needed by nobody who only wants to run the bot here or change the code.
 
 `package.json` holds eight scripts and no more: the two that start the bot, the four
 batteries, the watcher and `prepare`. Every gate is a row in
-`scripts/gates/gate-list.ts` and runs through one runner, `node scripts/gates/gate-runner.ts <gate>`,
+`scripts/gates/shared/gate-list.ts` and runs through one runner, `node scripts/gates/gate-runner.ts <gate>`,
 which leaves its log and its JSON verdict under `reports/gates/` — so the table names
 the gates by that line, and nothing in the repository tells a reader to type a tool's
 name by hand.
@@ -175,11 +175,11 @@ name by hand.
 | `npm start` | The same bot in a browser against a fake Telegram — no token, no network, and the one to run here |
 | `npm run check:quick` | Lint, types, documents and tests — the everyday gate to keep at zero |
 | `npm run check:push` | What a push to `main` must not break — lint, types (app and harness), the harness's own tests, documents; the website ships from `main`, the app's tests wait for the tag. **CI runs this on every push** |
-| `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — every gate runs (only mutation waits for a green suite), each leaves its log and a JSON verdict under `reports/gates/`, and the run ends with one line per gate and the `Gates:` paragraph the commit message pastes, also written to `reports/gates/gates-paragraph.txt` under a stamp of battery, HEAD and time; the commit-msg hook refuses a `Gates:` line whose stamp names another HEAD than the commit's parent or another battery than the line claims. A red gate is re-run alone with `node scripts/gates/gate-runner.ts <gate>`. No `docs-check`: documents and pictures are finished after the review, in their own stages |
+| `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — every gate runs (only mutation waits for a green suite), each leaves its log and a JSON verdict under `reports/gates/`, and the run ends with one line per gate and the `Gates:` paragraph the commit message pastes, also written to `reports/gates/gates-paragraph.txt` under a stamp of battery, HEAD and time; the commit-msg hook refuses a `Gates:` line whose stamp names another HEAD than the commit's parent or another battery than the line claims. A red gate is re-run alone with `node scripts/gates/gate-runner.ts <gate>`. No `check-docs`: documents and pictures are finished after the review, in their own stages |
 | `npm run check:release` | The same walker over the release list: `check:push`'s gates, coverage, mutation over what changed since the previous tag, every scenario. Refuses unless HEAD carries the new `v*` tag. **CI runs this on every release tag** |
 | `node scripts/gates/gate-runner.ts lint` | ESLint over `src/`, `scripts/` and `e2e/`, which enforces this project's conventions. A red line lists each finding as `file:line:col rule — message`, read from the JSON ESLint writes to `reports/lint/findings.json` |
 | `node scripts/gates/gate-runner.ts typecheck` | `tsc --noEmit` over `src/` and `scripts/`, from the root `tsconfig.json`; a red line lists each error as `file:line:col TSnnnn — message` |
-| `node scripts/gates/gate-runner.ts docs-check` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists — an `npm run` script, a gate the runner knows, a `tools.ts` verb; a tool run by hand is a complaint too. The complaints come back under one red line |
+| `node scripts/gates/gate-runner.ts check-docs` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists — an `npm run` script, a gate the runner knows, a `tools.ts` verb; a tool run by hand is a complaint too. A red line counts the complaints and lists up to thirty of them, the rest being in the log, read from the JSON the gate writes to `reports/check-docs/complaints.json` |
 | `node scripts/gates/gate-runner.ts test` | Vitest, once — units and integration together. One spec is `node scripts/gates/gate-runner.ts test <file>`: a red run prints each failed assertion with its file and message, and leaves `reports/gates/test.named.json` without touching the battery's paragraph |
 | `node scripts/gates/gate-runner.ts test:coverage` | Vitest with coverage; fails below 70% on any metric |
 | `node scripts/gates/gate-runner.ts test:mutation:changed` | Stryker over the files that differ from `origin/main` (or from `MUTATE_AGAINST`). Under its line, red or green, every mutant still alive — file, line, status, the replacement — up to twenty per family, so a survivor is read off the run rather than out of the HTML report |
@@ -194,9 +194,10 @@ name by hand.
 `start:prod` is the only one that reads an env file, and the only one that talks to
 Telegram. Everything else runs against the fake one in `e2e/`.
 
-The gates' configs — ESLint, Vitest, both Stryker families — live in
-`scripts/gates/config/` and are named by the runner and by the two Claude hooks that
-lint; `tsconfig.json` stays at the root, because Node and the editor read it there.
+A gate's config sits in that gate's own folder — ESLint under `lint/`, Vitest under
+`test/`, both Stryker families under `mutation/` — named by the runner and by the two
+Claude hooks that lint, so no tool finds a config by looking beside itself;
+`tsconfig.json` stays at the root, because Node and the editor read it there.
 
 Coverage and mutation write their reports into `reports/`, which is gitignored
 whole — nothing about testing lands next to the source. Anything else that ends up
@@ -271,7 +272,7 @@ whole deploy: no workflow, no second branch, nothing to keep in step by hand.
 
 **[The case study](https://oleg-vasilyev.github.io/FoolProof/case-study/)** is the
 other thing the site says: how the harness around this bot — `CLAUDE.md`, the
-skills, the agents, the hooks, the lint rules and `docs-check` — was built, broken
+skills, the agents, the hooks, the lint rules and `check-docs` — was built, broken
 and rebuilt over the 314 commits between 28 July and 11 September 2026, told in seven
 eras, with a strip of every commit and charts read from the tree at each one. It was
 written from the git history alone. Both languages share
@@ -287,7 +288,7 @@ Three parts of it are generated rather than written:
 | `docs/styles.computed.css` — Tailwind, minified and committed | `node scripts/tools/tools.ts site-css` |
 | the five chart lines drawn behind the landing's sections, in the players' colours from the posters, from the route in `scripts/tools/site-traces.ts` — the same drawing on both language pages, each line leaving a section exactly where it enters the next | `node scripts/tools/tools.ts site-traces` |
 
-**`node scripts/gates/gate-runner.ts docs-check` fails on any of them being stale**, and that is the point: a push
+**`node scripts/gates/gate-runner.ts check-docs` fails on any of them being stale**, and that is the point: a push
 is the deploy, so a forgotten rebuild does not wait to be noticed — it ships. The
 posters are the bot's own renders of one sample evening — English copy with Latin
 names for one page, Russian for the other, and the English three are the very files
@@ -369,13 +370,21 @@ deploy/                 the systemd units a server is installed from, the script
                         configuration, and the runbook for all of it
 .github/workflows/      the checks that run on every push
 scripts/                dev utilities that are not part of the bot, a folder per domain:
-                        gates/ the runner, the batteries and their configs; tools/ the
-                        occasional jobs behind tools.ts; drawings/ what the features
-                        offer to be drawn; docs-check/ what `docs-check` asks —
+                        gates/ every gate, described below; tools/ the occasional jobs
+                        behind tools.ts; drawings/ what the features offer to be drawn;
+                        hooks/ the pure halves of the Claude hooks; backup/ the snapshot
+                        the server's timer takes; benchmark/ the runner behind
+                        `run-benchmark.ts`, which a clone never carries
+scripts/gates/          the two entry points — the runner and the batteries — over
+                        shared/ what every gate needs: the roster, the names, the paths
+                        each writes to, the tool binaries. Then a folder per gate for
+                        what only it knows, its config included: verdict/ what a run
+                        amounts to and how it is said; lint/ and typecheck/ reading
+                        their tool's output; test/ reading vitest's report; mutation/
+                        picking the changed files and scoring the families; e2e/ which
+                        scenarios a diff can reach; check-docs/ what `check-docs` asks —
                         `documents/` what is read out of the documents, `source/` what
-                        they are held against; hooks/ the pure halves of the Claude
-                        hooks; backup/ the snapshot the server's timer takes; benchmark/
-                        the runner behind `run-benchmark.ts`, which a clone never carries
+                        they are held against
 e2e/                    the fake Telegram and the scenarios played against it
 benchmark/                  frozen tasks an agent is given cold in a fresh clone, the
                         hidden acceptance each is scored by, and the log of every run

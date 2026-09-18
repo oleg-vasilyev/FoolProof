@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { join } from "node:path";
-import { GATE } from "../gates/gate-names.ts";
+import { GATE } from "../gates/shared/gate-names.ts";
 import type { Files } from "./benchmark-config.ts";
 import type { Task } from "./benchmark-task.ts";
 import type { RunRecord } from "./benchmark-record.ts";
@@ -17,7 +17,7 @@ const verdictPathOfSpy = vi.fn(
   (gate: string, named?: boolean) => `reports/gates/${gate}${named === true ? ".named" : ""}.json`
 );
 
-vi.mock("../gates/gate-paths.ts", () => ({
+vi.mock("../gates/shared/gate-paths.ts", () => ({
   verdictPathOf: (gate: string, named?: boolean) => verdictPathOfSpy(gate, named),
 }));
 
@@ -211,8 +211,8 @@ beforeEach(() => {
   debtNamedInSpy.mockReturnValue(true);
   disk.onDisk.set(verdictAt(GATE.test, true), testVerdict(CASES, FAILED_CASES));
 
-  for (const gate of [GATE.lint, GATE.typecheck, GATE.docsCheck, GATE.coverage]) {
-    disk.onDisk.set(verdictAt(gate), gateVerdict(gate, gate !== GATE.docsCheck));
+  for (const gate of [GATE.lint, GATE.typecheck, GATE.checkDocs, GATE.coverage]) {
+    disk.onDisk.set(verdictAt(gate), gateVerdict(gate, gate !== GATE.checkDocs));
   }
 });
 
@@ -277,7 +277,7 @@ describe("runBenchmark()", () => {
         "dependencies installed",
         "agent: finished in 3 turns, $1.00",
         "acceptance: 9/11",
-        "gates: lint green, typecheck green, docs-check red, test:coverage green",
+        "gates: lint green, typecheck green, check-docs red, test:coverage green",
         "fence: 0 refusals",
         "the headline",
       ]);
@@ -430,7 +430,7 @@ describe("runBenchmark()", () => {
       expect(record.gates).toEqual([
         { gate: GATE.lint, ok: true },
         { gate: GATE.typecheck, ok: true },
-        { gate: GATE.docsCheck, ok: false },
+        { gate: GATE.checkDocs, ok: false },
         { gate: GATE.coverage, ok: true },
       ]);
     });

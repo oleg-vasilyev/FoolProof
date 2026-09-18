@@ -67,7 +67,7 @@ through, the step where the interesting thing was one step.
 Never the number: the numbers are positional — the drawing says so about its steps,
 and its stages are one insertion away from the same thing.
 
-**`docs:check` reads a log exactly once — in the commit that brings it in.** It
+**`check-docs` reads a log exactly once — in the commit that brings it in.** It
 resolves every citation against the drawing, checks the coverage above, and refuses a
 citation short enough to fit two lines or a step the drawing repeats in several stages
 (no wording separates those, so name their stage instead). After that commit the file
@@ -126,7 +126,7 @@ What is actually knowable:
   being an unrelated errand between the two commits. The end is the final commit's own
   `%cI`. **So wall clock may not be `not measured` when both ends are in the
   transcript** — the opening message carries a time, and `git log --format=%cI -1`
-  gives the second the moment the phase commits; `docs-check` refuses a `Ran:` that
+  gives the second the moment the phase commits; `check-docs` refuses a `Ran:` that
   says so, since 11 September 2026. `date +%F` is a date with no time in it and cannot produce a duration — the
   first version of this page recommended it anyway.
 

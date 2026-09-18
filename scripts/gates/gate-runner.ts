@@ -8,12 +8,12 @@ import {
   isGate,
   stepsFor,
   type Step,
-} from "./gate-list.ts";
-import type { Battery, Gate } from "./gate-names.ts";
-import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH, logPathOf, verdictPathOf } from "./gate-paths.ts";
-import { numbersFor, outputsOf, scopeOf, type MutationScope } from "./gate-numbers.ts";
-import { FAILED, PASSED, lineFor, verdictOf, type GateVerdict, type RanVerdict } from "./gate-verdict.ts";
-import { gatesParagraph, paragraphFileOf, reasonLines, stampLineOf } from "./gate-summary.ts";
+} from "./shared/gate-list.ts";
+import type { Battery, Gate } from "./shared/gate-names.ts";
+import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH, logPathOf, verdictPathOf } from "./shared/gate-paths.ts";
+import { numbersFor, outputsOf, scopeOf, type MutationScope } from "./verdict/gate-numbers.ts";
+import { FAILED, PASSED, lineFor, verdictOf, type GateVerdict, type RanVerdict } from "./verdict/gate-verdict.ts";
+import { gatesParagraph, paragraphFileOf, reasonLines, stampLineOf } from "./verdict/gate-summary.ts";
 
 
 const JSON_INDENT = 2;

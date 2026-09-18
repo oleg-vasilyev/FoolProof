@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { COMMANDS } from "./gate-list.ts";
-import { BATTERY, GATE } from "./gate-names.ts";
-import type { GateVerdict } from "./gate-verdict.ts";
-import { PARAGRAPH_PATH } from "./gate-paths.ts";
+import { COMMANDS } from "./shared/gate-list.ts";
+import { BATTERY, GATE } from "./shared/gate-names.ts";
+import type { GateVerdict } from "./verdict/gate-verdict.ts";
+import { PARAGRAPH_PATH } from "./shared/gate-paths.ts";
 
 
 const ROOT = "D:/Temp/FoolProof";
@@ -31,7 +31,7 @@ vi.mock("./gate-runner.ts", () => ({
   writeVerdict: (verdict: unknown) => writeVerdictSpy(verdict),
 }));
 
-vi.mock("./gate-verdict.ts", () => ({
+vi.mock("./verdict/gate-verdict.ts", () => ({
   PASSED: 0,
   FAILED: 1,
   skippedVerdict: (gate: unknown, because: unknown, at: unknown) => skippedVerdictSpy(gate, because, at),
@@ -39,7 +39,7 @@ vi.mock("./gate-verdict.ts", () => ({
 
 const paragraphFileOfSpy = vi.fn();
 
-vi.mock("./gate-summary.ts", () => ({
+vi.mock("./verdict/gate-summary.ts", () => ({
   summaryLines: (verdicts: unknown, root: unknown) => summaryLinesSpy(verdicts, root),
   gatesParagraph: (verdicts: unknown, battery: unknown) => gatesParagraphSpy(verdicts, battery),
   paragraphFileOf: (...args: readonly unknown[]) => paragraphFileOfSpy(...args),
@@ -266,7 +266,7 @@ describe("runBattery()", () => {
   it("should forget its gates' old verdicts and write its name down before the first gate runs", async () => {
     await runBattery(["node", "run-battery.ts", BATTERY.push], say, ROOT);
 
-    expect(forgetVerdictsSpy).toHaveBeenCalledWith([GATE.lint, GATE.typecheck, GATE.e2eTypecheck, GATE.harness, GATE.docsCheck]);
+    expect(forgetVerdictsSpy).toHaveBeenCalledWith([GATE.lint, GATE.typecheck, GATE.e2eTypecheck, GATE.harness, GATE.checkDocs]);
     expect(mkdirSyncSpy).toHaveBeenCalledWith("reports/gates", { recursive: true });
     expect(writeFileSyncSpy).toHaveBeenNthCalledWith(ONCE, "reports/gates/battery.txt", "check:push\n");
     expect(forgetVerdictsSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
@@ -283,7 +283,7 @@ describe("runBattery()", () => {
       GATE.typecheck,
       GATE.e2eTypecheck,
       GATE.harness,
-      GATE.docsCheck,
+      GATE.checkDocs,
     ]);
     expect(runGateSpy).toHaveBeenCalledWith(GATE.lint, undefined, COMMANDS[GATE.lint].steps);
     expect(execFileSyncSpy).toHaveBeenCalledTimes(ONCE);
@@ -321,7 +321,7 @@ describe("runBattery()", () => {
       GATE.typecheck,
       GATE.e2eTypecheck,
       GATE.harness,
-      GATE.docsCheck,
+      GATE.checkDocs,
       GATE.coverage,
       GATE.mutationChanged,
       GATE.e2e,

@@ -5,7 +5,7 @@ The bot is developed by an AI agent — Claude Code, driven by the skills in
 authority: each stage's rules live in the skill it names, and on any
 disagreement the skill wins, then the drawing is fixed. The two are tied
 together in both directions — every skill opens by naming the stage it belongs
-to, and `node scripts/gates/gate-runner.ts docs-check` fails when a stage reaches for a skill that names a
+to, and `node scripts/gates/gate-runner.ts check-docs` fails when a stage reaches for a skill that names a
 different one, so neither can be renumbered quietly. **Stages** are what a skill
 may cite; the step numbers beside the arrows are positional and shift the moment
 a step is inserted, so nothing outside this file refers to them. The retrospective
@@ -74,7 +74,7 @@ sequenceDiagram
         R->>R: name the cases the drawing must survive before drawing: emptiest, fullest, widest, each optional part gone, a tie
         R->>R: draw every named case, rasterize with the real fonts, look at each PNG, and redraw whatever fails the look
         R->>R: lay them into one contact sheet: every case, the neighbour it will sit next to, and an inventory naming every mark and label in a player's words
-        R->>C: the named cases, committed as docs/posters/[gallery script].cases.txt — docs-check later holds the gallery to them
+        R->>C: the named cases, committed as docs/posters/[gallery script].cases.txt — check-docs later holds the gallery to them
         R-->>C: the sheet, the SVG behind each panel, and which numbers the drawing assumes exist
         C->>R: the copy-reader agent — the inventory of every line the drawing puts on the poster, read as sentences
         R-->>C: the ones no person would say, each with a better line
@@ -83,11 +83,11 @@ sequenceDiagram
         U-->>C: approved, or changes
     end
     opt the change is a page of the site under docs/, not a poster
-        C->>C: write the facts first — the page's tree under docs/text/, one block per paragraph, the numbers and the commits each block may print, and docs-check holds both languages to it
+        C->>C: write the facts first — the page's tree under docs/text/, one block per paragraph, the numbers and the commits each block may print, and check-docs holds both languages to it
         C->>R: the site-writer agent, once per language — the tree and the block ids, never the other language's page
         R-->>C: one paragraph per block, ready to be placed
         C->>C: place the paragraphs, build the page and look at it at a phone's width and a laptop's — a page is laid out by the browser, so the contact sheet is the built page itself
-        C->>C: node scripts/gates/gate-runner.ts docs-check — the tree's words and the headings' pronouns are refused here, before any reader is paid for
+        C->>C: node scripts/gates/gate-runner.ts check-docs — the tree's words and the headings' pronouns are refused here, before any reader is paid for
         C->>R: the site-reader agent, once per language — the built page and nothing else — it runs node scripts/tools/tools.ts site-prose itself and judges every repeat the tool lists
         R-->>C: what each paragraph tells a visitor, and every one a person would not say that way, rewritten in full
         C->>R: the site-writer agent again with the findings, until the reader returns none
@@ -200,7 +200,7 @@ sequenceDiagram
     end
     opt the change touched what the bot or the site draws
         opt the phase added a poster the gallery has never drawn
-            C->>C: copy the cases named at stage 1 into the gallery — node scripts/gates/gate-runner.ts docs-check fails on a poster nobody drew
+            C->>C: copy the cases named at stage 1 into the gallery — node scripts/gates/gate-runner.ts check-docs fails on a poster nobody drew
         end
         C->>K: the refresh-the-pictures skill
         K-->>C: the table of every committed picture, what draws it, and which have no gate but the table
@@ -246,7 +246,7 @@ sequenceDiagram
         R-->>C: a row per rule — enforced by a machine, stated in another file, or the only place a remedy is written down
         C->>C: adopt a rewrite only when that inventory shows it loses no remedy, and check each cut against the file it names
     end
-    C->>C: node scripts/gates/gate-runner.ts docs-check — links resolve, the tables match the code, the budget holds
+    C->>C: node scripts/gates/gate-runner.ts check-docs — links resolve, the tables match the code, the budget holds
     end
 
     rect rgb(237, 233, 254)

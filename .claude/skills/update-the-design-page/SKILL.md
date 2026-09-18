@@ -54,7 +54,7 @@ Two directions lead here:
    even empty), then `write_files` with `localPath`. Read it back and compare
    against the local file — the write is done only when they are byte-identical.
 5. **The splice already wrote `docs/posters/design-page.sync`**, which holds the
-   fingerprint of the drawings it put on the page, and `docs-check` fails while
+   fingerprint of the drawings it put on the page, and `check-docs` fails while
    that fingerprint and the English posters disagree. Commit it with the phase — but only
    after step 4 passed, because until then it claims a sync that did not happen.
    That file is the whole reason this skill can no longer be forgotten: the page

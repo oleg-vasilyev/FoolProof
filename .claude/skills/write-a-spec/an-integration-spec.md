@@ -36,7 +36,7 @@ Eight exist. Four cover the contracts:
 - **`shared/repository/sqlite-connection.integration.spec.ts`** writes a file in the
   schema of an older release with plain `node:sqlite` **before** importing the
   connection, then asserts the column the release added is there. It is the only
-  gate on that path: `docs-check` compares `CREATE` statements and never sees an
+  gate on that path: `check-docs` compares `CREATE` statements and never sees an
   `ALTER`, and a fresh file gets the column from `CREATE TABLE` without it.
 - **`shared/telegram/api-retry.integration.spec.ts`** installs the real transformer
   over a fake wire on a real `Bot`. Order matters and reads backwards: the **last**

@@ -9,7 +9,7 @@ const HUB_PORT = 8080;
 
 const VITEST = resolve(import.meta.dirname, "..", "node_modules", "vitest", "vitest.mjs");
 
-const CONFIG = resolve(import.meta.dirname, "vitest.e2e.config.ts");
+const CONFIG = resolve(import.meta.dirname, "../scripts/gates/e2e/vitest.e2e.config.ts");
 
 const STOPPED = 0;
 

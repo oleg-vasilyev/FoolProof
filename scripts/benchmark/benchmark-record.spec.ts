@@ -90,7 +90,7 @@ const RECORD: RunRecord = {
   acceptance: { passed: 9, total: 11 },
   gates: [
     { gate: "lint", ok: true },
-    { gate: "docs-check", ok: false },
+    { gate: "check-docs", ok: false },
   ],
   obligations: [
     { name: "a", met: true },
@@ -195,7 +195,7 @@ describe("rowOf()", () => {
     const row = rowOf(RECORD);
 
     expect(row).toContain("| 9/11 |");
-    expect(row).toContain("| red: docs-check |");
+    expect(row).toContain("| red: check-docs |");
     expect(row).toContain("| 2/3 |");
     expect(row).toContain("| 3.46 |");
     expect(row).toContain("| yes |");
@@ -205,7 +205,7 @@ describe("rowOf()", () => {
 
   it("should write the row in the header's column order, cell by cell", () => {
     expect(rowOf(RECORD)).toBe(
-      `| ${STARTED} | flying-start v1 | 9510df8 | claude-sonnet-5 | default | yes | 9/11 | red: docs-check ` +
+      `| ${STARTED} | flying-start v1 | 9510df8 | claude-sonnet-5 | default | yes | 9/11 | red: check-docs ` +
         "| 2/3 | yes | 0 | 1 | 42 | 302 | 166 | 2.0 | 3.46 | claude-opus-5 2.50, claude-fable-5 0.96 " +
         "| 9% of 40 | 20260910T131243-flying-start-claude-sonnet-5.json |\n"
     );
@@ -319,7 +319,7 @@ describe("agentOutcomeOf(), the cost by model", () => {
 describe("headlineOf() and recordJsonOf()", () => {
   it("should say the task, the model and the four numbers in one line", () => {
     expect(headlineOf(RECORD)).toBe(
-      "flying-start on claude-sonnet-5: finished, acceptance 9/11, gates red: docs-check, obligations 2/3, " +
+      "flying-start on claude-sonnet-5: finished, acceptance 9/11, gates red: check-docs, obligations 2/3, " +
         "fence hits 0, 42 turns in 2.0 min"
     );
   });

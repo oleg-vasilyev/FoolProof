@@ -4,7 +4,7 @@ import { dirname } from "node:path";
 
 // Where a scenario's bot output is written, so a red e2e line can point at the log of
 // the scenario that failed. The path shape is repeated once on the other side of the
-// e2e wall, in scripts/gates/gate-numbers.ts, which reads it back off the results file:
+// e2e wall, in scripts/gates/shared/gate-paths.ts, which test/test-results.ts reads it back with:
 // scripts/ may not import e2e/ and e2e/ imports nothing from the app, so a spec on each
 // side pins the same shape.
 export const BOT_LOGS = "reports/e2e/bot";

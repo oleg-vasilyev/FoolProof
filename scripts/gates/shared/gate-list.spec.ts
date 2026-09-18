@@ -1,0 +1,198 @@
+import { describe, expect, it } from "vitest";
+import {
+  ALL_GATES,
+  BATTERIES,
+  THE_CHECK_GATES,
+  THE_FULL_MUTATION,
+  THE_PHASE_GATES,
+  THE_PUSH_GATES,
+  THE_RELEASE_GATES,
+  THE_SINGLE_GATES,
+  COMMANDS,
+  describeStep,
+  isBattery,
+  isGate,
+  rerunCommandFor,
+  stepsFor,
+} from "./gate-list.ts";
+import { BATTERY, GATE } from "./gate-names.ts";
+
+
+describe("the four batteries", () => {
+  it("should make check the everyday gate: lint, types, documents, the suite under coverage", () => {
+    expect(THE_CHECK_GATES).toEqual([GATE.lint, GATE.typecheck, GATE.checkDocs, GATE.coverage]);
+  });
+
+  it("should make check:push what CI holds every push to: both typechecks, the harness units, documents", () => {
+    expect(THE_PUSH_GATES).toEqual([GATE.lint, GATE.typecheck, GATE.e2eTypecheck, GATE.harness, GATE.checkDocs]);
+  });
+
+  it("should be the five phase gates, in the order the chain ran them", () => {
+    expect(THE_PHASE_GATES).toEqual([
+      GATE.lint,
+      GATE.typecheck,
+      GATE.coverage,
+      GATE.mutationChanged,
+      GATE.e2eChanged,
+    ]);
+  });
+
+  it("should make the release the push gates, then coverage, mutation over the diff, every scenario", () => {
+    expect(THE_RELEASE_GATES).toEqual([
+      ...THE_PUSH_GATES,
+      GATE.coverage,
+      GATE.mutationChanged,
+      GATE.e2e,
+    ]);
+  });
+
+  it("should never run the full mutation in any battery, since that is the checkup's", () => {
+    for (const gates of Object.values(BATTERIES)) {
+      expect(gates).not.toContain(THE_FULL_MUTATION);
+    }
+    expect(THE_FULL_MUTATION).toBe(GATE.mutation);
+  });
+
+  it("should name each battery after the npm script that runs it", () => {
+    expect(Object.keys(BATTERIES)).toEqual([BATTERY.quick, BATTERY.push, BATTERY.phase, BATTERY.release]);
+    expect(BATTERIES[BATTERY.phase]).toBe(THE_PHASE_GATES);
+  });
+});
+
+describe("ALL_GATES, isGate() and isBattery()", () => {
+  it("should know every gate of every battery and the full mutation, each once", () => {
+    const expected = new Set([...Object.values(BATTERIES).flat(), ...THE_SINGLE_GATES, THE_FULL_MUTATION]);
+
+    expect([...ALL_GATES].sort()).toEqual([...expected].sort());
+    expect(new Set(ALL_GATES).size).toBe(ALL_GATES.length);
+  });
+
+  it("should accept a gate by name and refuse anything else, an absent name included", () => {
+    expect(isGate(GATE.mutation)).toBe(true);
+    expect(isGate(GATE.e2e)).toBe(true);
+    expect(isGate("nonsense")).toBe(false);
+    expect(isGate(undefined)).toBe(false);
+  });
+
+  it("should accept a battery by its script name and refuse a gate, a prototype key or nothing", () => {
+    expect(isBattery(BATTERY.release)).toBe(true);
+    expect(isBattery(GATE.lint)).toBe(false);
+    expect(isBattery("toString")).toBe(false);
+    expect(isBattery(undefined)).toBe(false);
+  });
+});
+
+describe("COMMANDS", () => {
+  it("should run every tool by its entry file under node_modules, never by a name PATH has to find", () => {
+    for (const command of Object.values(COMMANDS)) {
+      for (const step of command.steps) {
+        expect(step.bin).toMatch(/^(node_modules\/|scripts\/).*\.(js|mjs|ts)$|^node_modules\/typescript\/bin\/tsc$/);
+      }
+    }
+  });
+
+  it("should lint the three linted roots quietly, through the moved config, into the findings file", () => {
+    expect(COMMANDS[GATE.lint].steps).toEqual([
+      {
+        bin: "node_modules/eslint/bin/eslint.js",
+        args: [
+          "--config",
+          "scripts/gates/lint/eslint.config.js",
+          "--quiet",
+          "--format",
+          "json",
+          "--output-file",
+          "reports/lint/findings.json",
+          "src",
+          "scripts",
+          "e2e",
+        ],
+      },
+    ]);
+  });
+
+  it("should run the suite through the moved vitest config, with coverage only for the coverage gate", () => {
+    expect(COMMANDS[GATE.test].steps).toEqual([
+      { bin: "node_modules/vitest/vitest.mjs", args: ["run", "--config", "scripts/gates/test/vitest.config.ts"] },
+    ]);
+    expect(COMMANDS[GATE.coverage].steps[0]?.args).toEqual([
+      "run",
+      "--config",
+      "scripts/gates/test/vitest.config.ts",
+      "--coverage",
+    ]);
+  });
+
+  it("should run both e2e configurations from the gate that owns them", () => {
+    expect(COMMANDS[GATE.e2e].steps[0]?.args).toContain("scripts/gates/e2e/vitest.e2e.config.ts");
+    expect(COMMANDS[GATE.harness].steps[0]?.args).toContain("scripts/gates/e2e/vitest.harness.config.ts");
+  });
+
+  it("should make e2e:typecheck two tsc steps, the harness then its pages, and the full mutation one Stryker step per family", () => {
+    expect(COMMANDS[GATE.e2eTypecheck].steps.map((step) => step.args)).toEqual([
+      ["-p", "e2e", "--noEmit", "--pretty", "false"],
+      ["-p", "e2e/pages", "--noEmit", "--pretty", "false"],
+    ]);
+    expect(COMMANDS[GATE.mutation].steps.map((step) => step.args)).toEqual([
+      ["run", "scripts/gates/mutation/stryker.config.json"],
+      ["run", "scripts/gates/mutation/stryker.scripts.json"],
+    ]);
+  });
+
+  it("should let only test and test:mutation:changed take files", () => {
+    const taking = Object.entries(COMMANDS)
+      .filter(([, command]) => command.takesFiles)
+      .map(([gate]) => gate);
+
+    expect(taking).toEqual([GATE.test, GATE.mutationChanged]);
+  });
+});
+
+describe("stepsFor()", () => {
+  it("should hand back the gate's own steps when no file is named", () => {
+    expect(stepsFor(GATE.lint, [])).toEqual({ ok: true, steps: COMMANDS[GATE.lint].steps });
+  });
+
+  it("should append the files to the step of a gate that takes them", () => {
+    expect(stepsFor(GATE.test, ["src/a.spec.ts", "src/b.spec.ts"])).toEqual({
+      ok: true,
+      steps: [
+        {
+          bin: "node_modules/vitest/vitest.mjs",
+          args: ["run", "--config", "scripts/gates/test/vitest.config.ts", "src/a.spec.ts", "src/b.spec.ts"],
+        },
+      ],
+    });
+  });
+
+  it("should refuse files for a gate that takes none, naming the gates that do", () => {
+    const refused = stepsFor(GATE.lint, ["src/a.ts"]);
+
+    expect(refused.ok).toBe(false);
+    expect(refused.ok ? "" : refused.notice).toContain("lint takes no files");
+    expect(refused.ok ? "" : refused.notice).toContain("test and test:mutation:changed");
+  });
+});
+
+describe("describeStep() and rerunCommandFor()", () => {
+  it("should spell a step the way a reader would type it", () => {
+    expect(describeStep({ bin: "node_modules/typescript/bin/tsc", args: ["--noEmit"] })).toBe(
+      "node node_modules/typescript/bin/tsc --noEmit"
+    );
+  });
+
+  it("should re-run one gate through the gate runner, never through an npm battery", () => {
+    expect(rerunCommandFor(GATE.e2eChanged)).toBe("node scripts/gates/gate-runner.ts e2e:changed");
+  });
+});
+
+describe("the single gates", () => {
+  it("should offer test as a gate the runner knows and no battery walks", () => {
+    expect(THE_SINGLE_GATES).toEqual([GATE.test]);
+    expect(isGate(GATE.test)).toBe(true);
+
+    for (const gates of Object.values(BATTERIES)) {
+      expect(gates).not.toContain(GATE.test);
+    }
+  });
+});

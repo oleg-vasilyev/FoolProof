@@ -15,7 +15,7 @@ vi.mock("node:fs", () => ({
   writeFileSync: (...args: unknown[]) => writeFileSpy(...args),
 }));
 
-vi.mock("../docs-check/document-files.ts", () => ({
+vi.mock("../gates/check-docs/document-files.ts", () => ({
   read: (path: string) => readSpy(path),
 }));
 

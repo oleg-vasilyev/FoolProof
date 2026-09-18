@@ -155,7 +155,7 @@ to beat is in [PLAN.md](PLAN.md#what-drawing-one-costs-everybody-else).
 
 ---
 
-## Half of `docs-check` is proven once, by hand, and never again
+## Half of `check-docs` is proven once, by hand, and never again
 
 The failure these rules have is peculiar to them: a rule that runs, reports nothing,
 and would report nothing whatever the repository looked like. It has shipped three
@@ -174,7 +174,7 @@ fixture, and the rules that could be tested without one already are.
 ## The design page's sync marker proves the splice, not the push
 
 `docs/posters/design-page.sync` holds the fingerprint of the drawings
-`node scripts/tools/tools.ts design-page` put into the page, and `docs-check` fails while
+`node scripts/tools/tools.ts design-page` put into the page, and `check-docs` fails while
 that fingerprint and the mockups disagree — which is what stopped the page falling
 two releases behind again. But the splice writes the marker locally and the push
 happens afterwards, by hand, over the MCP. So a phase that sees the gate red and
@@ -338,7 +338,7 @@ their space**, which opens the same three files anyway.
 
 ## The design-page gate assumes one account owns both the repository and the page
 
-`docs-check` compares `docs/posters/design-page.sync` against the drawings the code
+`check-docs` compares `docs/posters/design-page.sync` against the drawings the code
 produces, and that is the only thing in the repository that can notice the Claude
 Design page has gone stale — the page lives behind a login, so nothing else can see
 it. The gate is right to exist. What it silently assumes is that whoever can commit
@@ -394,10 +394,10 @@ be awkward, with the trigger that would make the split pay for itself.
 | `e2e/fake-telegram/fake-telegram.ts` | One `switch` over nine Bot API methods, mixing protocol shapes with the chat log. A `bot-api-methods.ts` was planned and folded in to save a file; that was probably the wrong trade. | A tenth method is needed, or a change has to reach into the protocol shapes *and* the chat log to be made. The count of refusals was the trigger here and it was the wrong one: it had already fired before it was written, it fired twice more without anybody wanting the split, and refusals turn out to sit above the switch in four-line helpers that mix nothing |
 | `e2e/harness/scenario-chat.ts` | Module-level singletons plus a 25-member `Chat` interface that scenarios use as a language. The interface grows every time a scenario wants a new question answered. | The interface passes ~30 members — then split the driving verbs from the queries |
 | `e2e/hub/hub-server.ts` | Proxy, cache, page serving and port probing in one file. | Anything is added to the hub |
-| `scripts/docs-check/source/committed-pictures.ts` | Two subjects sharing only the word *committed*: whether the drawings on disk match what the renderers draw now, and whether the gallery's approved case lists match the samples. | Either subject grows a third kind of artifact |
-| `scripts/docs-check/source/site-pages.ts` | CSS coverage, image geometry and a page weight budget — three questions that meet only in the site they are asked about. | The site gains a kind of page, or the weight budget needs reasoning of its own |
-| `scripts/docs-check/source/source-tree.ts` | Holds `scriptsOutOfStep`, whose subject is `package.json` and not the tree, and a crowded-layer rule that names no document at all. | Anything else starts asking `package.json` a question — then the script table is its own file |
-| `scripts/docs-check/documents/document-references.ts` | Two kinds of reference — a link with an anchor and an entry in the spec's contents — read by two separate parsers. A third kind lived here until the flow drawing turned out to gate it already, strictly, in both directions. | A third kind of reference arrives, and is one nothing else already checks |
+| `scripts/gates/check-docs/source/committed-pictures.ts` | Two subjects sharing only the word *committed*: whether the drawings on disk match what the renderers draw now, and whether the gallery's approved case lists match the samples. | Either subject grows a third kind of artifact |
+| `scripts/gates/check-docs/source/site-pages.ts` | CSS coverage, image geometry and a page weight budget — three questions that meet only in the site they are asked about. | The site gains a kind of page, or the weight budget needs reasoning of its own |
+| `scripts/gates/check-docs/source/source-tree.ts` | Holds `scriptsOutOfStep`, whose subject is `package.json` and not the tree, and a crowded-layer rule that names no document at all. | Anything else starts asking `package.json` a question — then the script table is its own file |
+| `scripts/gates/check-docs/documents/document-references.ts` | Two kinds of reference — a link with an anchor and an entry in the spec's contents — read by two separate parsers. A third kind lived here until the flow drawing turned out to gate it already, strictly, in both directions. | A third kind of reference arrives, and is one nothing else already checks |
 
 ---
 
@@ -537,10 +537,10 @@ toss. A third name was on this list — the phase-log field parsers living under
 
 ## Two corners of the tooling the mutation gate still cannot see
 
-`scripts/docs-check/`, `scripts/hooks/` and all of `scripts/gates/` are mutated at 80%
+All of `scripts/gates/` and `scripts/hooks/` are mutated at 80%
 now — the gates folder by glob since 9 September 2026, so a file added there joins the
 family on arrival — and two things that reason sit outside on the gates' side:
-`tools/design-page.ts`, whose `refuse()` branches have no spec, and `gates/e2e-changed.ts`, kept out of the glob
+`tools/design-page.ts`, whose `refuse()` branches have no spec, and `gates/e2e/e2e-changed.ts`, kept out of the glob
 by name because it decides which scenarios a diff can reach with no spec behind it.
 
 One module also passes only on the average — `source/env-keys.ts` at 78.02% the same
@@ -602,10 +602,10 @@ or the code did it.** Until then every row in `benchmark/RUNS.md` carries the on
 `TRACE_ROUTE` was drawn round the paragraphs as they stood on 16 September 2026, at four
 widths and with the parallax's extreme shifts simulated, in a browser by hand; a longer FAQ
 answer can put a line under text and no gate reads layout. **Redo that check whenever a
-landing paragraph changes length**; twice, and `docs-check` earns a headless browser. The
+landing paragraph changes length**; twice, and `check-docs` earns a headless browser. The
 lines, ribbons and header strip are `PLAYER_COLOURS` typed into `docs/styles.source.css` as
 hex, since `scripts/` may not import a feature. **When the poster palette changes**, the
-drawings contract offers a palette or `docs-check` holds the two files equal.
+drawings contract offers a palette or `check-docs` holds the two files equal.
 
 ## Not debt, deliberately
 
@@ -616,7 +616,7 @@ Listed so nobody "fixes" them:
 - **`diagnostics/` has no `domain/`.** There is nothing to decide there.
 - **The same product constraint opens `README.md` and `PLAN.md`.** A visitor must
   not have to open the spec to learn why the bot is a keyboard. It is the one
-  overlap `docs-check` and the `write-a-doc` skill deliberately allow.
+  overlap `check-docs` and the `write-a-doc` skill deliberately allow.
 - **`percent-label.ts` puts the `%` outside `copy.en.ts`, and `chronology-layout.ts`
   the truncation `…`.** Both mark something about a number or a column rather than
   saying anything, the way `svg-tags.ts` rounds a coordinate, and no language spells

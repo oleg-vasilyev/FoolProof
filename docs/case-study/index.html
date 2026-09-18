@@ -2,7 +2,7 @@
 <!-- A snapshot of the harness at commit 314 (09676f7, 11 September 2026): the story counts
      the commits up to it and does not follow the repository after that, by the owner's own
      request in the commit that added this page. Its text in both languages is written from
-     docs/text/case-study.facts.md by the site-writer agent, and docs-check holds both pages
+     docs/text/case-study.facts.md by the site-writer agent, and check-docs holds both pages
      to that tree; a block is never edited by hand, and never from the other language's page. -->
 <html lang="en">
 <head>
@@ -308,7 +308,7 @@ so a comment is refused at the edit, not at the end of the turn.</div>
         <details class="era-detail">
           <summary data-block="era-2.d4-summary"><span class="era-detail-h">The rulebook overflows</span><span class="era-detail-n">585 lines</span></summary>
           <p data-block="era-2.d4-p1"><code class="cmd">CLAUDE.md</code> had been the default place to append every lesson and reached 585 lines; it was cut to 354 by moving rather than deleting: the e2e rules went to their own README and the layering procedure to a new <code class="cmd">add-a-feature</code> skill <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/4a3d0a9" rel="noopener">4a3d0a9</a>.</p>
-          <p data-block="era-2.d4-p2">Then came the commit "make the documents check themselves" <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/29fe4d5" rel="noopener">29fe4d5</a>. The documents had been de-duplicated twice already, and its message blamed the rule on where a fact lives: nobody checked it. So it added the documents gate, spelled <code class="cmd">docs:check</code> then and <code class="cmd">docs-check</code> today. At first it covered links, the tree the README draws against the real folders, the script table against package.json, and a 380-line budget on CLAUDE.md; its first run found two undocumented scripts. By the end of the story it holds more than thirty groups of checks, each about one subject, which this page calls a family.</p>
+          <p data-block="era-2.d4-p2">Then came the commit "make the documents check themselves" <a class="hash" href="https://github.com/oleg-vasilyev/FoolProof/commit/29fe4d5" rel="noopener">29fe4d5</a>. The documents had been de-duplicated twice already, and its message blamed the rule on where a fact lives: nobody checked it. So it added the documents gate, spelled <code class="cmd">docs:check</code> then and <code class="cmd">check-docs</code> today. At first it covered links, the tree the README draws against the real folders, the script table against package.json, and a 380-line budget on CLAUDE.md; its first run found two undocumented scripts. By the end of the story it holds more than thirty groups of checks, each about one subject, which this page calls a family.</p>
         </details>
 
         <details class="era-detail">

@@ -2,9 +2,9 @@ import { readFileSync } from "node:fs";
 
 // PreToolUse hook on Bash: a gate typed by hand — `npx tsc`, `npx eslint`,
 // `node node_modules/vitest/vitest.mjs`, `npm test` — bypasses the runner that leaves
-// the log and the verdict under reports/gates/, and finds no config now that the
-// configs live under scripts/gates/config/. docs-check holds the documents to the
-// same rule; this holds the agent's own shell. The phase that moved the configs ran
+// the log and the verdict under reports/gates/, and finds no config now that each
+// one lives in the folder of the gate that reads it. check-docs holds the documents
+// to the same rule; this holds the agent's own shell. The phase that moved them ran
 // tsc and eslint by hand ten times while writing that rule for everybody else. The
 // detection is a pure function with a spec in scripts/hooks/, because nothing lints,
 // typechecks or tests this file. Exit code 2 with the reason on stderr blocks the call.

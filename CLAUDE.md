@@ -26,7 +26,7 @@ the schema. If no, it belongs here. **A fact lives where its reason lives; the o
 file gets a pointer, never a retelling.** When the two disagree, `PLAN.md` wins on
 behaviour and this file wins on style.
 
-That rule has needed enforcing twice, so it is enforced: `node scripts/gates/gate-runner.ts docs-check` holds
+That rule has needed enforcing twice, so it is enforced: `node scripts/gates/gate-runner.ts check-docs` holds
 every document against the repository it describes — links, tables, the schema, the
 pictures, the flow drawing, every path a document names, and **a line budget on this
 file, on `TECH-DEBT.md`, on every skill and on each page beside one**. The budget
@@ -108,11 +108,11 @@ chat's language. A module-level `import { copy }` pins the bot to one language.
 `shared/locale/plural-rules.ts` picks by the table's own `locale`. Specs leave copy
 tables real on purpose, so a decision made inside one is compared against itself and
 no test can catch it breaking; `write-a-spec` has the mutants that proved it, and
-`docs-check` now fails the shape on sight.
+`check-docs` now fails the shape on sight.
 
 **The site's pages are held like copy.** Each page pair has a language-neutral fact
 tree in `docs/text/`; a language's page is written from it by the `site-writer` agent,
-never from the other language's page, and `docs-check` holds both pages to the tree's
+never from the other language's page, and `check-docs` holds both pages to the tree's
 blocks, order, numbers and commits. Why that replaced translation is `finish-phase`'s.
 
 Player names are user data, not copy. Matching normalises via Unicode NFC and lower
@@ -127,7 +127,7 @@ another one. Deleting one was tested by deleting it, twice: the only failures ar
 `main.ts` and `main.spec.ts`, the composition root and the one spec *supposed* to
 know the roster. **Nothing in `scripts/` may import a feature** — the tooling asks
 what features offer through `shared/drawings/drawings-contract.ts` and finds them at
-run time, so a deleted folder simply stops being listed, and `docs-check` reports
+run time, so a deleted folder simply stops being listed, and `check-docs` reports
 the pictures it left behind instead of failing to compile. The procedure for adding
 one is the `add-a-feature` skill.
 
@@ -139,7 +139,7 @@ each gets a subfolder **named after that thing** — a picture, a screen, an ent
 the commands are about: `render/chronology/`, `render/seating-screen/`,
 `bot/lineup/`. Only what all of them use stays at the layer root. Never a bucket
 (`helpers/`, `common/`) and never a **process**; a single-command feature never
-subdivides. The `add-a-feature` skill has both traps and why `docs-check` fails a
+subdivides. The `add-a-feature` skill has both traps and why `check-docs` fails a
 layer root above nine files.
 
 **A feature folder is named after what the player gets**, not after an internal
@@ -313,11 +313,11 @@ person's convenience is second and is never the reason a script exists — the o
 so on 9 September 2026, after a month of gates read through `grep`.
 
 **`package.json` keeps eight scripts** — `prepare`, `start`, `start:prod`, `e2e:watch`
-and the four `check*` batteries — and every gate is a row in `scripts/gates/gate-list.ts`
+and the four `check*` batteries — and every gate is a row in `scripts/gates/shared/gate-list.ts`
 that runs only through `node scripts/gates/gate-runner.ts <gate>`, in prose too, which
-`docs-check` holds. The gates' configs live in `scripts/gates/config/` and are named by
-the runner and the hooks, so a bare `eslint` finds none; `tsconfig.json` stays at the
-root. `README.md` lists the scripts and the gates, by the rules in the `write-a-doc` skill.
+`check-docs` holds. A gate's own knowledge, its config included, lives in that gate's
+folder, named by the runner and the hooks, so a bare `eslint` finds none; only what
+every gate needs sits at the root of `scripts/gates/`, and `tsconfig.json` at the repo's. `README.md` lists the scripts and the gates, by the rules in the `write-a-doc` skill.
 
 ### What enforces what
 
@@ -340,7 +340,7 @@ judgement. `eslint.config.js` holds the checkable ones, several with no core equ
 | An alias ban (`#live-game/**`) fires, and survives `await import(…)` | a `regex` pattern, and the same bans as `no-restricted-syntax` |
 
 **Nothing that refuses is finished until it has been seen refusing**: a lint zone, a
-`docs-check` rule, a hook, a gate, a config a gate reads — break its subject on purpose,
+`check-docs` rule, a hook, a gate, a config a gate reads — break its subject on purpose,
 watch the red, then move to the next file; the break is chosen from the rule's own scope,
 because four probes in one phase hit nothing the rule watched and read as broken gates.
 The zones that never fired, and how to prove one, are the `add-a-feature` skill's.

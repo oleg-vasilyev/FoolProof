@@ -52,7 +52,7 @@ fi
 # 'Gates:' line names. An amend is refused by the same rule — HEAD is then the
 # commit itself, not its parent — and that is meant: a phase-final commit is not
 # amended here, and a paragraph that passed once must not pass a second commit.
-# The stamp's grammar is written by paragraphFileOf in scripts/gates/gate-summary.ts
+# The stamp's grammar is written by paragraphFileOf in scripts/gates/verdict/gate-summary.ts
 # and read by the two cuts below; a probe in the phase that wrote them pinned both.
 if grep -qE '^Gates: check:' "$message_file"; then
   paragraph_file="reports/gates/gates-paragraph.txt"
