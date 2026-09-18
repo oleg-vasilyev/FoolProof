@@ -179,7 +179,7 @@ name by hand.
 | `npm run check:release` | The same walker over the release list: `check:push`'s gates, coverage, mutation over what changed since the previous tag, every scenario. Refuses unless HEAD carries the new `v*` tag. **CI runs this on every release tag** |
 | `node scripts/gates/gate-runner.ts lint` | ESLint over `src/`, `scripts/` and `e2e/`, which enforces this project's conventions. A red line lists each finding as `file:line:col rule — message`, read from the JSON ESLint writes to `reports/lint/findings.json` |
 | `node scripts/gates/gate-runner.ts typecheck` | `tsc --noEmit` over `src/` and `scripts/`, from the root `tsconfig.json`; a red line lists each error as `file:line:col TSnnnn — message` |
-| `node scripts/gates/gate-runner.ts check-docs` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists — an `npm run` script, a gate the runner knows, a `tools.ts` verb; a tool run by hand is a complaint too. A red line counts the complaints and lists up to thirty of them, the rest being in the log, read from the JSON the gate writes to `reports/check-docs/complaints.json` |
+| `node scripts/gates/gate-runner.ts check-docs` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists — an `npm run` script, a gate the runner knows, a `tools.ts` verb; a tool run by hand is a complaint too. A red line counts the complaints and lists up to thirty of them, read from the JSON the gate writes to `reports/check-docs/complaints.json`, which carries all of them however many there are |
 | `node scripts/gates/gate-runner.ts test` | Vitest, once — units and integration together. One spec is `node scripts/gates/gate-runner.ts test <file>`: a red run prints each failed assertion with its file and message, and leaves `reports/gates/test.named.json` without touching the battery's paragraph |
 | `node scripts/gates/gate-runner.ts test:coverage` | Vitest with coverage; fails below 70% on any metric |
 | `node scripts/gates/gate-runner.ts test:mutation-changed` | Stryker over the files that differ from `origin/main` (or from `MUTATE_AGAINST`). Under its line, red or green, every mutant still alive — file, line, status, the replacement — up to twenty per family, so a survivor is read off the run rather than out of the HTML report |
@@ -372,6 +372,8 @@ deploy/                 the systemd units a server is installed from, the script
 scripts/                dev utilities that are not part of the bot, a folder per domain:
                         gates/ every gate, described below; tools/ the occasional jobs
                         behind tools.ts; drawings/ what the features offer to be drawn;
+                        site/ reading a built page as the blocks its fact tree names,
+                        which both the gate and the site tools ask for;
                         hooks/ the pure halves of the Claude hooks; backup/ the snapshot
                         the server's timer takes; benchmark/ the runner behind
                         `run-benchmark.ts`, which a clone never carries
@@ -382,9 +384,12 @@ scripts/gates/          the two entry points — the runner and the batteries �
                         amounts to and how it is said; lint/ and typecheck/ reading
                         their tool's output; test/ reading vitest's report; mutation/
                         picking the changed files and scoring the families; e2e/ which
-                        scenarios a diff can reach; check-docs/ what `check-docs` asks —
-                        `documents/` what is read out of the documents, `source/` what
-                        they are held against
+                        scenarios a diff can reach; check-docs/ a folder per subject
+                        held in agreement, over shared/ the file rosters and the
+                        markdown parsing — prose/ what any markdown says about itself,
+                        handbook/ the five documents, the skills and the agents, flow/
+                        the drawing and the phase logs, site/ what docs/ serves,
+                        pictures/ what the code draws, codebase/ what no linter states
 e2e/                    the fake Telegram and the scenarios played against it
 benchmark/                  frozen tasks an agent is given cold in a fresh clone, the
                         hidden acceptance each is scored by, and the log of every run

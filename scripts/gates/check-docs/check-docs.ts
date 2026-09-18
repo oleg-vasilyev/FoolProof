@@ -1,50 +1,47 @@
 import { drawnByName, featuresThatDraw } from "../../drawings/feature-drawings.ts";
-import {
-  flowWouldNotRender,
-  mermaidLinesCarryingASeparator,
-} from "./documents/mermaid-rendering.ts";
-import { agentsWithoutAContract } from "./documents/agent-contracts.ts";
-import { frontmatterThatWillNotParse } from "./documents/frontmatter-yaml.ts";
-import { brokenLinks, specContentsOutOfStep } from "./documents/document-references.ts";
-import { overBudget, pagesOverBudget, skillsOverBudget } from "./documents/reading-budgets.ts";
-import { citationsWithNoFile, pagesNobodyOpens } from "./documents/file-citations.ts";
-import { envTemplateOutOfStep, requiredKeysOutOfStep } from "./source/env-keys.ts";
-import {
-  casesOutOfStep,
-  designPageOutOfStep,
-  postersOutOfStep,
-  postersOutOfTheGallery,
-} from "./source/committed-pictures.ts";
-import { formsBakedIntoCopy } from "./source/copy-word-forms.ts";
-import { advancesOutOfStep } from "./source/glyph-advances.ts";
-import { debtWithoutATrigger } from "./documents/debt-entry-triggers.ts";
-import { DOCUMENTS, read } from "./document-files.ts";
-import {
-  descriptionsOffTheirStage,
-  flowOutOfStep,
-  flowRepliesLeaveTheLaneTheyWereAskedOf,
-  stagesOutOfStep,
-} from "./documents/flow-drawing.ts";
-import {
-  TOOLS_SCRIPT,
-  commandsNobodyHas,
-  toolVerbsIn,
-} from "./documents/named-commands.ts";
-import { phaseLogsOffTheMap } from "./documents/phase-log-paths.ts";
-import { schemaOutOfStep } from "./source/running-schema.ts";
-import {
-  crowdedLayers,
-  foldersMissingFromTheTree,
-  scriptsOutOfStep,
-} from "./source/source-tree.ts";
-import { faqOutOfStep, imagesOutOfStep, siteCssOutOfStep } from "./source/site-pages.ts";
-import { siteTextOutOfStep } from "./source/site-text.ts";
-import { siteProseOutOfStep } from "./source/site-prose.ts";
-import { lineEndingsOutOfStep } from "./source/line-endings.ts";
-import { tracesOutOfStep } from "./source/site-traces.ts";
 import { ALL_GATES } from "../shared/gate-list.ts";
 import { CHECK_DOCS_COMPLAINTS } from "../shared/gate-paths.ts";
-import { writeComplaints } from "./check-docs-complaints.ts";
+import { DOCUMENTS, read } from "./shared/document-files.ts";
+import { writeComplaints } from "./shared/complaints-report.ts";
+import { pointersThatResolveToNothing } from "./prose/broken-pointers.ts";
+import { TOOLS_SCRIPT, commandsNothingOffers, toolVerbsIn } from "./prose/named-commands.ts";
+import { frontmatterThatWillNotParse } from "./prose/frontmatter-yaml.ts";
+import { drawingsThatWouldNotRender } from "./prose/mermaid-drawings.ts";
+import { thePlanAndItsContentsListDisagree } from "./handbook/plan-contents-list.ts";
+import {
+  documentsOverTheirLineBudget,
+  pagesOverTheirLineBudget,
+  skillsOverTheirLineBudget,
+} from "./handbook/line-budgets.ts";
+import { pagesNobodyOpens } from "./handbook/skill-pages.ts";
+import { agentsWithoutAContract } from "./handbook/agent-contracts.ts";
+import { debtWithoutATrigger } from "./handbook/debt-entry-triggers.ts";
+import { foldersMissingFromTheTree } from "./handbook/source-tree-drawing.ts";
+import { scriptsMissingFromTheTable } from "./handbook/script-table.ts";
+import { schemaThePlanDoesNotQuote } from "./handbook/plan-schema-block.ts";
+import { theRosterTheFlowDisagreesWith } from "./flow/flow-roster.ts";
+import { repliesLeavingTheLaneTheyWereAskedOf } from "./flow/flow-lanes.ts";
+import { descriptionsThatNameNoStage, stagesASkillAndTheFlowDisagreeOn } from "./flow/skill-stages.ts";
+import { phaseLogsThatDoNotWalkTheDrawing } from "./flow/phase-log-walk.ts";
+import { pagesTheirFactTreeContradicts } from "./site/site-text.ts";
+import { wordsThePagesMayNotSay } from "./site/site-prose.ts";
+import { classesTheStylesheetHasNoRuleFor } from "./site/site-css.ts";
+import { picturesThePagesGetWrong } from "./site/site-images.ts";
+import { tracesTheRouteNoLongerDraws } from "./site/site-traces.ts";
+import { faqTheStructuredDataContradicts } from "./site/site-faq.ts";
+import { postersNoGalleryCaseDraws, galleryCasesNobodyApproved } from "./pictures/gallery-cases.ts";
+import {
+  committedPostersTheRendererDisagreesWith,
+  theDesignPageDrawnFromOlderPosters,
+} from "./pictures/committed-posters.ts";
+import { advancesMeasuredOnOtherFaces } from "./pictures/glyph-advances.ts";
+import { copyTablesChoosingAWordForm } from "./codebase/copy-word-forms.ts";
+import { layersWithMoreFilesThanTheRuleAllows } from "./codebase/crowded-layers.ts";
+import {
+  keysTheServerWouldShipWithout,
+  keysTheTemplateAndTheCodeDisagreeOn,
+} from "./codebase/env-keys.ts";
+import { filesCheckedOutWithTheWrongLineEnding } from "./codebase/line-endings.ts";
 
 
 const NOTHING = 0;
@@ -59,55 +56,54 @@ const theToolVerbs = new Set([
 ]);
 
 const complaints = [
-  ...formsBakedIntoCopy(),
-  ...brokenLinks(),
-  ...specContentsOutOfStep(),
-  ...overBudget(),
-  ...skillsOverBudget(),
-  ...pagesOverBudget(),
-  ...pagesNobodyOpens(),
-  ...citationsWithNoFile(),
-  ...agentsWithoutAContract(),
+  ...pointersThatResolveToNothing(),
+  ...commandsNothingOffers(theToolVerbs, new Set(ALL_GATES)),
   ...frontmatterThatWillNotParse(),
+  ...drawingsThatWouldNotRender(),
+
+  ...thePlanAndItsContentsListDisagree(),
+  ...documentsOverTheirLineBudget(),
+  ...skillsOverTheirLineBudget(),
+  ...pagesOverTheirLineBudget(),
+  ...pagesNobodyOpens(),
+  ...agentsWithoutAContract(),
   ...debtWithoutATrigger(),
-  ...flowOutOfStep(),
-  ...commandsNobodyHas(theToolVerbs, new Set(ALL_GATES)),
-  ...flowRepliesLeaveTheLaneTheyWereAskedOf(),
-  ...flowWouldNotRender(),
-  ...mermaidLinesCarryingASeparator(),
-  ...stagesOutOfStep(),
-  ...descriptionsOffTheirStage(),
-  ...phaseLogsOffTheMap(),
   ...foldersMissingFromTheTree(),
-  ...scriptsOutOfStep(),
-  ...crowdedLayers(),
-  ...schemaOutOfStep(),
-  ...requiredKeysOutOfStep(),
-  ...envTemplateOutOfStep(),
-  ...advancesOutOfStep(),
-  ...postersOutOfTheGallery(),
-  ...casesOutOfStep(),
-  ...postersOutOfStep(thePosters),
-  ...designPageOutOfStep(thePosters),
-  ...siteCssOutOfStep(),
-  ...imagesOutOfStep(),
-  ...siteTextOutOfStep(),
-  ...siteProseOutOfStep(),
-  ...lineEndingsOutOfStep(),
-  ...tracesOutOfStep(),
-  ...faqOutOfStep(),
+  ...scriptsMissingFromTheTable(),
+  ...schemaThePlanDoesNotQuote(),
+
+  ...theRosterTheFlowDisagreesWith(),
+  ...repliesLeavingTheLaneTheyWereAskedOf(),
+  ...stagesASkillAndTheFlowDisagreeOn(),
+  ...descriptionsThatNameNoStage(),
+  ...phaseLogsThatDoNotWalkTheDrawing(),
+
+  ...pagesTheirFactTreeContradicts(),
+  ...wordsThePagesMayNotSay(),
+  ...classesTheStylesheetHasNoRuleFor(),
+  ...picturesThePagesGetWrong(),
+  ...tracesTheRouteNoLongerDraws(),
+  ...faqTheStructuredDataContradicts(),
+
+  ...postersNoGalleryCaseDraws(),
+  ...galleryCasesNobodyApproved(),
+  ...committedPostersTheRendererDisagreesWith(thePosters),
+  ...theDesignPageDrawnFromOlderPosters(thePosters),
+  ...advancesMeasuredOnOtherFaces(),
+
+  ...copyTablesChoosingAWordForm(),
+  ...layersWithMoreFilesThanTheRuleAllows(),
+  ...keysTheServerWouldShipWithout(),
+  ...keysTheTemplateAndTheCodeDisagreeOn(),
+  ...filesCheckedOutWithTheWrongLineEnding(),
 ];
 
 writeComplaints(CHECK_DOCS_COMPLAINTS, complaints);
 
-for (const complaint of complaints) {
-  console.error(complaint);
-}
-
 console.log(
   complaints.length === NOTHING
     ? `documents agree: ${String(DOCUMENTS.length)} files, links and anchors resolve`
-    : `${String(complaints.length)} problem(s) in the documents`
+    : `${String(complaints.length)} problem(s) in ${CHECK_DOCS_COMPLAINTS}`
 );
 
 process.exit(complaints.length === NOTHING ? NOTHING : FAILED);

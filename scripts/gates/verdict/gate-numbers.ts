@@ -11,7 +11,7 @@ import {
 } from "../shared/gate-paths.ts";
 import type { Reader } from "../shared/report-reader.ts";
 import type { Finding } from "../shared/finding.ts";
-import { complaintsIn } from "../check-docs/check-docs-complaints.ts";
+import { complaintsIn } from "../check-docs/shared/complaints-report.ts";
 import { lintFindingsIn } from "../lint/lint-findings.ts";
 import { typecheckFindingsIn } from "../typecheck/typecheck-findings.ts";
 import { casesIn, ratesIn, resultsIn, type CaseCount, type CoverageRates } from "../test/test-results.ts";

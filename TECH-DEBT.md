@@ -394,10 +394,6 @@ be awkward, with the trigger that would make the split pay for itself.
 | `e2e/fake-telegram/fake-telegram.ts` | One `switch` over nine Bot API methods, mixing protocol shapes with the chat log. A `bot-api-methods.ts` was planned and folded in to save a file; that was probably the wrong trade. | A tenth method is needed, or a change has to reach into the protocol shapes *and* the chat log to be made. The count of refusals was the trigger here and it was the wrong one: it had already fired before it was written, it fired twice more without anybody wanting the split, and refusals turn out to sit above the switch in four-line helpers that mix nothing |
 | `e2e/harness/scenario-chat.ts` | Module-level singletons plus a 25-member `Chat` interface that scenarios use as a language. The interface grows every time a scenario wants a new question answered. | The interface passes ~30 members — then split the driving verbs from the queries |
 | `e2e/hub/hub-server.ts` | Proxy, cache, page serving and port probing in one file. | Anything is added to the hub |
-| `scripts/gates/check-docs/source/committed-pictures.ts` | Two subjects sharing only the word *committed*: whether the drawings on disk match what the renderers draw now, and whether the gallery's approved case lists match the samples. | Either subject grows a third kind of artifact |
-| `scripts/gates/check-docs/source/site-pages.ts` | CSS coverage, image geometry and a page weight budget — three questions that meet only in the site they are asked about. | The site gains a kind of page, or the weight budget needs reasoning of its own |
-| `scripts/gates/check-docs/source/source-tree.ts` | Holds `scriptsOutOfStep`, whose subject is `package.json` and not the tree, and a crowded-layer rule that names no document at all. | Anything else starts asking `package.json` a question — then the script table is its own file |
-| `scripts/gates/check-docs/documents/document-references.ts` | Two kinds of reference — a link with an anchor and an entry in the spec's contents — read by two separate parsers. A third kind lived here until the flow drawing turned out to gate it already, strictly, in both directions. | A third kind of reference arrives, and is one nothing else already checks |
 
 ---
 
@@ -520,7 +516,7 @@ dozen rules that describe a moment rather than a shape, is the shape of the fix.
 and `samples/contact-sheet.ts` is the exception: it computes coordinates, assembles
 SVG, and is the one file there Stryker still mutates, which is the tell. It cannot
 move to `render/`, where `CLAUDE.md` puts coordinates, because
-`postersOutOfTheGallery` would demand gallery cases for it and a contact sheet is what
+`postersNoGalleryCaseDraws` would demand gallery cases for it and a contact sheet is what
 the gallery *is*. The honest home is `shared/drawing/`, and the move takes the
 scoresheet's `svg-tags.ts` with it.
 
@@ -543,10 +539,10 @@ family on arrival — and two things that reason sit outside on the gates' side:
 `tools/design-page.ts`, whose `refuse()` branches have no spec, and `gates/e2e/e2e-changed.ts`, kept out of the glob
 by name because it decides which scenarios a diff can reach with no spec behind it.
 
-One module also passes only on the average — `source/env-keys.ts` at 78.02% the same
-day, short by its readers. Those are reachable: mocking `node:fs` lifted
-`source-tree.ts` from
-60.98% to 92.68%, and took `reading-budgets.ts` 77.78% to 100% the moment a diff
+One module also passes only on the average — `repository/env-keys.ts` at 78.02% the same
+day, short by its readers. Those are reachable: mocking `node:fs` lifted what is now
+`handbook/source-tree-drawing.ts` from
+60.98% to 92.68%, and took `handbook/line-budgets.ts` 77.78% to 100% the moment a diff
 left it alone with nowhere to hide.
 
 **Worth doing with the next phase that changes what one of these files decides, or

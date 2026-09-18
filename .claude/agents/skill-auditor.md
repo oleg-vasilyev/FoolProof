@@ -33,7 +33,7 @@ they are part of it and obey the same rules.
   had moved, and a rule a machine had quietly taken over. **The defect list is what
   this errand reliably produces**, and a rewrite is the exception — so a pass that
   found nothing to correct is the one to look at twice.
-- **The skill's line budget**, which lives in `scripts/gates/check-docs/documents/reading-budgets.ts`.
+- **The skill's line budget**, which lives in `scripts/gates/check-docs/handbook/line-budgets.ts`.
   You may read it yourself if the brief omits it, but a rewrite that breaks it is a
   rewrite nobody can commit.
 

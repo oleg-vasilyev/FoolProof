@@ -1,7 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { rootDir } from "#shared/config/env.ts";
-import { read } from "../gates/check-docs/document-files.ts";
+import { read } from "../gates/check-docs/shared/document-files.ts";
 import { LANDING_PAGES } from "./site-css.ts";
 
 

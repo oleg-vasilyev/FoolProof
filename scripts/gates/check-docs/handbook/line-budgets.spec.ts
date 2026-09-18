@@ -1,0 +1,363 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+
+const linesInSpy = vi.fn();
+
+const installedSkillsSpy = vi.fn();
+
+const skillFileSpy = vi.fn((skill: string) => `FILE-OF-${skill}`);
+
+const existsSyncSpy = vi.fn();
+
+const skillPagesSpy = vi.fn();
+
+vi.mock("../shared/document-files.ts", () => ({
+  SESSION_DOCUMENT: "THE-SESSION-DOCUMENT",
+  DEBT_DOCUMENT: "THE-DEBT-DOCUMENT",
+  SKILLS_FOLDER: "THE-SKILLS-FOLDER",
+  installedSkills: () => installedSkillsSpy(),
+  linesIn: (file: string) => linesInSpy(file),
+  skillFile: (skill: string) => skillFileSpy(skill),
+  skillPages: (skill: string) => skillPagesSpy(skill),
+}));
+
+vi.mock("node:fs", () => ({
+  existsSync: (path: string) => existsSyncSpy(path),
+}));
+
+const {
+  lineBudgetComplaints,
+  skillBudgetComplaints,
+  documentsOverTheirLineBudget,
+  skillsOverTheirLineBudget,
+  pageBudgetComplaints,
+  pagesOverTheirLineBudget,
+} = await import("./line-budgets.ts");
+
+const NO_COMPLAINTS = 0;
+
+const ONE_COMPLAINT = 1;
+
+const FIRST = 0;
+
+const AT_BUDGET = 100;
+
+const OVER_BUDGET = 101;
+
+const UNDER_BUDGET = 40;
+
+const UNUSED_LINES = 0;
+
+const REASON = "trim it";
+
+const ONE_LINE = 1;
+
+const SESSION_BUDGET = 380;
+
+const DEBT_BUDGET = 640;
+
+const A_BUDGETED_SKILL = "finish-phase";
+
+const A_SKILL_FILE = `FILE-OF-${A_BUDGETED_SKILL}`;
+
+const FAR_OVER_ANY_BUDGET = 9999;
+
+const PAGE_BUDGET = 120;
+
+const ONCE = 1;
+
+const ALWAYS_EXISTS = (): { readonly exists: boolean; readonly lines: number } => ({
+  exists: true,
+  lines: AT_BUDGET,
+});
+
+describe("lineBudgetComplaints", () => {
+  it("should say nothing about a file exactly at its budget", () => {
+    const complaints = lineBudgetComplaints([
+      { file: "CLAUDE.md", lines: AT_BUDGET, budget: AT_BUDGET, reason: REASON },
+    ]);
+
+    expect(complaints).toEqual([]);
+  });
+
+  it("should name a file one line over its budget", () => {
+    const complaints = lineBudgetComplaints([
+      { file: "CLAUDE.md", lines: OVER_BUDGET, budget: AT_BUDGET, reason: REASON },
+    ]);
+
+    expect(complaints).toHaveLength(ONE_COMPLAINT);
+    expect(complaints[FIRST]).toContain("CLAUDE.md");
+    expect(complaints[FIRST]).toContain(`${String(OVER_BUDGET)} lines, budget is ${String(AT_BUDGET)}`);
+    expect(complaints[FIRST]).toContain(REASON);
+  });
+
+  it("should say nothing about a file comfortably under its budget", () => {
+    const complaints = lineBudgetComplaints([
+      { file: "CLAUDE.md", lines: UNDER_BUDGET, budget: AT_BUDGET, reason: REASON },
+    ]);
+
+    expect(complaints).toEqual([]);
+  });
+
+  it("should check every entry in the table, not only the first", () => {
+    const complaints = lineBudgetComplaints([
+      { file: "CLAUDE.md", lines: AT_BUDGET, budget: AT_BUDGET, reason: REASON },
+      { file: "TECH-DEBT.md", lines: OVER_BUDGET, budget: AT_BUDGET, reason: REASON },
+    ]);
+
+    expect(complaints).toHaveLength(ONE_COMPLAINT);
+    expect(complaints[FIRST]).toContain("TECH-DEBT.md");
+  });
+});
+
+describe("skillBudgetComplaints", () => {
+  it("should say nothing about a skill installed, budgeted and within its lines", () => {
+    const complaints = skillBudgetComplaints(["a-skill"], { "a-skill": AT_BUDGET }, ALWAYS_EXISTS);
+
+    expect(complaints).toEqual([]);
+  });
+
+  it("should name a budget for a skill that is not installed", () => {
+    const complaints = skillBudgetComplaints([], { "ghost-skill": AT_BUDGET }, ALWAYS_EXISTS);
+
+    expect(complaints).toHaveLength(ONE_COMPLAINT);
+    expect(complaints[FIRST]).toContain('"ghost-skill"');
+    expect(complaints[FIRST]).toContain("delete it with the skill");
+  });
+
+  it("should name an installed skill that carries no budget row", () => {
+    const complaints = skillBudgetComplaints(["unbudgeted-skill"], {}, ALWAYS_EXISTS);
+
+    expect(complaints).toHaveLength(ONE_COMPLAINT);
+    expect(complaints[FIRST]).toContain("FILE-OF-unbudgeted-skill");
+    expect(complaints[FIRST]).toContain("every one of them has a number here");
+  });
+
+  it("should name a budgeted skill whose SKILL.md is missing", () => {
+    const complaints = skillBudgetComplaints(
+      ["hollow-skill"],
+      { "hollow-skill": AT_BUDGET },
+      () => ({ exists: false, lines: UNUSED_LINES })
+    );
+
+    expect(complaints).toHaveLength(ONE_COMPLAINT);
+    expect(complaints[FIRST]).toContain("FILE-OF-hollow-skill");
+    expect(complaints[FIRST]).toContain("no SKILL.md in it");
+  });
+
+  it("should say nothing about a skill exactly at its budget", () => {
+    const complaints = skillBudgetComplaints(
+      ["a-skill"],
+      { "a-skill": AT_BUDGET },
+      () => ({ exists: true, lines: AT_BUDGET })
+    );
+
+    expect(complaints).toEqual([]);
+  });
+
+  it("should name a skill one line over its budget", () => {
+    const complaints = skillBudgetComplaints(
+      ["a-skill"],
+      { "a-skill": AT_BUDGET },
+      () => ({ exists: true, lines: OVER_BUDGET })
+    );
+
+    expect(complaints).toHaveLength(ONE_COMPLAINT);
+    expect(complaints[FIRST]).toContain("a-skill");
+    expect(complaints[FIRST]).toContain(`${String(OVER_BUDGET)} lines, budget is ${String(AT_BUDGET)}`);
+    expect(complaints[FIRST]).toContain("move a rule into the skill loaded when it applies");
+  });
+
+  it("should say nothing when there is nothing installed and nothing budgeted", () => {
+    expect(skillBudgetComplaints([], {}, ALWAYS_EXISTS)).toHaveLength(NO_COMPLAINTS);
+  });
+});
+
+describe("every budget complaint carries the reason it exists for", () => {
+  const facts = (lines: number) => () => ({ exists: true, lines });
+
+  it("should say why a budget for a skill nobody installed is worse than none", () => {
+    const said = skillBudgetComplaints([], { ghost: AT_BUDGET }, facts(AT_BUDGET)).join("\n");
+
+    expect(said).toContain("a row nothing can fail reads exactly like a row that");
+    expect(said).toContain("never complains, so delete it with the skill");
+  });
+
+  it("should say why every skill owes a number, not merely that one is missing", () => {
+    const said = skillBudgetComplaints(["build-it"], {}, facts(AT_BUDGET)).join("\n");
+
+    expect(said).toContain("a skill is read whole by the job that");
+    expect(said).toContain("add a row at the length");
+    expect(said).toContain("this skill is now");
+  });
+
+  it("should say what to do instead of raising a budget that was passed", () => {
+    const over = skillBudgetComplaints(["build-it"], { "build-it": AT_BUDGET }, facts(OVER_BUDGET));
+    const said = over.join("\n");
+
+    expect(said).toContain("cut what only one of its triggers needs into a page beside it");
+    expect(said).toContain("move a rule into the skill loaded when it applies");
+    expect(said).toContain("compress an incident");
+    expect(said).toContain("rather than raising the number");
+  });
+});
+
+describe("documentsOverTheirLineBudget", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    linesInSpy.mockReturnValue(UNDER_BUDGET);
+  });
+
+  it("should measure both documents it answers for, each by its own name", () => {
+    documentsOverTheirLineBudget();
+
+    expect(linesInSpy).toHaveBeenCalledWith("THE-SESSION-DOCUMENT");
+    expect(linesInSpy).toHaveBeenCalledWith("THE-DEBT-DOCUMENT");
+  });
+
+  it("should say nothing while both documents sit exactly at the session budget", () => {
+    linesInSpy.mockReturnValue(SESSION_BUDGET);
+
+    expect(documentsOverTheirLineBudget()).toEqual([]);
+  });
+
+  it("should name the session document one line over, and only it", () => {
+    linesInSpy.mockReturnValue(SESSION_BUDGET + ONE_LINE);
+
+    const complaints = documentsOverTheirLineBudget();
+
+    expect(complaints).toHaveLength(ONE_COMPLAINT);
+    expect(complaints[FIRST]).toContain("THE-SESSION-DOCUMENT");
+    expect(complaints[FIRST]).toContain("move a paragraph into a skill rather than raising");
+  });
+
+  it("should still spare the debt document at exactly its own, larger budget", () => {
+    linesInSpy.mockReturnValue(DEBT_BUDGET);
+
+    const complaints = documentsOverTheirLineBudget();
+
+    expect(complaints).toHaveLength(ONE_COMPLAINT);
+    expect(complaints[FIRST]).toContain("THE-SESSION-DOCUMENT");
+  });
+
+  it("should name the debt document one line over, and say why an entry is not free", () => {
+    linesInSpy.mockReturnValue(DEBT_BUDGET + ONE_LINE);
+
+    const said = documentsOverTheirLineBudget().join("\n");
+
+    expect(said).toContain("THE-DEBT-DOCUMENT");
+    expect(said).toContain("re-read at the start of every phase");
+    expect(said).toContain("Close one whose trigger has fired");
+    expect(said).toContain("fewer lines, rather than raising the number");
+  });
+});
+
+describe("skillsOverTheirLineBudget", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    installedSkillsSpy.mockReturnValue([A_BUDGETED_SKILL]);
+    existsSyncSpy.mockReturnValue(true);
+    linesInSpy.mockReturnValue(UNDER_BUDGET);
+  });
+
+  it("should carry a budget for a skill this repository actually installs", () => {
+    const said = skillsOverTheirLineBudget().join("\n");
+
+    expect(said).not.toContain("no line budget");
+    expect(said).not.toContain("a skill folder with no SKILL.md in it");
+  });
+
+  it("should hold an installed skill to the number the table gives it", () => {
+    linesInSpy.mockReturnValue(FAR_OVER_ANY_BUDGET);
+
+    const said = skillsOverTheirLineBudget().join("\n");
+
+    expect(said).toContain(A_SKILL_FILE);
+    expect(said).toContain("move a rule into the skill loaded when it applies");
+  });
+
+  it("should ask after the skill's own file rather than its folder", () => {
+    skillsOverTheirLineBudget();
+
+    expect(skillFileSpy).toHaveBeenCalledWith(A_BUDGETED_SKILL);
+    expect(existsSyncSpy).toHaveBeenCalledWith(A_SKILL_FILE);
+  });
+
+  it("should not count the lines of a SKILL.md that is not there", () => {
+    existsSyncSpy.mockReturnValue(false);
+
+    const said = skillsOverTheirLineBudget().join("\n");
+
+    expect(said).toContain("a skill folder with no SKILL.md in it");
+    expect(linesInSpy).not.toHaveBeenCalled();
+  });
+
+  it("should judge the skill file alone, because a page is not loaded with it", () => {
+    linesInSpy.mockReturnValue(UNDER_BUDGET);
+    skillPagesSpy.mockReturnValue(["a-page.md", "another-page.md"]);
+
+    const said = skillsOverTheirLineBudget().join("\n");
+
+    expect(said).not.toContain("lines, budget is");
+    expect(linesInSpy).toHaveBeenCalledTimes(ONCE);
+  });
+});
+
+describe("pageBudgetComplaints", () => {
+  it("should say nothing about a page exactly at the page budget", () => {
+    expect(pageBudgetComplaints(["a-page.md"], () => PAGE_BUDGET)).toEqual([]);
+  });
+
+  it("should name a page one line over it, and say what a page is", () => {
+    const said = pageBudgetComplaints(["a-page.md"], () => PAGE_BUDGET + ONE_LINE);
+
+    expect(said).toHaveLength(ONE_COMPLAINT);
+    expect(said[FIRST]).toContain("a-page.md");
+    expect(said[FIRST]).toContain(
+      `${String(PAGE_BUDGET + ONE_LINE)} lines, budget is ${String(PAGE_BUDGET)}`
+    );
+    expect(said[FIRST]).toContain("read whole the moment something opens it");
+    expect(said[FIRST]).toContain("split it by the reason a reader arrives");
+  });
+
+  it("should judge every page handed to it, not only the first", () => {
+    const said = pageBudgetComplaints(["short.md", "long.md"], (page) =>
+      page === "long.md" ? FAR_OVER_ANY_BUDGET : UNDER_BUDGET
+    );
+
+    expect(said).toHaveLength(ONE_COMPLAINT);
+    expect(said[FIRST]).toContain("long.md");
+  });
+
+  it("should say nothing when a repository has no pages at all", () => {
+    expect(pageBudgetComplaints([], () => FAR_OVER_ANY_BUDGET)).toHaveLength(NO_COMPLAINTS);
+  });
+});
+
+describe("pagesOverTheirLineBudget", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    installedSkillsSpy.mockReturnValue([A_BUDGETED_SKILL]);
+    skillPagesSpy.mockReturnValue(["a-page.md"]);
+    linesInSpy.mockReturnValue(UNDER_BUDGET);
+  });
+
+  it("should measure a page by a path that names the skill it belongs to", () => {
+    pagesOverTheirLineBudget();
+
+    expect(linesInSpy).toHaveBeenCalledWith(expect.stringContaining(A_BUDGETED_SKILL));
+    expect(linesInSpy).toHaveBeenCalledWith(expect.stringContaining("a-page.md"));
+  });
+
+  it("should complain once a page outgrows the ceiling", () => {
+    linesInSpy.mockReturnValue(FAR_OVER_ANY_BUDGET);
+
+    expect(pagesOverTheirLineBudget()).toHaveLength(ONE_COMPLAINT);
+  });
+
+  it("should ask every installed skill for its pages", () => {
+    pagesOverTheirLineBudget();
+
+    expect(skillPagesSpy).toHaveBeenCalledWith(A_BUDGETED_SKILL);
+  });
+});

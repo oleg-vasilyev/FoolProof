@@ -19,6 +19,7 @@
   "mutate": [
     "scripts/hooks/**/*.ts",
     "scripts/gates/**/*.ts",
+    "scripts/site/**/*.ts",
     "scripts/tools/tool-verdict.ts",
     "scripts/benchmark/**/*.ts",
     "!scripts/gates/test/vitest.config.ts",
@@ -28,8 +29,8 @@
     "!scripts/**/*.spec.ts",
     "!scripts/**/*.stub.ts",
     "!scripts/gates/check-docs/check-docs.ts",
-    "!scripts/gates/check-docs/source-files.ts",
-    "!scripts/gates/check-docs/document-files.ts"
+    "!scripts/gates/check-docs/shared/source-files.ts",
+    "!scripts/gates/check-docs/shared/document-files.ts"
   ],
   "thresholds": {
     "high": 90,

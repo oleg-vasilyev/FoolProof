@@ -180,7 +180,7 @@ reads; one that repeats 1620 proves nothing and passes either way.
 
 ## Stubs
 
-**Every module in `shared/` has a stub, and a spec uses it rather than writing a
+**Every module in `src/shared/` has a stub, and a spec uses it rather than writing a
 fake by hand.** The stub carries a `module` field typed
 `typeof import("…")`, so mocking is one line:
 
