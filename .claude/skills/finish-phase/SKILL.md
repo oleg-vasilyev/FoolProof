@@ -73,9 +73,9 @@ phrase for it was *the duplication rule wearing a gate's clothes*. So before pay
 to fit something in, ask what already covers it: **read the neighbour before
 displacing it**, and before adding a check, read every check over the same subject.
 
-**A phase that touched `package.json` has a gate `npm run check:quick` cannot see.** It
-resolves against this machine, so a lock file written here can be unsatisfiable on
-the runner: [changing a dependency](changing-a-dependency.md).
+**Two phases have a gate `npm run check:quick` cannot see.** A `package.json` change
+resolves against this machine, not the runner ([changing a dependency](changing-a-dependency.md));
+and a phase whose subject *is* the gate machinery runs the whole battery before the review.
 
 ## 2. `node scripts/gates/gate-runner.ts test:coverage`
 
@@ -88,7 +88,7 @@ run to learn what its author already knew, and this gate is the one that notices
 last: coverage falls by a hundredth of a percent, well clear of the floor, and only
 a reader who looks at the number rather than the verdict sees it at all.
 
-## 3. `node scripts/gates/gate-runner.ts test:mutation:changed`
+## 3. `node scripts/gates/gate-runner.ts test:mutation-changed`
 
 Stryker over the files this phase touched — about a minute. A mutant in a file the
 phase never opened was killed in the phase that wrote it. A tag re-mutates only what
@@ -134,7 +134,7 @@ the nearest assertion that turns the mutant red.
 
 **Run gate 5's review pass before this one. Always.** Review findings edit code, and
 this is the costliest gate to repeat; an edit made after the run re-checks with
-`node scripts/gates/gate-runner.ts test:mutation:changed <file>` alone, which leaves the
+`node scripts/gates/gate-runner.ts test:mutation-changed <file>` alone, which leaves the
 paragraph untouched, never a full re-run. Size is not the test and neither is
 subject matter — a phase of 671 lines, 74% specs, ran the battery, took five
 findings, and ran it again: twenty-seven minutes of Stryker to learn the same thing

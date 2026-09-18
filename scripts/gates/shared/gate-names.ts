@@ -8,7 +8,7 @@ export const GATE = {
   harness: "test:e2e-harness",
   e2e: "e2e",
   e2eChanged: "e2e:changed",
-  mutationChanged: "test:mutation:changed",
+  mutationChanged: "test:mutation-changed",
   mutation: "test:mutation",
 } as const;
 

@@ -15,7 +15,7 @@ const A_FILE = ".claude/skills/build-it/SKILL.md";
 const THE_TARGETS = {
   scripts: new Set(["check", "e2e:changed"]),
   verbs: new Set(["posters"]),
-  gates: new Set(["lint", "test:mutation:changed"]),
+  gates: new Set(["lint", "e2e:typecheck", "test:mutation-changed"]),
 };
 
 const THE_RUNNER = "node scripts/gates/gate-runner.ts";
@@ -91,7 +91,8 @@ describe("namedCommandComplaints", () => {
 
 describe("namedCommandComplaints(), the gates a document names", () => {
   it("should pass a gate the runner knows, a colon and a digit included", () => {
-    expect(namedCommandComplaints(A_FILE, `${THE_RUNNER} test:mutation:changed src/a.ts`, THE_TARGETS)).toEqual([]);
+    expect(namedCommandComplaints(A_FILE, `${THE_RUNNER} test:mutation-changed src/a.ts`, THE_TARGETS)).toEqual([]);
+    expect(namedCommandComplaints(A_FILE, `${THE_RUNNER} e2e:typecheck`, THE_TARGETS)).toEqual([]);
     expect(namedCommandComplaints(A_FILE, `${THE_RUNNER} lint`, THE_TARGETS)).toEqual([]);
   });
 

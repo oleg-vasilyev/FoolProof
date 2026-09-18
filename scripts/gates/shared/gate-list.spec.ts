@@ -139,7 +139,7 @@ describe("COMMANDS", () => {
     ]);
   });
 
-  it("should let only test and test:mutation:changed take files", () => {
+  it("should let only test and test:mutation-changed take files", () => {
     const taking = Object.entries(COMMANDS)
       .filter(([, command]) => command.takesFiles)
       .map(([gate]) => gate);
@@ -170,7 +170,7 @@ describe("stepsFor()", () => {
 
     expect(refused.ok).toBe(false);
     expect(refused.ok ? "" : refused.notice).toContain("lint takes no files");
-    expect(refused.ok ? "" : refused.notice).toContain("test and test:mutation:changed");
+    expect(refused.ok ? "" : refused.notice).toContain("test and test:mutation-changed");
   });
 });
 

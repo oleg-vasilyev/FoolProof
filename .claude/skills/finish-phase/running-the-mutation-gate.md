@@ -36,7 +36,7 @@ An exclusion added to the config is not in force until you have found everything
 else that decides the same thing; this one was silently ignored for a whole run:
 
 ```
-node scripts/gates/gate-runner.ts test:mutation:changed src/features/<x>/a.ts src/features/<x>/b.ts
+node scripts/gates/gate-runner.ts test:mutation-changed src/features/<x>/a.ts src/features/<x>/b.ts
 ```
 
 It names files, never a glob, routes each to its family with that family's own

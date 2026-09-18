@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MutationMetricsStub } from "../mutation/mutation-testing-metrics.stub.ts";
 import { GATE } from "../shared/gate-names.ts";
 import {
   CHECK_DOCS_COMPLAINTS,
@@ -10,11 +11,9 @@ import {
 } from "../shared/gate-paths.ts";
 
 
-const calculateMetricsSpy = vi.fn();
+const metrics = new MutationMetricsStub();
 
-vi.mock("mutation-testing-metrics", () => ({
-  calculateMetrics: (files: unknown) => calculateMetricsSpy(files),
-}));
+vi.mock("mutation-testing-metrics", () => metrics.module);
 
 const { numbersFor, outputsOf, scopeOf } = await import("./gate-numbers.ts");
 
@@ -78,15 +77,33 @@ const coverageJson = (): string =>
     },
   });
 
+const VALID_MUTANTS = KILLED + SURVIVED;
+
+const NO_VALID_MUTANTS = 0;
+
 const metricsOf = (score: number) => ({
   metrics: {
     mutationScore: score,
+    totalValid: VALID_MUTANTS,
     killed: KILLED,
     survived: SURVIVED,
     noCoverage: NO_COVERAGE,
     timeout: TIMEOUT,
   },
 });
+
+const NONE_COUNTED = 0;
+
+const NOTHING_MUTATED = {
+  metrics: {
+    mutationScore: Number.NaN,
+    totalValid: NO_VALID_MUTANTS,
+    killed: NONE_COUNTED,
+    survived: NONE_COUNTED,
+    noCoverage: NONE_COUNTED,
+    timeout: NONE_COUNTED,
+  },
+};
 
 const readerOver = (files: Record<string, string>) => (path: string) => files[path] ?? null;
 
@@ -165,7 +182,7 @@ describe("numbersFor()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    calculateMetricsSpy.mockImplementation((files: unknown) =>
+    metrics.calculateMetricsSpy.mockImplementation((files: unknown) =>
       metricsOf("src/a.ts" in (files as object) ? SOURCE_SCORE : TOOLING_SCORE)
     );
   });
@@ -284,11 +301,23 @@ describe("numbersFor()", () => {
     });
   });
 
+  it("should keep a family whose score came back empty, rather than drop it out of the numbers", () => {
+    metrics.calculateMetricsSpy.mockImplementation(() => NOTHING_MUTATED);
+
+    expect(numbersFor(GATE.mutationChanged, "the diff", everything, NO_OUTPUT)).toMatchObject({
+      kind: "mutation",
+      families: [
+        { family: "source", score: null, killed: NONE_COUNTED },
+        { family: "tooling", score: null, killed: NONE_COUNTED },
+      ],
+    });
+  });
+
   it("should hand the report's files to the score calculation, not the whole report", () => {
     numbersFor(GATE.mutation, "everything", everything, NO_OUTPUT);
 
-    expect(calculateMetricsSpy).toHaveBeenNthCalledWith(FIRST_CALL, SOURCE_FILES);
-    expect(calculateMetricsSpy).toHaveBeenNthCalledWith(SECOND_CALL, TOOLING_FILES);
+    expect(metrics.calculateMetricsSpy).toHaveBeenNthCalledWith(FIRST_CALL, SOURCE_FILES);
+    expect(metrics.calculateMetricsSpy).toHaveBeenNthCalledWith(SECOND_CALL, TOOLING_FILES);
   });
 
   it("should leave out a family whose run wrote nothing, rather than read a stale score", () => {

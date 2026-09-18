@@ -4,9 +4,11 @@ import { survivorsIn, type ReportedFiles, type Survivors } from "./surviving-mut
 import type { Family, FamilyName } from "./mutation-families.ts";
 
 
+const NO_VALID_MUTANTS = 0;
+
 export interface FamilyScore {
   readonly family: FamilyName;
-  readonly score: number;
+  readonly score: number | null;
   readonly bar: number;
   readonly killed: number;
   readonly survived: number;
@@ -35,7 +37,7 @@ export const familyScore = (read: Reader, family: Family): FamilyScore | null =>
 
   return {
     family: family.family,
-    score: metrics.mutationScore,
+    score: metrics.totalValid === NO_VALID_MUTANTS ? null : metrics.mutationScore,
     bar: config.thresholds.break,
     killed: metrics.killed,
     survived: metrics.survived,

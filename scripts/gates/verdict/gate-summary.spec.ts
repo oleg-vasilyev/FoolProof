@@ -167,6 +167,54 @@ describe("gatesParagraph()", () => {
     expect(gatesParagraph(verdicts, BATTERY.release)).not.toContain("nothing to run over the tooling");
   });
 
+  it("should name the family a green full run never reached, a missing report not being a clean one", () => {
+    const verdicts = [
+      verdictWith(GATE.mutation, true, { kind: "mutation", scope: "everything", families: [SOURCE_SCORED] }),
+    ];
+
+    expect(gatesParagraph(verdicts, BATTERY.release)).toBe(
+      "Gates: check:release green — mutation 99.52% over all the source and tooling not run."
+    );
+  });
+
+  it("should say a family whose changed files carried no mutants has none, rather than print a score of nothing", () => {
+    const verdicts = [
+      verdictWith(GATE.mutationChanged, true, {
+        kind: "mutation",
+        scope: "the diff",
+        families: [{ ...TOOLING_SCORED, score: null }],
+      }),
+    ];
+
+    expect(gatesParagraph(verdicts, BATTERY.phase)).toBe(
+      "Gates: check:phase green — mutation nothing to run over the source and no mutants in the tooling."
+    );
+  });
+
+  it("should let a family that landed exactly on its bar pass, the bar being the floor and not the miss", () => {
+    const verdicts = [
+      verdictWith(GATE.mutationChanged, false, {
+        kind: "mutation",
+        scope: "the diff",
+        families: [{ ...TOOLING_SCORED, score: TOOLING_SCORED.bar }],
+      }),
+    ];
+
+    expect(gatesParagraph(verdicts, BATTERY.phase)).toBe("Gates: check:phase RED (test:mutation-changed red).");
+  });
+
+  it("should not hold a family with no mutants against its bar, there being no score to compare", () => {
+    const verdicts = [
+      verdictWith(GATE.mutationChanged, false, {
+        kind: "mutation",
+        scope: "the diff",
+        families: [{ ...TOOLING_SCORED, score: null }],
+      }),
+    ];
+
+    expect(gatesParagraph(verdicts, BATTERY.phase)).toBe("Gates: check:phase RED (test:mutation-changed red).");
+  });
+
   it("should count the harness units apart from the suite", () => {
     const verdicts = [
       verdictWith(GATE.harness, true, { kind: "harness", cases: 75, files: 9, failed: NO_FAILURES, failures: [] }),
@@ -249,13 +297,13 @@ describe("gatesParagraph()", () => {
     ];
 
     expect(gatesParagraph(verdicts, BATTERY.phase)).toBe(
-      "Gates: check:phase RED (test:mutation:changed red (76.07% tooling under the 80% bar))."
+      "Gates: check:phase RED (test:mutation-changed red (76.07% tooling under the 80% bar))."
     );
   });
 
   it("should say a skipped gate was skipped and why, as a red gate", () => {
     expect(gatesParagraph([SKIPPED], BATTERY.phase)).toBe(
-      "Gates: check:phase RED (test:mutation:changed red (skipped, test:coverage was red))."
+      "Gates: check:phase RED (test:mutation-changed red (skipped, test:coverage was red))."
     );
   });
 
@@ -287,7 +335,7 @@ describe("summaryLines()", () => {
       "lint: a line",
       "typecheck: a line",
       "test:coverage: a line",
-      "test:mutation:changed: a line",
+      "test:mutation-changed: a line",
       "e2e:changed: a line",
     ]);
     expect(lineForSpy).toHaveBeenCalledTimes(aGreenPhase().length);
@@ -307,7 +355,7 @@ describe("summaryLines()", () => {
     const lines = summaryLines([SKIPPED], ROOT);
 
     expect(rerunCommandForSpy).toHaveBeenCalledTimes(ONCE);
-    expect(lines.at(-1)).toBe("  rerun test:mutation:changed");
+    expect(lines.at(-1)).toBe("  rerun test:mutation-changed");
   });
 
   it("should add no advice to a green run", () => {
