@@ -385,7 +385,7 @@
   </section>
 
   <section aria-labelledby="cta-heading" class="border-t border-line bg-panel">
-    <div class="trace-frame reveal mx-auto max-w-6xl px-5 py-20 text-center sm:px-8" data-parallax="0.065" data-parallax-static=".trace">
+    <div class="trace-frame reveal mx-auto max-w-6xl px-5 py-20 text-center sm:px-8" data-parallax="0.065" data-parallax-static=".trace, .trace-dot">
       <svg class="trace" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="trace-1" points="81.6,0 90.6,6 100.0,35 104.5,55 90.5,75 79.0,100"/><polyline class="trace-2" points="82.8,0 92.4,6 106.5,35 106.5,55 97.0,75 81.0,100"/><polyline class="trace-3" points="84.0,0 94.2,6 108.5,35 108.5,55 99.0,75 83.0,100"/><polyline class="trace-4" points="85.2,0 100.0,6 110.5,35 115.0,55 101.0,75 85.0,100"/><polyline class="trace-5" points="86.4,0 101.8,6 112.5,35 117.0,55 103.0,75 91.5,100"/></svg>
       <h2 data-block="cta.title" data-rev="4" id="cta-heading" class="mx-auto max-w-[24ch] text-[32px] font-black leading-tight tracking-[-0.02em] sm:text-[44px]">
   Соберитесь за столом и узнайте, кто на самом деле лучший игрок
@@ -446,6 +446,16 @@ setTimeout(() => {
   });
 }, 2000);
 
+const traceEnd = document.querySelector('[aria-labelledby="cta-heading"] .trace-frame');
+if (traceEnd) {
+  traceEnd.querySelectorAll(".trace polyline").forEach((line) => {
+    const dot = document.createElement("span");
+    dot.className = "trace-dot " + line.getAttribute("class");
+    dot.style.left = line.getAttribute("points").split(" ").pop().split(",")[0] + "%";
+    traceEnd.appendChild(dot);
+  });
+}
+
 const drifting = [...document.querySelectorAll("[data-parallax]")];
 if (drifting.length > 0 && matchMedia("(prefers-reduced-motion: no-preference)").matches) {
   let queued = false;
@@ -474,16 +484,6 @@ if (drifting.length > 0 && matchMedia("(prefers-reduced-motion: no-preference)")
   addEventListener("scroll", ask, { passive: true });
   addEventListener("resize", ask);
   drift();
-}
-
-const traceEnd = document.querySelector('[aria-labelledby="cta-heading"] .trace-frame');
-if (traceEnd) {
-  traceEnd.querySelectorAll(".trace polyline").forEach((line) => {
-    const dot = document.createElement("span");
-    dot.className = "trace-dot " + line.getAttribute("class");
-    dot.style.left = line.getAttribute("points").split(" ").pop().split(",")[0] + "%";
-    traceEnd.appendChild(dot);
-  });
 }
 
 const language = document.querySelector(".lang");
