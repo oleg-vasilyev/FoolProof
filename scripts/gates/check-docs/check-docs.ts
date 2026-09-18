@@ -1,7 +1,7 @@
 import { drawnByName, featuresThatDraw } from "../../drawings/feature-drawings.ts";
 import { ALL_GATES } from "../shared/gate-list.ts";
 import { CHECK_DOCS_COMPLAINTS } from "../shared/gate-paths.ts";
-import { DOCUMENTS, read } from "./shared/document-files.ts";
+import { read } from "./shared/document-files.ts";
 import { writeComplaints } from "./shared/complaints-report.ts";
 import { pointersThatResolveToNothing } from "./prose/broken-pointers.ts";
 import { TOOLS_SCRIPT, commandsNothingOffers, toolVerbsIn } from "./prose/named-commands.ts";
@@ -45,6 +45,8 @@ import { filesCheckedOutWithTheWrongLineEnding } from "./codebase/line-endings.t
 
 
 const NOTHING = 0;
+
+const PASSED = 0;
 
 const FAILED = 1;
 
@@ -100,10 +102,4 @@ const complaints = [
 
 writeComplaints(CHECK_DOCS_COMPLAINTS, complaints);
 
-console.log(
-  complaints.length === NOTHING
-    ? `documents agree: ${String(DOCUMENTS.length)} files, links and anchors resolve`
-    : `${String(complaints.length)} problem(s) in ${CHECK_DOCS_COMPLAINTS}`
-);
-
-process.exit(complaints.length === NOTHING ? NOTHING : FAILED);
+process.exit(complaints.length === NOTHING ? PASSED : FAILED);
