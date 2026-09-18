@@ -15,6 +15,12 @@ export const COVERAGE_SUMMARY = "reports/coverage/coverage-summary.json";
 
 export const E2E_RESULTS = "reports/e2e/results.json";
 
+export const E2E_SELECTION = "reports/e2e/selection.json";
+
+export const TYPECHECK_FINDINGS = "reports/typecheck/findings.json";
+
+export const E2E_TYPECHECK_FINDINGS = "reports/typecheck/e2e-findings.json";
+
 export const LINT_FINDINGS = "reports/lint/findings.json";
 
 export const CHECK_DOCS_COMPLAINTS = "reports/check-docs/complaints.json";

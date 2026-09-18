@@ -5,6 +5,10 @@ export type Say = (line: string) => void;
 
 export const TOOLS_DIR = "reports/tools";
 
+export const THE_LISTING = "tools";
+
+export const THE_TOOLS_SCRIPT = "scripts/tools/tools.ts";
+
 export interface ToolVerdict {
   readonly verb: string;
   readonly args: readonly string[];

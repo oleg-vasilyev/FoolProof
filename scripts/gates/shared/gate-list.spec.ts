@@ -128,10 +128,12 @@ describe("COMMANDS", () => {
     expect(COMMANDS[GATE.harness].steps[0]?.args).toContain("scripts/gates/e2e/vitest.harness.config.ts");
   });
 
-  it("should make e2e:typecheck two tsc steps, the harness then its pages, and the full mutation one Stryker step per family", () => {
-    expect(COMMANDS[GATE.e2eTypecheck].steps.map((step) => step.args)).toEqual([
-      ["-p", "e2e", "--noEmit", "--pretty", "false"],
-      ["-p", "e2e/pages", "--noEmit", "--pretty", "false"],
+  it("should run each typecheck through its own wrapper, and the full mutation one Stryker step per family", () => {
+    expect(COMMANDS[GATE.typecheck].steps.map((step) => step.bin)).toEqual([
+      "scripts/gates/typecheck/typecheck.ts",
+    ]);
+    expect(COMMANDS[GATE.e2eTypecheck].steps.map((step) => step.bin)).toEqual([
+      "scripts/gates/typecheck/e2e-typecheck.ts",
     ]);
     expect(COMMANDS[GATE.mutation].steps.map((step) => step.args)).toEqual([
       ["run", "scripts/gates/mutation/stryker.config.json"],

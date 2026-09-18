@@ -15,6 +15,8 @@ import { read } from "../gates/check-docs/shared/document-files.ts";
 import { siteImageOf } from "./site-images.ts";
 import { REPORTS_DIR, tidyReports } from "./tidy-reports.ts";
 import {
+  THE_LISTING,
+  THE_TOOLS_SCRIPT,
   TOOLS_DIR,
   type Say,
   closingLine,
@@ -210,21 +212,30 @@ const allOf = (offered: readonly (readonly [string, Tool])[]): Readonly<Record<s
 
 const everyTool = allOf(await offeredByFeatures());
 
-const listItself = (): void => {
-  console.log("tools:");
+const listingLines = (tools: Readonly<Record<string, Tool>>): readonly string[] => [
+  "tools:",
+  ...Object.entries(tools).flatMap(([name, tool]) => [`  ${name} — ${tool.does}`, `      ${tool.usage}`]),
+];
 
-  for (const [name, tool] of Object.entries(everyTool)) {
-    console.log(`  ${name} — ${tool.does}`);
-    console.log(`      ${tool.usage}`);
-  }
-};
+const theListing = (asked: string | undefined): Tool => ({
+  does: "every tool there is, which is what a bare run writes",
+  usage: `node ${THE_TOOLS_SCRIPT}`,
+  run: (unused, say) => {
+    for (const line of listingLines(everyTool)) {
+      say(line);
+    }
+
+    if (asked !== undefined) {
+      throw new Error(`no tool called "${asked}"`);
+    }
+  },
+});
 
 const recorded = async (verb: string, tool: Tool, args: readonly string[]): Promise<ToolVerdict> => {
   const startedAt = new Date();
   const said: string[] = [];
   const say: Say = (line) => {
     said.push(line);
-    console.log(line);
   };
   let error: unknown = null;
 
@@ -256,13 +267,9 @@ const recorded = async (verb: string, tool: Tool, args: readonly string[]): Prom
 const args = process.argv.slice(AFTER_NODE_AND_SCRIPT);
 const asked = args[TOOL_NAME];
 const tool = asked === undefined ? undefined : everyTool[asked];
+const verdict =
+  asked === undefined || tool === undefined
+    ? await recorded(THE_LISTING, theListing(asked), args)
+    : await recorded(asked, tool, args);
 
-if (asked === undefined) {
-  listItself();
-} else if (tool === undefined) {
-  console.error(`no tool called "${asked}"`);
-  listItself();
-  process.exit(FAILED);
-} else {
-  process.exit((await recorded(asked, tool, args)).ok ? PASSED : FAILED);
-}
+process.exit(verdict.ok ? PASSED : FAILED);

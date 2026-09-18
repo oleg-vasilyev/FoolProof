@@ -79,8 +79,8 @@ Anything a machine can check is a lint rule, not a paragraph — see
   exempt — a non-obvious compiler flag has nowhere else to live.
 - **No `console.*` for app logging** — take one from
   `createLogger("scope")` in `#shared/logging/logger.ts`. `LOG_LEVEL`
-  (debug|info|warn|error, default `info`) sets the threshold; raw `console.*` is for
-  `scripts/` and for the logger itself.
+  (debug|info|warn|error, default `info`) sets the threshold; the three places raw
+  `console.*` is still allowed are in the table below.
 
 `strict: true` and **no `any`**. There is no build step: `tsconfig.json` mirrors how
 Node actually runs the code. `erasableSyntaxOnly` and `verbatimModuleSyntax` keep
@@ -335,7 +335,7 @@ judgement. `eslint.config.js` holds the checkable ones, several with no core equ
 | Only `sqlite-repository.ts` opens the database | `project/one-door-to-the-database` |
 | A screen's way off and way on are drawn in one place | `project/one-control-row` |
 | Braces on every `if`, `const` over `let` | `curly`, `prefer-const`, `no-var` |
-| No `console.*` outside the logger (and `scripts/`) | `no-console` |
+| `console.*` only in the logger, in `scripts/` outside `scripts/gates/`, and in `scripts/gates/shared/say.ts` | `no-console` |
 | Imports point downward, features stay independent, `e2e/` stays outside | `no-restricted-imports`, one zone per layer |
 | An alias ban (`#live-game/**`) fires, and survives `await import(…)` | a `regex` pattern, and the same bans as `no-restricted-syntax` |
 

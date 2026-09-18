@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { matchesGlob } from "node:path";
 import { FAMILIES, type Family } from "./mutation-families.ts";
 import { STRYKER } from "../shared/tool-binaries.ts";
+import { say } from "../shared/say.ts";
 
 
 export const DEFAULT_BASELINE = "origin/main";
@@ -126,5 +127,5 @@ export const mutateChanged = (
 };
 
 if (import.meta.main) {
-  process.exit(mutateChanged(process.env, console.log, process.argv.slice(AFTER_NODE_AND_SCRIPT)));
+  process.exit(mutateChanged(process.env, say, process.argv.slice(AFTER_NODE_AND_SCRIPT)));
 }

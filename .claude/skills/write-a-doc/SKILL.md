@@ -105,8 +105,8 @@ they arrived here from `CLAUDE.md` when a new rule pushed that file over its bud
 - **Keep the table short.** It is the first thing a new reader sees, and a reader
   who has to scan twenty rows to find `npm start` has been told the project is
   complicated before learning anything about it.
-- **Anything occasional goes behind `scripts/tools/tools.ts`**, which lists itself when
-  run with no argument, so a one-off never earns a permanent row.
+- **Anything occasional goes behind `scripts/tools/tools.ts`**, which writes its own list
+  to `reports/tools/tools.log` when run with no argument, so a one-off earns no row.
 
 ## When the document argues for something you want
 

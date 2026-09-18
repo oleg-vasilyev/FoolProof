@@ -2,6 +2,7 @@ import { rerunCommandFor } from "../shared/gate-list.ts";
 import type { Battery } from "../shared/gate-names.ts";
 import { lineFor, type GateVerdict } from "./gate-verdict.ts";
 import type { GateNumbers, MutationScope } from "./gate-numbers.ts";
+import type { E2eSelection } from "../e2e/e2e-selection.ts";
 import type { Failure } from "../test/test-results.ts";
 import type { FamilyScore } from "../mutation/family-scores.ts";
 import type { Finding } from "../shared/finding.ts";
@@ -79,9 +80,21 @@ const mutationPhrase = (scope: MutationScope, families: readonly FamilyScore[]):
 const counted = (cases: number, files: number): string =>
   `${String(cases)} cases in ${String(files)} files`;
 
+export const playedPhrase = (selection: E2eSelection, cases: number, files: number): string => {
+  switch (selection.kind) {
+    case "nothing":
+      return "nothing to play";
+
+    case "everything":
+      return `${counted(cases, files)} over every scenario`;
+
+    case "scenarios":
+      return `${counted(cases, files)} over ${plural(selection.files.length, "scenario")}`;
+  }
+};
+
 const numbersPhrase = (numbers: GateNumbers): string | null => {
   switch (numbers.kind) {
-    case "none":
     case "findings":
     case "complaints":
       return null;
@@ -102,7 +115,7 @@ const numbersPhrase = (numbers: GateNumbers): string | null => {
       return `mutation ${mutationPhrase(numbers.scope, numbers.families)}`;
 
     case "e2e":
-      return `e2e ${counted(numbers.cases, numbers.files)}`;
+      return `e2e ${playedPhrase(numbers.selection, numbers.cases, numbers.files)}`;
 
     case "missing":
       return `no numbers: ${numbers.expected} was not written`;
@@ -118,7 +131,6 @@ const complaintsPhrase = (count: number): string => (count > NO_FAILURES ? plura
 
 const redDetail = (numbers: GateNumbers): string => {
   switch (numbers.kind) {
-    case "none":
     case "missing":
       return "";
 
@@ -251,7 +263,6 @@ const detailLines = (numbers: GateNumbers, root: string): readonly string[] => {
     case "mutation":
       return survivorLines(numbers.families);
 
-    case "none":
     case "missing":
       return [];
   }

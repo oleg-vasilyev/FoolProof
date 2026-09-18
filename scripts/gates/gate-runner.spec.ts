@@ -42,7 +42,7 @@ vi.mock("node:fs", () => ({
 
 vi.mock("./verdict/gate-numbers.ts", () => ({
   LINT_FINDINGS: "reports/lint/findings.json",
-  numbersFor: (gate: unknown, scope: unknown, read: unknown, output: unknown) => numbersForSpy(gate, scope, read, output),
+  numbersFor: (gate: unknown, scope: unknown, read: unknown) => numbersForSpy(gate, scope, read),
   outputsOf: (gate: unknown) => outputsOfSpy(gate),
   scopeOf: (gate: unknown, against: unknown, args: unknown) => scopeOfSpy(gate, against, args),
 }));
@@ -95,7 +95,7 @@ const SECOND = 1;
 
 const THIRD = 2;
 
-const THE_NUMBERS = { kind: "none" } as const;
+const THE_NUMBERS = { kind: "findings", findings: [] } as const;
 
 const THE_VERDICT = { kind: "ran", gate: GATE.lint, named: false, ok: true, exitCode: PASSED } as unknown as GateVerdict;
 
@@ -354,12 +354,7 @@ describe("runGate()", () => {
     await runAndClose(PASSED, "v1.20.0");
 
     expect(scopeOfSpy).toHaveBeenCalledWith(GATE.lint, "v1.20.0", []);
-    expect(numbersForSpy).toHaveBeenCalledWith(GATE.lint, A_SCOPE, readOrNull, [
-      "$ node node_modules/eslint/bin/eslint.js --quiet src",
-      "first line",
-      "second line",
-      "",
-    ]);
+    expect(numbersForSpy).toHaveBeenCalledWith(GATE.lint, A_SCOPE, readOrNull);
   });
 
   it("should build the verdict from the exit code, the clock and the output split into lines", async () => {

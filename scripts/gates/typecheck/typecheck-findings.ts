@@ -1,4 +1,4 @@
-import { MOST_FINDINGS, type Finding } from "../shared/finding.ts";
+import type { Finding } from "../shared/finding.ts";
 
 
 export const A_TSC_LINE = /^(.+?)\((\d+),(\d+)\): error (TS\d+): (.*)$/;
@@ -46,5 +46,5 @@ export const typecheckFindingsIn = (output: readonly string[]): readonly Finding
     }
   }
 
-  return findings.slice(NOTHING, MOST_FINDINGS);
+  return findings;
 };

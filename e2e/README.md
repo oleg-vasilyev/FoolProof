@@ -13,7 +13,7 @@ between it and being trusted. Six are closed and the seventh is in
 So it is **a gate now**, and `node scripts/gates/gate-runner.ts e2e:changed` plays only what a diff can reach.
 
 Which means the reach has to be kept honest. `EVERYTHING` in
-[`scripts/gates/e2e/e2e-changed.ts`](../scripts/gates/e2e/e2e-changed.ts) lists the paths that force
+[`scripts/gates/e2e/e2e-selection.ts`](../scripts/gates/e2e/e2e-selection.ts) lists the paths that force
 every scenario to play, and a file missing from it is a hole rather than a
 saving: the suite's own Vitest configuration was absent, so a change to how the whole
 suite runs — worker count included — reported "nothing a scenario covers changed" and

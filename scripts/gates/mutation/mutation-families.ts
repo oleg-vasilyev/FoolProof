@@ -14,7 +14,7 @@ export interface Family {
   readonly report: string;
 }
 
-export const FAMILIES: readonly Family[] = [
+export const FAMILIES: readonly [Family, ...Family[]] = [
   {
     family: "source",
     config: SOURCE_STRYKER_CONFIG,
@@ -28,3 +28,9 @@ export const FAMILIES: readonly Family[] = [
 ];
 
 export const FAMILY_NAMES: readonly FamilyName[] = FAMILIES.map((family) => family.family);
+
+export const familyReports = (): readonly [string, ...string[]] => {
+  const [first, ...rest] = FAMILIES;
+
+  return [first.report, ...rest.map((family) => family.report)];
+};

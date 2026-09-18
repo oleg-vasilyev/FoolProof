@@ -11,6 +11,7 @@ import {
 } from "./shared/gate-list.ts";
 import type { Battery, Gate } from "./shared/gate-names.ts";
 import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH, logPathOf, verdictPathOf } from "./shared/gate-paths.ts";
+import { say } from "./shared/say.ts";
 import { numbersFor, outputsOf, scopeOf, type MutationScope } from "./verdict/gate-numbers.ts";
 import { FAILED, PASSED, lineFor, verdictOf, type GateVerdict, type RanVerdict } from "./verdict/gate-verdict.ts";
 import { gatesParagraph, paragraphFileOf, reasonLines, stampLineOf } from "./verdict/gate-summary.ts";
@@ -193,7 +194,7 @@ export const runGate = async (
     code,
     startedAt,
     new Date(),
-    numbersFor(gate, scope, readOrNull, output),
+    numbersFor(gate, scope, readOrNull),
     output
   );
 
@@ -238,5 +239,5 @@ export const main = async (
 };
 
 if (import.meta.main) {
-  process.exit(await main(process.argv, process.env, console.log, process.cwd()));
+  process.exit(await main(process.argv, process.env, say, process.cwd()));
 }

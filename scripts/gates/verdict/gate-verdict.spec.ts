@@ -16,22 +16,22 @@ const A_SIGNAL = 137;
 
 const LONGER_THAN_THE_TAIL = TAIL_LINES + 5;
 
-const NONE = { kind: "none" } as const;
+const NO_FINDINGS = { kind: "findings", findings: [] } as const;
 
 const output = (lines: number): readonly string[] =>
   Array.from({ length: lines }, (_, index) => `line ${String(index)}`);
 
 const greenVerdict = (): RanVerdict =>
-  verdictOf(GATE.lint, false, PASSED, STARTED, ENDED, NONE, output(LONGER_THAN_THE_TAIL));
+  verdictOf(GATE.lint, false, PASSED, STARTED, ENDED, NO_FINDINGS, output(LONGER_THAN_THE_TAIL));
 
 const redVerdict = (): RanVerdict =>
-  verdictOf(GATE.coverage, false, RED, STARTED, ENDED, NONE, output(LONGER_THAN_THE_TAIL));
+  verdictOf(GATE.coverage, false, RED, STARTED, ENDED, NO_FINDINGS, output(LONGER_THAN_THE_TAIL));
 
 describe("verdictOf()", () => {
   it("should call exit code zero green and anything else red", () => {
     expect(greenVerdict().ok).toBe(true);
     expect(redVerdict().ok).toBe(false);
-    expect(verdictOf(GATE.e2e, false, A_SIGNAL, STARTED, ENDED, NONE, []).ok).toBe(false);
+    expect(verdictOf(GATE.e2e, false, A_SIGNAL, STARTED, ENDED, NO_FINDINGS, []).ok).toBe(false);
   });
 
   it("should be a ran verdict carrying the exit code, the start and the duration as measured", () => {
@@ -45,7 +45,14 @@ describe("verdictOf()", () => {
   });
 
   it("should carry the numbers it was handed", () => {
-    const numbers = { kind: "e2e", cases: 1, files: 1, failed: 0, failures: [] } as const;
+    const numbers = {
+      kind: "e2e",
+      selection: { kind: "everything" },
+      cases: 1,
+      files: 1,
+      failed: 0,
+      failures: [],
+    } as const;
 
     expect(verdictOf(GATE.e2e, false, PASSED, STARTED, ENDED, numbers, []).numbers).toBe(numbers);
   });
@@ -98,7 +105,7 @@ describe("lineFor()", () => {
 
 describe("lineFor(), a named run", () => {
   it("should point a red named run at its own log, not the bare gate's", () => {
-    const named = verdictOf(GATE.test, true, RED, STARTED, ENDED, NONE, ["x"]);
+    const named = verdictOf(GATE.test, true, RED, STARTED, ENDED, NO_FINDINGS, ["x"]);
 
     expect(named.named).toBe(true);
     expect(lineFor(named)).toBe("test: RED in 61.5s — reports/gates/test.named.log");

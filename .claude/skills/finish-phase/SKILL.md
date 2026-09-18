@@ -159,8 +159,8 @@ selection rule that quietly hands one player four of nine rows passes every one 
 node scripts/tools/tools.ts evening <chat id>
 ```
 
-It prints the awards a real chat's newest evening would carry, in that chat's own
-language, and it reads whatever `DB_PATH` points at. Take the snapshot with
+It writes the awards a real chat's newest evening would carry, in that chat's own
+language, to `reports/tools/evening.log`, and reads whatever `DB_PATH` points at. Take the snapshot with
 `VACUUM INTO` from a read-only connection, never by copying the database file: the
 newest games live in the `-wal` sidecar and a copy leaves them behind.
 
@@ -173,7 +173,7 @@ had shipped through green gates.
 ## 4. `node scripts/gates/gate-runner.ts e2e:changed`
 
 Plays the scenarios the diff can reach: a change under `src/features/<X>/` plays
-what `scripts/gates/e2e/e2e-changed.ts` lists for `<X>`, a change under `shared/`, `main.ts`
+what `scripts/gates/e2e/e2e-selection.ts` lists for `<X>`, a change under `shared/`, `main.ts`
 or the harness plays everything, and a changed scenario file plays itself. It errs
 towards playing too much — an unknown feature folder means the map is out of date,
 so everything runs rather than nothing.

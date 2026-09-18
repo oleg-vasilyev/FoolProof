@@ -1,4 +1,4 @@
-import { ESLINT, STRYKER, TSC, VITEST } from "./tool-binaries.ts";
+import { ESLINT, STRYKER, VITEST } from "./tool-binaries.ts";
 import {
   E2E_CONFIG,
   ESLINT_CONFIG,
@@ -86,14 +86,8 @@ export const COMMANDS: Readonly<Record<Gate, GateCommand>> = {
     LINT_FINDINGS,
     ...LINTED_FOLDERS
   ),
-  [GATE.typecheck]: oneStep(TSC, "--noEmit", "--pretty", "false"),
-  [GATE.e2eTypecheck]: {
-    steps: [
-      { bin: TSC, args: ["-p", "e2e", "--noEmit", "--pretty", "false"] },
-      { bin: TSC, args: ["-p", "e2e/pages", "--noEmit", "--pretty", "false"] },
-    ],
-    takesFiles: false,
-  },
+  [GATE.typecheck]: oneStep("scripts/gates/typecheck/typecheck.ts"),
+  [GATE.e2eTypecheck]: oneStep("scripts/gates/typecheck/e2e-typecheck.ts"),
   [GATE.checkDocs]: oneStep("scripts/gates/check-docs/check-docs.ts"),
   [GATE.test]: { ...oneStep(VITEST, "run", "--config", VITEST_CONFIG), takesFiles: true },
   [GATE.coverage]: oneStep(VITEST, "run", "--config", VITEST_CONFIG, "--coverage"),

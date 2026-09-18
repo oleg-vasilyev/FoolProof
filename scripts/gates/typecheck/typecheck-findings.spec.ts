@@ -38,10 +38,11 @@ describe("typecheckFindingsIn()", () => {
     expect(typecheckFindingsIn(output)).toHaveLength(1);
   });
 
-  it("should keep at most the ceiling", () => {
-    const many = Array.from({ length: MOST_FINDINGS + 3 }, (_, at) => `src/a.ts(${String(at + 1)},1): error TS1: m`);
+  it("should keep every error it read, so the file the gate writes is the whole truth", () => {
+    const past = MOST_FINDINGS + 3;
+    const many = Array.from({ length: past }, (_, at) => `src/a.ts(${String(at + 1)},1): error TS1: m`);
 
-    expect(typecheckFindingsIn(many)).toHaveLength(MOST_FINDINGS);
+    expect(typecheckFindingsIn(many)).toHaveLength(past);
   });
 
   it("should match only an error line, never a warning or prose that mentions TS", () => {

@@ -178,17 +178,17 @@ name by hand.
 | `npm run check:phase` | The phase gates in one command: lint, types, coverage, mutation over the diff, e2e over the diff — every gate runs (only mutation waits for a green suite), each leaves its log and a JSON verdict under `reports/gates/`, and the run ends with one line per gate and the `Gates:` paragraph the commit message pastes, also written to `reports/gates/gates-paragraph.txt` under a stamp of battery, HEAD and time; the commit-msg hook refuses a `Gates:` line whose stamp names another HEAD than the commit's parent or another battery than the line claims. A red gate is re-run alone with `node scripts/gates/gate-runner.ts <gate>`. No `check-docs`: documents and pictures are finished after the review, in their own stages |
 | `npm run check:release` | The same walker over the release list: `check:push`'s gates, coverage, mutation over what changed since the previous tag, every scenario. Refuses unless HEAD carries the new `v*` tag. **CI runs this on every release tag** |
 | `node scripts/gates/gate-runner.ts lint` | ESLint over `src/`, `scripts/` and `e2e/`, which enforces this project's conventions. A red line lists each finding as `file:line:col rule — message`, read from the JSON ESLint writes to `reports/lint/findings.json` |
-| `node scripts/gates/gate-runner.ts typecheck` | `tsc --noEmit` over `src/` and `scripts/`, from the root `tsconfig.json`; a red line lists each error as `file:line:col TSnnnn — message` |
+| `node scripts/gates/gate-runner.ts typecheck` | `tsc --noEmit` over `src/` and `scripts/`, from the root `tsconfig.json`, through a wrapper that writes what it found to `reports/typecheck/findings.json`; a red line lists each error as `file:line:col TSnnnn — message`, read from that file |
 | `node scripts/gates/gate-runner.ts check-docs` | Links, anchors, the source tree, the script table above, that `DEVELOPMENT-FLOW.md` reaches every skill and agent, and that every command a document names exists — an `npm run` script, a gate the runner knows, a `tools.ts` verb; a tool run by hand is a complaint too. A red line counts the complaints and lists up to thirty of them, read from the JSON the gate writes to `reports/check-docs/complaints.json`, which carries all of them however many there are |
 | `node scripts/gates/gate-runner.ts test` | Vitest, once — units and integration together. One spec is `node scripts/gates/gate-runner.ts test <file>`: a red run prints each failed assertion with its file and message, and leaves `reports/gates/test.named.json` without touching the battery's paragraph |
 | `node scripts/gates/gate-runner.ts test:coverage` | Vitest with coverage; fails below 70% on any metric |
 | `node scripts/gates/gate-runner.ts test:mutation-changed` | Stryker over the files that differ from `origin/main` (or from `MUTATE_AGAINST`). Under its line, red or green, every mutant still alive — file, line, status, the replacement — up to twenty per family, so a survivor is read off the run rather than out of the HTML report |
 | `node scripts/gates/gate-runner.ts test:mutation` | Stryker over everything, 26 minutes measured at v1.20.1; two runs, the bot at 85% and the tooling at 80%. The weekly checkup's, not a release's |
 | `node scripts/gates/gate-runner.ts e2e` | Whole scenarios against the real bot and a fake Telegram. A failed case prints its message, up to three lines, and the path of the bot's log for that scenario under `reports/e2e/bot/` |
-| `node scripts/gates/gate-runner.ts e2e:changed` | Only the scenarios the diff against `origin/main` can reach |
+| `node scripts/gates/gate-runner.ts e2e:changed` | Only the scenarios the diff against `origin/main` can reach. What it chose — every scenario, a named few, or none — is written to `reports/e2e/selection.json` before anything plays, so a run that played nothing says so in the paragraph instead of vanishing from it |
 | `npm run e2e:watch` | The same run, slowed down, in one browser tab; `E2E_VERBOSE=1` brings the per-case output back on any e2e run |
 | `node scripts/gates/gate-runner.ts test:e2e-harness` | Units for the harness's own pure parts |
-| `node scripts/gates/gate-runner.ts e2e:typecheck` | `tsc` over `e2e/`, which has its own config |
+| `node scripts/gates/gate-runner.ts e2e:typecheck` | `tsc` over `e2e/` and `e2e/pages`, each with its own config, through the same wrapper, into `reports/typecheck/e2e-findings.json` |
 | `npm run prepare` | Run by `npm install` itself: points git at `.githooks/`, where the pre-push tag gate and the commit-msg hook's four gates — the flow drawing, its backers, the phase log, the Gates paragraph's stamp — live |
 
 `start:prod` is the only one that reads an env file, and the only one that talks to
@@ -381,8 +381,9 @@ scripts/gates/          the two entry points — the runner and the batteries �
                         shared/ what every gate needs: the roster, the names, the paths
                         each writes to, the tool binaries. Then a folder per gate for
                         what only it knows, its config included: verdict/ what a run
-                        amounts to and how it is said; lint/ and typecheck/ reading
-                        their tool's output; test/ reading vitest's report; mutation/
+                        amounts to and how it is said; lint/ reading ESLint's report and
+                        typecheck/ running tsc into one of its own; test/ reading
+                        vitest's report; mutation/
                         picking the changed files and scoring the families; e2e/ which
                         scenarios a diff can reach; check-docs/ a folder per subject
                         held in agreement, over shared/ the file rosters and the

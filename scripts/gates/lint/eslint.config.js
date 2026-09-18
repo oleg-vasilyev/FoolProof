@@ -729,4 +729,20 @@ export default [
       "scripts/ may not import a feature — ask for what features offer through #shared/drawings/drawings-contract.ts, so deleting a folder leaves the tooling running."
     ),
   },
+  {
+    // A gate reaches the console through shared/say.ts and not otherwise, the same
+    // shape src/shared/logging/logger.ts has. This is tidiness, not the guarantee:
+    // what stops a gate reporting out of a stream is that outputsOf() returns a
+    // non-empty tuple and numbersFor() has no way to see the captured output.
+    // no-console does not know process.stdout.write, and this block does not pretend
+    // to. It is "no-console" rather than a "no-restricted-syntax" selector on purpose
+    // — forbid() already sets that rule name for scripts/**, and a later block
+    // replaces an earlier one, so a selector here would silently delete the ban on
+    // importing a feature.
+    files: ["scripts/gates/**/*.ts"],
+    ignores: ["scripts/gates/shared/say.ts"],
+    rules: {
+      "no-console": "error",
+    },
+  },
 ];

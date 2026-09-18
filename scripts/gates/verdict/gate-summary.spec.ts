@@ -50,7 +50,7 @@ const SKIPPED: GateVerdict = {
   startedAt: "2026-09-09T10:00:00.000Z",
 };
 
-const NONE: GateNumbers = { kind: "none" };
+const NO_FINDINGS: GateNumbers = { kind: "findings", findings: [] };
 
 const NO_SURVIVORS = { named: [], total: 0 };
 
@@ -79,11 +79,18 @@ const SOURCE_SCORED = {
 
 const TOOLING_SCORED = { ...SOURCE_SCORED, family: "tooling", score: 84.02 } as const;
 
-const E2E: GateNumbers = { kind: "e2e", cases: 205, files: 17, failed: NO_FAILURES, failures: [] };
+const E2E: GateNumbers = {
+  kind: "e2e",
+  selection: { kind: "everything" },
+  cases: 205,
+  files: 17,
+  failed: NO_FAILURES,
+  failures: [],
+};
 
 const aGreenPhase = (): readonly GateVerdict[] => [
-  verdictWith(GATE.lint, true, NONE),
-  verdictWith(GATE.typecheck, true, NONE),
+  verdictWith(GATE.lint, true, NO_FINDINGS),
+  verdictWith(GATE.typecheck, true, NO_FINDINGS),
   verdictWith(GATE.coverage, true, COVERAGE),
   verdictWith(GATE.mutationChanged, true, {
     kind: "mutation",
@@ -125,7 +132,7 @@ describe("gatesParagraph()", () => {
     expect(gatesParagraph(aGreenPhase(), BATTERY.phase)).toBe(
       "Gates: check:phase green — 4651 tests in 199 files, coverage 99.84/97.61/100/99.83, " +
         "mutation 99.52% over the changed source and nothing to run over the tooling, " +
-        "e2e 205 cases in 17 files."
+        "e2e 205 cases in 17 files over every scenario."
     );
   });
 
@@ -237,13 +244,13 @@ describe("gatesParagraph()", () => {
 
   it("should open RED with every red gate named, and the failures counted where a tool counts them", () => {
     const verdicts = [
-      verdictWith(GATE.lint, false, NONE),
+      verdictWith(GATE.lint, false, NO_FINDINGS),
       verdictWith(GATE.coverage, false, { ...COVERAGE, failed: THREE_FAILED }),
       verdictWith(GATE.e2eChanged, true, E2E),
     ];
 
     expect(gatesParagraph(verdicts, BATTERY.phase)).toBe(
-      "Gates: check:phase RED (lint red, test:coverage red (3 failed)) — e2e 205 cases in 17 files."
+      "Gates: check:phase RED (lint red, test:coverage red (3 failed)) — e2e 205 cases in 17 files over every scenario."
     );
   });
 
@@ -316,7 +323,7 @@ describe("gatesParagraph()", () => {
   });
 
   it("should end after the verdict when no gate carries numbers", () => {
-    expect(gatesParagraph([verdictWith(GATE.lint, true, NONE)], BATTERY.quick)).toBe("Gates: check:quick green.");
+    expect(gatesParagraph([verdictWith(GATE.lint, true, NO_FINDINGS)], BATTERY.quick)).toBe("Gates: check:quick green.");
   });
 });
 
@@ -342,7 +349,7 @@ describe("summaryLines()", () => {
   });
 
   it("should end a red run with the command that re-runs each red gate alone", () => {
-    const lines = summaryLines([verdictWith(GATE.lint, false, NONE), verdictWith(GATE.e2e, false, NONE)], ROOT);
+    const lines = summaryLines([verdictWith(GATE.lint, false, NO_FINDINGS), verdictWith(GATE.e2e, false, NO_FINDINGS)], ROOT);
 
     expect(lines.slice(-THREE_FAILED)).toEqual([
       "Re-run a red gate alone, not the whole battery:",
@@ -406,7 +413,7 @@ describe("relativeTo()", () => {
 
 describe("reasonLines()", () => {
   it("should say nothing for a green gate or a skipped one", () => {
-    expect(reasonLines(verdictWith(GATE.lint, true, NONE), ROOT)).toEqual([]);
+    expect(reasonLines(verdictWith(GATE.lint, true, NO_FINDINGS), ROOT)).toEqual([]);
     expect(reasonLines(SKIPPED, ROOT)).toEqual([]);
   });
 
@@ -427,7 +434,7 @@ describe("reasonLines()", () => {
 
   it("should point an e2e failure at the bot log of its scenario, under the message", () => {
     const red = verdictWith(GATE.e2e, false, {
-      kind: "e2e", cases: 1, files: 1, failed: 1,
+      kind: "e2e", selection: { kind: "everything" }, cases: 1, files: 1, failed: 1,
       failures: [{ ...A_FAILURE, message: "expected\nreceived", botLog: "reports/e2e/bot/whole-game.log" }],
     });
 
@@ -479,7 +486,7 @@ describe("reasonLines()", () => {
   });
 
   it("should fall back to the verdict's tail, indented, when the kind carries no failures", () => {
-    const red = { ...verdictWith(GATE.checkDocs, false, NONE), tail: ["README.md: a complaint", "1 problem(s)"] };
+    const red = { ...verdictWith(GATE.checkDocs, false, NO_FINDINGS), tail: ["README.md: a complaint", "1 problem(s)"] };
 
     expect(reasonLines(red, ROOT)).toEqual(["  README.md: a complaint", "  1 problem(s)"]);
   });
@@ -494,7 +501,7 @@ describe("reasonLines()", () => {
   });
 
   it("should fall back to the tail when a reporter-backed gate died before writing any failure", () => {
-    const red = { ...verdictWith(GATE.e2e, false, { kind: "e2e", cases: 0, files: 0, failed: 0, failures: [] }), tail: ["killed"] };
+    const red = { ...verdictWith(GATE.e2e, false, { kind: "e2e", selection: { kind: "everything" }, cases: 0, files: 0, failed: 0, failures: [] }), tail: ["killed"] };
 
     expect(reasonLines(red, ROOT)).toEqual(["  killed"]);
   });

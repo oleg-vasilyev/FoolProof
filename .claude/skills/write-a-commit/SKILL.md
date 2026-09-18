@@ -39,7 +39,7 @@ it, never retype it; the history holds dozens of hand wordings of that line alon
 
 ```
 Gates: check:phase green — <N> tests in <M> files, coverage <st>/<br>/<fn>/<ln>,
-mutation <score>% over <the diff | everything>, e2e <N> cases in <M> files.
+mutation <score>% over <the diff | everything>, e2e <N> cases in <M> files over <every scenario | <N> scenarios>, or e2e nothing to play.
 Copy: <what was read and when, or why nothing was>.
 Gallery: <one specific claim about what was seen, or why it stayed shut>.
 Review: <N> findings, <their fate in a clause>.
