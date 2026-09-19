@@ -58,23 +58,35 @@ const A_NOTE_DROP = 210;
 
 const A_NOTE_BASELINE = 940;
 
+const TILES_ACROSS = 2;
+
+const A_MARK_GAP = 25;
+
+const A_MARK_LIFT = 15;
+
+const A_TICK_DROP = 20;
+
+const A_TICK_RISE = 9;
+
+const A_VALUE_DROP = 120;
+
 vi.mock("#scoresheet/render/personal/personal-metrics.ts", () => ({
-  TILES_PER_ROW: 2,
+  TILES_PER_ROW: TILES_ACROSS,
   TILES_TOP: A_TILES_TOP,
   TILE_BAR_DROP: A_BAR_DROP,
   TILE_BAR_HEIGHT: 12,
   TILE_BAR_RADIUS: 6,
   TILE_BAR_WIDTH: A_BAR_WIDTH,
-  TILE_MARK_GAP: 25,
-  TILE_MARK_LIFT: 15,
+  TILE_MARK_GAP: A_MARK_GAP,
+  TILE_MARK_LIFT: A_MARK_LIFT,
   TILE_NOTE_DROP: A_NOTE_DROP,
   TILES_NOTE_BASELINE: A_NOTE_BASELINE,
   TILE_ROW_HEIGHT: A_ROW_HEIGHT,
-  TILE_TICK_DROP: 20,
-  TILE_TICK_RISE: 7,
+  TILE_TICK_DROP: A_TICK_DROP,
+  TILE_TICK_RISE: A_TICK_RISE,
   TILE_TICK_WIDTH: 2,
   TILE_TRACKING: 3,
-  TILE_VALUE_DROP: 120,
+  TILE_VALUE_DROP: A_VALUE_DROP,
   personalFont: { tileLabel: 28, tileValue: 110, tileNote: 27 },
 }));
 
@@ -102,6 +114,12 @@ const { careerTiles } = await import("#scoresheet/render/personal/career-tiles.t
 const NOTHING = 0;
 
 const EVERY_TILE = 4;
+
+const A_TRACK_AND_ITS_FILL = 2;
+
+const ELEMENTS_IN_A_LEVEL_TILE = 7;
+
+const THE_NOTE = 1;
 
 const A_SHARE = 0.61;
 
@@ -149,6 +167,11 @@ const cardOf = (): CareerCard =>
 
 const drawn = (): readonly string[] => careerTiles(copy, cardOf(), A_PLAYER_INK);
 
+const AN_ATTRIBUTE_BAG = 1;
+
+const attributesOf = (call: readonly unknown[] | undefined, at: number): Record<string, unknown> =>
+  (call?.[at] ?? {}) as Record<string, unknown>;
+
 const fillsOf = (): readonly unknown[] =>
   rectSpy.mock.calls.map((call) => (call[NOTHING] as Record<string, unknown>).fill);
 
@@ -174,6 +197,15 @@ describe("careerTiles()", () => {
       expect(labels).toContain(copy.tileFool);
       expect(labels).toContain(copy.tileFirst);
       expect(labels).toContain(copy.tileFirstMove);
+    });
+
+    it("should set the rate itself in bold, so the figure carries the tile", () => {
+      drawn();
+
+      expect(textSpy).toHaveBeenCalledWith(
+        `pct(${String(A_SHARE)})`,
+        expect.objectContaining({ "font-weight": "bold" })
+      );
     });
 
     it("should print each tile's own rate through the percent label", () => {
@@ -209,6 +241,77 @@ describe("careerTiles()", () => {
     });
   });
 
+  describe("where each tile is laid", () => {
+    const A_COLUMN = (A_GRID_RIGHT - A_PAD) / TILES_ACROSS;
+
+    const SECOND_COLUMN = A_PAD + A_COLUMN;
+
+    const SECOND_ROW = A_TILES_TOP + A_ROW_HEIGHT;
+
+    const positionOf = (label: string): Record<string, unknown> =>
+      attributesOf(
+        textSpy.mock.calls.find((call) => call[NOTHING] === label),
+        AN_ATTRIBUTE_BAG
+      );
+
+    it("should fill the row across before starting the next one", () => {
+      drawn();
+
+      expect(
+        [copy.tileShare, copy.tileFool, copy.tileFirst, copy.tileFirstMove].map((label) => {
+          const at = positionOf(label);
+
+          return [at.x, at.y];
+        })
+      ).toEqual([
+        [A_PAD, A_TILES_TOP],
+        [SECOND_COLUMN, A_TILES_TOP],
+        [A_PAD, SECOND_ROW],
+        [SECOND_COLUMN, SECOND_ROW],
+      ]);
+    });
+
+    it("should drop the figure, the bar and the count below the label by their own measures", () => {
+      drawn();
+
+      expect([
+        positionOf(`pct(${String(A_SHARE)})`).y,
+        attributesOf(rectSpy.mock.calls[NOTHING], NOTHING).y,
+        positionOf(A_TALLY).y,
+      ]).toEqual([A_TILES_TOP + A_VALUE_DROP, A_TILES_TOP + A_BAR_DROP, A_TILES_TOP + A_NOTE_DROP]);
+    });
+
+    it("should carry every measure down to the second row, not only the label", () => {
+      drawn();
+
+      expect(positionOf(copy.tileOutOf(FIRSTS, GAMES)).y).toBe(SECOND_ROW + A_NOTE_DROP);
+    });
+
+    it("should stand the expectation's tick across the bar it belongs to", () => {
+      drawn();
+
+      const tick = attributesOf(lineSpy.mock.calls[NOTHING], NOTHING);
+
+      expect([tick.x1, tick.x2, tick.y1, tick.y2]).toEqual([
+        A_PAD + A_BAR_WIDTH * A_SHARE_CHANCE,
+        A_PAD + A_BAR_WIDTH * A_SHARE_CHANCE,
+        A_TILES_TOP + A_BAR_DROP - A_TICK_RISE,
+        A_TILES_TOP + A_BAR_DROP + A_TICK_DROP,
+      ]);
+    });
+
+    it("should set the expectation's figure past the end of the bar, not over it", () => {
+      drawn();
+
+      const beside = positionOf(`pct(${String(A_SHARE_CHANCE)})`);
+
+      expect([beside.x, beside.y]).toEqual([
+        A_PAD + A_BAR_WIDTH + A_MARK_GAP,
+        A_TILES_TOP + A_BAR_DROP + A_MARK_LIFT,
+      ]);
+    });
+  });
+
   describe("the bar under each figure", () => {
     it("should lay a track and fill it as far as the figure reaches", () => {
       drawn();
@@ -235,7 +338,7 @@ describe("careerTiles()", () => {
 
       expect(textSpy).toHaveBeenCalledWith(
         `pct(${String(A_SHARE_CHANCE)})`,
-        expect.objectContaining({ fill: "hint-ink" })
+        expect.objectContaining({ fill: "hint-ink", "font-weight": "bold" })
       );
     });
   });
@@ -265,6 +368,17 @@ describe("careerTiles()", () => {
       expect(fillsOf()).toContain(A_PLAYER_INK);
     });
 
+    it("should put the painted gap into the drawing, not only ask for it", () => {
+      const A_TENTH = 0.1;
+
+      gapOfSpy.mockReturnValue({ standing: Standing.Better, from: A_TENTH, to: A_SHARE });
+      rectSpy.mockImplementation(
+        (attributes: Record<string, unknown>) => `<rect fill="${String(attributes.fill)}"/>`
+      );
+
+      expect(drawn()).toContain(`<rect fill="${A_PLAYER_INK}"/>`);
+    });
+
     it("should paint a gap against the player in the fool's red", () => {
       const A_TENTH = 0.1;
 
@@ -290,7 +404,11 @@ describe("careerTiles()", () => {
 
       expect(fillsOf()).not.toContain(A_PLAYER_INK);
       expect(fillsOf()).not.toContain(FOOL_INK);
-      expect(rectSpy).toHaveBeenCalledTimes(EVERY_TILE * 2);
+      expect(rectSpy).toHaveBeenCalledTimes(EVERY_TILE * A_TRACK_AND_ITS_FILL);
+    });
+
+    it("should leave nothing behind it either, so the tile is only what it drew", () => {
+      expect(drawn()).toHaveLength(EVERY_TILE * ELEMENTS_IN_A_LEVEL_TILE + THE_NOTE);
     });
 
     it("should span the gap from where it starts to where it ends", () => {
