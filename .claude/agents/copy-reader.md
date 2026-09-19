@@ -49,9 +49,12 @@ full — a table is annotated against the English one, so a key exists in both, 
 sentences are written independently and go wrong independently.
 
 For each entry that takes arguments, you must know what those arguments really are
-before you can fill them in. **Find the one call site** — grep the key name across
-`src/`; a copy function is called from exactly one place, usually a `render/` file —
-and read what it is handed. The three kinds that matter, because mixing them up is
+before you can fill them in. **Find every call site** — grep the key name across
+`src/`; most keys are called from one place, usually a `render/` file, but many are
+called from several, so the first hit is not the answer, and read what each one is
+handed. A bare grep for the key also misses `copyIn(locale).key` in a feature's entry
+point, which is how a command's own description reaches Telegram: no hit does not mean
+no caller. The three kinds that matter, because mixing them up is
 what produces salad:
 
 - **A tally phrase** already carrying its noun: `gameTally(copy, 9)` → `"9 партий"`,

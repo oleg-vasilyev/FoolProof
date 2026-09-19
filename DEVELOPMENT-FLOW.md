@@ -100,7 +100,7 @@ sequenceDiagram
     K-->>C: how to test: one spec per file, everything around it stubbed
     opt the feature needs new database queries
         C->>K: the add-repository-method skill
-        K-->>C: five files that only change together
+        K-->>C: the files that only change together
     end
     C->>C: now, knowing the rules, freeze the interfaces: what each function takes and returns
     opt the phase adds something a player can reach, or changes a contract other code depends on

@@ -12,16 +12,15 @@ them, in the language they were composed in. `` `... и всё равно ${stre
 начисто` `` looks like a sentence with a hole in it. The hole is where the meaning was.
 
 So the reading is the **`copy-reader`** agent's, and it may not be done by whoever
-wrote the table. What the brief must carry is that agent's own section, and so are
-the four questions it asks. It reads **every** line filled in with real values, not
-only the ones a poster happens to draw; the lines nothing draws are where this rot
-survives longest.
+wrote the table. What the brief carries, what the agent reads and the questions it
+asks are in `.claude/agents/copy-reader.md` and nowhere else — read it before writing
+a brief rather than from memory of this page.
 
-Its third question is the one that pays for the gate twice: following a sentence back
-to the rule that earns it has already caught a claim no rule guaranteed and two
-arguments handed over in the wrong order. That question needs call sites, so at stage 2
-it is asked against the frozen signatures, and any of it left unanswerable waits for
-the second pass.
+One of its questions decides *when* this gate can run, which is why it is named here:
+following a sentence back to the rule that earns it needs call sites, so at stage 2 it
+is asked against the frozen signatures and whatever is still unanswerable waits for
+the second pass. That question is also what pays for the gate twice — it has caught a
+claim no rule guaranteed and two arguments handed over in the wrong order.
 
 **A drawing carries sentences too, and they are read before the owner sees them.**
 The mockup's labels and captions are written by the designer and, until this was

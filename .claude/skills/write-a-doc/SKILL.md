@@ -7,8 +7,8 @@ description: Decide which FoolProof document a fact belongs in, and how to add i
 
 > **Stage 6** of [how a change becomes a release](../../../DEVELOPMENT-FLOW.md).
 
-The five documents have been de-duplicated **twice**. Both times the cause was the
-same: a phase had twenty facts to record, the dividing question is applied to one
+The five documents have been de-duplicated more than once, and the cause was the same
+every time: a phase had twenty facts to record, the dividing question is applied to one
 fact at a time, and when a fact seems to fit two files the safe-feeling move is to
 write it in both. It is not safe. It creates two things that must be changed
 together, and one of them will not be. Nor does that take months — one rule written

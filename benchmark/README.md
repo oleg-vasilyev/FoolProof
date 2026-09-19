@@ -109,8 +109,10 @@ Three rules paid for already:
   here asked for an award reading the evening backwards from its last game, which
   `PLAN.md` retires by name: the bot never learns an evening has ended. Half the code
   was written before a grep found it.
-- **Size it to a phase, not a feature.** Thirty to fifty minutes of agent time at best.
-  A task that takes a day gets no repeat runs, and one number is not a measurement.
+- **Size it to a phase, not a feature.** Under an hour of agent time at best — the
+  pinned task took 47 minutes on 10 September 2026 and 75 on 19 September, for the same
+  eleven acceptance columns. A task that takes a day gets no repeat runs, and one
+  number is not a measurement.
 
 ## What it cannot measure yet
 

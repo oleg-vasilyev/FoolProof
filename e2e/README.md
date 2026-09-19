@@ -7,8 +7,8 @@ the whole thing. So this folder plays whole scenarios against a **real
 end.
 
 How to run it is in the root [README](../README.md#watching-it-play). It used to be
-parked — not a gate, nothing depending on it — because seven honest problems stood
-between it and being trusted. Six are closed and the seventh is in
+parked — not a gate, nothing depending on it — because of the honest problems that
+stood between it and being trusted. All but one are closed, and that one is in
 [TECH-DEBT.md](../TECH-DEBT.md): a graceful shutdown cannot be played on Windows.
 So it is **a gate now**, and `node scripts/gates/gate-runner.ts e2e:changed` plays only what a diff can reach.
 

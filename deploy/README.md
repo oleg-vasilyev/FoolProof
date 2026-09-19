@@ -17,8 +17,11 @@ domain and no certificate**, so a firewall with nothing but SSH in it is enough.
 Anything that runs Node 24 will do. This one runs on a free Oracle Cloud VM with
 1 GB of memory. Measured on 23 August 2026 the service idled at about 95 MB, and the
 heaviest `/stats` peaked at 411 MB; on 3 September it sat at 175 MB a day after a
-restart, with a 205 MB peak and some of it swapped, so the figure is still climbing
-and `systemctl show foolproof -p MemoryCurrent` is the thing to write down weekly.
+restart, with a 205 MB peak and some of it swapped; on 19 September, three days into a
+run and with `--omit=dev` in the deploy, 92 MB current against a 123 MB peak. Three
+figures on three different boxes-worth of install, so read them as readings rather
+than as a trend — `systemctl show foolproof -p MemoryCurrent` is the thing to write
+down weekly.
 
 On the server, once. Ubuntu's own Node is too old, and the unit files name
 `/usr/local/bin`, which is where the tarball puts it. `--omit=dev` because the bot

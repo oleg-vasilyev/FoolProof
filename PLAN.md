@@ -1325,8 +1325,9 @@ headlines every Friday.
 Nine is not a taste decision. The card is drawn at the same 1620 width as the
 chronology and is bound by the same [2560 limit](#what-telegram-does-to-the-image),
 so the row metrics are derived from that budget rather than from how the rows look
-on their own: nine awards at the dense scale come to 2514, and a tenth would not
-fit. Fewer than six awards switch to a roomier scale, because a short card has the
+on their own: nine awards at the dense scale fit under that limit and a tenth would
+not. The arithmetic is `render/awards/awards-layout.ts`, and what holds it is that
+file's spec, which measures a full nine-award card and refuses one over 2560. Fewer than six awards switch to a roomier scale, because a short card has the
 height to spare and a sparse one drawn dense reads as unfinished.
 
 #### The catalogue

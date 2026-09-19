@@ -92,6 +92,13 @@ is not a contradiction — it is the sharpest thing this field records. Two thin
 refused: the same line on both sides at once, and a whole stage called skipped while
 the walk goes through a step of it.
 
+**The release stage is where that goes wrong, and it goes wrong silently.** A tooling
+or documents phase commits and pushes to `main` and cuts no tag, which is the stage
+half-walked, not skipped: `Path:` names `commit and push to main`, `Skipped:` names
+`npm version with the release message`. Five logs in a row called the whole stage
+skipped while their own commits sat on `main`, and the gate could not see it because
+neither side named a step.
+
 `Path:` and `Gates:` are not the same field. `Path:` says which lines of the drawing
 were walked; `Gates:` says which checks ran and what each returned. The gates stage is
 one step in the drawing and four thresholds in practice, so only the second line can

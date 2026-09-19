@@ -133,7 +133,7 @@ one is the `add-a-feature` skill.
 
 **The commands a feature declares are the list of its sub-features.** `scoresheet`
 declares `/stats`, `/stats_chronology`, `/stats_awards` and `/personal`, so it gives
-the player three pictures; `live-game` declares four commands that between them open a card and
+the player three pictures; the commands `live-game` declares between them open a card and
 change the table. When a layer holds files serving more than one of those things,
 each gets a subfolder **named after that thing** — a picture, a screen, an entity
 the commands are about: `render/chronology/`, `render/seating-screen/`,

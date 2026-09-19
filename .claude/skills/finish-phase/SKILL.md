@@ -179,8 +179,8 @@ towards playing too much — an unknown feature folder means the map is out of d
 so everything runs rather than nothing.
 
 This is a real gate rather than a smoke test, and it is cheap because it is
-selective: a phase inside one feature usually plays two or three files in about
-fifteen seconds. The full `node scripts/gates/gate-runner.ts e2e` runs at a tag, inside `check:release`.
+selective: a phase inside one feature plays two or three files, seconds rather than the
+whole suite, which was 115 seconds on 19 September 2026. The full `node scripts/gates/gate-runner.ts e2e` runs at a tag, inside `check:release`.
 
 
 ## 5. A review pass over the phase's whole diff

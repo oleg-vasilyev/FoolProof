@@ -27,9 +27,9 @@ they are part of it and obey the same rules.
   exception and no argument against it is valid.
 - **Whether a rewrite is wanted at all.** Some errands want only the inventory,
   because the question was whether a rule is still enforced. Ask for neither more nor
-  less than the brief says. Expect inventory-only to be the answer: nine skills
-  audited in one sitting produced nine inventories and no rewrite any of them judged a
-  net win, while the same nine passes turned up stale counts, pointers into rules that
+  less than the brief says. Expect inventory-only to be the answer: a sitting that
+  audited every skill in the roster produced an inventory each and no rewrite any of
+  them judged a net win, while the same passes turned up stale counts, pointers into rules that
   had moved, and a rule a machine had quietly taken over. **The defect list is what
   this errand reliably produces**, and a rewrite is the exception — so a pass that
   found nothing to correct is the one to look at twice.

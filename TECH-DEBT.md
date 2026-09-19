@@ -109,7 +109,7 @@ tested a one-line delegation. Not worth a phase of its own.
 ## An evening's date is spelled out twice, and both spellings are UTC
 
 `scoresheet/render/session-date.ts` and `replace-names/render/evening-date.ts` are the
-same eight lines — split the ISO date, name the month from the copy's own `months`
+same handful of lines — split the ISO date, name the month from the copy's own `months`
 table, fall back to the raw string — and each feature carries its own twelve month
 names in both languages. The copy is forced the same way the counting was: a feature
 may not import a feature. Both read `date(started_at)`, which is UTC, so a game
@@ -303,9 +303,11 @@ for — while that game counts toward «Дураком в N из M» on the awar
 digit takes working out that somebody sat out.
 
 A later phase reached this entry and could not take it, which sharpens the trigger. The
-key lays its entries on a fixed pitch of 380px from `GRID_LEFT`, and three of them
-already end at 1286 of the 1560 available — a fourth would run past the right edge. So a
-second key entry is a relayout, not an addition.
+key lays its entries on a fixed pitch from the grid's left edge, and three of them
+already end close enough to the right edge that a fourth would run past it — the pitch
+is `SLOT_WIDTH` in `render/chronology/cell-key.ts`, and the edges it runs between are
+`GRID_LEFT` and `GRID_RIGHT` in `chronology-layout.ts`. So a second key entry is a
+relayout, not an addition.
 
 A poster reading found a second hole of the same shape: **the three entries are never
 drawn together in either language** — a sheet draws only what its evening earned, and the

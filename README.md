@@ -71,10 +71,11 @@ redraws them whenever the drawing code changes.
 `/personal` answers with a third: one player's card for everything they have ever
 played here. Pick a name from the keyboard it offers and it draws the numbers, the
 share of the table evening by evening, what stuck, and who has been the worst news.
-More facts can stick than a card prints — at most four — so two players at the same
-table get two different cards.
+More facts can stick than a card prints — at most four, `MOST_ROWS` in
+`render/personal/personal-layout.ts` plus the plate above them — so two players at the
+same table get two different cards.
 
-| The player card — six numbers, a career chart, and whichever facts this player earned |
+| The player card — its tiles, a career chart, and whichever facts this player earned |
 |---|
 | <a href="docs/posters/personal-en.png"><img src="docs/posters/personal-en.png" alt="The player card poster" width="49%"></a> |
 
@@ -286,7 +287,7 @@ Three parts of it are generated rather than written:
 |---|---|
 | `docs/posters/` — every poster in both languages: SVG, the WebP the pages show at the width they are read at, and a PNG at the width the bot sends, which the landing opens full screen | `node scripts/tools/tools.ts posters` |
 | `docs/styles.computed.css` — Tailwind, minified and committed | `node scripts/tools/tools.ts site-css` |
-| the five chart lines drawn behind the landing's sections, in the players' colours from the posters, from the route in `scripts/tools/site-traces.ts` — the same drawing on both language pages, each line leaving a section exactly where it enters the next | `node scripts/tools/tools.ts site-traces` |
+| the chart lines drawn behind the landing's sections, in the players' colours from the posters, from the route in `scripts/tools/site-traces.ts` — the same drawing on both language pages, each line leaving a section exactly where it enters the next | `node scripts/tools/tools.ts site-traces` |
 
 **`node scripts/gates/gate-runner.ts check-docs` fails on any of them being stale**, and that is the point: a push
 is the deploy, so a forgotten rebuild does not wait to be noticed — it ships. The
