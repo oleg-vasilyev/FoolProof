@@ -1299,8 +1299,11 @@ So there are two orders:
   every evening that qualifies, they are the two an evening is expected to have, and
   a card missing them reads as broken rather than as unusual.
 - **Every player at the table gets a row before rarity gets a say.** A first pass
-  walks the players the card has not spoken for yet — least-said-about first — and
-  gives each their best-ranked award; only then does rarity fill what is left. The
+  walks the players the card has not spoken for yet — fewest stories first, and where
+  two have as many, the seating decides — and gives each their best-ranked award;
+  only then does rarity fill what is left. A player who sat the whole evening out is
+  not walked at all: the guarantee is about what the card says of the people who
+  played. The
   king's own row counts as having spoken for him; **the fool's plate does not**,
   because a player who is the fool every Friday is exactly the one the guarantee
   exists for, and counting the plate would skip him. So the fool always has two rows:
@@ -1310,7 +1313,9 @@ So there are two orders:
   nothing at all. No filler row is invented for them: a row worth nothing is worse
   than no row.
 - **What is left over goes to whoever the card has said least about, and rarity breaks
-  the tie.** The ranking is `RAREST_FIRST` in `award-catalogue.ts`: one list, every
+  the tie.** An award shared by two players counts for the one the card has said
+  *most* about, so a shared row cannot be spent as though it spoke only for the
+  quieter of them. The ranking is `RAREST_FIRST` in `award-catalogue.ts`: one list, every
   award exactly once, rarest first. A spec asserts it is complete, because the
   selection indexes into it. Rarity alone was the rule until two real evenings were
   read: on the first, one player took four of the nine rows while the only award

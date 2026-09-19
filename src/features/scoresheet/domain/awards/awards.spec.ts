@@ -163,6 +163,22 @@ const firesFor = (name: AwardName, winner: number): void => {
   ruleSpies[name].mockReturnValue(awardOf(name, winner));
 };
 
+const pairedUp = (
+  playerIds: readonly number[],
+  names: readonly AwardName[]
+): readonly (readonly [number, AwardName])[] =>
+  playerIds.flatMap((playerId, at) => {
+    const name = names[at];
+
+    return name === undefined ? [] : [[playerId, name] as const];
+  });
+
+const oneAwardEach = (...pairs: readonly (readonly [number, AwardName])[]): void => {
+  for (const [playerId, name] of pairs) {
+    ruleSpies[name].mockReturnValue(awardOf(name, playerId));
+  }
+};
+
 const firesShared = (name: AwardName, one: number, other: number): void => {
   ruleSpies[name].mockReturnValue({
     ...awardOf(name, one),
@@ -409,6 +425,218 @@ describe("honoursFor()", () => {
       expect(namesOf()).toEqual([AwardName.TheTruce]);
     });
 
+    it("should serve a full table fewest-stories-first, and run out of rows on the busiest", () => {
+      const BUSY = 13;
+      const ONE_AWARD_EACH = [
+        AwardName.FirstWin,
+        AwardName.TheFlatline,
+        AwardName.TheComeback,
+        AwardName.TheCameo,
+        AwardName.TheAnchor,
+        AwardName.TheSlide,
+        AwardName.SweetRevenge,
+      ];
+      const THE_BUSIEST_PLAYERS_OWN = [
+        AwardName.NewAtTheTable,
+        AwardName.TheHalfNight,
+        AwardName.FalseDawn,
+      ];
+      const QUIET_PLAYERS = [14, 15, 16, 17, 18, 19, 20];
+
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI, BUSY, ...QUIET_PLAYERS));
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.FoolOfTheNight, ROMANI);
+
+      for (const name of THE_BUSIEST_PLAYERS_OWN) {
+        firesFor(name, BUSY);
+      }
+
+      oneAwardEach(...pairedUp(QUIET_PLAYERS, ONE_AWARD_EACH));
+
+      const printed = namesOf();
+
+      expect(printed).toHaveLength(MOST_AWARDS);
+      expect([...printed].sort()).toEqual(
+        [AwardName.King, AwardName.FoolOfTheNight, ...ONE_AWARD_EACH].sort()
+      );
+    });
+
+    it("should keep the fool's plate out of the rows the rarity pass has to fill", () => {
+      const THIRD = 13;
+      const A_FOURTH = 14;
+      const ROMANI_OWN = [
+        AwardName.FirstWin,
+        AwardName.TheFlatline,
+        AwardName.TheCameo,
+        AwardName.TheSlide,
+      ];
+      const THE_THIRD_PLAYERS_OWN = [
+        AwardName.TheComeback,
+        AwardName.TheAnchor,
+        AwardName.SweetRevenge,
+        AwardName.ThePacifist,
+      ];
+
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI, THIRD, A_FOURTH));
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.FoolOfTheNight, A_FOURTH);
+      firesShared(AwardName.TheTruce, ROMANI, THIRD);
+
+      for (const name of ROMANI_OWN) {
+        firesFor(name, ROMANI);
+      }
+
+      for (const name of THE_THIRD_PLAYERS_OWN) {
+        firesFor(name, THIRD);
+      }
+
+      const printed = namesOf();
+
+      expect(printed).toHaveLength(MOST_AWARDS);
+      expect(new Set(printed).size).toBe(MOST_AWARDS);
+    });
+
+    it("should spend no guaranteed row on the king, whose crown already speaks for him", () => {
+      const ONE_AWARD_EACH = [
+        AwardName.FirstWin,
+        AwardName.TheFlatline,
+        AwardName.TheComeback,
+        AwardName.TheCameo,
+        AwardName.TheAnchor,
+        AwardName.TheSlide,
+        AwardName.SweetRevenge,
+        AwardName.ThePacifist,
+      ];
+      const QUIET_PLAYERS = [13, 14, 15, 16, 17, 18, 19, 20];
+
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI, ...QUIET_PLAYERS));
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.FoolOfTheNight, ROMANI);
+      firesFor(AwardName.TheHalfNight, OLEG);
+      oneAwardEach(...pairedUp(QUIET_PLAYERS, ONE_AWARD_EACH));
+
+      expect(namesOf()).not.toContain(AwardName.TheHalfNight);
+    });
+
+    it("should still hand out the guarantees on a night nobody was king", () => {
+      const LAST_IN_ORDER = 20;
+      const EARLIER_PLAYERS = [12, 13, 14, 15, 16, 17, 18, 19];
+      const ONE_AWARD_EACH = [
+        AwardName.TheHalfNight,
+        AwardName.FirstWin,
+        AwardName.TheFlatline,
+        AwardName.TheComeback,
+        AwardName.TheCameo,
+        AwardName.TheAnchor,
+        AwardName.TheSlide,
+        AwardName.SweetRevenge,
+      ];
+
+      eveningOfSpy.mockReturnValue(seatedAs(...EARLIER_PLAYERS, LAST_IN_ORDER, ROMANI));
+      firesFor(AwardName.FoolOfTheNight, ROMANI);
+      firesFor(AwardName.NewAtTheTable, LAST_IN_ORDER);
+      oneAwardEach(...pairedUp(EARLIER_PLAYERS, ONE_AWARD_EACH));
+
+      expect([...namesOf()].sort()).toEqual(
+        [AwardName.FoolOfTheNight, ...ONE_AWARD_EACH].sort()
+      );
+    });
+
+    it("should promise no row to a player who sat the whole evening out", () => {
+      const SAT_OUT = 13;
+      const ONE_AWARD_EACH = [
+        AwardName.FirstWin,
+        AwardName.TheFlatline,
+        AwardName.TheComeback,
+        AwardName.TheCameo,
+        AwardName.TheAnchor,
+        AwardName.TheSlide,
+        AwardName.SweetRevenge,
+      ];
+      const QUIET_PLAYERS = [14, 15, 16, 17, 18, 19, 20];
+
+      eveningOfSpy.mockReturnValue(seatedAs(SAT_OUT, OLEG, ROMANI, ...QUIET_PLAYERS));
+      playedGamesSpy.mockImplementation((player: { readonly playerId: number }) =>
+        player.playerId === SAT_OUT ? NOTHING : EVENING_MINIMUM
+      );
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.FoolOfTheNight, ROMANI);
+      firesFor(AwardName.TheHalfNight, SAT_OUT);
+      oneAwardEach(...pairedUp(QUIET_PLAYERS, ONE_AWARD_EACH));
+
+      expect([...namesOf()].sort()).toEqual(
+        [AwardName.King, AwardName.FoolOfTheNight, ...ONE_AWARD_EACH].sort()
+      );
+    });
+
+    it("should count a shared row against the winner it has already said most about", () => {
+      const SHARES_WITH_ROMANI = 13;
+
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI, SHARES_WITH_ROMANI, 14, 15, 16));
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.FoolOfTheNight, ROMANI);
+      firesShared(AwardName.TheTruce, ROMANI, SHARES_WITH_ROMANI);
+      oneAwardEach(
+        [ROMANI, AwardName.NewAtTheTable],
+        [ROMANI, AwardName.TheHalfNight],
+        [SHARES_WITH_ROMANI, AwardName.FalseDawn],
+        [14, AwardName.FirstWin],
+        [14, AwardName.Encore],
+        [15, AwardName.TheFlatline],
+        [16, AwardName.TheComeback]
+      );
+
+      const printed = namesOf();
+
+      expect(printed).toContain(AwardName.Encore);
+      expect(printed).not.toContain(AwardName.TheTruce);
+    });
+
+    it("should count the king's own row when the rarity pass spreads what is left", () => {
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI, 13, 14, 15, 16, 17));
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.FoolOfTheNight, ROMANI);
+      oneAwardEach(
+        [OLEG, AwardName.Encore],
+        [ROMANI, AwardName.NewAtTheTable],
+        [ROMANI, AwardName.TheHalfNight],
+        [13, AwardName.FalseDawn],
+        [14, AwardName.FirstWin],
+        [15, AwardName.TheFlatline],
+        [16, AwardName.TheComeback],
+        [17, AwardName.TheCameo]
+      );
+
+      const printed = namesOf();
+
+      expect(printed).toContain(AwardName.TheHalfNight);
+      expect(printed).not.toContain(AwardName.Encore);
+    });
+
+    it("should let a shared row speak for both winners' guarantees, never one each", () => {
+      const ONE_WINNER = 13;
+      const THE_OTHER = 14;
+
+      eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI, ONE_WINNER, THE_OTHER, 15, 16, 17, 18, 19));
+      firesFor(AwardName.King, OLEG);
+      firesFor(AwardName.FoolOfTheNight, ROMANI);
+      firesShared(AwardName.TheCameo, ONE_WINNER, THE_OTHER);
+      oneAwardEach(
+        [ONE_WINNER, AwardName.Encore],
+        [THE_OTHER, AwardName.TheLastStand],
+        [15, AwardName.FalseDawn],
+        [16, AwardName.FirstWin],
+        [17, AwardName.TheFlatline],
+        [18, AwardName.TheComeback],
+        [19, AwardName.TheAnchor]
+      );
+
+      const printed = namesOf();
+
+      expect(printed).toContain(AwardName.Encore);
+      expect(printed).not.toContain(AwardName.TheLastStand);
+    });
+
     it("should give the row to the player the card has said least about", () => {
       eveningOfSpy.mockReturnValue(seatedAs(OLEG, ROMANI));
       firesFor(AwardName.TheCameo, OLEG);
@@ -492,6 +720,32 @@ describe("honoursFor()", () => {
       fires(AwardName.HotSeat);
 
       expect(namesOf()).toEqual([AwardName.HotSeat]);
+    });
+
+    it("should drop the invisible when the king's own row names the same player", () => {
+      fires(AwardName.TheInvisible, AwardName.King);
+
+      expect(namesOf()).toEqual([AwardName.King]);
+    });
+
+    it("should keep the invisible when somebody else was king", () => {
+      firesFor(AwardName.TheInvisible, ROMANI);
+      firesFor(AwardName.King, OLEG);
+
+      expect(namesOf()).toEqual([AwardName.King, AwardName.TheInvisible]);
+    });
+
+    it("should drop the ladder when the comeback already tells that player's climb", () => {
+      fires(AwardName.TheLadder, AwardName.TheComeback);
+
+      expect(namesOf()).toEqual([AwardName.TheComeback]);
+    });
+
+    it("should keep the ladder when the comeback belongs to somebody else", () => {
+      firesFor(AwardName.TheLadder, OLEG);
+      firesFor(AwardName.TheComeback, ROMANI);
+
+      expect(namesOf()).toEqual([AwardName.TheComeback, AwardName.TheLadder]);
     });
 
     it("should not let the dropped award take a slot from a rarer one", () => {
