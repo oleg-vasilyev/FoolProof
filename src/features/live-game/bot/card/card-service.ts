@@ -10,6 +10,7 @@ import type {
 } from "#shared/repository/repository-contract.ts";
 import {
   apply,
+  lastExit,
   nameAt,
   phaseOf,
   remainingSlots,
@@ -146,9 +147,7 @@ const noticeFor = (copy: Copy, before: CardState, after: CardState): string => {
   }
 
   if (after.exits.length > before.exits.length) {
-    const slot = after.exits[after.exits.length - 1] ?? 0;
-
-    return copy.tapRecorded(nameAt(after, slot), after.exits.length);
+    return copy.tapRecorded(nameAt(after, lastExit(after)), after.exits.length);
   }
 
   if (!before.drawAccepted && after.drawAccepted) {
@@ -263,8 +262,7 @@ const persist = (context: EditingContext, tap: Tap, after: CardState): void => {
   const gameId = tap.card.game.id;
 
   if (after.exits.length > tap.before.exits.length) {
-    const slot = after.exits[after.exits.length - 1];
-    const playerId = slot === undefined ? undefined : seatAt(after, slot)?.playerId;
+    const playerId = seatAt(after, lastExit(after))?.playerId;
 
     if (playerId !== undefined) {
       repo.appendExit(gameId, playerId, after.exits.length, tap.actorTgId);

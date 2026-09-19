@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { controlRow } from "#shared/telegram/control-row.ts";
+import { controlRow, withControlRow } from "#shared/telegram/control-row.ts";
 import type { InlineButton } from "#shared/telegram/inline-keyboard.ts";
 
 
@@ -72,5 +72,21 @@ describe("controlRow()", () => {
     it("should leave the row at two buttons, since a row is never anything else", () => {
       expect(rowWith(WAY_ON, SOMETHING_TO_UNDO)).toHaveLength(A_WAY_OUT_AND_A_WAY_ON);
     });
+  });
+});
+
+describe("withControlRow()", () => {
+  const PLAYER_ROWS = [[CANCEL], [BACK]];
+
+  it("should put the controls under the rows above them", () => {
+    expect(withControlRow(PLAYER_ROWS, [CANCEL, WAY_ON])).toEqual([...PLAYER_ROWS, [CANCEL, WAY_ON]]);
+  });
+
+  it("should draw no row at all when the screen offers neither a way off nor a way on", () => {
+    expect(withControlRow(PLAYER_ROWS, [])).toEqual(PLAYER_ROWS);
+  });
+
+  it("should leave a screen that is nothing but its controls with the one row", () => {
+    expect(withControlRow([], [CANCEL, WAY_ON])).toEqual([[CANCEL, WAY_ON]]);
   });
 });

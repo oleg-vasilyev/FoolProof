@@ -201,4 +201,10 @@ describe("renderSeatingKeyboard()", () => {
   it("should draw the row the shared builder returned, rather than one of its own", () => {
     expect(rowsOf(NOBODY_SEATED).at(LAST_ROW)).toEqual(THE_CONTROLS);
   });
+
+  it("should leave joining that row to the shared builder, which drops one with nothing on it", () => {
+    rowsOf(NOBODY_SEATED);
+
+    expect(controls.withControlRowSpy).toHaveBeenCalledWith(expect.anything(), THE_CONTROLS);
+  });
 });

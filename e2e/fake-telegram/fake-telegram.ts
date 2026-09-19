@@ -162,9 +162,20 @@ const overBudget = (buttons: ButtonRows): boolean =>
     row.some((button) => Buffer.byteLength(button.data) > LONGEST_CALLBACK_DATA)
   );
 
+// A fourth refusal, on a worst assumption rather than a documented limit — the
+// reason is in README.md under "It must refuse everything the real one refuses".
+const NO_BUTTONS = 0;
+
+const anEmptyRow = (buttons: ButtonRows): boolean =>
+  buttons.some((row) => row.length === NO_BUTTONS);
+
 const tooBig = (text: string, buttons: ButtonRows): ApiResult | null => {
   if ([...text].length > LONGEST_TEXT) {
     return refused("message is too long");
+  }
+
+  if (anEmptyRow(buttons)) {
+    return refused("inline keyboard row has no button on it");
   }
 
   return overBudget(buttons) ? refused("BUTTON_DATA_INVALID") : null;

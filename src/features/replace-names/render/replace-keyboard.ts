@@ -1,7 +1,7 @@
 import { ActionKind } from "#replace-names/domain/replace-states.ts";
 import type { Payload } from "#replace-names/domain/replace-plan.ts";
 import { encodeReplaceCallback } from "#replace-names/render/replace-callback-codec.ts";
-import { controlRow } from "#shared/telegram/control-row.ts";
+import { controlRow, withControlRow } from "#shared/telegram/control-row.ts";
 import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#replace-names/copy.ts";
 
@@ -21,6 +21,7 @@ const controlsFor = (copy: Copy, payload: Payload): readonly InlineButton[] =>
     anythingToUndo: NOTHING_TO_UNDO,
   });
 
-export const renderReplaceKeyboard = (copy: Copy, payload: Payload): InlineKeyboardRows => [
-  controlsFor(copy, payload),
-];
+const NO_ROWS_ABOVE: InlineKeyboardRows = [];
+
+export const renderReplaceKeyboard = (copy: Copy, payload: Payload): InlineKeyboardRows =>
+  withControlRow(NO_ROWS_ABOVE, controlsFor(copy, payload));

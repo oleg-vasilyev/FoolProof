@@ -20,6 +20,8 @@ const applySpy = vi.fn();
 
 const nameAtSpy = vi.fn();
 
+const lastExitSpy = vi.fn();
+
 const phaseOfSpy = vi.fn();
 
 const remainingSlotsSpy = vi.fn();
@@ -41,6 +43,7 @@ vi.mock("#shared/timing/debounce.ts", () => debounce.module);
 vi.mock("#live-game/domain/card-state.ts", () => ({
   apply: (state: unknown, action: unknown) => applySpy(state, action),
   nameAt: (state: unknown, slot: number) => nameAtSpy(state, slot),
+  lastExit: (state: unknown) => lastExitSpy(state),
   phaseOf: (state: unknown) => phaseOfSpy(state),
   remainingSlots: (state: unknown) => remainingSlotsSpy(state),
   seatAt: (state: unknown, slot: number) => seatAtSpy(state, slot),
@@ -654,11 +657,25 @@ describe("createCardService()", () => {
 
       it("should name the player and their place when an exit was recorded", async () => {
         applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ exits: [ROMA] }) });
+        lastExitSpy.mockReturnValue(ROMA);
         nameAtSpy.mockReturnValue("Roma");
 
         expect(await cards.tap(copy, CHAT_ID, payload("pick", ROMA), ACTOR_ID)).toBe(
           copy.tapRecorded("Roma", ONCE)
         );
+      });
+
+      it("should let the reducer say which seat left, rather than read the list itself", async () => {
+        const after = stateAfter({ exits: [ROMA] });
+
+        applySpy.mockReturnValue({ outcome: Outcome.Updated, state: after });
+        lastExitSpy.mockReturnValue(OLEG);
+        nameAtSpy.mockReturnValue("Oleg");
+
+        await cards.tap(copy, CHAT_ID, payload("pick", ROMA), ACTOR_ID);
+
+        expect(lastExitSpy).toHaveBeenCalledWith(after);
+        expect(nameAtSpy).toHaveBeenCalledWith(after, OLEG);
       });
 
       it("should announce a draw when the reducer accepted one", async () => {
@@ -1086,6 +1103,7 @@ describe("createCardService()", () => {
         cardRecordOf(THREE, { id: GAME_ID, starter_player_id: playerIdOf(OLEG) }, [ANYA])
       );
       applySpy.mockReturnValue({ outcome: Outcome.Updated, state: stateAfter({ exits: [ANYA, ROMA] }) });
+      lastExitSpy.mockReturnValue(ROMA);
 
       await cards.tap(copy, CHAT_ID, payload("pick", ROMA), ACTOR_ID);
 

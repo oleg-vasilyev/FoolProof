@@ -59,6 +59,12 @@ describe("renderReplaceKeyboard(copy, )", () => {
     expect(renderReplaceKeyboard(copy, PAYLOAD)[ONLY_ROW]).toEqual(THE_CONTROLS);
   });
 
+  it("should leave joining that row to the shared builder, which drops one with nothing on it", () => {
+    renderReplaceKeyboard(copy, PAYLOAD);
+
+    expect(controls.withControlRowSpy).toHaveBeenCalledWith(expect.anything(), THE_CONTROLS);
+  });
+
   it("should hand over Cancel as the way off", () => {
     expect(handedOver()?.cancel).toEqual({ text: copy.buttonCancel, callback_data: ENCODED_CANCEL });
   });

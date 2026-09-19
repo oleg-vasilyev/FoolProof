@@ -7,6 +7,7 @@ import {
   drawAvailable,
   finalPlacements,
   isReady,
+  lastExit,
   nameAt,
   phaseOf,
   recordedPlacements,
@@ -174,6 +175,16 @@ describe("seatAt() and nameAt()", () => {
 
   it("should give an empty name for an unknown slot", () => {
     expect(nameAt(cardStateOf(THREE), OUT_OF_RANGE_SLOT)).toBe("");
+  });
+});
+
+describe("lastExit()", () => {
+  it("should name the seat recorded last, not the lowest", () => {
+    expect(lastExit(cardStateOf(THREE, { exits: [ROMA, OLEG] }))).toBe(OLEG);
+  });
+
+  it("should refuse a card nobody has left yet, rather than name seat zero", () => {
+    expect(() => lastExit(cardStateOf(THREE))).toThrow("no seat has left the game yet");
   });
 });
 

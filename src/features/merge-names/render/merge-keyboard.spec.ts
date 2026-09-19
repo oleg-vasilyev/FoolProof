@@ -167,6 +167,12 @@ describe("renderMergeKeyboard(copy, )", () => {
       expect(renderMergeKeyboard(copy, ROSTER, []).at(LAST_ROW)).toEqual(THE_CONTROLS);
     });
 
+    it("should leave joining that row to the shared builder, which drops one with nothing on it", () => {
+      renderMergeKeyboard(copy, ROSTER, []);
+
+      expect(controls.withControlRowSpy).toHaveBeenCalledWith(expect.anything(), THE_CONTROLS);
+    });
+
     it("should send cancel to the codec as an action with no name", () => {
       renderMergeKeyboard(copy, ROSTER, []);
 

@@ -5,7 +5,7 @@ import {
   type LeavingPlan,
 } from "#live-game/domain/leaving-plan.ts";
 import { encodeLeavingCallback } from "#live-game/render/leaving-screen/leaving-callback-codec.ts";
-import { controlRow } from "#shared/telegram/control-row.ts";
+import { controlRow, withControlRow } from "#shared/telegram/control-row.ts";
 import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#live-game/copy.ts";
 
@@ -53,5 +53,5 @@ export const renderLeavingKeyboard = (copy: Copy, plan: LeavingPlan): InlineKeyb
     },
   ]);
 
-  return [...seatRows, controlsFor(copy, plan, order)];
+  return withControlRow(seatRows, controlsFor(copy, plan, order));
 };

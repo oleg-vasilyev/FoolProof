@@ -6,7 +6,7 @@ import {
   type SeatingPlan,
 } from "#live-game/domain/seating-plan.ts";
 import { encodeSeatingCallback } from "#live-game/render/seating-screen/seating-callback-codec.ts";
-import { controlRow } from "#shared/telegram/control-row.ts";
+import { controlRow, withControlRow } from "#shared/telegram/control-row.ts";
 import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#live-game/copy.ts";
 
@@ -57,5 +57,5 @@ export const renderSeatingKeyboard = (copy: Copy, plan: SeatingPlan): InlineKeyb
     },
   ]);
 
-  return [...seatRows, controlsFor(copy, plan, order)];
+  return withControlRow(seatRows, controlsFor(copy, plan, order));
 };

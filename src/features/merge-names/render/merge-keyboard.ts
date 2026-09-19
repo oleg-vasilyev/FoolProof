@@ -7,7 +7,7 @@ import {
   type Selection,
 } from "#merge-names/domain/merge-selection.ts";
 import { encodeMergeCallback } from "#merge-names/render/merge-callback-codec.ts";
-import { controlRow } from "#shared/telegram/control-row.ts";
+import { controlRow, withControlRow } from "#shared/telegram/control-row.ts";
 import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#merge-names/copy.ts";
 
@@ -54,15 +54,16 @@ export const renderMergeKeyboard = (
   copy: Copy,
   roster: readonly Candidate[],
   selection: Selection
-): InlineKeyboardRows => [
-  ...roster.map((candidate) => [
-    {
-      text: captionFor(copy, candidate, roleOf(selection, candidate.playerId)),
-      callback_data: encodeMergeCallback({
-        selection,
-        action: { kind: ActionKind.Pick, playerId: candidate.playerId },
-      }),
-    },
-  ]),
-  controlsFor(copy, selection),
-];
+): InlineKeyboardRows =>
+  withControlRow(
+    roster.map((candidate) => [
+      {
+        text: captionFor(copy, candidate, roleOf(selection, candidate.playerId)),
+        callback_data: encodeMergeCallback({
+          selection,
+          action: { kind: ActionKind.Pick, playerId: candidate.playerId },
+        }),
+      },
+    ]),
+    controlsFor(copy, selection)
+  );

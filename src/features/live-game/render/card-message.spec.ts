@@ -206,4 +206,10 @@ describe("renderResult()", () => {
 
     expect(remainingSlotsSpy).toHaveBeenCalledWith(state);
   });
+
+  it("should refuse a card with no starter, rather than name seat zero as the one who went first", () => {
+    expect(() => renderResult(copy, stateWith({ starterSlot: null }), GAME_NUMBER)).toThrow(
+      "a card with places on it has nobody who went first"
+    );
+  });
 });

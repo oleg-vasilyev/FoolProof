@@ -9,7 +9,7 @@ import {
   type CardState,
 } from "#live-game/domain/card-state.ts";
 import { encodeCallback } from "#live-game/render/callback-data-codec.ts";
-import { controlRow } from "#shared/telegram/control-row.ts";
+import { controlRow, withControlRow } from "#shared/telegram/control-row.ts";
 import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 import type { Copy } from "#live-game/copy.ts";
 
@@ -27,9 +27,14 @@ const captionFor = (
   sharedFinish: boolean
 ): string => {
   const name = nameAt(state, slot);
-  const position = positions.get(slot) ?? 0;
 
   if (state.exits.includes(slot)) {
+    const position = positions.get(slot);
+
+    if (position === undefined) {
+      throw new Error(`seat ${slot} has left the game and holds no place`);
+    }
+
     return `${copy.markExit} ${position} ${name}`;
   }
 
@@ -78,5 +83,5 @@ export const renderKeyboard = (
     },
   ]);
 
-  return [...playerRows, controlsFor(copy, state, tap)];
+  return withControlRow(playerRows, controlsFor(copy, state, tap));
 };

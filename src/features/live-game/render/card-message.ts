@@ -5,10 +5,20 @@ import type { Copy } from "#live-game/copy.ts";
 
 const nameOf = (state: CardState, slot: number): string => escapeHtml(nameAt(state, slot));
 
-const heading = (copy: Copy, state: CardState, gameNumber: number): readonly string[] => [
-  copy.header(gameNumber),
-  copy.wentFirst(nameOf(state, state.starterSlot ?? 0)),
-];
+const heading = (
+  copy: Copy,
+  state: CardState,
+  gameNumber: number,
+  starterSlot: number
+): readonly string[] => [copy.header(gameNumber), copy.wentFirst(nameOf(state, starterSlot))];
+
+const starterOf = (state: CardState): number => {
+  if (state.starterSlot === null) {
+    throw new Error("a card with places on it has nobody who went first");
+  }
+
+  return state.starterSlot;
+};
 
 const placeLines = (copy: Copy, state: CardState): readonly string[] => {
   const lastPosition = state.exits.length + 1;
@@ -30,8 +40,12 @@ export const renderCard = (copy: Copy, state: CardState, gameNumber: number): st
     return [copy.header(gameNumber), copy.askStarter].join("\n");
   }
 
-  return heading(copy, state, gameNumber).join("\n");
+  return heading(copy, state, gameNumber, state.starterSlot).join("\n");
 };
 
 export const renderResult = (copy: Copy, state: CardState, gameNumber: number): string =>
-  [...heading(copy, state, gameNumber), "", ...placeLines(copy, state)].join("\n");
+  [
+    ...heading(copy, state, gameNumber, starterOf(state)),
+    "",
+    ...placeLines(copy, state),
+  ].join("\n");

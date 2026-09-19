@@ -522,7 +522,9 @@ and nothing older.
   second-to-last player was marked — and the name a thumb was already travelling
   towards went out from under it. With Draw in the slot the card is `n + 1` rows in
   every phase, from the first tap to Confirm, and nothing a player is aiming at ever
-  moves
+  moves. The one card that is `n` rows is a reopened one stepped back to the starter
+  question: it has no Cancel, no way on and nothing left to undo, so [the control
+  row](#the-control-row) is not drawn at all rather than drawn empty
 - **Confirm** — once every position is determined. It takes the same slot Draw was
   in, so tapping Draw changes the word under the thumb and nothing else. The two
   never coexist, and cannot: Draw needs phase 2 and Confirm needs phase 3
@@ -651,7 +653,7 @@ way on on the right.**
   says no, rather than a toast after the tap.
 - **Only those three marks appear on a button anywhere in the bot**, and they mean
   the same thing on every screen: red leaves, the arrow steps back, green goes on.
-  A player who has learned the footer on one screen has learned it on all four.
+  A player who has learned the footer on one screen has learned it on every screen.
 
 That is a change of mind, and worth saying why. The way on used to open with `✅`,
 which was also the mark a player who had gone out carried on the card — one emoji
@@ -671,6 +673,13 @@ A screen that commits on a **single** tap has no control row and needs none:
 `/language` and the `/personal` roster are lists where any tap is the whole answer,
 so there is nothing to cancel and nothing to confirm. `/language` still marks the
 language in force with `🟢`, because there the row *is* the way on.
+
+**A row that would be empty is not drawn.** A screen whose way off and way on are
+both withheld — today only a reopened card stepped back to the starter question —
+ends at its last real row, because `withControlRow()` in the same file joins the row
+to the ones above it and drops it when it holds nothing. Telegram's answer to an
+empty row has never been asked for; the fake refuses it on the worst assumption,
+which is what keeps a scenario able to see one.
 
 `shared/telegram/control-row.ts` is the only place a control row is assembled, and
 `project/one-control-row` fails a keyboard that writes one of the five captions

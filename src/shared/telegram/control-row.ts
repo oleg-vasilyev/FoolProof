@@ -1,4 +1,4 @@
-import type { InlineButton } from "#shared/telegram/inline-keyboard.ts";
+import type { InlineButton, InlineKeyboardRows } from "#shared/telegram/inline-keyboard.ts";
 
 
 export interface Controls {
@@ -7,6 +7,8 @@ export interface Controls {
   readonly wayOn: InlineButton | null;
   readonly anythingToUndo: boolean;
 }
+
+const NO_CONTROLS = 0;
 
 const present = (button: InlineButton | null): readonly InlineButton[] =>
   button === null ? [] : [button];
@@ -20,3 +22,8 @@ export const controlRow = ({
   ...present(anythingToUndo ? back : cancel),
   ...present(wayOn),
 ];
+
+export const withControlRow = (
+  rows: InlineKeyboardRows,
+  controls: readonly InlineButton[]
+): InlineKeyboardRows => (controls.length === NO_CONTROLS ? rows : [...rows, controls]);

@@ -74,6 +74,16 @@ export const finalPlacements = (state: CardState): readonly Placement[] => {
   ];
 };
 
+export const lastExit = (state: CardState): number => {
+  const slot = state.exits[state.exits.length - 1];
+
+  if (slot === undefined) {
+    throw new Error("no seat has left the game yet");
+  }
+
+  return slot;
+};
+
 export const starterPlayerId = (state: CardState): number | null =>
   state.starterSlot === null ? null : (seatAt(state, state.starterSlot)?.playerId ?? null);
 

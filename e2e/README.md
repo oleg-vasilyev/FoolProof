@@ -84,6 +84,10 @@ Both were learned by getting them wrong:
   actually gets. That immediately broke two scenarios asserting "the card was
   edited again": the honest observable is that the bot **attempted** the edit, so
   the fake counts attempts separately from applied edits.
+- **Where the real one's answer is unknown, the fake takes the worst of it.** A
+  keyboard row with no button on it is refused with a `400`, though nobody has asked
+  a real chat what it does with one: the checkup of 19 September 2026 found the bot
+  drawing such a row on a reopened card, and every scenario had accepted it.
 
 That second rule is why `describeScenario`, and not the fake, is what refuses a
 scenario ending with a keyboard still on screen: knowing when a screen is finished

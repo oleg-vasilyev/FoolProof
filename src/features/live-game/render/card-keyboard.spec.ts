@@ -51,6 +51,10 @@ const ROMA = 2;
 
 const FIRST_PLACE = 1;
 
+const SECOND_PLACE = 2;
+
+const THIRD_PLACE = 3;
+
 const LAST_ROW = -1;
 
 const FIRST_CALL = 0;
@@ -145,6 +149,11 @@ describe("renderKeyboard()", () => {
     it("should mark the last one left as the fool", () => {
       isReadySpy.mockReturnValue(true);
       remainingSlotsSpy.mockReturnValue([ROMA]);
+      finalPlacementsSpy.mockReturnValue([
+        { slot: OLEG, position: FIRST_PLACE },
+        { slot: ANYA, position: SECOND_PLACE },
+        { slot: ROMA, position: THIRD_PLACE },
+      ]);
 
       expect(captionsOf(stateWith({ exits: [OLEG, ANYA] }))[ROMA]).toBe("💀 Roma");
     });
@@ -152,6 +161,11 @@ describe("renderKeyboard()", () => {
     it("should mark both players of a draw with the handshake instead", () => {
       isReadySpy.mockReturnValue(true);
       remainingSlotsSpy.mockReturnValue([ANYA, ROMA]);
+      finalPlacementsSpy.mockReturnValue([
+        { slot: OLEG, position: FIRST_PLACE },
+        { slot: ANYA, position: SECOND_PLACE },
+        { slot: ROMA, position: SECOND_PLACE },
+      ]);
 
       expect(captionsOf(stateWith({ exits: [OLEG] }))[ROMA]).toBe("🤝 Roma");
     });
@@ -278,6 +292,27 @@ describe("renderKeyboard()", () => {
       render(state);
 
       expect(phaseOfSpy).toHaveBeenCalledWith(state);
+    });
+
+    it("should leave the rows to the shared builder, so a row with nothing on it is never sent", () => {
+      const state = stateWith({});
+
+      render(state);
+
+      expect(controls.withControlRowSpy).toHaveBeenCalledWith(
+        [expect.anything(), expect.anything(), expect.anything()],
+        THE_CONTROLS
+      );
+    });
+  });
+
+  describe("a place the reducer did not give", () => {
+    it("should refuse to draw a player who is out but holds no place", () => {
+      finalPlacementsSpy.mockReturnValue([]);
+
+      expect(() => render(stateWith({ exits: [ANYA] }))).toThrow(
+        `seat ${ANYA} has left the game and holds no place`
+      );
     });
   });
 });
