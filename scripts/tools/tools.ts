@@ -14,6 +14,7 @@ import { blocksOnPage } from "../site/page-blocks.ts";
 import { read } from "../gates/check-docs/shared/document-files.ts";
 import { siteImageOf } from "./site-images.ts";
 import { REPORTS_DIR, tidyReports } from "./tidy-reports.ts";
+import { debtForTheDiff } from "./debt-for-a-diff.ts";
 import {
   THE_LISTING,
   THE_TOOLS_SCRIPT,
@@ -36,6 +37,8 @@ const PAGE_TO_READ = 1;
 const FILE_TO_WRITE = 2;
 
 const CHAT_TO_FORGET = 1;
+
+const AFTER_THE_VERB = 1;
 
 const FAILED = 1;
 
@@ -118,6 +121,16 @@ const TOOLS: Readonly<Record<string, Tool>> = {
     does: `draw every edge of every poster into ${GALLERY_DIR}/ for a human or an agent to look at`,
     usage: "node scripts/tools/tools.ts gallery",
     run: drawGallery,
+  },
+  debt: {
+    does:
+      "list the TECH-DEBT.md entries naming the files you ask about — the ones a phase is " +
+      "about to touch, or with no argument whatever differs from origin/main (or DEBT_AGAINST) " +
+      "— each with the trigger that file's own entry states",
+    usage: "node scripts/tools/tools.ts debt [file …]",
+    run: (args, say) => {
+      debtForTheDiff(args.slice(AFTER_THE_VERB), say);
+    },
   },
   "tidy-reports": {
     does: `delete everything under ${REPORTS_DIR}/ that no config, script or agent names`,

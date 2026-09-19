@@ -50,7 +50,7 @@ sequenceDiagram
     U->>C: what should be different, in the owner's own words
     C->>C: read it for the kind of work it is: something the bot does wrong, or something it does not do at all yet
     C->>C: study the project: CLAUDE.md is already in context, its links lead to PLAN.md and TECH-DEBT.md
-    C->>C: check the tech debt: a task that trips a deferred item's trigger takes it into scope
+    C->>C: check the tech debt: node scripts/tools/tools.ts debt with the files the task will touch lists the entries naming them, each with its trigger, and one the task trips comes into scope
     opt the bot already does this, and does it wrong
         C->>K: the fix-a-bug skill
         K-->>C: reproduce before reading the code, and prove the cause rather than guessing a third time
@@ -67,6 +67,10 @@ sequenceDiagram
     end
     C->>U: the size of the phase in one line, tripped debt and the sweep included
     U-->>C: agreed, or cut it down
+    opt the phase moves, renames or splits files
+        C->>U: the tree the phase will leave behind, before the first move — the same freeze the signatures get
+        U-->>C: agreed, or a different shape
+    end
     opt the feature affects the app's visuals
         C->>R: the poster-designer agent — the requirements, in words
         R->>D: read the design system before drawing anything
@@ -83,6 +87,8 @@ sequenceDiagram
         U-->>C: approved, or changes
     end
     opt the change is a page of the site under docs/, not a poster
+        C->>U: how many writer-to-reader rounds the page is worth, and what they will cost — a site page has cost 27M subagent tokens against a tooling phase's 69k
+        U-->>C: the cap, three rounds per language unless he says otherwise
         C->>C: write the facts first — the page's tree under docs/text/, one block per paragraph, the numbers and the commits each block may print, and check-docs holds both languages to it
         C->>R: the site-writer agent, once per language — the tree and the block ids, never the other language's page
         R-->>C: one paragraph per block, ready to be placed
@@ -90,14 +96,18 @@ sequenceDiagram
         C->>C: node scripts/gates/gate-runner.ts check-docs — the tree's words and the headings' pronouns are refused here, before any reader is paid for
         C->>R: the site-reader agent, once per language — the built page and nothing else — it runs node scripts/tools/tools.ts site-prose itself and judges every repeat the tool lists
         R-->>C: what each paragraph tells a visitor, and every one a person would not say that way, rewritten in full
-        C->>R: the site-writer agent again with the findings, until the reader returns none
+        C->>R: the site-writer agent again with the findings, until the reader returns none or the cap is spent — then the rest are taken by hand
         C->>U: the built page for approval, at both widths
         U-->>C: approved, or changes
     end
-    C->>K: the add-a-feature skill
-    K-->>C: how a feature is shaped: the layers, where files go, how they are named
-    C->>K: the write-a-spec skill
-    K-->>C: how to test: one spec per file, everything around it stubbed
+    opt the phase adds a feature folder or changes what one declares
+        C->>K: the add-a-feature skill
+        K-->>C: how a feature is shaped: the layers, where files go, how they are named
+    end
+    opt the diff will carry a spec, which a tooling phase's does not always
+        C->>K: the write-a-spec skill
+        K-->>C: how to test: one spec per file, everything around it stubbed
+    end
     opt the feature needs new database queries
         C->>K: the add-repository-method skill
         K-->>C: the files that only change together
@@ -134,7 +144,7 @@ sequenceDiagram
         note over C: a test written after the fix asserts what the code does, not what the bug was
     end
     loop one file at a time
-        C->>C: write the core of the feature
+        C->>C: read the file this one will sit beside first — the same shape is usually already decided there — then write the core of the feature
         note over C: saving the file fires the lint hook on it, unasked
         opt it found something
             C->>C: fix now, before the next file
@@ -238,9 +248,11 @@ sequenceDiagram
     end
     C->>C: write the phase log to logbook/phases/ — every phase, straight ones included, or the pile only ever shows the bad ones
     C->>C: name in it the lines of this drawing the phase walked and the ones it went round — a whole stage or a single step, each cited by the opening words it is drawn with, never by a number
-    C->>K: the write-a-doc skill
-    K-->>C: every fact has one home document, and CLAUDE.md has a line budget
-    C->>C: update README, PLAN and whatever else the phase owes
+    opt the phase edits a document, changes what a rule says anywhere, or changed what the bot does
+        C->>K: the write-a-doc skill
+        K-->>C: every fact has one home document, and CLAUDE.md has a line budget
+        C->>C: update README, PLAN and whatever else the phase owes
+    end
     opt a skill outgrew its budget, somebody proposed rewriting one, or a rule inside one may no longer be enforced
         C->>R: the skill-auditor agent — which skill, and whether a rewrite is wanted at all
         R-->>C: a row per rule — enforced by a machine, stated in another file, or the only place a remedy is written down

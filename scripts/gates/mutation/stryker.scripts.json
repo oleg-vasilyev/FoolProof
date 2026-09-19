@@ -21,6 +21,7 @@
     "scripts/gates/**/*.ts",
     "scripts/site/**/*.ts",
     "scripts/tools/tool-verdict.ts",
+    "scripts/tools/debt-for-a-diff.ts",
     "scripts/benchmark/**/*.ts",
     "!scripts/gates/test/vitest.config.ts",
     "!scripts/gates/e2e/vitest.e2e.config.ts",

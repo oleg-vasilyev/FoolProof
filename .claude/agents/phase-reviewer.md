@@ -29,6 +29,8 @@ in the commit that created it has usually stopped being one three commits later.
   invisible in a diff read for style unless somebody points at them.
 - **Any rule this phase itself introduced**, so it can be run against the phase's
   own diff. A new rule is least believed by whoever just wrote it.
+- **The caller's own gate verdict**, since you may not run a battery yourself. A
+  brief without it is one to ask about rather than to replace with a run.
 
 When a description of a file arrives anyway, **open the file cold, judge it against
 nothing but its own contents, and say in the report that you were given one.**
@@ -51,8 +53,12 @@ apart from a pass that looked at nothing.
 
 ## Then, what to look for
 
-Most style rules are enforced by ESLint now, so do not spend the pass on them —
-run `npm run check:quick` and trust it. Spend the pass on what no rule can check:
+Most style rules are enforced by ESLint now, so do not spend the pass on them — the
+brief carries the caller's own green verdict, and `reports/gates/` holds it. **Do not
+run a battery yourself**: every gate writes into `reports/`, the caller is running
+`check:phase` over the same files, and three phases have paid for a battery twice
+because a reviewer overwrote the coverage temp file under it. Read the verdict, and
+spend the pass on what no rule can check:
 
 - **Shape.** Does each touched file open with its idea, or with its
   implementation? Is the exported factory a table of contents that delegates?
@@ -114,10 +120,8 @@ run `npm run check:quick` and trust it. Spend the pass on what no rule can check
 
 ## What comes back
 
-**Write the report to `reports/phase-review-<date>.md` as each finding lands, and
-repeat it whole in the final reply.** A run cut short — a usage limit, a crash — then
-leaves what it found instead of nothing, which is the difference between relaunching
-a reviewer and paying for one twice.
+**The report is the final reply, whole** — a run cut short leaves nothing, so the
+caller relaunches this agent rather than paying twice for one that is still out.
 
 Three parts, in this order, and the first is one line:
 
