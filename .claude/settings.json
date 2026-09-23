@@ -17,6 +17,17 @@
             "statusMessage": "Checking the gate goes through the runner…"
           }
         ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/refuse-a-full-mutation-outside-the-checkup.mjs",
+            "timeout": 10,
+            "statusMessage": "Checking the full mutation run is the checkup's…"
+          }
+        ]
       }
     ],
     "PostToolUse": [

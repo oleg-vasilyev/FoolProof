@@ -95,7 +95,7 @@ phase never opened was killed in the phase that wrote it. A tag re-mutates only 
 changed since the previous tag (`check:release`, run before the push and read by the pre-push hook): a guard
 against a phase that skipped this gate, not against a weakened spec, a changed stub or a
 shared helper over an untouched subject — that gap, and the **full** `node scripts/gates/gate-runner.ts test:mutation` (26 minutes at v1.20.1),
-belong to the weekly `deep-checkup`.
+belong to the weekly `deep-checkup`, and a hook refuses the full run to anybody else.
 Coverage says a line ran; this says a test would have noticed it break.
 
 **Two families, two runs, two bars, and both must pass.** The bot breaks below 85%

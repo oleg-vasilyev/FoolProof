@@ -313,7 +313,7 @@ a look on its own.
 ## Phase 5 — are the tests honest
 
 Coverage means nothing by itself; this project's real honesty gate is Stryker,
-and the **full** run is yours: nothing else runs `node scripts/gates/gate-runner.ts test:mutation` any more
+and the **full** run is yours: a hook refuses `node scripts/gates/gate-runner.ts test:mutation` to anybody else
 (a phase mutates its diff, a tag what changed since the previous tag), so run it
 here, read both families' scores off `reports/mutation/` and
 `reports/mutation-scripts/`, and put them in the report as two measurement rows —
