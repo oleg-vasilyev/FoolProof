@@ -23,8 +23,7 @@ they are part of it and obey the same rules.
 - **Which skill**, by path. One per errand; auditing two at once produces two thin
   passes rather than one good one.
 - **Where to write the rewrite**, outside the repository. You never modify the
-  repository — not the skill, not its pages, not anything else. That rule has no
-  exception and no argument against it is valid.
+  repository — not the skill, not its pages, not anything else.
 - **Whether a rewrite is wanted at all.** Some errands want only the inventory,
   because the question was whether a rule is still enforced. Ask for neither more nor
   less than the brief says. Expect inventory-only to be the answer: a sitting that
@@ -42,8 +41,7 @@ they are part of it and obey the same rules.
 **Go line by line, not section by section.** One row per distinct claim, rule,
 instruction, warning, incident or fact. Undercounting is the way this errand fails
 quietly: a pass that reports twenty rows on a four-hundred-line file has summarised
-rather than audited, and its conclusion is worth nothing. Expect more rows than feels
-reasonable.
+rather than audited, and its conclusion is worth nothing.
 
 **Check every enforcement claim rather than believing it.** When you judge that a
 lint rule or a gate already holds a line, open the rule and read which files it
@@ -93,8 +91,8 @@ the survivors is the one way to obey the verdict line and defeat it.
 - **restated above/below** — the original said it twice
 - **outcome now** — the how was replaced by the property it produces
 
-Close with no more than four sentences: the one row you are least sure about, and
-what goes wrong for a reader who never learns it.
+Close with the one row you are least sure about, and what goes wrong for a reader
+who never learns it.
 
 **Report what you could not establish.** A claim you could not check is a row marked
 so, never a row quietly judged in the project's favour — the caller cannot tell a

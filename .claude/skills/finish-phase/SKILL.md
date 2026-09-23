@@ -73,9 +73,9 @@ phrase for it was *the duplication rule wearing a gate's clothes*. So before pay
 to fit something in, ask what already covers it: **read the neighbour before
 displacing it**, and before adding a check, read every check over the same subject.
 
-**Two phases have a gate `npm run check:quick` cannot see.** A `package.json` change
-resolves against this machine, not the runner ([changing a dependency](changing-a-dependency.md));
-and a phase whose subject *is* the gate machinery runs the whole battery before the review.
+**`npm run check:quick` runs whenever it helps; `check:phase` is green before the review
+launches.** A `package.json` change has a gate neither can see, because both resolve
+against this machine, not the runner ([changing a dependency](changing-a-dependency.md)).
 
 ## 2. `node scripts/gates/gate-runner.ts test:coverage`
 
@@ -203,7 +203,7 @@ ran the reviewer while its own mutation fixes were still landing; the report ope
 by saying so, and every finding then needed confirming twice. **A defect you already
 know about is landed before the launch, never deferred until the report is back** — a
 reading of a tree you knew was wrong is a reading you have to take twice. Land the
-fixes, get `npm run check:quick` green, *then* review.
+fixes, get `npm run check:phase` green, *then* review.
 
 **Spend the waiting on read-only work** — a control run, a report, the
 retrospective's counting. It has been broken repeatedly and never by a decision:

@@ -118,6 +118,24 @@ describe("endsOnAPromise", () => {
     expect(endsOnAPromise("Всё готово, продолжаю не я.")).toBe(false);
   });
 
+  it("should fire on the next step announced rather than taken", () => {
+    expect(endsOnAPromise("Next, I'll run the full battery.")).toBe(true);
+    expect(endsOnAPromise("Now I'll write the log.")).toBe(true);
+    expect(endsOnAPromise("Then I'll commit.")).toBe(true);
+    expect(endsOnAPromise("Let me check that.")).toBe(true);
+    expect(endsOnAPromise("Дальше — прогоню гейты.")).toBe(true);
+    expect(endsOnAPromise("Дальше запущу батарею.")).toBe(true);
+    expect(endsOnAPromise("Далее — сделаю коммит.")).toBe(true);
+    expect(endsOnAPromise("Теперь допишу спек.")).toBe(true);
+    expect(endsOnAPromise("Теперь перейду к логу.")).toBe(true);
+    expect(endsOnAPromise("Далее, возьмусь за ревью.")).toBe(true);
+  });
+
+  it("should not fire on an offer the owner answers or a fact opening with a sequencing word", () => {
+    expect(endsOnAPromise("Let me know.")).toBe(false);
+    expect(endsOnAPromise("Теперь в репозитории 3697 тестов.")).toBe(false);
+  });
+
   it("should still fire on an announcement exactly as long as one is allowed to be", () => {
     const eight = "Продолжаю со второго файла и до конца списка.";
 

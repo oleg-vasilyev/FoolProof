@@ -47,9 +47,6 @@ literal under `kind`, `outcome`, `phase`, `problem`, `finish`, `role`, `because`
 `method === "sendMessage"` — and test data like `name: "Oleg"`, which is why `name`
 is a legal *fixture* key and an illegal thing to compare against.
 
-Extending the rule to specs immediately found five sites in **production** code
-that a src-only sweep had missed, so do not assume the fixtures are the cheap half.
-
 **A fixture that enumerates a union enumerates it from the table** —
 `Object.values(AwardName)`, never a hand-typed list. The lint cannot help here: a
 string inside an array literal is neither a comparison nor a discriminant key, which
@@ -180,8 +177,8 @@ reads; one that repeats 1620 proves nothing and passes either way.
 
 ## Stubs
 
-**Every module in `src/shared/` has a stub, and a spec uses it rather than writing a
-fake by hand.** The stub carries a `module` field typed
+**A spec mocks a `src/shared/` module through its stub, never a fake written by hand —
+and a module mocked without one earns it in the same edit.** The stub carries a `module` field typed
 `typeof import("…")`, so mocking is one line:
 
 ```ts
@@ -275,6 +272,7 @@ arrived untested and nothing said so.
 - One behaviour per `it`, phrased as `should …`.
 - Separate arrange, act and assert with blank lines.
 - Assert the thing that would break, not the thing that is easy to reach.
+- A probe written to find or check something stays in the scratchpad; it never becomes a spec.
 
 ## A line drawn at a fixed size owes a spec that measures it
 
@@ -344,7 +342,7 @@ was written down.
 
 ## Judging a spec you did not write
 
-Ask, in this order:
+Ask:
 
 1. Does it import anything unmocked besides its subject, its stubs and a data
    table? If yes it is not a unit, and it is not named like an integration spec.
@@ -359,14 +357,14 @@ Ask, in this order:
    sibling asserting the interaction happened — `expect(callsTo("sendMessage")).toHaveLength(ONCE)`
    — or it guards nothing. Inverting a branch does not catch this; unregistering the
    handler does.
-5. **Is it a port?** A spec moved into a new file is rewritten, not copied — the
+5. **Is it a port?** A spec moved into a new file is moved mechanically, then re-judged case by case — the
    old file's sins travel with it and arrive looking established. Two phases
    running have proved it: splitting a render file silently dropped four
    assertions that had been killing mutants, and splitting a handler file carried
    a fake that lowercased its own input, so the case "should not create the same
    name twice" was asserting `String.prototype.toLowerCase`. Read every ported
    case against these questions as if it were new, because to this file it is.
-5. **Does any assertion stand on a `filter` or a `find` that could match nothing?**
+6. **Does any assertion stand on a `filter` or a `find` that could match nothing?**
    That is how a spec goes vacuous without ever failing. A legend spec selected its
    rows by exact font size; the font later became a function of the slot width, the
    filter stopped matching, and `Math.max` over the empty result returned
@@ -383,7 +381,7 @@ Ask, in this order:
    the mutation cannot move (here the English table, which is the shape master), and
    assert the output is neither `""` nor `"undefined"` before looking inside it.
 
-6. **Does a negative assertion exclude anything the positive one beside it allows?**
+7. **Does a negative assertion exclude anything the positive one beside it allows?**
    On a call that happens once, `not.toHaveBeenCalledWith(a, b, WRONG, d)` is already
    implied by `toHaveBeenCalledWith(a, b, RIGHT, d)`, so it kills no mutant of its own
    and costs a reader a second pass over an argument list. Worse, it needs a constant

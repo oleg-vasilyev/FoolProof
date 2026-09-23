@@ -4,9 +4,9 @@
 
 The gate itself — thresholds, the glob traps, when to run it — is `finish-phase`'s.
 What a survivor *means* is this skill's, and the answer is rarely "write another
-assertion". Two of the commonest causes are rules in [writing a spec](SKILL.md)
-itself: a spy left dirty by the test before it, and an assertion whose subject is
-something *missing*. The rest:
+assertion". Two of the commonest causes are covered in [writing a spec](SKILL.md)
+itself: a spy left dirty by the test before it (the `beforeEach` reset), and an
+assertion whose subject is something *missing*. The rest:
 
 - **One round of survivor-killing per phase, and only for mutants whose death would
   prevent a bug a player could see.** Above roughly 95% the survivors are mostly

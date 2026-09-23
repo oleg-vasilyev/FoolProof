@@ -49,7 +49,7 @@ Two directions lead here:
    with no slot, or a slot holding nested markup all refuse by name.
 3. **Read what the change made false.** The drawings are now current; the prose
    around them may not be. A renamed award, a new colour, a changed size — fix
-   the sentence, and bump the `Rev.` in the header and the footer together.
+   the sentence in place — never rewrite the page — and bump the `Rev.` in the header and the footer together.
 4. **Push it back**: `finalize_plan` with the one path (it wants `deletes` too,
    even empty), then `write_files` with `localPath`. Read it back and compare
    against the local file — the write is done only when they are byte-identical.

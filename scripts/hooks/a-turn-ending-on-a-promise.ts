@@ -5,7 +5,7 @@ const LAST = -1;
 const AS_LONG_AS_AN_ANNOUNCEMENT = 8;
 
 const A_PROMISE =
-  /^(?:продолжаю|продолжу|продолжаем|начинаю|начну|приступаю|приступлю|перехожу|перейду|иду дальше|двигаюсь дальше|доделаю|дописываю|дорабатываю|займусь|запускаю|continuing|carrying on|moving on|proceeding|starting now|let me continue|i'?ll (?:continue|carry on|proceed|start|finish|do that|take care of))(?![\p{L}\p{N}])/iu;
+  /^(?:продолжаю|продолжу|продолжаем|начинаю|начну|приступаю|приступлю|перехожу|перейду|иду дальше|двигаюсь дальше|доделаю|дописываю|дорабатываю|займусь|запускаю|continuing|carrying on|moving on|proceeding|starting now|let me continue|i'?ll (?:continue|carry on|proceed|start|finish|do that|take care of)|(?:next|now|then),?\s+i'?ll|let me(?!\s+know)|(?:дальше|далее|теперь)[\s,—-]+(?:запущу|сделаю|допишу|прогоню|перейду|возьмусь))(?![\p{L}\p{N}])/iu;
 
 const WAITING_ON_THE_OWNER =
   /(?<![\p{L}\p{N}])(?:после тво|после ваш|когда (?:дашь|скажешь|подтвердишь|решишь|ответишь)|по тво(?:ей|ему)|по ваш(?:ей|ему)|если (?:скажешь|захочешь|подтвердишь)|как (?:скажешь|решишь)|once you|when you|after you|if you|on your (?:word|say-so|go))/iu;

@@ -42,15 +42,14 @@ drawing is only tested by the phases that departed from it.
    spent in parallel. Say whether that trade was worth taking this time, and name
    the agent that was not.
 
-   **Delegating an independent scope is the default now, so this question is the
-   experiment's readout.** Report three numbers rather than an impression: what the
-   agents spent, how much wall-clock they ran alongside your own work, and how much
-   of what they produced survived without rework — a scope delegated and then redone
-   by hand counts against the trade twice. Count the scopes you *could* have
-   delegated and did not, too: the failure mode of a new default is not using it
-   badly, it is quietly not using it. If the answer comes out negative two phases
-   running, say so plainly. The rule was adopted to be tested, and a test that
-   cannot fail was never one.
+   **This question is the delegation rule's readout.** Report three numbers rather
+   than an impression: what the agents spent, how much wall-clock they ran alongside
+   your own work, and how much of what they produced survived without rework — a
+   scope delegated and then redone by hand counts against the trade twice. Count the
+   scopes over the threshold in [delegating work](../finish-phase/delegating-work.md)
+   you could have delegated and did not. If the answer comes out negative two phases
+   running, say so plainly. The rule was adopted to be tested, and a test that cannot
+   fail was never one.
 4. **Sequencing.** Did an agent write against a subject you were still changing?
    Did you block on one whose files were disjoint from yours and could have run
    alongside?
@@ -155,10 +154,11 @@ Gate runs:  <gate>×<n>, <how many re-read a report already on disk>
 Subagents:  <n> for <what they produced> — paid / did not, per kind of work
 Sequencing: <what was written against a moving subject, or blocked on nothing>
 Reading:    <what was read again that was already in context>
+Removed:    <the rule this phase made untrue or unneeded, and why — or none>
 Landed:     <file> — <the default it now changes>
 ```
 
-`none` is a complete answer to any of the first five, and writing it is the point:
+`none` is a complete answer to any of the first six, and writing it is the point:
 a question answered *none* and a question never asked look identical in prose and
 different here. `Landed:` repeats per rule and is the only line that may not be
 `none` while any other line carries a count — a phase that found something and

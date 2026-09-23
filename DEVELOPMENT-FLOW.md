@@ -274,7 +274,7 @@ sequenceDiagram
         G-->>C: a green check on the commit
         alt the phase changed what a player or the operator gets
             C->>C: npm version with the release message
-            C->>C: npm run check:release at the tagged commit, detached — half an hour that no longer runs inside git push
+            C->>C: npm run check:release at the tagged commit, detached — half an hour, run before git push rather than inside it
             C->>C: the pre-push hook reads the battery's stamp — a tag leaves only behind a green check:release at that commit
             C->>G: the tag is pushed
             C->>U: a chat message: the release is cut — the version, and what it changes
@@ -303,7 +303,7 @@ sequenceDiagram
         R->>R: run the edge cases instead of reasoning about them, and write evidence beside every claim
         R->>R: sweep one skill or agent for rules that should already be gone, and read one section of PLAN.md line by line — both rotate, and the report names where they stopped
         R->>R: read a week of phase logs as one pile and divide their fields — who found each defect, which gate keeps being skipped, what a kind of work keeps costing
-        R->>R: delete the logs folded in, naming each — its one write outside reports/, and not a repair to anything the project ships
+        R->>R: delete the logs folded in, naming each — its one write outside reports/ besides the report, and not a repair to anything the project ships
         R-->>C: findings, most severe first, with the measurements as a table so the next checkup can compare
         loop for each finding
             C->>C: check it myself before believing it — a confident agent is not evidence

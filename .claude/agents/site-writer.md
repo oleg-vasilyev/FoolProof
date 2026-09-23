@@ -103,7 +103,7 @@ For each block, in the tree's order:
 ## What the sentence has to survive
 
 Read each paragraph aloud in your head, as a person who does not know the project
-and is reading it on a phone. It has to survive four things:
+and is reading it on a phone. It has to survive these:
 
 - **A verb in every clause.** A dash or a semicolon standing where the verb should
   be is the commonest fault on these pages. *«с тех пор — 50%»* is two fragments.

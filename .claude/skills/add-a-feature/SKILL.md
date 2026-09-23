@@ -59,7 +59,7 @@ so the question is the rule and the count only makes somebody ask it.
 A feature does **not** get the `Bot`. It returns a `Feature`
 (`shared/telegram/feature-contract.ts`):
 
-- `commands` — each with `menuDescription` and `help`, both from `copy.en.ts`.
+- `commands` — each with `menuDescription` and `help`, both read from `copyIn(locale)`.
   `/help` and the `/` menu are generated from this one list, so they cannot drift
   from what is installed. `hidden: true` keeps a command out of both while still
   registering it, which is how the installer filters twice from a single list.
@@ -139,8 +139,8 @@ survived into review — an axis with a single label, and a sheet 36px past
 
 - Every file gets a spec beside it, and everything it imports is mocked. Load the
   `write-a-spec` skill before writing them.
-- Every user-readable string lives in `copy.en.ts` and nowhere else, and a copy
-  function interpolates rather than decides — `CLAUDE.md` has why.
+- Every user-readable string lives in `copy.en.ts` and `copy.ru.ts` and nowhere else,
+  and a copy function interpolates rather than decides — `CLAUDE.md` has why.
 - **Freeze a refusal union against the copy lines it will be spoken with**: every
   argument a refusal's line interpolates is a field of that union member, not
   something the handler digs up afterwards.

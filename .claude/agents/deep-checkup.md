@@ -35,7 +35,8 @@ is to find what a green pipeline cannot see.
 4. **Fix nothing.** The audit is read-only with respect to the working tree and
    the branch. Experiments run in a fresh clone under a temp directory, never in
    `D:\Temp\FoolProof` itself. The only writes allowed in the main tree are
-   under `reports/checkup/` (gitignored, like every check's output).
+   under `reports/checkup/` (gitignored, like every check's output), the report at
+   the path the brief names, and the phase logs Phase 3¾ folded in, deleted at phase 10.
 5. **Red lines, absolute.** Never read the value of `BOT_TOKEN` or any secret —
    on the server, `.env.production` is checked by existence, mode `600`, key
    *names* and value *lengths* only, never contents. Never read private keys
@@ -203,12 +204,12 @@ let a file added mid-cycle wait for the next lap. Rule by rule:
   made any more: a warning about hand-rolling something the repository now ships
   ready-made, a workaround for a limit that was lifted.
 
-Each is a finding naming the rule, its file and line, and which of the four it failed
+Each is a finding naming the rule, its file and line, and which of these questions it failed
 — a *proposed* deletion, never a deletion, because this audit fixes nothing.
 
-**One test outranks all four**, and it is in
+**One test outranks all of them**, and it is in
 [what a skill holds](../skills/write-a-doc/what-a-skill-holds.md) — read it before
-proposing a single deletion, because a rule all four questions condemn can still be
+proposing a single deletion, because a rule every question condemns can still be
 the only thing standing between a reader and a trap. **An enforcement claim is
 opened, not believed**: where question one says a machine holds a line, read which
 files that machine actually applies to. A skill needing more than this pass can give
@@ -277,8 +278,8 @@ the fix is the retrospective, not this phase.
 
 **Empty the folder of what you used — but at phase 10, as you write the report, not
 here.** Delete every log you folded in, naming each one in the report that folds it.
-That is the single write you make outside `reports/`, and it is not a fix to the
-project: it is this errand clearing its own input so the next checkup reads a week
+That is the one write besides the report you make outside `reports/`, and it is
+not a fix to the project: it is this errand clearing its own input so the next checkup reads a week
 rather than a year. Doing it here instead would let a run that dies before phase 10
 eat the input and leave no output. A log you could not use stays where it is, with
 the reason you could not.
@@ -440,8 +441,7 @@ the next reader to rediscover it.
 
 **Write the report once to the path the brief names; if the harness refuses the
 write, the report is your final message, in full** — the first run lost its
-`REPORT.md` to a retry loop, and the run of 11 September 2026 wrote
-`logbook/checkups/2026-09-11.md` on the first try. Evidence files go to disk as you go, and every verdict cites one.
+`REPORT.md` to a retry loop. Evidence files go to disk as you go, and every verdict cites one.
 
 One line first:
 
@@ -468,50 +468,11 @@ and numbers scattered through prose compare to nothing. The caller saves the rep
 `reports/`, which is not — the logbook's README says why the line falls there. What
 becomes a `TECH-DEBT.md` entry, a fix or a deleted memory is their call, not yours.
 
-## Calibrating this agent — plant a fault and see whether it is found
+## If the brief hands you a prepared clone
 
-A checkup that reports nothing looks exactly like a checkup that looked at
-nothing, which is the same problem a lint zone has: this project has shipped two
-zones that never fired, and a documents rule whose regex had lost its escaping
-and could not match on the platform it ran on. Both were found by breaking
-something on purpose. This agent deserves the same treatment, and the owner asked
-for it.
-
-**Plant only where nothing else looks.** A fault in `src/` is caught by the tests
-this agent already runs, so it proves nothing. The menu is the places with no
-automatic gate, one for each thing this brief claims to look at:
-
-| Phase | A fault worth planting |
-|---|---|
-| 2 | the unit file on disk edited away from the repo's copy |
-| 3 | a `PLAN.md` sentence made false — a limit, a refusal, a measured number |
-| 3 | a rule in the file due for sweeping, left naming a command that was renamed |
-| 3 | a skill's `description:` edited to trigger on the wrong moment |
-| 3½ | a memory file naming a flag or a file the code no longer has |
-| 5 | a spec whose assertion cannot fail, added to a file with a good score |
-| 7 | a guard dropped from `deploy/configure-server.sh` |
-| 8 | a committed picture replaced with an older render |
-| 9½ | a measuring command in a skill left broken by a signature change |
-
-**Choose from the table, never by inspiration.** A fault invented on the spot
-lands where the planter already believes the agent looks, which measures
-confidence rather than coverage.
-
-**Never plant into `main` and never into a tag.** This agent clones the released
-tag cold, so a working-tree edit is invisible to it and a committed one would be
-a deliberate bug in the history. A calibration run gets a throwaway clone prepared
-in advance and is told to audit *that path* instead of cloning for itself — the
-one time the isolation rule in phase 0 is handed its subject rather than taking
-it.
-
-**Grade per phase, not overall.** A miss inside a phase this brief claims is a
-real miss and becomes an edit to that phase's instructions. A miss outside every
-phase is a gap in the brief, which is a different repair and a more valuable one.
-
-**Run one rarely.** A calibration costs a whole checkup. Earn it: two consecutive
-checkups that came back thin, or a rewrite of this brief, or a new phase added
-here. A calibration that changes nothing in this file was not worth its price, and
-that verdict belongs in its report.
+Audit that path instead of cloning; phase 0's isolation still applies to it. Such a
+run is a calibration, and grading it is the caller's job, not yours — the procedure
+is [the logbook's](../../logbook/README.md#calibrating-the-checkup--plant-a-fault-and-see-whether-it-is-found).
 
 ## If time runs short
 

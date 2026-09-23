@@ -108,7 +108,7 @@ chat's language. A module-level `import { copy }` pins the bot to one language.
 `shared/locale/plural-rules.ts` picks by the table's own `locale`. Specs leave copy
 tables real on purpose, so a decision made inside one is compared against itself and
 no test can catch it breaking; `write-a-spec` has the mutants that proved it, and
-`check-docs` now fails the shape on sight.
+`check-docs` fails the shape on sight.
 
 **The site's pages are held like copy.** Each page pair has a language-neutral fact
 tree in `docs/text/`; a language's page is written from it by the `site-writer` agent,
@@ -179,7 +179,7 @@ src/
 
 **Everything in `shared/` lives in a folder named after its subject**, including the
 ones holding a single module plus its spec. A `platform/` or `infra/` bucket would
-be the same vagueness the file names were just cured of.
+be the vagueness the file-name rules above refuse.
 
 **There are no relative imports in `src/`** — every specifier is a `#` alias, even
 for a sibling, so every import line reads the same way and a violation is visible

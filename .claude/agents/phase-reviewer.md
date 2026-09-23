@@ -55,8 +55,8 @@ apart from a pass that looked at nothing.
 
 Most style rules are enforced by ESLint now, so do not spend the pass on them — the
 brief carries the caller's own green verdict, and `reports/gates/` holds it. **Do not
-run a battery yourself**: every gate writes into `reports/`, the caller is running
-`check:phase` over the same files, and three phases have paid for a battery twice
+run a battery yourself**: every gate writes into `reports/`, where the caller's
+`check:phase` verdict on this tree already sits, and three phases have paid for a battery twice
 because a reviewer overwrote the coverage temp file under it. Read the verdict, and
 spend the pass on what no rule can check:
 
@@ -65,7 +65,7 @@ spend the pass on what no rule can check:
 - **Naming.** Does every named constant carry the intent, or only the value?
 - **File names, tested against the contents.** Take each new or renamed file and
   read its exports back against its basename alone, the way an editor tab shows
-  it. Two failures to look for, in this order:
+  it. Three failures to look for, in this order:
   - the name claims something the contents contradict. A file called
     `same-table.ts` holding the two commands whose whole purpose is to *change*
     the table is worse than a vague name, because it actively misleads;
@@ -99,9 +99,7 @@ spend the pass on what no rule can check:
   out of any `domain/` or `render/` folder, and for one feature reaching into another.
 - **Everything the diff touches outside `src/`.** Deploy scripts, systemd units, CI
   workflows, hooks: no lint zone fences them, no test drives them, and the most
-  expensive place to be wrong is the one nothing checks. This used to be a separate
-  walk taken just before handing you the diff, by the person who wrote it — which
-  made it a second reading by the same reader. Ask what happens if a script dies
+  expensive place to be wrong is the one nothing checks. Ask what happens if a script dies
   mid-run, whether a re-run is idempotent, whether a destructive command can meet an
   empty variable, and whether a rollback covers the step that actually fails.
 - **Tests.** Does each new test assert something that would fail if the code

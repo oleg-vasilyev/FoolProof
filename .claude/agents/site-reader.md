@@ -51,7 +51,7 @@ do it for every block — a reading you found nothing wrong with is still printe
 because the list of readings is what proves the pass happened and is the datum
 somebody else compares against the facts.
 
-Then ask five questions of the block, in this order:
+Then ask these questions of the block, in this order:
 
 1. **Would a person say this?** Aloud, to a friend, in this language. A clause
    with no verb, a dash standing in for one, a noun phrase glued to a number, a
@@ -76,8 +76,8 @@ Then ask five questions of the block, in this order:
    A pronoun or an ellipsis whose referent sits a clause or a block away fails, and
    in a heading any pronoun for the bot fails outright.
 7. **Is the heading a heading?** The small line above names the topic; the large line
-   under it is two to four words that sell, with no pronoun, no question, no
-   sentence; a step's title is an imperative; a menu item says what the visitor will
+   under it is two to four words that sell, with no pronoun for the bot, no question over a
+   step or a list of facts, no sentence; a step's title is an imperative; a menu item says what the visitor will
    do there, and two neighbouring menu items must not rhyme («Как это работает» beside
    «История разработки»). A call («Ещё сомневаетесь?») never sits over a list of facts.
 8. **Does the paragraph sell, or describe?** The page's job is to make a visitor want

@@ -40,7 +40,7 @@ export const gateRunByHand = (command: string): string | null => {
     `Refused: ${found.join(", ")} runs a gate by hand.`,
     `Every gate runs through node ${GATE_RUNNER} <gate> — ${ALL_GATES.map(gateOffered).join(", ")} —`,
     "which leaves the log and the verdict under",
-    "reports/gates/ and names the config, now that the configs live in scripts/gates/",
-    "and the tool's bare name finds none.",
+    "reports/gates/ and passes the config from the gate's own folder under scripts/gates/,",
+    "which the tool's bare name does not find.",
   ].join("\n");
 };

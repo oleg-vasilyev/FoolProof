@@ -55,8 +55,8 @@ describe("gateRunByHand()", () => {
         "test [files], test:coverage, test:e2e-harness, e2e, e2e:changed, test:mutation-changed [files], " +
         "test:mutation —",
       "which leaves the log and the verdict under",
-      "reports/gates/ and names the config, now that the configs live in scripts/gates/",
-      "and the tool's bare name finds none.",
+      "reports/gates/ and passes the config from the gate's own folder under scripts/gates/,",
+      "which the tool's bare name does not find.",
     ]);
   });
 });

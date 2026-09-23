@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "acceptance": {
     "into": "src/features/scoresheet/domain/awards/flying-start.acceptance.spec.ts",
     "cases": 11

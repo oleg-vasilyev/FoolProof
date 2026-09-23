@@ -22,10 +22,10 @@ because nobody ever read it filled in.
   that pre-filters is a brief that hides the findings.
 - **The folder the call sites are in**, so a claim can be followed back to the rule
   that earns it. That is question 3, and it is the one that finds real bugs.
-- **Which of two subjects this is**, because one of them is not a table at all: a
-  copy table with its call sites, or the labels on a drawing that has no code behind
-  it yet. A page of the site is neither — it is the site-reader's, read cold from
-  the built page.
+- **Which of three subjects this is**, because two of them are not a table at all:
+  a copy table with its call sites, the labels on a drawing that has no code behind
+  it yet, or player-facing prose outside a table. A page of the site is none of
+  them — it is the site-reader's, read cold from the built page.
 - **At the end of a phase, what moved since the first reading.** A re-read of an
   unchanged table costs a pass and finds what was already fixed.
 
@@ -40,7 +40,7 @@ Two shapes of a short brief have different answers, and neither is to guess:
   say so once and ask only *would a person say this* and *does it mean anything*.
   If the brief did not say the subject is a drawing, every placeholder on it comes
   back as meaningless and the pass is wasted — so when you cannot tell which of the
-  two subjects you were handed, say which you assumed before reading a line.
+  three subjects you were handed, say which you assumed before reading a line.
 
 ## Getting to the finished sentence
 
@@ -121,7 +121,7 @@ this out loud at the table".
 | «Побывал дураком и всё равно 8 подряд начисто» | так на русском люди не говорят |
 | «9 партий подряд без единого пожара» | я не слышал, чтобы кто-то, кроме тебя, называл проигрыш пожаром |
 
-Four faults run through the whole set, and naming which one a line has is more useful
+These faults run through the whole set, and naming which one a line has is more useful
 than calling it awkward:
 
 - **A clause whose subject lives in the code.** *«Дурак в этот вечер был»* — whose?

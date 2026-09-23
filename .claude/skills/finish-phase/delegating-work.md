@@ -16,8 +16,7 @@ bot every ten seconds forever when `.env.production` was missing. You cannot rev
 your own work by reading it again.
 
 **Writing is delegated only above ten files, and only once the artifact those files
-are written against has been generated and looked at.** That narrows an earlier rule
-here — *an independent scope is delegated on sight* — and the narrowing is the
+are written against has been generated and looked at.** The threshold is the
 owner's, decided against this skill's own ledger after three phases in a row paid the
 same rework. Below the threshold, doing it yourself is cheaper than briefing.
 
@@ -89,7 +88,7 @@ judgement:
   what landed and do the rest yourself; one phase nearly rewrote seven specs the
   agent had in fact delivered ten minutes earlier.
 - **Say what its report must carry, because a hand-briefed agent has no file to hold
-  it.** The six named agents each declare a `What comes back`; this one is defined by
+  it.** Every agent in `.claude/agents/` declares a `What comes back`; this one is defined by
   the brief alone, and what a caller cannot reconstruct is **which files it actually
   wrote**, which it was given and did not, why, and anything it touched that the
   brief never named. Ask for that list in those words.

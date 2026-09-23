@@ -38,8 +38,7 @@ line into `reports/gates/gates-paragraph.txt`, stamped for the commit-msg hook �
 it, never retype it; the history holds dozens of hand wordings of that line alone:
 
 ```
-Gates: check:phase green — <N> tests in <M> files, coverage <st>/<br>/<fn>/<ln>,
-mutation <score>% over <the diff | everything>, e2e <N> cases in <M> files over <every scenario | <N> scenarios>, or e2e nothing to play.
+Gates: <the line check:phase wrote to reports/gates/gates-paragraph.txt, pasted as is>
 Copy: <what was read and when, or why nothing was>.
 Gallery: <one specific claim about what was seen, or why it stayed shut>.
 Review: <N> findings, <their fate in a clause>.
@@ -72,7 +71,7 @@ paragraph, naming the mutant and why its death is not worth buying.
 **Trailer, always the last line:**
 
 ```
-Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+Co-Authored-By: Claude <the model that wrote it> <noreply@anthropic.com>
 ```
 
 The model name in the trailer is whichever Claude actually wrote the commit.
@@ -97,7 +96,7 @@ npm version minor -m "Release %s
 A minor: <one paragraph — what this tag gives the player or the operator,
 in plain words, no gate numbers, no file names>.
 
-Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+Co-Authored-By: Claude <the model that wrote it> <noreply@anthropic.com>"
 npm run check:release
 git push --follow-tags
 ```

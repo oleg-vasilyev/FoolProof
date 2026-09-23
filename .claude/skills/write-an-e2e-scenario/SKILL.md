@@ -15,8 +15,8 @@ not when writing a scenario.
 
 ## First: is one owed?
 
-Usually not. A scenario is the slowest test this project has, and `npm run
-e2e:changed` will play it on every phase that touches its feature — so it is a
+Usually not. A scenario is the slowest test this project has, and `node
+scripts/gates/gate-runner.ts e2e:changed` plays it on every phase that touches its feature — so it is a
 standing cost, not a one-off. Three things earn one:
 
 - **A keyboard whose buttons carry `callback_data`.** Whether a tap reaches the
@@ -98,7 +98,7 @@ Reading: `chat.captions()`, `chat.cardText()`, `chat.lastText()`, `chat.lastAnsw
 (the callback toast), `chat.messages()`, `chat.photoBytes()`, `chat.promptId()`,
 `chat.commands()`.
 
-## Three rules with teeth
+## Four rules with teeth
 
 - **Assert the text before the captions when a screen boundary is involved.** A new
   screen inserted before an old one usually lists the same names, so a scenario
