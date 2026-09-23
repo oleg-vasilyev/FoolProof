@@ -161,7 +161,9 @@ rev: 2
 - Every word here must be understood on its own: no name from inside the project (no gate, harness, phase, hook, spec or brief) may appear in this section before the page has explained it, and the section explains none of them; the writer says what the thing is instead of what it is called.
 - The section has to be the most readable one on the page, because a reader who leaves here leaves for good; the lead promises nothing about the paragraphs' length, since both cold readers caught the word "short" over paragraphs that are not.
 - A heading here is a heading, not a sentence: about seven words at most, no word twice, no pronoun, no dash standing for a verb; a short antithesis in two halves is allowed, a twelve-word sentence with a subordinate clause is not, because both readers stopped on those.
-rev: 3
+- The one idea the five share, said before them in two sentences: an AI developer does what is checked, not what is written, so the thing worth building is the checks, and they in turn have to be checked. The five climb that in order, each asking what else must be checked before the checks can be trusted: the rules, then the checks themselves, then the model that writes the work, then the reader of the results, who is now the agent itself reading its own tools' output, then the whole set at once.
+- For the writer: the owner's talk on this project, prepared in September 2026, is built on the same idea and the same five steps, and a listener who comes here from it must recognise them; the lead stays one paragraph, the idea first and the reader's promise after it. The ladder is said as a ladder only once it has been named, the history is six and a half weeks as the hero says, and the section title's word "five" is not repeated.
+rev: 5
 
 ### f1-n
 - The first finding's number.
@@ -207,15 +209,20 @@ numbers: 2
 numbers: 03
 
 ### f3-title
-- The idea: quality needs a reviewer with a clean context, a second AI that was told nothing about what it is looking at, because the one that wrote the thing cannot see it any more.
-rev: 3
+- The idea: the plan comes before the code, and each is read by somebody who did not write it. The English heading is "No code before a stranger reads the plan." and a Russian heading says the same two things, plan first and a reader who is not the author, with no pronoun.
+rev: 5
 
 ### f3-body
-- The model that wrote a thing still holds the reasoning that made it look right, so asking it to review its own work is asking it to read with the answer in hand; a person has the same blindness, and here the fix is cheap: start a second model with an empty context and a one-line job. In this project every change is reviewed by a second model that did not write it, every picture the bot draws is described by one that was not told what it is for, every sentence the bot can say is read with real names and numbers filled in, and a plan is criticised before any code exists.
+- What is left once a machine checks everything it can is what needs judgement: whether a plan is good, whether a picture is understood, whether a sentence sounds like a person. The costliest way to work with an agent is two sentences and "go": it builds fast and sure, and half the decisions are made without you. Here the path of a piece of work is drawn in 8 stages, and the first is not code: the agent asks the repository first and the owner second, draws a mockup when the work shows something, and fixes a plan of files, signatures and tests.
+- The model that wrote a thing still holds the reasoning that made it look right, so asking it to review its own work is asking it to read with the answer in hand. So the plan is read by a second model with an empty context, given only the owner's words and the agreed signatures, before any code exists; and every later stage is read the same way: a change by a model that did not write it, a picture by one that was not told what it is for.
+- A reviewer is checked like any other check: one that looked at nothing and said "no findings" reads exactly like one that looked at everything, so every reviewing model owes a reply that opens with two numbers, how much it covered and how much it found.
 - The turn for the reader: the proof is this very page. A model given the page and the project's git history, and nothing else, found 17 of its 263 claims that the history did not support, and every one of them had read perfectly to the author who wrote it.
+- For the writer: three paragraphs at most, the idea, the cold reader, the reviewer's own check; the proof of 17 claims proves what a cold reader catches, not the two numbers, so it is said as proof of that wherever it stands. The section's vocabulary rule holds, so a stage, a plan and a signature are said in words a stranger has, and "gate" or "brief" are not; "asks the repository" is the project's phrase, a stranger reads what is already written in the repository.
 numbers: 17, 263
-commits: 5bf13e4
-rev: 3
+numbers-ru: 8
+commits: e64c8cd, ba4603f, 5bf13e4
+granularity: section
+rev: 5
 
 ### f3-link
 - Leads to era 5.
@@ -230,11 +237,12 @@ numbers: 04
 rev: 3
 
 ### f4-body
-- Every tool in a software project is shaped for a person at a terminal: output scrolls past, a verdict is a line you glance at, a command is something you remember. An AI developer does none of that the same way: it sees only the tail of a long output, forgets what scrolled off, and reads a verdict by searching the text for it. For six weeks nobody here noticed the mismatch, and a count over one month of the agent's session transcripts found 1463 test runs it had typed by hand, fishing each verdict out of the scroll with a text search.
-- The turn for the reader: once the tooling was rebuilt for its real user, the scripts went from twenty-three to eight, and every check began to write its verdict, its reasons and the one command that re-runs it into a file the agent opens; a person's convenience became second, on purpose, and the person lost nothing.
+- Every tool in a software project is shaped for a person at a terminal: output scrolls past, a verdict is a line you glance at, a command is something you remember. An AI developer does none of that the same way: it sees only the tail of a long output, forgets what scrolled off, and reads a verdict by searching the text for it. For six weeks nobody here noticed the mismatch, and a count over one month of the agent's session transcripts found 1463 test runs it had typed by hand, each run aimed at a single test file (not the same file every time), fishing each verdict out of the scroll with a text search (af08fc5, whose hash sits after this count).
+- The turn for the reader: once the tooling was rebuilt for its real user, the scripts went from twenty-three to eight, and every check began to write its verdict, its reasons and the one command that re-runs it into a file the agent opens, so the thousands of lines of the log never reach the agent's context; and the old way was closed, a script refusing a check typed by hand in the shell instead of run through the one runner. A person's convenience became second, on purpose, and the person lost nothing.
+- For the writer: the drop from twenty-three scripts to eight took two commits, e026d5e to nineteen and d49d590 to eight, so the sentence that says twenty-three to eight carries no single hash as if one commit did it; d49d590 sits after the closed path, which is its alone.
 numbers: 1463
 commits: af08fc5, d49d590
-rev: 3
+rev: 6
 
 ### f4-link
 - Leads to era 7.
@@ -245,17 +253,19 @@ numbers: 7
 numbers: 05
 
 ### f5-title
-- The idea: the harness improves itself, in three loops of different length: a retrospective after every task turns a lesson into a rule, a weekly checkup reads all the retrospectives together to see the whole picture, and a benchmark measures whether the harness as a whole got better.
-rev: 3
+- The idea, as a question the heading asks: does the whole set of rules and checks get better, or only bigger? It has to answer that itself, in three loops of different length, or it only grows.
+rev: 4
 
 ### f5-body
-- The short loop: every piece of work ends with a retrospective, run as a gate a task cannot skip, that counts what the work cost, rework, checks run twice, a decision guessed, and turns each lesson into a rule somewhere durable, a lint rule, a hook, a line in a skill; every such retrospective leaves one log in a logbook, saying what was asked, what ran, what was rebuilt and which check found each defect.
-- The long loop: a weekly checkup, an agent told to believe nothing on say-so, fix nothing, and cite a command for every verdict, reads that logbook across the week and the running system itself, so a pattern no single task could see, a rule broken in six phases out of ten, a deploy failing for days, shows up as a count; its own reports keep a table of measurements so the next checkup can ask whether a number moved.
+- The question: by now everything is checked, the code, the checks, the plans, the reports, and every week adds a rule, a script, another model with a job; whether that made the whole better or only bigger cannot be told by eye, and the owner's remarks in a chat are lost with the chat, so the set has to answer the question itself and correct itself, in three loops of different length.
+- For the writer: the three loops are labelled as three, the benchmark being the third, whose length is weeks: one run answers nothing, the answer is the rows compared week after week; it is not called the longest, and the closing turn names which loop corrected itself, the short one; the retrospective is said as mandatory when it was introduced, at the end of era 2 and not at the project's start, and made conditional later, so the two paragraphs do not contradict each other. The first paragraph does not repeat the title's phrase, and a piece of work has one name throughout the block.
+- The short loop: every piece of work ends with a retrospective, introduced as a step a task could not skip, that counts what the work cost, rework, checks run twice, a decision guessed, and turns each lesson into a rule somewhere durable, a lint rule, a hook, a line in a skill; every such retrospective leaves one log in a logbook, saying what was asked, what ran, what was rebuilt and which check found each defect.
+- The long loop: a weekly checkup, an agent told to believe nothing on say-so, fix nothing, and cite a command for every verdict (4e56b66, which cites nothing else), reads that logbook across the week and the running system itself, so a pattern no single task could see shows up as a count; both examples are the second checkup's, 6207423, and its hash sits after them: a rule broken in six phases out of ten, and a deploy failing about a third of its attempts for days on end (not a release that never arrived: one went live half an hour late); its own reports keep a table of measurements so the next checkup can ask whether a number moved.
 - The measure: a benchmark gives a model the same frozen task in a copy of the repository, hides the test that judges it, and scores the result with the repository's own checks, so the harness is measured as a whole rather than argued about; the same run at the same effort every week is what lets the rows be compared.
 - The turn for the reader: the loop also has to correct itself, and did: the retrospective once ran after every task regardless and was made conditional, only when there is something to count, because a ritual that always runs and usually finds nothing teaches the reader to skip the line where a real finding would sit.
-commits: ec3d818, db81a3a, 4e56b66, d011e68, fff3c5f
+commits: ec3d818, db81a3a, 4e56b66, 6207423, d011e68, fff3c5f
 granularity: section
-rev: 3
+rev: 7
 
 ### f5-link
 - Leads to era 7.
