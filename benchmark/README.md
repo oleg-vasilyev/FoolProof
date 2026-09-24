@@ -24,9 +24,20 @@ What the agent gets: the task's `brief.md` on stdin, in a clone of `HEAD` cut un
 the system temp folder, with the history, this folder and `scripts/benchmark/` removed,
 dependencies installed, web search and fetch off, no memory (a fresh path has none),
 permissions skipped because nobody is there to answer. The caps live in
-[`benchmark.json`](benchmark.json) — turns and dollars — and so does the **pinned model
+[`benchmark.json`](benchmark.json) — turns, dollars and minutes of waiting — and so does the **pinned model
 the checkup runs on**, so a checkup measures the harness and not a model that moved
 under it.
+
+The minutes are the one cap that is not the CLI's own flag. A headless session whose
+last turn ends on "waiting for the reviewer" stays alive for the background subagent,
+but only ten minutes by default; then it interrupts the subagent and exits, and the run
+reads as a phase abandoned before its gates. On 23 September a `copy-reader` still
+reading at minute twelve cost a run exactly that, so the runner hands the agent
+`CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS` — a variable found in the CLI's code, not its
+documentation, and proved by a probe: the same brief ended without the subagent's
+answer under a twenty-second ceiling and waited for it under a five-minute one. The
+runner refuses anything but a whole number of minutes above zero before it clones:
+to the CLI a zero means no ceiling at all, and a hung subagent would hang the run.
 
 What the agent never sees: `task.json`, `acceptance.spec.ts`, the reference diff, this
 file, and the runner itself. The hidden spec also has to stay outside every runner's

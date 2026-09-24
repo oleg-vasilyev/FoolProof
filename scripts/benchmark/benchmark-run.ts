@@ -14,6 +14,7 @@ import {
 } from "./benchmark-config.ts";
 import { CLOSING_MESSAGE, COMMIT_MESSAGE, debtNamedIn, obligationsMet, taskOf, type Task } from "./benchmark-task.ts";
 import {
+  MS_IN_A_MINUTE,
   RUNS_LOG_HEADER,
   agentOutcomeOf,
   headlineOf,
@@ -54,6 +55,8 @@ export const SCRATCHPADS_FOLDER = "claude";
 
 export const HOOK_TIMEOUT_S = 10;
 
+export const BACKGROUND_WAIT_CEILING = "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS";
+
 const FENCED_TOOLS = "Read|Edit|Write|MultiEdit|NotebookEdit|Glob|Grep|Bash";
 
 const A_PLAIN_TOKEN = /^[\w.[\]-]+$/;
@@ -86,7 +89,9 @@ export interface ShellResult {
   readonly stderr: string;
 }
 
-export type Shell = (command: string, cwd: string, input?: string) => ShellResult;
+export type Environment = Readonly<Record<string, string>>;
+
+export type Shell = (command: string, cwd: string, input?: string, env?: Environment) => ShellResult;
 
 export interface BenchmarkRun {
   readonly root: string;
@@ -105,16 +110,18 @@ interface Workspace {
   readonly run: BenchmarkRun;
   readonly task: Task;
   readonly config: BenchmarkConfig;
+  readonly agentEnvironment: Environment;
   readonly startedAt: Date;
   readonly reportDir: string;
   readonly clone: string;
 }
 
-export const realShell: Shell = (command, cwd, input) => {
+export const realShell: Shell = (command, cwd, input, env = {}) => {
   const done = spawnSync(command, {
     cwd,
     shell: true,
     input,
+    env: { ...process.env, ...env },
     encoding: "utf8",
     maxBuffer: OUTPUT_LIMIT,
   });
@@ -222,6 +229,19 @@ const agentCommandOf = (space: Workspace): string => {
   );
 };
 
+export const agentEnvironmentOf = (config: BenchmarkConfig): Environment => {
+  const minutes = config.maxBackgroundWaitMinutes;
+
+  if (!Number.isInteger(minutes) || minutes <= NOTHING) {
+    throw new Error(
+      `maxBackgroundWaitMinutes must be a whole number above zero, not ${String(minutes)}: ` +
+        "zero lifts the CLI's ceiling, and a hung subagent would then hang the run"
+    );
+  }
+
+  return { [BACKGROUND_WAIT_CEILING]: String(minutes * MS_IN_A_MINUTE) };
+};
+
 const agentEndOf = (outcome: AgentOutcome): string => {
   if (outcome.aborted !== null) {
     return `VOID, ${outcome.aborted}, cut off`;
@@ -233,7 +253,7 @@ const agentEndOf = (outcome: AgentOutcome): string => {
 const runAgent = (space: Workspace): AgentOutcome => {
   const { run, task, reportDir, clone } = space;
   const began = run.now().getTime();
-  const result = run.shell(agentCommandOf(space), clone, task.brief);
+  const result = run.shell(agentCommandOf(space), clone, task.brief, space.agentEnvironment);
   const outcome = agentOutcomeOf(result.stdout, run.now().getTime() - began);
 
   run.files.write(join(reportDir, AGENT_OUTPUT), result.stdout);
@@ -361,7 +381,8 @@ export const runBenchmark = (run: BenchmarkRun): RunRecord => {
   const runName = `${stampOf(startedAt.toISOString())}-${task.name}`;
   const reportDir = join(run.root, BENCHMARK_REPORTS, runName);
   const clone = join(run.tmp, CLONES_FOLDER, runName, CLONE_FOLDER);
-  const space: Workspace = { run, task, config, startedAt, reportDir, clone };
+  const agentEnvironment = agentEnvironmentOf(config);
+  const space: Workspace = { run, task, config, agentEnvironment, startedAt, reportDir, clone };
   const snapshot = snapshotOf(space);
 
   run.files.mkdir(reportDir);

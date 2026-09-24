@@ -18,6 +18,7 @@ export interface BenchmarkConfig {
   readonly checkupTask: string;
   readonly maxTurns: number;
   readonly maxBudgetUsd: number;
+  readonly maxBackgroundWaitMinutes: number;
 }
 
 export interface Files {

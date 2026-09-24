@@ -3,5 +3,6 @@
   "checkupEffort": "high",
   "checkupTask": "flying-start",
   "maxTurns": 400,
-  "maxBudgetUsd": 60
+  "maxBudgetUsd": 60,
+  "maxBackgroundWaitMinutes": 60
 }

@@ -44,6 +44,8 @@ vi.mock("./benchmark-task.ts", () => ({
   debtNamedIn: (task: unknown, texts: unknown) => debtNamedInSpy(task, texts),
 }));
 
+const MS_IN_A_MINUTE = 60_000;
+
 const agentOutcomeOfSpy = vi.fn();
 
 const rowOfSpy = vi.fn((_record: unknown) => "| row |\n");
@@ -55,6 +57,7 @@ const headlineOfSpy = vi.fn((_record: unknown) => "the headline");
 const recordJsonOfSpy = vi.fn((_record: unknown) => "{record}\n");
 
 vi.mock("./benchmark-record.ts", () => ({
+  MS_IN_A_MINUTE,
   RUNS_LOG_HEADER: "| header |\n",
   agentOutcomeOf: (stdout: string, ms: number) => agentOutcomeOfSpy(stdout, ms),
   headlineOf: (record: unknown) => headlineOfSpy(record),
@@ -102,7 +105,18 @@ const TASK: Task = {
 
 const BUDGET_USD = 2;
 
-const CONFIG = { checkupModel: A_MODEL, checkupEffort: null, checkupTask: "flying-start", maxTurns: 5, maxBudgetUsd: BUDGET_USD };
+const WAIT_MINUTES = 3;
+
+const HALF_A_MINUTE = 0.5;
+
+const CONFIG = {
+  checkupModel: A_MODEL,
+  checkupEffort: null,
+  checkupTask: "flying-start",
+  maxTurns: 5,
+  maxBudgetUsd: BUDGET_USD,
+  maxBackgroundWaitMinutes: WAIT_MINUTES,
+};
 
 const A_TALLY = { assistantMessages: 7, toolCalls: 4 };
 
@@ -147,10 +161,10 @@ const clone = join(around, "clone");
 
 const transcriptOnDisk = join(HOME, ".claude", "projects", projectSlugOf(clone), "sess-1.jsonl");
 
-const commandsRun: { command: string; cwd: string; input?: string }[] = [];
+const commandsRun: { command: string; cwd: string; input?: string; env?: Readonly<Record<string, string>> }[] = [];
 
-const answering = (command: string, cwd: string, input?: string) => {
-  commandsRun.push({ command, cwd, input });
+const answering = (command: string, cwd: string, input?: string, env?: Readonly<Record<string, string>>) => {
+  commandsRun.push({ command, cwd, input, env });
 
   if (command.startsWith("git rev-parse")) {
     return { code: PASSED, stdout: "9510df8\n", stderr: "" };
@@ -311,6 +325,26 @@ describe("runBenchmark()", () => {
         `claude -p --model ${A_MODEL} --output-format json --dangerously-skip-permissions ` +
           "--disallowedTools WebSearch WebFetch --max-turns 5 --max-budget-usd 2"
       );
+    });
+
+    it("should let a background subagent outlive the closing turn for the configured minutes, not the CLI's ten", () => {
+      runBenchmark(runOf());
+
+      expect(commandsMatching("claude")[NOTHING]?.env).toEqual({ CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS: "180000" });
+      expect(commandsMatching("npm ci")[NOTHING]?.env).toBeUndefined();
+    });
+
+    it("should refuse a wait that is zero, fractional or missing before anything is cloned", () => {
+      for (const minutes of [NOTHING, HALF_A_MINUTE, undefined]) {
+        benchmarkConfigOfSpy.mockReturnValue({ ...CONFIG, maxBackgroundWaitMinutes: minutes });
+
+        expect(() => runBenchmark(runOf())).toThrow(
+          `maxBackgroundWaitMinutes must be a whole number above zero, not ${String(minutes)}: ` +
+            "zero lifts the CLI's ceiling, and a hung subagent would then hang the run"
+        );
+      }
+
+      expect(commandsRun).toHaveLength(NOTHING);
     });
 
     it("should pass the effort through when one was asked for", () => {
@@ -575,6 +609,17 @@ describe("realShell()", () => {
     expect(spawnSyncSpy).toHaveBeenCalledWith(
       "claude -p",
       expect.objectContaining({ cwd: clone, shell: true, input: "brief", encoding: "utf8" })
+    );
+  });
+
+  it("should lay the given variables over the inherited environment", () => {
+    spawnSyncSpy.mockReturnValue({ status: PASSED, stdout: "", stderr: "" });
+
+    realShell("claude -p", clone, "brief", { A_CEILING: "1" });
+
+    expect(spawnSyncSpy).toHaveBeenCalledWith(
+      "claude -p",
+      expect.objectContaining({ env: { ...process.env, A_CEILING: "1" } })
     );
   });
 

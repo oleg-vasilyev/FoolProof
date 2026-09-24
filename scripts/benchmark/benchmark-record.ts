@@ -7,7 +7,7 @@ const JSON_INDENT = 2;
 
 const TWO_DECIMALS = 2;
 
-const MS_IN_A_MINUTE = 60_000;
+export const MS_IN_A_MINUTE = 60_000;
 
 const ONE_DECIMAL = 1;
 
