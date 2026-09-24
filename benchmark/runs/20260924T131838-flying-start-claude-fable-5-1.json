@@ -1,0 +1,101 @@
+{
+  "task": "flying-start",
+  "taskVersion": 2,
+  "snapshot": "a54c555",
+  "model": "claude-fable-5-1",
+  "effort": "low",
+  "startedAt": "2026-09-24T13:18:38.714Z",
+  "clone": "C:\\Users\\thisO\\AppData\\Local\\Temp\\foolproof-benchmark\\20260924T131838-flying-start\\clone",
+  "transcript": "D:\\Temp\\FoolProof\\reports\\benchmark\\20260924T131838-flying-start\\transcript.jsonl",
+  "transcriptTally": {
+    "assistantMessages": 119,
+    "toolCalls": 114
+  },
+  "budgetUsd": 60,
+  "agent": {
+    "finished": true,
+    "turns": 17,
+    "costUsd": 16.108711500000002,
+    "costByModel": {
+      "claude-fable-5-1": 16.108711500000002
+    },
+    "inputTokens": 4031353,
+    "outputTokens": 11770,
+    "durationMs": 1760638,
+    "closing": "Готово: коммит `8876ca0` на `master`, все гейты зелёные, тег по условию не резался, пуша нет (у клона нет remote).\n\n**Размер фазы:** одно правило со спеком, член каталога, вложенная пара, ветка рендера, две копи-строки в двух таблицах, случай галереи, две таблицы в `PLAN.md`.\n\n**Что сделано**\n- Правило `flyingStart` в `run-awards.ts` считает серию побед строго с раунда 0 по индексу появления, поэтому опоздавший и пропустивший партию не проходят. Спек проверяет все три обрыва и то, что правило не ходит в `longestRun`.\n- Каталог, `RAREST_FIRST`, `RULES_IN_ORDER`, `OVERSHADOWED` и `award-lines.ts` расширены по брифу; в `PLAN.md` добавлены строка каталога и десятая вложенная пара.\n- Копи: EN `FLYING START` / «The evening's opening 3 games, out first in every one.»; RU «С МЕСТА В КАРЬЕР» / «С первой партии вечера 3 партии подряд — и в каждой первое место.»\n- Случай галереи `flying-start` (en) печатает награду с фактом 3 и без HAT TRICK; строка добавлена в утверждённый список `docs/posters/gallery-edges.cases.txt` мной, то есть согласована, но не одобрена владельцем.\n\n**Решения, принятые за владельца**\n- Русское название: идиома «С МЕСТА В КАРЬЕР», подтверждена copy-reader как не калька.\n- Сработавший триггер долга «закоммитить симулятор при добавлении правила» не оплачен: бриф дал 4% и запретил считать. В `PLAN.md` записано, что число оценочное, в `TECH-DEBT.md` — что триггер сработал и что `tools.ts debt` слеп к записям без имени файла.\n- Две находки poster-reader оставлены без правки как свойства не этой фазы: в фикстуре галереи открывающий партию и есть победитель, поэтому FROM THE OFF печатает ту же тройку рядом с FLYING START; игрок-дурак 5 из 5 собирает три строки об одном факте. Вторую хотел записать в долг, но бюджет `TECH-DEBT.md` не позволил, так что она живёт только здесь и в теле коммита.\n\n**Гейты**\n\n| Гейт | Итог |\n|---|---|\n| lint, typecheck, test | зелёные, 5337 тестов |\n| coverage | 99.85 / 97.85 / 100 / 99.83 |\n| mutation over the diff | 99.58%, 4 выживших на чужих строках; один свой (пустой `case` с провалом в соседний) убит новым утверждением |\n| e2e over the diff | 26 случаев в 3 сценариях |\n| check-docs | зелёный |\n| phase-reviewer | 9 обещаний, 0 находок |\n\n**Что стоит знать владельцу**\n- В клоне нет `origin/main`, поэтому первый `check:phase` ушёл в красное на обоих diff-гейтах. Повторно запущен с `MUTATE_AGAINST=HEAD E2E_AGAINST=HEAD`; это записано в память проекта.\n- Второй проход copy-reader над одной переписанной строкой ничего не нашёл; ретроспектива отметила его как неокупившийся.",
+    "sessionId": "484622dd-ee41-4f82-aa6e-45118ffb72d9",
+    "aborted": null
+  },
+  "acceptance": {
+    "passed": 11,
+    "total": 11
+  },
+  "gates": [
+    {
+      "gate": "lint",
+      "ok": true
+    },
+    {
+      "gate": "typecheck",
+      "ok": true
+    },
+    {
+      "gate": "check-docs",
+      "ok": true
+    },
+    {
+      "gate": "test:coverage",
+      "ok": true
+    }
+  ],
+  "obligations": [
+    {
+      "name": "printed right after HAT TRICK",
+      "met": true
+    },
+    {
+      "name": "overshadowed by HAT TRICK",
+      "met": true
+    },
+    {
+      "name": "Russian title",
+      "met": true
+    },
+    {
+      "name": "PLAN catalogue row after HAT TRICK",
+      "met": true
+    },
+    {
+      "name": "PLAN nested-pairs row",
+      "met": true
+    },
+    {
+      "name": "gallery case in the owner's list",
+      "met": true
+    },
+    {
+      "name": "render spec samples the new award",
+      "met": true
+    },
+    {
+      "name": "copy spec measures the new reason",
+      "met": true
+    },
+    {
+      "name": "rule spec at the boundary",
+      "met": true
+    },
+    {
+      "name": "last commit is phase-final",
+      "met": true
+    },
+    {
+      "name": "closing message says what was decided",
+      "met": true
+    }
+  ],
+  "fenceHits": 0,
+  "commits": 1,
+  "treeClean": true,
+  "debtNamed": true
+}
