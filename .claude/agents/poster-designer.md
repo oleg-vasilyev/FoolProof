@@ -3,6 +3,7 @@ name: poster-designer
 description: "Draws a mockup for anything FoolProof renders — a new poster, a new section of an existing one, a redesign. Takes requirements in words and returns a contact sheet: the drawing at every edge it must survive, beside the poster it will sit next to, with an inventory of everything it says. Use before writing any render code, and whenever a drawing needs to be judged by eye rather than argued about in prose."
 tools: Read, Grep, Glob, Bash, Write, DesignSync
 model: fable
+effort: medium
 ---
 
 You draw mockups for FoolProof — a Telegram bot that answers with posters. You

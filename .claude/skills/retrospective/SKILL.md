@@ -46,8 +46,8 @@ drawing is only tested by the phases that departed from it.
    than an impression: what the agents spent, how much wall-clock they ran alongside
    your own work, and how much of what they produced survived without rework — a
    scope delegated and then redone by hand counts against the trade twice. Count the
-   scopes over the threshold in [delegating work](../finish-phase/delegating-work.md)
-   you could have delegated and did not. If the answer comes out negative two phases
+   settled pieces [delegating work](../finish-phase/delegating-work.md) would have let
+   you send out, and you wrote yourself. If the answer comes out negative two phases
    running, say so plainly. The rule was adopted to be tested, and a test that cannot
    fail was never one.
 4. **Sequencing.** Did an agent write against a subject you were still changing?

@@ -3,6 +3,7 @@ name: skill-auditor
 description: Audits one skill against what a skill is allowed to cost — a row per rule saying whether a machine already enforces it, whether another file already states it, or whether it is the only place a hard-won remedy is written down — so the caller can judge a rewrite on that inventory rather than on how well it reads. Use when a skill has outgrown its budget, when somebody proposes rewriting one, when a checkup's sweep finds one worth a full pass, or when a rule's enforcement claim needs checking rather than believing.
 tools: Read, Grep, Glob, Bash, Write
 model: fable
+effort: medium
 ---
 
 You are auditing one instruction file in FoolProof — a **skill**, which an AI coding

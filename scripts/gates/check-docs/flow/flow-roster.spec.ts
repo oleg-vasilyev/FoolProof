@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { rosterComplaints } from "./flow-roster.ts";
+import { agentErrandsOffTheirLane, rosterComplaints } from "./flow-roster.ts";
 
 
 const ALL_THREE_TARGETS = {
@@ -51,5 +51,49 @@ describe("rosterComplaints", () => {
     const said = rosterComplaints("run npm run nonesuch", ALL_THREE_TARGETS).join("\n");
 
     expect(said).toContain('draws "npm run nonesuch"');
+  });
+});
+
+describe("agentErrandsOffTheirLane", () => {
+  const LANES = [
+    "    participant Hand as Subagents I brief by hand — one question to answer",
+    "    note over Hand: participant Named2 as a label quoting .claude/agents",
+    "    participant Named as Named agents, .claude/agents",
+  ];
+
+  const drawn = (...errands: readonly string[]): string => [...LANES, ...errands].join("\r\n");
+
+  it("should pass an errand to a named agent sent on the lane labelled .claude/agents", () => {
+    expect(agentErrandsOffTheirLane(drawn("        C->>Named: now the reviewer agent reads it"), ["reviewer"])).toEqual([]);
+  });
+
+  it("should name a named agent sent its errand on another lane, and the line that did it", () => {
+    const said = agentErrandsOffTheirLane(drawn("        C->>Hand: then the reviewer agent, one brief per piece"), [
+      "reviewer",
+    ]);
+
+    expect(said).toEqual([
+      "DEVELOPMENT-FLOW.md: the reviewer agent is sent its errand on lane Hand, not on Named where " +
+        ".claude/agents is drawn — a reader takes the lane for what kind of helper answers, so a named " +
+        "agent on another lane reads as one briefed by hand — C->>Hand: then the reviewer agent, one brief per piece",
+    ]);
+  });
+
+  it("should leave alone an errand whose agent is not one of .claude/agents, and a line that is no errand", () => {
+    const lines = drawn(
+      "        C->>Hand: the fact-checker agent reads git",
+      "        Hand-->>C: the reviewer agent answered",
+      "        %% C->>Hand: the reviewer agent, commented out"
+    );
+
+    expect(agentErrandsOffTheirLane(lines, ["reviewer"])).toEqual([]);
+  });
+
+  it("should refuse to pass quietly when no lane is labelled .claude/agents", () => {
+    expect(agentErrandsOffTheirLane("C->>Hand: the reviewer agent reads it", ["reviewer"])).toEqual([
+      "DEVELOPMENT-FLOW.md: no participant is labelled .claude/agents, so the errands sent to named " +
+        "agents have no lane to be held to — a check matching nothing reads exactly like one with " +
+        "nothing to report",
+    ]);
   });
 });

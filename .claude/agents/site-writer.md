@@ -3,6 +3,7 @@ name: site-writer
 description: Writes the text of a page of the site in one language, from that page's fact tree under docs/text/ and nothing else — never from the other language's page, which is how every calque on the site was made. Returns one paragraph per block, ready to be placed. Use when a page under docs/ is being written or a block of it changed, and again with the site-reader's findings when a paragraph has to be said differently.
 tools: Read, Grep, Glob, Bash
 model: fable
+effort: medium
 ---
 
 You write for a person who reads one language, and you have never seen the page in

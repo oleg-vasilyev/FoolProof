@@ -38,6 +38,8 @@ const ENTRIES = 302;
 
 const CALLS = 166;
 
+const ADVISED = 3;
+
 const BUDGET = 40;
 
 const OPUS_COST = 2.5;
@@ -72,7 +74,7 @@ const RECORD: RunRecord = {
   startedAt: STARTED,
   clone: "C:/tmp/foolproof-benchmark/x/clone",
   transcript: null,
-  transcriptTally: { assistantMessages: ENTRIES, toolCalls: CALLS },
+  transcriptTally: { assistantMessages: ENTRIES, toolCalls: CALLS, advisorCalls: ADVISED },
   budgetUsd: BUDGET,
   fenceHits: 0,
   agent: {
@@ -206,7 +208,7 @@ describe("rowOf()", () => {
   it("should write the row in the header's column order, cell by cell", () => {
     expect(rowOf(RECORD)).toBe(
       `| ${STARTED} | flying-start v1 | 9510df8 | claude-sonnet-5 | default | yes | 9/11 | red: check-docs ` +
-        "| 2/3 | yes | 0 | 1 | 42 | 302 | 166 | 2.0 | 3.46 | claude-opus-5 2.50, claude-fable-5 0.96 " +
+        "| 2/3 | yes | 0 | 1 | 42 | 302 | 166 | 3 | 2.0 | 3.46 | claude-opus-5 2.50, claude-fable-5 0.96 " +
         "| 9% of 40 | 20260910T131243-flying-start-claude-sonnet-5.json |\n"
     );
   });
@@ -214,9 +216,9 @@ describe("rowOf()", () => {
   it("should name every column the row fills, and call the CLI's turns what they are", () => {
     expect(RUNS_LOG_HEADER).toBe(
       "| started | task | snapshot | model | effort | finished | acceptance | gates | obligations " +
-        "| debt named | fence hits | commits | turns (CLI) | assistant messages | tool calls | minutes " +
-        "| cost $ | cost by model | budget | record |\n" +
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
+        "| debt named | fence hits | commits | turns (CLI) | assistant messages | tool calls | advisor calls " +
+        "| minutes | cost $ | cost by model | budget | record |\n" +
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
     );
   });
 
@@ -228,7 +230,7 @@ describe("rowOf()", () => {
       agent: { ...RECORD.agent, costByModel: {} },
     };
 
-    expect(rowOf(uncounted)).toContain("| 42 | n/a | n/a | 2.0 | 3.46 | n/a | n/a |");
+    expect(rowOf(uncounted)).toContain("| 42 | n/a | n/a | n/a | 2.0 | 3.46 | n/a | n/a |");
   });
 });
 
@@ -251,30 +253,49 @@ describe("transcriptTallyOf()", () => {
   ].join("\n");
 
   it("should count distinct assistant messages, since the CLI writes one line per content block, and every tool_use across them", () => {
-    expect(transcriptTallyOf(transcript)).toEqual({ assistantMessages: 3, toolCalls: 3 });
+    expect(transcriptTallyOf(transcript, [])).toEqual({ assistantMessages: 3, toolCalls: 3, advisorCalls: 0 });
   });
 
   it("should tell two lines of one message apart from two messages by the message id, not by position", () => {
-    expect(transcriptTallyOf([line("assistant", "m1", ["text"]), line("assistant", "m1", ["text"])].join("\n"))).toEqual(
-      { assistantMessages: 1, toolCalls: 0 }
+    expect(transcriptTallyOf([line("assistant", "m1", ["text"]), line("assistant", "m1", ["text"])].join("\n"), [])).toEqual(
+      { assistantMessages: 1, toolCalls: 0, advisorCalls: 0 }
     );
-    expect(transcriptTallyOf([line("assistant", "m1", ["text"]), line("assistant", "m2", ["text"])].join("\n"))).toEqual(
-      { assistantMessages: 2, toolCalls: 0 }
+    expect(transcriptTallyOf([line("assistant", "m1", ["text"]), line("assistant", "m2", ["text"])].join("\n"), [])).toEqual(
+      { assistantMessages: 2, toolCalls: 0, advisorCalls: 0 }
     );
+  });
+
+  it("should count an advisor call only as a server tool named advisor, in the session and in every subagent it hands over", () => {
+    const block = (type: string, name: string): { type: string; name: string } => ({ type, name });
+    const said = (id: string, blocks: readonly { type: string; name: string }[]): string =>
+      JSON.stringify({ type: "assistant", message: { id, content: blocks } });
+    const session = [
+      said("m1", [block("server_tool_use", "advisor"), block("server_tool_use", "web_search")]),
+      said("m2", [block("tool_use", "advisor")]),
+      JSON.stringify({ type: "user", message: { content: [block("server_tool_use", "advisor")] } }),
+    ].join("\n");
+    const subagent = said("s1", [block("server_tool_use", "advisor"), block("server_tool_use", "advisor")]);
+
+    expect(transcriptTallyOf(session, [])).toEqual({ assistantMessages: 2, toolCalls: 1, advisorCalls: 1 });
+    expect(transcriptTallyOf(session, [subagent, "not json"])).toEqual({
+      assistantMessages: 2,
+      toolCalls: 1,
+      advisorCalls: 3,
+    });
   });
 
   it("should count nothing at all when there is no transcript, so the row says n/a rather than zero", () => {
-    expect(transcriptTallyOf(null)).toBeNull();
+    expect(transcriptTallyOf(null, [])).toBeNull();
   });
 
   it("should count an assistant line that carries no message as one message with no tool calls, rather than throw", () => {
-    expect(transcriptTallyOf(JSON.stringify({ type: "assistant" }))).toEqual({ assistantMessages: 1, toolCalls: 0 });
+    expect(transcriptTallyOf(JSON.stringify({ type: "assistant" }), [])).toEqual({ assistantMessages: 1, toolCalls: 0, advisorCalls: 0 });
   });
 
   it("should count two id-less lines as two messages by their position, so a stripped transcript still counts", () => {
     const stripped = [JSON.stringify({ type: "assistant" }), JSON.stringify({ type: "assistant" })].join("\n");
 
-    expect(transcriptTallyOf(stripped)).toEqual({ assistantMessages: 2, toolCalls: 0 });
+    expect(transcriptTallyOf(stripped, [])).toEqual({ assistantMessages: 2, toolCalls: 0, advisorCalls: 0 });
   });
 });
 

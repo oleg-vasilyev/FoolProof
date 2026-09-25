@@ -41,6 +41,10 @@ export const CLOSING_FILE = "closing.md";
 
 export const TRANSCRIPT_FILE = "transcript.jsonl";
 
+const SUBAGENTS_FOLDER = "subagents";
+
+const TRANSCRIPT_EXTENSION = ".jsonl";
+
 export const FENCE_LOG = "reports/benchmark-fence.log";
 
 export const FENCE_HOOK = ".claude/hooks/refuse-a-step-outside-the-fence.mjs";
@@ -265,24 +269,57 @@ const runAgent = (space: Workspace): AgentOutcome => {
   return outcome;
 };
 
-const keepTranscript = (space: Workspace, agent: AgentOutcome): string | null => {
+interface KeptTranscript {
+  readonly copy: string;
+  readonly text: string;
+  readonly subagentTranscripts: readonly string[];
+}
+
+const keepSubagentTranscripts = (files: Files, from: string, to: string): readonly string[] => {
+  const kept = files
+    .list(from)
+    .filter((name) => name.endsWith(TRANSCRIPT_EXTENSION))
+    .map((name) => ({ name, text: files.read(join(from, name)) }))
+    .filter((transcript): transcript is { name: string; text: string } => transcript.text !== null);
+
+  if (kept.length > NOTHING) {
+    files.mkdir(to);
+  }
+
+  kept.forEach(({ name, text }) => {
+    files.write(join(to, name), text);
+  });
+
+  return kept.map(({ text }) => text);
+};
+
+const keepTranscript = (space: Workspace, agent: AgentOutcome): KeptTranscript | null => {
   const { run, reportDir, clone } = space;
 
   if (agent.sessionId === null) {
     return null;
   }
 
-  const kept = run.files.read(join(memoryOf(run.home, clone), `${agent.sessionId}.jsonl`));
+  const session = join(memoryOf(run.home, clone), agent.sessionId);
+  const text = run.files.read(`${session}${TRANSCRIPT_EXTENSION}`);
 
-  if (kept === null) {
+  if (text === null) {
     return null;
   }
 
   const copy = join(reportDir, TRANSCRIPT_FILE);
 
-  run.files.write(copy, kept);
+  run.files.write(copy, text);
 
-  return copy;
+  return {
+    copy,
+    text,
+    subagentTranscripts: keepSubagentTranscripts(
+      run.files,
+      join(session, SUBAGENTS_FOLDER),
+      join(reportDir, SUBAGENTS_FOLDER)
+    ),
+  };
 };
 
 const gateVerdictIn = (space: Workspace, gate: GateVerdict["gate"], named = false): GateVerdict | null => {
@@ -390,8 +427,9 @@ export const runBenchmark = (run: BenchmarkRun): RunRecord => {
   installDependencies(space);
 
   const agent = runAgent(space);
-  const transcript = keepTranscript(space, agent);
-  const transcriptTally = transcript === null ? null : transcriptTallyOf(run.files.read(transcript));
+  const kept = keepTranscript(space, agent);
+  const transcript = kept === null ? null : kept.copy;
+  const transcriptTally = kept === null ? null : transcriptTallyOf(kept.text, kept.subagentTranscripts);
   const acceptance = runAcceptance(space);
   const gates = runQuickGates(space);
   const fenceHits = fenceHitsIn(space);

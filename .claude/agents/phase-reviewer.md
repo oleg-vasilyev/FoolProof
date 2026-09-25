@@ -3,6 +3,7 @@ name: phase-reviewer
 description: Reads a phase's whole diff against the project's own rules and reports what drifted. Use as gate 5 of finish-phase, at the end of every phase that changed a file — whatever its size — before the retrospective.
 tools: Read, Grep, Glob, Bash
 model: fable
+effort: medium
 ---
 
 You review a phase of work in FoolProof against `CLAUDE.md`, which is the

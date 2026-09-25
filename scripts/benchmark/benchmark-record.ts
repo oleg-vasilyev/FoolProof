@@ -36,6 +36,7 @@ export interface GateOutcome {
 export interface TranscriptTally {
   readonly assistantMessages: number;
   readonly toolCalls: number;
+  readonly advisorCalls: number;
 }
 
 export interface RunRecord {
@@ -82,13 +83,17 @@ interface TranscriptEntry {
   readonly uuid?: string;
   readonly message?: {
     readonly id?: string;
-    readonly content?: readonly { readonly type?: string }[] | string;
+    readonly content?: readonly { readonly type?: string; readonly name?: string }[] | string;
   };
 }
 
 const ASSISTANT = "assistant";
 
 const TOOL_USE = "tool_use";
+
+const SERVER_TOOL_USE = "server_tool_use";
+
+const ADVISOR = "advisor";
 
 const entryOf = (line: string): TranscriptEntry | null => {
   try {
@@ -104,19 +109,37 @@ const toolCallsIn = (entry: TranscriptEntry): number => {
   return Array.isArray(content) ? content.filter((block) => block.type === TOOL_USE).length : NOTHING;
 };
 
-export const transcriptTallyOf = (jsonl: string | null): TranscriptTally | null => {
-  if (jsonl === null) {
-    return null;
-  }
+const advisorCallsIn = (entry: TranscriptEntry): number => {
+  const content = entry.message?.content;
 
-  const entries = jsonl
+  return Array.isArray(content)
+    ? content.filter((block) => block.type === SERVER_TOOL_USE && block.name === ADVISOR).length
+    : NOTHING;
+};
+
+const assistantEntriesOf = (jsonl: string): readonly TranscriptEntry[] =>
+  jsonl
     .split("\n")
     .map(entryOf)
     .filter((entry): entry is TranscriptEntry => entry !== null && entry.type === ASSISTANT);
 
+const advisorCallsOf = (jsonl: string): number =>
+  assistantEntriesOf(jsonl).reduce((sum, entry) => sum + advisorCallsIn(entry), NOTHING);
+
+export const transcriptTallyOf = (
+  jsonl: string | null,
+  subagentTranscripts: readonly string[]
+): TranscriptTally | null => {
+  if (jsonl === null) {
+    return null;
+  }
+
+  const entries = assistantEntriesOf(jsonl);
+
   return {
     assistantMessages: new Set(entries.map((entry, index) => entry.message?.id ?? entry.uuid ?? String(index))).size,
     toolCalls: entries.reduce((sum, entry) => sum + toolCallsIn(entry), NOTHING),
+    advisorCalls: [jsonl, ...subagentTranscripts].reduce((sum, text) => sum + advisorCallsOf(text), NOTHING),
   };
 };
 
@@ -235,9 +258,9 @@ const budgetShareOf = (record: RunRecord): string =>
 
 export const RUNS_LOG_HEADER =
   "| started | task | snapshot | model | effort | finished | acceptance | gates | obligations " +
-  "| debt named | fence hits | commits | turns (CLI) | assistant messages | tool calls | minutes " +
-  "| cost $ | cost by model | budget | record |\n" +
-  "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n";
+  "| debt named | fence hits | commits | turns (CLI) | assistant messages | tool calls | advisor calls " +
+  "| minutes | cost $ | cost by model | budget | record |\n" +
+  "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n";
 
 export const rowOf = (record: RunRecord): string =>
   `| ${record.startedAt} | ${record.task} v${String(record.taskVersion)} | ${record.snapshot} ` +
@@ -247,6 +270,7 @@ export const rowOf = (record: RunRecord): string =>
   `| ${String(record.fenceHits)} | ${String(record.commits)} | ${String(record.agent.turns)} ` +
   `| ${tallyOf(record.transcriptTally, (tally) => tally.assistantMessages)} ` +
   `| ${tallyOf(record.transcriptTally, (tally) => tally.toolCalls)} ` +
+  `| ${tallyOf(record.transcriptTally, (tally) => tally.advisorCalls)} ` +
   `| ${minutesOf(record.agent.durationMs)} | ${record.agent.costUsd.toFixed(TWO_DECIMALS)} ` +
   `| ${costCellOf(record.agent)} | ${budgetShareOf(record)} ` +
   `| ${recordNameOf(record)}.json |\n`;

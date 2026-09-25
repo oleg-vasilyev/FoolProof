@@ -9,7 +9,8 @@
   "transcript": "D:\\Temp\\FoolProof\\reports\\benchmark\\20260924T134855-flying-start\\transcript.jsonl",
   "transcriptTally": {
     "assistantMessages": 118,
-    "toolCalls": 158
+    "toolCalls": 158,
+    "advisorCalls": 0
   },
   "budgetUsd": 60,
   "agent": {

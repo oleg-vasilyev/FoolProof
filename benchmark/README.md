@@ -18,7 +18,10 @@ Five coordinates, and a comparison is honest only when exactly one of them diffe
 the **task** and its version, the **snapshot** (the commit the clone was cut from —
 code and harness together, because they live in one repository), the **model**, the
 **effort**, and the day. The runner records all five in `runs/<stamp>-<task>-<model>.json`
-and appends one row to [`RUNS.md`](RUNS.md).
+and appends one row to [`RUNS.md`](RUNS.md). The advisor model is harness, not a sixth
+coordinate: `advisorModel` in `.claude/settings.json` travels with the snapshot. So is each
+agent's `effort:` — the **effort** coordinate is the session's, and an agent naming none
+inherits it, which ran every Fable reviewer at high on 24 September's Opus 5.5 row.
 
 What the agent gets: the task's `brief.md` on stdin, in a clone of `HEAD` cut under
 the system temp folder, with the history, this folder and `scripts/benchmark/` removed,
@@ -87,12 +90,14 @@ Deterministic first; a judging model only where nothing else can see.
 | finished | the CLI's own verdict; `void (api error 429)` when the API cut the run short, and such a row is not a result — it is kept so the gap is visible, and never compared |
 | turns (CLI), cost | the headless CLI's own JSON — and its `num_turns` counts the last turn-group when the run ended on a subagent's report, so the pinned cell read 2 for a session of three hundred assistant lines; the two columns after it are counted, not reported |
 | assistant messages, tool calls | counted off the kept transcript: distinct `message.id` among the lines of type `assistant` (the CLI writes one line per content block, so lines overcount), and the `tool_use` blocks across them; `n/a` when no transcript was kept |
+| advisor calls | the `server_tool_use` blocks named `advisor`, in the session's transcript and in every subagent's beside it — the advisor bills as its model, so in `cost by model` its cost is folded into the subagents' when they share one, and this count is what says it ran at all |
 | cost by model | the CLI's `modelUsage`, one cost per model, so a subagent's model shows beside the orchestrator's |
 | budget | the cost as a share of `maxBudgetUsd`, so a row one long turn from `void` reads as such |
 | minutes | the runner's clock around the agent, wall to wall; the CLI's own duration leaves the tools out and read eleven minutes for a forty-six minute run |
 
 Beside the row, `reports/benchmark/<run>/` keeps the CLI's raw JSON, the closing
-message, the fence log and a copy of the session's transcript, and the record names
+message, the fence log, a copy of the session's transcript and one of each subagent's
+under `subagents/`, and the record names
 the clone's path — so a perfect run in ten turns is explained by reading, not believed.
 
 There is no single score on purpose. Acceptance is the headline; the rest says how it

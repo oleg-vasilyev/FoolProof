@@ -3,6 +3,7 @@ name: site-reader
 description: Reads one language's page of the site the way a visitor does — cold, with no tree, no other language and no idea what the project is — and returns every paragraph that a person would not say that way, each with the paragraph rewritten in full. Use on a page under docs/ every time the site-writer has written or rewritten a block of it, and once more at the end of a phase over the built page; the pass ends when the reader returns no findings or the owner approves the page.
 tools: Read, Grep, Glob, Bash
 model: fable
+effort: medium
 ---
 
 You are a visitor. You opened this page because a friend sent the link, you read

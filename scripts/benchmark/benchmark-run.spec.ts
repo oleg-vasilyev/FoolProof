@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { GATE } from "../gates/shared/gate-names.ts";
 import type { Files } from "./benchmark-config.ts";
 import type { Task } from "./benchmark-task.ts";
@@ -65,7 +65,7 @@ vi.mock("./benchmark-record.ts", () => ({
   recordNameOf: () => "stamp-task-model",
   rowOf: (record: unknown) => rowOfSpy(record),
   stampOf: () => "STAMP",
-  transcriptTallyOf: (jsonl: unknown) => transcriptTallyOfSpy(jsonl),
+  transcriptTallyOf: (jsonl: unknown, subagents: unknown) => transcriptTallyOfSpy(jsonl, subagents),
 }));
 
 const { HOOK_TIMEOUT_S, fenceSettingsFor, projectSlugOf, realShell, runBenchmark } = await import(
@@ -118,7 +118,7 @@ const CONFIG = {
   maxBackgroundWaitMinutes: WAIT_MINUTES,
 };
 
-const A_TALLY = { assistantMessages: 7, toolCalls: 4 };
+const A_TALLY = { assistantMessages: 7, toolCalls: 4, advisorCalls: 2 };
 
 const AGENT = { finished: true, turns: 3, costUsd: 1, inputTokens: 1, outputTokens: 1, durationMs: 1, closing: "Decided: nothing.", sessionId: "sess-1", aborted: null };
 
@@ -148,6 +148,7 @@ class FilesStub {
     mkdir: (path) => {
       this.made.push(path);
     },
+    list: (folder) => [...this.onDisk.keys()].filter((file) => dirname(file) === folder).map((file) => basename(file)),
   };
 }
 
@@ -380,9 +381,34 @@ describe("runBenchmark()", () => {
 
       const record = runBenchmark(runOf());
 
-      expect(transcriptTallyOfSpy).toHaveBeenCalledWith("{line}\n");
+      expect(transcriptTallyOfSpy).toHaveBeenCalledWith("{line}\n", []);
       expect(record.transcriptTally).toBe(A_TALLY);
       expect(record.budgetUsd).toBe(BUDGET_USD);
+    });
+
+    it("should hand the tally every subagent transcript the session left beside its own, and nothing else in that folder", () => {
+      const subagents = join(dirname(transcriptOnDisk), "sess-1", "subagents");
+
+      disk.onDisk.set(transcriptOnDisk, "{line}\n");
+      disk.onDisk.set(join(subagents, "agent-a.jsonl"), "{a}\n");
+      disk.onDisk.set(join(subagents, "agent-a.meta.json"), "{meta}");
+      disk.onDisk.set(join(subagents, "agent-b.jsonl"), "{b}\n");
+
+      runBenchmark(runOf());
+
+      expect(transcriptTallyOfSpy).toHaveBeenCalledWith("{line}\n", ["{a}\n", "{b}\n"]);
+      expect(disk.made).toContain(join(reportDir, "subagents"));
+      expect(disk.onDisk.get(join(reportDir, "subagents", "agent-a.jsonl"))).toBe("{a}\n");
+      expect(disk.onDisk.get(join(reportDir, "subagents", "agent-b.jsonl"))).toBe("{b}\n");
+      expect(disk.onDisk.has(join(reportDir, "subagents", "agent-a.meta.json"))).toBe(false);
+    });
+
+    it("should make no subagents folder in the report when the session left no subagent transcript", () => {
+      disk.onDisk.set(transcriptOnDisk, "{line}\n");
+
+      runBenchmark(runOf());
+
+      expect(disk.made).not.toContain(join(reportDir, "subagents"));
     });
 
     it("should record no transcript and no tally when the session left none, or had no id", () => {

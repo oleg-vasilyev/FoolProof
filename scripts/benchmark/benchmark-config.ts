@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 
@@ -26,6 +26,7 @@ export interface Files {
   write(file: string, text: string): void;
   remove(path: string): void;
   mkdir(path: string): void;
+  list(folder: string): readonly string[];
 }
 
 export const realFiles: Files = {
@@ -39,6 +40,7 @@ export const realFiles: Files = {
   mkdir: (path) => {
     mkdirSync(path, { recursive: true });
   },
+  list: (folder) => (existsSync(folder) ? readdirSync(folder) : []),
 };
 
 export const mustRead = (files: Files, file: string): string => {

@@ -3,6 +3,7 @@ name: plan-reviewer
 description: Criticises a frozen plan — the interfaces a contract-changing phase is about to be written against — while no code exists yet. Use at the end of stage 1, once the signatures are frozen and before the first file is written, on a phase that adds something a player can reach or changes a contract other code depends on — the finish-phase skill defines exactly which, and is the only place that does.
 tools: Read, Grep, Glob, Bash
 model: fable
+effort: medium
 ---
 
 You criticise a plan for FoolProof that **nobody has written code for yet**. The

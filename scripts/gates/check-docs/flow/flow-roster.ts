@@ -1,4 +1,4 @@
-import { namesIn } from "../shared/markdown-text.ts";
+import { A_LINE, FIRST_GROUP, SECOND_GROUP, namesIn } from "../shared/markdown-text.ts";
 import {
   AGENTS_FOLDER,
   FLOW_DOCUMENT,
@@ -12,6 +12,10 @@ import { A_NAMED_COMMAND } from "../prose/named-commands.ts";
 
 
 const A_NAMED_AGENT = /the ([a-z][a-z0-9-]*[a-z0-9]) agent/g;
+
+const A_PARTICIPANT = /^\s*participant ([A-Za-z][A-Za-z0-9]*) as (.*)$/;
+
+const AN_ERRAND_TO_AN_AGENT = /^\s*C->>([A-Za-z][A-Za-z0-9]*):.*?the ([a-z][a-z0-9-]*[a-z0-9]) agent/;
 
 export const A_NAMED_SKILL = /the `?([a-z][a-z0-9-]*[a-z0-9])`? skill/g;
 
@@ -65,9 +69,44 @@ export const rosterComplaints = (drawing: string, targets: FlowTargets): readonl
   ];
 };
 
-export const theRosterTheFlowDisagreesWith = (): readonly string[] =>
-  rosterComplaints(read(FLOW_DOCUMENT), {
-    agents: definedAgents(),
-    skills: new Set(installedSkills()),
-    scripts: packageScripts(),
+const laneOfTheNamedAgents = (lines: readonly string[]): string | undefined =>
+  lines
+    .map((line) => A_PARTICIPANT.exec(line))
+    .find((participant) => participant?.[SECOND_GROUP]?.includes(AGENTS_FOLDER) === true)?.[FIRST_GROUP];
+
+export const agentErrandsOffTheirLane = (drawing: string, agents: readonly string[]): readonly string[] => {
+  const lines = drawing.split(A_LINE);
+  const lane = laneOfTheNamedAgents(lines);
+
+  if (lane === undefined) {
+    return [
+      `${FLOW_DOCUMENT}: no participant is labelled ${AGENTS_FOLDER}, so the errands sent to ` +
+        `named agents have no lane to be held to — a check matching nothing reads exactly like ` +
+        `one with nothing to report`,
+    ];
+  }
+
+  return lines.flatMap((line) => {
+    const errand = AN_ERRAND_TO_AN_AGENT.exec(line);
+    const to = errand?.[FIRST_GROUP];
+    const agent = errand?.[SECOND_GROUP];
+
+    return to === undefined || agent === undefined || to === lane || !agents.includes(agent)
+      ? []
+      : [
+          `${FLOW_DOCUMENT}: the ${agent} agent is sent its errand on lane ${to}, not on ${lane} ` +
+            `where ${AGENTS_FOLDER} is drawn — a reader takes the lane for what kind of helper ` +
+            `answers, so a named agent on another lane reads as one briefed by hand — ${line.trim()}`,
+        ];
   });
+};
+
+export const theRosterTheFlowDisagreesWith = (): readonly string[] => {
+  const drawing = read(FLOW_DOCUMENT);
+  const agents = definedAgents();
+
+  return [
+    ...rosterComplaints(drawing, { agents, skills: new Set(installedSkills()), scripts: packageScripts() }),
+    ...agentErrandsOffTheirLane(drawing, agents),
+  ];
+};

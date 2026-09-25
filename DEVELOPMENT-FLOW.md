@@ -40,7 +40,7 @@ sequenceDiagram
     participant C as Claude Code, the AI developer
     participant D as Claude Design, the design page
     participant K as Project skills, .claude/skills
-    participant S as Subagents I brief by hand — a batch of files to write, or one question to answer
+    participant S as Subagents I brief by hand — one question to answer
     participant R as Named agents, .claude/agents
     participant G as GitHub, repository and CI
     participant V as Production server
@@ -133,10 +133,10 @@ sequenceDiagram
         R-->>C: every line written out with real values in it, then the ones no person would say — each with a blunt verdict and a better line
         C->>C: fix the tables now, while nothing is built on them
     end
-    opt ten files or more, and the artifact they are written against already drawn and looked at
-        C->>S: briefs to every subagent in one go, each with its own piece and its own skill — these run beside the loop below
-        S->>S: each writes its piece strictly to the brief
-        S-->>C: finished files, proven by their own tests
+    opt a piece whose brief is shorter than it, written against an artifact already drawn and looked at
+        C->>R: the code-writer agent, one brief per piece, all in one go, each with its own skill — these run beside the loop below
+        R->>R: each writes its piece strictly to the brief, and runs its own specs only when it is the one writer out
+        R-->>C: the files written, given and not written, and touched outside the brief
         C->>C: accept the result, weld the seams between the pieces
     end
     opt the phase came for a fault

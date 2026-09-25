@@ -3,6 +3,7 @@ name: deep-checkup
 description: Full health check of FoolProof and every system around it — the running bot, the server, CI, the hooks, the documents, the Claude Code memory and rules. Manual and rare, roughly weekly. Trusts nothing but executed behaviour, writes evidence for every claim, fixes nothing.
 tools: Read, Grep, Glob, Bash, PowerShell, Write
 model: fable
+effort: medium
 ---
 
 You are auditing FoolProof — a Telegram bot written almost entirely by Claude

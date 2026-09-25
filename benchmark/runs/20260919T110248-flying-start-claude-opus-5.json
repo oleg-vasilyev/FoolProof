@@ -9,7 +9,8 @@
   "transcript": "C:\\Users\\thisO\\AppData\\Local\\Temp\\claude\\D--Temp-FoolProof\\c9462e63-87e8-4b42-a38e-9b0e1cdfaaee\\scratchpad\\clone\\reports\\benchmark\\20260919T110248-flying-start\\transcript.jsonl",
   "transcriptTally": {
     "assistantMessages": 201,
-    "toolCalls": 219
+    "toolCalls": 219,
+    "advisorCalls": 0
   },
   "budgetUsd": 60,
   "agent": {

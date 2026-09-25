@@ -12,7 +12,10 @@ const rmSyncSpy = vi.fn();
 
 const mkdirSyncSpy = vi.fn();
 
+const readdirSyncSpy = vi.fn();
+
 vi.mock("node:fs", () => ({
+  readdirSync: (path: unknown) => readdirSyncSpy(path),
   existsSync: (path: unknown) => existsSyncSpy(path),
   readFileSync: (path: unknown, encoding: unknown) => readFileSyncSpy(path, encoding),
   writeFileSync: (path: unknown, text: unknown, encoding: unknown) => writeFileSyncSpy(path, text, encoding),
@@ -36,6 +39,7 @@ const files = {
   write: vi.fn(),
   remove: vi.fn(),
   mkdir: vi.fn(),
+  list: vi.fn(),
 };
 
 beforeEach(() => {
@@ -103,5 +107,19 @@ describe("realFiles", () => {
     realFiles.mkdir(A_FILE);
 
     expect(mkdirSyncSpy).toHaveBeenCalledWith(A_FILE, { recursive: true });
+  });
+
+  it("should list the names in a folder that exists", () => {
+    readdirSyncSpy.mockReturnValue(["a.jsonl", "a.meta.json"]);
+
+    expect(realFiles.list(A_FILE)).toEqual(["a.jsonl", "a.meta.json"]);
+    expect(readdirSyncSpy).toHaveBeenCalledWith(A_FILE);
+  });
+
+  it("should list nothing for a folder that does not exist, without reading it", () => {
+    existsSyncSpy.mockReturnValue(false);
+
+    expect(realFiles.list(A_FILE)).toEqual([]);
+    expect(readdirSyncSpy).not.toHaveBeenCalled();
   });
 });

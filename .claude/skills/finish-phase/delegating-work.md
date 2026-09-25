@@ -15,19 +15,17 @@ real bugs rather than style, the sharpest a systemd unit that would have restart
 bot every ten seconds forever when `.env.production` was missing. You cannot review
 your own work by reading it again.
 
-**Writing is delegated only above ten files, and only once the artifact those files
-are written against has been generated and looked at.** The threshold is the
-owner's, decided against this skill's own ledger after three phases in a row paid the
-same rework. Below the threshold, doing it yourself is cheaper than briefing.
+**Writing is delegated at any size, once what it is written against has been generated
+and looked at.** The rework behind the ten-file floor (23 August to 25 September 2026)
+came from unsettled subjects; now a piece goes out when its brief is the shorter text.
 
 A writing brief names the **shape** wanted — *a check over every README, under a name
 that predicts its exports* — never the file to extend: a brief naming the file has
 chosen the name for an agent that will not question it, and one phase paid the review
 to move the result back out of `flow-drawing.ts`.
 
-**A question is delegated at any size, and the threshold does not apply to it.** That
-number weighs writing a brief against writing the code yourself; a read-only errand has
-no such arithmetic, because the alternative is reading the files in your own window and
+**A question is delegated at any size.** A writing brief is weighed against writing the
+code yourself; a read-only errand has no such arithmetic, because the alternative is reading the files in your own window and
 then carrying them for the rest of the phase. One brief sent cold to read the agent
 files against each other cost 149k tokens in a single call (26 August 2026) and returned three defects
 nothing else was looking for, the sharpest a *known asymmetry* in the deploy that had
@@ -41,13 +39,12 @@ nothing to act on, and it comes **before the questions that go to the owner** �
 question the repository can settle should never reach them, and the ones left after it
 are the ones only they can answer.
 
-**Neither threshold opens what was always closed.** Whatever is expensive to be wrong
-about stays in your hands at any size — the mechanic a player will feel, a cross-feature
-hazard, anything touching `shared/` or the schema. A twelve-file batch across `shared/`
-is not delegable for being twelve files; it is the case the count was never about.
+**Nothing here opens what was always closed.** What is expensive to be wrong about —
+the mechanic a player will feel, a cross-feature hazard, anything touching `shared/` or
+the schema — stays in your hands at any size, however settled.
 
-When a batch does go out, on `model: "sonnet"` because settled transcription is not
-judgement:
+When a batch does go out, it goes to the code-writer agent, on Opus rather than Fable,
+because the model that reviews a diff should not be the one that wrote it:
 
 - **The brief carries everything** — the exact files to write, the subject each spec
   tests, the stubs to use by name, the skill to load first — and tells the agent to
@@ -71,8 +68,8 @@ judgement:
   last turn on stale mocks.
 - **Before parallelising, name the exclusive resource they share.** Disjoint files
   are not enough: agents share one working tree, and any tool that copies it, writes
-  a fixed temp directory or a fixed report file can only be run by one of them at a
-  time. Three writers were told to run Stryker, whose sandbox lives *inside* the
+  a fixed temp directory or a fixed report file — the named `test` run's verdict too —
+  can only be run by one of them at a time. Three writers were told to run Stryker, whose sandbox lives *inside* the
   repository — so one run copied another's half-written sandbox and died, and the
   brief needed two corrections mid-flight. Ask what each agent runs, and where that
   writes; anything exclusive stays with you and runs after they finish. **A tool's
@@ -87,18 +84,14 @@ judgement:
 - **Stalled twice means finished — but read the tree before redoing anything.** Take
   what landed and do the rest yourself; one phase nearly rewrote seven specs the
   agent had in fact delivered ten minutes earlier.
-- **Say what its report must carry, because a hand-briefed agent has no file to hold
-  it.** Every agent in `.claude/agents/` declares a `What comes back`; this one is defined by
-  the brief alone, and what a caller cannot reconstruct is **which files it actually
-  wrote**, which it was given and did not, why, and anything it touched that the
-  brief never named. Ask for that list in those words.
 - **An agent that cannot do something says so instead of doing something adjacent.**
   A narrowed pass reads exactly like a completed one, and no gate is watching.
 - **A model that refuses or dies mid-run is the caller's problem, not the agent's.**
   Re-run the errand and say in the phase's record on which model — what may not be
   substituted is the property the agent was chosen for: a context that did not write it.
 - **What never leaves your hands:** copy, commit messages and document prose, because
-  the voice is the product here, and anything resting on why-context this session
+  the voice is the product here — a table row, a listed path or a count `check-docs`
+  holds is not prose, and goes out with the code it describes — and anything resting on why-context this session
   accumulated — why a threshold is 7 and not 5 — which no brief can carry. The poster
   gallery is the exception that runs the other way: judging a drawing needs eyes that
   have not lived the phase, so it is delegated *because* it is judgement. What stays
@@ -112,6 +105,10 @@ the *conversation* rather than the task — a one-line answer needing no tools m
 whose value is coldness**: forking the reviewer or either reader is re-reading your own
 work under a second name. The retrospective looked made for a fork and cost 313,321
 then 237,649 tokens for six lines back (7 September 2026), so it runs in the conversation itself now.
+
+The **advisor** (`advisorModel` in `.claude/settings.json`) is priced alike — each call
+re-reads the session uncached — and is as warm: it catches a wrong turn mid-phase, and
+never stands in for the reviewer or a reader.
 
 `context: fork` is a *different* mechanism: an isolated subagent driven by the skill
 body, with no conversation. It reads as *always delegated* and writes on every
