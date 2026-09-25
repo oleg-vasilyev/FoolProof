@@ -135,7 +135,7 @@ sequenceDiagram
     end
     opt a piece whose brief is shorter than it, written against an artifact already drawn and looked at
         C->>R: the code-writer agent, one brief per piece, all in one go, each with its own skill — these run beside the loop below
-        R->>R: each writes its piece strictly to the brief, and runs its own specs only when it is the one writer out
+        R->>R: each writes its piece strictly to the brief, and runs its own specs in a run folder of its own
         R-->>C: the files written, given and not written, and touched outside the brief
         C->>C: accept the result, weld the seams between the pieces
     end

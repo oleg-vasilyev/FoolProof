@@ -151,8 +151,21 @@ const redDetail = (numbers: GateNumbers): string => {
   }
 };
 
+const detailOf = (verdict: GateVerdict): string => {
+  switch (verdict.kind) {
+    case "ran":
+      return redDetail(verdict.numbers);
+
+    case "skipped":
+      return `skipped, ${verdict.because} was red`;
+
+    case "refused":
+      return "refused, another run held what it needs";
+  }
+};
+
 const redPhrase = (verdict: GateVerdict): string => {
-  const detail = verdict.kind === "ran" ? redDetail(verdict.numbers) : `skipped, ${verdict.because} was red`;
+  const detail = detailOf(verdict);
 
   return detail === "" ? `${verdict.gate} red` : `${verdict.gate} red (${detail})`;
 };

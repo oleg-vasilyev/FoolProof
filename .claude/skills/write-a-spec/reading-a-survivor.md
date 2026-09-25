@@ -22,7 +22,7 @@ assertion whose subject is something *missing*. The rest:
 - **Read the survivor's own line before believing it is a gap.** A line number quoted
   from memory cost a whole extra run: the rule everyone worried about was already
   killed and the survivor beside it was equivalent. Print the mutant and its
-  replacement from `reports/mutation/mutation.json`, never the line you remember.
+  replacement from the run's `mutation-<family>.json`, never the line you remember.
 - **An arithmetic mutant on a nullable accumulator is usually equivalent.** `sum +
   null` is `sum + 0` in JavaScript, so *add the value even when it is absent* changes
   nothing observable. Recognising that is cheaper than writing the test that cannot

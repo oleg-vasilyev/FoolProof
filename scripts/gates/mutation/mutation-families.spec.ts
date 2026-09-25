@@ -1,39 +1,33 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { VITEST_CONFIG } from "../shared/gate-paths.ts";
-import { FAMILIES, FAMILY_NAMES, familyReports } from "./mutation-families.ts";
+import { FAMILIES, FAMILY_NAMES } from "./mutation-families.ts";
 
 
 describe("FAMILIES", () => {
-  it("should know the two families, source first, each with its config and the report that config writes", () => {
+  it("should know the two families, source first, each with its config and the report its run writes into its folder", () => {
     expect(FAMILIES).toEqual([
       {
         family: "source",
         config: "scripts/gates/mutation/stryker.config.json",
-        report: "reports/mutation/mutation.json",
+        report: "mutation-source.json",
       },
       {
         family: "tooling",
         config: "scripts/gates/mutation/stryker.scripts.json",
-        report: "reports/mutation-scripts/mutation.json",
+        report: "mutation-tooling.json",
       },
     ]);
   });
 
+  it("should give each family a report of its own, both being written into the one run folder", () => {
+    const reports = FAMILIES.map((family) => family.report);
+
+    expect(new Set(reports).size).toBe(reports.length);
+  });
+
   it("should list the names in the same order", () => {
     expect(FAMILY_NAMES).toEqual(["source", "tooling"]);
-  });
-});
-
-describe("familyReports", () => {
-  it("should name every family's report, so the runner forgets each before a run", () => {
-    expect(familyReports()).toEqual(FAMILIES.map((family) => family.report));
-  });
-
-  it("should hand back at least one, which is what lets a gate declare a file at all", () => {
-    const [first] = familyReports();
-
-    expect(typeof first).toBe("string");
   });
 });
 

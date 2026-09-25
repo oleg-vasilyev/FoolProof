@@ -2,6 +2,7 @@ import { calculateMetrics } from "mutation-testing-metrics";
 import { parse, type Reader } from "../shared/report-reader.ts";
 import { survivorsIn, type ReportedFiles, type Survivors } from "./surviving-mutants.ts";
 import type { Family, FamilyName } from "./mutation-families.ts";
+import { inRun } from "../shared/gate-paths.ts";
 
 
 const NO_VALID_MUTANTS = 0;
@@ -25,8 +26,8 @@ interface StrykerConfig {
   readonly thresholds: { readonly break: number };
 }
 
-export const familyScore = (read: Reader, family: Family): FamilyScore | null => {
-  const report = parse<MutationReport>(read, family.report);
+export const familyScore = (read: Reader, family: Family, folder: string): FamilyScore | null => {
+  const report = parse<MutationReport>(read, inRun(folder, family.report));
   const config = parse<StrykerConfig>(read, family.config);
 
   if (report === null || config === null) {

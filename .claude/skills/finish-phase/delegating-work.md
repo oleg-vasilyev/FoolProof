@@ -67,12 +67,14 @@ because the model that reviews a diff should not be the one that wrote it:
   while an agent was writing specs against those very paths, and the agent spent its
   last turn on stale mocks.
 - **Before parallelising, name the exclusive resource they share.** Disjoint files
-  are not enough: agents share one working tree, and any tool that copies it, writes
-  a fixed temp directory or a fixed report file — the named `test` run's verdict too —
-  can only be run by one of them at a time. Three writers were told to run Stryker, whose sandbox lives *inside* the
-  repository — so one run copied another's half-written sandbox and died, and the
-  brief needed two corrections mid-flight. Ask what each agent runs, and where that
-  writes; anything exclusive stays with you and runs after they finish. **A tool's
+  are not enough: agents share one working tree. A gate through the runner is not one
+  — every run writes into a folder of its own, Stryker's sandbox included, so each
+  writer runs its own specs. What is: the e2e worlds and a battery, a second of which
+  the runner refuses, and any tool run outside it that writes a fixed path. Three
+  writers were once told to run Stryker while its sandbox was one folder, so one run
+  copied another's half-written sandbox and died, and the brief needed two corrections
+  mid-flight. Ask what each agent runs, and where that writes; anything exclusive
+  stays with you and runs after they finish. **A tool's
   behaviour you did not observe is a guess** — two flags were invented rather than
   read the same hour, and `--help` costs a second.
 - **Launch parallel agents in one message**, and do not block on one whose files are

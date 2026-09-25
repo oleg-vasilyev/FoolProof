@@ -55,9 +55,10 @@ apart from a pass that looked at nothing.
 ## Then, what to look for
 
 Most style rules are enforced by ESLint now, so do not spend the pass on them — the
-brief carries the caller's own green verdict, and `reports/gates/` holds it. **Do not
-run a battery yourself**: every gate writes into `reports/`, where the caller's
-`check:phase` verdict on this tree already sits, and three phases have paid for a battery twice
+brief carries the caller's own green verdict, and `reports/gates/gates-paragraph.txt`
+holds it. **Do not run a battery yourself**: it would rewrite that paragraph over the
+caller's `check:phase` verdict on this tree, or be refused while the caller's still runs;
+before every run had its own folder, three phases paid for a battery twice
 because a reviewer overwrote the coverage temp file under it. Read the verdict, and
 spend the pass on what no rule can check:
 

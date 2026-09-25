@@ -15,8 +15,22 @@ import {
   rerunCommandFor,
   stepsFor,
 } from "./gate-list.ts";
-import { BATTERY, GATE } from "./gate-names.ts";
+import { BATTERY, GATE, LOCK } from "./gate-names.ts";
 
+
+const A_RUN = "reports/runs/x/a-run";
+
+const ANOTHER_RUN = "reports/runs/y/another-run";
+
+const VITEST_BIN = "node_modules/vitest/vitest.mjs";
+
+const VITEST_CONFIG = "scripts/gates/test/vitest.config.ts";
+
+const RESULTS_INTO_A_RUN = "--outputFile.json=reports/runs/x/a-run/results.json";
+
+const FIRST = 0;
+
+const NONE = 0;
 
 describe("the four batteries", () => {
   it("should make check the everyday gate: lint, types, documents, the suite under coverage", () => {
@@ -85,14 +99,20 @@ describe("ALL_GATES, isGate() and isBattery()", () => {
 describe("COMMANDS", () => {
   it("should run every tool by its entry file under node_modules, never by a name PATH has to find", () => {
     for (const command of Object.values(COMMANDS)) {
-      for (const step of command.steps) {
+      for (const step of command.steps(A_RUN)) {
         expect(step.bin).toMatch(/^(node_modules\/|scripts\/).*\.(js|mjs|ts)$|^node_modules\/typescript\/bin\/tsc$/);
       }
     }
   });
 
-  it("should lint the three linted roots quietly, through the moved config, into the findings file", () => {
-    expect(COMMANDS[GATE.lint].steps).toEqual([
+  it("should spell the run's folder into the steps, so two runs of one gate write apart", () => {
+    for (const command of Object.values(COMMANDS)) {
+      expect(command.steps(A_RUN)).not.toEqual(command.steps(ANOTHER_RUN));
+    }
+  });
+
+  it("should lint the three linted roots quietly, through the moved config, into the run's findings file", () => {
+    expect(COMMANDS[GATE.lint].steps(A_RUN)).toEqual([
       {
         bin: "node_modules/eslint/bin/eslint.js",
         args: [
@@ -102,7 +122,7 @@ describe("COMMANDS", () => {
           "--format",
           "json",
           "--output-file",
-          "reports/lint/findings.json",
+          "reports/runs/x/a-run/lint-findings.json",
           "src",
           "scripts",
           "e2e",
@@ -111,34 +131,53 @@ describe("COMMANDS", () => {
     ]);
   });
 
-  it("should run the suite through the moved vitest config, with coverage only for the coverage gate", () => {
-    expect(COMMANDS[GATE.test].steps).toEqual([
-      { bin: "node_modules/vitest/vitest.mjs", args: ["run", "--config", "scripts/gates/test/vitest.config.ts"] },
-    ]);
-    expect(COMMANDS[GATE.coverage].steps[0]?.args).toEqual([
-      "run",
-      "--config",
-      "scripts/gates/test/vitest.config.ts",
-      "--coverage",
+  it("should run the suite through the moved vitest config, its results written into the run", () => {
+    expect(COMMANDS[GATE.test].steps(A_RUN)).toEqual([
+      { bin: VITEST_BIN, args: ["run", "--config", VITEST_CONFIG, RESULTS_INTO_A_RUN] },
     ]);
   });
 
-  it("should run both e2e configurations from the gate that owns them", () => {
-    expect(COMMANDS[GATE.e2e].steps[0]?.args).toContain("scripts/gates/e2e/vitest.e2e.config.ts");
-    expect(COMMANDS[GATE.harness].steps[0]?.args).toContain("scripts/gates/e2e/vitest.harness.config.ts");
+  it("should add coverage only for the coverage gate, its report folder inside the run", () => {
+    expect(COMMANDS[GATE.coverage].steps(A_RUN)).toEqual([
+      {
+        bin: VITEST_BIN,
+        args: [
+          "run",
+          "--config",
+          VITEST_CONFIG,
+          RESULTS_INTO_A_RUN,
+          "--coverage",
+          "--coverage.reportsDirectory=reports/runs/x/a-run/coverage",
+        ],
+      },
+    ]);
   });
 
-  it("should run each typecheck through its own wrapper, and the full mutation one Stryker step per family", () => {
-    expect(COMMANDS[GATE.typecheck].steps.map((step) => step.bin)).toEqual([
-      "scripts/gates/typecheck/typecheck.ts",
+  it("should run both e2e configurations from the gate that owns them, each writing results into the run", () => {
+    expect(COMMANDS[GATE.e2e].steps(A_RUN)).toEqual([
+      { bin: VITEST_BIN, args: ["run", "--config", "scripts/gates/e2e/vitest.e2e.config.ts", RESULTS_INTO_A_RUN] },
     ]);
-    expect(COMMANDS[GATE.e2eTypecheck].steps.map((step) => step.bin)).toEqual([
-      "scripts/gates/typecheck/e2e-typecheck.ts",
+    expect(COMMANDS[GATE.harness].steps(A_RUN)).toEqual([
+      {
+        bin: VITEST_BIN,
+        args: ["run", "--config", "scripts/gates/e2e/vitest.harness.config.ts", RESULTS_INTO_A_RUN],
+      },
     ]);
-    expect(COMMANDS[GATE.mutation].steps.map((step) => step.args)).toEqual([
-      ["run", "scripts/gates/mutation/stryker.config.json"],
-      ["run", "scripts/gates/mutation/stryker.scripts.json"],
-    ]);
+  });
+
+  it("should hand our own scripts the run's folder as their only argument", () => {
+    const ours = [
+      [GATE.typecheck, "scripts/gates/typecheck/typecheck.ts"],
+      [GATE.e2eTypecheck, "scripts/gates/typecheck/e2e-typecheck.ts"],
+      [GATE.checkDocs, "scripts/gates/check-docs/check-docs.ts"],
+      [GATE.e2eChanged, "scripts/gates/e2e/e2e-changed.ts"],
+      [GATE.mutationChanged, "scripts/gates/mutation/mutate-changed.ts"],
+      [GATE.mutation, "scripts/gates/mutation/mutate-everything.ts"],
+    ] as const;
+
+    for (const [gate, bin] of ours) {
+      expect(COMMANDS[gate].steps(A_RUN)).toEqual([{ bin, args: [A_RUN] }]);
+    }
   });
 
   it("should let only test and test:mutation-changed take files", () => {
@@ -148,23 +187,48 @@ describe("COMMANDS", () => {
 
     expect(taking).toEqual([GATE.test, GATE.mutationChanged]);
   });
+
+  it("should make only the two e2e gates hold the e2e worlds' lock, so a second e2e run refuses", () => {
+    const holding = Object.entries(COMMANDS)
+      .filter(([, command]) => command.holds === LOCK.e2eWorlds)
+      .map(([gate]) => gate);
+
+    expect(holding).toEqual([GATE.e2e, GATE.e2eChanged]);
+  });
+
+  it("should let every other gate hold no lock at all, the battery's lock included", () => {
+    const others = Object.entries(COMMANDS).filter(([, command]) => command.holds !== LOCK.e2eWorlds);
+
+    expect(others.length).toBeGreaterThan(NONE);
+    for (const [, command] of others) {
+      expect(command.holds).toBeNull();
+    }
+  });
 });
 
 describe("stepsFor()", () => {
-  it("should hand back the gate's own steps when no file is named", () => {
-    expect(stepsFor(GATE.lint, [])).toEqual({ ok: true, steps: COMMANDS[GATE.lint].steps });
+  it("should hand back the gate's own steps for a folder when no file is named", () => {
+    const steps = stepsFor(GATE.lint, []);
+
+    expect(steps.ok).toBe(true);
+    expect(steps.ok ? steps.steps(A_RUN) : []).toEqual(COMMANDS[GATE.lint].steps(A_RUN));
   });
 
-  it("should append the files to the step of a gate that takes them", () => {
-    expect(stepsFor(GATE.test, ["src/a.spec.ts", "src/b.spec.ts"])).toEqual({
-      ok: true,
-      steps: [
-        {
-          bin: "node_modules/vitest/vitest.mjs",
-          args: ["run", "--config", "scripts/gates/test/vitest.config.ts", "src/a.spec.ts", "src/b.spec.ts"],
-        },
-      ],
-    });
+  it("should append the files after the folder's arguments for a gate that takes them", () => {
+    const steps = stepsFor(GATE.test, ["src/a.spec.ts", "src/b.spec.ts"]);
+
+    expect(steps.ok ? steps.steps(A_RUN) : []).toEqual([
+      {
+        bin: VITEST_BIN,
+        args: ["run", "--config", VITEST_CONFIG, RESULTS_INTO_A_RUN, "src/a.spec.ts", "src/b.spec.ts"],
+      },
+    ]);
+  });
+
+  it("should hand the mutation over named files the folder first and the files after it", () => {
+    const steps = stepsFor(GATE.mutationChanged, ["src/a.ts"]);
+
+    expect(steps.ok ? steps.steps(A_RUN)[FIRST]?.args : []).toEqual([A_RUN, "src/a.ts"]);
   });
 
   it("should refuse files for a gate that takes none, naming the gates that do", () => {
@@ -185,6 +249,12 @@ describe("describeStep() and rerunCommandFor()", () => {
 
   it("should re-run one gate through the gate runner, never through an npm battery", () => {
     expect(rerunCommandFor(GATE.e2eChanged)).toBe("node scripts/gates/gate-runner.ts e2e:changed");
+  });
+
+  it("should spell the files a named run was given, so the re-run covers the same ones", () => {
+    expect(rerunCommandFor(GATE.test, ["src/a.spec.ts", "src/b.spec.ts"])).toBe(
+      "node scripts/gates/gate-runner.ts test src/a.spec.ts src/b.spec.ts"
+    );
   });
 });
 

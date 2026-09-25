@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { basename, dirname, join } from "node:path";
+import { dirname, isAbsolute, join, relative, sep } from "node:path";
 import { GATE } from "../gates/shared/gate-names.ts";
 import type { Files } from "./benchmark-config.ts";
 import type { Task } from "./benchmark-task.ts";
@@ -13,12 +13,11 @@ vi.mock("node:child_process", () => ({
   spawnSync: (command: unknown, options: unknown) => spawnSyncSpy(command, options),
 }));
 
-const verdictPathOfSpy = vi.fn(
-  (gate: string, named?: boolean) => `reports/gates/${gate}${named === true ? ".named" : ""}.json`
-);
+const runsFolderOfSpy = vi.fn((gate: string) => `reports/every-run/${gate}`);
 
 vi.mock("../gates/shared/gate-paths.ts", () => ({
-  verdictPathOf: (gate: string, named?: boolean) => verdictPathOfSpy(gate, named),
+  VERDICT_FILE: "the-verdict.json",
+  runsFolderOf: (gate: string) => runsFolderOfSpy(gate),
 }));
 
 const benchmarkConfigOfSpy = vi.fn();
@@ -122,10 +121,18 @@ const A_TALLY = { assistantMessages: 7, toolCalls: 4, advisorCalls: 2 };
 
 const AGENT = { finished: true, turns: 3, costUsd: 1, inputTokens: 1, outputTokens: 1, durationMs: 1, closing: "Decided: nothing.", sessionId: "sess-1", aborted: null };
 
-const testVerdict = (cases: number, failed: number): string =>
-  JSON.stringify({ kind: "ran", gate: "test", ok: failed === NOTHING, numbers: { kind: "tests", cases, failed, files: ONCE, failures: [] } });
+const testVerdict = (cases: number, failed: number, named = true): string =>
+  JSON.stringify({
+    kind: "ran",
+    gate: "test",
+    named,
+    ok: failed === NOTHING,
+    numbers: { kind: "tests", cases, failed, files: ONCE, failures: [] },
+  });
 
-const gateVerdict = (gate: string, ok: boolean): string => JSON.stringify({ kind: "ran", gate, ok });
+const gateVerdict = (gate: string, ok: boolean): string => JSON.stringify({ kind: "ran", gate, named: false, ok });
+
+const FIRST_PART = 0;
 
 class FilesStub {
   public readonly onDisk = new Map<string, string>();
@@ -148,7 +155,14 @@ class FilesStub {
     mkdir: (path) => {
       this.made.push(path);
     },
-    list: (folder) => [...this.onDisk.keys()].filter((file) => dirname(file) === folder).map((file) => basename(file)),
+    list: (folder) => [
+      ...new Set(
+        [...this.onDisk.keys()]
+          .map((file) => relative(folder, file))
+          .filter((path) => !path.startsWith("..") && !isAbsolute(path))
+          .map((path) => path.split(sep)[FIRST_PART] ?? path)
+      ),
+    ],
   };
 }
 
@@ -209,8 +223,14 @@ const runOf = (): BenchmarkRun => ({
 
 const commandsMatching = (prefix: string) => commandsRun.filter((ran) => ran.command.startsWith(prefix));
 
-const verdictAt = (gate: string, named = false): string =>
-  join(clone, `reports/gates/${gate}${named ? ".named" : ""}.json`);
+const THE_NAMED_RUN = "2026-09-10T12-00-00.000Z-p100";
+
+const A_LATER_RUN = "2026-09-10T12-30-00.000Z-p200";
+
+const AN_EARLIER_RUN = "2026-09-10T11-00-00.000Z-p300";
+
+const verdictAt = (gate: string, run = THE_NAMED_RUN): string =>
+  join(clone, `reports/every-run/${gate}/${run}/the-verdict.json`);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -224,7 +244,7 @@ beforeEach(() => {
   agentOutcomeOfSpy.mockReturnValue(AGENT);
   obligationsMetSpy.mockReturnValue([{ name: "a", met: true }]);
   debtNamedInSpy.mockReturnValue(true);
-  disk.onDisk.set(verdictAt(GATE.test, true), testVerdict(CASES, FAILED_CASES));
+  disk.onDisk.set(verdictAt(GATE.test), testVerdict(CASES, FAILED_CASES));
 
   for (const gate of [GATE.lint, GATE.typecheck, GATE.checkDocs, GATE.coverage]) {
     disk.onDisk.set(verdictAt(gate), gateVerdict(gate, gate !== GATE.checkDocs));
@@ -451,11 +471,22 @@ describe("runBenchmark()", () => {
       expect(disk.onDisk.has(into)).toBe(false);
     });
 
-    it("should read the verdict of the named run, not of the agent's last full suite", () => {
-      disk.onDisk.set(verdictAt(GATE.test), testVerdict(CASES, NOTHING));
-      runBenchmark(runOf());
+    it("should read the verdict of the named run, not of a later full suite the agent left beside it", () => {
+      disk.onDisk.set(verdictAt(GATE.test, A_LATER_RUN), testVerdict(CASES, NOTHING, false));
 
-      expect(verdictPathOfSpy).toHaveBeenCalledWith(GATE.test, true);
+      expect(runBenchmark(runOf()).acceptance.passed).toBe(CASES - FAILED_CASES);
+      expect(runsFolderOfSpy).toHaveBeenCalledWith(GATE.test);
+    });
+
+    it("should pass over a later run that has no verdict yet, rather than stop at it", () => {
+      disk.onDisk.set(join(clone, `reports/every-run/test/${A_LATER_RUN}/gate.log`), "still going");
+
+      expect(runBenchmark(runOf()).acceptance.passed).toBe(CASES - FAILED_CASES);
+    });
+
+    it("should read the newest named run when the agent left an earlier one", () => {
+      disk.onDisk.set(verdictAt(GATE.test, AN_EARLIER_RUN), testVerdict(CASES, NOTHING));
+
       expect(runBenchmark(runOf()).acceptance.passed).toBe(CASES - FAILED_CASES);
     });
 
@@ -464,13 +495,13 @@ describe("runBenchmark()", () => {
     });
 
     it("should score a spec that did not compile as nothing passed", () => {
-      disk.onDisk.set(verdictAt(GATE.test, true), testVerdict(NOTHING, NOTHING));
+      disk.onDisk.set(verdictAt(GATE.test), testVerdict(NOTHING, NOTHING));
 
       expect(runBenchmark(runOf()).acceptance).toEqual({ passed: NOTHING, total: CASES });
     });
 
     it("should score a missing verdict as nothing passed", () => {
-      disk.onDisk.delete(verdictAt(GATE.test, true));
+      disk.onDisk.delete(verdictAt(GATE.test));
 
       expect(runBenchmark(runOf()).acceptance.passed).toBe(NOTHING);
     });

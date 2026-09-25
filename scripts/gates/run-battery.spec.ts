@@ -1,17 +1,38 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { COMMANDS } from "./shared/gate-list.ts";
-import { BATTERY, GATE } from "./shared/gate-names.ts";
+import { BATTERY, GATE, LOCK } from "./shared/gate-names.ts";
 import type { GateVerdict } from "./verdict/gate-verdict.ts";
-import { PARAGRAPH_PATH } from "./shared/gate-paths.ts";
+import { BATTERY_PATH, PARAGRAPH_PATH } from "./shared/gate-paths.ts";
 
 
 const ROOT = "D:/Temp/FoolProof";
 
 const runGateSpy = vi.fn();
 
-const forgetVerdictsSpy = vi.fn();
-
 const writeVerdictSpy = vi.fn();
+
+const takeLockSpy = vi.fn();
+
+const releaseSpy = vi.fn();
+
+const refusalOfSpy = vi.fn();
+
+const isAliveSpy = vi.fn();
+
+const A_RUN = "2026-09-25T10-00-00.000Z-p4821";
+
+vi.mock("./runs/run-folders.ts", () => ({
+  runIdOf: () => A_RUN,
+}));
+
+vi.mock("./runs/run-lock.ts", () => ({
+  isAlive: isAliveSpy,
+  takeLock: (...args: readonly unknown[]) => takeLockSpy(...args),
+}));
+
+vi.mock("./runs/lock-refusal.ts", () => ({
+  refusalOf: (...args: readonly unknown[]) => refusalOfSpy(...args),
+}));
 
 const skippedVerdictSpy = vi.fn();
 
@@ -27,14 +48,16 @@ const writeFileSyncSpy = vi.fn();
 
 vi.mock("./gate-runner.ts", () => ({
   runGate: (gate: unknown, mutateAgainst: unknown, steps: unknown) => runGateSpy(gate, mutateAgainst, steps),
-  forgetVerdicts: (gates: unknown) => forgetVerdictsSpy(gates),
+}));
+
+vi.mock("./runs/runs-on-disk.ts", () => ({
   writeVerdict: (verdict: unknown) => writeVerdictSpy(verdict),
 }));
 
 vi.mock("./verdict/gate-verdict.ts", () => ({
   PASSED: 0,
   FAILED: 1,
-  skippedVerdict: (gate: unknown, because: unknown, at: unknown) => skippedVerdictSpy(gate, because, at),
+  skippedVerdict: (...args: readonly unknown[]) => skippedVerdictSpy(...args),
 }));
 
 const paragraphFileOfSpy = vi.fn();
@@ -101,6 +124,8 @@ beforeEach(() => {
   skippedVerdictSpy.mockReturnValue(SKIPPED);
   summaryLinesSpy.mockReturnValue(["a summary line"]);
   gatesParagraphSpy.mockReturnValue("Gates: a paragraph.");
+  takeLockSpy.mockReturnValue({ ok: true, release: releaseSpy });
+  refusalOfSpy.mockReturnValue("the paragraph is in use by another battery");
 });
 
 describe("THE_SUITE and NEEDS_THE_SUITE", () => {
@@ -260,18 +285,67 @@ describe("runBattery()", () => {
     expect(status).toBe(RED);
     expect(say.mock.calls[FIRST]?.[FIRST]).toContain("check:quick, check:push, check:phase, check:release");
     expect(runGateSpy).toHaveBeenCalledTimes(NEVER);
-    expect(forgetVerdictsSpy).toHaveBeenCalledTimes(NEVER);
+    expect(takeLockSpy).toHaveBeenCalledTimes(NEVER);
   });
 
-  it("should forget its gates' old verdicts and write its name down before the first gate runs", async () => {
+  it("should take the battery's lock as this process, naming the npm script that re-runs it", async () => {
     await runBattery(["node", "run-battery.ts", BATTERY.push], say, ROOT);
 
-    expect(forgetVerdictsSpy).toHaveBeenCalledWith([GATE.lint, GATE.typecheck, GATE.e2eTypecheck, GATE.harness, GATE.checkDocs]);
-    expect(mkdirSyncSpy).toHaveBeenCalledWith("reports/gates", { recursive: true });
-    expect(writeFileSyncSpy).toHaveBeenNthCalledWith(ONCE, "reports/gates/battery.txt", "check:push\n");
-    expect(forgetVerdictsSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
+    expect(takeLockSpy).toHaveBeenCalledWith(
+      "reports/gates/battery.lock",
+      { pid: process.pid, command: "npm run check:push", startedAt: expect.any(String), folder: null },
+      isAliveSpy
+    );
+  });
+
+  it("should write its name and the moment it started before the first gate runs, so a re-run counts only newer runs", async () => {
+    await runBattery(["node", "run-battery.ts", BATTERY.push], say, ROOT);
+
+    const [path, text] = writeFileSyncSpy.mock.calls[FIRST] ?? [];
+    const written = JSON.parse(String(text)) as { battery: string; startedAt: string };
+
+    expect(path).toBe(BATTERY_PATH);
+    expect(written.battery).toBe(BATTERY.push);
+    expect(Number.isNaN(Date.parse(written.startedAt))).toBe(false);
+    expect(takeLockSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
+      writeFileSyncSpy.mock.invocationCallOrder[FIRST] ?? 0
+    );
+    expect(writeFileSyncSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
       runGateSpy.mock.invocationCallOrder[FIRST] ?? 0
     );
+  });
+
+  it("should refuse while another battery holds the lock, saying who and how to re-run, and touch nothing", async () => {
+    const holder = { pid: 4821, command: "npm run check:quick", startedAt: "2026-09-25T09:00:00.000Z", folder: null };
+
+    takeLockSpy.mockReturnValue({ ok: false, holder });
+
+    const status = await runBattery(["node", "run-battery.ts", BATTERY.phase], say, ROOT);
+
+    expect(status).toBe(RED);
+    expect(refusalOfSpy).toHaveBeenCalledWith(LOCK.battery, holder, "npm run check:phase");
+    expect(say.mock.calls.map((call) => call[FIRST])).toEqual([
+      "check:phase: refused — the paragraph is in use by another battery",
+    ]);
+    expect(runGateSpy).toHaveBeenCalledTimes(NEVER);
+    expect(writeFileSyncSpy).toHaveBeenCalledTimes(NEVER);
+    expect(releaseSpy).toHaveBeenCalledTimes(NEVER);
+  });
+
+  it("should release the lock once, after the paragraph is written", async () => {
+    await runBattery(["node", "run-battery.ts", BATTERY.push], say, ROOT);
+
+    expect(releaseSpy).toHaveBeenCalledTimes(ONCE);
+    expect(writeFileSyncSpy.mock.invocationCallOrder.at(-1) ?? 0).toBeLessThan(
+      releaseSpy.mock.invocationCallOrder[FIRST] ?? 0
+    );
+  });
+
+  it("should release the lock even when a gate throws, so a crash inside never blocks the next battery", async () => {
+    runGateSpy.mockRejectedValue(new Error("spawn failed"));
+
+    await expect(runBattery(["node", "run-battery.ts", BATTERY.push], say, ROOT)).rejects.toThrow("spawn failed");
+    expect(releaseSpy).toHaveBeenCalledTimes(ONCE);
   });
 
   it("should walk the named battery with no baseline and exit green when every gate is", async () => {
@@ -300,15 +374,21 @@ describe("runBattery()", () => {
     expect(writeFileSyncSpy).toHaveBeenCalledWith(PARAGRAPH_PATH, "a stamped file");
   });
 
-  it("should write a skipped gate's verdict to disk too, so a single re-run reads the whole battery", async () => {
+  it("should write a skipped gate's verdict into a run folder of its own, so a single re-run reads the whole battery", async () => {
     runGateSpy.mockImplementation((gate: GateVerdict["gate"]) =>
       Promise.resolve(verdictFor(gate, gate !== GATE.coverage))
     );
 
     await runBattery(["node", "run-battery.ts", BATTERY.phase], say, ROOT);
 
-    expect(skippedVerdictSpy).toHaveBeenCalledWith(GATE.mutationChanged, GATE.coverage, expect.any(Date));
+    const folder = `reports/runs/test-mutation-changed/${A_RUN}`;
+
+    expect(skippedVerdictSpy).toHaveBeenCalledWith(GATE.mutationChanged, folder, GATE.coverage, expect.any(Date));
+    expect(mkdirSyncSpy).toHaveBeenCalledWith(folder, { recursive: true });
     expect(writeVerdictSpy).toHaveBeenCalledWith(SKIPPED);
+    expect(mkdirSyncSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
+      writeVerdictSpy.mock.invocationCallOrder[FIRST] ?? 0
+    );
   });
 
   it("should walk the release gates against the previous tag when the battery is the release", async () => {
@@ -338,7 +418,7 @@ describe("runBattery()", () => {
     expect(status).toBe(RED);
     expect(say.mock.calls[FIRST]?.[FIRST]).toContain("HEAD carries no v* tag");
     expect(runGateSpy).toHaveBeenCalledTimes(NEVER);
-    expect(forgetVerdictsSpy).toHaveBeenCalledTimes(NEVER);
+    expect(takeLockSpy).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should write the paragraph last and say the summary, then exit red on any red gate", async () => {

@@ -34,6 +34,7 @@ const verdictWith = (gate: RanVerdict["gate"], ok: boolean, numbers: GateNumbers
   kind: "ran",
   gate,
   named: false,
+  folder: "reports/runs/a-gate/a-run",
   ok,
   exitCode: ok ? PASSED : RED,
   startedAt: "2026-09-09T10:00:00.000Z",
@@ -45,8 +46,17 @@ const verdictWith = (gate: RanVerdict["gate"], ok: boolean, numbers: GateNumbers
 const SKIPPED: GateVerdict = {
   kind: "skipped",
   gate: GATE.mutationChanged,
+  folder: "reports/runs/test-mutation-changed/a-run",
   ok: false,
   because: GATE.coverage,
+  startedAt: "2026-09-09T10:00:00.000Z",
+};
+
+const REFUSED: GateVerdict = {
+  kind: "refused",
+  gate: GATE.e2eChanged,
+  ok: false,
+  notice: "another e2e run holds the e2e-worlds lock",
   startedAt: "2026-09-09T10:00:00.000Z",
 };
 
@@ -314,11 +324,17 @@ describe("gatesParagraph()", () => {
     );
   });
 
+  it("should say a refused gate was refused because another run held what it needs, as a red gate", () => {
+    expect(gatesParagraph([REFUSED], BATTERY.phase)).toBe(
+      "Gates: check:phase RED (e2e:changed red (refused, another run held what it needs))."
+    );
+  });
+
   it("should say which file a green gate failed to write, rather than invent a number", () => {
-    const verdicts = [verdictWith(GATE.e2e, true, { kind: "missing", expected: "reports/e2e/results.json" })];
+    const verdicts = [verdictWith(GATE.e2e, true, { kind: "missing", expected: "reports/runs/e2e/a-run/results.json" })];
 
     expect(gatesParagraph(verdicts, BATTERY.release)).toBe(
-      "Gates: check:release green — no numbers: reports/e2e/results.json was not written."
+      "Gates: check:release green — no numbers: reports/runs/e2e/a-run/results.json was not written."
     );
   });
 
@@ -363,6 +379,13 @@ describe("summaryLines()", () => {
 
     expect(rerunCommandForSpy).toHaveBeenCalledTimes(ONCE);
     expect(lines.at(-1)).toBe("  rerun test:mutation-changed");
+  });
+
+  it("should count a refused gate among the red ones to re-run, once whatever held it has let go", () => {
+    const lines = summaryLines([REFUSED], ROOT);
+
+    expect(rerunCommandForSpy).toHaveBeenCalledTimes(ONCE);
+    expect(lines).toEqual(["e2e:changed: a line", "Re-run a red gate alone, not the whole battery:", "  rerun e2e:changed"]);
   });
 
   it("should add no advice to a green run", () => {
@@ -412,9 +435,10 @@ describe("relativeTo()", () => {
 });
 
 describe("reasonLines()", () => {
-  it("should say nothing for a green gate or a skipped one", () => {
+  it("should say nothing for a green gate, a skipped one or a refused one", () => {
     expect(reasonLines(verdictWith(GATE.lint, true, NO_FINDINGS), ROOT)).toEqual([]);
     expect(reasonLines(SKIPPED, ROOT)).toEqual([]);
+    expect(reasonLines(REFUSED, ROOT)).toEqual([]);
   });
 
   it("should list each finding as file:line:col rule — message, the file made relative", () => {
@@ -493,7 +517,7 @@ describe("reasonLines()", () => {
 
   it("should fall back to the tail when a gate died before writing the file its numbers come from", () => {
     const red = {
-      ...verdictWith(GATE.checkDocs, false, { kind: "missing", expected: "reports/check-docs/complaints.json" }),
+      ...verdictWith(GATE.checkDocs, false, { kind: "missing", expected: "reports/runs/check-docs/a-run/complaints.json" }),
       tail: ["it threw"],
     };
 

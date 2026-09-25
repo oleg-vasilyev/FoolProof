@@ -1,16 +1,14 @@
 import { GATE, type Gate } from "../shared/gate-names.ts";
-import { FAMILIES, familyReports } from "../mutation/mutation-families.ts";
+import { FAMILIES } from "../mutation/mutation-families.ts";
 import { familyScore, type FamilyScore } from "../mutation/family-scores.ts";
 import {
   CHECK_DOCS_COMPLAINTS,
   COVERAGE_SUMMARY,
-  E2E_RESULTS,
   E2E_SELECTION,
-  E2E_TYPECHECK_FINDINGS,
-  HARNESS_RESULTS,
   LINT_FINDINGS,
-  TESTS_RESULTS,
+  RESULTS,
   TYPECHECK_FINDINGS,
+  inRun,
 } from "../shared/gate-paths.ts";
 import { selectionIn, type E2eSelection } from "../e2e/e2e-selection.ts";
 import type { Reader } from "../shared/report-reader.ts";
@@ -34,41 +32,6 @@ export type GateNumbers =
 
 const NO_ARGUMENTS = 0;
 
-export const outputsOf = (gate: Gate): readonly [string, ...string[]] => {
-  switch (gate) {
-    case GATE.typecheck:
-      return [TYPECHECK_FINDINGS];
-
-    case GATE.e2eTypecheck:
-      return [E2E_TYPECHECK_FINDINGS];
-
-    case GATE.checkDocs:
-      return [CHECK_DOCS_COMPLAINTS];
-
-    case GATE.lint:
-      return [LINT_FINDINGS];
-
-    case GATE.harness:
-      return [HARNESS_RESULTS];
-
-    case GATE.test:
-      return [TESTS_RESULTS];
-
-    case GATE.coverage:
-      return [TESTS_RESULTS, COVERAGE_SUMMARY];
-
-    case GATE.mutationChanged:
-    case GATE.mutation:
-      return familyReports();
-
-    case GATE.e2e:
-      return [E2E_RESULTS];
-
-    case GATE.e2eChanged:
-      return [E2E_RESULTS, E2E_SELECTION];
-  }
-};
-
 export const scopeOf = (
   gate: Gate,
   mutateAgainst: string | undefined,
@@ -91,12 +54,12 @@ const testNumbers = (read: Reader, kind: "harness" | "tests", path: string): Gat
   return results === null ? { kind: "missing", expected: path } : { kind, ...casesIn(results, false) };
 };
 
-const coverageNumbers = (read: Reader): GateNumbers => {
-  const results = resultsIn(read, TESTS_RESULTS);
-  const rates = ratesIn(read, COVERAGE_SUMMARY);
+const coverageNumbers = (read: Reader, folder: string): GateNumbers => {
+  const results = resultsIn(read, inRun(folder, RESULTS));
+  const rates = ratesIn(read, inRun(folder, COVERAGE_SUMMARY));
 
   if (results === null) {
-    return { kind: "missing", expected: TESTS_RESULTS };
+    return { kind: "missing", expected: inRun(folder, RESULTS) };
   }
 
   if (rates === null) {
@@ -106,25 +69,25 @@ const coverageNumbers = (read: Reader): GateNumbers => {
   return { kind: "coverage", ...casesIn(results, false), ...rates };
 };
 
-const lintNumbers = (read: Reader): GateNumbers => {
-  const json = read(LINT_FINDINGS);
+const lintNumbers = (read: Reader, path: string): GateNumbers => {
+  const json = read(path);
 
-  return json === null ? { kind: "missing", expected: LINT_FINDINGS } : { kind: "findings", findings: lintFindingsIn(json) };
+  return json === null ? { kind: "missing", expected: path } : { kind: "findings", findings: lintFindingsIn(json) };
 };
 
-const checkDocsNumbers = (read: Reader): GateNumbers => {
-  const json = read(CHECK_DOCS_COMPLAINTS);
+const checkDocsNumbers = (read: Reader, path: string): GateNumbers => {
+  const json = read(path);
 
   return json === null
-    ? { kind: "missing", expected: CHECK_DOCS_COMPLAINTS }
+    ? { kind: "missing", expected: path }
     : { kind: "complaints", complaints: complaintsIn(json) };
 };
 
-const mutationNumbers = (read: Reader, scope: MutationScope): GateNumbers => ({
+const mutationNumbers = (read: Reader, scope: MutationScope, folder: string): GateNumbers => ({
   kind: "mutation",
   scope,
   families: FAMILIES.flatMap((family) => {
-    const score = familyScore(read, family);
+    const score = familyScore(read, family, folder);
 
     return score === null ? [] : [score];
   }),
@@ -145,17 +108,17 @@ const selectionRead = (read: Reader, path: string): E2eSelection | null => {
   return json === null ? null : selectionIn(json);
 };
 
-const played = (read: Reader, selection: E2eSelection): GateNumbers => {
-  const results = resultsIn(read, E2E_RESULTS);
+const played = (read: Reader, selection: E2eSelection, path: string): GateNumbers => {
+  const results = resultsIn(read, path);
 
   return results === null
-    ? { kind: "missing", expected: E2E_RESULTS }
+    ? { kind: "missing", expected: path }
     : { kind: "e2e", selection, ...casesIn(results, true) };
 };
 
-const e2eNumbers = (read: Reader, selection: E2eSelection | null): GateNumbers => {
+const e2eNumbers = (read: Reader, selection: E2eSelection | null, folder: string): GateNumbers => {
   if (selection === null) {
-    return { kind: "missing", expected: E2E_SELECTION };
+    return { kind: "missing", expected: inRun(folder, E2E_SELECTION) };
   }
 
   switch (selection.kind) {
@@ -164,41 +127,39 @@ const e2eNumbers = (read: Reader, selection: E2eSelection | null): GateNumbers =
 
     case "everything":
     case "scenarios":
-      return played(read, selection);
+      return played(read, selection, inRun(folder, RESULTS));
   }
 };
 
-export const numbersFor = (gate: Gate, scope: MutationScope, read: Reader): GateNumbers => {
+export const numbersFor = (gate: Gate, scope: MutationScope, read: Reader, folder: string): GateNumbers => {
   switch (gate) {
     case GATE.checkDocs:
-      return checkDocsNumbers(read);
+      return checkDocsNumbers(read, inRun(folder, CHECK_DOCS_COMPLAINTS));
 
     case GATE.lint:
-      return lintNumbers(read);
+      return lintNumbers(read, inRun(folder, LINT_FINDINGS));
 
     case GATE.typecheck:
-      return savedFindings(read, TYPECHECK_FINDINGS);
-
     case GATE.e2eTypecheck:
-      return savedFindings(read, E2E_TYPECHECK_FINDINGS);
+      return savedFindings(read, inRun(folder, TYPECHECK_FINDINGS));
 
     case GATE.harness:
-      return testNumbers(read, "harness", HARNESS_RESULTS);
+      return testNumbers(read, "harness", inRun(folder, RESULTS));
 
     case GATE.test:
-      return testNumbers(read, "tests", TESTS_RESULTS);
+      return testNumbers(read, "tests", inRun(folder, RESULTS));
 
     case GATE.coverage:
-      return coverageNumbers(read);
+      return coverageNumbers(read, folder);
 
     case GATE.mutationChanged:
     case GATE.mutation:
-      return mutationNumbers(read, scope);
+      return mutationNumbers(read, scope, folder);
 
     case GATE.e2e:
-      return e2eNumbers(read, { kind: "everything" });
+      return e2eNumbers(read, { kind: "everything" }, folder);
 
     case GATE.e2eChanged:
-      return e2eNumbers(read, selectionRead(read, E2E_SELECTION));
+      return e2eNumbers(read, selectionRead(read, inRun(folder, E2E_SELECTION)), folder);
   }
 };

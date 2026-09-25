@@ -13,6 +13,7 @@ export default defineConfig({
     exclude: ["e2e/**/*.e2e.spec.ts"],
     root: resolve(import.meta.dirname, "../../.."),
     environment: "node",
-    reporters: [["json", { outputFile: "reports/tests/harness-results.json" }]],
+    reporters: ["json"],
+    outputFile: { json: "reports/tests/harness-results.json" },
   },
 });

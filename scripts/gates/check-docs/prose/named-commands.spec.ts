@@ -120,9 +120,9 @@ describe("namedCommandComplaints(), a gate run by hand", () => {
     );
 
     expect(said.map((line) => line.slice(A_FILE.length))).toEqual([
-      ': runs "npm test" by hand — a gate runs only through scripts/gates/gate-runner.ts, so its verdict lands under reports/gates/ and its config is the one the runner names',
-      ': runs "npx vitest" by hand — a gate runs only through scripts/gates/gate-runner.ts, so its verdict lands under reports/gates/ and its config is the one the runner names',
-      ': runs "npx --no-install eslint" by hand — a gate runs only through scripts/gates/gate-runner.ts, so its verdict lands under reports/gates/ and its config is the one the runner names',
+      ': runs "npm test" by hand — a gate runs only through scripts/gates/gate-runner.ts, so its verdict lands in a folder of its own under reports/runs/ and its config is the one the runner names',
+      ': runs "npx vitest" by hand — a gate runs only through scripts/gates/gate-runner.ts, so its verdict lands in a folder of its own under reports/runs/ and its config is the one the runner names',
+      ': runs "npx --no-install eslint" by hand — a gate runs only through scripts/gates/gate-runner.ts, so its verdict lands in a folder of its own under reports/runs/ and its config is the one the runner names',
     ]);
   });
 

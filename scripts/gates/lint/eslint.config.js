@@ -732,8 +732,8 @@ export default [
   {
     // A gate reaches the console through shared/say.ts and not otherwise, the same
     // shape src/shared/logging/logger.ts has. This is tidiness, not the guarantee:
-    // what stops a gate reporting out of a stream is that outputsOf() returns a
-    // non-empty tuple and numbersFor() has no way to see the captured output.
+    // what stops a gate reporting out of a stream is that every case of numbersFor()
+    // reads a file inside the run's folder and has no way to see the captured output.
     // no-console does not know process.stdout.write, and this block does not pretend
     // to. It is "no-console" rather than a "no-restricted-syntax" selector on purpose
     // — forbid() already sets that rule name for scripts/**, and a later block

@@ -28,9 +28,3 @@ export const FAMILIES: readonly [Family, ...Family[]] = [
 ];
 
 export const FAMILY_NAMES: readonly FamilyName[] = FAMILIES.map((family) => family.family);
-
-export const familyReports = (): readonly [string, ...string[]] => {
-  const [first, ...rest] = FAMILIES;
-
-  return [first.report, ...rest.map((family) => family.report)];
-};

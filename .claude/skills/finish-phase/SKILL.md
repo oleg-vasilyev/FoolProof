@@ -24,7 +24,7 @@ green. Say which of the two happened in the closing message.
 Gates 1–4 are one command: **`npm run check:phase`** — lint, types, the suite
 under coverage, mutation over the diff, e2e over the diff, with the tests
 counted once. Every gate runs (only mutation waits for a green suite); each leaves
-`reports/gates/<gate>.log` and `.json`, and the run ends with the `Gates:` paragraph
+its log and verdict in a folder under `reports/runs/<gate>/`, and the run ends with the `Gates:` paragraph
 the commit pastes, in `reports/gates/gates-paragraph.txt`. A red gate prints its
 reasons under its line and is re-run **alone** — `node scripts/gates/gate-runner.ts <gate>`,
 or one spec as `… test <file>` — never by repeating the chain; gate 3's rules still apply.

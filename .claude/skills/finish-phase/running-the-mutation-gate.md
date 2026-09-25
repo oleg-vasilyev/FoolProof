@@ -40,9 +40,9 @@ node scripts/gates/gate-runner.ts test:mutation-changed src/features/<x>/a.ts sr
 ```
 
 It names files, never a glob, routes each to its family with that family's own
-exclusions, and writes `reports/gates/test-mutation-changed.named.json` beside the log
-without touching the battery's verdict or the paragraph — though it does rewrite
-`reports/mutation*/mutation.json` for the family it ran and deletes the other's first. If you ever run
+exclusions, and writes everything — log, verdict marked named, each family's Stryker
+sandbox and `mutation-<family>.json` — into a folder of its own, so two named runs go at
+once and neither touches the battery's paragraph. If you ever run
 Stryker outside the runner, keep `json` in `--reporters`: with `clear-text` alone the `mutation.json` on disk is the
 *previous* run's, and a survivor triaged off it reads tests that no longer exist. One
 phase paid a whole extra Stryker run to learn that its new cases had been counted.
@@ -67,8 +67,8 @@ Rules about *running* it, learned by burning most of a phase's budget on them:
   then needs, and the cheapest way back is running the thing again — which is the
   rule this one protects. Send the whole run to a file and grep the file. Every
   run through the runner prints every mutant still alive under its line — file, line,
-  status, replacement, twenty per family — and writes `reports/mutation/mutation.json`
-  and `reports/mutation/index.html` for the rest; read those. `/merge` was closed with eight
+  status, replacement, twenty per family — and writes `mutation-<family>.json` and
+  `.html` into the run's folder for the rest; read those. `/merge` was closed with eight
   Stryker invocations where two would have done, three of them the same full run
   repeated to look at three slices of one table.
 - **Moving code moves its mutants — re-run the gate after a split or a rename.**
@@ -79,8 +79,8 @@ Rules about *running* it, learned by burning most of a phase's budget on them:
   That is the second round the rule above forbids, and it is the one case where
   taking it is right.
 - **`--reporters` replaces the configured set, it does not add to it.** Passing
-  `--reporters clear-text` drops the `json` one, so `reports/mutation/mutation.json`
-  still holds the *previous* run's survivors — and the rule above sends you straight
+  `--reporters clear-text` to Stryker by hand drops the `json` one, so the
+  `mutation.json` its config names still holds the *previous* run's survivors — and the rule above sends you straight
   to that stale file. This has already produced a confident reading of seven
   survivors from a run that mutated three files and found two. Override the
   reporters or read the report, never both.

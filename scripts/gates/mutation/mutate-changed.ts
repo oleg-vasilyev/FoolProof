@@ -1,8 +1,9 @@
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { matchesGlob } from "node:path";
 import { FAMILIES, type Family } from "./mutation-families.ts";
-import { STRYKER } from "../shared/tool-binaries.ts";
+import { runStryker, worstOf } from "./stryker-run.ts";
+import { folderArgumentOf } from "../runs/run-folders.ts";
 import { say } from "../shared/say.ts";
 
 
@@ -70,9 +71,6 @@ export const planLines = (plan: Plan, against: string): readonly string[] =>
         ...plan.files.map((file) => `  ${file}`),
       ];
 
-export const worstOf = (statuses: readonly number[]): number =>
-  statuses.find((status) => status !== NOTHING) ?? NOTHING;
-
 export const gitLines = (...args: readonly string[]): readonly string[] =>
   execFileSync("git", args, { encoding: "utf8" })
     .split("\n")
@@ -84,19 +82,13 @@ export const changedFiles = (baseline: string): readonly string[] => [
   ...gitLines("ls-files", "--others", "--exclude-standard"),
 ];
 
-export const runStryker = (plan: Plan, patterns: readonly string[]): number =>
-  spawnSync(
-    process.execPath,
-    [STRYKER, "run", plan.family.config, "--mutate", mutateArgument(patterns, plan.files)],
-    { stdio: "inherit" }
-  ).status ?? KILLED;
-
 export const strayAmong = (named: readonly string[], plans: readonly Plan[]): readonly string[] =>
   named.filter((file) => !plans.some((plan) => plan.files.includes(file)));
 
 export const mutateChanged = (
   env: Readonly<Record<string, string | undefined>>,
   say: (line: string) => void,
+  folder: string,
   named: readonly string[] = []
 ): number => {
   const baseline = env.MUTATE_AGAINST ?? DEFAULT_BASELINE;
@@ -120,12 +112,21 @@ export const mutateChanged = (
       say(line);
     }
 
-    return plan.files.length === NOTHING ? NOTHING : runStryker(plan, patterns(plan.family.config));
+    return plan.files.length === NOTHING
+      ? NOTHING
+      : runStryker(plan.family, folder, ["--mutate", mutateArgument(patterns(plan.family.config), plan.files)]);
   });
 
   return worstOf(statuses);
 };
 
 if (import.meta.main) {
-  process.exit(mutateChanged(process.env, say, process.argv.slice(AFTER_NODE_AND_SCRIPT)));
+  const argument = folderArgumentOf("mutate-changed", process.argv.slice(AFTER_NODE_AND_SCRIPT));
+
+  if (!argument.ok) {
+    say(argument.notice);
+    process.exit(KILLED);
+  }
+
+  process.exit(mutateChanged(process.env, say, argument.folder, argument.rest));
 }

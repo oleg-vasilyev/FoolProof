@@ -1,10 +1,14 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { BATTERIES, COMMANDS, isBattery } from "./shared/gate-list.ts";
-import { BATTERY, GATE, type Battery, type Gate } from "./shared/gate-names.ts";
-import { BATTERY_PATH, GATES_DIR, PARAGRAPH_PATH } from "./shared/gate-paths.ts";
+import { BATTERY, GATE, LOCK, type Battery, type Gate } from "./shared/gate-names.ts";
+import { BATTERY_PATH, PARAGRAPH_PATH, lockPathOf, runFolderOf } from "./shared/gate-paths.ts";
 import { say } from "./shared/say.ts";
-import { forgetVerdicts, runGate, writeVerdict } from "./gate-runner.ts";
+import { runIdOf } from "./runs/run-folders.ts";
+import { isAlive, takeLock } from "./runs/run-lock.ts";
+import { refusalOf } from "./runs/lock-refusal.ts";
+import { runGate } from "./gate-runner.ts";
+import { writeVerdict } from "./runs/runs-on-disk.ts";
 import { FAILED, PASSED, skippedVerdict, type GateVerdict } from "./verdict/gate-verdict.ts";
 import { gatesParagraph, paragraphFileOf, summaryLines } from "./verdict/gate-summary.ts";
 
@@ -82,11 +86,33 @@ export const baselineFromGit = (): Baseline =>
   );
 
 const skipOnDisk = (gate: Gate, because: Gate): GateVerdict => {
-  const verdict = skippedVerdict(gate, because, new Date());
+  const now = new Date();
+  const folder = runFolderOf(gate, runIdOf(now, process.pid));
+  const verdict = skippedVerdict(gate, folder, because, now);
 
+  mkdirSync(folder, { recursive: true });
   writeVerdict(verdict);
 
   return verdict;
+};
+
+export const commandOf = (battery: Battery): string => `npm run ${battery}`;
+
+const walkHolding = async (battery: Battery, mutateAgainst: string | undefined): Promise<readonly GateVerdict[]> => {
+  writeFileSync(BATTERY_PATH, JSON.stringify({ battery, startedAt: new Date().toISOString() }));
+
+  const verdicts = await walkTheGates(
+    BATTERIES[battery],
+    (gate) => runGate(gate, mutateAgainst, COMMANDS[gate].steps),
+    skipOnDisk
+  );
+
+  writeFileSync(
+    PARAGRAPH_PATH,
+    paragraphFileOf(battery, gitLine("rev-parse", "HEAD"), new Date(), gatesParagraph(verdicts, battery))
+  );
+
+  return verdicts;
 };
 
 export const runBattery = async (
@@ -110,21 +136,22 @@ export const runBattery = async (
     return FAILED;
   }
 
-  mkdirSync(GATES_DIR, { recursive: true });
-  forgetVerdicts(BATTERIES[battery]);
-  writeFileSync(BATTERY_PATH, `${battery}\n`);
+  const holder = {
+    pid: process.pid,
+    command: commandOf(battery),
+    startedAt: new Date().toISOString(),
+    folder: null,
+  };
+  const held = takeLock(lockPathOf(LOCK.battery), holder, isAlive);
+
+  if (!held.ok) {
+    say(`${battery}: refused — ${refusalOf(LOCK.battery, held.holder, commandOf(battery))}`);
+
+    return FAILED;
+  }
 
   const mutateAgainst = baseline?.ok === true ? baseline.tag : undefined;
-  const verdicts = await walkTheGates(
-    BATTERIES[battery],
-    (gate) => runGate(gate, mutateAgainst, COMMANDS[gate].steps),
-    skipOnDisk
-  );
-
-  writeFileSync(
-    PARAGRAPH_PATH,
-    paragraphFileOf(battery, gitLine("rev-parse", "HEAD"), new Date(), gatesParagraph(verdicts, battery))
-  );
+  const verdicts = await walkHolding(battery, mutateAgainst).finally(held.release);
 
   for (const line of whatToSay(verdicts, battery, root)) {
     say(line);

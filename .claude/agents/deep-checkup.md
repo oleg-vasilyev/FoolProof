@@ -317,8 +317,8 @@ a look on its own.
 Coverage means nothing by itself; this project's real honesty gate is Stryker,
 and the **full** run is yours: a hook refuses `node scripts/gates/gate-runner.ts test:mutation` to anybody else
 (a phase mutates its diff, a tag what changed since the previous tag), so run it
-here, read both families' scores off `reports/mutation/` and
-`reports/mutation-scripts/`, and put them in the report as two measurement rows —
+here, read both families' scores off `mutation-source.json` and
+`mutation-tooling.json` in the folder named on the gate's own line, and put them in the report as two measurement rows —
 the trend between checkups is the only place a weakened spec over an untouched
 subject can show. Then audit the gate itself: what `stryker.config` excludes or ignores from
 mutation — confirm the game rules, transition logic and lineup parsing are

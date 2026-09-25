@@ -1,18 +1,14 @@
 import { EventEmitter } from "node:events";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { BATTERY, GATE } from "./shared/gate-names.ts";
+import { GATE, LOCK } from "./shared/gate-names.ts";
 import type { GateVerdict } from "./verdict/gate-verdict.ts";
 
 
 const spawnSpy = vi.fn();
 
-const readFileSyncSpy = vi.fn();
-
-const rmSyncSpy = vi.fn();
-
 const mkdirSyncSpy = vi.fn();
 
-const writeFileSyncSpy = vi.fn();
+const createWriteStreamSpy = vi.fn();
 
 const logWriteSpy = vi.fn();
 
@@ -20,30 +16,43 @@ const logEndSpy = vi.fn();
 
 const numbersForSpy = vi.fn();
 
-const outputsOfSpy = vi.fn();
-
 const scopeOfSpy = vi.fn();
 
 const verdictOfSpy = vi.fn();
 
-const gatesParagraphSpy = vi.fn();
+const refusedVerdictSpy = vi.fn();
+
+const reasonLinesSpy = vi.fn();
+
+const readOrNullSpy = vi.fn();
+
+const rewriteParagraphSpy = vi.fn();
+
+const tidyRunsOfSpy = vi.fn();
+
+const writeVerdictSpy = vi.fn();
+
+const takeLockSpy = vi.fn();
+
+const releaseSpy = vi.fn();
+
+const isAliveSpy = vi.fn();
+
+const refusalOfSpy = vi.fn();
+
+const A_RUN = "2026-09-25T10-00-00.000Z-p4821";
 
 vi.mock("node:child_process", () => ({
   spawn: (...args: readonly unknown[]) => spawnSpy(...args),
 }));
 
 vi.mock("node:fs", () => ({
-  readFileSync: (...args: readonly unknown[]) => readFileSyncSpy(...args),
-  rmSync: (...args: readonly unknown[]) => rmSyncSpy(...args),
   mkdirSync: (...args: readonly unknown[]) => mkdirSyncSpy(...args),
-  writeFileSync: (...args: readonly unknown[]) => writeFileSyncSpy(...args),
-  createWriteStream: () => ({ write: logWriteSpy, end: logEndSpy }),
+  createWriteStream: (...args: readonly unknown[]) => createWriteStreamSpy(...args),
 }));
 
 vi.mock("./verdict/gate-numbers.ts", () => ({
-  LINT_FINDINGS: "reports/lint/findings.json",
-  numbersFor: (gate: unknown, scope: unknown, read: unknown) => numbersForSpy(gate, scope, read),
-  outputsOf: (gate: unknown) => outputsOfSpy(gate),
+  numbersFor: (...args: readonly unknown[]) => numbersForSpy(...args),
   scopeOf: (gate: unknown, against: unknown, args: unknown) => scopeOfSpy(gate, against, args),
 }));
 
@@ -51,32 +60,40 @@ vi.mock("./verdict/gate-verdict.ts", () => ({
   FAILED: 1,
   PASSED: 0,
   verdictOf: (...args: readonly unknown[]) => verdictOfSpy(...args),
+  refusedVerdict: (...args: readonly unknown[]) => refusedVerdictSpy(...args),
   lineFor: () => "a line",
 }));
 
-const reasonLinesSpy = vi.fn();
-
-const paragraphFileOfSpy = vi.fn();
-
-const stampLineOfSpy = vi.fn();
-
 vi.mock("./verdict/gate-summary.ts", () => ({
-  gatesParagraph: (verdicts: unknown, battery: unknown) => gatesParagraphSpy(verdicts, battery),
-  paragraphFileOf: (...args: readonly unknown[]) => paragraphFileOfSpy(...args),
   reasonLines: (verdict: unknown, root: unknown) => reasonLinesSpy(verdict, root),
-  stampLineOf: (text: unknown) => stampLineOfSpy(text),
+}));
+
+vi.mock("./runs/run-folders.ts", () => ({
+  runIdOf: () => A_RUN,
+}));
+
+vi.mock("./runs/runs-on-disk.ts", () => ({
+  readOrNull: readOrNullSpy,
+  rewriteParagraph: () => rewriteParagraphSpy(),
+  tidyRunsOf: (gate: unknown, now: unknown) => tidyRunsOfSpy(gate, now),
+  writeVerdict: (verdict: unknown) => writeVerdictSpy(verdict),
+}));
+
+vi.mock("./runs/run-lock.ts", () => ({
+  isAlive: isAliveSpy,
+  takeLock: (...args: readonly unknown[]) => takeLockSpy(...args),
+}));
+
+vi.mock("./runs/lock-refusal.ts", () => ({
+  refusalOf: (...args: readonly unknown[]) => refusalOfSpy(...args),
 }));
 
 const {
-  batteryOnDisk,
   childEnvironment,
-  forgetVerdicts,
+  exitCodeOf,
+  holdFor,
   main,
-  readOrNull,
-  rewriteParagraph,
   runGate,
-  verdictsOnDisk,
-  writeVerdict,
   WITHOUT_EXPERIMENT_WARNINGS,
 } = await import("./gate-runner.ts");
 
@@ -89,15 +106,30 @@ const FAILED = 1;
 
 const ONCE = 1;
 
+const NEVER = 0;
+
 const FIRST = 0;
 
 const SECOND = 1;
 
 const THIRD = 2;
 
+const LINT_FOLDER = `reports/runs/lint/${A_RUN}`;
+
+const E2E_FOLDER = `reports/runs/e2e/${A_RUN}`;
+
 const THE_NUMBERS = { kind: "findings", findings: [] } as const;
 
-const THE_VERDICT = { kind: "ran", gate: GATE.lint, named: false, ok: true, exitCode: PASSED } as unknown as GateVerdict;
+const THE_VERDICT = {
+  kind: "ran",
+  gate: GATE.lint,
+  named: false,
+  folder: LINT_FOLDER,
+  ok: true,
+  exitCode: PASSED,
+} as unknown as GateVerdict;
+
+const A_REFUSAL = { kind: "refused", gate: GATE.e2e, ok: false } as unknown as GateVerdict;
 
 const A_SCOPE = "since v1.20.0";
 
@@ -111,6 +143,10 @@ const TWO_STEPS = [
   { bin: "node_modules/typescript/bin/tsc", args: ["-p", "e2e"] },
   { bin: "node_modules/typescript/bin/tsc", args: ["-p", "e2e/pages"] },
 ];
+
+const BATTERY_START = "2026-09-25T09:00:00.000Z";
+
+const A_HOLDER = { pid: 5150, command: "node scripts/gates/gate-runner.ts e2e:changed", startedAt: BATTERY_START, folder: null };
 
 class ChildStub extends EventEmitter {
   public stdout = Object.assign(new EventEmitter(), { setEncoding: vi.fn() });
@@ -135,34 +171,25 @@ class ChildStub extends EventEmitter {
 
 let child: ChildStub;
 
-const filesOnDisk = (files: Record<string, string>): void => {
-  readFileSyncSpy.mockImplementation((path: string) => {
-    const text = files[path];
-
-    if (text === undefined) {
-      throw new Error("ENOENT");
-    }
-
-    return text;
-  });
-};
+const onlyThese = (steps: readonly { bin: string; args: string[] }[]) => () => steps;
 
 beforeEach(() => {
   vi.clearAllMocks();
 
   child = new ChildStub();
   spawnSpy.mockReturnValue(child);
-  outputsOfSpy.mockReturnValue(["reports/tests/results.json"]);
+  createWriteStreamSpy.mockReturnValue({ write: logWriteSpy, end: logEndSpy });
   scopeOfSpy.mockReturnValue(A_SCOPE);
   numbersForSpy.mockReturnValue(THE_NUMBERS);
   verdictOfSpy.mockReturnValue(THE_VERDICT);
-  gatesParagraphSpy.mockReturnValue("Gates: a paragraph.");
+  refusedVerdictSpy.mockReturnValue(A_REFUSAL);
   reasonLinesSpy.mockReturnValue([]);
-  filesOnDisk({});
+  takeLockSpy.mockReturnValue({ ok: true, release: releaseSpy });
+  refusalOfSpy.mockReturnValue("the e2e worlds are in use");
 });
 
 const runAndClose = async (code: number | null, against?: string) => {
-  const pending = runGate(GATE.lint, against, [LINT_STEP]);
+  const pending = runGate(GATE.lint, against, onlyThese([LINT_STEP]));
 
   child.say("first line\nsecond");
   child.complain(" line\n");
@@ -170,19 +197,6 @@ const runAndClose = async (code: number | null, against?: string) => {
 
   return pending;
 };
-
-describe("readOrNull()", () => {
-  it("should hand back a file's text", () => {
-    filesOnDisk({ "some.json": "{}" });
-
-    expect(readOrNull("some.json")).toBe("{}");
-    expect(readFileSyncSpy).toHaveBeenCalledWith("some.json", "utf8");
-  });
-
-  it("should say null for a file that is not there, rather than throw", () => {
-    expect(readOrNull("missing.json")).toBeNull();
-  });
-});
 
 describe("childEnvironment()", () => {
   it("should hand the child this environment with colour and experiment warnings switched off, and nothing more without a baseline", () => {
@@ -210,109 +224,84 @@ describe("childEnvironment()", () => {
   });
 });
 
-describe("writeVerdict() and forgetVerdicts()", () => {
-  it("should write a verdict under its gate's own file, as JSON a reader can open", () => {
-    writeVerdict(THE_VERDICT);
+describe("holdFor()", () => {
+  const STARTED = new Date(BATTERY_START);
 
-    expect(writeFileSyncSpy).toHaveBeenCalledWith("reports/gates/lint.json", JSON.stringify(THE_VERDICT, null, 2));
+  it("should hold nothing, and take no lock, for a gate whose tool writes only into its own folder", () => {
+    const held = holdFor(GATE.test, "reports/runs/test/a", [], STARTED);
+
+    expect(held.ok).toBe(true);
+    expect(takeLockSpy).not.toHaveBeenCalled();
   });
 
-  it("should remove the verdict file of each gate named, and mind a missing one not at all", () => {
-    forgetVerdicts([GATE.lint, GATE.e2eChanged]);
+  it("should take the e2e worlds' lock as this process, naming the command and the folder it writes into", () => {
+    holdFor(GATE.e2eChanged, "reports/runs/e2e-changed/a", [], STARTED);
 
-    expect(rmSyncSpy.mock.calls).toEqual([
-      ["reports/gates/lint.json", { force: true }],
-      ["reports/gates/e2e-changed.json", { force: true }],
-    ]);
-  });
-});
-
-describe("verdictsOnDisk()", () => {
-  it("should read the battery's gates in the battery's order, leaving out one with no verdict yet", () => {
-    filesOnDisk({
-      "reports/gates/typecheck.json": JSON.stringify({ gate: GATE.typecheck }),
-      "reports/gates/lint.json": JSON.stringify({ gate: GATE.lint }),
-      "reports/gates/e2e.json": JSON.stringify({ gate: GATE.e2e }),
-    });
-
-    expect(verdictsOnDisk(BATTERY.quick)).toEqual([{ gate: GATE.lint }, { gate: GATE.typecheck }]);
-  });
-
-  it("should leave out a verdict file that is not JSON, rather than throw inside a battery", () => {
-    filesOnDisk({ "reports/gates/lint.json": "{ cut off" });
-
-    expect(verdictsOnDisk(BATTERY.quick)).toEqual([]);
-  });
-});
-
-describe("batteryOnDisk()", () => {
-  it("should take the battery the walker wrote down", () => {
-    filesOnDisk({ "reports/gates/battery.txt": "check:release\n" });
-
-    expect(batteryOnDisk()).toBe(BATTERY.release);
-  });
-
-  it("should say null when no walker wrote one, or the name is no battery", () => {
-    expect(batteryOnDisk()).toBeNull();
-
-    filesOnDisk({ "reports/gates/battery.txt": "nonsense\n" });
-
-    expect(batteryOnDisk()).toBeNull();
-  });
-});
-
-describe("rewriteParagraph()", () => {
-  it("should rebuild the paragraph from the battery's verdicts on disk, under the stamp the battery left", () => {
-    filesOnDisk({
-      "reports/gates/battery.txt": "check:push\n",
-      "reports/gates/lint.json": JSON.stringify(THE_VERDICT),
-      "reports/gates/gates-paragraph.txt": "the old file",
-    });
-    stampLineOfSpy.mockReturnValue("check:push · abc1234 · 2026-09-11T12:00:00.000Z");
-
-    rewriteParagraph();
-
-    expect(gatesParagraphSpy).toHaveBeenCalledWith([THE_VERDICT], BATTERY.push);
-    expect(stampLineOfSpy).toHaveBeenCalledWith("the old file");
-    expect(writeFileSyncSpy).toHaveBeenCalledWith(
-      "reports/gates/gates-paragraph.txt",
-      "check:push · abc1234 · 2026-09-11T12:00:00.000Z\nGates: a paragraph.\n"
+    expect(takeLockSpy).toHaveBeenCalledWith(
+      "reports/gates/e2e-worlds.lock",
+      {
+        pid: process.pid,
+        command: "node scripts/gates/gate-runner.ts e2e:changed",
+        startedAt: BATTERY_START,
+        folder: "reports/runs/e2e-changed/a",
+      },
+      isAliveSpy
     );
   });
 
-  it("should stamp the paragraph with an unknown HEAD when the file on disk carried no stamp", () => {
-    filesOnDisk({
-      "reports/gates/battery.txt": "check:push\n",
-      "reports/gates/lint.json": JSON.stringify(THE_VERDICT),
-    });
-    stampLineOfSpy.mockReturnValue(null);
-    paragraphFileOfSpy.mockReturnValue("a stamped file");
+  it("should turn a lost lock into a notice naming the holder and the command, files included, that re-runs this one", () => {
+    takeLockSpy.mockReturnValue({ ok: false, holder: A_HOLDER });
 
-    rewriteParagraph();
+    const held = holdFor(GATE.e2e, "reports/runs/e2e/a", ["e2e/a.e2e.spec.ts"], STARTED);
 
-    expect(stampLineOfSpy).toHaveBeenCalledWith(null);
-    expect(paragraphFileOfSpy).toHaveBeenCalledWith(BATTERY.push, null, expect.any(Date), "Gates: a paragraph.");
-    expect(writeFileSyncSpy).toHaveBeenCalledWith("reports/gates/gates-paragraph.txt", "a stamped file");
-  });
-
-  it("should write no paragraph at all when no battery is on disk, rather than invent one", () => {
-    filesOnDisk({ "reports/gates/lint.json": JSON.stringify(THE_VERDICT) });
-
-    rewriteParagraph();
-
-    expect(gatesParagraphSpy).not.toHaveBeenCalled();
-    expect(writeFileSyncSpy).not.toHaveBeenCalled();
+    expect(refusalOfSpy).toHaveBeenCalledWith(
+      LOCK.e2eWorlds,
+      A_HOLDER,
+      "node scripts/gates/gate-runner.ts e2e e2e/a.e2e.spec.ts"
+    );
+    expect(held).toEqual({ ok: false, notice: "the e2e worlds are in use" });
   });
 });
 
 describe("runGate()", () => {
-  it("should forget the gate's previous outputs before it runs, so a stale report is never read", async () => {
+  it("should prune the gate's old runs before its own folder exists, so it can never prune itself", async () => {
     await runAndClose(PASSED);
 
-    expect(rmSyncSpy).toHaveBeenCalledWith("reports/tests/results.json", { force: true });
-    expect(rmSyncSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
-      spawnSpy.mock.invocationCallOrder[FIRST] ?? 0
+    expect(tidyRunsOfSpy).toHaveBeenCalledTimes(ONCE);
+    expect(tidyRunsOfSpy).toHaveBeenCalledWith(GATE.lint, expect.any(Date));
+    expect(tidyRunsOfSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
+      mkdirSyncSpy.mock.invocationCallOrder[FIRST] ?? 0
     );
+  });
+
+  it("should prune by the clock the run started at, the same one its verdict carries", async () => {
+    await runAndClose(PASSED);
+
+    expect(tidyRunsOfSpy.mock.calls[FIRST]?.[SECOND]).toBeInstanceOf(Date);
+    expect(tidyRunsOfSpy.mock.calls[FIRST]?.[SECOND]).toBe(verdictOfSpy.mock.calls[FIRST]?.[THIRD]);
+  });
+
+  it("should open a folder of its own, named after the gate and this run, before anything runs", async () => {
+    await runAndClose(PASSED);
+
+    expect(mkdirSyncSpy).toHaveBeenCalledWith(LINT_FOLDER, { recursive: true });
+    expect(mkdirSyncSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(spawnSpy.mock.invocationCallOrder[FIRST] ?? 0);
+  });
+
+  it("should hand the steps its folder, so the tool writes there and nowhere shared", async () => {
+    const steps = vi.fn(() => [LINT_STEP]);
+    const pending = runGate(GATE.lint, undefined, steps);
+
+    child.close(PASSED);
+    await pending;
+
+    expect(steps).toHaveBeenCalledWith(LINT_FOLDER);
+  });
+
+  it("should keep the log in the run's folder", async () => {
+    await runAndClose(PASSED);
+
+    expect(createWriteStreamSpy).toHaveBeenCalledWith(`${LINT_FOLDER}/gate.log`);
   });
 
   it("should run the step's entry file under this node with no shell, both streams piped, in the child environment", async () => {
@@ -344,26 +333,19 @@ describe("runGate()", () => {
     expect(logEndSpy).toHaveBeenCalledTimes(ONCE);
   });
 
-  it("should open the gates folder before the gate runs", async () => {
-    await runAndClose(PASSED);
-
-    expect(mkdirSyncSpy).toHaveBeenCalledWith("reports/gates", { recursive: true });
-  });
-
-  it("should read the numbers for the gate's scope once it has closed", async () => {
+  it("should read the numbers for the gate's scope out of its own folder once it has closed", async () => {
     await runAndClose(PASSED, "v1.20.0");
 
     expect(scopeOfSpy).toHaveBeenCalledWith(GATE.lint, "v1.20.0", []);
-    expect(numbersForSpy).toHaveBeenCalledWith(GATE.lint, A_SCOPE, readOrNull);
+    expect(numbersForSpy).toHaveBeenCalledWith(GATE.lint, A_SCOPE, readOrNullSpy, LINT_FOLDER);
   });
 
-  it("should build the verdict from the exit code, the clock and the output split into lines", async () => {
+  it("should build the verdict from the run, the exit code, the clock and the output split into lines", async () => {
     const verdict = await runAndClose(RED);
 
     expect(verdict).toBe(THE_VERDICT);
     expect(verdictOfSpy).toHaveBeenCalledWith(
-      GATE.lint,
-      false,
+      { gate: GATE.lint, named: false, folder: LINT_FOLDER },
       RED,
       expect.any(Date),
       expect.any(Date),
@@ -375,24 +357,24 @@ describe("runGate()", () => {
   it("should read a gate killed by a signal, which has no code, as failed", async () => {
     await runAndClose(null);
 
-    expect(verdictOfSpy.mock.calls[FIRST]?.[THIRD]).toBe(FAILED);
+    expect(verdictOfSpy.mock.calls[FIRST]?.[SECOND]).toBe(FAILED);
   });
 
   it("should settle red when the gate could not even be started, with the reason in the log", async () => {
-    const pending = runGate(GATE.lint, undefined, [LINT_STEP]);
+    const pending = runGate(GATE.lint, undefined, onlyThese([LINT_STEP]));
 
     child.fail(new Error("spawn ENOENT"));
 
     await pending;
 
-    expect(verdictOfSpy.mock.calls[FIRST]?.[THIRD]).toBe(FAILED);
+    expect(verdictOfSpy.mock.calls[FIRST]?.[SECOND]).toBe(FAILED);
     expect(logWriteSpy.mock.calls[SECOND]?.[FIRST]).toContain(
       "could not run node node_modules/eslint/bin/eslint.js --quiet src: Error: spawn ENOENT"
     );
   });
 
   it("should settle once when a failed start is followed by a close, as node does", async () => {
-    const pending = runGate(GATE.lint, undefined, [LINT_STEP]);
+    const pending = runGate(GATE.lint, undefined, onlyThese([LINT_STEP]));
 
     child.fail(new Error("spawn ENOENT"));
     child.close(null);
@@ -403,25 +385,70 @@ describe("runGate()", () => {
     expect(logEndSpy).toHaveBeenCalledTimes(ONCE);
   });
 
-  it("should leave the verdict beside the log, then rebuild the paragraph for the battery on disk", async () => {
-    filesOnDisk({
-      "reports/gates/battery.txt": "check:quick\n",
-      "reports/gates/lint.json": JSON.stringify(THE_VERDICT),
-    });
-
-    paragraphFileOfSpy.mockReturnValue("a stamped file");
-
+  it("should leave the verdict in its folder, then rebuild the paragraph for the battery on disk", async () => {
     await runAndClose(PASSED);
 
-    expect(writeFileSyncSpy).toHaveBeenCalledWith("reports/gates/lint.json", JSON.stringify(THE_VERDICT, null, 2));
-    expect(writeFileSyncSpy).toHaveBeenLastCalledWith("reports/gates/gates-paragraph.txt", "a stamped file");
-    expect(gatesParagraphSpy).toHaveBeenCalledWith([THE_VERDICT], BATTERY.quick);
+    expect(writeVerdictSpy).toHaveBeenCalledTimes(ONCE);
+    expect(writeVerdictSpy).toHaveBeenCalledWith(THE_VERDICT);
+    expect(rewriteParagraphSpy).toHaveBeenCalledTimes(ONCE);
+    expect(writeVerdictSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
+      rewriteParagraphSpy.mock.invocationCallOrder[FIRST] ?? 0
+    );
+  });
+});
+
+describe("runGate(), a gate that holds the e2e worlds", () => {
+  const runE2e = async () => {
+    const pending = runGate(GATE.e2e, undefined, onlyThese([TEST_STEP]));
+
+    child.close(PASSED);
+
+    return pending;
+  };
+
+  it("should release the lock once the verdict is written", async () => {
+    await runE2e();
+
+    expect(releaseSpy).toHaveBeenCalledTimes(ONCE);
+    expect(writeVerdictSpy.mock.invocationCallOrder[FIRST] ?? 0).toBeLessThan(
+      releaseSpy.mock.invocationCallOrder[FIRST] ?? 0
+    );
+  });
+
+  it("should release the lock even when the run throws, so a crash never blocks the next one", async () => {
+    verdictOfSpy.mockImplementation(() => {
+      throw new Error("a broken report");
+    });
+
+    await expect(runE2e()).rejects.toThrow("a broken report");
+    expect(releaseSpy).toHaveBeenCalledTimes(ONCE);
+  });
+
+  it("should refuse when another run holds them, running, pruning and writing nothing", async () => {
+    takeLockSpy.mockReturnValue({ ok: false, holder: A_HOLDER });
+
+    const verdict = await runGate(GATE.e2e, undefined, onlyThese([TEST_STEP]));
+
+    expect(verdict).toBe(A_REFUSAL);
+    expect(refusedVerdictSpy).toHaveBeenCalledWith(GATE.e2e, "the e2e worlds are in use", expect.any(Date));
+    expect(spawnSpy).toHaveBeenCalledTimes(NEVER);
+    expect(tidyRunsOfSpy).toHaveBeenCalledTimes(NEVER);
+    expect(mkdirSyncSpy).toHaveBeenCalledTimes(NEVER);
+    expect(writeVerdictSpy).toHaveBeenCalledTimes(NEVER);
+    expect(rewriteParagraphSpy).toHaveBeenCalledTimes(NEVER);
+    expect(releaseSpy).toHaveBeenCalledTimes(NEVER);
+  });
+
+  it("should take the lock for the folder it is about to open", async () => {
+    await runE2e();
+
+    expect(takeLockSpy.mock.calls[FIRST]?.[SECOND]).toEqual(expect.objectContaining({ folder: E2E_FOLDER }));
   });
 });
 
 describe("runGate(), a gate of two steps", () => {
   it("should run the second step only after the first passed, each under its own line in one log", async () => {
-    const pending = runGate(GATE.e2eTypecheck, undefined, TWO_STEPS);
+    const pending = runGate(GATE.e2eTypecheck, undefined, onlyThese(TWO_STEPS));
 
     child.close(PASSED);
     await new Promise((done) => setImmediate(done));
@@ -440,21 +467,68 @@ describe("runGate(), a gate of two steps", () => {
   });
 
   it("should stop at the first red step and carry its code, never starting the next", async () => {
-    const pending = runGate(GATE.e2eTypecheck, undefined, TWO_STEPS);
+    const pending = runGate(GATE.e2eTypecheck, undefined, onlyThese(TWO_STEPS));
 
     child.close(RED);
     await pending;
 
     expect(spawnSpy).toHaveBeenCalledTimes(ONCE);
-    expect(verdictOfSpy.mock.calls[FIRST]?.[THIRD]).toBe(RED);
+    expect(verdictOfSpy.mock.calls[FIRST]?.[SECOND]).toBe(RED);
   });
 });
+
+describe("runGate(), with arguments", () => {
+  const runNamed = async () => {
+    verdictOfSpy.mockReturnValue({ ...THE_VERDICT, gate: GATE.test });
+    const pending = runGate(GATE.test, undefined, onlyThese([TEST_STEP]), ["src/a.spec.ts", "src/b.spec.ts"]);
+
+    child.close(PASSED);
+
+    return pending;
+  };
+
+  it("should mark a run with arguments as named, in a folder like any other", async () => {
+    await runNamed();
+
+    expect(verdictOfSpy.mock.calls[FIRST]?.[FIRST]).toEqual({
+      gate: GATE.test,
+      named: true,
+      folder: `reports/runs/test/${A_RUN}`,
+    });
+  });
+
+  it("should never rebuild the paragraph after a named run, though its verdict is written like any other", async () => {
+    await runNamed();
+
+    expect(writeVerdictSpy).toHaveBeenCalledTimes(ONCE);
+    expect(rewriteParagraphSpy).toHaveBeenCalledTimes(NEVER);
+  });
+
+  it("should read the scope with the arguments, so a named mutation says so", async () => {
+    const pending = runGate(GATE.mutationChanged, "v1.20.0", onlyThese([TEST_STEP]), ["scripts/a.ts"]);
+
+    child.close(PASSED);
+    await pending;
+
+    expect(scopeOfSpy).toHaveBeenCalledWith(GATE.mutationChanged, "v1.20.0", ["scripts/a.ts"]);
+  });
+});
+
+describe("exitCodeOf()", () => {
+  it("should pass a ran gate's own code on, and read anything else as failed", () => {
+    expect(exitCodeOf({ ...THE_VERDICT, exitCode: RED } as GateVerdict)).toBe(RED);
+    expect(exitCodeOf(A_REFUSAL)).toBe(FAILED);
+    expect(exitCodeOf({ kind: "skipped" } as unknown as GateVerdict)).toBe(FAILED);
+  });
+});
+
+const ROOT = "D:/Temp/FoolProof";
 
 describe("main()", () => {
   const say = vi.fn();
 
   it("should refuse a name that is no gate, without running anything", async () => {
-    const status = await main(["node", "gate-runner.ts", "nonsense"], {}, say, "D:/Temp/FoolProof");
+    const status = await main(["node", "gate-runner.ts", "nonsense"], {}, say, ROOT);
 
     expect(status).toBe(FAILED);
     expect(say.mock.calls[FIRST]?.[FIRST]).toContain('"nonsense" is not a gate');
@@ -463,7 +537,7 @@ describe("main()", () => {
 
   it("should run the named gate with the baseline from the environment, say its line and pass its exit code on", async () => {
     verdictOfSpy.mockReturnValue({ ...THE_VERDICT, exitCode: RED });
-    const pending = main(["node", "gate-runner.ts", GATE.lint], { MUTATE_AGAINST: "v1.20.0" }, say, "D:/Temp/FoolProof");
+    const pending = main(["node", "gate-runner.ts", GATE.lint], { MUTATE_AGAINST: "v1.20.0" }, say, ROOT);
 
     child.close(RED);
 
@@ -477,7 +551,7 @@ describe("main()", () => {
       "--format",
       "json",
       "--output-file",
-      "reports/lint/findings.json",
+      `${LINT_FOLDER}/lint-findings.json`,
       "src",
       "scripts",
       GATE.e2e,
@@ -486,73 +560,29 @@ describe("main()", () => {
   });
 
   it("should refuse files for a gate that takes none before anything runs or is written", async () => {
-    const status = await main(["node", "gate-runner.ts", GATE.lint, "src/a.ts"], {}, say, "D:/Temp/FoolProof");
+    const status = await main(["node", "gate-runner.ts", GATE.lint, "src/a.ts"], {}, say, ROOT);
 
     expect(status).toBe(FAILED);
     expect(say.mock.calls.at(-1)?.[FIRST]).toContain("lint takes no files");
     expect(spawnSpy).not.toHaveBeenCalled();
-    expect(writeFileSyncSpy).not.toHaveBeenCalled();
-  });
-});
-
-const ROOT = "D:/Temp/FoolProof";
-
-describe("runGate(), with arguments", () => {
-  const runNamed = async () => {
-    verdictOfSpy.mockReturnValue({ ...THE_VERDICT, gate: GATE.test });
-    const pending = runGate(
-      GATE.test,
-      undefined,
-      [{ bin: TEST_STEP.bin, args: [...TEST_STEP.args, "src/a.spec.ts", "src/b.spec.ts"] }],
-      ["src/a.spec.ts", "src/b.spec.ts"]
-    );
-
-    child.close(PASSED);
-
-    return pending;
-  };
-
-  it("should run the steps it was handed, files included", async () => {
-    await runNamed();
-
-    expect(spawnSpy.mock.calls[FIRST]?.[SECOND]).toEqual([
-      TEST_STEP.bin,
-      "run",
-      "src/a.spec.ts",
-      "src/b.spec.ts",
-    ]);
+    expect(writeVerdictSpy).not.toHaveBeenCalled();
   });
 
-  it("should write a named log and verdict, leaving the bare gate's files alone", async () => {
-    await runNamed();
+  it("should say a refusal's line and exit red when another run holds what the gate needs", async () => {
+    takeLockSpy.mockReturnValue({ ok: false, holder: A_HOLDER });
 
-    expect(writeFileSyncSpy).toHaveBeenCalledWith("reports/gates/test.named.json", expect.any(String));
-    expect(writeFileSyncSpy).not.toHaveBeenCalledWith("reports/gates/test.json", expect.any(String));
-  });
+    const status = await main(["node", "gate-runner.ts", GATE.e2e], {}, say, ROOT);
 
-  it("should never rebuild the paragraph after a named run, whatever battery is on disk", async () => {
-    filesOnDisk({ "reports/gates/battery.txt": "check:phase\n" });
-
-    await runNamed();
-
-    expect(gatesParagraphSpy).not.toHaveBeenCalled();
-    expect(writeFileSyncSpy).not.toHaveBeenCalledWith("reports/gates/gates-paragraph.txt", expect.any(String));
-  });
-
-  it("should read the scope with the arguments, so a named mutation says so", async () => {
-    const pending = runGate(GATE.mutationChanged, "v1.20.0", [TEST_STEP], ["scripts/a.ts"]);
-
-    child.close(PASSED);
-    await pending;
-
-    expect(scopeOfSpy).toHaveBeenCalledWith(GATE.mutationChanged, "v1.20.0", ["scripts/a.ts"]);
+    expect(status).toBe(FAILED);
+    expect(say.mock.calls.map((call) => call[FIRST])).toEqual(["a line"]);
+    expect(reasonLinesSpy).toHaveBeenCalledWith(A_REFUSAL, ROOT);
   });
 });
 
 describe("main(), the reasons under a red line", () => {
   const say = vi.fn();
 
-  it("should take the gate from the first argument and pass the rest on", async () => {
+  it("should take the gate from the first argument and pass the rest on, after the folder", async () => {
     const pending = main(["node", "gate-runner.ts", GATE.test, "src/a.spec.ts"], {}, say, ROOT);
 
     child.close(PASSED);
@@ -563,6 +593,7 @@ describe("main(), the reasons under a red line", () => {
       "run",
       "--config",
       "scripts/gates/test/vitest.config.ts",
+      `--outputFile.json=reports/runs/test/${A_RUN}/results.json`,
       "src/a.spec.ts",
     ]);
   });
@@ -577,20 +608,5 @@ describe("main(), the reasons under a red line", () => {
 
     expect(reasonLinesSpy).toHaveBeenCalledWith({ ...THE_VERDICT, ok: false, exitCode: RED }, ROOT);
     expect(say.mock.calls.map((call) => call[FIRST])).toEqual(["a line", "  ✗ a failure"]);
-  });
-});
-
-describe("runGate(), what the verdict is told about naming", () => {
-  it("should mark a run with arguments as named and a bare one as not", async () => {
-    await runAndClose(PASSED);
-
-    expect(verdictOfSpy.mock.calls[FIRST]?.[SECOND]).toBe(false);
-
-    const pending = runGate(GATE.test, undefined, [TEST_STEP], ["src/a.spec.ts"]);
-
-    child.close(PASSED);
-    await pending;
-
-    expect(verdictOfSpy.mock.calls[SECOND]?.[SECOND]).toBe(true);
   });
 });

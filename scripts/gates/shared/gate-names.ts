@@ -22,3 +22,10 @@ export const BATTERY = {
 } as const;
 
 export type Battery = (typeof BATTERY)[keyof typeof BATTERY];
+
+export const LOCK = {
+  e2eWorlds: "e2e-worlds",
+  battery: "battery",
+} as const;
+
+export type Lock = (typeof LOCK)[keyof typeof LOCK];

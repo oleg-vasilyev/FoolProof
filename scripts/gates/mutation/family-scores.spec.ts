@@ -20,6 +20,20 @@ vi.mock("./surviving-mutants.ts", () => ({
   survivorsIn: (files: unknown) => survivorsInSpy(files),
 }));
 
+const inRunSpy = vi.fn();
+
+vi.mock("../shared/gate-paths.ts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../shared/gate-paths.ts")>();
+
+  return {
+    inRun: (folder: string, file: string) => {
+      inRunSpy(folder, file);
+
+      return actual.inRun(folder, file);
+    },
+  };
+});
+
 const { familyScore } = await import("./family-scores.ts");
 
 
@@ -28,6 +42,10 @@ const A_FAMILY: Family = {
   config: "a-config.json",
   report: "a-report.json",
 };
+
+const A_FOLDER = "reports/runs/test-mutation/a-run";
+
+const THE_REPORT_IN_THE_FOLDER = "reports/runs/test-mutation/a-run/a-report.json";
 
 const REPORTED_FILES = { "scripts/a.ts": { mutants: [] } };
 
@@ -66,6 +84,10 @@ const FIRST_CALL = 1;
 
 const SECOND_CALL = 2;
 
+const ONCE = 1;
+
+const TWICE = 2;
+
 const NEVER = 0;
 
 const read = vi.fn();
@@ -87,11 +109,13 @@ describe("familyScore()", () => {
       timeout: TIMEOUT,
     });
     survivorsInSpy.mockReturnValue(THE_SURVIVORS);
-    parseSpy.mockImplementation(parsedFrom({ [A_FAMILY.report]: A_REPORT, [A_FAMILY.config]: A_CONFIG }));
+    parseSpy.mockImplementation(
+      parsedFrom({ [THE_REPORT_IN_THE_FOLDER]: A_REPORT, [A_FAMILY.config]: A_CONFIG })
+    );
   });
 
   it("should carry each count through under its own name, and take the bar from the config rather than the report", () => {
-    expect(familyScore(read, A_FAMILY)).toEqual({
+    expect(familyScore(read, A_FAMILY, A_FOLDER)).toEqual({
       family: A_FAMILY.family,
       score: A_SCORE,
       bar: A_BAR,
@@ -103,15 +127,29 @@ describe("familyScore()", () => {
     });
   });
 
-  it("should read the report and the config through the reader it was handed, the report first", () => {
-    familyScore(read, A_FAMILY);
+  it("should read the report inside the run's folder and the config where the repository keeps it, the report first", () => {
+    familyScore(read, A_FAMILY, A_FOLDER);
 
-    expect(parseSpy).toHaveBeenNthCalledWith(FIRST_CALL, read, A_FAMILY.report);
+    expect(parseSpy).toHaveBeenCalledTimes(TWICE);
+    expect(parseSpy).toHaveBeenNthCalledWith(FIRST_CALL, read, THE_REPORT_IN_THE_FOLDER);
     expect(parseSpy).toHaveBeenNthCalledWith(SECOND_CALL, read, A_FAMILY.config);
   });
 
+  it("should place only the report in the folder, the folder first, the config never", () => {
+    familyScore(read, A_FAMILY, A_FOLDER);
+
+    expect(inRunSpy).toHaveBeenCalledTimes(ONCE);
+    expect(inRunSpy).toHaveBeenCalledWith(A_FOLDER, A_FAMILY.report);
+  });
+
+  it("should not score a report lying outside the run's folder, which another run wrote", () => {
+    parseSpy.mockImplementation(parsedFrom({ [A_FAMILY.report]: A_REPORT, [A_FAMILY.config]: A_CONFIG }));
+
+    expect(familyScore(read, A_FAMILY, A_FOLDER)).toBeNull();
+  });
+
   it("should measure the report's files, not the whole report, and scan those same files for survivors", () => {
-    familyScore(read, A_FAMILY);
+    familyScore(read, A_FAMILY, A_FOLDER);
 
     expect(metrics.calculateMetricsSpy).toHaveBeenCalledWith(REPORTED_FILES);
     expect(survivorsInSpy).toHaveBeenCalledWith(REPORTED_FILES);
@@ -127,20 +165,28 @@ describe("familyScore()", () => {
       timeout: NONE_COUNTED,
     });
 
-    expect(familyScore(read, A_FAMILY)?.score).toBeNull();
+    expect(familyScore(read, A_FAMILY, A_FOLDER)?.score).toBeNull();
   });
 
   it("should say nothing at all when the run wrote no report, rather than score an absent one", () => {
     parseSpy.mockImplementation(parsedFrom({ [A_FAMILY.config]: A_CONFIG }));
 
-    expect(familyScore(read, A_FAMILY)).toBeNull();
+    expect(familyScore(read, A_FAMILY, A_FOLDER)).toBeNull();
     expect(metrics.calculateMetricsSpy).toHaveBeenCalledTimes(NEVER);
   });
 
   it("should say nothing when the report is there but its config is not, the bar being unknown", () => {
-    parseSpy.mockImplementation(parsedFrom({ [A_FAMILY.report]: A_REPORT }));
+    parseSpy.mockImplementation(parsedFrom({ [THE_REPORT_IN_THE_FOLDER]: A_REPORT }));
 
-    expect(familyScore(read, A_FAMILY)).toBeNull();
+    expect(familyScore(read, A_FAMILY, A_FOLDER)).toBeNull();
     expect(metrics.calculateMetricsSpy).toHaveBeenCalledTimes(NEVER);
+  });
+
+  it("should not look for the config inside the run's folder, where no run ever writes one", () => {
+    const configInTheFolder = `${A_FOLDER}/${A_FAMILY.config}`;
+
+    parseSpy.mockImplementation(parsedFrom({ [THE_REPORT_IN_THE_FOLDER]: A_REPORT, [configInTheFolder]: A_CONFIG }));
+
+    expect(familyScore(read, A_FAMILY, A_FOLDER)).toBeNull();
   });
 });

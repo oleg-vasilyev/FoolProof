@@ -60,9 +60,7 @@ export default defineConfig({
     sequence: { concurrent: false },
     testTimeout: caseTimeoutMs,
     hookTimeout: caseTimeoutMs,
-    reporters:
-      process.env.E2E_VERBOSE === undefined
-        ? [["json", { outputFile: "reports/e2e/results.json" }]]
-        : ["verbose"],
+    reporters: process.env.E2E_VERBOSE === undefined ? ["json"] : ["verbose"],
+    outputFile: { json: "reports/e2e/results.json" },
   },
 });

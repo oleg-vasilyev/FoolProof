@@ -1,35 +1,37 @@
-import type { Gate } from "./gate-names.ts";
+import type { Battery, Gate, Lock } from "./gate-names.ts";
 
 
 export const GATES_DIR = "reports/gates";
 
+export const RUNS_DIR = "reports/runs";
+
 export const PARAGRAPH_PATH = `${GATES_DIR}/gates-paragraph.txt`;
 
-export const BATTERY_PATH = `${GATES_DIR}/battery.txt`;
+export const BATTERY_PATH = `${GATES_DIR}/battery.json`;
 
-export const TESTS_RESULTS = "reports/tests/results.json";
+export const VERDICT_FILE = "verdict.json";
 
-export const HARNESS_RESULTS = "reports/tests/harness-results.json";
+export const LOG_FILE = "gate.log";
 
-export const COVERAGE_SUMMARY = "reports/coverage/coverage-summary.json";
+export const RESULTS = "results.json";
 
-export const E2E_RESULTS = "reports/e2e/results.json";
+export const COVERAGE_FOLDER = "coverage";
 
-export const E2E_SELECTION = "reports/e2e/selection.json";
+export const COVERAGE_SUMMARY = `${COVERAGE_FOLDER}/coverage-summary.json`;
 
-export const TYPECHECK_FINDINGS = "reports/typecheck/findings.json";
+export const E2E_SELECTION = "selection.json";
 
-export const E2E_TYPECHECK_FINDINGS = "reports/typecheck/e2e-findings.json";
+export const TYPECHECK_FINDINGS = "typecheck-findings.json";
 
-export const LINT_FINDINGS = "reports/lint/findings.json";
+export const LINT_FINDINGS = "lint-findings.json";
 
-export const CHECK_DOCS_COMPLAINTS = "reports/check-docs/complaints.json";
+export const CHECK_DOCS_COMPLAINTS = "complaints.json";
+
+export const SOURCE_MUTATION_REPORT = "mutation-source.json";
+
+export const TOOLING_MUTATION_REPORT = "mutation-tooling.json";
 
 export const BOT_LOGS = "reports/e2e/bot";
-
-export const SOURCE_MUTATION_REPORT = "reports/mutation/mutation.json";
-
-export const TOOLING_MUTATION_REPORT = "reports/mutation-scripts/mutation.json";
 
 export const ESLINT_CONFIG = "scripts/gates/lint/eslint.config.js";
 
@@ -43,20 +45,19 @@ export const SOURCE_STRYKER_CONFIG = "scripts/gates/mutation/stryker.config.json
 
 export const TOOLING_STRYKER_CONFIG = "scripts/gates/mutation/stryker.scripts.json";
 
-const NAMED = ".named";
-
 const NOT_A_FILE_NAME = /[^a-z0-9]+/g;
 
 const A_DASH_AT_AN_END = /^-|-$/g;
 
-export const fileStemOf = (gate: Gate, named = false): string =>
-  `${gate.replaceAll(":", "-")}${named ? NAMED : ""}`;
+export const fileStemOf = (name: Gate | Battery): string => name.replaceAll(":", "-");
 
-export const logPathOf = (gate: Gate, named = false): string =>
-  `${GATES_DIR}/${fileStemOf(gate, named)}.log`;
+export const runsFolderOf = (gate: Gate): string => `${RUNS_DIR}/${fileStemOf(gate)}`;
 
-export const verdictPathOf = (gate: Gate, named = false): string =>
-  `${GATES_DIR}/${fileStemOf(gate, named)}.json`;
+export const runFolderOf = (gate: Gate, runId: string): string => `${runsFolderOf(gate)}/${runId}`;
+
+export const inRun = (folder: string, file: string): string => `${folder}/${file}`;
+
+export const lockPathOf = (lock: Lock): string => `${GATES_DIR}/${lock}.lock`;
 
 export const botLogPathOf = (scenario: string): string =>
   `${BOT_LOGS}/${scenario.toLowerCase().replace(NOT_A_FILE_NAME, "-").replace(A_DASH_AT_AN_END, "")}.log`;

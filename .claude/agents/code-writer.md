@@ -24,12 +24,6 @@ owes, and in particular:
   a query, and so on — and the stubs to use, by name.
 - **The property and the evidence** a spec must pin — the mutant that must die, the
   case that went wrong — rather than the assertion to type.
-- **Whether you are the one writer out.** Your specs run through
-  `node scripts/gates/gate-runner.ts test <your specs>`, which writes one fixed verdict,
-  `reports/gates/test.named.json`, for whoever ran last — so beside another writer you
-  do not run them, and the caller runs every piece's specs once all of you are back.
-  Anything else that copies the tree or writes a fixed report — Stryker, e2e, a
-  battery — is the caller's either way.
 
 A brief missing the files, the frozen paths or the settled artifact is not ready to
 write from. Say so in the verdict line rather than guessing the rest.
@@ -39,9 +33,11 @@ write from. Say so in the verdict line rather than guessing the rest.
 Read `CLAUDE.md` and the skill the brief names before the first file, then read the
 file yours will sit beside — the same shape is usually decided there. Write the core,
 then its spec, one file at a time: the lint hook judges every save, so put a use
-before its import or both in one edit. When you are the one writer out, run only your
-own specs and read the verdict from `reports/gates/test.named.json`, never from a piped
-tail.
+before its import or both in one edit. Run only your own specs,
+`node scripts/gates/gate-runner.ts test <your specs>`, and read the verdict from the
+folder named on the gate's own line, above any reasons — other writers' runs land in
+folders beside yours — never
+from a piped tail. A battery and the e2e gates stay the caller's.
 
 A document edit the brief names is yours when it is mechanical — a table row, a path
 in a list, a count or a name `check-docs` holds against the tree — and never when it is
@@ -57,7 +53,7 @@ why. An agent that cannot do something says so instead of doing something adjace
 ## What comes back
 
 ```
-Verdict: <N> of <M> files written, own specs <green|red|left to the caller>, <K> touched outside the brief.
+Verdict: <N> of <M> files written, own specs <green|red>, <K> touched outside the brief.
 ```
 
 Then three lists, each present even when empty:

@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { verdictPathOf } from "../gates/shared/gate-paths.ts";
+import { VERDICT_FILE, runsFolderOf } from "../gates/shared/gate-paths.ts";
 import { GATE } from "../gates/shared/gate-names.ts";
 import type { GateVerdict } from "../gates/verdict/gate-verdict.ts";
 import {
@@ -322,10 +322,22 @@ const keepTranscript = (space: Workspace, agent: AgentOutcome): KeptTranscript |
   };
 };
 
-const gateVerdictIn = (space: Workspace, gate: GateVerdict["gate"], named = false): GateVerdict | null => {
-  const text = space.run.files.read(join(space.clone, verdictPathOf(gate, named)));
+const namedOf = (verdict: GateVerdict): boolean => verdict.kind === "ran" && verdict.named;
 
-  return text === null ? null : (JSON.parse(text) as GateVerdict);
+const gateVerdictIn = (space: Workspace, gate: GateVerdict["gate"], named = false): GateVerdict | null => {
+  const runs = join(space.clone, runsFolderOf(gate));
+  const newestFirst = [...space.run.files.list(runs)].sort().reverse();
+
+  for (const id of newestFirst) {
+    const text = space.run.files.read(join(runs, id, VERDICT_FILE));
+    const verdict = text === null ? null : (JSON.parse(text) as GateVerdict);
+
+    if (verdict !== null && namedOf(verdict) === named) {
+      return verdict;
+    }
+  }
+
+  return null;
 };
 
 const casesFailedIn = (verdict: GateVerdict | null, total: number): number => {

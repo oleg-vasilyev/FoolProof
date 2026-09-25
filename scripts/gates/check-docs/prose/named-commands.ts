@@ -64,7 +64,7 @@ export const namedCommandComplaints = (
   ...[...new Set(namesIn(text, A_GATE_RUN_BY_HAND))].map(
     (command) =>
       `${file}: runs "${command}" by hand — a gate runs only through ${GATE_RUNNER}, so its ` +
-      `verdict lands under reports/gates/ and its config is the one the runner names`
+      `verdict lands in a folder of its own under reports/runs/ and its config is the one the runner names`
   ),
 ];
 

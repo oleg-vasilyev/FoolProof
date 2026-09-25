@@ -54,8 +54,8 @@ describe("gateRunByHand()", () => {
       `Every gate runs through node ${GATE_RUNNER} <gate> — lint, typecheck, e2e:typecheck, check-docs, ` +
         "test [files], test:coverage, test:e2e-harness, e2e, e2e:changed, test:mutation-changed [files], " +
         "test:mutation —",
-      "which leaves the log and the verdict under",
-      "reports/gates/ and passes the config from the gate's own folder under scripts/gates/,",
+      "which leaves the log and the verdict in a folder of its own under",
+      "reports/runs/ and passes the config from the gate's own folder under scripts/gates/,",
       "which the tool's bare name does not find.",
     ]);
   });
