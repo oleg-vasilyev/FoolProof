@@ -322,20 +322,23 @@ visitor's browser is what kept the first screen at 44 KB that day, with the post
 below it lazy.
 
 A page nobody links to is read by nobody, so two questions are worth asking of it:
-does anyone arrive, and does arriving lead anywhere. Each has its own dashboard, and
-neither can answer the other's question:
+does anyone arrive, and does arriving lead anywhere. Three dashboards answer them, and
+each knows something the other two cannot:
 
 | Dashboard | What only it knows |
 |---|---|
 | [GoatCounter](https://alehvasilyeu.goatcounter.com/) | how many people opened a page and where they came from — plus a click event on every `t.me` link, named `add-to-group-<lang>` or `open-bot-<lang>`, so the button and the language both show |
 | [Search Console](https://search.google.com/search-console) | how often Google *offered* the pages to somebody who then did not click. An impression never reaches the page, so no script on it can count one |
+| [Bing Webmaster Tools](https://www.bing.com/webmasters) | whether an AI answer built on Bing, Copilot's included, cited a page — its *AI Performance* report. A reader who got the answer and never clicked leaves no trace in the other two |
 
-Both are read-only errands for whoever runs the bot; the sign-in is personal, and
-the links are here so the next person does not have to rediscover which two tabs to
+All three are read-only errands for whoever runs the bot; the sign-in is personal, and
+the links are here so the next person does not have to rediscover which three tabs to
 open. The beacon sets no cookie and stores nothing personal, which is why the pages
 carry no consent banner, and a visitor who blocks it costs one uncounted visit
 rather than a broken page. The Search Console `<meta>` tag verifies the URL-prefix
-property ending in `/FoolProof/`, because the domain above it is GitHub's.
+property ending in `/FoolProof/`, because the domain above it is GitHub's. Bing
+carries no tag of its own: the site was imported from Search Console, which vouches
+for it.
 
 ## How a change becomes a release
 
