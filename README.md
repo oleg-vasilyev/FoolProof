@@ -327,7 +327,7 @@ each knows something the other two cannot:
 
 | Dashboard | What only it knows |
 |---|---|
-| [GoatCounter](https://alehvasilyeu.goatcounter.com/) | how many people opened a page and where they came from — plus a click event on every `t.me` link, named `add-to-group-<lang>` or `open-bot-<lang>`, so the button and the language both show |
+| [GoatCounter](https://foolproof.goatcounter.com/) | how many people opened a page and where they came from — plus a click event on every `t.me` link, named `add-to-group-<lang>` or `open-bot-<lang>`, so the button and the language both show |
 | [Search Console](https://search.google.com/search-console) | how often Google *offered* the pages to somebody who then did not click. An impression never reaches the page, so no script on it can count one |
 | [Bing Webmaster Tools](https://www.bing.com/webmasters) | whether an AI answer built on Bing, Copilot's included, cited a page — its *AI Performance* report. A reader who got the answer and never clicked leaves no trace in the other two |
 
